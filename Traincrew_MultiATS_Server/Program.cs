@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Traincrew_MultiATS_Server.Data;
+using Traincrew_MultiATS_Server.Hubs;
 using Traincrew_MultiATS_Server.Repositories.Station;
 using WebApplication1.Services;
 
@@ -13,6 +14,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddSignalR();
 
 builder.Services.AddScoped<IStationRepository, StationRepository>();
 builder.Services.AddScoped<StationService>();
@@ -38,5 +40,7 @@ app.UseAuthorization();
 app.UseRouting();
 
 app.MapControllers();
+
+app.MapHub<TrainHub>("/train");
 
 app.Run();

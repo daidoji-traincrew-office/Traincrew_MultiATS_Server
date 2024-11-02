@@ -10,4 +10,9 @@ public class StationRepository(ApplicationDbContext context) : IStationRepositor
     {
         return context.Stations.FirstOrDefaultAsync(s => s.Name == name);
     }
+
+    public async Task Save(Models.Station station)
+    {
+        await context.Stations.AddAsync(station);
+    }
 }

@@ -15,6 +15,7 @@ public class StationService
 
     public Task<Station?> GetStationByName(string name)
     {
+        // 駅を取得する
         return _stationRepository.GetStationByName(name);
     }
 }
