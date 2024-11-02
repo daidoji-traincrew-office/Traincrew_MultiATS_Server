@@ -1,0 +1,3 @@
+CREATE TABLE station(
+    name VARCHAR(255) PRIMARY KEY
+)
