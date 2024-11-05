@@ -1,13 +1,21 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-    </PropertyGroup>
+      <UserSecretsId>3b835f78-9aa9-45dc-8356-0c862e798668</UserSecretsId>
+  </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Discord.Net" Version="3.16.0" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.10">
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+          <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.10" />
+        <PackageReference Include="OpenIddict.AspNetCore" Version="5.8.0" />
+        <PackageReference Include="OpenIddict.EntityFrameworkCore" Version="5.8.0" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
     </ItemGroup>
 
