@@ -1,8 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore.Infrastructure;
-using Traincrew_MultiATS_Server.Models;
+﻿using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.Station;
 
-namespace WebApplication1.Services;
+namespace Traincrew_MultiATS_Server.Services;
 
 public class StationService
 {
