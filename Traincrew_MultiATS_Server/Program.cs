@@ -77,7 +77,7 @@ builder.Services.AddOpenIddict()
     .AddServer(options =>
     {
         // Authorizationとtokenエンドポイントを有効にする
-        options.SetAuthorizationEndpointUris("authorize")
+        options.SetAuthorizationEndpointUris("auth/authorize")
                .SetTokenEndpointUris("token");
 
         // AuthorizationCodeFlowとRefreshTokenFlowを有効にする
@@ -117,11 +117,15 @@ builder.Services.AddOpenIddict()
     });
 builder.Services.AddAuthorization()
     .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie();
+    .AddCookie(options =>
+    {
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
+    });
 // DI周り
-builder.Services.AddScoped<IStationRepository, StationRepository>();
-builder.Services.AddScoped<StationService>();
-builder.Services.AddScoped<DiscordService>();
+builder.Services
+    .AddScoped<IStationRepository, StationRepository>()
+    .AddScoped<StationService>()
+    .AddSingleton<DiscordService>();
 
 
 var app = builder.Build();
@@ -155,7 +159,7 @@ await using (var scope = app.Services.CreateAsyncScope())
             ClientType = ClientTypes.Public,
             RedirectUris =
             {
-                new Uri("https://localhost:7232/auth/callback"),
+                new Uri("http://localhost:49152/")
             },
             Permissions =
             {

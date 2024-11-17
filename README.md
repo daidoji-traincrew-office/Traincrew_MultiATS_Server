@@ -12,3 +12,6 @@ Traincrew運転会用のマルチATSサーバー。
     - できればDocker上でappsettings.jsonに置いときたい
 - RedirectUriを設定する
 - 本番用の証明書作成
+
+## デプロイ
+
