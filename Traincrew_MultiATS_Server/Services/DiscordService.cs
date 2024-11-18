@@ -1,50 +1,18 @@
-using Discord;
 using Discord.Rest;
-using Discord.WebSocket;
 using Traincrew_MultiATS_Server.Exception.DiscordAuthenticationException;
 using Traincrew_MultiATS_Server.Models;
+using Traincrew_MultiATS_Server.Repositories.Discord;
 
 namespace Traincrew_MultiATS_Server.Services;
 
-public class DiscordService
+public class DiscordService(IConfiguration configuration, IDiscordRepository discordRepository)
 {
-    private readonly IConfiguration configuration;
-    private readonly DiscordSocketClient client;
-    private bool isStarted;
-    private readonly TaskCompletionSource isReady = new();
-
-    public DiscordService(IConfiguration configuration)
-    {
-        this.configuration = configuration;
-        client = new DiscordSocketClient();
-    }
-
-    private async Task Initialize()
-    {
-        if (!isStarted)
-        {
-            var token = configuration.GetSection("Discord:BotToken").Get<string>();
-            await client.LoginAsync(TokenType.Bot, token);
-            await client.StartAsync();
-            isStarted = true;
-        }
-        client.Ready += () =>
-        {
-            isReady.SetResult();
-            return Task.CompletedTask;
-        };
-        await isReady.Task;
-    }
 
     public async Task<(RestGuildUser, TraincrewRole)> DiscordAuthentication(string token)
     {
-        var guildId = configuration.GetValue<ulong>("Discord:GuildId");
         var beginnerRoleId = configuration.GetValue<ulong>("Discord:Roles:Beginner");
-        await using var client = new DiscordRestClient();
-        await client.LoginAsync(TokenType.Bearer, token);
-
+        var member =  await discordRepository.GetMemberByToken(token);
         // 運転会サーバーに所属しているか確認
-        var member = await client.GetCurrentUserGuildMemberAsync(guildId);
         if (member is null)
         {
             throw new DiscordAuthenticationException("You are not a member of the specific server.");
@@ -62,19 +30,10 @@ public class DiscordService
     public async Task<TraincrewRole> GetRoleByMemberId(ulong memberId)
     {
         // Todo: 本来はサーバー起動時にするべき
-        await Initialize().WaitAsync(TimeSpan.FromSeconds(1));
-        var guildId = configuration.GetValue<ulong>("Discord:GuildId");
-        var guild = client.GetGuild(guildId);
-        if (guild is null)
-        {
-            throw new DiscordAuthenticationException("The server is not found.");
-        }
-        var member = guild.GetUser(memberId);
-        if (member is null)
-        {
-            throw new DiscordAuthenticationException("The member is not found.");
-        } 
-        return GetRole(member.Roles.Select(x => x.Id).ToArray());
+        await discordRepository.Initialize().WaitAsync(TimeSpan.FromSeconds(1));
+        var member = await discordRepository.GetMember(memberId);
+        var roles = member.Roles.Select(role => role.Id).ToList();
+        return GetRole(roles);
     }
 
     private TraincrewRole GetRole(IReadOnlyCollection<ulong> roleIds)

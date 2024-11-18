@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using OpenIddict.Abstractions;
 using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.Hubs;
+using Traincrew_MultiATS_Server.Repositories.Discord;
 using Traincrew_MultiATS_Server.Repositories.Station;
 using Traincrew_MultiATS_Server.Services;
 using static OpenIddict.Abstractions.OpenIddictConstants;
@@ -125,7 +126,8 @@ builder.Services.AddAuthorization()
 builder.Services
     .AddScoped<IStationRepository, StationRepository>()
     .AddScoped<StationService>()
-    .AddSingleton<DiscordService>();
+    .AddSingleton<DiscordService>()
+    .AddSingleton<IDiscordRepository, DiscordRepository>();
 
 
 var app = builder.Build();
