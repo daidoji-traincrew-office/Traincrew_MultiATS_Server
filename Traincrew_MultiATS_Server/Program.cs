@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using OpenIddict.Abstractions;
@@ -42,16 +44,55 @@ builder.Services.AddOpenIddict()
 
         // Register the signing and encryption credentials used to protect
         // sensitive data like the state tokens produced by OpenIddict.
-        if(builder.Environment.IsDevelopment())
+        if (builder.Environment.IsDevelopment())
         {
             options.AddDevelopmentEncryptionCertificate()
                 .AddDevelopmentSigningCertificate();
         }
         else
         {
-            // Todo: 本番環境では、本番環境用の証明書を使う
-            throw new NotImplementedException();
+            // Todo: 関数化する
+            const string encryptionCertificatePath = "cert/client-encryption-certificate.pfx";
+            const string signingCertificatePath = "cert/client-signing-certificate.pfx";
+            // Generate a certificate at startup and register it.
+            if (!File.Exists(encryptionCertificatePath))
+            {
+                using var algorithm = RSA.Create(keySizeInBits: 2048);
+
+                var subject = new X500DistinguishedName("CN=Fabrikam Client Encryption Certificate");
+                var request = new CertificateRequest(subject, algorithm, HashAlgorithmName.SHA256,
+                    RSASignaturePadding.Pkcs1);
+                request.CertificateExtensions.Add(new X509KeyUsageExtension(X509KeyUsageFlags.KeyEncipherment,
+                    critical: true));
+
+                var certificate = request.CreateSelfSigned(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddYears(2));
+
+                File.WriteAllBytes(encryptionCertificatePath,
+                    certificate.Export(X509ContentType.Pfx, string.Empty));
+            }
+
+            if (!File.Exists(signingCertificatePath))
+            {
+                using var algorithm = RSA.Create(keySizeInBits: 2048);
+
+                var subject = new X500DistinguishedName("CN=Fabrikam Client Signing Certificate");
+                var request = new CertificateRequest(subject, algorithm, HashAlgorithmName.SHA256,
+                    RSASignaturePadding.Pkcs1);
+                request.CertificateExtensions.Add(new X509KeyUsageExtension(X509KeyUsageFlags.DigitalSignature,
+                    critical: true));
+
+                var certificate = request.CreateSelfSigned(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddYears(2));
+
+                File.WriteAllBytes(signingCertificatePath,
+                    certificate.Export(X509ContentType.Pfx, string.Empty));
+            }
+            
+            options.AddEncryptionCertificate(
+                new X509Certificate2(encryptionCertificatePath, string.Empty));
+            options.AddSigningCertificate(
+                new X509Certificate2(signingCertificatePath, string.Empty));
         }
+
         // Register the ASP.NET Core host and configure the ASP.NET Core-specific options.
         options.UseAspNetCore()
             .EnableRedirectionEndpointPassthrough();
@@ -64,7 +105,7 @@ builder.Services.AddOpenIddict()
 
         // Register the Web providers integrations.
         options.UseWebProviders()
-            .AddDiscord(discord => 
+            .AddDiscord(discord =>
             {
                 discord.AddScopes("identify", "guilds", "guilds.members.read");
                 discord
@@ -78,24 +119,62 @@ builder.Services.AddOpenIddict()
     {
         // Authorizationとtokenエンドポイントを有効にする
         options.SetAuthorizationEndpointUris("authorize")
-               .SetTokenEndpointUris("token");
+            .SetTokenEndpointUris("token");
 
         // AuthorizationCodeFlowとRefreshTokenFlowを有効にする
         options.AllowAuthorizationCodeFlow()
             .AllowRefreshTokenFlow();
-        
+
         // Register the signing and encryption credentials
-        if(builder.Environment.IsDevelopment())
+        if (builder.Environment.IsDevelopment())
         {
             options.AddDevelopmentEncryptionCertificate()
                 .AddDevelopmentSigningCertificate();
         }
         else
         {
-            // Todo: 本番環境では、本番環境用の証明書を使う
-            throw new NotImplementedException();
+            // Todo: 関数化する
+            const string encryptionCertificatePath = "cert/server-encryption-certificate.pfx";
+            const string signingCertificatePath = "cert/server-signing-certificate.pfx";
+            // Generate a certificate at startup and register it.
+            if (!File.Exists(encryptionCertificatePath))
+            {
+                using var algorithm = RSA.Create(keySizeInBits: 2048);
+
+                var subject = new X500DistinguishedName("CN=Fabrikam Server Encryption Certificate");
+                var request = new CertificateRequest(subject, algorithm, HashAlgorithmName.SHA256,
+                    RSASignaturePadding.Pkcs1);
+                request.CertificateExtensions.Add(new X509KeyUsageExtension(X509KeyUsageFlags.KeyEncipherment,
+                    critical: true));
+
+                var certificate = request.CreateSelfSigned(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddYears(2));
+
+                File.WriteAllBytes(encryptionCertificatePath,
+                    certificate.Export(X509ContentType.Pfx, string.Empty));
+            }
+
+            if (!File.Exists(signingCertificatePath))
+            {
+                using var algorithm = RSA.Create(keySizeInBits: 2048);
+
+                var subject = new X500DistinguishedName("CN=Fabrikam Server Signing Certificate");
+                var request = new CertificateRequest(subject, algorithm, HashAlgorithmName.SHA256,
+                    RSASignaturePadding.Pkcs1);
+                request.CertificateExtensions.Add(new X509KeyUsageExtension(X509KeyUsageFlags.DigitalSignature,
+                    critical: true));
+
+                var certificate = request.CreateSelfSigned(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddYears(2));
+
+                File.WriteAllBytes(signingCertificatePath,
+                    certificate.Export(X509ContentType.Pfx, string.Empty));
+            }
+            
+            options.AddEncryptionCertificate(
+                new X509Certificate2(encryptionCertificatePath, string.Empty));
+            options.AddSigningCertificate(
+                new X509Certificate2(signingCertificatePath, string.Empty));
         }
-        
+
         // Register the ASP.NET Core host and configure the ASP.NET Core-specific options.
         //
         // Note: unlike other samples, this sample doesn't use token endpoint pass-through
@@ -104,7 +183,7 @@ builder.Services.AddOpenIddict()
         // resolved from the authorization code to produce access and identity tokens.
         //
         options.UseAspNetCore()
-               .EnableAuthorizationEndpointPassthrough();
+            .EnableAuthorizationEndpointPassthrough();
     })
     // Register the OpenIddict validation components.
     .AddValidation(options =>
