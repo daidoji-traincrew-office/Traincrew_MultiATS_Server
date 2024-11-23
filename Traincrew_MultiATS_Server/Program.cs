@@ -51,14 +51,15 @@ builder.Services.AddOpenIddict()
         }
         else
         {
-            const string encryptionCertificatePath = "cert/server-encryption-certificate.pfx";
-            const string signingCertificatePath = "cert/server-signing-certificate.pfx";
+            // Todo: 関数化する
+            const string encryptionCertificatePath = "cert/client-encryption-certificate.pfx";
+            const string signingCertificatePath = "cert/client-signing-certificate.pfx";
             // Generate a certificate at startup and register it.
             if (!File.Exists(encryptionCertificatePath))
             {
                 using var algorithm = RSA.Create(keySizeInBits: 2048);
 
-                var subject = new X500DistinguishedName("CN=Fabrikam Server Encryption Certificate");
+                var subject = new X500DistinguishedName("CN=Fabrikam Client Encryption Certificate");
                 var request = new CertificateRequest(subject, algorithm, HashAlgorithmName.SHA256,
                     RSASignaturePadding.Pkcs1);
                 request.CertificateExtensions.Add(new X509KeyUsageExtension(X509KeyUsageFlags.KeyEncipherment,
@@ -74,7 +75,7 @@ builder.Services.AddOpenIddict()
             {
                 using var algorithm = RSA.Create(keySizeInBits: 2048);
 
-                var subject = new X500DistinguishedName("CN=Fabrikam Server Signing Certificate");
+                var subject = new X500DistinguishedName("CN=Fabrikam Client Signing Certificate");
                 var request = new CertificateRequest(subject, algorithm, HashAlgorithmName.SHA256,
                     RSASignaturePadding.Pkcs1);
                 request.CertificateExtensions.Add(new X509KeyUsageExtension(X509KeyUsageFlags.DigitalSignature,
@@ -132,8 +133,46 @@ builder.Services.AddOpenIddict()
         }
         else
         {
-            // Todo: 本番環境では、本番環境用の証明書を使う
-            throw new NotImplementedException();
+            // Todo: 関数化する
+            const string encryptionCertificatePath = "cert/server-encryption-certificate.pfx";
+            const string signingCertificatePath = "cert/server-signing-certificate.pfx";
+            // Generate a certificate at startup and register it.
+            if (!File.Exists(encryptionCertificatePath))
+            {
+                using var algorithm = RSA.Create(keySizeInBits: 2048);
+
+                var subject = new X500DistinguishedName("CN=Fabrikam Server Encryption Certificate");
+                var request = new CertificateRequest(subject, algorithm, HashAlgorithmName.SHA256,
+                    RSASignaturePadding.Pkcs1);
+                request.CertificateExtensions.Add(new X509KeyUsageExtension(X509KeyUsageFlags.KeyEncipherment,
+                    critical: true));
+
+                var certificate = request.CreateSelfSigned(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddYears(2));
+
+                File.WriteAllBytes(encryptionCertificatePath,
+                    certificate.Export(X509ContentType.Pfx, string.Empty));
+            }
+
+            if (!File.Exists(signingCertificatePath))
+            {
+                using var algorithm = RSA.Create(keySizeInBits: 2048);
+
+                var subject = new X500DistinguishedName("CN=Fabrikam Server Signing Certificate");
+                var request = new CertificateRequest(subject, algorithm, HashAlgorithmName.SHA256,
+                    RSASignaturePadding.Pkcs1);
+                request.CertificateExtensions.Add(new X509KeyUsageExtension(X509KeyUsageFlags.DigitalSignature,
+                    critical: true));
+
+                var certificate = request.CreateSelfSigned(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddYears(2));
+
+                File.WriteAllBytes(signingCertificatePath,
+                    certificate.Export(X509ContentType.Pfx, string.Empty));
+            }
+            
+            options.AddEncryptionCertificate(
+                new X509Certificate2(encryptionCertificatePath, string.Empty));
+            options.AddSigningCertificate(
+                new X509Certificate2(signingCertificatePath, string.Empty));
         }
 
         // Register the ASP.NET Core host and configure the ASP.NET Core-specific options.
