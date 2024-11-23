@@ -18,4 +18,4 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0
 EXPOSE 8080
 WORKDIR /app
 COPY --link --from=build /app .
-ENTRYPOINT ["./aspnetapp"]
+ENTRYPOINT ["./Traincrew_MultiATS_Server"]
