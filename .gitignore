@@ -4,3 +4,4 @@ obj/
 riderModule.iml
 /_ReSharper.Caches/
 .idea/
+Traincrew_MultiATS_Server/appsettings.Development.json
