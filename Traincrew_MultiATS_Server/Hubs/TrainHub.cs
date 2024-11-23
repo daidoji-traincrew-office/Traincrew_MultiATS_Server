@@ -10,8 +10,8 @@ public class TrainHub: Hub
    {
       return Task.FromResult(0);
    }
-   public async Task SendData_ATS(DataToServer data)
+   public async Task SendData_ATS(DataFromServer sendData_ATS)
    {
-      Console.WriteLine($"{data.DiaName}");
+      await Clients.Caller.SendAsync("ReceiveData_ATS", sendData_ATS);
    }
 }
