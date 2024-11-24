@@ -5,6 +5,7 @@ namespace Traincrew_MultiATS_Server.Data;
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 {
     public DbSet<Models.Station> Stations { get; set; }
+    public DbSet<Models.Circuit> Circuits { get; set;}
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

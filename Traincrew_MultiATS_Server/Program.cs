@@ -168,6 +168,8 @@ await using (var scope = app.Services.CreateAsyncScope())
     }
 }
 
+await InitDB.initDB();
+
 app.UseRouting();
 app.UseCors();
 
