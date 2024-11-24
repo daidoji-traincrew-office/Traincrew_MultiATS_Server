@@ -1,0 +1,14 @@
+-- Create "lever" table
+CREATE TABLE "lever" ("id" serial NOT NULL, "station" character varying(100) NOT NULL, "name" character varying(20) NOT NULL, "description" text NOT NULL, "type" character varying(50) NOT NULL, "root" character varying(100) NULL, "indicator" character varying(10) NULL, "approach_lock_time" integer NULL, PRIMARY KEY ("id"), CONSTRAINT "lever_station_name_key" UNIQUE ("station", "name"));
+-- Create "lever_include" table
+CREATE TABLE "lever_include" ("source_lever_id" integer NOT NULL, "target_lever_id" integer NOT NULL, CONSTRAINT "lever_include_source_lever_id_fkey" FOREIGN KEY ("source_lever_id") REFERENCES "lever" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION, CONSTRAINT "lever_include_target_lever_id_fkey" FOREIGN KEY ("target_lever_id") REFERENCES "lever" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION);
+-- Create "lock" table
+CREATE TABLE "lock" ("id" serial NOT NULL, "lever_id" integer NULL, "type" character varying(255) NULL, "route_lock_group" integer NULL, "or_condition_group" integer NULL, PRIMARY KEY ("id"), CONSTRAINT "lock_lever_id_fkey" FOREIGN KEY ("lever_id") REFERENCES "lever" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION);
+-- Create "station" table
+CREATE TABLE "station" ("name" character varying(100) NOT NULL, PRIMARY KEY ("name"));
+-- Create "track_circuit" table
+CREATE TABLE "track_circuit" ("id" serial NOT NULL, "station" character varying(100) NULL, "name" character varying(20) NOT NULL, "protection_zone" character varying(20) NOT NULL, PRIMARY KEY ("id"), CONSTRAINT "track_circuit_name_key" UNIQUE ("name"), CONSTRAINT "track_circuit_station_fkey" FOREIGN KEY ("station") REFERENCES "station" ("name") ON UPDATE NO ACTION ON DELETE NO ACTION);
+-- Create "lock_condition" table
+CREATE TABLE "lock_condition" ("id" serial NOT NULL, "type" character varying(50) NOT NULL, "lever_id" integer NULL, "track_circuit_id" character varying(255) NULL, "timer_seconds" integer NULL, "is_reverse" boolean NOT NULL, "is_total_control" boolean NOT NULL, "is_single_lock" boolean NOT NULL, "condition_time_seconds" integer NULL, PRIMARY KEY ("id"), CONSTRAINT "lock_condition_lever_id_fkey" FOREIGN KEY ("lever_id") REFERENCES "lever" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION, CONSTRAINT "lock_condition_track_circuit_id_fkey" FOREIGN KEY ("track_circuit_id") REFERENCES "track_circuit" ("name") ON UPDATE NO ACTION ON DELETE NO ACTION);
+-- Create "lock_condition_execute" table
+CREATE TABLE "lock_condition_execute" ("source_id" integer NOT NULL, "target_id" integer NOT NULL, CONSTRAINT "lock_condition_execute_source_id_fkey" FOREIGN KEY ("source_id") REFERENCES "lock_condition" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION, CONSTRAINT "lock_condition_execute_target_id_fkey" FOREIGN KEY ("target_id") REFERENCES "lock_condition" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION);

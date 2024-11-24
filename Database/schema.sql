@@ -75,3 +75,64 @@ CREATE TABLE "OpenIddictTokens"
 
 CREATE INDEX "IX_OpenIddictTokens_authorization_id" ON "OpenIddictTokens" (authorization_id);
 CREATE UNIQUE INDEX "IX_OpenIddictTokens_reference_id" ON "OpenIddictTokens" (reference_id);
+
+CREATE TABLE lever
+(
+    id                 SERIAL PRIMARY KEY,
+    station            VARCHAR(100) NOT NULL,
+    name               VARCHAR(20)  NOT NULL,
+    description        TEXT         NOT NULL,
+    type               VARCHAR(50)  NOT NULL,
+    root               VARCHAR(100),
+    indicator          VARCHAR(10),
+    approach_lock_time INT,
+    UNIQUE (station, name)
+);
+
+CREATE TABLE lever_include
+(
+    source_lever_id INT REFERENCES lever (ID) NOT NULL,
+    target_lever_id INT REFERENCES lever (ID) NOT NULL
+);
+
+CREATE TABLE station
+(
+    name VARCHAR(100) NOT NULL,
+    PRIMARY KEY (name)
+);
+
+CREATE TABLE track_circuit
+(
+    id              SERIAL PRIMARY KEY,
+    station         VARCHAR(100) REFERENCES station (name),
+    name            VARCHAR(20) NOT NULL UNIQUE,
+    protection_zone VARCHAR(20) NOT NULL
+);
+
+CREATE TABLE lock
+(
+    id                 SERIAL PRIMARY KEY,
+    lever_id           INT REFERENCES lever (ID),
+    type               VARCHAR(255),
+    route_lock_group   INT,
+    or_condition_group INT
+);
+
+CREATE TABLE lock_condition
+(
+    ID                     SERIAL PRIMARY KEY,
+    type                   VARCHAR(50) NOT NULL,
+    lever_id               INT REFERENCES lever (ID),
+    track_circuit_id       VARCHAR(255) REFERENCES track_circuit (name),
+    timer_seconds          INT,
+    is_reverse             BOOLEAN     NOT NULL,
+    is_total_control       BOOLEAN     NOT NULL,
+    is_single_lock         BOOLEAN     NOT NULL,
+    condition_time_seconds INT
+);
+
+CREATE TABLE lock_condition_execute
+(
+    source_id INT REFERENCES lock_condition (ID) NOT NULL,
+    target_id INT REFERENCES lock_condition (ID) NOT NULL
+);
