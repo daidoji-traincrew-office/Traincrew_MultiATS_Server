@@ -81,6 +81,7 @@ CREATE TABLE lever
     id                 SERIAL PRIMARY KEY,
     station            VARCHAR(100) NOT NULL,
     name               VARCHAR(20)  NOT NULL,
+    tc_name            VARCHAR(100),
     description        TEXT         NOT NULL,
     type               VARCHAR(50)  NOT NULL,
     root               VARCHAR(100),
@@ -106,7 +107,16 @@ CREATE TABLE track_circuit
     id              SERIAL PRIMARY KEY,
     station         VARCHAR(100) REFERENCES station (name),
     name            VARCHAR(20) NOT NULL UNIQUE,
-    protection_zone VARCHAR(20) NOT NULL
+    protection_zone INT         NOT NULL
+);
+
+CREATE TABLE signal
+(
+    name VARCHAR(100) NOT NULL,
+    next_signal_name VARCHAR(100) REFERENCES signal (name),
+    track_circuit_id INT REFERENCES track_circuit (ID),
+    lever_id INT REFERENCES lever (ID),
+    PRIMARY KEY (name)
 );
 
 CREATE TABLE lock
