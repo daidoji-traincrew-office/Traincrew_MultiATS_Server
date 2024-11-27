@@ -112,10 +112,10 @@ CREATE TABLE track_circuit
 
 CREATE TABLE signal
 (
-    name VARCHAR(100) NOT NULL,
+    name             VARCHAR(100) NOT NULL,
     next_signal_name VARCHAR(100) REFERENCES signal (name),
     track_circuit_id INT REFERENCES track_circuit (ID),
-    lever_id INT REFERENCES lever (ID),
+    lever_id         INT REFERENCES lever (ID),
     PRIMARY KEY (name)
 );
 
