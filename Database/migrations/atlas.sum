@@ -1,3 +1,6 @@
-h1:npjaYuj03VEGY8pZJw8u59IFlqBLbRNDHZQKNCq5C80=
+h1:mjyNuZBI1EKUsG5W+C9tqhrGrFcPX8swYJZ4D2lUT8Y=
 20241105144637_create_openiddict.sql h1:e3YP3bvDT2pkUc506P3fgKJoLzdNnzBgjkBNMKvEKoI=
-20241124133627_create_interlocking.sql h1:tlYEafp73nQ1w1OjDt1+2QNSUp0hO8l6njUWYNo4SrE=
+20241124133627_create_interlocking.sql h1:veXOYiLu2CQChDJRmsl0rbml+Uxp/7fHydwNGE+1FrE=
+20241127132655_change_protection_zone.sql h1:zSNZUnvyIAR9dYUqPp28jUNY6MbQhMXfw5imcuwHM3M=
+20241127132826_add_tc_name.sql h1:ljAvMu3cr0NbEDhXvbE8ERf1Mog5rahE8Mq80x9n+UA=
+20241127132845_add_signals.sql h1:ZIHgk55n7Q/+GWpXVXu21ffbk+GB9m3ZY/sbrG1g1sk=
