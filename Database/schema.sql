@@ -76,48 +76,91 @@ CREATE TABLE "OpenIddictTokens"
 CREATE INDEX "IX_OpenIddictTokens_authorization_id" ON "OpenIddictTokens" (authorization_id);
 CREATE UNIQUE INDEX "IX_OpenIddictTokens_reference_id" ON "OpenIddictTokens" (reference_id);
 
-CREATE TABLE lever
-(
-    id                 SERIAL PRIMARY KEY,
-    station            VARCHAR(100) NOT NULL,
-    name               VARCHAR(20)  NOT NULL,
-    tc_name            VARCHAR(100),
-    description        TEXT         NOT NULL,
-    type               VARCHAR(50)  NOT NULL,
-    root               VARCHAR(100),
-    indicator          VARCHAR(10),
-    approach_lock_time INT,
-    UNIQUE (station, name)
-);
+-- Todo: あとで各行にコメントを書こう
 
-CREATE TABLE lever_include
-(
-    source_lever_id INT REFERENCES lever (ID) NOT NULL,
-    target_lever_id INT REFERENCES lever (ID) NOT NULL
-);
-
+-- 停車場を表す
 CREATE TABLE station
 (
     name VARCHAR(100) NOT NULL,
     PRIMARY KEY (name)
 );
 
+CREATE TYPE object_type AS ENUM ('route', 'switching_machine', 'track_circuit');
+
+-- object(進路、転てつ機、軌道回路)を表す
+-- 以上3つのIDの一元管理を行う
+CREATE TABLE object
+(
+    id   BIGSERIAL PRIMARY KEY,
+    type object_type NOT NULL -- 進路、転てつ機、軌道回路
+);
+
+-- 進路
+-- 場内信号機、出発信号機、誘導信号機、入換信号機、入換標識
+CREATE TYPE route_type AS ENUM ('arriving', 'departure', 'guide', 'switch_signal', 'switch_route');
+
+CREATE TABLE route
+(
+    id                 BIGINT PRIMARY KEY REFERENCES object (id),
+    station            VARCHAR(100) NOT NULL, -- 停車場の名前
+    name               VARCHAR(20)  NOT NULL, -- 名前
+    tc_name            VARCHAR(100),          -- Traincrewでの名前(要検討)
+    description        TEXT,                  -- 説明
+    route_type         route_type   NOT NULL,
+    root               VARCHAR(100),
+    indicator          VARCHAR(10),
+    approach_lock_time INT,
+    UNIQUE (station, name)
+);
+
+CREATE TABLE route_include
+(
+    source_lever_id INT REFERENCES lever (ID) NOT NULL,
+    target_lever_id INT REFERENCES lever (ID) NOT NULL
+);
+
+-- 信号
+---- Todo: SwitchGを入れるか？
+CREATE TYPE signal_indication AS ENUM ('R', 'YY', 'Y', 'YG', 'G');
+--- 信号機種類テーブル(現示の種類)
+--- 次の信号機がこれなら、この信号機の現示はこれ、っていうリスト
+CREATE TABLE signal_type
+(
+    name            VARCHAR(100)      NOT NULL, -- 4灯式とか、3灯式とかのやつ
+    next_indication signal_indication NOT NULL,
+    this_indication signal_indication NOT NULL,
+    UNIQUE (name, next_indication)
+);
+CREATE INDEX signal_type_name_index ON signal_type (name);
+
+--- 信号機
+CREATE TABLE signal
+(
+    name             VARCHAR(100) PRIMARY KEY                   NOT NULL,
+    next_signal_name VARCHAR(100) REFERENCES signal (name),               -- 次の信号機
+    type             VARCHAR(100) REFERENCES signal_type (name) NOT NULL, -- 信号機の種類(4灯式とか)
+    track_circuit_id BIGINT REFERENCES track_circuit (ID)                 -- 閉そく信号機の軌道回路
+);
+
+--- 信号機と進路の関係
+CREATE TABLE signal_route
+(
+    signal_name VARCHAR(100) REFERENCES signal (name) NOT NULL,
+    route_id    BIGINT REFERENCES route (id)          NOT NULL
+);
+CREATE INDEX signal_route_signal_name_index ON signal_route (signal_name);
+
+
+-- 軌道回路
 CREATE TABLE track_circuit
 (
-    id              SERIAL PRIMARY KEY,
+    id              BIGINT PRIMARY KEY REFERENCES object (id),
     station         VARCHAR(100) REFERENCES station (name),
     name            VARCHAR(20) NOT NULL UNIQUE,
     protection_zone INT         NOT NULL
 );
 
-CREATE TABLE signal
-(
-    name             VARCHAR(100) NOT NULL,
-    next_signal_name VARCHAR(100) REFERENCES signal (name),
-    track_circuit_id INT REFERENCES track_circuit (ID),
-    lever_id         INT REFERENCES lever (ID),
-    PRIMARY KEY (name)
-);
+
 
 CREATE TABLE lock
 (
@@ -131,6 +174,7 @@ CREATE TABLE lock
 CREATE TABLE lock_condition
 (
     ID                     SERIAL PRIMARY KEY,
+    lock_id                INT REFERENCES lock (ID),
     type                   VARCHAR(50) NOT NULL,
     lever_id               INT REFERENCES lever (ID),
     track_circuit_id       VARCHAR(255) REFERENCES track_circuit (name),
