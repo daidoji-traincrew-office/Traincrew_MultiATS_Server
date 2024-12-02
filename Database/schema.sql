@@ -232,11 +232,11 @@ CREATE TABLE route_state
     -- Todo: 内部的にどっちにしてほしいカラム
 );
 
--- 鎖状状態
--- Todo: 進路定位時、接近鎖状とするか進路鎖状とするか、どちらでもない場合の値をいれる(進路に対してかかるもの)
-CREATE TABLE lock_state
+-- 進路の鎖状状態
+CREATE TABLE route_lock_state
 (
-    route_id  INT REFERENCES route (ID) NOT NULL,
+    target_route_id INT REFERENCES route (ID) NOT NULL, -- 鎖状される進路のID
+    source_route_id INT REFERENCES route (ID) NOT NULL, -- 鎖状する要因の進路ID
     lock_type lock_type                 NOT NULL,
     end_time  TIMESTAMP -- 接近鎖状が終了する時刻
 );
