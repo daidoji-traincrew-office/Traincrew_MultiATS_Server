@@ -104,20 +104,22 @@ CREATE TABLE route
     id                 BIGINT PRIMARY KEY REFERENCES object (id),
     station            VARCHAR(100) NOT NULL, -- 停車場の名前
     name               VARCHAR(20)  NOT NULL, -- 名前
-    tc_name            VARCHAR(100),          -- Traincrewでの名前(要検討)
+    tc_name            VARCHAR(100) NOT NULL, -- Traincrewでの名前(要検討)
     description        TEXT,                  -- 説明
     route_type         route_type   NOT NULL,
+    -- Todo: この辺が転てつ機に必要か確認
     root               VARCHAR(100),
     indicator          VARCHAR(10),
-    approach_lock_time INT,
-    UNIQUE (station, name)
+    approach_lock_time INT
 );
 
 CREATE TABLE route_include
 (
-    source_lever_id INT REFERENCES lever (ID) NOT NULL,
-    target_lever_id INT REFERENCES lever (ID) NOT NULL
+    source_lever_id INT REFERENCES route (ID) NOT NULL,
+    target_lever_id INT REFERENCES route (ID) NOT NULL,
+    UNIQUE (source_lever_id, target_lever_id)
 );
+CREATE INDEX route_include_source_lever_id_index ON route_include (source_lever_id);
 
 -- 信号
 ---- Todo: SwitchGを入れるか？
@@ -160,13 +162,26 @@ CREATE TABLE track_circuit
     protection_zone INT         NOT NULL
 );
 
+-- 転てつ機
+CREATE TABLE switching_machine
+(
+    id      BIGINT PRIMARY KEY REFERENCES object (id),
+    station VARCHAR(100) REFERENCES station (name) NOT NULL,
+    name    VARCHAR(100)                           NOT NULL,
+    tc_name VARCHAR(100)                           NOT NULL,
+    -- Todo: 進路にある情報が必要か確認
+    UNIQUE (station, name)
+);
 
+-- 鎖状条件
+-- 鎖状、信号制御、てっさ鎖状、進路鎖状、接近鎖状
+CREATE TYPE lock_type AS ENUM ('lock', 'signal_control', 'detector', 'route', 'approach');
 
 CREATE TABLE lock
 (
     id                 SERIAL PRIMARY KEY,
-    lever_id           INT REFERENCES lever (ID),
-    type               VARCHAR(255),
+    object_id          INT REFERENCES object (id), 
+    type               lock_type NOT NULL,
     route_lock_group   INT,
     or_condition_group INT
 );
@@ -176,8 +191,7 @@ CREATE TABLE lock_condition
     ID                     SERIAL PRIMARY KEY,
     lock_id                INT REFERENCES lock (ID),
     type                   VARCHAR(50) NOT NULL,
-    lever_id               INT REFERENCES lever (ID),
-    track_circuit_id       VARCHAR(255) REFERENCES track_circuit (name),
+    object_id              INT REFERENCES object (id),
     timer_seconds          INT,
     is_reverse             BOOLEAN     NOT NULL,
     is_total_control       BOOLEAN     NOT NULL,
