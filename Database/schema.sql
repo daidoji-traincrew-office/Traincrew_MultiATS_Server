@@ -204,11 +204,39 @@ CREATE TABLE lock_condition_execute
     target_id INT REFERENCES lock_condition (ID) NOT NULL
 );
 
--- Todo: 進路定位時、接近鎖状とするか進路鎖状とするか、どちらでもない場合の値をいれる(進路に対してかかるもの)
+-- ここから状態系
 
+-- 軌道回路状態
+CREATE TABLE track_circuit_state
+(
+    id           BIGINT PRIMARY KEY REFERENCES track_circuit (ID),
+    train_number VARCHAR(100),
+    is_short_circuit BOOLEAN -- 短絡状態
+);
+
+-- 転てつ機状態
+CREATE TABLE switching_machine_state
+(
+    id              BIGINT PRIMARY KEY REFERENCES switching_machine (ID),
+    lever_state     BOOLEAN, 
+    current_state   BOOLEAN NOT NULL,
+    switch_end_time TIMESTAMP
+);
+
+-- Todo: 進路状態
+CREATE TABLE route_state
+(
+    id           BIGINT PRIMARY KEY REFERENCES route (ID),
+    lever_state  BOOLEAN,
+    current_state BOOLEAN
+    -- Todo: 内部的にどっちにしてほしいカラム
+);
+
+-- 鎖状状態
+-- Todo: 進路定位時、接近鎖状とするか進路鎖状とするか、どちらでもない場合の値をいれる(進路に対してかかるもの)
 CREATE TABLE lock_state
 (
     route_id  INT REFERENCES route (ID) NOT NULL,
     lock_type lock_type                 NOT NULL,
-    end_time  TIMESTAMP WITH TIME ZONE -- 接近鎖状が終了する時刻
+    end_time  TIMESTAMP -- 接近鎖状が終了する時刻
 )
