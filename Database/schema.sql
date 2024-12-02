@@ -107,10 +107,9 @@ CREATE TABLE route
     tc_name            VARCHAR(100) NOT NULL, -- Traincrewでの名前(要検討)
     description        TEXT,                  -- 説明
     route_type         route_type   NOT NULL,
-    -- Todo: この辺が転てつ機に必要か確認
-    root               VARCHAR(100),
-    indicator          VARCHAR(10),
-    approach_lock_time INT
+    root               VARCHAR(100),          --親進路
+    indicator          VARCHAR(10),           -- 進路表示機(Todo: ここに持たせるべきなのか?)
+    approach_lock_time INT                    -- 接近鎖状の時間
 );
 
 CREATE TABLE route_include
@@ -180,7 +179,7 @@ CREATE TYPE lock_type AS ENUM ('lock', 'signal_control', 'detector', 'route', 'a
 CREATE TABLE lock
 (
     id                 SERIAL PRIMARY KEY,
-    object_id          INT REFERENCES object (id), 
+    object_id          INT REFERENCES object (id),
     type               lock_type NOT NULL,
     route_lock_group   INT,
     or_condition_group INT
@@ -204,3 +203,12 @@ CREATE TABLE lock_condition_execute
     source_id INT REFERENCES lock_condition (ID) NOT NULL,
     target_id INT REFERENCES lock_condition (ID) NOT NULL
 );
+
+-- Todo: 進路定位時、接近鎖状とするか進路鎖状とするか、どちらでもない場合の値をいれる(進路に対してかかるもの)
+
+CREATE TABLE lock_state
+(
+    route_id  INT REFERENCES route (ID) NOT NULL,
+    lock_type lock_type                 NOT NULL,
+    end_time  TIMESTAMP WITH TIME ZONE -- 接近鎖状が終了する時刻
+)
