@@ -239,4 +239,4 @@ CREATE TABLE lock_state
     route_id  INT REFERENCES route (ID) NOT NULL,
     lock_type lock_type                 NOT NULL,
     end_time  TIMESTAMP -- 接近鎖状が終了する時刻
-)
+);
