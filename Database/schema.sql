@@ -209,26 +209,26 @@ CREATE TABLE lock_condition_execute
 -- 軌道回路状態
 CREATE TABLE track_circuit_state
 (
-    id           BIGINT PRIMARY KEY REFERENCES track_circuit (ID),
-    train_number VARCHAR(100),
+    id               BIGINT PRIMARY KEY REFERENCES track_circuit (ID),
+    train_number     VARCHAR(100),
     is_short_circuit BOOLEAN -- 短絡状態
 );
 
 -- 転てつ機状態
 CREATE TABLE switching_machine_state
 (
-    id              BIGINT PRIMARY KEY REFERENCES switching_machine (ID),
-    lever_state     BOOLEAN, 
-    current_state   BOOLEAN NOT NULL,
-    switch_end_time TIMESTAMP
+    id                BIGINT PRIMARY KEY REFERENCES switching_machine (ID),
+    is_reversed       BOOLEAN NOT NULL,
+    is_lever_reversed BOOLEAN,
+    switch_end_time   TIMESTAMP
 );
 
 -- Todo: 進路状態
 CREATE TABLE route_state
 (
-    id           BIGINT PRIMARY KEY REFERENCES route (ID),
-    lever_state  BOOLEAN,
-    current_state BOOLEAN
+    id                BIGINT PRIMARY KEY REFERENCES route (ID),
+    is_lever_reversed BOOLEAN NOT NULL,
+    is_reversed       BOOLEAN NOT NULL
     -- Todo: 内部的にどっちにしてほしいカラム
 );
 
