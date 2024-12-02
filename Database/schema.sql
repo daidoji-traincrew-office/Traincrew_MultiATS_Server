@@ -121,18 +121,20 @@ CREATE TABLE route_include
 CREATE INDEX route_include_source_lever_id_index ON route_include (source_lever_id);
 
 -- 信号
----- Todo: SwitchGを入れるか？
 CREATE TYPE signal_indication AS ENUM ('R', 'YY', 'Y', 'YG', 'G');
 --- 信号機種類テーブル(現示の種類)
 --- 次の信号機がこれなら、この信号機の現示はこれ、っていうリスト
 CREATE TABLE signal_type
 (
-    name            VARCHAR(100)      NOT NULL, -- 4灯式とか、3灯式とかのやつ
+    name            VARCHAR(100) PRIMARY KEY -- 4灯式とか、3灯式とかのやつ
+);
+CREATE TABLE signal_type_indication
+(
+    signal_type_name VARCHAR(100) REFERENCES signal_type (name) NOT NULL,
     next_indication signal_indication NOT NULL,
     this_indication signal_indication NOT NULL,
-    UNIQUE (name, next_indication)
+    UNIQUE (signal_type_name, next_indication)
 );
-CREATE INDEX signal_type_name_index ON signal_type (name);
 
 --- 信号機
 CREATE TABLE signal
