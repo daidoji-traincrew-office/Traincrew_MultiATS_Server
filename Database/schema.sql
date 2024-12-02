@@ -172,10 +172,10 @@ CREATE TABLE switching_machine
     UNIQUE (station, name)
 );
 
--- 鎖状条件
 -- 鎖状、信号制御、てっさ鎖状、進路鎖状、接近鎖状
 CREATE TYPE lock_type AS ENUM ('lock', 'signal_control', 'detector', 'route', 'approach');
 
+-- 各進路、転てつ機の鎖状条件(すべての鎖状条件をここにいれる)
 CREATE TABLE lock
 (
     id                 SERIAL PRIMARY KEY,
@@ -184,7 +184,9 @@ CREATE TABLE lock
     route_lock_group   INT,
     or_condition_group INT
 );
+CREATE INDEX lock_object_id_type_index ON lock (object_id, type);
 
+-- てこ条件の詳細
 CREATE TABLE lock_condition
 (
     ID                     SERIAL PRIMARY KEY,
@@ -197,12 +199,14 @@ CREATE TABLE lock_condition
     is_single_lock         BOOLEAN     NOT NULL,
     condition_time_seconds INT
 );
+CREATE INDEX lock_condition_lock_id_index ON lock_condition (lock_id);
 
 CREATE TABLE lock_condition_execute
 (
     source_id INT REFERENCES lock_condition (ID) NOT NULL,
     target_id INT REFERENCES lock_condition (ID) NOT NULL
 );
+CREATE INDEX lock_condition_execute_source_id_index ON lock_condition_execute (source_id);
 
 -- ここから状態系
 
@@ -240,3 +244,4 @@ CREATE TABLE route_lock_state
     lock_type lock_type                 NOT NULL,
     end_time  TIMESTAMP -- 接近鎖状が終了する時刻
 );
+CREATE INDEX route_lock_state_target_route_id_index ON route_lock_state (target_route_id);
