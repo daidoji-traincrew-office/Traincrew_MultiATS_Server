@@ -126,16 +126,13 @@ CREATE TYPE signal_indication AS ENUM ('R', 'YY', 'Y', 'YG', 'G');
 --- 次の信号機がこれなら、この信号機の現示はこれ、っていうリスト
 CREATE TABLE signal_type
 (
-    name            VARCHAR(100) PRIMARY KEY -- 4灯式とか、3灯式とかのやつ
+    name            VARCHAR(100) PRIMARY KEY, -- 4灯式とか、3灯式とかのやつ
+    r_indication    signal_indication NOT NULL,
+    yy_indication   signal_indication NOT NULL,
+    y_indication    signal_indication NOT NULL,
+    yg_indication   signal_indication NOT NULL,
+    g_indication    signal_indication NOT NULL
 );
-CREATE TABLE signal_type_indication
-(
-    signal_type_name VARCHAR(100) REFERENCES signal_type (name) NOT NULL,
-    next_indication signal_indication NOT NULL,
-    this_indication signal_indication NOT NULL,
-    UNIQUE (signal_type_name, next_indication)
-);
-
 --- 信号機
 CREATE TABLE signal
 (
