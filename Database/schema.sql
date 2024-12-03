@@ -236,6 +236,13 @@ CREATE TABLE route_state
     should_reverse    BOOLEAN NOT NULL                          --内部的にどっちにしてほしいカラム
 );
 
+-- 信号機状態
+CREATE TABLE signal_state
+(
+    signal_name VARCHAR(100) PRIMARY KEY REFERENCES signal (name), -- 信号機の名前
+    is_lighted  BOOLEAN NOT NULL                                   -- 点灯状態
+);
+
 -- 進路の鎖状状態
 CREATE TABLE route_lock_state
 (
