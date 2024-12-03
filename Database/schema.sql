@@ -137,10 +137,19 @@ CREATE TABLE signal_type
 CREATE TABLE signal
 (
     name             VARCHAR(100) PRIMARY KEY                   NOT NULL,
-    next_signal_name VARCHAR(100) REFERENCES signal (name),               -- 次の信号機
     type             VARCHAR(100) REFERENCES signal_type (name) NOT NULL, -- 信号機の種類(4灯式とか)
     track_circuit_id BIGINT REFERENCES track_circuit (ID)                 -- 閉そく信号機の軌道回路
 );
+
+-- 次の信号リスト
+CREATE TABLE next_signal
+(
+    signal_name VARCHAR(100) REFERENCES signal (name) NOT NULL,
+    next_signal_name VARCHAR(100) REFERENCES signal (name) NOT NULL,
+    UNIQUE (signal_name, next_signal_name)
+);
+CREATE INDEX next_signal_signal_name_index ON next_signal (signal_name);
+                                                            
 
 --- 信号機と進路の関係(停車場内の信号機に設定する)
 CREATE TABLE signal_route
