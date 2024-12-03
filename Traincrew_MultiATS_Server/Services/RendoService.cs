@@ -1,5 +1,6 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using System.Collections.Immutable;
+//※DB取得・設定は失敗時速やかに早期リターン
 
 namespace Traincrew_MultiATS_Server.Services
 {
@@ -18,9 +19,7 @@ namespace Traincrew_MultiATS_Server.Services
         {
             //DB取得:stationIDの連動表情報取得　なかったら早期リターン
             var rendoObj = new Object();
-            //DB取得:Nameの情報取得　なかったら早期リターン    
-            var targetRendoTableObj = new Object();
-            //DB取得:Nameのtype取得        
+            //DB取得:Nameのtype取得　なかったら早期リターン         
             var targetRendoTableObjType = "";
 
             switch (targetRendoTableObjType)
@@ -39,11 +38,11 @@ namespace Traincrew_MultiATS_Server.Services
                     //進路てこ
                     if (isR)
                     {
-
+                        SetRoute(stationID, name);
                     }
                     else
                     {
-
+                        ResetRoute(stationID, name);
                     }
                     break;
                 case "AutoTeko":
@@ -62,7 +61,7 @@ namespace Traincrew_MultiATS_Server.Services
         /// <summary>
         /// 進路反位処理部
         /// </summary>
-        private void SetRoute(string stationID, string name, bool isR)
+        private void SetRoute(string stationID, string name)
         {
             //DB取得:stationID,nameが総括制御するてこの一覧を取得
 
@@ -102,29 +101,89 @@ namespace Traincrew_MultiATS_Server.Services
                     var otherTeihan = true;
                     if (otherTeihan != rendoExecute.teihan)
                     {
+                        //DB設定:rendoExecute.idに定反転換指令を出す
                         return;
                     }
                 }
             }
-            //DB設定:pointMoveListの各要素の情報に従い内部指示を目的方向へ変更
+
+            var AllPoint = false;
             foreach (var point in pointMoveList)
             {
-                //DB取得:point.Item1(駅名), point.Item2(番号)の転換状態を取得
-                var nowState = 1;
-                if (point.Item3 != nowState)
+                //DB取得:point.idのてこの定反状態を取得     
+                var pointTeihan = true;
+                if (pointTeihan != point.Item3)
                 {
-                    return;
+                    //DB設定:point.id内部指示をpoint.Item3へ変更      
+                    AllPoint = true;
                 }
             }
-            //DB設定:stationID,nameの内部状態を反位にする
+
+            //ポイント転換確認
+            if (AllPoint) { return; }
+
+            foreach (var rendoExecute in rendoExecuteList)
+            {
+                //rendoExecute.type：鎖錠テーブルの各要素の種類    
+                //rendoExecute.name：鎖錠テーブルの各要素の種類            
+                //rendoExecute.id：鎖錠テーブルの各要素のid         
+
+                //DB設定:rendoExecute.idを鎖錠
+            }
         }
 
         /// <summary>
         /// 進路定位処理部
         /// </summary>
-        private void ResetRoute(string stationID, string name, bool isR)
+        private void ResetRoute(string stationID, string name)
         {
-
+            //DB取得:stationID,nameの反位鎖錠原因リストを取得              
+            if (/*リストに要素があったら*/)
+            {
+                //反位強制
+                return;
+            }
+            //DB設定:stationID,nameの接近鎖錠を取得
+            var nowApproachLock = true;
+            if (nowApproachLock)
+            {
+                //DB設定:stationID,nameの接近鎖錠解錠時刻を取得
+                if (/*接近鎖錠解錠時刻 < 現時刻*/)
+                {
+                    return;
+                }
+            }
+            //接近鎖錠必要かどうか判定部      
+            //DB取得:stationID,nameの接近鎖錠リストを取得    
+            var approachLockList = new List<string>();
+            foreach (var track in approachLockList)
+            {
+                //DB取得:track.idの軌道回路の短絡状態を取得          
+                var trackOn = true;
+                if (trackOn)
+                {
+                    //DB設定:stationID,nameの接近鎖錠を鎖錠に設定   
+                    //DB取得:stationID,nameの接近鎖錠時素秒数を取得        
+                    //DB設定:stationID,nameの接近鎖錠解錠時刻を現在時刻+時素秒数に設定
+                    break;
+                }
+            }
+            //進路鎖錠必要かどうか判定部            
+            //DB取得:stationID,nameの進路鎖錠リストを取得    
+            var routeLockList = new List<List<string>>();
+            foreach (var tracks in routeLockList)
+            {
+                foreach (var track in tracks)
+                {
+                    //DB取得:track.idの軌道回路の短絡状態を取得          
+                    var trackOn = true;
+                    if (trackOn)
+                    {
+                        //DB設定:stationID,nameの進路鎖錠を鎖錠に設定   
+                        break;
+                    }
+                }
+            }
         }
     }
 }
