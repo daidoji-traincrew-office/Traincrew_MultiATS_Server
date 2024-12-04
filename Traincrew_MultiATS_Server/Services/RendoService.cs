@@ -143,7 +143,61 @@ namespace Traincrew_MultiATS_Server.Services
                 //反位強制
                 return;
             }
-            //DB設定:stationID,nameの接近鎖錠を取得
+            //DB取得:stationID,nameの進路鎖錠リストを取得    
+            var routeLockList = new List<List<string>>();
+            //DB取得:stationID,nameの進路鎖錠を取得
+            var nowRouteLock = true;
+            if (nowRouteLock)
+            {
+                var OpenTracks = new List<List<string>>();
+                var OpenState = true;
+                foreach (var tracks in routeLockList)
+                {
+                    foreach (var track in tracks)
+                    {
+                        //DB取得:track.idの軌道回路の短絡状態を取得          
+                        var trackOn = true;
+                        if (trackOn)
+                        {
+                            //DB設定:stationID,nameの進路鎖錠を鎖錠に設定   
+                            OpenState = false;
+                            break;
+                        }
+                    }
+                    if (OpenState)
+                    {
+                        OpenTracks.Add(tracks);
+                        routeLockList.Remove(tracks);
+                    }
+                }
+
+                foreach (var tracks in OpenTracks)
+                {
+                    foreach (var track in tracks)
+                    {
+                        //DB設定:track.idの軌道回路の鎖錠を解錠に設定      
+                    }
+                }
+                if (routeLockList.Count != 0)
+                {
+                    return;
+                }
+            }
+            //進路鎖錠必要かどうか判定部            
+            foreach (var tracks in routeLockList)
+            {
+                foreach (var track in tracks)
+                {
+                    //DB取得:track.idの軌道回路の短絡状態を取得          
+                    var trackOn = true;
+                    if (trackOn)
+                    {
+                        //DB設定:stationID,nameの進路鎖錠を鎖錠に設定   
+                        return;
+                    }
+                }
+            }
+            //DB取得:stationID,nameの接近鎖錠を取得
             var nowApproachLock = true;
             if (nowApproachLock)
             {
@@ -165,25 +219,11 @@ namespace Traincrew_MultiATS_Server.Services
                     //DB設定:stationID,nameの接近鎖錠を鎖錠に設定   
                     //DB取得:stationID,nameの接近鎖錠時素秒数を取得        
                     //DB設定:stationID,nameの接近鎖錠解錠時刻を現在時刻+時素秒数に設定
-                    break;
+                    return;
                 }
             }
-            //進路鎖錠必要かどうか判定部            
-            //DB取得:stationID,nameの進路鎖錠リストを取得    
-            var routeLockList = new List<List<string>>();
-            foreach (var tracks in routeLockList)
-            {
-                foreach (var track in tracks)
-                {
-                    //DB取得:track.idの軌道回路の短絡状態を取得          
-                    var trackOn = true;
-                    if (trackOn)
-                    {
-                        //DB設定:stationID,nameの進路鎖錠を鎖錠に設定   
-                        break;
-                    }
-                }
-            }
+            //鎖錠原因全通過
+            //DB設定:stationID,nameの内部状態を定位に設定   
         }
     }
 }
