@@ -28,7 +28,7 @@ namespace Traincrew_MultiATS_Server.Services
                     //方向てこ
                     break;
                 case "Point":
-                    //転轍てこ
+                    //転てつてこ
                     break;
                 case "ArrSignal":
                 case "DepSignal":
@@ -224,6 +224,48 @@ namespace Traincrew_MultiATS_Server.Services
             }
             //鎖錠原因全通過
             //DB設定:stationID,nameの内部状態を定位に設定   
+        }
+
+        /// <summary>
+        /// 転てつ器処理部
+        /// </summary>
+        private void PointSet(string stationID, string name, bool isR)
+        {
+            //DB取得:stationID,nameの転換状態を取得  
+            var State = true;
+            if (isR == State)
+            {
+                //同じだから何もしない
+                return;
+            }
+            else if (isR == 転換中)
+            {
+                //DB取得:stationID,nameの転換終了時刻を取得    
+                if (/*接近鎖錠解錠時刻 < 現時刻*/)
+                {
+                    return;
+                }
+            }
+            else
+            {
+                //DB取得:stationID,nameのてっ査鎖錠リストを取得                  
+                //DB設定:stationID,nameの接近鎖錠解錠時刻を現在時刻+時素秒数に設定
+                var detectorLockList = new List<string>();
+                foreach (var track in detectorLockList)
+                {
+                    //DB取得:rendoExecute.idの軌道回路の鎖錠状態を取得
+                    var trackLock = true;
+                    //DB取得:rendoExecute.idの軌道回路の短絡状態を取得          
+                    var trackOn = true;
+                    if (trackLock || trackOn)
+                    {
+                        //てっ査鎖錠されている
+                        return;
+                    }
+                }
+                //DB設定:stationID,nameの転換状態を転換中に設定         
+                //DB設定:stationID,nameの転換状態を転換終了時刻を現在時刻+転換必要時間に設定  
+            }
         }
     }
 }
