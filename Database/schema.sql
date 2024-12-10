@@ -80,18 +80,22 @@ CREATE UNIQUE INDEX "IX_OpenIddictTokens_reference_id" ON "OpenIddictTokens" (re
 -- 停車場を表す
 CREATE TABLE station
 (
-    name VARCHAR(100) NOT NULL,
-    PRIMARY KEY (name)
+    id   VARCHAR(10) PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE
 );
 
 CREATE TYPE object_type AS ENUM ('route', 'switching_machine', 'track_circuit');
 
 -- object(進路、転てつ機、軌道回路)を表す
 -- 以上3つのIDの一元管理を行う
-CREATE TABLE object
+-- Todo: 命名を連動オブジェクトなどに変更する
+CREATE TABLE interlocking_object
 (
     id   BIGSERIAL PRIMARY KEY,
-    type object_type NOT NULL -- 進路、転てつ機、軌道回路
+    type object_type NOT NULL, -- 進路、転てつ機、軌道回路
+    name VARCHAR(100) NOT NULL, -- 名前
+    station_id VARCHAR(10) REFERENCES station (id), -- 所属する停車場
+    UNIQUE (station_id, name)
 );
 
 -- 進路
@@ -100,9 +104,7 @@ CREATE TYPE route_type AS ENUM ('arriving', 'departure', 'guide', 'switch_signal
 
 CREATE TABLE route
 (
-    id                 BIGINT PRIMARY KEY REFERENCES object (id),
-    station            VARCHAR(100) NOT NULL, -- 停車場の名前
-    name               VARCHAR(20)  NOT NULL, -- 名前
+    id                 BIGINT PRIMARY KEY REFERENCES interlocking_object (id),
     tc_name            VARCHAR(100) NOT NULL, -- Traincrewでの名前
     description        TEXT,                  -- 説明
     route_type         route_type   NOT NULL,
@@ -119,6 +121,23 @@ CREATE TABLE route_include
     UNIQUE (source_lever_id, target_lever_id)
 );
 CREATE INDEX route_include_source_lever_id_index ON route_include (source_lever_id);
+
+-- 軌道回路
+CREATE TABLE track_circuit
+(
+    id              BIGINT PRIMARY KEY REFERENCES interlocking_object (id),
+    protection_zone INT         NOT NULL                    -- 防護無線区間
+);
+
+-- 転てつ機
+CREATE TABLE switching_machine
+(
+    id      BIGINT PRIMARY KEY REFERENCES interlocking_object (id),
+    tc_name VARCHAR(100)                           NOT NULL -- Traincrewでの名前
+);
+
+-- 鎖状、信号制御、てっさ鎖状、進路鎖状、接近鎖状
+CREATE TYPE lock_type AS ENUM ('lock', 'signal_control', 'detector', 'route', 'approach');
 
 -- 信号
 CREATE TYPE signal_indication AS ENUM ('R', 'YY', 'Y', 'YG', 'G');
@@ -159,35 +178,11 @@ CREATE TABLE signal_route
     UNIQUE (signal_name, route_id)
 );
 CREATE INDEX signal_route_signal_name_index ON signal_route (signal_name);
-
-
--- 軌道回路
-CREATE TABLE track_circuit
-(
-    id              BIGINT PRIMARY KEY REFERENCES object (id),
-    station         VARCHAR(100) REFERENCES station (name), -- 停車場の名前(nullable)
-    name            VARCHAR(20) NOT NULL UNIQUE,            -- 軌道回路名
-    protection_zone INT         NOT NULL                    -- 防護無線区間
-);
-
--- 転てつ機
-CREATE TABLE switching_machine
-(
-    id      BIGINT PRIMARY KEY REFERENCES object (id),
-    station VARCHAR(100) REFERENCES station (name) NOT NULL, --停車場の名前
-    name    VARCHAR(100)                           NOT NULL, -- 転てつ機名
-    tc_name VARCHAR(100)                           NOT NULL, -- Traincrewでの名前
-    UNIQUE (station, name)
-);
-
--- 鎖状、信号制御、てっさ鎖状、進路鎖状、接近鎖状
-CREATE TYPE lock_type AS ENUM ('lock', 'signal_control', 'detector', 'route', 'approach');
-
 -- 各進路、転てつ機の鎖状条件(すべての鎖状条件をここにいれる)
 CREATE TABLE lock
 (
     id                 SERIAL PRIMARY KEY,
-    object_id          INT REFERENCES object (id), -- 進路、転てつ機、軌道回路のID
+    object_id          INT REFERENCES interlocking_object (id), -- 進路、転てつ機、軌道回路のID
     type               lock_type NOT NULL,         -- 鎖状の種類
     route_lock_group   INT,                        -- 進路鎖状のグループ(カッコで囲まれてるやつを同じ数字にする)
     or_condition_group INT                         -- OR条件のグループ(OR条件のものを同じ数字にする)
@@ -200,13 +195,13 @@ CREATE TABLE lock_condition
     ID               SERIAL PRIMARY KEY,
     lock_id          INT REFERENCES lock (ID),   -- 鎖状条件のID
     type             VARCHAR(50) NOT NULL,       -- object or timer?
-    object_id        INT REFERENCES object (id), -- 進路、転てつ機、軌道回路のID
+    object_id        INT REFERENCES interlocking_object (id), -- 進路、転てつ機、軌道回路のID
     timer_seconds    INT,                        -- タイマーの秒数
     is_reverse       BOOLEAN     NOT NULL,       -- 定反
     is_total_control BOOLEAN     NOT NULL,       -- 統括制御かどうか
     is_single_lock   BOOLEAN     NOT NULL        -- 片鎖状がどうか
 );
-CREATE INDEX lock_condition_lock_id_index ON lock_condition (lock_id);
+CREATE UNIQUE INDEX lock_condition_lock_id_index ON lock_condition (lock_id);
 
 -- てこ条件のリスト
 CREATE TABLE lock_condition_execute

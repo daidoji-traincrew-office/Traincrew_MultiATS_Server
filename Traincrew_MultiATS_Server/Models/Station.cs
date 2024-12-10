@@ -6,6 +6,7 @@ namespace Traincrew_MultiATS_Server.Models;
 [Table("station")]
 public class Station
 {
-    [Key]
+    [Key] 
+    public string Id { get; set; }
     public string Name { get; set; }
 }
