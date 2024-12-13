@@ -6,4 +6,5 @@ namespace Traincrew_MultiATS_Server.Models;
 public class TrackCircuit : InterlockingObject
 {
     public int ProtectionZone { get; set; }
+    public TrackCircuitState? TrackCircuitState { get; set; }
 }

@@ -6,4 +6,5 @@ namespace Traincrew_MultiATS_Server.Models;
 public class SwitchingMachine : InterlockingObject
 {
     public string TcName { get; set; }
+    public SwitchingMachineState? SwitchingMachineState { get; set; }
 }
