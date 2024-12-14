@@ -1,8 +1,12 @@
-﻿namespace Traincrew_MultiATS_Server.Models;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
+namespace Traincrew_MultiATS_Server.Models;
+
+[Table("track_circuit_state")]
 public class TrackCircuitState
 {
-    public long Id { get; set; }
+    public ulong Id { get; set; }
     public string? TrainNumber { get; set; }
     public bool IsShortCircuit { get; set; }
+    public virtual TrackCircuit TrackCircuit { get; set; }
 }

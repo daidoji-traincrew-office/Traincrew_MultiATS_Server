@@ -10,5 +10,5 @@ public class Route : InterlockingObject
     public string? Root { get; set; }
     public string? Indicator { get; set; }
     public int? ApproachLockTime { get; set; }
-    public RouteState? RouteState { get; set; }
+    public virtual RouteState RouteState { get; set; }
 }

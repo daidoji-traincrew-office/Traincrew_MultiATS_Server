@@ -95,6 +95,7 @@ CREATE TABLE interlocking_object
     type object_type NOT NULL, -- 進路、転てつ機、軌道回路
     name VARCHAR(100) NOT NULL, -- 名前
     station_id VARCHAR(10) REFERENCES station (id), -- 所属する停車場
+    description        TEXT,                  -- 説明
     UNIQUE (station_id, name)
 );
 
@@ -106,7 +107,6 @@ CREATE TABLE route
 (
     id                 BIGINT PRIMARY KEY REFERENCES interlocking_object (id),
     tc_name            VARCHAR(100) NOT NULL, -- Traincrewでの名前
-    description        TEXT,                  -- 説明
     route_type         route_type   NOT NULL,
     root               VARCHAR(100),          --親進路
     indicator          VARCHAR(10),           -- 進路表示機(Todo: ここに持たせるべきなのか?)
@@ -116,8 +116,8 @@ CREATE TABLE route
 -- 進路の親子関係
 CREATE TABLE route_include
 (
-    source_lever_id INT REFERENCES route (ID) NOT NULL,
-    target_lever_id INT REFERENCES route (ID) NOT NULL,
+    source_lever_id BIGINT REFERENCES route (ID) NOT NULL,
+    target_lever_id BIGINT REFERENCES route (ID) NOT NULL,
     UNIQUE (source_lever_id, target_lever_id)
 );
 CREATE INDEX route_include_source_lever_id_index ON route_include (source_lever_id);
@@ -181,8 +181,8 @@ CREATE INDEX signal_route_signal_name_index ON signal_route (signal_name);
 -- 各進路、転てつ機の鎖状条件(すべての鎖状条件をここにいれる)
 CREATE TABLE lock
 (
-    id                 SERIAL PRIMARY KEY,
-    object_id          INT REFERENCES interlocking_object (id), -- 進路、転てつ機、軌道回路のID
+    id                 BIGSERIAL PRIMARY KEY,
+    object_id          BIGINT REFERENCES interlocking_object (id), -- 進路、転てつ機、軌道回路のID
     type               lock_type NOT NULL,         -- 鎖状の種類
     route_lock_group   INT,                        -- 進路鎖状のグループ(カッコで囲まれてるやつを同じ数字にする)
     or_condition_group INT                         -- OR条件のグループ(OR条件のものを同じ数字にする)
@@ -192,10 +192,10 @@ CREATE INDEX lock_object_id_type_index ON lock (object_id, type);
 -- てこ条件の詳細
 CREATE TABLE lock_condition
 (
-    ID               SERIAL PRIMARY KEY,
-    lock_id          INT REFERENCES lock (ID),   -- 鎖状条件のID
+    id               BIGSERIAL PRIMARY KEY,
+    lock_id          BIGINT REFERENCES lock (ID),   -- 鎖状条件のID
     type             VARCHAR(50) NOT NULL,       -- object or timer?
-    object_id        INT REFERENCES interlocking_object (id), -- 進路、転てつ機、軌道回路のID
+    object_id        BIGINT REFERENCES interlocking_object (id), -- 進路、転てつ機、軌道回路のID
     timer_seconds    INT,                        -- タイマーの秒数
     is_reverse       BOOLEAN     NOT NULL,       -- 定反
     is_total_control BOOLEAN     NOT NULL,       -- 統括制御かどうか
@@ -206,8 +206,8 @@ CREATE UNIQUE INDEX lock_condition_lock_id_index ON lock_condition (lock_id);
 -- てこ条件のリスト
 CREATE TABLE lock_condition_execute
 (
-    source_id INT REFERENCES lock_condition (ID) NOT NULL,
-    target_id INT REFERENCES lock_condition (ID) NOT NULL,
+    source_id BIGINT REFERENCES lock_condition (ID) NOT NULL,
+    target_id BIGINT REFERENCES lock_condition (ID) NOT NULL,
     UNIQUE (source_id, target_id)
 );
 CREATE INDEX lock_condition_execute_source_id_index ON lock_condition_execute (source_id);
@@ -250,8 +250,9 @@ CREATE TABLE signal_state
 -- 進路の鎖状状態
 CREATE TABLE route_lock_state
 (
-    target_route_id INT REFERENCES route (ID) NOT NULL, -- 鎖状される進路のID
-    source_route_id INT REFERENCES route (ID) NOT NULL, -- 鎖状する要因の進路ID
+    id              BIGSERIAL PRIMARY KEY,
+    target_route_id BIGINT REFERENCES route (ID) NOT NULL, -- 鎖状される進路のID
+    source_route_id BIGINT REFERENCES route (ID) NOT NULL, -- 鎖状する要因の進路ID
     lock_type       lock_type                 NOT NULL, -- 鎖状の種類
     end_time        TIMESTAMP                           -- 接近鎖状が終了する時刻
 );
