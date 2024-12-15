@@ -226,7 +226,7 @@ CREATE TABLE track_circuit_state
 CREATE TABLE switching_machine_state
 (
     id                BIGINT PRIMARY KEY REFERENCES switching_machine (ID), -- 転てつ機のID
-    is_reversed       BOOLEAN NOT NULL,                                     -- 定反(実際の状態、now < switch_end_time なら転換状態)
+    is_reverse        BOOLEAN NOT NULL,                                     -- 定反(実際の状態、now < switch_end_time なら転換状態)
     is_lever_reversed BOOLEAN,                                              -- レバーの位置(True=反位、False定位、null=正面)
     switch_end_time   TIMESTAMP                                             -- 転換終了時刻
 );

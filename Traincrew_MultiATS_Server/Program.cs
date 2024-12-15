@@ -2,9 +2,11 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using OpenIddict.Abstractions;
 using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.Hubs;
+using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
 using Traincrew_MultiATS_Server.Repositories.LockCondition;
 using Traincrew_MultiATS_Server.Repositories.Station;
@@ -23,7 +25,9 @@ builder.Services.AddSwaggerGen();
 // DB
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+    var dataSourceBuilder = new NpgsqlDataSourceBuilder(builder.Configuration.GetConnectionString("DefaultConnection"));
+    dataSourceBuilder.MapEnum<LockType>();
+    options.UseNpgsql(dataSourceBuilder.Build());
     // Todo: セッションであることを考えると、Redisを使ったほうが良いかも
     options.UseOpenIddict();
 });

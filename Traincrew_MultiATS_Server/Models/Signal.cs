@@ -3,5 +3,5 @@
 public class Signal
 {
     public string TcName { get; set; }
-    public SignalState? SignalState { get; set; }
+    public virtual SignalState SignalState { get; set; }
 }
