@@ -6,4 +6,14 @@ public class SwitchingMachineRepository : ISwitchingMachineRepository
     {
         throw new NotImplementedException();
     }
+
+    public async Task UpdateSwitchEndTime(IEnumerable<ulong> ids, DateTime switchEndTime)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task UpdateIsReverse(IEnumerable<ulong> ids, bool isReverse)
+    {
+        throw new NotImplementedException();
+    }
 }
