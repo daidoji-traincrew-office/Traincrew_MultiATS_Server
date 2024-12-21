@@ -221,7 +221,7 @@ CREATE TABLE track_circuit_state
 (
     id               BIGINT PRIMARY KEY REFERENCES track_circuit (ID), -- 軌道回路のID
     train_number     VARCHAR(100),                                     -- 列車番号
-    is_short_circuit BOOLEAN                                           -- 短絡状態
+    is_short_circuit BOOLEAN NOT NULL                                  -- 短絡状態
 );
 
 
