@@ -27,6 +27,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     var dataSourceBuilder = new NpgsqlDataSourceBuilder(builder.Configuration.GetConnectionString("DefaultConnection"));
     dataSourceBuilder.MapEnum<LockType>();
+    dataSourceBuilder.MapEnum<NR>();
+    dataSourceBuilder.MapEnum<NRC>();
     options.UseNpgsql(dataSourceBuilder.Build());
     // Todo: セッションであることを考えると、Redisを使ったほうが良いかも
     options.UseOpenIddict();

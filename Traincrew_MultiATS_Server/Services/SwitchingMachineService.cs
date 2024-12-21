@@ -29,11 +29,12 @@ public class SwitchingMachineService(
             {
                 // Todo: 転換中なので例外
             }
-
+            /*
             if (switchingMachine.SwitchingMachineState.IsReverse == isReverse)
             {
                 continue;
             }
+            */
         }
     }
 }
