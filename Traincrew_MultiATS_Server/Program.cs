@@ -2,9 +2,13 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using OpenIddict.Abstractions;
 using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.Hubs;
+using Traincrew_MultiATS_Server.Models;
+using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
+using Traincrew_MultiATS_Server.Repositories.LockCondition;
 using Traincrew_MultiATS_Server.Repositories.Station;
 using Traincrew_MultiATS_Server.Services;
 using static OpenIddict.Abstractions.OpenIddictConstants;
@@ -21,7 +25,9 @@ builder.Services.AddSwaggerGen();
 // DB
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+    var dataSourceBuilder = new NpgsqlDataSourceBuilder(builder.Configuration.GetConnectionString("DefaultConnection"));
+    dataSourceBuilder.MapEnum<LockType>();
+    options.UseNpgsql(dataSourceBuilder.Build());
     // Todo: セッションであることを考えると、Redisを使ったほうが良いかも
     options.UseOpenIddict();
 });
@@ -57,13 +63,13 @@ builder.Services.AddOpenIddict()
             // Generate a certificate at startup and register it.
             if (!File.Exists(encryptionCertificatePath))
             {
-                using var algorithm = RSA.Create(keySizeInBits: 2048);
+                using var algorithm = RSA.Create(2048);
 
                 var subject = new X500DistinguishedName("CN=Fabrikam Client Encryption Certificate");
                 var request = new CertificateRequest(subject, algorithm, HashAlgorithmName.SHA256,
                     RSASignaturePadding.Pkcs1);
                 request.CertificateExtensions.Add(new X509KeyUsageExtension(X509KeyUsageFlags.KeyEncipherment,
-                    critical: true));
+                    true));
 
                 var certificate = request.CreateSelfSigned(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddYears(2));
 
@@ -73,20 +79,20 @@ builder.Services.AddOpenIddict()
 
             if (!File.Exists(signingCertificatePath))
             {
-                using var algorithm = RSA.Create(keySizeInBits: 2048);
+                using var algorithm = RSA.Create(2048);
 
                 var subject = new X500DistinguishedName("CN=Fabrikam Client Signing Certificate");
                 var request = new CertificateRequest(subject, algorithm, HashAlgorithmName.SHA256,
                     RSASignaturePadding.Pkcs1);
                 request.CertificateExtensions.Add(new X509KeyUsageExtension(X509KeyUsageFlags.DigitalSignature,
-                    critical: true));
+                    true));
 
                 var certificate = request.CreateSelfSigned(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddYears(2));
 
                 File.WriteAllBytes(signingCertificatePath,
                     certificate.Export(X509ContentType.Pfx, string.Empty));
             }
-            
+
             options.AddEncryptionCertificate(
                 new X509Certificate2(encryptionCertificatePath, string.Empty));
             options.AddSigningCertificate(
@@ -139,13 +145,13 @@ builder.Services.AddOpenIddict()
             // Generate a certificate at startup and register it.
             if (!File.Exists(encryptionCertificatePath))
             {
-                using var algorithm = RSA.Create(keySizeInBits: 2048);
+                using var algorithm = RSA.Create(2048);
 
                 var subject = new X500DistinguishedName("CN=Fabrikam Server Encryption Certificate");
                 var request = new CertificateRequest(subject, algorithm, HashAlgorithmName.SHA256,
                     RSASignaturePadding.Pkcs1);
                 request.CertificateExtensions.Add(new X509KeyUsageExtension(X509KeyUsageFlags.KeyEncipherment,
-                    critical: true));
+                    true));
 
                 var certificate = request.CreateSelfSigned(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddYears(2));
 
@@ -155,20 +161,20 @@ builder.Services.AddOpenIddict()
 
             if (!File.Exists(signingCertificatePath))
             {
-                using var algorithm = RSA.Create(keySizeInBits: 2048);
+                using var algorithm = RSA.Create(2048);
 
                 var subject = new X500DistinguishedName("CN=Fabrikam Server Signing Certificate");
                 var request = new CertificateRequest(subject, algorithm, HashAlgorithmName.SHA256,
                     RSASignaturePadding.Pkcs1);
                 request.CertificateExtensions.Add(new X509KeyUsageExtension(X509KeyUsageFlags.DigitalSignature,
-                    critical: true));
+                    true));
 
                 var certificate = request.CreateSelfSigned(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddYears(2));
 
                 File.WriteAllBytes(signingCertificatePath,
                     certificate.Export(X509ContentType.Pfx, string.Empty));
             }
-            
+
             options.AddEncryptionCertificate(
                 new X509Certificate2(encryptionCertificatePath, string.Empty));
             options.AddSigningCertificate(
@@ -199,6 +205,8 @@ builder.Services.AddAuthorization()
     .AddCookie();
 // DI周り
 builder.Services.AddScoped<IStationRepository, StationRepository>();
+builder.Services.AddScoped<IInterlockingObjectRepository, InterlockingObjectRepository>();
+builder.Services.AddScoped<ILockConditionRepository, LockConditionRepository>();
 builder.Services.AddScoped<StationService>();
 builder.Services.AddScoped<DiscordService>();
 
@@ -220,9 +228,6 @@ else
 // Note: in a real world application, this step should be part of a setup script.
 await using (var scope = app.Services.CreateAsyncScope())
 {
-    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    await context.Database.EnsureCreatedAsync();
-
     var manager = scope.ServiceProvider.GetRequiredService<IOpenIddictApplicationManager>();
 
     if (await manager.FindByClientIdAsync("MultiATS_Client") == null)
