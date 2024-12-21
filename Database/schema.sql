@@ -190,6 +190,8 @@ CREATE TABLE lock
 CREATE INDEX lock_object_id_type_index ON lock (object_id, type);
 
 -- てこ条件の詳細
+CREATE TYPE nr AS ENUM ('reversed', 'normal');
+CREATE TYPE nrc AS ENUM ('reversed', 'center', 'normal');
 CREATE TABLE lock_condition
 (
     id               BIGSERIAL PRIMARY KEY,
@@ -197,7 +199,7 @@ CREATE TABLE lock_condition
     type             VARCHAR(50) NOT NULL,                       -- object or timer?
     object_id        BIGINT REFERENCES interlocking_object (id), -- 進路、転てつ機、軌道回路のID
     timer_seconds    INT,                                        -- タイマーの秒数
-    is_reverse       BOOLEAN     NOT NULL,                       -- 定反
+    is_reverse       nr          NOT NULL,                       -- 定反
     is_total_control BOOLEAN     NOT NULL,                       -- 統括制御かどうか
     is_single_lock   BOOLEAN     NOT NULL                        -- 片鎖状がどうか
 );
@@ -224,8 +226,6 @@ CREATE TABLE track_circuit_state
 
 
 -- 転てつ機状態
-CREATE TYPE nr AS ENUM ('reversed', 'normal');
-CREATE TYPE nrc AS ENUM ('reversed', 'center', 'normal');
 CREATE TABLE switching_machine_state
 (
     id                BIGINT PRIMARY KEY REFERENCES switching_machine (ID), -- 転てつ機のID
@@ -239,9 +239,9 @@ CREATE TABLE switching_machine_state
 CREATE TABLE route_state
 (
     id                BIGINT PRIMARY KEY REFERENCES route (ID), -- 進路のID
-    is_lever_reversed BOOLEAN NOT NULL,                         -- レバーの位置(True=反位、False=定位)
-    is_reversed       BOOLEAN NOT NULL,                         -- 定反(実際の状態)
-    should_reverse    BOOLEAN NOT NULL                          --内部的にどっちにしてほしいカラム
+    is_lever_reversed nr      NOT NULL,                         -- レバーの位置(True=反位、False=定位)
+    is_reversed       nr      NOT NULL,                         -- 定反(実際の状態)
+    should_reverse    nr      NOT NULL                          --内部的にどっちにしてほしいカラム
 );
 
 -- 信号機状態

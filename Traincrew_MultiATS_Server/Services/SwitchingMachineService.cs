@@ -9,7 +9,7 @@ public class SwitchingMachineService(
     SwitchingMachineRepository switchingMachineRepository)
 {
     private const int SwitchingTime = 3;
-    public async Task SetSwitchingMachines(List<(ulong, bool)> switchingMachineList)
+    public async Task SetSwitchingMachines(List<(ulong, NR)> switchingMachineList)
     {
         var now = dateTimeRepository.GetNow();
         var switchingMachineIds = switchingMachineList.Select(x => x.Item1);
