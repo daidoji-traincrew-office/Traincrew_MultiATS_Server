@@ -34,7 +34,7 @@ public class RendoService(
                 await SetRoute(route);
                 break;
             case Route route:
-                ResetRoute(route);
+                await ResetRoute(route);
                 break;
             case SwitchingMachine:
                 //転てつてこ
@@ -161,7 +161,7 @@ public class RendoService(
     /// <summary>
     ///     進路定位処理部
     /// </summary>
-    private void ResetRoute(Route route)
+    private async Task ResetRoute(Route route)
     {
         // //DB取得:stationID,nameの反位鎖錠原因リストを取得              
         // if ( /*リストに要素があったら*/)

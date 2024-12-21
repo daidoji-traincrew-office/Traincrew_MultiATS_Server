@@ -247,13 +247,13 @@ CREATE TABLE signal_state
     is_lighted  BOOLEAN NOT NULL                                   -- 点灯状態
 );
 
--- 進路の鎖状状態
-CREATE TABLE route_lock_state
+-- 鎖状状態
+CREATE TABLE lock_state
 (
     id              BIGSERIAL PRIMARY KEY,
-    target_route_id BIGINT REFERENCES route (ID) NOT NULL, -- 鎖状される進路のID
-    source_route_id BIGINT REFERENCES route (ID) NOT NULL, -- 鎖状する要因の進路ID
+    target_route_id BIGINT REFERENCES interlocking_object (ID) NOT NULL, -- 鎖状されるオブジェクトID
+    source_route_id BIGINT REFERENCES interlocking_object (ID) NOT NULL, -- 鎖状する要因のオブジェクトID
     lock_type       lock_type                 NOT NULL, -- 鎖状の種類
     end_time        TIMESTAMP                           -- 接近鎖状が終了する時刻
 );
-CREATE INDEX route_lock_state_target_route_id_index ON route_lock_state (target_route_id);
+CREATE INDEX lock_state_target_route_id_index ON lock_state (target_route_id);
