@@ -136,8 +136,8 @@ CREATE TABLE switching_machine
     tc_name VARCHAR(100) NOT NULL -- Traincrewでの名前
 );
 
--- 鎖状、信号制御、てっさ鎖状、進路鎖状、接近鎖状
-CREATE TYPE lock_type AS ENUM ('lock', 'signal_control', 'detector', 'route', 'approach');
+-- 鎖状、信号制御、てっさ鎖状、進路鎖状、接近鎖状、保留鎖状
+CREATE TYPE lock_type AS ENUM ('lock', 'signal_control', 'detector', 'route', 'approach', 'stick');
 
 -- 信号
 CREATE TYPE signal_indication AS ENUM ('R', 'YY', 'Y', 'YG', 'G');
@@ -252,12 +252,19 @@ CREATE TABLE signal_state
 );
 
 -- 鎖状状態
+-- 進路鎖状の場合、接近鎖状の場合、てっさ鎖状、保留鎖状
+-- テッサ鎖状は、軌道回路の短絡状態を見ればよいので含めない
+-- 接近鎖状は、鎖状しているオブジェクトのlock_typeをすべて接近鎖状に変更し、end_timeを設定する
+-- 進路鎖状は、進路から軌道回路に鎖状をかける(特段追加カラム必要なし)
+-- 保留鎖状は、接近鎖状とほぼ同じ
 CREATE TABLE lock_state
 (
     id              BIGSERIAL PRIMARY KEY,
-    target_route_id BIGINT REFERENCES interlocking_object (ID) NOT NULL, -- 鎖状されるオブジェクトID
-    source_route_id BIGINT REFERENCES interlocking_object (ID) NOT NULL, -- 鎖状する要因のオブジェクトID
+    target_object_id BIGINT REFERENCES interlocking_object (ID) NOT NULL, -- 鎖状されるオブジェクトID
+    source_object_id BIGINT REFERENCES interlocking_object (ID) NOT NULL, -- 鎖状する要因のオブジェクトID
+    is_reverse      nr                                         NOT NULL, -- 定反
     lock_type       lock_type                                  NOT NULL, -- 鎖状の種類
     end_time        TIMESTAMP                                            -- 接近鎖状が終了する時刻
 );
-CREATE INDEX lock_state_target_route_id_index ON lock_state (target_route_id);
+
+CREATE INDEX lock_state_target_object_id_index ON lock_state (target_object_id);

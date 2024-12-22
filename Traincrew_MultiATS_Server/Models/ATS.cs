@@ -1,21 +1,21 @@
-    public enum KokuchiType
-    {
-        None,
-        Yokushi,
-        Tsuuchi,
-        TsuuchiKaijo,
-        Kaijo,
-        Shuppatsu,
-        ShuppatsuJikoku,
-        Torikeshi,
-        Tenmatsusho
-    }
+public enum KokuchiType
+{
+    None,
+    Yokushi,
+    Tsuuchi,
+    TsuuchiKaijo,
+    Kaijo,
+    Shuppatsu,
+    ShuppatsuJikoku,
+    Torikeshi,
+    Tenmatsusho
+}
 
 public class KokuchiData
 {
-    public KokuchiType Type;
     public string DisplayData;
     public DateTime OriginTime;
+    public KokuchiType Type;
 
     public KokuchiData(KokuchiType Type, string DisplayData, DateTime OriginTime)
     {
@@ -49,21 +49,21 @@ public class SignalData
 
 public class CarState
 {
-    public bool DoorClose;
-    public float BC_Press;
     public float Ampare;
+    public float BC_Press;
     public string CarModel;
-    public bool HasPantograph = false;
-    public bool HasDriverCab = false;
+    public bool DoorClose;
     public bool HasConductorCab = false;
+    public bool HasDriverCab = false;
     public bool HasMotor = false;
+    public bool HasPantograph = false;
 }
 
 public class TrackCircuitData
 {
-    public bool On = false;
-    public string Last = null;//軌道回路を踏んだ列車の名前
+    public string Last = null; //軌道回路を踏んだ列車の名前
     public string Name = "";
+    public bool On = false;
 
     public override string ToString()
     {
@@ -73,22 +73,24 @@ public class TrackCircuitData
 
 public class DataToServer
 {
+    public int BNotch;
+    public bool BougoState;
+    public List<CarState> CarStates = new();
     public string DiaName;
     public List<TrackCircuitData> OnTrackList = null;
-    public bool BougoState;
+
+    public int PNotch;
+
     //将来用
     public float Speed;
-    public int PNotch;
-    public int BNotch;
-    public List<CarState> CarStates = new List<CarState>();
 }
 
 public class DataFromServer
 {
-    public SignalData NextSignalData = null;
-    public SignalData DoubleNextSignalData = null;
     //進路表示の表示はTC本体実装待ち　未決定
     public bool BougoState;
+    public SignalData DoubleNextSignalData = null;
     public List<EmergencyLightData> EmergencyLightDatas;
     public Dictionary<string, KokuchiData> KokuchiData;
+    public SignalData NextSignalData = null;
 }

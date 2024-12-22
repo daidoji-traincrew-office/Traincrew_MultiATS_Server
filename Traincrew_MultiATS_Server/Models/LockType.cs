@@ -6,5 +6,6 @@ public enum LockType
     SignalControl,
     Detector,
     Route,
-    Approach
+    Approach,
+    Stick
 }
