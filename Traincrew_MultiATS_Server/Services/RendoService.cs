@@ -83,7 +83,7 @@ public class RendoService(
         var objectMap = objectList.ToDictionary(x => x.Id);
         // Todo: 各オブジェクトの鎖状状態を取得する処理を追加
 
-        var switchingMachineMoveList = new List<(ulong, bool)>();
+        var switchingMachineMoveList = new List<(ulong, NR)>();
         foreach (var lockCondition in rendoExecuteList)
         {
             switch (lockCondition.Type)
@@ -99,10 +99,10 @@ public class RendoService(
                         case TrackCircuit trackCircuit:
                             //軌道回路要素のとき
                             //Todo: DB取得:rendoExecute.idの軌道回路の鎖錠状態を取得
-                            var trackLock = true;
+                            var trackLock = NR.Normal;
                             //DB取得:rendoExecute.idの軌道回路の短絡状態を取得          
                             var trackOn = trackCircuit.TrackCircuitState.IsShortCircuit;
-                            if (trackLock != lockCondition.IsReverse || trackOn != lockCondition.IsReverse) return;
+                            if (trackLock != lockCondition.IsReverse || trackOn) return;
                             break;
                         case SwitchingMachine switchingMachine:
                             //転てつ器要素のとき
@@ -112,7 +112,7 @@ public class RendoService(
                         default:
                             // Routeの場合？
                             //Todo: DB取得:rendoExecute.idのてこの定反状態を取得      
-                            var otherTeihan = true;
+                            var otherTeihan = NR.Normal;
                             if (otherTeihan != lockCondition.IsReverse)
                                 //Todo: DB設定:rendoExecute.idに定反転換指令を出す
                                 return;

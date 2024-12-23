@@ -15,7 +15,7 @@ public class LockCondition
     public ulong? ObjectId { get; set; }
     public virtual InterlockingObject? targetObject { get; set; }
     public int? TimerSeconds { get; set; }
-    public bool IsReverse { get; set; }
+    public NR IsReverse { get; set; }
     public bool IsTotalControl { get; set; }
     public bool IsSingleLock { get; set; }
 }

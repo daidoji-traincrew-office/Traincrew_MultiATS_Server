@@ -6,8 +6,8 @@ namespace Traincrew_MultiATS_Server.Models;
 public class RouteState
 {
     public ulong Id { get; set; }
-    public bool IsLeverReversed { get; set; }
-    public bool IsReversed { get; set; }
-    public bool ShouldReverse { get; set; }
+    public NR IsLeverReversed { get; set; }
+    public NR IsReversed { get; set; }
+    public NR ShouldReverse { get; set; }
     public virtual Route Route { get; set; }
 }
