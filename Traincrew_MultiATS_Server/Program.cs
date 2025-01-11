@@ -212,14 +212,11 @@ builder.Services.AddAuthorization()
 // DI周り
 builder.Services
     .AddScoped<IStationRepository, StationRepository>()
+    .AddScoped<IInterlockingObjectRepository, InterlockingObjectRepository>()
+    .AddScoped<ILockConditionRepository, LockConditionRepository>()
     .AddScoped<StationService>()
     .AddSingleton<DiscordService>()
     .AddSingleton<IDiscordRepository, DiscordRepository>();
-builder.Services.AddScoped<IStationRepository, StationRepository>();
-builder.Services.AddScoped<IInterlockingObjectRepository, InterlockingObjectRepository>();
-builder.Services.AddScoped<ILockConditionRepository, LockConditionRepository>();
-builder.Services.AddScoped<StationService>();
-builder.Services.AddScoped<DiscordService>();
 
 
 var app = builder.Build();
