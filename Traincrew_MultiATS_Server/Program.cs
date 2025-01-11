@@ -38,7 +38,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddSignalR();
 
 // 認証周り
-
 builder.Services.AddOpenIddict()
     // Register the OpenIddict core components.
     .AddCore(options =>
