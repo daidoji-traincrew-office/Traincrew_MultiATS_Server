@@ -72,10 +72,10 @@ public class RendoService(
         //DB設定:stationID,nameが総括制御するてこの内部してほしい状態を反位に設定する
 
         //stationID,nameの信号制御の一覧を取得
-        var rendoExecuteList = await lockConditionRepository
+        var signalControlConditions = await lockConditionRepository
             .GetConditionsByObjectIdAndType(route.Id, LockType.SignalControl);
         // 該当オブジェクトを取得
-        var objectIds = rendoExecuteList
+        var objectIds = signalControlConditions
             .Where(x => x.ObjectId.HasValue)
             .Select(x => x.ObjectId.Value);
         var objectList = await interlockingObjectRepository
@@ -84,7 +84,7 @@ public class RendoService(
         // Todo: 各オブジェクトの鎖状状態を取得する処理を追加
 
         var switchingMachineMoveList = new List<(ulong, NR)>();
-        foreach (var lockCondition in rendoExecuteList)
+        foreach (var lockCondition in signalControlConditions)
         {
             switch (lockCondition.Type)
             {
@@ -109,8 +109,10 @@ public class RendoService(
                             //後で転換するので、転換すべき転てつ器の情報をまとめておく
                             switchingMachineMoveList.Add((switchingMachine.Id, lockCondition.IsReverse));
                             break;
+                        case Route targetRoute:
+                            //進路要素のとき
                         default:
-                            // Routeの場合？
+                            // それ以外の場合？
                             //Todo: DB取得:rendoExecute.idのてこの定反状態を取得      
                             var otherTeihan = NR.Normal;
                             if (otherTeihan != lockCondition.IsReverse)
@@ -145,16 +147,17 @@ public class RendoService(
 
         //ポイント転換確認
         if (AllPoint) return;
-
-        // Todo: 鎖状状態リストを作成
-        foreach (var rendoExecute in rendoExecuteList)
+        //stationID,nameの鎖状一覧を取得
+        var lockConditions = await lockConditionRepository
+            .GetConditionsByObjectIdAndType(route.Id, LockType.Lock);
+        // 鎖状状態リストを作成
+        var lockStates = lockConditions.Select(lockCondition => new LockState
         {
-            //rendoExecute.type：鎖錠テーブルの各要素の種類    
-            //rendoExecute.name：鎖錠テーブルの各要素の種類            
-            //rendoExecute.id：鎖錠テーブルの各要素のid         
-
-            //DB設定:rendoExecute.idを鎖錠
-        }
+            TargetObjectId = lockCondition.ObjectId.Value,
+            SourceObjectId = route.Id,
+            IsReverse = lockCondition.IsReverse,
+            Type = LockType.Lock
+        }).ToList();
         // Todo: 最後にDB設定鎖状状態リストをInsert
     }
 
