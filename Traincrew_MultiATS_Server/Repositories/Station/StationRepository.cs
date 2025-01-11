@@ -1,10 +1,9 @@
-﻿
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Traincrew_MultiATS_Server.Data;
 
-namespace Traincrew_MultiATS_Server.Repositories.Station; 
+namespace Traincrew_MultiATS_Server.Repositories.Station;
 
-public class StationRepository(ApplicationDbContext context) : IStationRepository
+public class StationRepository(DbContextOptions<ApplicationDbContext> options, ApplicationDbContext context) : IStationRepository
 {
     public Task<Models.Station?> GetStationByName(string name)
     {
@@ -13,6 +12,7 @@ public class StationRepository(ApplicationDbContext context) : IStationRepositor
 
     public async Task Save(Models.Station station)
     {
+        await using var context = new ApplicationDbContext(options);
         await context.Stations.AddAsync(station);
     }
 }
