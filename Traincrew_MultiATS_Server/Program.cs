@@ -38,6 +38,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddSignalR();
 
 // 認証周り
+
 builder.Services.AddOpenIddict()
     // Register the OpenIddict core components.
     .AddCore(options =>
@@ -60,41 +61,17 @@ builder.Services.AddOpenIddict()
         }
         else
         {
-            // Todo: 関数化する
+            // Generate a certificate at startup and register it.
             const string encryptionCertificatePath = "cert/client-encryption-certificate.pfx";
             const string signingCertificatePath = "cert/client-signing-certificate.pfx";
-            // Generate a certificate at startup and register it.
-            if (!File.Exists(encryptionCertificatePath))
-            {
-                using var algorithm = RSA.Create(2048);
-
-                var subject = new X500DistinguishedName("CN=Fabrikam Client Encryption Certificate");
-                var request = new CertificateRequest(subject, algorithm, HashAlgorithmName.SHA256,
-                    RSASignaturePadding.Pkcs1);
-                request.CertificateExtensions.Add(new X509KeyUsageExtension(X509KeyUsageFlags.KeyEncipherment,
-                    true));
-
-                var certificate = request.CreateSelfSigned(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddYears(2));
-
-                File.WriteAllBytes(encryptionCertificatePath,
-                    certificate.Export(X509ContentType.Pfx, string.Empty));
-            }
-
-            if (!File.Exists(signingCertificatePath))
-            {
-                using var algorithm = RSA.Create(2048);
-
-                var subject = new X500DistinguishedName("CN=Fabrikam Client Signing Certificate");
-                var request = new CertificateRequest(subject, algorithm, HashAlgorithmName.SHA256,
-                    RSASignaturePadding.Pkcs1);
-                request.CertificateExtensions.Add(new X509KeyUsageExtension(X509KeyUsageFlags.DigitalSignature,
-                    true));
-
-                var certificate = request.CreateSelfSigned(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddYears(2));
-
-                File.WriteAllBytes(signingCertificatePath,
-                    certificate.Export(X509ContentType.Pfx, string.Empty));
-            }
+            EnsureCertificateExists(
+                encryptionCertificatePath, 
+                "CN=Fabrikam Client Encryption Certificate",
+                X509KeyUsageFlags.KeyEncipherment);
+            EnsureCertificateExists(
+                signingCertificatePath, 
+                "CN=Fabrikam Client Signing Certificate",
+                X509KeyUsageFlags.DigitalSignature);
 
             options.AddEncryptionCertificate(
                 new X509Certificate2(encryptionCertificatePath, string.Empty));
@@ -142,42 +119,17 @@ builder.Services.AddOpenIddict()
         }
         else
         {
-            // Todo: 関数化する
+            // Generate a certificate at startup and register it.
             const string encryptionCertificatePath = "cert/server-encryption-certificate.pfx";
             const string signingCertificatePath = "cert/server-signing-certificate.pfx";
-            // Generate a certificate at startup and register it.
-            if (!File.Exists(encryptionCertificatePath))
-            {
-                using var algorithm = RSA.Create(2048);
-
-                var subject = new X500DistinguishedName("CN=Fabrikam Server Encryption Certificate");
-                var request = new CertificateRequest(subject, algorithm, HashAlgorithmName.SHA256,
-                    RSASignaturePadding.Pkcs1);
-                request.CertificateExtensions.Add(new X509KeyUsageExtension(X509KeyUsageFlags.KeyEncipherment,
-                    true));
-
-                var certificate = request.CreateSelfSigned(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddYears(2));
-
-                File.WriteAllBytes(encryptionCertificatePath,
-                    certificate.Export(X509ContentType.Pfx, string.Empty));
-            }
-
-            if (!File.Exists(signingCertificatePath))
-            {
-                using var algorithm = RSA.Create(2048);
-
-                var subject = new X500DistinguishedName("CN=Fabrikam Server Signing Certificate");
-                var request = new CertificateRequest(subject, algorithm, HashAlgorithmName.SHA256,
-                    RSASignaturePadding.Pkcs1);
-                request.CertificateExtensions.Add(new X509KeyUsageExtension(X509KeyUsageFlags.DigitalSignature,
-                    true));
-
-                var certificate = request.CreateSelfSigned(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddYears(2));
-
-                File.WriteAllBytes(signingCertificatePath,
-                    certificate.Export(X509ContentType.Pfx, string.Empty));
-            }
-
+            EnsureCertificateExists(
+                encryptionCertificatePath, 
+                "CN=Fabrikam Server Encryption Certificate",
+                X509KeyUsageFlags.KeyEncipherment);
+            EnsureCertificateExists(
+                signingCertificatePath, 
+                "CN=Fabrikam Server Signing Certificate",
+                X509KeyUsageFlags.DigitalSignature);
             options.AddEncryptionCertificate(
                 new X509Certificate2(encryptionCertificatePath, string.Empty));
             options.AddSigningCertificate(
@@ -271,3 +223,21 @@ app.MapControllers();
 app.MapHub<TrainHub>("/hub/train");
 
 app.Run();
+return;
+
+static void EnsureCertificateExists(string certificatePath, string subjectName, X509KeyUsageFlags keyUsageFlags)
+{
+    if (File.Exists(certificatePath))
+    {
+        return;
+    }
+    using var algorithm = RSA.Create(2048);
+
+    var subject = new X500DistinguishedName(subjectName);
+    var request = new CertificateRequest(subject, algorithm, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+    request.CertificateExtensions.Add(new X509KeyUsageExtension(keyUsageFlags, true));
+
+    var certificate = request.CreateSelfSigned(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddYears(2));
+
+    File.WriteAllBytes(certificatePath, certificate.Export(X509ContentType.Pfx, string.Empty));
+}
