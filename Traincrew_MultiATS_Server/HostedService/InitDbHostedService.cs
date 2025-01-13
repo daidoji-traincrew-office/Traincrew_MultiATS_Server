@@ -4,8 +4,7 @@ using Traincrew_MultiATS_Server.Models;
 
 namespace Traincrew_MultiATS_Server.HostedService;
 
-// Todo: クラスの名前が良くない
-public class TestHostedService(IServiceScopeFactory serviceScopeFactory) : IHostedService
+public class InitDbHostedService(IServiceScopeFactory serviceScopeFactory) : IHostedService
 {
     public async Task StartAsync(CancellationToken cancellationToken)
     {
