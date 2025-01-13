@@ -171,7 +171,7 @@ builder.Services
     .AddSingleton<DiscordService>()
     .AddSingleton<IDiscordRepository, DiscordRepository>();
 // HostedServiceまわり
-builder.Services.AddHostedService<TestHostedService>();
+builder.Services.AddHostedService<InitDbHostedService>();
 
 
 var app = builder.Build();
