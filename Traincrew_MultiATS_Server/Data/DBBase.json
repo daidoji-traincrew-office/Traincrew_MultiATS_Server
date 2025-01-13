@@ -1,0 +1,3335 @@
+{
+	"trackCircuitList": [
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH50_31イT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH50_34ロT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH64_21T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH64_12LT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH64_12RT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH64_14RT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH64_22T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "上り398T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "上り404T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "上り406T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH48_1RT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH50_33イT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH50_12RT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH48_TST"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "下り405T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "下り403T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "下り397T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH50_14LT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH48_22イT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH48_4LT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH48_8LT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH48_9LET"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH48_25ロT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH48_21T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH48_1RBT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH48_24T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH48_22ロT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH48_23T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH48_1RDT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH48_1RCT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH48_9LAT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH48_26T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH48_27ロT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "上り416T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "上り420T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "上り424T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH48_27イT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH48_SST"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH46_12LT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH48_25イT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "下り425T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "下り419T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH48_9LT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH46_TST"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH50_23LT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH50_31ロT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH50_24LT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH51_22ロT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "MFT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH50_TST"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH50_33T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH54_22イT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH54_21イT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH54_12RT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH54_22ロT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH53_21T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH53_13LT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH53_15LT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH53_15RT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH53_22T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH62_21T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH62_13LT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH62_15LT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH62_15RT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH62_22T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH51_15LT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH58_22ロT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH61_22T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH61_2RAT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "JR3RT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "JR上り5T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "JR上り4T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "JR上り3T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "JR上り2T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "JR上り1T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "JR1LT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "JR下り1T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "JR下り2T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "JR下り3T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "JR下り4T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "JR下り5T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "JR上り浜園手前T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "JR3LT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "JR1RT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH58_24T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH58_DT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH58_ET"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH58_23イT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH58_9LCT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH58_25T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH58_22イT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH58_1RBT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH58_23ロT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH58_21T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH58_2RAT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH58_9LT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "AS1T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "AS2T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH57_21T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH59_21ロT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "NA1T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "NA2T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH58_2RT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH51_22イT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH51_21ロT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH51_21イT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH51_12RT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH52_22イT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH54_21ロT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH55S_21イT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH59_21イT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH61_21ロT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH63_22イT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH63_21ロT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH53_12LT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH53_12RT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH53_14RT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH52_21T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "SNT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "KST"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH62_12LT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH62_12RT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH62_14RT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH61_2RT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH2T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH1T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "MT2T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "MT1T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH63_22ロT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH64_13LT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH64_15LT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH64_15RT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "FMT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH63_21イT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH65_50イT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH65_XT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "DF1T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "DF2T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH46_OST"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH45_10LT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH75_45T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH66S_1RCT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "上り156T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH65_1RT"
+		},
+		{
+			"On": false,
+			"Last": "1909A",
+			"Name": "TH66S_5LT"
+		},
+		{
+			"On": false,
+			"Last": "1909A",
+			"Name": "TH65_TST"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH65_41T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH65_42ロT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH65_42イT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH65_12LT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH65_44T"
+		},
+		{
+			"On": true,
+			"Last": "2087C",
+			"Name": "TH65_11LT"
+		},
+		{
+			"On": false,
+			"Last": "2087C",
+			"Name": "TH65_45T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH65_3RT"
+		},
+		{
+			"On": false,
+			"Last": "2087C",
+			"Name": "TH65_47T"
+		},
+		{
+			"On": false,
+			"Last": "2087C",
+			"Name": "TH65_48T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH65_7T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH65_6T"
+		},
+		{
+			"On": false,
+			"Last": "2087C",
+			"Name": "TH65_50ロT"
+		},
+		{
+			"On": false,
+			"Last": "2087C",
+			"Name": "TH65_YT"
+		},
+		{
+			"On": false,
+			"Last": "2087C",
+			"Name": "TH65_ET"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH65_2RT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH65_49T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH61_2RBT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH61_5RT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "上り238T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "上り242T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "上り246T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "上り250T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH59_11RT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH61_21イT"
+		},
+		{
+			"On": false,
+			"Last": "1909A",
+			"Name": "TH67_31T"
+		},
+		{
+			"On": false,
+			"Last": "1909A",
+			"Name": "TH67_TST"
+		},
+		{
+			"On": false,
+			"Last": "1909A",
+			"Name": "下り123T"
+		},
+		{
+			"On": false,
+			"Last": "1909A",
+			"Name": "下り117T"
+		},
+		{
+			"On": true,
+			"Last": "1909A",
+			"Name": "下り111T"
+		},
+		{
+			"On": true,
+			"Last": "1909A",
+			"Name": "下り105T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "下り103T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH70_21イT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH70_5LT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "上り102T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "上り108T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "上り114T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "上り120T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "上り124T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH67_1RT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH67_32T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH70_21ロT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH70_SST"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "下り89T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH71_24T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH71_6LT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH70_2LT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH70_5LBT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH71_22T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH71_6LDT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH71_21T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH71_1RAT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH71_23T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH71_1RBT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH71_6LCT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH71_TST"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "下り75T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "下り71T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "下り67T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "下り59T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "下り55T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "下り49T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "下り45T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "下り41T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "下り35T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "下り27T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH75_50ロT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH75_9LT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "上り26T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "上り30T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "上り36T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "上り42T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "上り48T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "上り56T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "上り62T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "上り68T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "上り74T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH75_50イT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH75_SST"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH71_1RT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "上り86T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "上り92T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH71_SST"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH70_1RAT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH54_15LT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH52_12RT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH52_15LT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH52_22ロT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "NMT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH75_44T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH76_21イT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH76_23T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH76_5LDT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH76_21ロT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH76_5LCT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH55S_21ロT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH57_12RT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH57_13RT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "上り306T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "上り312T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "上り314T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "上り320T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "上り324T"
+		},
+		{
+			"On": false,
+			"Last": "1909A",
+			"Name": "TH66S_53T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH66S_52T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH66S_55T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH66S_54T"
+		},
+		{
+			"On": false,
+			"Last": "1909A",
+			"Name": "下り151T"
+		},
+		{
+			"On": false,
+			"Last": "1909A",
+			"Name": "下り145T"
+		},
+		{
+			"On": false,
+			"Last": "1909A",
+			"Name": "下り143T"
+		},
+		{
+			"On": false,
+			"Last": "1909A",
+			"Name": "下り137T"
+		},
+		{
+			"On": false,
+			"Last": "1909A",
+			"Name": "TH67_10LT"
+		},
+		{
+			"On": false,
+			"Last": "1909A",
+			"Name": "TH67_35イT"
+		},
+		{
+			"On": false,
+			"Last": "1909A",
+			"Name": "TH66S_5LET"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "上り136T"
+		},
+		{
+			"On": true,
+			"Last": "2002A",
+			"Name": "上り142T"
+		},
+		{
+			"On": true,
+			"Last": "2002A",
+			"Name": "上り146T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH67_36イT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH67_SST"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH66S_1RT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH66S_51ロT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH66S_56T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH66S_1RAT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH66S_57T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH66S_1RBT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH66S_5LDT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH66S_51イT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH66S_13T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH45_23ロT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH45_9LT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH45_22イT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH76_27T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "下り7T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "下り9T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH75_TST"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH75_41イT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH76_26ロT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "上り6T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "上り8T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH75_1RT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH75_41ロT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH46_37T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH46_34T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH46_10LT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH46_32ロT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH46_35T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH46_11LT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH46_33T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH45_21ロT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH45_24T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH45_2RT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH45_1RAT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH45_21イT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH45_1RT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH45_23イT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH45_3RT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH45_22ロT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH45_OST"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH46_1RT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH45_SST"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH46_36T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH46_2RT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH46_1RAT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH46_31T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH46_3RT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH46_32イT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH55S_11LT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "下り323T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "下り317T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "下り313T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "下り311T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "下り305T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH57_14LT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH50_34イT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH55S_11RT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TK1T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TK2T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH59_13LT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH59_12LT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "下り249T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "下り245T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "下り241T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "下り237T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH61_6LT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH63_15LT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH63_12RT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH76_24イT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH76_5LBT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH76_25T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH76_22T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH76_5LAT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH76_26イT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH67_36ロT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH67_23RT"
+		},
+		{
+			"On": true,
+			"Last": "2069",
+			"Name": "TH67_5LT"
+		},
+		{
+			"On": false,
+			"Last": "1909A",
+			"Name": "TH67_34T"
+		},
+		{
+			"On": false,
+			"Last": "1909A",
+			"Name": "TH67_4LT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH67_1RAT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH67_33イT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH67_1RBT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH67_33ロT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH67_35ロT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH75_42イT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH75_34LT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH75_4T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH75_48T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH75_8T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH75_42ロT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH75_7T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH75_49イT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH75_46ロT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH75_5RAT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH75_49ロT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH75_6LT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH75_9LCT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH75_46イT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH75_5RBT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH75_9T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH75_43ロT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH75_43イT"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH75_1RET"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH75_6T"
+		},
+		{
+			"On": false,
+			"Last": "",
+			"Name": "TH75_5T"
+		}
+	],
+	"otherTrainDataList": [],
+	"signalDataList": [
+		{
+			"Name": "上吉沢上り出発14R",
+			"phase": 1
+		},
+		{
+			"Name": "駒野下り場内9LC",
+			"phase": 1
+		},
+		{
+			"Name": "藤江下り出発12L",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞416",
+			"phase": 5
+		},
+		{
+			"Name": "駒野入換14L",
+			"phase": 1
+		},
+		{
+			"Name": "下り閉塞389",
+			"phase": 1
+		},
+		{
+			"Name": "名田上り出発15R",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞268",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞68",
+			"phase": 4
+		},
+		{
+			"Name": "上り閉塞398",
+			"phase": 5
+		},
+		{
+			"Name": "大路上り場内9L",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞406",
+			"phase": 3
+		},
+		{
+			"Name": "二木戸上り出発13R",
+			"phase": 1
+		},
+		{
+			"Name": "三石上り場内13R",
+			"phase": 1
+		},
+		{
+			"Name": "駒野下り出発6L中継",
+			"phase": 1
+		},
+		{
+			"Name": "下り閉塞341",
+			"phase": 1
+		},
+		{
+			"Name": "津崎上り出発4R",
+			"phase": 1
+		},
+		{
+			"Name": "下り閉塞267",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞62",
+			"phase": 5
+		},
+		{
+			"Name": "駒野入換29R",
+			"phase": 1
+		},
+		{
+			"Name": "江ノ原入換13R",
+			"phase": 1
+		},
+		{
+			"Name": "下り閉塞59",
+			"phase": 5
+		},
+		{
+			"Name": "下吉沢下り出発12L",
+			"phase": 1
+		},
+		{
+			"Name": "下り閉塞111",
+			"phase": 1
+		},
+		{
+			"Name": "上吉沢下り出発13L",
+			"phase": 1
+		},
+		{
+			"Name": "大道寺上り出発9R",
+			"phase": 1
+		},
+		{
+			"Name": "下り3閉塞",
+			"phase": 5
+		},
+		{
+			"Name": "JR浜園下り出発3L",
+			"phase": 1
+		},
+		{
+			"Name": "高見沢下り出発12L",
+			"phase": 1
+		},
+		{
+			"Name": "江ノ原検車区上り場内1RB",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞30",
+			"phase": 5
+		},
+		{
+			"Name": "下り閉塞249",
+			"phase": 5
+		},
+		{
+			"Name": "下り閉塞419",
+			"phase": 3
+		},
+		{
+			"Name": "高見沢上り出発15R",
+			"phase": 1
+		},
+		{
+			"Name": "中継下り閉塞203",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞74",
+			"phase": 3
+		},
+		{
+			"Name": "上り閉塞114",
+			"phase": 5
+		},
+		{
+			"Name": "三石下り出発12L",
+			"phase": 1
+		},
+		{
+			"Name": "駒野上り出発8R",
+			"phase": 1
+		},
+		{
+			"Name": "大路上り場内8L",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞334",
+			"phase": 1
+		},
+		{
+			"Name": "下り閉塞89",
+			"phase": 3
+		},
+		{
+			"Name": "名田上り場内12R",
+			"phase": 1
+		},
+		{
+			"Name": "館浜下り場内5L",
+			"phase": 1
+		},
+		{
+			"Name": "下り閉塞177",
+			"phase": 1
+		},
+		{
+			"Name": "大路上り場内10LB",
+			"phase": 1
+		},
+		{
+			"Name": "大路上り場内10LC",
+			"phase": 1
+		},
+		{
+			"Name": "津崎下り出発2L中継",
+			"phase": 1
+		},
+		{
+			"Name": "江ノ原検車区下り出発3L",
+			"phase": 1
+		},
+		{
+			"Name": "館浜上り出発4R",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞166中継",
+			"phase": 5
+		},
+		{
+			"Name": "駒野下り出発6L",
+			"phase": 1
+		},
+		{
+			"Name": "大道寺下り場内13LC",
+			"phase": 1
+		},
+		{
+			"Name": "大路上り出発4L",
+			"phase": 1
+		},
+		{
+			"Name": "館浜上り出発1R",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞314",
+			"phase": 4
+		},
+		{
+			"Name": "新野崎上り出発8R",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞8",
+			"phase": 3
+		},
+		{
+			"Name": "三石上り出発15R",
+			"phase": 1
+		},
+		{
+			"Name": "赤山町入換33L",
+			"phase": 1
+		},
+		{
+			"Name": "新大路下り場内1RA",
+			"phase": 1
+		},
+		{
+			"Name": "下吉沢上り場内12R",
+			"phase": 1
+		},
+		{
+			"Name": "下り閉塞317",
+			"phase": 5
+		},
+		{
+			"Name": "下り閉塞35",
+			"phase": 4
+		},
+		{
+			"Name": "下り閉塞245",
+			"phase": 5
+		},
+		{
+			"Name": "大道寺上り場内4R",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞224",
+			"phase": 1
+		},
+		{
+			"Name": "大道寺上り場内3R",
+			"phase": 1
+		},
+		{
+			"Name": "新大路上り出発5L",
+			"phase": 1
+		},
+		{
+			"Name": "藤江下り場内14L",
+			"phase": 1
+		},
+		{
+			"Name": "下り閉塞75",
+			"phase": 5
+		},
+		{
+			"Name": "大路下り場内2R",
+			"phase": 1
+		},
+		{
+			"Name": "下り閉塞55",
+			"phase": 5
+		},
+		{
+			"Name": "下り閉塞351",
+			"phase": 1
+		},
+		{
+			"Name": "駒野入換13R",
+			"phase": 1
+		},
+		{
+			"Name": "三石下り出発13L",
+			"phase": 1
+		},
+		{
+			"Name": "下り閉塞277",
+			"phase": 1
+		},
+		{
+			"Name": "駒野入換12L",
+			"phase": 1
+		},
+		{
+			"Name": "下り閉塞237",
+			"phase": 3
+		},
+		{
+			"Name": "上吉沢上り場内13R",
+			"phase": 1
+		},
+		{
+			"Name": "浜園上り出発2R中継",
+			"phase": 1
+		},
+		{
+			"Name": "新野崎下り出発2L",
+			"phase": 1
+		},
+		{
+			"Name": "赤山町下り出発4L",
+			"phase": 1
+		},
+		{
+			"Name": "津崎下り出発3L",
+			"phase": 1
+		},
+		{
+			"Name": "新大路下り場内3R",
+			"phase": 1
+		},
+		{
+			"Name": "新野崎上り出発6R",
+			"phase": 1
+		},
+		{
+			"Name": "大道寺入換30R",
+			"phase": 1
+		},
+		{
+			"Name": "大路下り場内3R",
+			"phase": 1
+		},
+		{
+			"Name": "上り1閉塞",
+			"phase": 5
+		},
+		{
+			"Name": "上吉沢上り場内12R",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞136",
+			"phase": 3
+		},
+		{
+			"Name": "高見沢下り場内15L",
+			"phase": 1
+		},
+		{
+			"Name": "下り閉塞41",
+			"phase": 5
+		},
+		{
+			"Name": "下り閉塞123",
+			"phase": 4
+		},
+		{
+			"Name": "高見沢下り場内14L",
+			"phase": 1
+		},
+		{
+			"Name": "浜園下り出発2L",
+			"phase": 4
+		},
+		{
+			"Name": "上り閉塞242",
+			"phase": 5
+		},
+		{
+			"Name": "高見沢上り出発14R",
+			"phase": 1
+		},
+		{
+			"Name": "下り閉塞7中継",
+			"phase": 2
+		},
+		{
+			"Name": "赤山町上り出発8R",
+			"phase": 1
+		},
+		{
+			"Name": "下り閉塞117",
+			"phase": 3
+		},
+		{
+			"Name": "新野崎上り場内1RA",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞166",
+			"phase": 5
+		},
+		{
+			"Name": "上り閉塞218",
+			"phase": 1
+		},
+		{
+			"Name": "浜園下り出発2L中継",
+			"phase": 4
+		},
+		{
+			"Name": "大道寺上り出発7R",
+			"phase": 5
+		},
+		{
+			"Name": "日野森上り場内2RB",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞36",
+			"phase": 5
+		},
+		{
+			"Name": "大道寺下り場内11L",
+			"phase": 1
+		},
+		{
+			"Name": "西赤山上り出発13R",
+			"phase": 1
+		},
+		{
+			"Name": "下り閉塞67",
+			"phase": 5
+		},
+		{
+			"Name": "大路上り出発5L",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞324",
+			"phase": 2
+		},
+		{
+			"Name": "赤山町下り場内9L",
+			"phase": 1
+		},
+		{
+			"Name": "津崎下り場内6LD",
+			"phase": 1
+		},
+		{
+			"Name": "水越下り出発13L",
+			"phase": 1
+		},
+		{
+			"Name": "津崎上り場内1RB",
+			"phase": 1
+		},
+		{
+			"Name": "新野崎上り出発9R",
+			"phase": 1
+		},
+		{
+			"Name": "赤山町入換32L",
+			"phase": 1
+		},
+		{
+			"Name": "江ノ原検車区上り出発2R",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞258",
+			"phase": 1
+		},
+		{
+			"Name": "下り閉塞223",
+			"phase": 1
+		},
+		{
+			"Name": "藤江下り出発13L中継",
+			"phase": 1
+		},
+		{
+			"Name": "藤江上り出発14R",
+			"phase": 1
+		},
+		{
+			"Name": "駒野入換11R",
+			"phase": 1
+		},
+		{
+			"Name": "津崎下り出発3R中継",
+			"phase": 1
+		},
+		{
+			"Name": "駒野上り場内1RE",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞336",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞238",
+			"phase": 5
+		},
+		{
+			"Name": "下り閉塞171",
+			"phase": 1
+		},
+		{
+			"Name": "下り閉塞143",
+			"phase": 4
+		},
+		{
+			"Name": "藤江上り出発15R",
+			"phase": 1
+		},
+		{
+			"Name": "下り閉塞425",
+			"phase": 4
+		},
+		{
+			"Name": "下り閉塞377",
+			"phase": 1
+		},
+		{
+			"Name": "江ノ原検車区上り場内1RC",
+			"phase": 5
+		},
+		{
+			"Name": "上り4閉塞",
+			"phase": 5
+		},
+		{
+			"Name": "西赤山上り場内11R",
+			"phase": 1
+		},
+		{
+			"Name": "駒野入換28R",
+			"phase": 1
+		},
+		{
+			"Name": "名田下り出発13L",
+			"phase": 1
+		},
+		{
+			"Name": "駒野上り出発7R",
+			"phase": 1
+		},
+		{
+			"Name": "下り閉塞305",
+			"phase": 3
+		},
+		{
+			"Name": "上り閉塞117中継",
+			"phase": 3
+		},
+		{
+			"Name": "名田下り出発12L",
+			"phase": 1
+		},
+		{
+			"Name": "下り閉塞333",
+			"phase": 1
+		},
+		{
+			"Name": "東井上り出発7R",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞204",
+			"phase": 1
+		},
+		{
+			"Name": "下り閉塞209",
+			"phase": 1
+		},
+		{
+			"Name": "浜園上り場内1R中継",
+			"phase": 1
+		},
+		{
+			"Name": "浜園入換12L",
+			"phase": 1
+		},
+		{
+			"Name": "下吉沢下り場内14L",
+			"phase": 1
+		},
+		{
+			"Name": "下吉沢上り場内13R",
+			"phase": 1
+		},
+		{
+			"Name": "新大路下り出発9R",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞172",
+			"phase": 3
+		},
+		{
+			"Name": "江ノ原検車区下り場内5LD",
+			"phase": 1
+		},
+		{
+			"Name": "赤山町下り出発3L",
+			"phase": 1
+		},
+		{
+			"Name": "大道寺入換32L",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞124",
+			"phase": 3
+		},
+		{
+			"Name": "上り閉塞120",
+			"phase": 4
+		},
+		{
+			"Name": "東井上り出発6R",
+			"phase": 1
+		},
+		{
+			"Name": "東井上り場内1R",
+			"phase": 1
+		},
+		{
+			"Name": "藤江上り出発15R中継",
+			"phase": 1
+		},
+		{
+			"Name": "駒野下り第二出発2L",
+			"phase": 1
+		},
+		{
+			"Name": "藤江下り場内15L",
+			"phase": 1
+		},
+		{
+			"Name": "新野崎上り場内1RB",
+			"phase": 1
+		},
+		{
+			"Name": "下り閉塞45",
+			"phase": 5
+		},
+		{
+			"Name": "二木戸上り場内12R",
+			"phase": 1
+		},
+		{
+			"Name": "日野森下り場内6L",
+			"phase": 1
+		},
+		{
+			"Name": "下り閉塞405",
+			"phase": 5
+		},
+		{
+			"Name": "JR浜園上り出発3R",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞26",
+			"phase": 5
+		},
+		{
+			"Name": "上り閉塞42",
+			"phase": 5
+		},
+		{
+			"Name": "水越上り出発14R",
+			"phase": 1
+		},
+		{
+			"Name": "三石下り場内14L",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞48",
+			"phase": 5
+		},
+		{
+			"Name": "上り閉塞86",
+			"phase": 4
+		},
+		{
+			"Name": "日野森下り出発3L",
+			"phase": 1
+		},
+		{
+			"Name": "水越上り出発15R中継",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞42中継",
+			"phase": 5
+		},
+		{
+			"Name": "下り閉塞145",
+			"phase": 5
+		},
+		{
+			"Name": "館浜下り場内5L中継2",
+			"phase": 1
+		},
+		{
+			"Name": "赤山町上り出発6R",
+			"phase": 1
+		},
+		{
+			"Name": "下吉沢上り出発14R",
+			"phase": 1
+		},
+		{
+			"Name": "西赤山下り場内13L",
+			"phase": 1
+		},
+		{
+			"Name": "水越上り場内13R",
+			"phase": 1
+		},
+		{
+			"Name": "東井上り出発5R",
+			"phase": 1
+		},
+		{
+			"Name": "JR浜園場内1L",
+			"phase": 1
+		},
+		{
+			"Name": "下り閉塞27",
+			"phase": 3
+		},
+		{
+			"Name": "新大路上り場内12LC",
+			"phase": 1
+		},
+		{
+			"Name": "下り2閉塞",
+			"phase": 5
+		},
+		{
+			"Name": "大道寺下り出発6L",
+			"phase": 1
+		},
+		{
+			"Name": "下り閉塞193",
+			"phase": 1
+		},
+		{
+			"Name": "高見沢下り出発13L",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞312",
+			"phase": 5
+		},
+		{
+			"Name": "藤江上り場内13R",
+			"phase": 1
+		},
+		{
+			"Name": "館浜上り出発3R",
+			"phase": 1
+		},
+		{
+			"Name": "大道寺下り出発5L",
+			"phase": 5
+		},
+		{
+			"Name": "津崎上り場内1RA",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞424",
+			"phase": 3
+		},
+		{
+			"Name": "水越下り場内15L",
+			"phase": 1
+		},
+		{
+			"Name": "東井下り出発4L",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞404",
+			"phase": 4
+		},
+		{
+			"Name": "新野崎下り出発3L",
+			"phase": 5
+		},
+		{
+			"Name": "上吉沢上り出発15R",
+			"phase": 1
+		},
+		{
+			"Name": "日野森上り出発5R",
+			"phase": 1
+		},
+		{
+			"Name": "下り1閉塞",
+			"phase": 3
+		},
+		{
+			"Name": "上り閉塞306",
+			"phase": 5
+		},
+		{
+			"Name": "新野崎下り場内5L",
+			"phase": 1
+		},
+		{
+			"Name": "大道寺入換31L",
+			"phase": 1
+		},
+		{
+			"Name": "下り閉塞287",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞346",
+			"phase": 1
+		},
+		{
+			"Name": "大路下り出発7R",
+			"phase": 1
+		},
+		{
+			"Name": "高見沢上り場内13R",
+			"phase": 1
+		},
+		{
+			"Name": "下り閉塞403",
+			"phase": 4
+		},
+		{
+			"Name": "上り閉塞250",
+			"phase": 3
+		},
+		{
+			"Name": "上吉沢下り場内15L",
+			"phase": 1
+		},
+		{
+			"Name": "二木戸下り出発12L",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞92",
+			"phase": 3
+		},
+		{
+			"Name": "二木戸下り場内14L",
+			"phase": 1
+		},
+		{
+			"Name": "東井下り場内9L",
+			"phase": 1
+		},
+		{
+			"Name": "駒野下り出発3L",
+			"phase": 1
+		},
+		{
+			"Name": "三郷上り出発13R",
+			"phase": 1
+		},
+		{
+			"Name": "津崎下り出発2L",
+			"phase": 1
+		},
+		{
+			"Name": "上り3閉塞",
+			"phase": 5
+		},
+		{
+			"Name": "津崎上り出発5R",
+			"phase": 1
+		},
+		{
+			"Name": "三石上り場内12R",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞288",
+			"phase": 1
+		},
+		{
+			"Name": "大道寺上り場内2R",
+			"phase": 5
+		},
+		{
+			"Name": "水越下り出発13L中継",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞8中継",
+			"phase": 3
+		},
+		{
+			"Name": "大道寺入換25R",
+			"phase": 1
+		},
+		{
+			"Name": "珠川上り出発11R",
+			"phase": 1
+		},
+		{
+			"Name": "大道寺下り場内12L",
+			"phase": 1
+		},
+		{
+			"Name": "下り閉塞313",
+			"phase": 5
+		},
+		{
+			"Name": "上り閉塞420",
+			"phase": 4
+		},
+		{
+			"Name": "下り閉塞311",
+			"phase": 4
+		},
+		{
+			"Name": "上り閉塞124中継",
+			"phase": 3
+		},
+		{
+			"Name": "新大路下り場内1RB",
+			"phase": 1
+		},
+		{
+			"Name": "駒野下り場内9LB",
+			"phase": 1
+		},
+		{
+			"Name": "下り閉塞365",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞48中継",
+			"phase": 5
+		},
+		{
+			"Name": "新野崎下り場内10LC",
+			"phase": 1
+		},
+		{
+			"Name": "新大路下り出発8R",
+			"phase": 1
+		},
+		{
+			"Name": "下り閉塞105",
+			"phase": 1
+		},
+		{
+			"Name": "津崎下り場内6L中継",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞384",
+			"phase": 1
+		},
+		{
+			"Name": "駒野入換27R",
+			"phase": 1
+		},
+		{
+			"Name": "東井下り場内8L",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞56",
+			"phase": 5
+		},
+		{
+			"Name": "江ノ原検車区下り場内5LE",
+			"phase": 5
+		},
+		{
+			"Name": "大道寺下り場内13LD",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞246",
+			"phase": 4
+		},
+		{
+			"Name": "JR浜園上り出発4R",
+			"phase": 1
+		},
+		{
+			"Name": "赤山町上り出発7R",
+			"phase": 1
+		},
+		{
+			"Name": "江ノ原検車区上り場内1RA",
+			"phase": 1
+		},
+		{
+			"Name": "水越下り場内14L",
+			"phase": 1
+		},
+		{
+			"Name": "駒野下り出発4L",
+			"phase": 1
+		},
+		{
+			"Name": "下り閉塞227",
+			"phase": 1
+		},
+		{
+			"Name": "新野崎下り場内10LD",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞102",
+			"phase": 5
+		},
+		{
+			"Name": "三石上り出発14R",
+			"phase": 1
+		},
+		{
+			"Name": "藤江上り場内12R",
+			"phase": 1
+		},
+		{
+			"Name": "新大路上り場内12LD",
+			"phase": 1
+		},
+		{
+			"Name": "赤山町下り出発5L",
+			"phase": 1
+		},
+		{
+			"Name": "津崎上り場内1R中継",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞320",
+			"phase": 3
+		},
+		{
+			"Name": "上り5閉塞",
+			"phase": 5
+		},
+		{
+			"Name": "下り閉塞397",
+			"phase": 3
+		},
+		{
+			"Name": "東井下り出発3L",
+			"phase": 1
+		},
+		{
+			"Name": "駒野上り場内1RD",
+			"phase": 1
+		},
+		{
+			"Name": "浜園上り出発3R",
+			"phase": 1
+		},
+		{
+			"Name": "下り閉塞241",
+			"phase": 4
+		},
+		{
+			"Name": "下り4閉塞",
+			"phase": 5
+		},
+		{
+			"Name": "新大路上り場内10L",
+			"phase": 1
+		},
+		{
+			"Name": "津崎下り場内6LC",
+			"phase": 1
+		},
+		{
+			"Name": "新大路下り出発6R",
+			"phase": 1
+		},
+		{
+			"Name": "珠川下り出発11L",
+			"phase": 1
+		},
+		{
+			"Name": "下り閉塞203",
+			"phase": 1
+		},
+		{
+			"Name": "下り閉塞49",
+			"phase": 5
+		},
+		{
+			"Name": "上り閉塞142",
+			"phase": 1
+		},
+		{
+			"Name": "新大路上り出発4L",
+			"phase": 1
+		},
+		{
+			"Name": "藤江下り出発13L",
+			"phase": 1
+		},
+		{
+			"Name": "大道寺上り場内1R",
+			"phase": 5
+		},
+		{
+			"Name": "名田上り出発14R",
+			"phase": 1
+		},
+		{
+			"Name": "下り閉塞295",
+			"phase": 1
+		},
+		{
+			"Name": "館浜上り出発2R",
+			"phase": 1
+		},
+		{
+			"Name": "JR浜園下り出発4L",
+			"phase": 1
+		},
+		{
+			"Name": "江ノ原検車区下り出発4L",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞360",
+			"phase": 1
+		},
+		{
+			"Name": "駒野入換26R",
+			"phase": 1
+		},
+		{
+			"Name": "下り閉塞137",
+			"phase": 3
+		},
+		{
+			"Name": "高見沢上り場内12R",
+			"phase": 1
+		},
+		{
+			"Name": "大道寺下り場内13L中継",
+			"phase": 1
+		},
+		{
+			"Name": "下吉沢下り場内15L",
+			"phase": 1
+		},
+		{
+			"Name": "下り閉塞103",
+			"phase": 5
+		},
+		{
+			"Name": "下吉沢下り出発13L",
+			"phase": 1
+		},
+		{
+			"Name": "新野崎上り出発7R",
+			"phase": 1
+		},
+		{
+			"Name": "下り閉塞323",
+			"phase": 5
+		},
+		{
+			"Name": "上り閉塞142中継",
+			"phase": 1
+		},
+		{
+			"Name": "大道寺上り出発8R",
+			"phase": 1
+		},
+		{
+			"Name": "駒野入換34L",
+			"phase": 1
+		},
+		{
+			"Name": "新大路下り出発7R",
+			"phase": 1
+		},
+		{
+			"Name": "水越上り場内12R",
+			"phase": 1
+		},
+		{
+			"Name": "下り閉塞71",
+			"phase": 5
+		},
+		{
+			"Name": "上り閉塞188",
+			"phase": 1
+		},
+		{
+			"Name": "新大路下り場内2R",
+			"phase": 1
+		},
+		{
+			"Name": "水越上り出発15R",
+			"phase": 1
+		},
+		{
+			"Name": "東井下り出発2L",
+			"phase": 1
+		},
+		{
+			"Name": "名田上り場内13R",
+			"phase": 1
+		},
+		{
+			"Name": "三郷下り場内14L",
+			"phase": 1
+		},
+		{
+			"Name": "浜園上り場内1R",
+			"phase": 1
+		},
+		{
+			"Name": "大道寺入換29L",
+			"phase": 1
+		},
+		{
+			"Name": "浜園上り出発4R",
+			"phase": 1
+		},
+		{
+			"Name": "新大路上り場内11L",
+			"phase": 1
+		},
+		{
+			"Name": "赤山町上り場内2R",
+			"phase": 1
+		},
+		{
+			"Name": "水越下り出発12L",
+			"phase": 1
+		},
+		{
+			"Name": "名田下り場内15L",
+			"phase": 1
+		},
+		{
+			"Name": "三石下り場内15L",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞372",
+			"phase": 1
+		},
+		{
+			"Name": "駒野入換25R",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞200",
+			"phase": 1
+		},
+		{
+			"Name": "大道寺上り出発10R",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞282",
+			"phase": 1
+		},
+		{
+			"Name": "大路下り出発6R",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞6",
+			"phase": 4
+		},
+		{
+			"Name": "駒野上り場内5RB",
+			"phase": 1
+		},
+		{
+			"Name": "駒野入換24R",
+			"phase": 1
+		},
+		{
+			"Name": "大道寺入換26R",
+			"phase": 1
+		},
+		{
+			"Name": "西赤山下り出発12L",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞156",
+			"phase": 5
+		},
+		{
+			"Name": "浜園下り場内5L",
+			"phase": 5
+		},
+		{
+			"Name": "江ノ原検車区内入換",
+			"phase": 1
+		},
+		{
+			"Name": "上り2閉塞",
+			"phase": 5
+		},
+		{
+			"Name": "駒野下り場内9L中継",
+			"phase": 1
+		},
+		{
+			"Name": "三郷下り出発12L",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞146",
+			"phase": 1
+		},
+		{
+			"Name": "新野崎入換25L",
+			"phase": 1
+		},
+		{
+			"Name": "JR浜園場内2L",
+			"phase": 1
+		},
+		{
+			"Name": "日野森下り出発4L",
+			"phase": 1
+		},
+		{
+			"Name": "江ノ原信号場入換11R",
+			"phase": 1
+		},
+		{
+			"Name": "下吉沢上り出発15R",
+			"phase": 1
+		},
+		{
+			"Name": "下り閉塞7",
+			"phase": 2
+		},
+		{
+			"Name": "三郷上り場内12R",
+			"phase": 1
+		},
+		{
+			"Name": "下り閉塞151",
+			"phase": 5
+		},
+		{
+			"Name": "上吉沢下り場内14L",
+			"phase": 1
+		},
+		{
+			"Name": "上吉沢下り出発12L",
+			"phase": 1
+		},
+		{
+			"Name": "下り閉塞335",
+			"phase": 1
+		},
+		{
+			"Name": "上り閉塞108",
+			"phase": 5
+		},
+		{
+			"Name": "名田下り場内14L",
+			"phase": 1
+		},
+		{
+			"Name": "駒野入換15L",
+			"phase": 1
+		},
+		{
+			"Name": "駒野上り場内5RA",
+			"phase": 1
+		},
+		{
+			"Name": "日野森上り場内2RA",
+			"phase": 1
+		},
+		{
+			"Name": "下り閉塞9",
+			"phase": 3
+		},
+		{
+			"Name": "新野崎下り場内4L",
+			"phase": 1
+		},
+		{
+			"Name": "新野崎入換21L",
+			"phase": 1
+		},
+		{
+			"Name": "新野崎入換23R",
+			"phase": 1
+		},
+		{
+			"Name": "江ノ原入換16L",
+			"phase": 1
+		},
+		{
+			"Name": "新野崎入換24R",
+			"phase": 1
+		},
+		{
+			"Name": "大道寺入換28L",
+			"phase": 1
+		},
+		{
+			"Name": "大道寺入換22R",
+			"phase": 1
+		},
+		{
+			"Name": "駒野入換35L",
+			"phase": 1
+		},
+		{
+			"Name": "江ノ原入換15L",
+			"phase": 1
+		},
+		{
+			"Name": "大道寺入換21R",
+			"phase": 1
+		},
+		{
+			"Name": "大道寺入換27L",
+			"phase": 1
+		},
+		{
+			"Name": "大道寺入換24R",
+			"phase": 1
+		},
+		{
+			"Name": "赤山町入換31R",
+			"phase": 1
+		},
+		{
+			"Name": "大道寺入換23R",
+			"phase": 1
+		},
+		{
+			"Name": "新野崎入換22L",
+			"phase": 1
+		},
+		{
+			"Name": "駒野入換36L",
+			"phase": 1
+		},
+		{
+			"Name": "浜園入換11R",
+			"phase": 1
+		},
+		{
+			"Name": "駒野上り出発8R中継",
+			"phase": 1
+		}
+	],
+	"gameScreen": 0,
+	"crewType": 0,
+	"driveMode": 1
+}

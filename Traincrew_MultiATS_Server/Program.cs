@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using OpenIddict.Abstractions;
 using Traincrew_MultiATS_Server.Data;
+using Traincrew_MultiATS_Server.HostedService;
 using Traincrew_MultiATS_Server.Hubs;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
@@ -30,6 +31,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     dataSourceBuilder.MapEnum<LockType>();
     dataSourceBuilder.MapEnum<NR>();
     dataSourceBuilder.MapEnum<NRC>();
+    dataSourceBuilder.MapEnum<ObjectType>();
     options.UseNpgsql(dataSourceBuilder.Build());
     // Todo: セッションであることを考えると、Redisを使ったほうが良いかも
     options.UseOpenIddict();
@@ -168,6 +170,8 @@ builder.Services
     .AddScoped<StationService>()
     .AddSingleton<DiscordService>()
     .AddSingleton<IDiscordRepository, DiscordRepository>();
+// HostedServiceまわり
+builder.Services.AddHostedService<InitDbHostedService>();
 
 
 var app = builder.Build();
