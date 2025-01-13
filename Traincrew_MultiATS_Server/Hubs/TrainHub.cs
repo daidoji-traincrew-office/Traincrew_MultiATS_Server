@@ -9,12 +9,10 @@ namespace Traincrew_MultiATS_Server.Hubs;
 [Authorize(AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
 public class TrainHub: Hub
 {
-   public Task<int> Emit([FromServices] StationService stationService)
-   {
-      return Task.FromResult(0);
-   }
    public async Task SendData_ATS(DataToServer data)
    {
+      DataFromServer serverData = new DataFromServer();
       Console.WriteLine($"{data.DiaName}");
+      await Clients.Caller.SendAsync("ReceiveData", serverData);
    }
 }
