@@ -11,7 +11,7 @@ public class TestHostedService(IServiceScopeFactory serviceScopeFactory) : IHost
     {
         using var scope = serviceScopeFactory.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var jsonstring = File.ReadAllText("./Data/DBBase.json");
+        var jsonstring = await File.ReadAllTextAsync("./Data/DBBase.json", cancellationToken);
         var DBBase = JsonSerializer.Deserialize<DBBasejson>(jsonstring);
         ulong i = 0;
         int protection_zone = 0;
@@ -37,8 +37,8 @@ public class TestHostedService(IServiceScopeFactory serviceScopeFactory) : IHost
         await context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task StopAsync(CancellationToken cancellationToken)
+    public Task StopAsync(CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        return Task.CompletedTask;  // 何もしない
     }
 }
