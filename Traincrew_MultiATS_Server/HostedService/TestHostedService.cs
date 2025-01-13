@@ -39,5 +39,6 @@ public class TestHostedService(IServiceScopeFactory serviceScopeFactory) : IHost
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
+        throw new NotImplementedException();
     }
 }
