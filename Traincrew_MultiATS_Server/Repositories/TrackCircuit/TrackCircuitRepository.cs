@@ -8,7 +8,8 @@ public class TrackCircuitRepository(ApplicationDbContext context) : ITrackCircui
 {
     public async Task<List<Models.TrackCircuit>> GetAllTrackCircuitList()
     {
-        List<Models.TrackCircuit> trackcircuitlist_db = await context.TrackCircuits.ToListAsync();
+        List<Models.TrackCircuit> trackcircuitlist_db = await context.TrackCircuits
+			.Include(obj => obj.TrackCircuitState).ToListAsync();
 		return trackcircuitlist_db;
     }
 }
