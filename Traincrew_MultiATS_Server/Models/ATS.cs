@@ -59,15 +59,33 @@ public class CarState
     public bool HasPantograph = false;
 }
 
-public class TrackCircuitData
+public class TrackCircuitData: IEquatable<TrackCircuitData>
 {
-    public string Last{get; set;} //軌道回路を踏んだ列車の名前
-    public string Name {get;set;}
-    public bool On{get; set;}
+    public string Last {get; set;} //軌道回路を踏んだ列車の名前
+    public string Name { get; init; }
+    public bool On {get; set;}
 
     public override string ToString()
     {
         return $"{Name}/{Last}/{On}";
+    }
+
+
+    public bool Equals(TrackCircuitData? other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return Name == other.Name;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return Equals(obj as TrackCircuitData);
+    }
+
+    public override int GetHashCode()
+    {
+        return Name.GetHashCode();
     }
 }
 

@@ -6,7 +6,7 @@ namespace Traincrew_MultiATS_Server.Models;
 public class TrackCircuitState
 {
     public ulong Id { get; set; }
-    public string? TrainNumber { get; set; }
+    public required string TrainNumber { get; set; }
     public bool IsShortCircuit { get; set; }
     public virtual TrackCircuit TrackCircuit { get; set; }
 }

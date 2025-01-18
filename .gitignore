@@ -7,3 +7,4 @@ riderModule.iml
 Traincrew_MultiATS_Server/appsettings.Development.json
 data/
 Migrations/
+.DS_Store
