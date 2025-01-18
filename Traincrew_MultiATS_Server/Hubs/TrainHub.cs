@@ -6,7 +6,7 @@ using Traincrew_MultiATS_Server.Services;
 
 namespace Traincrew_MultiATS_Server.Hubs;
 
-// [Authorize(AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
+[Authorize(AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
 public class TrainHub(TrackCircuitService trackCircuitService) : Hub
 {
     public async Task<DataFromServer> SendData_ATS(DataToServer clientData)

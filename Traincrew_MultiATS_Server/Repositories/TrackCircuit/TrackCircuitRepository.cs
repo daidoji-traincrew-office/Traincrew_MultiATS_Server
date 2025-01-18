@@ -23,6 +23,7 @@ public class TrackCircuitRepository(ApplicationDbContext context) : ITrackCircui
 
     public async Task SetTrackCircuitList(List<Models.TrackCircuit> trackCircuitList, string trainNumber)
     {
+        // Todo: N+1問題の解消
         foreach (var trackCircuit in trackCircuitList)
         {
             Models.TrackCircuitState item = context.TrackCircuits
@@ -39,6 +40,7 @@ public class TrackCircuitRepository(ApplicationDbContext context) : ITrackCircui
 
     public async Task ClearTrackCircuitList(List<Models.TrackCircuit> trackCircuitList)
     {
+        // Todo: N+1問題の解消
         foreach (var trackCircuit in trackCircuitList)
         {
             Models.TrackCircuitState item = context.TrackCircuits
