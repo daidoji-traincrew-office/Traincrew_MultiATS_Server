@@ -28,8 +28,7 @@ public class TrackCircuitService(ITrackCircuitRepository trackCircuitRepository)
         List<Models.TrackCircuit> trackCircuit = trackCircuitData
             .Select(item => new Models.TrackCircuit
             {
-                Name = item.Name,
-                TrackCircuitState = new() { TrainNumber = trainNumber, IsShortCircuit = true }
+                Name = item.Name
             })
             .ToList();
         await trackCircuitRepository.SetTrackCircuitList(trackCircuit, trainNumber);
@@ -40,8 +39,7 @@ public class TrackCircuitService(ITrackCircuitRepository trackCircuitRepository)
         List<Models.TrackCircuit> trackCircuit = trackCircuitData
             .Select(item => new Models.TrackCircuit
             {
-                Name = item.Name,
-                TrackCircuitState = new() { TrainNumber = "", IsShortCircuit = false }
+                Name = item.Name
             })
             .ToList();
 

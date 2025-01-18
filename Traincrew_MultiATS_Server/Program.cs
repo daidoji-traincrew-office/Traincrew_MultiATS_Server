@@ -14,7 +14,6 @@ using Traincrew_MultiATS_Server.Repositories.Discord;
 using Traincrew_MultiATS_Server.Repositories.Station;
 using Traincrew_MultiATS_Server.Services;
 using static OpenIddict.Abstractions.OpenIddictConstants;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
 
 var builder = WebApplication.CreateBuilder(args);
