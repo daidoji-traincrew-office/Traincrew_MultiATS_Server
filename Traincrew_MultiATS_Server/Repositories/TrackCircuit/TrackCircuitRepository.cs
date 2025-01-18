@@ -34,7 +34,7 @@ public class TrackCircuitRepository(ApplicationDbContext context) : ITrackCircui
 		await context.SaveChangesAsync();
 	}
 
-	public async Task ClearTrackCircuitList(List<Models.TrackCircuit> trackCircuitList, string trainNumber)
+	public async Task ClearTrackCircuitList(List<Models.TrackCircuit> trackCircuitList)
 	{
 		foreach (var trackCircuit in trackCircuitList)
 		{

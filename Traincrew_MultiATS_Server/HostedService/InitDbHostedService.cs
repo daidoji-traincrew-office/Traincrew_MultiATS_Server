@@ -26,11 +26,11 @@ public class InitDbHostedService(IServiceScopeFactory serviceScopeFactory) : IHo
                     Type = ObjectType.TrackCircuit,
                     TrackCircuitState = new TrackCircuitState
                     {
-                        IsShortCircuit = false
+                        IsShortCircuit = false,
+                        TrainNumber = ""
                     }
                 });
             }
-
             i++;
         }
         await context.SaveChangesAsync(cancellationToken);
