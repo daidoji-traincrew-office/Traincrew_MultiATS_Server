@@ -19,4 +19,19 @@ public class TrackCircuitService(ITrackCircuitRepository trackCircuitRepository)
 		);
 		return trackCircuitDataList;
 	}
+	public async Task<List<TrackCircuitData>> GetTrackCircuitDataListByTrainNumber(string trainNumber)
+	{
+		List<TrackCircuitData> trackCircuitDataList = new List<TrackCircuitData>();
+		List<Models.TrackCircuit> trackCircuits_db = await trackCircuitRepository.GetTrackCircuitListByTrainNumber(trainNumber);
+		trackCircuitDataList.AddRange
+		(
+			trackCircuits_db.Select(item => new TrackCircuitData()
+			{
+				Last = item.TrackCircuitState.TrainNumber,
+				Name = item.Name,
+				On = item.TrackCircuitState.IsShortCircuit
+			})
+		);
+		return trackCircuitDataList;
+	}
 }
