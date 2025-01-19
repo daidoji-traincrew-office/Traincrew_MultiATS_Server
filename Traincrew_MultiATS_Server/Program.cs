@@ -8,9 +8,9 @@ using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.HostedService;
 using Traincrew_MultiATS_Server.Hubs;
 using Traincrew_MultiATS_Server.Models;
+using Traincrew_MultiATS_Server.Repositories.Discord;
 using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
 using Traincrew_MultiATS_Server.Repositories.LockCondition;
-using Traincrew_MultiATS_Server.Repositories.Discord;
 using Traincrew_MultiATS_Server.Repositories.Station;
 using Traincrew_MultiATS_Server.Services;
 using static OpenIddict.Abstractions.OpenIddictConstants;
@@ -146,7 +146,8 @@ builder.Services.AddOpenIddict()
         // resolved from the authorization code to produce access and identity tokens.
         //
         options.UseAspNetCore()
-            .EnableAuthorizationEndpointPassthrough();
+            .EnableAuthorizationEndpointPassthrough()
+            .DisableTransportSecurityRequirement();
     })
     // Register the OpenIddict validation components.
     .AddValidation(options =>
