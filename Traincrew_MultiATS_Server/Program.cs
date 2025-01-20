@@ -1,6 +1,9 @@
+using System.Net;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.HttpLogging;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using OpenIddict.Abstractions;
@@ -17,6 +20,26 @@ using static OpenIddict.Abstractions.OpenIddictConstants;
 using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
 
 var builder = WebApplication.CreateBuilder(args);
+// Logging
+builder.Services.AddHttpLogging(options =>
+{
+   options.LoggingFields = HttpLoggingFields.RequestPropertiesAndHeaders;
+});
+// Proxied headers
+if (!builder.Environment.IsDevelopment())
+{
+    
+    builder.Services.Configure<ForwardedHeadersOptions>(options =>
+    {
+        options.ForwardedHeaders =
+            ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
+        var proxyIp = builder.Configuration["ProxyIP"];
+        if (IPAddress.TryParse(proxyIp, out var ip))
+        {
+            options.KnownProxies.Add(ip);
+        }
+    });
+}
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -125,11 +148,11 @@ builder.Services.AddOpenIddict()
             const string encryptionCertificatePath = "cert/server-encryption-certificate.pfx";
             const string signingCertificatePath = "cert/server-signing-certificate.pfx";
             EnsureCertificateExists(
-                encryptionCertificatePath, 
+                encryptionCertificatePath,
                 "CN=Fabrikam Server Encryption Certificate",
                 X509KeyUsageFlags.KeyEncipherment);
             EnsureCertificateExists(
-                signingCertificatePath, 
+                signingCertificatePath,
                 "CN=Fabrikam Server Signing Certificate",
                 X509KeyUsageFlags.DigitalSignature);
             options.AddEncryptionCertificate(
@@ -146,8 +169,7 @@ builder.Services.AddOpenIddict()
         // resolved from the authorization code to produce access and identity tokens.
         //
         options.UseAspNetCore()
-            .EnableAuthorizationEndpointPassthrough()
-            .DisableTransportSecurityRequirement();
+            .EnableAuthorizationEndpointPassthrough();
     })
     // Register the OpenIddict validation components.
     .AddValidation(options =>
@@ -189,8 +211,10 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
+    app.UseForwardedHeaders();
     app.UseHsts();
 }
+app.UseHttpLogging();
 
 // Create a new application registration matching the values configured in MultiATS_Client.
 // Note: in a real world application, this step should be part of a setup script.
