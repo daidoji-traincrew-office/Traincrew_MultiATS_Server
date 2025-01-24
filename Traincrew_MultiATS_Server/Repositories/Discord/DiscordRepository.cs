@@ -8,11 +8,16 @@ public class DiscordRepository(IConfiguration configuration) : IDiscordRepositor
 {
     private readonly DiscordSocketClient _client = new();
 
-    public async Task Initialize()
+    internal async Task Initialize()
     {
         var token = configuration.GetSection("Discord:BotToken").Get<string>();
         await _client.LoginAsync(TokenType.Bot, token);
         await _client.StartAsync();
+    }
+
+    internal async Task Logout()
+    {
+        await _client.LogoutAsync();
     }
 
     public Task<SocketGuildUser> GetMember(ulong memberId)

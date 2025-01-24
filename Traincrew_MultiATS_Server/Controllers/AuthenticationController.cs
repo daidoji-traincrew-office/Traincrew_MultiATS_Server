@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using System.Text.Json;
 using Discord.Net;
 using Discord.Rest;
 using Microsoft.AspNetCore.Authentication;
@@ -10,7 +9,6 @@ using Microsoft.IdentityModel.Tokens;
 using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
 using Traincrew_MultiATS_Server.Exception.DiscordAuthenticationException;
-using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Services;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 using static OpenIddict.Client.WebIntegration.OpenIddictClientWebIntegrationConstants;
@@ -57,8 +55,6 @@ public class AuthenticationController(ILogger<AuthenticationController> logger, 
         identity.AddClaim(new Claim(Claims.Subject, principal.FindFirst(ClaimTypes.NameIdentifier)!.Value));
         identity.AddClaim(new Claim(Claims.Name, principal.FindFirst(ClaimTypes.Name)!.Value)
             .SetDestinations(Destinations.AccessToken));
-        identity.AddClaim(new Claim(TraincrewRole.ClaimType, principal.FindFirst(TraincrewRole.ClaimType)!.Value)
-            .SetDestinations(Destinations.AccessToken));
         identity.AddClaim(new Claim(Claims.Private.RegistrationId,
             principal.FindFirst(Claims.Private.RegistrationId)!.Value)
             .SetDestinations(Destinations.AccessToken));
@@ -90,11 +86,9 @@ public class AuthenticationController(ILogger<AuthenticationController> logger, 
 
         // Traincrewサーバーにユーザーが所属しているか確認
         RestGuildUser member;
-        // Todo: Roleの取得はDiscordBOTでやる
-        TraincrewRole role;
         try
         {
-            (member, role) = await discordService.DiscordAuthentication(token);
+            member = await discordService.DiscordAuthentication(token);
         }
         catch (HttpException e)
         {
@@ -119,8 +113,7 @@ public class AuthenticationController(ILogger<AuthenticationController> logger, 
             .SetClaim(Claims.Private.RegistrationId,
                 result.Principal!.GetClaim(Claims.Private.RegistrationId))
             .SetClaim(Claims.Private.ProviderName,
-                result.Principal!.GetClaim(Claims.Private.ProviderName))
-            .SetClaim(TraincrewRole.ClaimType, JsonSerializer.Serialize(role));
+                result.Principal!.GetClaim(Claims.Private.ProviderName));
 
         // Build the authentication properties based on the properties that were added when the challenge was triggered.
         var properties = new AuthenticationProperties(result.Properties.Items)
