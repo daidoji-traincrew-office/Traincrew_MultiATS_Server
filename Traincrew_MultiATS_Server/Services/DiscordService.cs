@@ -39,8 +39,11 @@ public class DiscordService(IConfiguration configuration, IDiscordRepository dis
         var result = new TraincrewRole
         {
             IsDriver = configuration.GetSection("Discord:Roles:Driver").Get<ulong[]>().Any(roleIdSet.Contains),
+            IsDriverManager = configuration.GetSection("Discord:Roles:DriverManager").Get<ulong[]>().Any(roleIdSet.Contains),
+            IsConductor = configuration.GetSection("Discord:Roles:Conductor").Get<ulong[]>().Any(roleIdSet.Contains),
             IsCommander = configuration.GetSection("Discord:Roles:Commander").Get<ulong[]>().Any(roleIdSet.Contains),
-            IsSignalman = configuration.GetSection("Discord:Roles:Signalman").Get<ulong[]>().Any(roleIdSet.Contains)
+            IsSignalman = configuration.GetSection("Discord:Roles:Signalman").Get<ulong[]>().Any(roleIdSet.Contains),
+            IsAdministrator = configuration.GetSection("Discord:Roles:Administrator").Get<ulong[]>().Any(roleIdSet.Contains),
         };
         return result;
     }
