@@ -17,7 +17,7 @@ public class DiscordService(IConfiguration configuration, IDiscordRepository dis
             throw new DiscordAuthenticationException("You are not a member of the specific server.");
         }
 
-        // 最低限、教習生ロールを持っているか確認する
+        // 最低限、入鋏ロールを持っているか確認する
         if (!member.RoleIds.Contains(beginnerRoleId))
         {
             throw new DiscordAuthenticationException("You don't have the required role.");
