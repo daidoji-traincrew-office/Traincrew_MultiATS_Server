@@ -2,11 +2,13 @@ using System.Net;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using OpenIddict.Abstractions;
+using Traincrew_MultiATS_Server.Authentication;
 using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.HostedService;
 using Traincrew_MultiATS_Server.Hubs;
@@ -200,7 +202,42 @@ builder.Services.AddOpenIddict()
         // Register the ASP.NET Core host.
         options.UseAspNetCore();
     });
-builder.Services.AddAuthorization()
+builder.Services.AddAuthorization(options =>
+    {
+        // 車上装置は運転士か車掌のみアクセス可能
+        options.AddPolicy("TrainPolicy", policy =>
+        {
+            policy.Requirements.Add(new DiscordRoleRequirement
+            {
+                Condition = role => role.IsDriver || role.IsConductor
+            });
+        });
+        // TIDは司令員か乗務助役のみアクセス可能
+        options.AddPolicy("TIDPolicy", policy =>
+        {
+            policy.Requirements.Add(new DiscordRoleRequirement
+            {
+                Condition = role => role.IsCommander || role.IsDriverManager
+            });
+        });
+        // 信号盤は信号係員のみアクセス可能
+        options.AddPolicy("InterlockingConsolePolicy", policy =>
+        {
+            policy.Requirements.Add(new DiscordRoleRequirement
+            {
+                Condition = role => role.IsSignalman
+
+            });
+        });
+        // 司令卓は司令員のみアクセス可能
+        options.AddPolicy("CommanderTablePolicy", policy =>
+        {
+            policy.Requirements.Add(new DiscordRoleRequirement
+            {
+                Condition = role => role.IsCommander
+            });
+        });
+    })
     .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options => { options.ExpireTimeSpan = TimeSpan.FromMinutes(10); });
 // DI周り
@@ -230,9 +267,13 @@ builder.Services
     .AddScoped<SwitchingMachineService>() 
     .AddScoped<TrackCircuitService>()
     .AddSingleton<DiscordService>()
-    .AddSingleton<IDiscordRepository, DiscordRepository>();
+    .AddSingleton<DiscordRepository>()
+    .AddSingleton<IDiscordRepository>(provider => provider.GetRequiredService<DiscordRepository>())
+    .AddSingleton<IAuthorizationHandler, DiscordRoleHandler>();
 // HostedServiceまわり
-builder.Services.AddHostedService<InitDbHostedService>();
+builder.Services
+    .AddHostedService<InitDbHostedService>()
+    .AddHostedService<DiscordBotHostedService>();
 
 
 var app = builder.Build();
