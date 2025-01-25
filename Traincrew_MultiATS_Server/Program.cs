@@ -35,15 +35,13 @@ using Traincrew_MultiATS_Server.Services;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
 var builder = WebApplication.CreateBuilder(args);
+var enableAuthorization =
+    !builder.Environment.IsDevelopment() || builder.Configuration.GetValue<bool>("EnableAuthorization");
 // Logging
-builder.Services.AddHttpLogging(options =>
-{
-   options.LoggingFields = HttpLoggingFields.RequestPropertiesAndHeaders;
-});
+builder.Services.AddHttpLogging(options => { options.LoggingFields = HttpLoggingFields.RequestPropertiesAndHeaders; });
 // Proxied headers
 if (!builder.Environment.IsDevelopment())
 {
-    
     builder.Services.Configure<ForwardedHeadersOptions>(options =>
     {
         options.ForwardedHeaders =
@@ -86,160 +84,164 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddSignalR();
 
 // 認証周り
-builder.Services.AddOpenIddict()
-    // Register the OpenIddict core components.
-    .AddCore(options =>
-    {
-        options.UseEntityFrameworkCore()
-            .UseDbContext<ApplicationDbContext>();
-    })
-    // Register the OpenIddict client components.
-    .AddClient(options =>
-    {
-        // Enable the client credentials flow. 
-        options.AllowAuthorizationCodeFlow();
-
-        // Register the signing and encryption credentials used to protect
-        // sensitive data like the state tokens produced by OpenIddict.
-        if (builder.Environment.IsDevelopment())
+if (enableAuthorization)
+{
+    builder.Services.AddOpenIddict()
+        // Register the OpenIddict core components.
+        .AddCore(options =>
         {
-            options.AddDevelopmentEncryptionCertificate()
-                .AddDevelopmentSigningCertificate();
-        }
-        else
+            options.UseEntityFrameworkCore()
+                .UseDbContext<ApplicationDbContext>();
+        })
+        // Register the OpenIddict client components.
+        .AddClient(options =>
         {
-            // Generate a certificate at startup and register it.
-            const string encryptionCertificatePath = "cert/client-encryption-certificate.pfx";
-            const string signingCertificatePath = "cert/client-signing-certificate.pfx";
-            EnsureCertificateExists(
-                encryptionCertificatePath,
-                "CN=Fabrikam Client Encryption Certificate",
-                X509KeyUsageFlags.KeyEncipherment);
-            EnsureCertificateExists(
-                signingCertificatePath,
-                "CN=Fabrikam Client Signing Certificate",
-                X509KeyUsageFlags.DigitalSignature);
+            // Enable the client credentials flow. 
+            options.AllowAuthorizationCodeFlow();
 
-            options.AddEncryptionCertificate(
-                new X509Certificate2(encryptionCertificatePath, string.Empty));
-            options.AddSigningCertificate(
-                new X509Certificate2(signingCertificatePath, string.Empty));
-        }
-
-        // Register the ASP.NET Core host and configure the ASP.NET Core-specific options.
-        options.UseAspNetCore()
-            .EnableRedirectionEndpointPassthrough();
-
-        // Register the System.Net.Http integration and use the identity of the current
-        // assembly as a more specific user agent, which can be useful when dealing with
-        // providers that use the user agent as a way to throttle requests (e.g Reddit).
-        options.UseSystemNetHttp()
-            .SetProductInformation(typeof(Program).Assembly);
-
-        // Register the Web providers integrations.
-        options.UseWebProviders()
-            .AddDiscord(discord =>
+            // Register the signing and encryption credentials used to protect
+            // sensitive data like the state tokens produced by OpenIddict.
+            if (builder.Environment.IsDevelopment())
             {
-                discord.AddScopes("identify", "guilds", "guilds.members.read");
-                discord
-                    .SetClientId(builder.Configuration["Discord:ClientId"] ?? "")
-                    .SetClientSecret(builder.Configuration["Discord:ClientSecret"] ?? "")
-                    .SetRedirectUri("auth/callback");
-            });
-    })
-    // Register the OpenIddict server components.
-    .AddServer(options =>
-    {
-        // Authorizationとtokenエンドポイントを有効にする
-        options.SetAuthorizationEndpointUris("auth/authorize")
-            .SetTokenEndpointUris("token");
-
-        // AuthorizationCodeFlowとRefreshTokenFlowを有効にする
-        options.AllowAuthorizationCodeFlow()
-            .AllowRefreshTokenFlow();
-
-        // Register the signing and encryption credentials
-        if (builder.Environment.IsDevelopment())
-        {
-            options.AddDevelopmentEncryptionCertificate()
-                .AddDevelopmentSigningCertificate();
-        }
-        else
-        {
-            // Generate a certificate at startup and register it.
-            const string encryptionCertificatePath = "cert/server-encryption-certificate.pfx";
-            const string signingCertificatePath = "cert/server-signing-certificate.pfx";
-            EnsureCertificateExists(
-                encryptionCertificatePath,
-                "CN=Fabrikam Server Encryption Certificate",
-                X509KeyUsageFlags.KeyEncipherment);
-            EnsureCertificateExists(
-                signingCertificatePath,
-                "CN=Fabrikam Server Signing Certificate",
-                X509KeyUsageFlags.DigitalSignature);
-            options.AddEncryptionCertificate(
-                new X509Certificate2(encryptionCertificatePath, string.Empty));
-            options.AddSigningCertificate(
-                new X509Certificate2(signingCertificatePath, string.Empty));
-        }
-
-        // Register the ASP.NET Core host and configure the ASP.NET Core-specific options.
-        //
-        // Note: unlike other samples, this sample doesn't use token endpoint pass-through
-        // to handle token requests in a custom MVC action. As such, the token requests
-        // will be automatically handled by OpenIddict, that will reuse the identity
-        // resolved from the authorization code to produce access and identity tokens.
-        //
-        options.UseAspNetCore()
-            .EnableAuthorizationEndpointPassthrough();
-    })
-    // Register the OpenIddict validation components.
-    .AddValidation(options =>
-    {
-        // Import the configuration from the local OpenIddict server instance.
-        options.UseLocalServer();
-
-        // Register the ASP.NET Core host.
-        options.UseAspNetCore();
-    });
-builder.Services.AddAuthorization(options =>
-    {
-        // 車上装置は運転士か車掌のみアクセス可能
-        options.AddPolicy("TrainPolicy", policy =>
-        {
-            policy.Requirements.Add(new DiscordRoleRequirement
+                options.AddDevelopmentEncryptionCertificate()
+                    .AddDevelopmentSigningCertificate();
+            }
+            else
             {
-                Condition = role => role.IsDriver || role.IsConductor
-            });
+                // Generate a certificate at startup and register it.
+                const string encryptionCertificatePath = "cert/client-encryption-certificate.pfx";
+                const string signingCertificatePath = "cert/client-signing-certificate.pfx";
+                EnsureCertificateExists(
+                    encryptionCertificatePath,
+                    "CN=Fabrikam Client Encryption Certificate",
+                    X509KeyUsageFlags.KeyEncipherment);
+                EnsureCertificateExists(
+                    signingCertificatePath,
+                    "CN=Fabrikam Client Signing Certificate",
+                    X509KeyUsageFlags.DigitalSignature);
+
+                options.AddEncryptionCertificate(
+                    new X509Certificate2(encryptionCertificatePath, string.Empty));
+                options.AddSigningCertificate(
+                    new X509Certificate2(signingCertificatePath, string.Empty));
+            }
+
+            // Register the ASP.NET Core host and configure the ASP.NET Core-specific options.
+            options.UseAspNetCore()
+                .EnableRedirectionEndpointPassthrough();
+
+            // Register the System.Net.Http integration and use the identity of the current
+            // assembly as a more specific user agent, which can be useful when dealing with
+            // providers that use the user agent as a way to throttle requests (e.g Reddit).
+            options.UseSystemNetHttp()
+                .SetProductInformation(typeof(Program).Assembly);
+
+            // Register the Web providers integrations.
+            options.UseWebProviders()
+                .AddDiscord(discord =>
+                {
+                    discord.AddScopes("identify", "guilds", "guilds.members.read");
+                    discord
+                        .SetClientId(builder.Configuration["Discord:ClientId"] ?? "")
+                        .SetClientSecret(builder.Configuration["Discord:ClientSecret"] ?? "")
+                        .SetRedirectUri("auth/callback");
+                });
+        })
+        // Register the OpenIddict server components.
+        .AddServer(options =>
+        {
+            // Authorizationとtokenエンドポイントを有効にする
+            options.SetAuthorizationEndpointUris("auth/authorize")
+                .SetTokenEndpointUris("token");
+
+            // AuthorizationCodeFlowとRefreshTokenFlowを有効にする
+            options.AllowAuthorizationCodeFlow()
+                .AllowRefreshTokenFlow();
+
+            // Register the signing and encryption credentials
+            if (builder.Environment.IsDevelopment())
+            {
+                options.AddDevelopmentEncryptionCertificate()
+                    .AddDevelopmentSigningCertificate();
+            }
+            else
+            {
+                // Generate a certificate at startup and register it.
+                const string encryptionCertificatePath = "cert/server-encryption-certificate.pfx";
+                const string signingCertificatePath = "cert/server-signing-certificate.pfx";
+                EnsureCertificateExists(
+                    encryptionCertificatePath,
+                    "CN=Fabrikam Server Encryption Certificate",
+                    X509KeyUsageFlags.KeyEncipherment);
+                EnsureCertificateExists(
+                    signingCertificatePath,
+                    "CN=Fabrikam Server Signing Certificate",
+                    X509KeyUsageFlags.DigitalSignature);
+                options.AddEncryptionCertificate(
+                    new X509Certificate2(encryptionCertificatePath, string.Empty));
+                options.AddSigningCertificate(
+                    new X509Certificate2(signingCertificatePath, string.Empty));
+            }
+
+            // Register the ASP.NET Core host and configure the ASP.NET Core-specific options.
+            //
+            // Note: unlike other samples, this sample doesn't use token endpoint pass-through
+            // to handle token requests in a custom MVC action. As such, the token requests
+            // will be automatically handled by OpenIddict, that will reuse the identity
+            // resolved from the authorization code to produce access and identity tokens.
+            //
+            options.UseAspNetCore()
+                .EnableAuthorizationEndpointPassthrough();
+        })
+        // Register the OpenIddict validation components.
+        .AddValidation(options =>
+        {
+            // Import the configuration from the local OpenIddict server instance.
+            options.UseLocalServer();
+
+            // Register the ASP.NET Core host.
+            options.UseAspNetCore();
         });
-        // TIDは司令員か乗務助役のみアクセス可能
-        options.AddPolicy("TIDPolicy", policy =>
+    builder.Services.AddAuthorization(options =>
         {
-            policy.Requirements.Add(new DiscordRoleRequirement
+            // 車上装置は運転士か車掌のみアクセス可能
+            options.AddPolicy("TrainPolicy", policy =>
             {
-                Condition = role => role.IsCommander || role.IsDriverManager
+                policy.Requirements.Add(new DiscordRoleRequirement
+                {
+                    Condition = role => role.IsDriver || role.IsConductor
+                });
             });
-        });
-        // 信号盤は信号係員のみアクセス可能
-        options.AddPolicy("InterlockingConsolePolicy", policy =>
-        {
-            policy.Requirements.Add(new DiscordRoleRequirement
+            // TIDは司令員か乗務助役のみアクセス可能
+            options.AddPolicy("TIDPolicy", policy =>
             {
-                Condition = role => role.IsSignalman
+                policy.Requirements.Add(new DiscordRoleRequirement
+                {
+                    Condition = role => role.IsCommander || role.IsDriverManager
+                });
+            });
+            // 信号盤は信号係員のみアクセス可能
+            options.AddPolicy("InterlockingConsolePolicy", policy =>
+            {
+                policy.Requirements.Add(new DiscordRoleRequirement
+                {
+                    Condition = role => role.IsSignalman
+                });
+            });
+            // 司令卓は司令員のみアクセス可能
+            options.AddPolicy("CommanderTablePolicy", policy =>
+            {
+                policy.Requirements.Add(new DiscordRoleRequirement
+                {
+                    Condition = role => role.IsCommander
+                });
+            });
+        })
+        .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+        .AddCookie(options => { options.ExpireTimeSpan = TimeSpan.FromMinutes(10); });
+    builder.Services.AddHostedService<DiscordBotHostedService>();
+}
 
-            });
-        });
-        // 司令卓は司令員のみアクセス可能
-        options.AddPolicy("CommanderTablePolicy", policy =>
-        {
-            policy.Requirements.Add(new DiscordRoleRequirement
-            {
-                Condition = role => role.IsCommander
-            });
-        });
-    })
-    .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options => { options.ExpireTimeSpan = TimeSpan.FromMinutes(10); });
 // DI周り
 builder.Services
     .AddScoped<IDateTimeRepository, DateTimeRepository>()
@@ -272,8 +274,7 @@ builder.Services
     .AddSingleton<IAuthorizationHandler, DiscordRoleHandler>();
 // HostedServiceまわり
 builder.Services
-    .AddHostedService<InitDbHostedService>()
-    .AddHostedService<DiscordBotHostedService>();
+    .AddHostedService<InitDbHostedService>();
 
 
 var app = builder.Build();
@@ -289,41 +290,45 @@ else
     app.UseForwardedHeaders();
     app.UseHsts();
 }
+
 app.UseHttpLogging();
 
-// Create a new application registration matching the values configured in MultiATS_Client.
-// Note: in a real world application, this step should be part of a setup script.
-await using (var scope = app.Services.CreateAsyncScope())
-{
-    var manager = scope.ServiceProvider.GetRequiredService<IOpenIddictApplicationManager>();
-
-    if (await manager.FindByClientIdAsync("MultiATS_Client") == null)
-    {
-        await manager.CreateAsync(new OpenIddictApplicationDescriptor
-        {
-            ApplicationType = ApplicationTypes.Native,
-            ClientId = "MultiATS_Client",
-            ClientType = ClientTypes.Public,
-            RedirectUris =
-            {
-                new Uri("http://localhost:49152/")
-            },
-            Permissions =
-            {
-                Permissions.Endpoints.Authorization,
-                Permissions.Endpoints.Token,
-                Permissions.GrantTypes.AuthorizationCode,
-                Permissions.ResponseTypes.Code
-            }
-        });
-    }
-}
 
 app.UseRouting();
 app.UseCors();
+if (enableAuthorization)
+{
+    // Create a new application registration matching the values configured in MultiATS_Client.
+    // Note: in a real world application, this step should be part of a setup script.
+    await using (var scope = app.Services.CreateAsyncScope())
+    {
+        var manager = scope.ServiceProvider.GetRequiredService<IOpenIddictApplicationManager>();
 
-app.UseAuthentication();
-app.UseAuthorization();
+        if (await manager.FindByClientIdAsync("MultiATS_Client") == null)
+        {
+            await manager.CreateAsync(new OpenIddictApplicationDescriptor
+            {
+                ApplicationType = ApplicationTypes.Native,
+                ClientId = "MultiATS_Client",
+                ClientType = ClientTypes.Public,
+                RedirectUris =
+                {
+                    new Uri("http://localhost:49152/")
+                },
+                Permissions =
+                {
+                    Permissions.Endpoints.Authorization,
+                    Permissions.Endpoints.Token,
+                    Permissions.GrantTypes.AuthorizationCode,
+                    Permissions.ResponseTypes.Code
+                }
+            });
+        }
+    }
+
+    app.UseAuthentication();
+    app.UseAuthorization();
+}
 
 app.MapControllers();
 
