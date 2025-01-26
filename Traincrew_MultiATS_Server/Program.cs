@@ -229,7 +229,11 @@ await using (var scope = app.Services.CreateAsyncScope())
             ClientType = ClientTypes.Public,
             RedirectUris =
             {
-                new Uri("http://localhost:49152/")
+                new Uri("http://localhost:49152/"),
+                new Uri("http://localhost:49153/"),
+                new Uri("http://localhost:49154/"),
+                new Uri("http://localhost:49155/"),
+                new Uri("http://localhost:49156/"),
             },
             Permissions =
             {
