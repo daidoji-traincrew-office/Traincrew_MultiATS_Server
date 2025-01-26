@@ -61,9 +61,9 @@ public class CarState
 
 public class TrackCircuitData: IEquatable<TrackCircuitData>
 {
-    public string Last {get; set;} //軌道回路を踏んだ列車の名前
-    public string Name { get; init; }
-    public bool On {get; set;}
+    public string Last {get; init;} //軌道回路を踏んだ列車の名前
+    public required string Name { get; init; }
+    public bool On {get; init;}
 
     public override string ToString()
     {
@@ -91,16 +91,16 @@ public class TrackCircuitData: IEquatable<TrackCircuitData>
 
 public class DataToServer
 {
-    public int BNotch;
-    public bool BougoState;
-    public List<CarState> CarStates = new();
-    public string DiaName;
-    public List<TrackCircuitData> OnTrackList = null;
+    public int BNotch { get; init; }
+    public bool BougoState { get; init; }
+    public List<CarState> CarStates { get; init; }
+    public string DiaName { get; init; }
+    public List<TrackCircuitData> OnTrackList { get; init; }
 
-    public int PNotch;
+    public int PNotch{ get; init; }
 
     //将来用
-    public float Speed;
+    public float Speed{ get; init; }
 }
 
 public class DataFromServer
