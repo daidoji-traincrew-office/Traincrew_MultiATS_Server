@@ -61,9 +61,9 @@ public class CarState
 
 public class TrackCircuitData: IEquatable<TrackCircuitData>
 {
-    public string Last {get; set;} //軌道回路を踏んだ列車の名前
+    public string Last {get; init;} //軌道回路を踏んだ列車の名前
     public string Name { get; init; }
-    public bool On {get; set;}
+    public bool On {get; init;}
 
     public override string ToString()
     {
