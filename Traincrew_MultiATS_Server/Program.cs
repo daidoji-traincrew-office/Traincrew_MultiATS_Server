@@ -86,6 +86,10 @@ builder.Services.AddSignalR();
 // 認証周り
 if (enableAuthorization)
 {
+    // Cookie認証の設定
+    builder.Services
+        .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+        .AddCookie(options => { options.ExpireTimeSpan = TimeSpan.FromMinutes(10); });
     builder.Services.AddOpenIddict()
         // Register the OpenIddict core components.
         .AddCore(options =>
@@ -202,45 +206,48 @@ if (enableAuthorization)
             // Register the ASP.NET Core host.
             options.UseAspNetCore();
         });
-    builder.Services.AddAuthorization(options =>
-        {
-            // 車上装置は運転士か車掌のみアクセス可能
-            options.AddPolicy("TrainPolicy", policy =>
-            {
-                policy.Requirements.Add(new DiscordRoleRequirement
-                {
-                    Condition = role => role.IsDriver || role.IsConductor
-                });
-            });
-            // TIDは司令員か乗務助役のみアクセス可能
-            options.AddPolicy("TIDPolicy", policy =>
-            {
-                policy.Requirements.Add(new DiscordRoleRequirement
-                {
-                    Condition = role => role.IsCommander || role.IsDriverManager
-                });
-            });
-            // 信号盤は信号係員のみアクセス可能
-            options.AddPolicy("InterlockingConsolePolicy", policy =>
-            {
-                policy.Requirements.Add(new DiscordRoleRequirement
-                {
-                    Condition = role => role.IsSignalman
-                });
-            });
-            // 司令卓は司令員のみアクセス可能
-            options.AddPolicy("CommanderTablePolicy", policy =>
-            {
-                policy.Requirements.Add(new DiscordRoleRequirement
-                {
-                    Condition = role => role.IsCommander
-                });
-            });
-        })
-        .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-        .AddCookie(options => { options.ExpireTimeSpan = TimeSpan.FromMinutes(10); });
+    // 認証使う場合はDiscord BOTの起動をする
     builder.Services.AddHostedService<DiscordBotHostedService>();
 }
+else
+{
+    builder.Services.AddControllersWithViews(options =>
+    {
+        options.Filters.Add<DevelopmentOnlyAuthorizationFilter>(); 
+    });
+}
+
+builder.Services.AddAuthorization();
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("TrainPolicy", policy =>
+    {
+        policy.Requirements.Add(new DiscordRoleRequirement
+        {
+            Condition = role => role.IsDriver || role.IsConductor
+        });
+    })
+    .AddPolicy("TIDPolicy", policy =>
+    {
+        policy.Requirements.Add(new DiscordRoleRequirement
+        {
+            Condition = role => role.IsCommander || role.IsDriverManager
+        });
+    })
+    .AddPolicy("InterlockingConsolePolicy", policy =>
+    {
+        policy.Requirements.Add(new DiscordRoleRequirement
+        {
+            Condition = role => role.IsSignalman
+        });
+    })
+    .AddPolicy("CommanderTablePolicy", policy =>
+    {
+        policy.Requirements.Add(new DiscordRoleRequirement
+        {
+            Condition = role => role.IsCommander
+        });
+    });
+
 
 // DI周り
 builder.Services
@@ -326,10 +333,10 @@ if (enableAuthorization)
         }
     }
 
-    app.UseAuthentication();
-    app.UseAuthorization();
 }
 
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapControllers();
 
 app.MapHub<TrainHub>("/hub/train");
