@@ -83,10 +83,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // SignalR
 builder.Services.AddSignalR();
 
-// 認証周り
+// 認可周り
 if (enableAuthorization)
 {
-    // Cookie認証の設定
+    // Cookie認可の設定
     builder.Services
         .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
         .AddCookie(options => { options.ExpireTimeSpan = TimeSpan.FromMinutes(10); });
@@ -206,15 +206,8 @@ if (enableAuthorization)
             // Register the ASP.NET Core host.
             options.UseAspNetCore();
         });
-    // 認証使う場合はDiscord BOTの起動をする
+    // 認可を使う場合はDiscord BOTの起動をする
     builder.Services.AddHostedService<DiscordBotHostedService>();
-}
-else
-{
-    builder.Services.AddControllersWithViews(options =>
-    {
-        options.Filters.Add<DevelopmentOnlyAuthorizationFilter>(); 
-    });
 }
 
 builder.Services.AddAuthorization();
@@ -303,45 +296,48 @@ app.UseHttpLogging();
 
 app.UseRouting();
 app.UseCors();
-if (enableAuthorization)
+// Create a new application registration matching the values configured in MultiATS_Client.
+// Note: in a real world application, this step should be part of a setup script.
+await using (var scope = app.Services.CreateAsyncScope())
 {
-    // Create a new application registration matching the values configured in MultiATS_Client.
-    // Note: in a real world application, this step should be part of a setup script.
-    await using (var scope = app.Services.CreateAsyncScope())
+    var manager = scope.ServiceProvider.GetRequiredService<IOpenIddictApplicationManager>();
+
+    if (await manager.FindByClientIdAsync("MultiATS_Client") == null)
     {
-        var manager = scope.ServiceProvider.GetRequiredService<IOpenIddictApplicationManager>();
-
-        if (await manager.FindByClientIdAsync("MultiATS_Client") == null)
+        await manager.CreateAsync(new OpenIddictApplicationDescriptor
         {
-            await manager.CreateAsync(new OpenIddictApplicationDescriptor
+            ApplicationType = ApplicationTypes.Native,
+            ClientId = "MultiATS_Client",
+            ClientType = ClientTypes.Public,
+            RedirectUris =
             {
-                ApplicationType = ApplicationTypes.Native,
-                ClientId = "MultiATS_Client",
-                ClientType = ClientTypes.Public,
-                RedirectUris =
-                {
-                    new Uri("http://localhost:49152/")
-                },
-                Permissions =
-                {
-                    Permissions.Endpoints.Authorization,
-                    Permissions.Endpoints.Token,
-                    Permissions.GrantTypes.AuthorizationCode,
-                    Permissions.ResponseTypes.Code
-                }
-            });
-        }
+                new Uri("http://localhost:49152/")
+            },
+            Permissions =
+            {
+                Permissions.Endpoints.Authorization,
+                Permissions.Endpoints.Token,
+                Permissions.GrantTypes.AuthorizationCode,
+                Permissions.ResponseTypes.Code
+            }
+        });
     }
-
 }
+
 
 app.UseAuthentication();
 app.UseAuthorization();
-app.MapControllers();
-
-app.MapHub<TrainHub>("/hub/train");
-app.MapHub<TIDHub>("/hub/TID");
-app.MapHub<InterlockingHub>("/hub/interlocking");
+List<IEndpointConventionBuilder> conventionBuilders =
+[
+    app.MapControllers(),
+    app.MapHub<TrainHub>("/hub/train"),
+    app.MapHub<TIDHub>("/hub/TID"),
+    app.MapHub<InterlockingHub>("/hub/interlocking");
+];
+if (!enableAuthorization)
+{
+    conventionBuilders.ForEach(conventionBuilder => conventionBuilder.AllowAnonymous());
+}
 
 app.Run();
 return;
