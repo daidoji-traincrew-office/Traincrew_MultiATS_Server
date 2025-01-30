@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Traincrew_MultiATS_Server.Services;
+using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace Traincrew_MultiATS_Server.Authentication;
 
@@ -7,7 +8,7 @@ public class DiscordRoleHandler(DiscordService discordService) : AuthorizationHa
 {
     protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, DiscordRoleRequirement requirement)
     {
-        var userIdClaim = context.User.FindFirst("sub");
+        var userIdClaim = context.User.FindFirst(Claims.Subject);
         if (userIdClaim == null)
         {
             context.Fail();
