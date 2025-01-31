@@ -13,11 +13,13 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<TrackCircuit> TrackCircuits { get; set; }
     public DbSet<Lock> Locks { get; set; }
     public DbSet<LockCondition> LockConditions { get; set; }
+    public DbSet<Signal> Signals { get; set; }
+    public DbSet<NextSignal> NextSignals { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        
+
         modelBuilder.Entity<Route>()
             .HasOne(r => r.RouteState)
             .WithOne(rs => rs.Route)
@@ -36,14 +38,27 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasForeignKey<LockCondition>(lc => lc.LockId);
         modelBuilder.Entity<LockCondition>()
             .HasOne(lc => lc.targetObject)
-            .WithMany(obj => obj.LockConditions)
-            .HasForeignKey(lc => lc.ObjectId);
-        
+            .WithMany(obj => obj.LockConditions);
+        modelBuilder.Entity<Signal>()
+            .HasOne(s => s.Type)
+            .WithMany()
+            .HasForeignKey(s => s.TypeName);
+
         // Convert all column names to snake_case 
         foreach (var entity in modelBuilder.Model.GetEntityTypes())
         {
+            if (entity.ClrType.Name == nameof(SignalIndication))
+            {
+                continue;
+            }
             foreach (var property in entity.GetProperties())
             {
+                var columnAttribute = property.GetAnnotations()
+                    .FirstOrDefault(a => a.Name == "Relational:ColumnName");
+                if (columnAttribute != null)
+                {
+                    continue;
+                }
                 property.SetColumnName(ToSnakeCase(property.Name));
             }
         }

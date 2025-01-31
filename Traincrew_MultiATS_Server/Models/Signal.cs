@@ -11,7 +11,7 @@ public class Signal
     [Column("type")]
     public string TypeName { get; init; }
     public SignalType Type { get; init; }
-    // Todo: signal_stateの追加
+    public SignalState SignalState { get; init; }
     public ulong? TrackCircuitId { get; init; }
     public TrackCircuit? TrackCircuit { get; init; } 
     public Route? Route { get; init; }

@@ -9,6 +9,7 @@ public class SignalRepository(ApplicationDbContext context) : ISignalRepository
     {
         return await context.Signals
             .Where(s => signalNames.Contains(s.Name))
+            .Include(s => s.SignalState)
             .Include(s => s.Type)
             .Include(s => s.TrackCircuit)
             .ThenInclude(t => t!.TrackCircuitState)
