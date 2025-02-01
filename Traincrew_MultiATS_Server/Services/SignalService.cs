@@ -24,14 +24,13 @@ public class SignalService(
                 g => g.Select(x => x.TargetSignalName).ToList()
             );
         var cache = new Dictionary<string, SignalIndication>();
-        var result =
-            signalNames.ToDictionary(
-                name => name,
-                name => ToPhase(CalcSignalIndication(name, signals, nextSignalDict, cache))
-            );
+        signalNames.ForEach(name => CalcSignalIndication(name, signals, nextSignalDict, cache));
         // Todo: 無灯火時、無灯火と返すようにする
         // 信号機の現示を計算して返す
-        return result;
+        return cache.ToDictionary(
+            kv => kv.Key,
+            kv => ToPhase(kv.Value)
+        );
     }
 
     public async Task<List<string>> GetSignalNamesByTrackCircuits(List<string> trackCircuitNames, bool isUp)
