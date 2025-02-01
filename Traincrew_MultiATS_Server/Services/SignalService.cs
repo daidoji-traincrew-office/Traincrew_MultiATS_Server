@@ -4,9 +4,11 @@ using Traincrew_MultiATS_Server.Repositories.Signal;
 
 namespace Traincrew_MultiATS_Server.Services;
 
-public class SignalService(ISignalRepository signalRepository, INextSignalRepository nextSignalRepository)
+public class SignalService(
+    ISignalRepository signalRepository,
+    INextSignalRepository nextSignalRepository)
 {
-    public async Task<Dictionary<string, SignalIndication>> CalcSignalIndication(List<string> signalNames)
+    public async Task<Dictionary<string, Phase>> CalcSignalIndication(List<string> signalNames)
     {
         // まず、先の信号機名を取得
         var nextSignals = await nextSignalRepository.GetNextSignalByNamesOrderByDepthDesc(signalNames);
@@ -25,11 +27,16 @@ public class SignalService(ISignalRepository signalRepository, INextSignalReposi
         var result =
             signalNames.ToDictionary(
                 name => name,
-                name => CalcSignalIndication(name, signals, nextSignalDict, cache)
+                name => ToPhase(CalcSignalIndication(name, signals, nextSignalDict, cache))
             );
         // Todo: 無灯火時、無灯火と返すようにする
         // 信号機の現示を計算して返す
         return result;
+    }
+
+    public async Task<List<string>> GetSignalNamesByTrackCircuits(List<string> trackCircuitNames, bool isUp)
+    {
+        return await signalRepository.GetSignalNamesByTrackCircuits(trackCircuitNames, isUp);
     }
 
     private static SignalIndication CalcSignalIndication(
@@ -83,6 +90,18 @@ public class SignalService(ISignalRepository signalRepository, INextSignalReposi
             SignalIndication.Y => signalType.YIndication,
             SignalIndication.YY => signalType.YYIndication,
             _ => signalType.RIndication,
+        };
+    }
+    
+    private static Phase ToPhase(SignalIndication indication)
+    {
+        return indication switch
+        {
+            SignalIndication.G => Phase.G,
+            SignalIndication.YG => Phase.YG,
+            SignalIndication.Y => Phase.Y,
+            SignalIndication.YY => Phase.YY,
+            _ => Phase.R,
         };
     }
 }

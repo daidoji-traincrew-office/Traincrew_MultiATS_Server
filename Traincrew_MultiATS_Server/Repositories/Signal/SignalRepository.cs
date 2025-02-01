@@ -16,5 +16,13 @@ public class SignalRepository(ApplicationDbContext context) : ISignalRepository
             .Include(s => s.Route)
             .ThenInclude(r => r!.RouteState)
             .ToListAsync();
-    } 
+    }
+
+    public async Task<List<string>> GetSignalNamesByTrackCircuits(List<string> trackCircuitNames, bool isUp)
+    {
+        return await context.TrackCircuitSignals
+            .Where(tcs => trackCircuitNames.Contains(tcs.TrackCircuit.Name) && tcs.IsUp == isUp)
+            .Select(tcs => tcs.SignalName)
+            .ToListAsync();
+    }
 }
