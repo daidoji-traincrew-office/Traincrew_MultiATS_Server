@@ -15,6 +15,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<LockCondition> LockConditions { get; set; }
     public DbSet<Signal> Signals { get; set; }
     public DbSet<NextSignal> NextSignals { get; set; }
+    public DbSet<TrackCircuitSignal> TrackCircuitSignals { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -43,6 +44,18 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasOne(s => s.Type)
             .WithMany()
             .HasForeignKey(s => s.TypeName);
+
+        modelBuilder.Entity<TrackCircuitSignal>()
+            .HasOne(tcs => tcs.TrackCircuit)
+            .WithMany()
+            .HasForeignKey(tcs => tcs.TrackCircuitId)
+            .HasPrincipalKey(tc => tc.Id);
+
+        modelBuilder.Entity<TrackCircuitSignal>()
+            .HasOne(tcs => tcs.Signal)
+            .WithMany()
+            .HasForeignKey(tcs => tcs.SignalName)
+            .HasPrincipalKey(s => s.Name);
 
         // Convert all column names to snake_case 
         foreach (var entity in modelBuilder.Model.GetEntityTypes())
