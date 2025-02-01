@@ -22,14 +22,17 @@ public class SignalService(ISignalRepository signalRepository, INextSignalReposi
                 g => g.Select(x => x.TargetSignalName).ToList()
             );
         var cache = new Dictionary<string, SignalIndication>();
-        var result = 
-            signalNames.ToDictionary(name => name, name => CalcSignalIndication(name, signals, nextSignalDict, cache));
+        var result =
+            signalNames.ToDictionary(
+                name => name,
+                name => CalcSignalIndication(name, signals, nextSignalDict, cache)
+            );
         // 信号機の現示を計算して返す
         return result;
     }
-    
+
     private static SignalIndication CalcSignalIndication(
-        string signalName, 
+        string signalName,
         Dictionary<string, Signal> signals,
         Dictionary<string, List<string>> nextSignalDict,
         Dictionary<string, SignalIndication> cache
@@ -40,11 +43,13 @@ public class SignalService(ISignalRepository signalRepository, INextSignalReposi
         {
             return signalIndication;
         }
+
         var result = SignalIndication.R;
         if (
             // 信号機が存在している
             signals.TryGetValue(signalName, out var signal)
-            // Todo: 信号機は消灯していない
+            // 信号機は点灯している
+            && signal.SignalState.IsLighted
             // Todo: 絶対信号機の場合、進路が空いている
             // 許容信号機の場合、対象軌道回路が短絡していない
             && !(signal.TrackCircuit?.TrackCircuitState.IsShortCircuit ?? false))
@@ -59,15 +64,17 @@ public class SignalService(ISignalRepository signalRepository, INextSignalReposi
             var nextSignalIndication = SignalIndication.R;
             if (nextSignalIndications.Count != 0)
             {
-               nextSignalIndication = nextSignalIndications.Max(); 
+                nextSignalIndication = nextSignalIndications.Max();
             }
+
             // 信号機の種類によって、信号の現示を計算する
             result = GetIndication(signal.Type, nextSignalIndication);
         }
+
         cache[signalName] = result;
         return result;
     }
-    
+
     private static SignalIndication GetIndication(SignalType signalType, SignalIndication nextSignalIndication)
     {
         return nextSignalIndication switch
