@@ -16,6 +16,10 @@ public class TrainHub(TrackCircuitService trackCircuitService) : Hub
             clientData.OnTrackList.Except(old_TrackCircuitDataList).ToList();
         List<TrackCircuitData> Decremental_TrackCircuitDataList =
             old_TrackCircuitDataList.Except(clientData.OnTrackList).ToList();
+        if(clientData.BougoState == true)
+        {
+            
+        }
         await trackCircuitService.SetTrackCircuitDataList(Incremental_TrackCircuitDataList, clientData.DiaName);
         await trackCircuitService.ClearTrackCircuitDataList(Decremental_TrackCircuitDataList);
         DataFromServer serverData = new DataFromServer();

@@ -12,7 +12,6 @@ public class InitDbHostedService(IServiceScopeFactory serviceScopeFactory) : IHo
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         var jsonstring = await File.ReadAllTextAsync("./Data/DBBase.json", cancellationToken);
         var DBBase = JsonSerializer.Deserialize<DBBasejson>(jsonstring);
-        ulong i = 0;
         int protection_zone = 0;
         foreach (var item in DBBase.trackCircuitList)
         {
@@ -31,7 +30,13 @@ public class InitDbHostedService(IServiceScopeFactory serviceScopeFactory) : IHo
                     }
                 });
             }
-            i++;
+        }
+        for (ulong i = 1; i <= 12; i++)
+        {
+            if(!context.protectionZoneStates.Any(tc => tc.ProtectionZone == i))
+            {
+                context.protectionZoneStates.Add(new ProtectionZoneState{ProtectionZone = i, TrainNumber = null});
+            }
         }
         await context.SaveChangesAsync(cancellationToken);
     }

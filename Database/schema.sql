@@ -129,6 +129,11 @@ CREATE TABLE track_circuit
     protection_zone INT NOT NULL -- 防護無線区間
 );
 
+CREATE TABLE protection_zone_state (
+    protection_zone BIGINT PRIMARY KEY,
+    train_number    VARCHAR(100)[]
+);
+
 -- 転てつ機
 CREATE TABLE switching_machine
 (

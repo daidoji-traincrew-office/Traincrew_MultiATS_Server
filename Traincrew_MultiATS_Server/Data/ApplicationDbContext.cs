@@ -13,6 +13,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<TrackCircuit> TrackCircuits { get; set; }
     public DbSet<Lock> Locks { get; set; }
     public DbSet<LockCondition> LockConditions { get; set; }
+    public DbSet<ProtectionZoneState> protectionZoneStates{ get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -38,6 +39,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasOne(lc => lc.targetObject)
             .WithMany(obj => obj.LockConditions)
             .HasForeignKey(lc => lc.ObjectId);
+        modelBuilder.Entity<ProtectionZoneState>();
         
         // Convert all column names to snake_case 
         foreach (var entity in modelBuilder.Model.GetEntityTypes())
