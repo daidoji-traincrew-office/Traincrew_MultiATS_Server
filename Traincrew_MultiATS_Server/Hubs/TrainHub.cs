@@ -23,13 +23,22 @@ public class TrainHub(TrackCircuitService trackCircuitService, SignalService sig
         await trackCircuitService.ClearTrackCircuitDataList(Decremental_TrackCircuitDataList);
         
         // 信号現示の計算
+        // Todo: 文字化けへの対応ができたらこの処理はいらない
+        // 軌道回路を取得しようとする
+        var trackCircuitDataList = await trackCircuitService.GetTrackCircuitDataListByNames(
+            clientData.OnTrackList.Select(tcd => tcd.Name).ToList());
+        // 取得できない軌道回路がある場合、一旦前回のデータを使う
+        if (trackCircuitDataList.Count != clientData.OnTrackList.Count)
+        {
+            trackCircuitDataList = old_TrackCircuitDataList;
+        }
+        
         // 上りか下りか判断(偶数なら上り、奇数なら下り)
         var lastDiaNumber = clientData.DiaName.Last(char.IsDigit) - '0';
         var isUp = lastDiaNumber % 2 == 0;
         // 該当軌道回路の信号機を全取得
         var signalNames = await signalService
-            .GetSignalNamesByTrackCircuits(clientData.OnTrackList.Select(tcd => tcd.Name).ToList(), isUp);
-        Console.WriteLine("signalNames: " + string.Join(", ", signalNames));
+            .GetSignalNamesByTrackCircuits(trackCircuitDataList.Select(tcd => tcd.Name).ToList(), isUp);
         // 現示計算
         var signalIndications = await signalService.CalcSignalIndication(signalNames);
         serverData.NextSignalData = signalIndications.Select(pair => new SignalData
@@ -37,7 +46,6 @@ public class TrainHub(TrackCircuitService trackCircuitService, SignalService sig
            Name = pair.Key,
            phase = pair.Value 
         }).ToList();
-        Console.WriteLine("signalIndications: " + string.Join(", ", serverData.NextSignalData.Select(sd => sd.Name + ": " + sd.phase)));
         return serverData;
     }
 }
