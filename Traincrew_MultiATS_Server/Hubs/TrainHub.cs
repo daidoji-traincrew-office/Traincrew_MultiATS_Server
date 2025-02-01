@@ -24,6 +24,18 @@ public class TrainHub(TrackCircuitService trackCircuitService, ProtectionService
         {
             serverData.BougoState = true;
         }
+        if (clientData.BougoState == true)
+        {
+            foreach (var item in bougo_zone)
+            {
+                await protectionService.EnableProtection(clientData.DiaName, item);
+            }
+        }
+        if(clientData.BougoState == false)
+        {
+            await protectionService.DisableProtection(clientData.DiaName);
+        }
+        if(clientData.BougoState == false)
         await trackCircuitService.SetTrackCircuitDataList(Incremental_TrackCircuitDataList, clientData.DiaName);
         await trackCircuitService.ClearTrackCircuitDataList(Decremental_TrackCircuitDataList);
         return serverData;

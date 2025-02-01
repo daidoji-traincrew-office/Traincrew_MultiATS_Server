@@ -9,7 +9,7 @@ public class TrackCircuitRepository(ApplicationDbContext context) : ITrackCircui
 {
     public async Task<List<int>> GetBougoZoneByTrackCircuitList(List<Models.TrackCircuit> trackCircuitList)
     {
-        List<int> zones = new List<int>();
+        HashSet<int> zones = new HashSet<int>();
         foreach (var trackCircuit in trackCircuitList)
         {
             Models.TrackCircuit trackCircuit_db = await context.TrackCircuits
@@ -21,7 +21,7 @@ public class TrackCircuitRepository(ApplicationDbContext context) : ITrackCircui
                 zones.Add(trackCircuit_db.ProtectionZone);
             }
         }
-        return zones;
+        return zones.ToList();
     }
     public async Task<List<Models.TrackCircuit>> GetAllTrackCircuitList()
     {

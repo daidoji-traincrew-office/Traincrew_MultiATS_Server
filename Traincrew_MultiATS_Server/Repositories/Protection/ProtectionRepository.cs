@@ -25,4 +25,29 @@ public class ProtectionRepository(ApplicationDbContext context) : IProtectionRep
 			return false;
 		}
 	}
+
+	public async Task EnableProtection(string train_number, int bougo_zone)
+	{
+		context.protectionZoneStates.Add(new ProtectionZoneState
+		{
+			train_number = train_number, 
+			protection_zone = bougo_zone
+		});
+		await context.SaveChangesAsync();
+	}
+
+	public async Task DisableProtection(string train_number)
+	{
+		List<ProtectionZoneState> protectionZoneStates = 
+			await context.protectionZoneStates
+				.Where(x => x.train_number == train_number)
+				.ToListAsync();
+		if (protectionZoneStates == null)
+			return ;
+		foreach (var item in protectionZoneStates)
+		{
+			context.protectionZoneStates.Remove(item);
+		}
+		await context.SaveChangesAsync();
+	}
 }

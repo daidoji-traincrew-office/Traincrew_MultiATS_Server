@@ -9,4 +9,14 @@ public class ProtectionService(IProtectionRepository protectionRepository)
 	{
 		return await protectionRepository.GetProtectionZoneState(bougo_zone);
 	}
+
+	public async Task EnableProtection(string train_number, int protection_zone)
+	{
+		await protectionRepository.EnableProtection(train_number, protection_zone);
+	}
+
+	public async Task DisableProtection(string train_number)
+	{
+		await protectionRepository.DisableProtection(train_number);
+	}
 }
