@@ -31,13 +31,6 @@ public class InitDbHostedService(IServiceScopeFactory serviceScopeFactory) : IHo
                 });
             }
         }
-        for (ulong i = 1; i <= 12; i++)
-        {
-            if(!context.protectionZoneStates.Any(tc => tc.ProtectionZone == i))
-            {
-                context.protectionZoneStates.Add(new ProtectionZoneState{ProtectionZone = i, TrainNumber = null});
-            }
-        }
         await context.SaveChangesAsync(cancellationToken);
     }
 

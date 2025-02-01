@@ -130,8 +130,10 @@ CREATE TABLE track_circuit
 );
 
 CREATE TABLE protection_zone_state (
-    protection_zone BIGINT PRIMARY KEY,
-    train_number    VARCHAR(100)[]
+    id BIGSERIAL PRIMARY KEY,
+    protection_zone BIGINT NOT NULL,
+    train_number    VARCHAR(100) NOT NULL,
+    UNIQUE (protection_zone, train_number)
 );
 
 -- 転てつ機

@@ -6,7 +6,9 @@ namespace Traincrew_MultiATS_Server.Models;
 [Table("protection_zone_state")]
 public class ProtectionZoneState
 {
+	[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     [Key]
-	public ulong ProtectionZone{ get; set; }
-	public List<string>? TrainNumber { get; set; }
+	public ulong id { get; set; }
+	public int protection_zone { get; set; }
+	public required string train_number { get; set; }
 }
