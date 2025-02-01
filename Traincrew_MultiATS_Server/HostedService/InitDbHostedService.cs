@@ -183,7 +183,7 @@ file class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Cancel
                     g => g.Select(ns => ns.TargetSignalName).ToList(),
                     cancellationToken
                 );
-            List<NextSignal> nextNextSignals = new();
+            List<NextSignal> nextNextSignals = [];
             // 全信号機でループ
             foreach (var signal in allSignals)
             {
@@ -219,6 +219,7 @@ file class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Cancel
                     }
                 }
             }
+            context.NextSignals.AddRange(nextNextSignals); 
             await context.SaveChangesAsync(cancellationToken);
         }
     }
