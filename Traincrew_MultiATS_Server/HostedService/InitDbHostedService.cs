@@ -203,24 +203,24 @@ file class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Cancel
 
                     foreach (var nextNextSignal in nnSignals)
                     {
+                        // Todo: N+1問題が発生しているので、改善したほうが良いかも
                        if (context.NextSignals.Any(ns =>
                             ns.SignalName == signal.Name && ns.TargetSignalName == nextNextSignal))
                         {
                             continue;
                         }
 
-                        nextNextSignals.Add(new()
+                        context.NextSignals.Add(new()
                         {
                             SignalName = signal.Name,
                             SourceSignalName = nextSignal,
                             TargetSignalName = nextNextSignal,
                             Depth = depth
                         }); 
+                        await context.SaveChangesAsync(cancellationToken);
                     }
                 }
             }
-            context.NextSignals.AddRange(nextNextSignals); 
-            await context.SaveChangesAsync(cancellationToken);
         }
     }
 
