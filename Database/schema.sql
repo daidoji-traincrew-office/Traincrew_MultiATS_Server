@@ -173,6 +173,16 @@ CREATE TABLE next_signal
 );
 CREATE INDEX next_signal_signal_name_index ON next_signal (signal_name);
 
+-- 軌道回路に対する信号機のリスト
+CREATE TABLE track_circuit_signal
+(
+    id               BIGSERIAL PRIMARY KEY,
+    track_circuit_id BIGINT REFERENCES track_circuit (ID)  NOT NULL, -- 軌道回路のID
+    is_up            BOOLEAN                               NOT NULL, -- 上りか下りか
+    signal_name      VARCHAR(100) REFERENCES signal (name) NOT NULL, -- 信号機の名前
+    UNIQUE (track_circuit_id, is_up, signal_name)
+);
+
 -- 各進路、転てつ機の鎖状条件(すべての鎖状条件をここにいれる)
 CREATE TABLE lock
 (
