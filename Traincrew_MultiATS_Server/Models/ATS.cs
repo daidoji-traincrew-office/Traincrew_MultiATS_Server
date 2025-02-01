@@ -44,7 +44,7 @@ public enum Phase
 public class SignalData
 {
     public string Name { get; init; }
-    public Phase phase = Phase.None;
+    public Phase phase { get; init; } = Phase.None;
     public List<string>? NextSignalNames { get; init; } = null;
 }
 
