@@ -27,6 +27,7 @@ public class SignalService(ISignalRepository signalRepository, INextSignalReposi
                 name => name,
                 name => CalcSignalIndication(name, signals, nextSignalDict, cache)
             );
+        // Todo: 無灯火時、無灯火と返すようにする
         // 信号機の現示を計算して返す
         return result;
     }
@@ -48,8 +49,6 @@ public class SignalService(ISignalRepository signalRepository, INextSignalReposi
         if (
             // 信号機が存在している
             signals.TryGetValue(signalName, out var signal)
-            // 信号機は点灯している
-            && signal.SignalState.IsLighted
             // Todo: 絶対信号機の場合、進路が空いている
             // 許容信号機の場合、対象軌道回路が短絡していない
             && !(signal.TrackCircuit?.TrackCircuitState.IsShortCircuit ?? false))
