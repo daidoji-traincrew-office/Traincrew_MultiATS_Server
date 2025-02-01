@@ -1,4 +1,4 @@
-﻿-- Create index "track_circuit_state_train_number_index" to table: "track_circuit_state"
+-- Create index "track_circuit_state_train_number_index" to table: "track_circuit_state"
 CREATE INDEX "track_circuit_state_train_number_index" ON "track_circuit_state" USING hash ("train_number");
 -- Drop next_signal table
 DROP TABLE "next_signal";
