@@ -16,6 +16,7 @@ public class TrackCircuitRepository(ApplicationDbContext context) : ITrackCircui
     {
        return await context.TrackCircuits
            .Where(obj => trackCircuitNames.Contains(obj.Name))
+           .Include(obj => obj.TrackCircuitState)
            .ToListAsync(); 
     }
 
