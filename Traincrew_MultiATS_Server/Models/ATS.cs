@@ -45,7 +45,17 @@ public class SignalData
 {
     public string Name { get; init; }
     public Phase phase { get; init; } = Phase.None;
-    public List<string>? NextSignalNames { get; init; } = null;
+
+}
+
+public class SignalTypeData
+{
+    public string Name { get; init; }
+    public string RIndication { get; init; }
+    public string YYIndication { get; init; }
+    public string YIndication { get; init; }
+    public string YGIndication { get; init; }
+    public string GIndication { get; init; }
 }
 
 public class CarState
@@ -62,15 +72,14 @@ public class CarState
 
 public class TrackCircuitData: IEquatable<TrackCircuitData>
 {
-    public string Last {get; init;} //軌道回路を踏んだ列車の名前
+    public string Last { get; init; } // 軌道回路を踏んだ列車の名前
     public required string Name { get; init; }
-    public bool On {get; init;}
+    public bool On { get; init; }
 
     public override string ToString()
     {
         return $"{Name}/{Last}/{On}";
     }
-
 
     public bool Equals(TrackCircuitData? other)
     {

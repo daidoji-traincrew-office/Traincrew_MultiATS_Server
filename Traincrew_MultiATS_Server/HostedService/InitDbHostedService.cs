@@ -31,8 +31,10 @@ file class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Cancel
     internal async Task Initialize()
     {
         await InitTrackCircuit();
+        await InitSignalType();
         await InitSignal();
         await InitNextSignal();
+        await InitTrackCircuitSignal(); // 追加
     }
 
     private async Task InitTrackCircuit()
@@ -62,7 +64,6 @@ file class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Cancel
 
     private async Task InitSignal()
     {
-        // Todo: SignalTypeの追加
         // 信号情報登録
         foreach (var signalData in DBBase.signalDataList)
         {
@@ -83,20 +84,54 @@ file class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Cancel
                     .FirstOrDefaultAsync(cancellationToken);
             }
 
-            // Todo: signal_typeの追加 
             context.Signals.Add(new()
             {
                 Name = signalData.Name,
                 TrackCircuitId = trackCircuitId > 0 ? trackCircuitId : null,
-                TypeName = "4灯式B",
+                TypeName = signalData.TypeName,
                 SignalState = new()
                 {
-                   IsLighted = true,
+                    IsLighted = true,
                 }
             });
             await context.SaveChangesAsync(cancellationToken);
         }
+    }
 
+    private async Task InitSignalType()
+    {
+        foreach (var signalTypeData in DBBase.signalTypeList)
+        {
+            if (context.SignalTypes.Any(st => st.Name == signalTypeData.Name))
+            {
+                continue;
+            }
+
+            context.SignalTypes.Add(new()
+            {
+                Name = signalTypeData.Name,
+                RIndication = GetSignalIndication(signalTypeData.RIndication),
+                YYIndication = GetSignalIndication(signalTypeData.YYIndication),
+                YIndication = GetSignalIndication(signalTypeData.YIndication),
+                YGIndication = GetSignalIndication(signalTypeData.YGIndication),
+                GIndication = GetSignalIndication(signalTypeData.GIndication)
+            });
+        }
+
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
+    private static SignalIndication GetSignalIndication(string indication)
+    {
+        return indication switch
+        {
+            "R" => SignalIndication.R,
+            "YY" => SignalIndication.YY,
+            "Y" => SignalIndication.Y,
+            "YG" => SignalIndication.YG,
+            "G" => SignalIndication.G,
+            _ => SignalIndication.R
+        };
     }
 
     private async Task InitNextSignal()
@@ -109,19 +144,22 @@ file class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Cancel
             {
                 // Todo: ここでN+1問題が発生しているので、改善したほうが良いかも
                 // 既に登録済みの場合、スキップ
-               if (context.NextSignals.Any(ns => ns.SignalName == signalData.Name && ns.TargetSignalName == nextSignalName))
-               {
-                   continue;
-               } 
-               context.NextSignals.Add(new()
-               {
-                   SignalName = signalData.Name,
-                   SourceSignalName = signalData.Name,
-                   TargetSignalName = nextSignalName,
-                   Depth = 1
-               });
+                if (context.NextSignals.Any(ns =>
+                        ns.SignalName == signalData.Name && ns.TargetSignalName == nextSignalName))
+                {
+                    continue;
+                }
+
+                context.NextSignals.Add(new()
+                {
+                    SignalName = signalData.Name,
+                    SourceSignalName = signalData.Name,
+                    TargetSignalName = nextSignalName,
+                    Depth = 1
+                });
             }
         }
+
         await context.SaveChangesAsync(cancellationToken);
 
         var allSignals = await context.Signals.ToListAsync(cancellationToken);
@@ -145,6 +183,7 @@ file class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Cancel
                     g => g.Select(ns => ns.TargetSignalName).ToList(),
                     cancellationToken
                 );
+            List<NextSignal> nextNextSignals = new();
             // 全信号機でループ
             foreach (var signal in allSignals)
             {
@@ -162,24 +201,70 @@ file class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Cancel
                         continue;
                     }
 
-                    context.NextSignals.AddRange(nnSignals.Select(nextNextSignal => new NextSignal
+                    foreach (var nextNextSignal in nnSignals)
                     {
-                        SignalName = signal.Name,
-                        SourceSignalName = nextSignal,
-                        TargetSignalName = nextNextSignal,
-                        Depth = depth
-                    }));
+                       if (context.NextSignals.Any(ns =>
+                            ns.SignalName == signal.Name && ns.TargetSignalName == nextNextSignal))
+                        {
+                            continue;
+                        }
+
+                        nextNextSignals.Add(new()
+                        {
+                            SignalName = signal.Name,
+                            SourceSignalName = nextSignal,
+                            TargetSignalName = nextNextSignal,
+                            Depth = depth
+                        }); 
+                    }
                 }
             }
+            await context.SaveChangesAsync(cancellationToken);
+        }
+    }
 
-            try
+    private async Task InitTrackCircuitSignal()
+    {
+        foreach (var trackCircuit in DBBase.trackCircuitList)
+        {
+            var trackCircuitEntity = await context.TrackCircuits
+                .FirstOrDefaultAsync(tc => tc.Name == trackCircuit.Name, cancellationToken);
+
+            if (trackCircuitEntity == null) continue;
+            foreach (var signalName in trackCircuit.NextSignalNamesUp ?? [])
             {
-                await context.SaveChangesAsync(cancellationToken);
+                // Todo: ここでN+1問題が発生しているので、改善したほうが良いかも
+                if (context.TrackCircuitSignals.Any(tcs =>
+                        tcs.TrackCircuitId == trackCircuitEntity.Id && tcs.SignalName == signalName && tcs.IsUp))
+                {
+                    continue;
+                }
+
+                context.TrackCircuitSignals.Add(new()
+                {
+                    TrackCircuitId = trackCircuitEntity.Id,
+                    SignalName = signalName,
+                    IsUp = true
+                });
             }
-            catch (DbUpdateException)
+
+            foreach (var signalName in trackCircuit.NextSignalNamesDown ?? [])
             {
-                // 既に登録済みの場合はスキップ
+                // Todo: ここでN+1問題が発生しているので、改善したほうが良いかも
+                if (context.TrackCircuitSignals.Any(tcs =>
+                        tcs.TrackCircuitId == trackCircuitEntity.Id && tcs.SignalName == signalName && !tcs.IsUp))
+                {
+                    continue;
+                }
+
+                context.TrackCircuitSignals.Add(new()
+                {
+                    TrackCircuitId = trackCircuitEntity.Id,
+                    SignalName = signalName,
+                    IsUp = false
+                });
             }
         }
+        await context.SaveChangesAsync(cancellationToken);
     }
 }
