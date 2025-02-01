@@ -29,6 +29,7 @@ public class TrainHub(TrackCircuitService trackCircuitService, SignalService sig
         // 該当軌道回路の信号機を全取得
         var signalNames = await signalService
             .GetSignalNamesByTrackCircuits(clientData.OnTrackList.Select(tcd => tcd.Name).ToList(), isUp);
+        Console.WriteLine("signalNames: " + string.Join(", ", signalNames));
         // 現示計算
         var signalIndications = await signalService.CalcSignalIndication(signalNames);
         serverData.NextSignalData = signalIndications.Select(pair => new SignalData
@@ -36,6 +37,7 @@ public class TrainHub(TrackCircuitService trackCircuitService, SignalService sig
            Name = pair.Key,
            phase = pair.Value 
         }).ToList();
+        Console.WriteLine("signalIndications: " + string.Join(", ", serverData.NextSignalData.Select(sd => sd.Name + ": " + sd.phase)));
         return serverData;
     }
 }

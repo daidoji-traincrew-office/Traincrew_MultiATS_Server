@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - feature/closure_signal
 
 jobs:
     build:
