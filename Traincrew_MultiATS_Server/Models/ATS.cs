@@ -108,8 +108,7 @@ public class DataFromServer
 {
     //進路表示の表示はTC本体実装待ち　未決定
     public bool BougoState;
-    public SignalData DoubleNextSignalData = null;
     public List<EmergencyLightData> EmergencyLightDatas;
     public Dictionary<string, KokuchiData> KokuchiData;
-    public SignalData NextSignalData = null;
+    public List<SignalData> NextSignalData { get; set; } = [];
 }
