@@ -39,10 +39,14 @@ file class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Cancel
 
     private async Task InitTrackCircuit()
     {
+        // 全軌道回路情報を取得
+        var trackCircuitNames = (await context.TrackCircuits
+            .Select(tc => tc.Name)
+            .ToListAsync(cancellationToken)).ToHashSet();
+        
         foreach (var item in DBBase.trackCircuitList)
         {
-            // Todo: ここでN+1問題が発生しているので、改善したほうが良いかも
-            if (!context.TrackCircuits.Any(tc => tc.Name == item.Name))
+            if (trackCircuitNames.Contains(item.Name))
             {
                 continue;
             }
