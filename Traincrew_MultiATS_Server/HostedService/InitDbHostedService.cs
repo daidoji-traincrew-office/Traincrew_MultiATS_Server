@@ -34,7 +34,7 @@ file class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Cancel
         await InitSignalType();
         await InitSignal();
         await InitNextSignal();
-        await InitTrackCircuitSignal(); // 追加
+        await InitTrackCircuitSignal();
     }
 
     private async Task InitTrackCircuit()
