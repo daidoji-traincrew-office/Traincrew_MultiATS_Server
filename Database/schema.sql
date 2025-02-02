@@ -157,27 +157,32 @@ CREATE TABLE signal
 (
     name             VARCHAR(100) PRIMARY KEY                   NOT NULL,
     type             VARCHAR(100) REFERENCES signal_type (name) NOT NULL, -- 信号機の種類(4灯式とか)
-    track_circuit_id BIGINT REFERENCES track_circuit (ID)                 -- 閉そく信号機の軌道回路
+    track_circuit_id BIGINT REFERENCES track_circuit (ID),                -- 閉そく信号機の軌道回路
+    route_id         BIGINT REFERENCES route (ID)                         -- 絶対信号機の進路
 );
 
 -- 次の信号リスト
 CREATE TABLE next_signal
 (
-    signal_name      VARCHAR(100) REFERENCES signal (name) NOT NULL,
-    next_signal_name VARCHAR(100) REFERENCES signal (name) NOT NULL,
-    UNIQUE (signal_name, next_signal_name)
+    id                 BIGSERIAL PRIMARY KEY,
+    signal_name        VARCHAR(100) REFERENCES signal (name) NOT NULL, -- 探索キー
+    source_signal_name VARCHAR(100) REFERENCES signal (name) NOT NULL, -- 探索キーからn-1番目の信号機
+    target_signal_name VARCHAR(100) REFERENCES signal (name) NOT NULL, -- 探索キーからn番目の信号機
+    depth              INT                                   NOT NULL, -- n番目の信号か
+    UNIQUE (signal_name, target_signal_name)
 );
 CREATE INDEX next_signal_signal_name_index ON next_signal (signal_name);
 
-
---- 信号機と進路の関係(停車場内の信号機に設定する)
-CREATE TABLE signal_route
+-- 軌道回路に対する信号機のリスト
+CREATE TABLE track_circuit_signal
 (
-    signal_name VARCHAR(100) REFERENCES signal (name) NOT NULL,
-    route_id    BIGINT REFERENCES route (id)          NOT NULL,
-    UNIQUE (signal_name, route_id)
+    id               BIGSERIAL PRIMARY KEY,
+    track_circuit_id BIGINT REFERENCES track_circuit (ID)  NOT NULL, -- 軌道回路のID
+    is_up            BOOLEAN                               NOT NULL, -- 上りか下りか
+    signal_name      VARCHAR(100) REFERENCES signal (name) NOT NULL, -- 信号機の名前
+    UNIQUE (track_circuit_id, is_up, signal_name)
 );
-CREATE INDEX signal_route_signal_name_index ON signal_route (signal_name);
+
 -- 各進路、転てつ機の鎖状条件(すべての鎖状条件をここにいれる)
 CREATE TABLE lock
 (
@@ -223,6 +228,7 @@ CREATE TABLE track_circuit_state
     train_number     VARCHAR(100),                                     -- 列車番号
     is_short_circuit BOOLEAN NOT NULL                                  -- 短絡状態
 );
+CREATE INDEX track_circuit_state_train_number_index ON track_circuit_state USING hash (train_number);
 
 
 -- 転てつ機状態
@@ -239,9 +245,9 @@ CREATE TABLE switching_machine_state
 CREATE TABLE route_state
 (
     id                BIGINT PRIMARY KEY REFERENCES route (ID), -- 進路のID
-    is_lever_reversed nr      NOT NULL,                         -- レバーの位置(True=反位、False=定位)
-    is_reversed       nr      NOT NULL,                         -- 定反(実際の状態)
-    should_reverse    nr      NOT NULL                          --内部的にどっちにしてほしいカラム
+    is_lever_reversed nr NOT NULL,                              -- レバーの位置(True=反位、False=定位)
+    is_reversed       nr NOT NULL,                              -- 定反(実際の状態)
+    should_reverse    nr NOT NULL                               --内部的にどっちにしてほしいカラム
 );
 
 -- 信号機状態
@@ -259,12 +265,12 @@ CREATE TABLE signal_state
 -- 保留鎖状は、接近鎖状とほぼ同じ
 CREATE TABLE lock_state
 (
-    id              BIGSERIAL PRIMARY KEY,
+    id               BIGSERIAL PRIMARY KEY,
     target_object_id BIGINT REFERENCES interlocking_object (ID) NOT NULL, -- 鎖状されるオブジェクトID
     source_object_id BIGINT REFERENCES interlocking_object (ID) NOT NULL, -- 鎖状する要因のオブジェクトID
-    is_reverse      nr                                         NOT NULL, -- 定反
-    lock_type       lock_type                                  NOT NULL, -- 鎖状の種類
-    end_time        TIMESTAMP                                            -- 接近鎖状が終了する時刻
+    is_reverse       nr                                         NOT NULL, -- 定反
+    lock_type        lock_type                                  NOT NULL, -- 鎖状の種類
+    end_time         TIMESTAMP                                            -- 接近鎖状が終了する時刻
 );
 
 CREATE INDEX lock_state_target_object_id_index ON lock_state (target_object_id);

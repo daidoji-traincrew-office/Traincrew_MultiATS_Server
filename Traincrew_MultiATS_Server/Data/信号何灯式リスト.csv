@@ -1,0 +1,16 @@
+名前,次がR,次がYY,次がY,次がYG,次がG
+なし,R,R,R,R,R
+2灯式,G,G,G,G,G
+3灯式,Y,Y,G,G,G
+4灯YY式,YY,Y,G,G,G
+4灯YY式G無,YY,Y,Y,Y,Y
+4灯YG式,Y,Y,YG,G,G
+5灯式,YY,Y,YG,G,G
+中継（灯列）,R,YY,Y,YG,G
+中継（色灯2灯式）,R,YY,Y,YG,G
+中継（色灯3灯式）,R,YY,Y,YG,G
+中継（色灯4灯YY式）,R,YY,Y,YG,G
+中継（色灯4灯YY式G無）,R,YY,Y,YG,G
+中継（色灯4灯YG式）,R,YY,Y,YG,G
+中継（色灯5灯式）,R,YY,Y,YG,G
+入換信号機,G,G,G,G,G
