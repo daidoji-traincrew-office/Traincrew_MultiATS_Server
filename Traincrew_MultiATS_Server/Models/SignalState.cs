@@ -1,7 +1,12 @@
-﻿namespace Traincrew_MultiATS_Server.Models;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
+namespace Traincrew_MultiATS_Server.Models;
+
+[Table("signal_state")]
 public class SignalState
 {
-    public string SignalName { get; set; }
+    [Key]
+    public string SignalName { get; init; }
     public bool IsLighted { get; set; }
 }

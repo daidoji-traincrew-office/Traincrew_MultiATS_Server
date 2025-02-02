@@ -1,3 +1,4 @@
+using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
 
 namespace Traincrew_MultiATS_Server.Services;
@@ -15,7 +16,16 @@ public class TrackCircuitService(ITrackCircuitRepository trackCircuitRepository)
     }
     public async Task<List<TrackCircuitData>> GetAllTrackCircuitDataList()
     {
-        List<Models.TrackCircuit> trackCircuitsDb = await trackCircuitRepository.GetAllTrackCircuitList();
+        List<TrackCircuit> trackCircuitsDb = await trackCircuitRepository.GetAllTrackCircuitList();
+        List<TrackCircuitData> trackCircuitDataList = trackCircuitsDb
+            .Select(ToTrackCircuitData)
+            .ToList();
+        return trackCircuitDataList;
+    }
+    
+    public async Task<List<TrackCircuitData>> GetTrackCircuitDataListByNames(List<string> trackCircuitNames)
+    {
+        List<TrackCircuit> trackCircuitsDb = await trackCircuitRepository.GetTrackCircuitByName(trackCircuitNames);
         List<TrackCircuitData> trackCircuitDataList = trackCircuitsDb
             .Select(ToTrackCircuitData)
             .ToList();
@@ -24,7 +34,7 @@ public class TrackCircuitService(ITrackCircuitRepository trackCircuitRepository)
 
     public async Task<List<TrackCircuitData>> GetTrackCircuitDataListByTrainNumber(string trainNumber)
     {
-        List<Models.TrackCircuit> trackCircuitsDb =
+        List<TrackCircuit> trackCircuitsDb =
             await trackCircuitRepository.GetTrackCircuitListByTrainNumber(trainNumber);
         List<TrackCircuitData> trackCircuitDataList = trackCircuitsDb
             .Select(ToTrackCircuitData)
@@ -34,8 +44,8 @@ public class TrackCircuitService(ITrackCircuitRepository trackCircuitRepository)
 
     public async Task SetTrackCircuitDataList(List<TrackCircuitData> trackCircuitData, string trainNumber)
     {
-        List<Models.TrackCircuit> trackCircuit = trackCircuitData
-            .Select(item => new Models.TrackCircuit
+        List<TrackCircuit> trackCircuit = trackCircuitData
+            .Select(item => new TrackCircuit
             {
                 Name = item.Name
             })
@@ -45,8 +55,8 @@ public class TrackCircuitService(ITrackCircuitRepository trackCircuitRepository)
 
     public async Task ClearTrackCircuitDataList(List<TrackCircuitData> trackCircuitData)
     {
-        List<Models.TrackCircuit> trackCircuit = trackCircuitData
-            .Select(item => new Models.TrackCircuit
+        List<TrackCircuit> trackCircuit = trackCircuitData
+            .Select(item => new TrackCircuit
             {
                 Name = item.Name
             })
@@ -55,7 +65,7 @@ public class TrackCircuitService(ITrackCircuitRepository trackCircuitRepository)
         await trackCircuitRepository.ClearTrackCircuitList(trackCircuit);
     }
 
-    private static TrackCircuitData ToTrackCircuitData(Models.TrackCircuit trackCircuit)
+    private static TrackCircuitData ToTrackCircuitData(TrackCircuit trackCircuit)
     {
         return new()
         {

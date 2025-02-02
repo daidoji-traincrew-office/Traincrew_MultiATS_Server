@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using Traincrew_MultiATS_Server.Data;
-
+using Traincrew_MultiATS_Server.Models;
 
 namespace Traincrew_MultiATS_Server.Repositories.TrackCircuit;
 
@@ -29,6 +29,13 @@ public class TrackCircuitRepository(ApplicationDbContext context) : ITrackCircui
             .Include(obj => obj.TrackCircuitState).ToListAsync();
         return trackcircuitlist_db;
     }
+    public async Task<List<Models.TrackCircuit>> GetTrackCircuitByName(List<string> trackCircuitNames)
+    {
+       return await context.TrackCircuits
+           .Where(obj => trackCircuitNames.Contains(obj.Name))
+           .Include(obj => obj.TrackCircuitState)
+           .ToListAsync(); 
+    }
 
     public async Task<List<Models.TrackCircuit>> GetTrackCircuitListByTrainNumber(string trainNumber)
     {
@@ -43,7 +50,7 @@ public class TrackCircuitRepository(ApplicationDbContext context) : ITrackCircui
         // Todo: N+1問題の解消
         foreach (var trackCircuit in trackCircuitList)
         {
-            Models.TrackCircuitState item = context.TrackCircuits
+            TrackCircuitState item = context.TrackCircuits
                 .Include(item => item.TrackCircuitState)
                 .Where(obj => obj.Name == trackCircuit.Name)
                 .Select(item => item.TrackCircuitState)
@@ -60,7 +67,7 @@ public class TrackCircuitRepository(ApplicationDbContext context) : ITrackCircui
         // Todo: N+1問題の解消
         foreach (var trackCircuit in trackCircuitList)
         {
-            Models.TrackCircuitState item = context.TrackCircuits
+            TrackCircuitState item = context.TrackCircuits
                 .Include(item => item.TrackCircuitState)
                 .Where(obj => obj.Name == trackCircuit.Name)
                 .Select(item => item.TrackCircuitState)
