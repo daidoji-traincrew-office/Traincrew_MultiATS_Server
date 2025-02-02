@@ -9,6 +9,6 @@ public class ProtectionZoneState
 	[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     [Key]
 	public ulong id { get; set; }
-	public int protection_zone { get; set; }
-	public required string train_number { get; set; }
+	public int ProtectionZone { get; set; }
+	public required string TrainNumber { get; set; }
 }

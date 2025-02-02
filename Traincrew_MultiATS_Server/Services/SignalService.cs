@@ -33,9 +33,10 @@ public class SignalService(
         );
     }
 
-    public async Task<List<string>> GetSignalNamesByTrackCircuits(List<string> trackCircuitNames, bool isUp)
+    public async Task<List<string>> GetSignalNamesByTrackCircuits(List<TrackCircuit> trackCircuits, bool isUp)
     {
-        return await signalRepository.GetSignalNamesByTrackCircuits(trackCircuitNames, isUp);
+        return await signalRepository.GetSignalNamesByTrackCircuits(
+            trackCircuits.Select(tc => tc.Name).ToList(), isUp);
     }
 
     private static SignalIndication CalcSignalIndication(

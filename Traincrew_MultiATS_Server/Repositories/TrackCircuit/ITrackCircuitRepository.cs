@@ -2,7 +2,6 @@
 
 public interface ITrackCircuitRepository
 {
-    Task<List<int>> GetBougoZoneByTrackCircuitList(List<Models.TrackCircuit> trackCircuitList);
     Task<List<Models.TrackCircuit>> GetAllTrackCircuitList();
     Task<List<Models.TrackCircuit>> GetTrackCircuitListByTrainNumber(string trainNumber);
     Task<List<Models.TrackCircuit>> GetTrackCircuitByName(List<string> trackCircuitNames);

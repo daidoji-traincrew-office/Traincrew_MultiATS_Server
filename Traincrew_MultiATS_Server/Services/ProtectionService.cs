@@ -1,22 +1,22 @@
 using Traincrew_MultiATS_Server.Models;
-using Traincrew_MultiATS_Server.Repositories.Protection;
 
 namespace Traincrew_MultiATS_Server.Services;
 
 public class ProtectionService(IProtectionRepository protectionRepository)
 {
-	public async Task<bool> GetProtectionZoneStateByBougoZone(List<int> bougo_zone)
+	public async Task<bool> IsProtectionEnabledForTrackCircuits(List<TrackCircuit> trackCircuits)
 	{
-		return await protectionRepository.GetProtectionZoneState(bougo_zone);
+		throw new NotImplementedException();
+	}
+	
+	public async Task EnableProtectionByTrackCircuits(string trainNumber, List<TrackCircuit> trackCircuits)
+	{
+		await protectionRepository.EnableProtection(
+			trainNumber, trackCircuits.Select(tc => tc.ProtectionZone).ToList());
 	}
 
-	public async Task EnableProtection(string train_number, int protection_zone)
+	public async Task DisableProtection(string trainNumber)
 	{
-		await protectionRepository.EnableProtection(train_number, protection_zone);
-	}
-
-	public async Task DisableProtection(string train_number)
-	{
-		await protectionRepository.DisableProtection(train_number);
+		await protectionRepository.DisableProtection(trainNumber);
 	}
 }
