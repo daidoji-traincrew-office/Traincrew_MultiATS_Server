@@ -70,12 +70,15 @@ file class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Cancel
 
     private async Task InitSignal()
     {
+        // 既に登録済みの信号情報を取得
+        var signalNames = (await context.Signals
+            .Select(s => s.Name)
+            .ToListAsync(cancellationToken)).ToHashSet();
         // 信号情報登録
         foreach (var signalData in DBBase.signalDataList)
         {
             // 既に登録済みの場合、スキップ
-            // Todo: ここでN+1問題が発生しているので、改善したほうが良いかも
-            if (context.Signals.Any(s => s.Name == signalData.Name))
+            if (signalNames.Contains(signalData.Name)) 
             {
                 continue;
             }
@@ -100,8 +103,8 @@ file class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Cancel
                     IsLighted = true,
                 }
             });
-            await context.SaveChangesAsync(cancellationToken);
         }
+        await context.SaveChangesAsync(cancellationToken);
     }
 
     private async Task InitSignalType()
