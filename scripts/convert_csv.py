@@ -5,12 +5,13 @@ def remove_nashi(xs):
     return [x for x in xs if x != 'なし' and x != '']
 
 class TrackCircuitData:
-    def __init__(self, name, NextSignalNamesUp, NextSignalNamesDown):
+    def __init__(self, name, NextSignalNamesUp, NextSignalNamesDown, protectionZone):
         self.Name = name
         self.Last = ''
         self.On = False
         self.NextSignalNamesUp = remove_nashi(NextSignalNamesUp)
         self.NextSignalNamesDown = remove_nashi(NextSignalNamesDown)
+        self.ProtectionZone = int(protectionZone) if protectionZone != '' else None
 
 class SignalData:
     def __init__(self, name, type_name, next_signal_names):
@@ -55,7 +56,7 @@ def main():
     db = DBBasejson()
     db.trackCircuitList = read_csv(
         '../Traincrew_MultiATS_Server/Data/軌道回路に対する計算するべき信号機リスト.csv',
-        TrackCircuitData, 0, [1, 2, 3, 4, 5], [7, 8, 9, 10, 11]
+        TrackCircuitData, 0, [1, 2, 3, 4, 5], [7, 8, 9, 10, 11], 13
     )
     db.signalDataList = read_csv(
         '../Traincrew_MultiATS_Server/Data/信号リスト.csv',

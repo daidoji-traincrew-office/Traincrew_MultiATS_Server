@@ -2,7 +2,7 @@ namespace Traincrew_MultiATS_Server.Models;
 
 public class JsonTrackCircuitData : TrackCircuitData
 {
-    public int ProtectionZone { get; init; }
+    public int? ProtectionZone { get; init; } = null;
     public List<string> NextSignalNamesUp { get; init; } = [];
     public List<string> NextSignalNamesDown { get; init; } = [];
 }

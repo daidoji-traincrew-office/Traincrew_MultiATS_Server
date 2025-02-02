@@ -39,24 +39,26 @@ file class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Cancel
 
     private async Task InitTrackCircuit()
     {
-        var protectionZone = 0;
         foreach (var item in DBBase.trackCircuitList)
         {
             // Todo: ここでN+1問題が発生しているので、改善したほうが良いかも
             if (!context.TrackCircuits.Any(tc => tc.Name == item.Name))
             {
-                context.TrackCircuits.Add(new TrackCircuit
-                {
-                    ProtectionZone = protectionZone,
-                    Name = item.Name,
-                    Type = ObjectType.TrackCircuit,
-                    TrackCircuitState = new TrackCircuitState
-                    {
-                        IsShortCircuit = false,
-                        TrainNumber = ""
-                    }
-                });
+                continue;
             }
+
+            context.TrackCircuits.Add(new()
+            {
+                // Todo: ProtectionZoneの未定義部分がなくなったら、ProtectionZoneのデフォルト値の設定を解除
+                ProtectionZone = item.ProtectionZone ?? 99,
+                Name = item.Name,
+                Type = ObjectType.TrackCircuit,
+                TrackCircuitState = new()
+                {
+                    IsShortCircuit = false,
+                    TrainNumber = ""
+                }
+            });
         }
 
         await context.SaveChangesAsync(cancellationToken);
@@ -204,8 +206,8 @@ file class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Cancel
                     foreach (var nextNextSignal in nnSignals)
                     {
                         // Todo: N+1問題が発生しているので、改善したほうが良いかも
-                       if (context.NextSignals.Any(ns =>
-                            ns.SignalName == signal.Name && ns.TargetSignalName == nextNextSignal))
+                        if (context.NextSignals.Any(ns =>
+                                ns.SignalName == signal.Name && ns.TargetSignalName == nextNextSignal))
                         {
                             continue;
                         }
@@ -216,7 +218,7 @@ file class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Cancel
                             SourceSignalName = nextSignal,
                             TargetSignalName = nextNextSignal,
                             Depth = depth
-                        }); 
+                        });
                         await context.SaveChangesAsync(cancellationToken);
                     }
                 }
@@ -266,6 +268,7 @@ file class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Cancel
                 });
             }
         }
+
         await context.SaveChangesAsync(cancellationToken);
     }
 }
