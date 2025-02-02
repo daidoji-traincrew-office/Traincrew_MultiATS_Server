@@ -6,7 +6,12 @@ public class ProtectionService(IProtectionRepository protectionRepository)
 {
 	public async Task<bool> IsProtectionEnabledForTrackCircuits(List<TrackCircuit> trackCircuits)
 	{
-		throw new NotImplementedException();
+		// 防護範囲の最大、最小を求め、それの+1、-1を求める
+		var protectionZone = trackCircuits.Select(tc => tc.ProtectionZone).ToList();
+		var minProtectionZone = protectionZone.Min() - 1;
+		var maxProtectionZone = protectionZone.Max() + 1;
+		// その防護範囲で防護無線が発報されているか確認
+		return await protectionRepository.IsProtectionEnabled(minProtectionZone, maxProtectionZone);
 	}
 	
 	public async Task EnableProtectionByTrackCircuits(string trainNumber, List<TrackCircuit> trackCircuits)
