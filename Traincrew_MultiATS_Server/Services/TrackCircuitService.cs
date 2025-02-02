@@ -14,23 +14,14 @@ public class TrackCircuitService(ITrackCircuitRepository trackCircuitRepository)
         return trackCircuitDataList;
     }
     
-    public async Task<List<TrackCircuitData>> GetTrackCircuitDataListByNames(List<string> trackCircuitNames)
+    public async Task<List<TrackCircuit>> GetTrackCircuitsByNames(List<string> trackCircuitNames)
     {
-        List<TrackCircuit> trackCircuitsDb = await trackCircuitRepository.GetTrackCircuitByName(trackCircuitNames);
-        List<TrackCircuitData> trackCircuitDataList = trackCircuitsDb
-            .Select(ToTrackCircuitData)
-            .ToList();
-        return trackCircuitDataList;
+        return await trackCircuitRepository.GetTrackCircuitByName(trackCircuitNames);
     }
-
-    public async Task<List<TrackCircuitData>> GetTrackCircuitDataListByTrainNumber(string trainNumber)
+    
+    public async Task<List<TrackCircuit>> GetTrackCircuitsByTrainNumber(string trainNumber)
     {
-        List<TrackCircuit> trackCircuitsDb =
-            await trackCircuitRepository.GetTrackCircuitListByTrainNumber(trainNumber);
-        List<TrackCircuitData> trackCircuitDataList = trackCircuitsDb
-            .Select(ToTrackCircuitData)
-            .ToList();
-        return trackCircuitDataList;
+        return await trackCircuitRepository.GetTrackCircuitListByTrainNumber(trainNumber);
     }
 
     public async Task SetTrackCircuitDataList(List<TrackCircuitData> trackCircuitData, string trainNumber)
@@ -56,7 +47,7 @@ public class TrackCircuitService(ITrackCircuitRepository trackCircuitRepository)
         await trackCircuitRepository.ClearTrackCircuitList(trackCircuit);
     }
 
-    private static TrackCircuitData ToTrackCircuitData(TrackCircuit trackCircuit)
+    internal static TrackCircuitData ToTrackCircuitData(TrackCircuit trackCircuit)
     {
         return new()
         {

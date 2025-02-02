@@ -274,3 +274,11 @@ CREATE TABLE lock_state
 );
 
 CREATE INDEX lock_state_target_object_id_index ON lock_state (target_object_id);
+
+-- 防護無線状態
+CREATE TABLE protection_zone_state (
+    id BIGSERIAL PRIMARY KEY,
+    protection_zone BIGINT NOT NULL,
+    train_number    VARCHAR(100) NOT NULL,
+    UNIQUE (protection_zone, train_number)
+);

@@ -9,7 +9,8 @@
             ],
             "NextSignalNamesDown": [
                 "赤山町下り場内9L"
-            ]
+            ],
+            "ProtectionZone": null
         },
         {
             "Name": "AS2T",
@@ -20,7 +21,8 @@
             ],
             "NextSignalNamesDown": [
                 "下り閉塞287"
-            ]
+            ],
+            "ProtectionZone": null
         },
         {
             "Name": "DF1T",
@@ -32,7 +34,8 @@
             "NextSignalNamesDown": [
                 "大道寺下り場内13LC",
                 "大道寺下り場内13LD"
-            ]
+            ],
+            "ProtectionZone": 7
         },
         {
             "Name": "DF2T",
@@ -44,7 +47,8 @@
             ],
             "NextSignalNamesDown": [
                 "下り閉塞171"
-            ]
+            ],
+            "ProtectionZone": 7
         },
         {
             "Name": "FMT",
@@ -57,126 +61,144 @@
             "NextSignalNamesDown": [
                 "藤江下り場内14L",
                 "藤江下り場内15L"
-            ]
+            ],
+            "ProtectionZone": 8
         },
         {
             "Name": "JR1LT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "JR1RT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "JR3LT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "JR3RT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "JR上り1T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "JR上り2T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "JR上り3T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "JR上り4T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "JR上り5T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "JR上り浜園手前T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "JR下り1T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "JR下り2T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "JR下り3T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "JR下り4T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "JR下り5T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "KST",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "MFT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "MT1T",
@@ -188,7 +210,8 @@
             "NextSignalNamesDown": [
                 "水越下り場内14L",
                 "水越下り場内15L"
-            ]
+            ],
+            "ProtectionZone": 8
         },
         {
             "Name": "MT2T",
@@ -200,7 +223,8 @@
             ],
             "NextSignalNamesDown": [
                 "下り閉塞203"
-            ]
+            ],
+            "ProtectionZone": 8
         },
         {
             "Name": "NA1T",
@@ -211,7 +235,8 @@
             ],
             "NextSignalNamesDown": [
                 "西赤山下り場内13L"
-            ]
+            ],
+            "ProtectionZone": 11
         },
         {
             "Name": "NA2T",
@@ -222,21 +247,24 @@
             ],
             "NextSignalNamesDown": [
                 "下り閉塞277"
-            ]
+            ],
+            "ProtectionZone": 11
         },
         {
             "Name": "NMT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "SNT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH1T",
@@ -248,7 +276,8 @@
             "NextSignalNamesDown": [
                 "高見沢下り場内14L",
                 "高見沢下り場内15L"
-            ]
+            ],
+            "ProtectionZone": 9
         },
         {
             "Name": "TH2T",
@@ -260,700 +289,800 @@
             ],
             "NextSignalNamesDown": [
                 "下り閉塞223"
-            ]
+            ],
+            "ProtectionZone": 9
         },
         {
             "Name": "TK1T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TK2T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH45_1RAT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH45_1RT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH45_2RT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH45_3RT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH45_9LT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH45_10LT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH45_21イT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH45_21ロT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH45_22イT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH45_22ロT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH45_23イT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH45_23ロT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH45_24T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH45_OST",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH45_SST",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH46_1RAT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH46_1RT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH46_2RT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH46_3RT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH46_10LT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH46_11LT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH46_12LT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH46_31T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH46_32イT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH46_32ロT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH46_33T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH46_34T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH46_35T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH46_36T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH46_37T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH46_OST",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH46_TST",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH48_1RBT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH48_1RCT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH48_1RDT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH48_1RT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH48_4LT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH48_8LT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH48_9LAT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH48_9LET",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH48_9LT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH48_21T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH48_22イT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH48_22ロT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH48_23T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH48_24T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH48_25イT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH48_25ロT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH48_26T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH48_27イT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH48_27ロT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH48_SST",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH48_TST",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH50_12RT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH50_14LT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH50_23LT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH50_24LT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH50_31イT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH50_31ロT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH50_33T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH50_33イT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH50_34イT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH50_34ロT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH50_TST",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH51_12RT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH51_15LT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH51_21イT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH51_21ロT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH51_22イT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH51_22ロT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH52_12RT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH52_15LT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH52_21T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH52_22イT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH52_22ロT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH53_12LT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH53_12RT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH53_13LT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH53_14RT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH53_15LT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH53_15RT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH53_21T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH53_22T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH54_12RT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH54_15LT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH54_21イT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH54_21ロT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH54_22イT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH54_22ロT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH55S_11LT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH55S_11RT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH55S_21イT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH55S_21ロT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH57_12RT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH57_13RT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH57_14LT",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH57_21T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "TH58_1RBT",
@@ -964,7 +1093,8 @@
             ],
             "NextSignalNamesDown": [
                 "赤山町下り出発4L"
-            ]
+            ],
+            "ProtectionZone": 11
         },
         {
             "Name": "TH58_2RAT",
@@ -976,7 +1106,8 @@
             ],
             "NextSignalNamesDown": [
                 "赤山町下り出発3L"
-            ]
+            ],
+            "ProtectionZone": 11
         },
         {
             "Name": "TH58_2RT",
@@ -990,7 +1121,8 @@
             ],
             "NextSignalNamesDown": [
                 "下り閉塞277"
-            ]
+            ],
+            "ProtectionZone": 11
         },
         {
             "Name": "TH58_9LCT",
@@ -1001,7 +1133,8 @@
             ],
             "NextSignalNamesDown": [
                 "赤山町下り出発5L"
-            ]
+            ],
+            "ProtectionZone": 11
         },
         {
             "Name": "TH58_9LT",
@@ -1014,7 +1147,8 @@
                 "赤山町下り出発3L",
                 "赤山町下り出発4L",
                 "赤山町下り出発5L"
-            ]
+            ],
+            "ProtectionZone": 11
         },
         {
             "Name": "TH58_21T",
@@ -1028,7 +1162,8 @@
             ],
             "NextSignalNamesDown": [
                 "下り閉塞277"
-            ]
+            ],
+            "ProtectionZone": 11
         },
         {
             "Name": "TH58_22イT",
@@ -1039,7 +1174,8 @@
             ],
             "NextSignalNamesDown": [
                 "下り閉塞277"
-            ]
+            ],
+            "ProtectionZone": 11
         },
         {
             "Name": "TH58_22ロT",
@@ -1050,7 +1186,8 @@
             ],
             "NextSignalNamesDown": [
                 "下り閉塞277"
-            ]
+            ],
+            "ProtectionZone": 11
         },
         {
             "Name": "TH58_23イT",
@@ -1061,7 +1198,8 @@
             ],
             "NextSignalNamesDown": [
                 "赤山町下り出発3L"
-            ]
+            ],
+            "ProtectionZone": 11
         },
         {
             "Name": "TH58_23ロT",
@@ -1072,7 +1210,8 @@
             ],
             "NextSignalNamesDown": [
                 "赤山町下り出発4L"
-            ]
+            ],
+            "ProtectionZone": 11
         },
         {
             "Name": "TH58_24T",
@@ -1081,7 +1220,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "赤山町下り出発3L"
-            ]
+            ],
+            "ProtectionZone": 11
         },
         {
             "Name": "TH58_25T",
@@ -1094,7 +1234,8 @@
                 "赤山町下り出発3L",
                 "赤山町下り出発4L",
                 "赤山町下り出発5L"
-            ]
+            ],
+            "ProtectionZone": 11
         },
         {
             "Name": "TH58_DT",
@@ -1103,7 +1244,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "赤山町入換32L"
-            ]
+            ],
+            "ProtectionZone": 11
         },
         {
             "Name": "TH58_ET",
@@ -1112,7 +1254,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "赤山町入換33L"
-            ]
+            ],
+            "ProtectionZone": 11
         },
         {
             "Name": "TH59_11RT",
@@ -1121,7 +1264,8 @@
             "NextSignalNamesUp": [
                 "西赤山上り出発13R"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 10
         },
         {
             "Name": "TH59_12LT",
@@ -1130,7 +1274,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "下り閉塞249"
-            ]
+            ],
+            "ProtectionZone": 10
         },
         {
             "Name": "TH59_13LT",
@@ -1139,7 +1284,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "西赤山下り出発12L"
-            ]
+            ],
+            "ProtectionZone": 10
         },
         {
             "Name": "TH59_21イT",
@@ -1148,7 +1294,8 @@
             "NextSignalNamesUp": [
                 "上り閉塞258"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 10
         },
         {
             "Name": "TH59_21ロT",
@@ -1159,7 +1306,8 @@
             ],
             "NextSignalNamesDown": [
                 "西赤山下り出発12L"
-            ]
+            ],
+            "ProtectionZone": 10
         },
         {
             "Name": "TH61_2RAT",
@@ -1168,7 +1316,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "日野森下り出発3L"
-            ]
+            ],
+            "ProtectionZone": 9
         },
         {
             "Name": "TH61_2RBT",
@@ -1177,7 +1326,8 @@
             "NextSignalNamesUp": [
                 "日野森上り出発5R"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 9
         },
         {
             "Name": "TH61_2RT",
@@ -1188,7 +1338,8 @@
             ],
             "NextSignalNamesDown": [
                 "下り閉塞227"
-            ]
+            ],
+            "ProtectionZone": 9
         },
         {
             "Name": "TH61_5RT",
@@ -1197,7 +1348,8 @@
             "NextSignalNamesUp": [
                 "上り閉塞238"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 9
         },
         {
             "Name": "TH61_6LT",
@@ -1206,7 +1358,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "日野森下り出発4L"
-            ]
+            ],
+            "ProtectionZone": 9
         },
         {
             "Name": "TH61_21イT",
@@ -1217,7 +1370,8 @@
             ],
             "NextSignalNamesDown": [
                 "下り閉塞227"
-            ]
+            ],
+            "ProtectionZone": 9
         },
         {
             "Name": "TH61_21ロT",
@@ -1226,7 +1380,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "下り閉塞227"
-            ]
+            ],
+            "ProtectionZone": 9
         },
         {
             "Name": "TH61_22T",
@@ -1237,7 +1392,8 @@
             ],
             "NextSignalNamesDown": [
                 "下り閉塞227"
-            ]
+            ],
+            "ProtectionZone": 9
         },
         {
             "Name": "TH62_12LT",
@@ -1248,7 +1404,8 @@
             ],
             "NextSignalNamesDown": [
                 "下り閉塞209"
-            ]
+            ],
+            "ProtectionZone": 9
         },
         {
             "Name": "TH62_12RT",
@@ -1259,7 +1416,8 @@
             ],
             "NextSignalNamesDown": [
                 "高見沢下り出発12L"
-            ]
+            ],
+            "ProtectionZone": 9
         },
         {
             "Name": "TH62_13LT",
@@ -1270,7 +1428,8 @@
             ],
             "NextSignalNamesDown": [
                 "下り閉塞209"
-            ]
+            ],
+            "ProtectionZone": 9
         },
         {
             "Name": "TH62_14RT",
@@ -1281,7 +1440,8 @@
             ],
             "NextSignalNamesDown": [
                 "高見沢下り出発12L"
-            ]
+            ],
+            "ProtectionZone": 9
         },
         {
             "Name": "TH62_15LT",
@@ -1292,7 +1452,8 @@
             ],
             "NextSignalNamesDown": [
                 "高見沢下り出発13L"
-            ]
+            ],
+            "ProtectionZone": 9
         },
         {
             "Name": "TH62_15RT",
@@ -1303,7 +1464,8 @@
             ],
             "NextSignalNamesDown": [
                 "高見沢下り出発13L"
-            ]
+            ],
+            "ProtectionZone": 9
         },
         {
             "Name": "TH62_21T",
@@ -1314,7 +1476,8 @@
             ],
             "NextSignalNamesDown": [
                 "下り閉塞209"
-            ]
+            ],
+            "ProtectionZone": 9
         },
         {
             "Name": "TH62_22T",
@@ -1325,7 +1488,8 @@
             ],
             "NextSignalNamesDown": [
                 "高見沢下り出発13L"
-            ]
+            ],
+            "ProtectionZone": 9
         },
         {
             "Name": "TH63_12RT",
@@ -1336,7 +1500,8 @@
             ],
             "NextSignalNamesDown": [
                 "水越下り出発12L"
-            ]
+            ],
+            "ProtectionZone": 8
         },
         {
             "Name": "TH63_15LT",
@@ -1347,7 +1512,8 @@
             ],
             "NextSignalNamesDown": [
                 "水越下り出発13L"
-            ]
+            ],
+            "ProtectionZone": 8
         },
         {
             "Name": "TH63_21イT",
@@ -1359,7 +1525,8 @@
             ],
             "NextSignalNamesDown": [
                 "下り閉塞193"
-            ]
+            ],
+            "ProtectionZone": 8
         },
         {
             "Name": "TH63_21ロT",
@@ -1370,7 +1537,8 @@
             ],
             "NextSignalNamesDown": [
                 "下り閉塞193"
-            ]
+            ],
+            "ProtectionZone": 8
         },
         {
             "Name": "TH63_22イT",
@@ -1381,7 +1549,8 @@
             ],
             "NextSignalNamesDown": [
                 "水越下り出発12L"
-            ]
+            ],
+            "ProtectionZone": 8
         },
         {
             "Name": "TH63_22ロT",
@@ -1393,7 +1562,8 @@
             "NextSignalNamesDown": [
                 "水越下り出発12L",
                 "水越下り出発13L"
-            ]
+            ],
+            "ProtectionZone": 8
         },
         {
             "Name": "TH64_12LT",
@@ -1404,7 +1574,8 @@
             ],
             "NextSignalNamesDown": [
                 "下り閉塞177"
-            ]
+            ],
+            "ProtectionZone": 7
         },
         {
             "Name": "TH64_12RT",
@@ -1415,7 +1586,8 @@
             ],
             "NextSignalNamesDown": [
                 "藤江下り出発12L"
-            ]
+            ],
+            "ProtectionZone": 7
         },
         {
             "Name": "TH64_13LT",
@@ -1426,7 +1598,8 @@
             ],
             "NextSignalNamesDown": [
                 "下り閉塞177"
-            ]
+            ],
+            "ProtectionZone": 7
         },
         {
             "Name": "TH64_14RT",
@@ -1437,7 +1610,8 @@
             ],
             "NextSignalNamesDown": [
                 "藤江下り出発12L"
-            ]
+            ],
+            "ProtectionZone": 7
         },
         {
             "Name": "TH64_15LT",
@@ -1448,7 +1622,8 @@
             ],
             "NextSignalNamesDown": [
                 "藤江下り出発13L"
-            ]
+            ],
+            "ProtectionZone": 7
         },
         {
             "Name": "TH64_15RT",
@@ -1459,7 +1634,8 @@
             ],
             "NextSignalNamesDown": [
                 "藤江下り出発13L"
-            ]
+            ],
+            "ProtectionZone": 7
         },
         {
             "Name": "TH64_21T",
@@ -1471,7 +1647,8 @@
             ],
             "NextSignalNamesDown": [
                 "下り閉塞177"
-            ]
+            ],
+            "ProtectionZone": 7
         },
         {
             "Name": "TH64_22T",
@@ -1483,7 +1660,8 @@
             "NextSignalNamesDown": [
                 "藤江下り出発13L",
                 "藤江下り出発12L"
-            ]
+            ],
+            "ProtectionZone": 7
         },
         {
             "Name": "TH65_1RT",
@@ -1494,7 +1672,8 @@
                 "大道寺上り場内3R",
                 "大道寺上り場内4R"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
         },
         {
             "Name": "TH65_2RT",
@@ -1504,7 +1683,8 @@
                 "大道寺上り出発7R",
                 "大道寺入換21R"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
         },
         {
             "Name": "TH65_3RT",
@@ -1514,7 +1694,8 @@
                 "大道寺入換22R",
                 "大道寺上り出発8R"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
         },
         {
             "Name": "TH65_6T",
@@ -1523,7 +1704,8 @@
             "NextSignalNamesUp": [
                 "大道寺入換25R"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
         },
         {
             "Name": "TH65_7T",
@@ -1532,7 +1714,8 @@
             "NextSignalNamesUp": [
                 "大道寺入換26R"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
         },
         {
             "Name": "TH65_11LT",
@@ -1544,7 +1727,8 @@
             ],
             "NextSignalNamesDown": [
                 "大道寺下り出発5L"
-            ]
+            ],
+            "ProtectionZone": 6
         },
         {
             "Name": "TH65_12LT",
@@ -1556,7 +1740,8 @@
             ],
             "NextSignalNamesDown": [
                 "大道寺下り出発6L"
-            ]
+            ],
+            "ProtectionZone": 6
         },
         {
             "Name": "TH65_41T",
@@ -1567,7 +1752,8 @@
                 "大道寺上り場内3R",
                 "大道寺上り場内4R"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
         },
         {
             "Name": "TH65_42イT",
@@ -1577,7 +1763,8 @@
             "NextSignalNamesDown": [
                 "江ノ原検車区下り場内5LE",
                 "江ノ原検車区下り場内5LD"
-            ]
+            ],
+            "ProtectionZone": 6
         },
         {
             "Name": "TH65_42ロT",
@@ -1589,7 +1776,8 @@
             "NextSignalNamesDown": [
                 "江ノ原検車区下り場内5LE",
                 "江ノ原検車区下り場内5LD"
-            ]
+            ],
+            "ProtectionZone": 6
         },
         {
             "Name": "TH65_44T",
@@ -1602,7 +1790,8 @@
             "NextSignalNamesDown": [
                 "大道寺下り場内12L",
                 "大道寺入換28L"
-            ]
+            ],
+            "ProtectionZone": 6
         },
         {
             "Name": "TH65_45T",
@@ -1615,7 +1804,8 @@
             "NextSignalNamesDown": [
                 "大道寺下り場内11L",
                 "大道寺入換27L"
-            ]
+            ],
+            "ProtectionZone": 6
         },
         {
             "Name": "TH65_47T",
@@ -1630,7 +1820,8 @@
                 "大道寺下り場内12L",
                 "大道寺入換27L",
                 "大道寺入換28L"
-            ]
+            ],
+            "ProtectionZone": 6
         },
         {
             "Name": "TH65_48T",
@@ -1645,7 +1836,8 @@
                 "大道寺下り場内12L",
                 "大道寺入換27L",
                 "大道寺入換28L"
-            ]
+            ],
+            "ProtectionZone": 6
         },
         {
             "Name": "TH65_49T",
@@ -1659,7 +1851,8 @@
                 "大道寺下り場内12L",
                 "大道寺入換27L",
                 "大道寺入換28L"
-            ]
+            ],
+            "ProtectionZone": 6
         },
         {
             "Name": "TH65_50イT",
@@ -1673,7 +1866,8 @@
                 "大道寺下り場内12L",
                 "大道寺入換27L",
                 "大道寺入換28L"
-            ]
+            ],
+            "ProtectionZone": 6
         },
         {
             "Name": "TH65_50ロT",
@@ -1684,7 +1878,8 @@
                 "大道寺入換29L",
                 "大道寺入換27L",
                 "大道寺入換28L"
-            ]
+            ],
+            "ProtectionZone": 6
         },
         {
             "Name": "TH65_ET",
@@ -1695,7 +1890,8 @@
             ],
             "NextSignalNamesDown": [
                 "大道寺入換29L"
-            ]
+            ],
+            "ProtectionZone": 6
         },
         {
             "Name": "TH65_TST",
@@ -1705,7 +1901,8 @@
             "NextSignalNamesDown": [
                 "江ノ原検車区下り場内5LE",
                 "江ノ原検車区下り場内5LD"
-            ]
+            ],
+            "ProtectionZone": 6
         },
         {
             "Name": "TH65_XT",
@@ -1716,7 +1913,8 @@
             ],
             "NextSignalNamesDown": [
                 "大道寺入換31L"
-            ]
+            ],
+            "ProtectionZone": 6
         },
         {
             "Name": "TH65_YT",
@@ -1725,7 +1923,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "大道寺入換32L"
-            ]
+            ],
+            "ProtectionZone": 6
         },
         {
             "Name": "TH66S_1RAT",
@@ -1735,7 +1934,8 @@
             "NextSignalNamesDown": [
                 "江ノ原検車区下り出発3L",
                 "江ノ原入換15L"
-            ]
+            ],
+            "ProtectionZone": 6
         },
         {
             "Name": "TH66S_1RBT",
@@ -1745,7 +1945,8 @@
             "NextSignalNamesDown": [
                 "江ノ原検車区下り出発4L",
                 "江ノ原入換16L"
-            ]
+            ],
+            "ProtectionZone": 6
         },
         {
             "Name": "TH66S_1RCT",
@@ -1754,7 +1955,8 @@
             "NextSignalNamesUp": [
                 "上り閉塞156"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
         },
         {
             "Name": "TH66S_1RT",
@@ -1763,7 +1965,8 @@
             "NextSignalNamesUp": [
                 "上り閉塞156"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
         },
         {
             "Name": "TH66S_5LDT",
@@ -1772,7 +1975,8 @@
             "NextSignalNamesUp": [
                 "江ノ原信号場入換11R"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
         },
         {
             "Name": "TH66S_5LET",
@@ -1781,7 +1985,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "下り閉塞151"
-            ]
+            ],
+            "ProtectionZone": 6
         },
         {
             "Name": "TH66S_5LT",
@@ -1790,7 +1995,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "下り閉塞151"
-            ]
+            ],
+            "ProtectionZone": 6
         },
         {
             "Name": "TH66S_13T",
@@ -1802,7 +2008,8 @@
             ],
             "NextSignalNamesDown": [
                 "江ノ原検車区内入換"
-            ]
+            ],
+            "ProtectionZone": 6
         },
         {
             "Name": "TH66S_51イT",
@@ -1812,7 +2019,8 @@
                 "江ノ原検車区上り出発2R",
                 "江ノ原入換13R"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
         },
         {
             "Name": "TH66S_51ロT",
@@ -1821,7 +2029,8 @@
             "NextSignalNamesUp": [
                 "上り閉塞156"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
         },
         {
             "Name": "TH66S_52T",
@@ -1832,7 +2041,8 @@
             ],
             "NextSignalNamesDown": [
                 "下り閉塞151"
-            ]
+            ],
+            "ProtectionZone": 6
         },
         {
             "Name": "TH66S_53T",
@@ -1841,7 +2051,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "下り閉塞151"
-            ]
+            ],
+            "ProtectionZone": 6
         },
         {
             "Name": "TH66S_54T",
@@ -1852,7 +2063,8 @@
             ],
             "NextSignalNamesDown": [
                 "下り閉塞151"
-            ]
+            ],
+            "ProtectionZone": 6
         },
         {
             "Name": "TH66S_55T",
@@ -1863,7 +2075,8 @@
             ],
             "NextSignalNamesDown": [
                 "下り閉塞151"
-            ]
+            ],
+            "ProtectionZone": 6
         },
         {
             "Name": "TH66S_56T",
@@ -1872,7 +2085,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "下り閉塞151"
-            ]
+            ],
+            "ProtectionZone": 6
         },
         {
             "Name": "TH66S_57T",
@@ -1881,7 +2095,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "下り閉塞151"
-            ]
+            ],
+            "ProtectionZone": 6
         },
         {
             "Name": "TH67_1RAT",
@@ -1891,7 +2106,8 @@
                 "新野崎上り出発8R",
                 "新野崎入換23R"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 5
         },
         {
             "Name": "TH67_1RBT",
@@ -1901,7 +2117,8 @@
                 "新野崎上り出発9R",
                 "新野崎入換24R"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 5
         },
         {
             "Name": "TH67_1RT",
@@ -1911,7 +2128,8 @@
                 "新野崎上り出発8R",
                 "新野崎上り出発9R"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 5
         },
         {
             "Name": "TH67_4LT",
@@ -1922,7 +2140,8 @@
             ],
             "NextSignalNamesDown": [
                 "新野崎下り出発2L"
-            ]
+            ],
+            "ProtectionZone": 5
         },
         {
             "Name": "TH67_5LT",
@@ -1933,7 +2152,8 @@
             ],
             "NextSignalNamesDown": [
                 "新野崎下り出発3L"
-            ]
+            ],
+            "ProtectionZone": 5
         },
         {
             "Name": "TH67_10LT",
@@ -1943,7 +2163,8 @@
             "NextSignalNamesDown": [
                 "新野崎下り場内4L",
                 "新野崎下り場内5L"
-            ]
+            ],
+            "ProtectionZone": 5
         },
         {
             "Name": "TH67_23RT",
@@ -1952,7 +2173,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "新野崎入換25L"
-            ]
+            ],
+            "ProtectionZone": 5
         },
         {
             "Name": "TH67_31T",
@@ -1961,7 +2183,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "下り閉塞123"
-            ]
+            ],
+            "ProtectionZone": 5
         },
         {
             "Name": "TH67_32T",
@@ -1971,7 +2194,8 @@
                 "新野崎上り出発8R",
                 "新野崎上り出発9R"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 5
         },
         {
             "Name": "TH67_33イT",
@@ -1980,7 +2204,8 @@
             "NextSignalNamesUp": [
                 "上り閉塞136"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 5
         },
         {
             "Name": "TH67_33ロT",
@@ -1989,7 +2214,8 @@
             "NextSignalNamesUp": [
                 "上り閉塞136"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 5
         },
         {
             "Name": "TH67_34T",
@@ -2003,7 +2229,8 @@
                 "新野崎下り場内5L",
                 "新野崎入換21L",
                 "新野崎入換22L"
-            ]
+            ],
+            "ProtectionZone": 5
         },
         {
             "Name": "TH67_35イT",
@@ -2017,7 +2244,8 @@
                 "新野崎下り場内5L",
                 "新野崎入換21L",
                 "新野崎入換22L"
-            ]
+            ],
+            "ProtectionZone": 5
         },
         {
             "Name": "TH67_35ロT",
@@ -2029,7 +2257,8 @@
             "NextSignalNamesDown": [
                 "新野崎入換21L",
                 "新野崎入換22L"
-            ]
+            ],
+            "ProtectionZone": 5
         },
         {
             "Name": "TH67_36イT",
@@ -2041,7 +2270,8 @@
             "NextSignalNamesDown": [
                 "新野崎入換21L",
                 "新野崎入換22L"
-            ]
+            ],
+            "ProtectionZone": 5
         },
         {
             "Name": "TH67_36ロT",
@@ -2051,7 +2281,8 @@
             "NextSignalNamesDown": [
                 "新野崎入換21L",
                 "新野崎入換22L"
-            ]
+            ],
+            "ProtectionZone": 5
         },
         {
             "Name": "TH67_SST",
@@ -2060,7 +2291,8 @@
             "NextSignalNamesUp": [
                 "上り閉塞136"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 5
         },
         {
             "Name": "TH67_TST",
@@ -2069,7 +2301,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "下り閉塞123"
-            ]
+            ],
+            "ProtectionZone": 5
         },
         {
             "Name": "TH70_1RAT",
@@ -2079,7 +2312,8 @@
                 "浜園上り出発3R",
                 "浜園入換11R"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 3
         },
         {
             "Name": "TH70_2LT",
@@ -2088,7 +2322,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "下り閉塞89"
-            ]
+            ],
+            "ProtectionZone": 3
         },
         {
             "Name": "TH70_5LBT",
@@ -2099,7 +2334,8 @@
             ],
             "NextSignalNamesDown": [
                 "浜園下り出発2L"
-            ]
+            ],
+            "ProtectionZone": 3
         },
         {
             "Name": "TH70_5LT",
@@ -2108,7 +2344,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "浜園下り出発2L"
-            ]
+            ],
+            "ProtectionZone": 3
         },
         {
             "Name": "TH70_21イT",
@@ -2119,7 +2356,8 @@
             ],
             "NextSignalNamesDown": [
                 "浜園下り出発2L"
-            ]
+            ],
+            "ProtectionZone": 3
         },
         {
             "Name": "TH70_21ロT",
@@ -2128,7 +2366,8 @@
             "NextSignalNamesUp": [
                 "上り閉塞102"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 3
         },
         {
             "Name": "TH70_SST",
@@ -2139,7 +2378,8 @@
             ],
             "NextSignalNamesDown": [
                 "浜園入換12L"
-            ]
+            ],
+            "ProtectionZone": 3
         },
         {
             "Name": "TH71_1RAT",
@@ -2148,7 +2388,8 @@
             "NextSignalNamesUp": [
                 "津崎上り出発4R"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 3
         },
         {
             "Name": "TH71_1RBT",
@@ -2157,7 +2398,8 @@
             "NextSignalNamesUp": [
                 "津崎上り出発5R"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 3
         },
         {
             "Name": "TH71_1RT",
@@ -2167,7 +2409,8 @@
                 "津崎上り出発4R",
                 "津崎上り出発5R"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 3
         },
         {
             "Name": "TH71_6LCT",
@@ -2176,7 +2419,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "津崎下り出発2L"
-            ]
+            ],
+            "ProtectionZone": 3
         },
         {
             "Name": "TH71_6LDT",
@@ -2185,7 +2429,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "津崎下り出発3L"
-            ]
+            ],
+            "ProtectionZone": 3
         },
         {
             "Name": "TH71_6LT",
@@ -2195,7 +2440,8 @@
             "NextSignalNamesDown": [
                 "津崎下り出発2L",
                 "津崎下り出発3L"
-            ]
+            ],
+            "ProtectionZone": 3
         },
         {
             "Name": "TH71_21T",
@@ -2205,7 +2451,8 @@
                 "津崎上り出発4R",
                 "津崎上り出発5R"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 3
         },
         {
             "Name": "TH71_22T",
@@ -2214,7 +2461,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "下り閉塞75"
-            ]
+            ],
+            "ProtectionZone": 3
         },
         {
             "Name": "TH71_23T",
@@ -2223,7 +2471,8 @@
             "NextSignalNamesUp": [
                 "上り閉塞86"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 3
         },
         {
             "Name": "TH71_24T",
@@ -2233,7 +2482,8 @@
             "NextSignalNamesDown": [
                 "津崎下り出発2L",
                 "津崎下り出発3L"
-            ]
+            ],
+            "ProtectionZone": 3
         },
         {
             "Name": "TH71_SST",
@@ -2242,7 +2492,8 @@
             "NextSignalNamesUp": [
                 "上り閉塞86"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 3
         },
         {
             "Name": "TH71_TST",
@@ -2251,7 +2502,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "下り閉塞75"
-            ]
+            ],
+            "ProtectionZone": 3
         },
         {
             "Name": "TH75_1RET",
@@ -2262,7 +2514,8 @@
                 "駒野上り場内5RB",
                 "駒野入換13R"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 1
         },
         {
             "Name": "TH75_1RT",
@@ -2272,7 +2525,8 @@
                 "駒野上り場内5RA",
                 "駒野上り場内5RB"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 1
         },
         {
             "Name": "TH75_4T",
@@ -2283,7 +2537,8 @@
             ],
             "NextSignalNamesDown": [
                 "駒野入換34L"
-            ]
+            ],
+            "ProtectionZone": 1
         },
         {
             "Name": "TH75_5RAT",
@@ -2294,7 +2549,8 @@
             ],
             "NextSignalNamesDown": [
                 "駒野入換15L"
-            ]
+            ],
+            "ProtectionZone": 1
         },
         {
             "Name": "TH75_5RBT",
@@ -2303,7 +2559,8 @@
             "NextSignalNamesUp": [
                 "駒野上り出発8R"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 1
         },
         {
             "Name": "TH75_5T",
@@ -2315,7 +2572,8 @@
             "NextSignalNamesDown": [
                 "駒野下り出発3L",
                 "駒野入換35L"
-            ]
+            ],
+            "ProtectionZone": 1
         },
         {
             "Name": "TH75_6LT",
@@ -2325,7 +2583,8 @@
             "NextSignalNamesDown": [
                 "駒野下り第二出発2L",
                 "駒野入換12L"
-            ]
+            ],
+            "ProtectionZone": 1
         },
         {
             "Name": "TH75_6T",
@@ -2337,7 +2596,8 @@
             "NextSignalNamesDown": [
                 "駒野下り出発4L",
                 "駒野入換36L"
-            ]
+            ],
+            "ProtectionZone": 1
         },
         {
             "Name": "TH75_7T",
@@ -2346,7 +2606,8 @@
             "NextSignalNamesUp": [
                 "駒野入換27R"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 1
         },
         {
             "Name": "TH75_8T",
@@ -2355,7 +2616,8 @@
             "NextSignalNamesUp": [
                 "駒野入換28R"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 1
         },
         {
             "Name": "TH75_9LCT",
@@ -2365,7 +2627,8 @@
             "NextSignalNamesDown": [
                 "駒野下り出発6L",
                 "駒野入換14L"
-            ]
+            ],
+            "ProtectionZone": 1
         },
         {
             "Name": "TH75_9LT",
@@ -2374,7 +2637,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "駒野下り出発6L"
-            ]
+            ],
+            "ProtectionZone": 1
         },
         {
             "Name": "TH75_9T",
@@ -2383,7 +2647,8 @@
             "NextSignalNamesUp": [
                 "駒野入換29R"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 1
         },
         {
             "Name": "TH75_34LT",
@@ -2392,7 +2657,8 @@
             "NextSignalNamesUp": [
                 "駒野入換24R"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 1
         },
         {
             "Name": "TH75_41イT",
@@ -2405,7 +2671,8 @@
             ],
             "NextSignalNamesDown": [
                 "下り閉塞9"
-            ]
+            ],
+            "ProtectionZone": 1
         },
         {
             "Name": "TH75_41ロT",
@@ -2420,7 +2687,8 @@
             ],
             "NextSignalNamesDown": [
                 "下り閉塞9"
-            ]
+            ],
+            "ProtectionZone": 1
         },
         {
             "Name": "TH75_42イT",
@@ -2431,7 +2699,8 @@
                 "駒野入換25R",
                 "駒野入換26R"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 1
         },
         {
             "Name": "TH75_42ロT",
@@ -2441,7 +2710,8 @@
                 "駒野入換25R",
                 "駒野入換26R"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 1
         },
         {
             "Name": "TH75_43イT",
@@ -2456,7 +2726,8 @@
             ],
             "NextSignalNamesDown": [
                 "下り閉塞9"
-            ]
+            ],
+            "ProtectionZone": 1
         },
         {
             "Name": "TH75_43ロT",
@@ -2468,7 +2739,8 @@
             ],
             "NextSignalNamesDown": [
                 "下り閉塞9"
-            ]
+            ],
+            "ProtectionZone": 1
         },
         {
             "Name": "TH75_44T",
@@ -2480,7 +2752,8 @@
             ],
             "NextSignalNamesDown": [
                 "下り閉塞9"
-            ]
+            ],
+            "ProtectionZone": 1
         },
         {
             "Name": "TH75_45T",
@@ -2492,7 +2765,8 @@
             ],
             "NextSignalNamesDown": [
                 "下り閉塞9"
-            ]
+            ],
+            "ProtectionZone": 1
         },
         {
             "Name": "TH75_46イT",
@@ -2502,7 +2776,8 @@
                 "駒野上り出発7R",
                 "駒野上り出発8R"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 1
         },
         {
             "Name": "TH75_46ロT",
@@ -2515,7 +2790,8 @@
                 "駒野入換34L",
                 "駒野入換35L",
                 "駒野入換36L"
-            ]
+            ],
+            "ProtectionZone": 1
         },
         {
             "Name": "TH75_48T",
@@ -2528,7 +2804,8 @@
                 "駒野入換36L",
                 "駒野入換35L",
                 "駒野入換34L"
-            ]
+            ],
+            "ProtectionZone": 1
         },
         {
             "Name": "TH75_49イT",
@@ -2537,7 +2814,8 @@
             "NextSignalNamesUp": [
                 "上り閉塞26"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 1
         },
         {
             "Name": "TH75_49ロT",
@@ -2546,7 +2824,8 @@
             "NextSignalNamesUp": [
                 "上り閉塞26"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 1
         },
         {
             "Name": "TH75_50イT",
@@ -2555,7 +2834,8 @@
             "NextSignalNamesUp": [
                 "上り閉塞26"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 1
         },
         {
             "Name": "TH75_50ロT",
@@ -2564,7 +2844,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "駒野下り出発6L"
-            ]
+            ],
+            "ProtectionZone": 1
         },
         {
             "Name": "TH75_SST",
@@ -2573,7 +2854,8 @@
             "NextSignalNamesUp": [
                 "上り閉塞26"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 1
         },
         {
             "Name": "TH75_TST",
@@ -2584,7 +2866,8 @@
             ],
             "NextSignalNamesDown": [
                 "下り閉塞9"
-            ]
+            ],
+            "ProtectionZone": 1
         },
         {
             "Name": "TH76_5LAT",
@@ -2593,7 +2876,8 @@
             "NextSignalNamesUp": [
                 "館浜上り出発1R"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 1
         },
         {
             "Name": "TH76_5LBT",
@@ -2602,7 +2886,8 @@
             "NextSignalNamesUp": [
                 "館浜上り出発2R"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 1
         },
         {
             "Name": "TH76_5LCT",
@@ -2611,7 +2896,8 @@
             "NextSignalNamesUp": [
                 "館浜上り出発3R"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 1
         },
         {
             "Name": "TH76_5LDT",
@@ -2620,7 +2906,8 @@
             "NextSignalNamesUp": [
                 "館浜上り出発4R"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 1
         },
         {
             "Name": "TH76_21イT",
@@ -2629,7 +2916,8 @@
             "NextSignalNamesUp": [
                 "上り閉塞6"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 1
         },
         {
             "Name": "TH76_21ロT",
@@ -2638,7 +2926,8 @@
             "NextSignalNamesUp": [
                 "上り閉塞6"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 1
         },
         {
             "Name": "TH76_22T",
@@ -2647,7 +2936,8 @@
             "NextSignalNamesUp": [
                 "上り閉塞6"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 1
         },
         {
             "Name": "TH76_23T",
@@ -2656,7 +2946,8 @@
             "NextSignalNamesUp": [
                 "上り閉塞6"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 1
         },
         {
             "Name": "TH76_24イT",
@@ -2665,7 +2956,8 @@
             "NextSignalNamesUp": [
                 "上り閉塞6"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 1
         },
         {
             "Name": "TH76_25T",
@@ -2674,7 +2966,8 @@
             "NextSignalNamesUp": [
                 "上り閉塞6"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 1
         },
         {
             "Name": "TH76_26イT",
@@ -2683,7 +2976,8 @@
             "NextSignalNamesUp": [
                 "上り閉塞6"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 1
         },
         {
             "Name": "TH76_26ロT",
@@ -2692,14 +2986,16 @@
             "NextSignalNamesUp": [
                 "上り閉塞6"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 1
         },
         {
             "Name": "TH76_27T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 1
         },
         {
             "Name": "上り6T",
@@ -2708,7 +3004,8 @@
             "NextSignalNamesUp": [
                 "上り閉塞8"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 1
         },
         {
             "Name": "上り8T",
@@ -2718,7 +3015,8 @@
                 "駒野上り場内1RD",
                 "駒野上り場内1RE"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 1
         },
         {
             "Name": "上り26T",
@@ -2727,7 +3025,8 @@
             "NextSignalNamesUp": [
                 "上り閉塞30"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 2
         },
         {
             "Name": "上り30T",
@@ -2736,7 +3035,8 @@
             "NextSignalNamesUp": [
                 "上り閉塞36"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 2
         },
         {
             "Name": "上り36T",
@@ -2745,7 +3045,8 @@
             "NextSignalNamesUp": [
                 "上り閉塞42"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 2
         },
         {
             "Name": "上り42T",
@@ -2754,7 +3055,8 @@
             "NextSignalNamesUp": [
                 "上り閉塞48"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 2
         },
         {
             "Name": "上り48T",
@@ -2763,7 +3065,8 @@
             "NextSignalNamesUp": [
                 "上り閉塞56"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 2
         },
         {
             "Name": "上り56T",
@@ -2772,7 +3075,8 @@
             "NextSignalNamesUp": [
                 "上り閉塞62"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 2
         },
         {
             "Name": "上り62T",
@@ -2781,7 +3085,8 @@
             "NextSignalNamesUp": [
                 "上り閉塞68"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 2
         },
         {
             "Name": "上り68T",
@@ -2790,7 +3095,8 @@
             "NextSignalNamesUp": [
                 "上り閉塞74"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 3
         },
         {
             "Name": "上り74T",
@@ -2800,7 +3106,8 @@
                 "津崎上り場内1RA",
                 "津崎上り場内1RB"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 3
         },
         {
             "Name": "上り86T",
@@ -2809,7 +3116,8 @@
             "NextSignalNamesUp": [
                 "上り閉塞92"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 3
         },
         {
             "Name": "上り92T",
@@ -2818,7 +3126,8 @@
             "NextSignalNamesUp": [
                 "浜園上り場内1R"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 3
         },
         {
             "Name": "上り102T",
@@ -2827,7 +3136,8 @@
             "NextSignalNamesUp": [
                 "上り閉塞108"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 4
         },
         {
             "Name": "上り108T",
@@ -2836,7 +3146,8 @@
             "NextSignalNamesUp": [
                 "上り閉塞114"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 4
         },
         {
             "Name": "上り114T",
@@ -2845,7 +3156,8 @@
             "NextSignalNamesUp": [
                 "上り閉塞120"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 4
         },
         {
             "Name": "上り120T",
@@ -2854,7 +3166,8 @@
             "NextSignalNamesUp": [
                 "上り閉塞124"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 4
         },
         {
             "Name": "上り124T",
@@ -2864,7 +3177,8 @@
                 "新野崎上り場内1RA",
                 "新野崎上り場内1RB"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 5
         },
         {
             "Name": "上り136T",
@@ -2873,7 +3187,8 @@
             "NextSignalNamesUp": [
                 "上り閉塞142"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 5
         },
         {
             "Name": "上り142T",
@@ -2882,7 +3197,8 @@
             "NextSignalNamesUp": [
                 "上り閉塞146"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 5
         },
         {
             "Name": "上り146T",
@@ -2893,7 +3209,8 @@
                 "江ノ原検車区上り場内1RB",
                 "江ノ原検車区上り場内1RC"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
         },
         {
             "Name": "上り156T",
@@ -2902,7 +3219,8 @@
             "NextSignalNamesUp": [
                 "大道寺上り場内1R"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
         },
         {
             "Name": "上り238T",
@@ -2911,7 +3229,8 @@
             "NextSignalNamesUp": [
                 "上り閉塞242"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 10
         },
         {
             "Name": "上り242T",
@@ -2920,7 +3239,8 @@
             "NextSignalNamesUp": [
                 "上り閉塞246"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 10
         },
         {
             "Name": "上り246T",
@@ -2929,7 +3249,8 @@
             "NextSignalNamesUp": [
                 "上り閉塞250"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 10
         },
         {
             "Name": "上り250T",
@@ -2938,84 +3259,96 @@
             "NextSignalNamesUp": [
                 "西赤山上り場内11R"
             ],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 10
         },
         {
             "Name": "上り306T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "上り312T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "上り314T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "上り320T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "上り324T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "上り398T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "上り404T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "上り406T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "上り416T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "上り420T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "上り424T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "下り7T",
@@ -3024,7 +3357,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "館浜下り場内5L"
-            ]
+            ],
+            "ProtectionZone": 1
         },
         {
             "Name": "下り9T",
@@ -3033,7 +3367,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "下り閉塞7"
-            ]
+            ],
+            "ProtectionZone": 1
         },
         {
             "Name": "下り27T",
@@ -3043,7 +3378,8 @@
             "NextSignalNamesDown": [
                 "駒野下り場内9LB",
                 "駒野下り場内9LC"
-            ]
+            ],
+            "ProtectionZone": 2
         },
         {
             "Name": "下り35T",
@@ -3052,7 +3388,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "下り閉塞27"
-            ]
+            ],
+            "ProtectionZone": 2
         },
         {
             "Name": "下り41T",
@@ -3061,7 +3398,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "下り閉塞35"
-            ]
+            ],
+            "ProtectionZone": 2
         },
         {
             "Name": "下り45T",
@@ -3070,7 +3408,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "下り閉塞41"
-            ]
+            ],
+            "ProtectionZone": 2
         },
         {
             "Name": "下り49T",
@@ -3079,7 +3418,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "下り閉塞45"
-            ]
+            ],
+            "ProtectionZone": 2
         },
         {
             "Name": "下り55T",
@@ -3088,7 +3428,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "下り閉塞49"
-            ]
+            ],
+            "ProtectionZone": 2
         },
         {
             "Name": "下り59T",
@@ -3097,7 +3438,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "下り閉塞55"
-            ]
+            ],
+            "ProtectionZone": 2
         },
         {
             "Name": "下り67T",
@@ -3106,7 +3448,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "下り閉塞59"
-            ]
+            ],
+            "ProtectionZone": 2
         },
         {
             "Name": "下り71T",
@@ -3115,7 +3458,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "下り閉塞67"
-            ]
+            ],
+            "ProtectionZone": 2
         },
         {
             "Name": "下り75T",
@@ -3124,7 +3468,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "下り閉塞71"
-            ]
+            ],
+            "ProtectionZone": 3
         },
         {
             "Name": "下り89T",
@@ -3134,7 +3479,8 @@
             "NextSignalNamesDown": [
                 "津崎下り場内6LC",
                 "津崎下り場内6LD"
-            ]
+            ],
+            "ProtectionZone": 3
         },
         {
             "Name": "下り103T",
@@ -3143,7 +3489,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "浜園下り場内5L"
-            ]
+            ],
+            "ProtectionZone": 4
         },
         {
             "Name": "下り105T",
@@ -3152,7 +3499,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "下り閉塞103"
-            ]
+            ],
+            "ProtectionZone": 4
         },
         {
             "Name": "下り111T",
@@ -3161,7 +3509,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "下り閉塞105"
-            ]
+            ],
+            "ProtectionZone": 4
         },
         {
             "Name": "下り117T",
@@ -3170,7 +3519,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "下り閉塞111"
-            ]
+            ],
+            "ProtectionZone": 4
         },
         {
             "Name": "下り123T",
@@ -3179,7 +3529,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "下り閉塞117"
-            ]
+            ],
+            "ProtectionZone": 4
         },
         {
             "Name": "下り137T",
@@ -3189,7 +3540,8 @@
             "NextSignalNamesDown": [
                 "新野崎下り場内10LC",
                 "新野崎下り場内10LD"
-            ]
+            ],
+            "ProtectionZone": 5
         },
         {
             "Name": "下り143T",
@@ -3198,7 +3550,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "下り閉塞137"
-            ]
+            ],
+            "ProtectionZone": 5
         },
         {
             "Name": "下り145T",
@@ -3207,7 +3560,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "下り閉塞143"
-            ]
+            ],
+            "ProtectionZone": 5
         },
         {
             "Name": "下り151T",
@@ -3216,7 +3570,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "下り閉塞145"
-            ]
+            ],
+            "ProtectionZone": 6
         },
         {
             "Name": "下り237T",
@@ -3225,7 +3580,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "日野森下り場内6L"
-            ]
+            ],
+            "ProtectionZone": 10
         },
         {
             "Name": "下り241T",
@@ -3234,7 +3590,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "下り閉塞237"
-            ]
+            ],
+            "ProtectionZone": 10
         },
         {
             "Name": "下り245T",
@@ -3243,7 +3600,8 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "下り閉塞241"
-            ]
+            ],
+            "ProtectionZone": 10
         },
         {
             "Name": "下り249T",
@@ -3252,77 +3610,88 @@
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
                 "下り閉塞245"
-            ]
+            ],
+            "ProtectionZone": 10
         },
         {
             "Name": "下り305T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "下り311T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "下り313T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "下り317T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "下り323T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "下り397T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "下り403T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "下り405T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "下り419T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         },
         {
             "Name": "下り425T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [],
-            "NextSignalNamesDown": []
+            "NextSignalNamesDown": [],
+            "ProtectionZone": null
         }
     ],
     "signalDataList": [

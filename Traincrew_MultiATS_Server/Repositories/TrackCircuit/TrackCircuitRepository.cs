@@ -6,6 +6,7 @@ namespace Traincrew_MultiATS_Server.Repositories.TrackCircuit;
 
 public class TrackCircuitRepository(ApplicationDbContext context) : ITrackCircuitRepository
 {
+
     public async Task<List<Models.TrackCircuit>> GetAllTrackCircuitList()
     {
         List<Models.TrackCircuit> trackcircuitlist_db = await context.TrackCircuits
