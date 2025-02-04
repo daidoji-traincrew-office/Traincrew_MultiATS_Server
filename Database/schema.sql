@@ -99,6 +99,33 @@ CREATE TABLE interlocking_object
     UNIQUE (station_id, name)
 );
 
+-- てこ
+CREATE TYPE lever_type AS ENUM ('route', 'switching_machine');
+CREATE TABLE lever
+(
+    name       VARCHAR(100) PRIMARY KEY,                     -- てこの名前
+    station_id VARCHAR(10) REFERENCES station (id) NOT NULL, -- 所属する停車場
+    type       lever_type                          NOT NULL  -- てこの種類 
+);
+
+-- 着点ボタン
+CREATE TABLE destination_button
+(
+    name       VARCHAR(100) PRIMARY KEY,                    -- 着点ボタンの名前
+    station_id VARCHAR(10) REFERENCES station (id) NOT NULL -- 所属する停車場
+);
+
+-- 進路に対するてこと着点ボタンのリスト
+CREATE TABLE route_lever_destination_button
+(
+    id                      BIGSERIAL PRIMARY KEY,
+    route_id                BIGINT REFERENCES route (ID)                      NOT NULL, -- 進路のID
+    lever_name              VARCHAR(100) REFERENCES lever (name)              NOT NULL, -- てこの名前
+    destination_button_name VARCHAR(100) REFERENCES destination_button (name) NOT NULL, -- 着点ボタンの名前
+    UNIQUE (route_id),
+    UNIQUE (lever_name, destination_button_name)
+);
+
 -- 進路
 -- 場内信号機、出発信号機、誘導信号機、入換信号機、入換標識
 CREATE TYPE route_type AS ENUM ('arriving', 'departure', 'guide', 'switch_signal', 'switch_route');
@@ -108,7 +135,7 @@ CREATE TABLE route
     id                 BIGINT PRIMARY KEY REFERENCES interlocking_object (id),
     tc_name            VARCHAR(100) NOT NULL, -- Traincrewでの名前
     route_type         route_type   NOT NULL,
-    root               VARCHAR(100),          --親進路
+    root               VARCHAR(100),          -- 親進路
     indicator          VARCHAR(10),           -- 進路表示機(Todo: ここに持たせるべきなのか?)
     approach_lock_time INT                    -- 接近鎖状の時間
 );
@@ -197,6 +224,7 @@ CREATE INDEX lock_object_id_type_index ON lock (object_id, type);
 -- てこ条件の詳細
 CREATE TYPE nr AS ENUM ('reversed', 'normal');
 CREATE TYPE nrc AS ENUM ('reversed', 'center', 'normal');
+CREATE TYPE relay_status AS ENUM ('raise', 'drop');
 CREATE TABLE lock_condition
 (
     id               BIGSERIAL PRIMARY KEY,
@@ -220,6 +248,20 @@ CREATE TABLE lock_condition_execute
 CREATE INDEX lock_condition_execute_source_id_index ON lock_condition_execute (source_id);
 
 -- ここから状態系
+-- てこ状態
+CREATE TABLE lever_state
+(
+    name        VARCHAR(100) PRIMARY KEY REFERENCES lever (name), -- てこの名前
+    is_reversed nrc NOT NULL                                      -- てこの位置
+);
+
+-- 着点ボタン状態
+CREATE TABLE destination_button_state
+(
+    name        VARCHAR(100) PRIMARY KEY REFERENCES destination_button (name), -- 着点ボタンの名前
+    is_raised   relay_status NOT NULL,                                         -- 着点ボタンの扛上、落下
+    operated_at TIMESTAMP    NOT NULL                                          -- 最終操作時刻
+);
 
 -- 軌道回路状態
 CREATE TABLE track_circuit_state
@@ -244,10 +286,9 @@ CREATE TABLE switching_machine_state
 -- Todo: 進路状態
 CREATE TABLE route_state
 (
-    id                BIGINT PRIMARY KEY REFERENCES route (ID), -- 進路のID
-    is_lever_reversed nr NOT NULL,                              -- レバーの位置(True=反位、False=定位)
-    is_reversed       nr NOT NULL,                              -- 定反(実際の状態)
-    should_reverse    nr NOT NULL                               --内部的にどっちにしてほしいカラム
+    id            BIGINT PRIMARY KEY REFERENCES route (ID), -- 進路のID
+    is_raised     relay_status NOT NULL,                    -- リレーの状態
+    should_raised relay_status NOT NULL                     -- リレーの状態
 );
 
 -- 信号機状態
@@ -276,9 +317,10 @@ CREATE TABLE lock_state
 CREATE INDEX lock_state_target_object_id_index ON lock_state (target_object_id);
 
 -- 防護無線状態
-CREATE TABLE protection_zone_state (
-    id BIGSERIAL PRIMARY KEY,
-    protection_zone BIGINT NOT NULL,
+CREATE TABLE protection_zone_state
+(
+    id              BIGSERIAL PRIMARY KEY,
+    protection_zone BIGINT       NOT NULL,
     train_number    VARCHAR(100) NOT NULL,
     UNIQUE (protection_zone, train_number)
 );
