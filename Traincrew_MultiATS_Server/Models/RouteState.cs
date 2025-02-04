@@ -1,13 +1,16 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Traincrew_MultiATS_Server.Models;
 
 [Table("route_state")]
 public class RouteState
 {
-    public ulong Id { get; set; }
-    public NR IsLeverReversed { get; set; }
-    public NR IsReversed { get; set; }
-    public NR ShouldReverse { get; set; }
-    public virtual Route Route { get; set; }
+    [Key]
+    public long Id { get; set; }
+    public bool IsLeverRelayRaised { get; set; }
+    public bool IsRouteRelayRaised { get; set; }
+    public bool IsSignalControlRaised { get; set; }
+    public bool IsApproachLockRaised { get; set; }
+    public bool IsRouteLockRaised { get; set; }
 }

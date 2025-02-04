@@ -224,7 +224,7 @@ CREATE INDEX lock_object_id_type_index ON lock (object_id, type);
 -- てこ条件の詳細
 CREATE TYPE nr AS ENUM ('reversed', 'normal');
 CREATE TYPE nrc AS ENUM ('reversed', 'center', 'normal');
-CREATE TYPE relay_status AS ENUM ('raise', 'drop');
+CREATE TYPE raise_drop AS ENUM ('raise', 'drop');
 CREATE TABLE lock_condition
 (
     id               BIGSERIAL PRIMARY KEY,
@@ -259,8 +259,8 @@ CREATE TABLE lever_state
 CREATE TABLE destination_button_state
 (
     name        VARCHAR(100) PRIMARY KEY REFERENCES destination_button (name), -- 着点ボタンの名前
-    is_raised   relay_status NOT NULL,                                         -- 着点ボタンの扛上、落下
-    operated_at TIMESTAMP    NOT NULL                                          -- 最終操作時刻
+    is_raised   raise_drop NOT NULL,                                           -- 着点ボタンの扛上、落下
+    operated_at TIMESTAMP  NOT NULL                                            -- 最終操作時刻
 );
 
 -- 軌道回路状態
@@ -268,7 +268,8 @@ CREATE TABLE track_circuit_state
 (
     id               BIGINT PRIMARY KEY REFERENCES track_circuit (ID), -- 軌道回路のID
     train_number     VARCHAR(100),                                     -- 列車番号
-    is_short_circuit BOOLEAN NOT NULL                                  -- 短絡状態
+    is_short_circuit BOOLEAN NOT NULL,                                 -- 短絡状態
+    is_locked        BOOLEAN NOT NULL                                  -- 鎖状しているかどうか
 );
 CREATE INDEX track_circuit_state_train_number_index ON track_circuit_state USING hash (train_number);
 
@@ -286,9 +287,12 @@ CREATE TABLE switching_machine_state
 -- Todo: 進路状態
 CREATE TABLE route_state
 (
-    id            BIGINT PRIMARY KEY REFERENCES route (ID), -- 進路のID
-    is_raised     relay_status NOT NULL,                    -- リレーの状態
-    should_raised relay_status NOT NULL                     -- リレーの状態
+    id                       BIGINT PRIMARY KEY REFERENCES route (ID), -- 進路のID
+    is_lever_relay_raised    raise_drop NOT NULL,                      -- てこリレーが上がっているか
+    is_route_relay_raised    raise_drop NOT NULL,                      -- 進路照査リレーが上がっているか
+    is_signal_control_raised raise_drop NOT NULL,                      -- 信号制御リレーが上がっているか
+    is_approach_lock_raised  raise_drop NOT NULL,                      -- 接近鎖状が上がっているか
+    is_route_lock_raised     raise_drop NOT NULL                       -- 進路鎖状が上がっているか
 );
 
 -- 信号機状態
