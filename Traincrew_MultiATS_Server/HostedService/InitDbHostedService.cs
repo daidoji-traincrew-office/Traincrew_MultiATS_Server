@@ -208,6 +208,10 @@ internal class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Ca
 
     private async Task InitSignal()
     {
+        // 軌道回路情報を取得
+        var trackCircuits = await context.TrackCircuits
+            .Select(tc => new{tc.Id, tc.Name})
+            .ToDictionaryAsync(tc => tc.Name, tc => tc.Id, cancellationToken);
         // 既に登録済みの信号情報を取得
         var signalNames = (await context.Signals
             .Select(s => s.Name)
@@ -225,12 +229,8 @@ internal class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Ca
             if (signalData.Name.StartsWith("上り閉塞") || signalData.Name.StartsWith("下り閉塞"))
             {
                 var trackCircuitName = $"{signalData.Name.Replace("閉塞", "")}T";
-                trackCircuitId = await context.TrackCircuits
-                    .Where(tc => tc.Name == trackCircuitName)
-                    .Select(tc => tc.Id)
-                    .FirstOrDefaultAsync(cancellationToken);
+                trackCircuits.TryGetValue(trackCircuitName, out trackCircuitId);
             }
-
             context.Signals.Add(new()
             {
                 Name = signalData.Name,
@@ -248,9 +248,12 @@ internal class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Ca
 
     private async Task InitSignalType()
     {
+        var signalTypeNames = (await context.SignalTypes
+            .Select(st => st.Name)
+            .ToListAsync(cancellationToken)).ToHashSet();
         foreach (var signalTypeData in DBBase.signalTypeList)
         {
-            if (context.SignalTypes.Any(st => st.Name == signalTypeData.Name))
+            if (signalTypeNames.Contains(signalTypeData.Name))
             {
                 continue;
             }
