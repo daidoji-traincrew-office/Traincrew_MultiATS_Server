@@ -13,4 +13,5 @@ public class RouteState
     public bool IsSignalControlRaised { get; set; }
     public bool IsApproachLockRaised { get; set; }
     public bool IsRouteLockRaised { get; set; }
+    public Route? Route { get; set; }
 }

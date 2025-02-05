@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Traincrew_MultiATS_Server.Models;
+
+namespace Traincrew_MultiATS_Server.Models;
 
 [Table("lock_condition")]
 public class LockCondition
