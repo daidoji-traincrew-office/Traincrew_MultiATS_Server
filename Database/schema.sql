@@ -103,7 +103,8 @@ CREATE TABLE interlocking_object
 CREATE TYPE lever_type AS ENUM ('route', 'switching_machine');
 CREATE TABLE lever
 (
-    name       VARCHAR(100) PRIMARY KEY,                     -- てこの名前
+    id         BIGINT PRIMARY KEY REFERENCES interlocking_object (id),
+    name       VARCHAR(100) UNIQUE                 NOT NULL, -- てこの名前
     station_id VARCHAR(10) REFERENCES station (id) NOT NULL, -- 所属する停車場
     type       lever_type                          NOT NULL  -- てこの種類 
 );
@@ -213,46 +214,44 @@ CREATE TABLE track_circuit_signal
 -- 各進路、転てつ機の鎖状条件(すべての鎖状条件をここにいれる)
 CREATE TABLE lock
 (
-    id                 BIGSERIAL PRIMARY KEY,
-    object_id          BIGINT REFERENCES interlocking_object (id), -- 進路、転てつ機、軌道回路のID
-    type               lock_type NOT NULL,                         -- 鎖状の種類
-    route_lock_group   INT,                                        -- 進路鎖状のグループ(カッコで囲まれてるやつを同じ数字にする)
-    or_condition_group INT                                         -- OR条件のグループ(OR条件のものを同じ数字にする)
+    id               BIGSERIAL PRIMARY KEY,
+    object_id        BIGINT REFERENCES interlocking_object (id), -- 進路、転てつ機、軌道回路のID
+    type             lock_type NOT NULL,                         -- 鎖状の種類
+    route_lock_group INT                                         -- 進路鎖状のグループ(カッコで囲まれてるやつを同じ数字にする)
 );
 CREATE INDEX lock_object_id_type_index ON lock (object_id, type);
 
--- てこ条件の詳細
 CREATE TYPE nr AS ENUM ('reversed', 'normal');
 CREATE TYPE nrc AS ENUM ('reversed', 'center', 'normal');
 CREATE TYPE raise_drop AS ENUM ('raise', 'drop');
+CREATE TYPE lock_condition_type AS ENUM ('and', 'or', 'object');
+
+-- 鎖状条件詳細(and, or, object)
 CREATE TABLE lock_condition
 (
-    id               BIGSERIAL PRIMARY KEY,
-    lock_id          BIGINT REFERENCES lock (ID),                -- 鎖状条件のID
-    type             VARCHAR(50) NOT NULL,                       -- object or timer?
-    object_id        BIGINT REFERENCES interlocking_object (id), -- 進路、転てつ機、軌道回路のID
-    timer_seconds    INT,                                        -- タイマーの秒数
-    is_reverse       nr          NOT NULL,                       -- 定反
-    is_total_control BOOLEAN     NOT NULL,                       -- 統括制御かどうか
-    is_single_lock   BOOLEAN     NOT NULL                        -- 片鎖状がどうか
+    id        BIGSERIAL PRIMARY KEY,
+    lock_id   BIGINT REFERENCES lock (ID) NOT NULL,  -- 鎖状のID(グラフの根、鎖状条件の一番上の階層)
+    parent_id BIGINT REFERENCES lock_condition (ID), -- 親のID(いれば)
+    type      lock_condition_type         NOT NULL   -- 鎖状条件の種類(and, or, object)
 );
-CREATE UNIQUE INDEX lock_condition_lock_id_index ON lock_condition (lock_id);
-
--- てこ条件のリスト
-CREATE TABLE lock_condition_execute
+CREATE INDEX lock_condition_lock_id_index ON lock_condition (lock_id);
+-- 鎖状条件のobjectの詳細
+CREATE TABLE lock_condition_object
 (
-    source_id BIGINT REFERENCES lock_condition (ID) NOT NULL,
-    target_id BIGINT REFERENCES lock_condition (ID) NOT NULL,
-    UNIQUE (source_id, target_id)
+    lock_condition_id BIGINT PRIMARY KEY REFERENCES lock_condition (ID),   -- 鎖状条件のID
+    object_id         BIGINT REFERENCES interlocking_object (id) NOT NULL, -- 進路、転てつ機、軌道回路、てこのID
+    timer_seconds     INT,                                                 -- タイマーの秒数
+    is_reverse        nr                                         NOT NULL, -- 定反
+    is_total_control  BOOLEAN                                    NOT NULL, -- 統括制御かどうか
+    is_single_lock    BOOLEAN                                    NOT NULL  -- 片鎖状がどうか    
 );
-CREATE INDEX lock_condition_execute_source_id_index ON lock_condition_execute (source_id);
 
 -- ここから状態系
 -- てこ状態
 CREATE TABLE lever_state
 (
-    name        VARCHAR(100) PRIMARY KEY REFERENCES lever (name), -- てこの名前
-    is_reversed nrc NOT NULL                                      -- てこの位置
+    id          BIGINT PRIMARY KEY REFERENCES lever (ID), -- てこのID
+    is_reversed nrc NOT NULL                              -- てこの位置
 );
 
 -- 着点ボタン状態

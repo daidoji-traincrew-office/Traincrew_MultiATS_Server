@@ -7,7 +7,9 @@ namespace Traincrew_MultiATS_Server.Models;
 public class Lever
 {
     [Key]
-    public string Name { get; set; }
-    public string StationId { get; set; }
-    public LeverType Type { get; set; }
+    public ulong Id { get; set; }
+    public string Name { get; init; }
+    public string StationId { get; init; }
+    public LeverType Type { get; init; }
+    public LeverState LeverState { get; init; }
 }

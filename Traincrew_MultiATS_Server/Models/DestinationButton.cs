@@ -7,6 +7,7 @@ namespace Traincrew_MultiATS_Server.Models;
 public class DestinationButton
 {
     [Key]
-    public string Name { get; set; }
-    public string StationId { get; set; }
+    public required string Name { get; init; }
+    public string StationId { get; init; }
+    public DestinationButtonState DestinationButtonState { get; init; }
 }
