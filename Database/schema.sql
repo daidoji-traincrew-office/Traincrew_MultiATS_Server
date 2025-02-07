@@ -116,17 +116,6 @@ CREATE TABLE destination_button
     station_id VARCHAR(10) REFERENCES station (id) NOT NULL -- 所属する停車場
 );
 
--- 進路に対するてこと着点ボタンのリスト
-CREATE TABLE route_lever_destination_button
-(
-    id                      BIGSERIAL PRIMARY KEY,
-    route_id                BIGINT REFERENCES route (ID)                      NOT NULL, -- 進路のID
-    lever_name              VARCHAR(100) REFERENCES lever (name)              NOT NULL, -- てこの名前
-    destination_button_name VARCHAR(100) REFERENCES destination_button (name) NOT NULL, -- 着点ボタンの名前
-    UNIQUE (route_id),
-    UNIQUE (lever_name, destination_button_name)
-);
-
 -- 進路
 -- 場内信号機、出発信号機、誘導信号機、入換信号機、入換標識
 CREATE TYPE route_type AS ENUM ('arriving', 'departure', 'guide', 'switch_signal', 'switch_route');
@@ -149,6 +138,17 @@ CREATE TABLE route_include
     UNIQUE (source_lever_id, target_lever_id)
 );
 CREATE INDEX route_include_source_lever_id_index ON route_include (source_lever_id);
+
+-- 進路に対するてこと着点ボタンのリスト
+CREATE TABLE route_lever_destination_button
+(
+    id                      BIGSERIAL PRIMARY KEY,
+    route_id                BIGINT REFERENCES route (ID)                      NOT NULL, -- 進路のID
+    lever_name              VARCHAR(100) REFERENCES lever (name)              NOT NULL, -- てこの名前
+    destination_button_name VARCHAR(100) REFERENCES destination_button (name) NOT NULL, -- 着点ボタンの名前
+    UNIQUE (route_id),
+    UNIQUE (lever_name, destination_button_name)
+);
 
 -- 軌道回路
 CREATE TABLE track_circuit
@@ -242,9 +242,15 @@ CREATE TABLE lock_condition_object
     object_id         BIGINT REFERENCES interlocking_object (id) NOT NULL, -- 進路、転てつ機、軌道回路、てこのID
     timer_seconds     INT,                                                 -- タイマーの秒数
     is_reverse        nr                                         NOT NULL, -- 定反
-    is_total_control  BOOLEAN                                    NOT NULL, -- 統括制御かどうか
     is_single_lock    BOOLEAN                                    NOT NULL  -- 片鎖状がどうか    
 );
+CREATE TABLE total_control
+(
+    id                BIGSERIAL PRIMARY KEY,
+    source_route_id   BIGINT REFERENCES route (id) NOT NULL UNIQUE, -- 統括制御の元となる進路
+    target_route_id   BIGINT REFERENCES route (id) NOT NULL UNIQUE  -- 統括制御の対象となる進路
+);
+-- Todo: 統括制御のテーブルを作成する
 
 -- ここから状態系
 -- てこ状態
