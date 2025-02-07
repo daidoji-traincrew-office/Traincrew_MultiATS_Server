@@ -8,7 +8,6 @@ public class LockConditionObject: LockCondition
     public InterlockingObject Object { get; set; }
     public int? TimerSeconds { get; set; }
     public NR IsReverse { get; set; }
-    public bool IsTotalControl { get; set; }
     public bool IsSingleLock { get; set; }
 }
 
