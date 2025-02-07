@@ -7,7 +7,7 @@ namespace Traincrew_MultiATS_Server.Models;
 public class RouteState
 {
     [Key]
-    public long Id { get; set; }
+    public ulong Id { get; init; }
     public bool IsLeverRelayRaised { get; set; }
     public bool IsRouteRelayRaised { get; set; }
     public bool IsSignalControlRaised { get; set; }
