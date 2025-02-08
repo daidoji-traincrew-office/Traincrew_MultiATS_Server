@@ -95,62 +95,8 @@ var openIddictBuilder = builder.Services.AddOpenIddict()
     {
         options.UseEntityFrameworkCore()
             .UseDbContext<ApplicationDbContext>();
-    })
-    // Register the OpenIddict server components.
-    .AddServer(options =>
-    {
-        // Authorizationとtokenエンドポイントを有効にする
-        options.SetAuthorizationEndpointUris("auth/authorize")
-            .SetTokenEndpointUris("token");
-
-        // AuthorizationCodeFlowとRefreshTokenFlowを有効にする
-        options.AllowAuthorizationCodeFlow()
-            .AllowRefreshTokenFlow();
-
-        // Register the signing and encryption credentials
-        if (builder.Environment.IsDevelopment())
-        {
-            options.AddDevelopmentEncryptionCertificate()
-                .AddDevelopmentSigningCertificate();
-        }
-        else
-        {
-            // Generate a certificate at startup and register it.
-            const string encryptionCertificatePath = "cert/server-encryption-certificate.pfx";
-            const string signingCertificatePath = "cert/server-signing-certificate.pfx";
-            EnsureCertificateExists(
-                encryptionCertificatePath,
-                "CN=Fabrikam Server Encryption Certificate",
-                X509KeyUsageFlags.KeyEncipherment);
-            EnsureCertificateExists(
-                signingCertificatePath,
-                "CN=Fabrikam Server Signing Certificate",
-                X509KeyUsageFlags.DigitalSignature);
-            options.AddEncryptionCertificate(
-                new X509Certificate2(encryptionCertificatePath, string.Empty));
-            options.AddSigningCertificate(
-                new X509Certificate2(signingCertificatePath, string.Empty));
-        }
-
-        // Register the ASP.NET Core host and configure the ASP.NET Core-specific options.
-        //
-        // Note: unlike other samples, this sample doesn't use token endpoint pass-through
-        // to handle token requests in a custom MVC action. As such, the token requests
-        // will be automatically handled by OpenIddict, that will reuse the identity
-        // resolved from the authorization code to produce access and identity tokens.
-        //
-        options.UseAspNetCore()
-            .EnableAuthorizationEndpointPassthrough();
-    })
-    // Register the OpenIddict validation components.
-    .AddValidation(options =>
-    {
-        // Import the configuration from the local OpenIddict server instance.
-        options.UseLocalServer();
-
-        // Register the ASP.NET Core host.
-        options.UseAspNetCore();
     });
+
 // 認証を有効にする場合の設定
 if (enableAuthorization)
 {
@@ -209,9 +155,63 @@ if (enableAuthorization)
                         .SetRedirectUri("auth/callback");
                 });
         });
-    // 認可を使う場合はDiscord BOTの起動をする
-    builder.Services.AddHostedService<DiscordBotHostedService>();
 }
+openIddictBuilder
+    // Register the OpenIddict server components.
+    .AddServer(options =>
+    {
+        // Authorizationとtokenエンドポイントを有効にする
+        options.SetAuthorizationEndpointUris("auth/authorize")
+            .SetTokenEndpointUris("token");
+
+        // AuthorizationCodeFlowとRefreshTokenFlowを有効にする
+        options.AllowAuthorizationCodeFlow()
+            .AllowRefreshTokenFlow();
+
+        // Register the signing and encryption credentials
+        if (builder.Environment.IsDevelopment())
+        {
+            options.AddDevelopmentEncryptionCertificate()
+                .AddDevelopmentSigningCertificate();
+        }
+        else
+        {
+            // Generate a certificate at startup and register it.
+            const string encryptionCertificatePath = "cert/server-encryption-certificate.pfx";
+            const string signingCertificatePath = "cert/server-signing-certificate.pfx";
+            EnsureCertificateExists(
+                encryptionCertificatePath,
+                "CN=Fabrikam Server Encryption Certificate",
+                X509KeyUsageFlags.KeyEncipherment);
+            EnsureCertificateExists(
+                signingCertificatePath,
+                "CN=Fabrikam Server Signing Certificate",
+                X509KeyUsageFlags.DigitalSignature);
+            options.AddEncryptionCertificate(
+                new X509Certificate2(encryptionCertificatePath, string.Empty));
+            options.AddSigningCertificate(
+                new X509Certificate2(signingCertificatePath, string.Empty));
+        }
+
+        // Register the ASP.NET Core host and configure the ASP.NET Core-specific options.
+        //
+        // Note: unlike other samples, this sample doesn't use token endpoint pass-through
+        // to handle token requests in a custom MVC action. As such, the token requests
+        // will be automatically handled by OpenIddict, that will reuse the identity
+        // resolved from the authorization code to produce access and identity tokens.
+        //
+        options.UseAspNetCore()
+            .EnableAuthorizationEndpointPassthrough();
+    })
+    // Register the OpenIddict validation components.
+    .AddValidation(options =>
+    {
+        // Import the configuration from the local OpenIddict server instance.
+        options.UseLocalServer();
+
+        // Register the ASP.NET Core host.
+        options.UseAspNetCore();
+    });
 
 builder.Services.AddAuthorization();
 builder.Services.AddAuthorizationBuilder()
@@ -278,7 +278,11 @@ builder.Services
 // HostedServiceまわり
 builder.Services
     .AddHostedService<InitDbHostedService>();
-
+if (enableAuthorization)
+{
+    // 認可を使う場合はDiscord BOTの起動をする
+    builder.Services.AddHostedService<DiscordBotHostedService>();
+}
 
 var app = builder.Build();
 
