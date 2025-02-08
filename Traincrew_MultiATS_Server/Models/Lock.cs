@@ -10,7 +10,7 @@ public class Lock
     [Key] 
     public ulong Id { get; set; }
     public ulong ObjectId { get; set; }
+    public InterlockingObject Object { get; set; }
     public LockType Type { get; set; }
-    public virtual LockCondition LockCondition { get; set; }
+    public int? RouteLockGroup { get; set; }
 }
-

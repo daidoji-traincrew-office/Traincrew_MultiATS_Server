@@ -35,6 +35,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasOne(tc => tc.TrackCircuitState)
             .WithOne(tcs => tcs.TrackCircuit)
             .HasForeignKey<TrackCircuitState>(tcs => tcs.Id);
+        /*
         modelBuilder.Entity<Lock>()
             .HasOne(l => l.LockCondition)
             .WithOne(lc => lc.Lock)
@@ -43,6 +44,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasOne(lc => lc.targetObject)
             .WithMany(obj => obj.LockConditions)
             .HasForeignKey(lc => lc.ObjectId);
+        */
         modelBuilder.Entity<Signal>()
             .HasOne(s => s.Type)
             .WithMany()

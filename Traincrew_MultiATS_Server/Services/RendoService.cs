@@ -1,6 +1,5 @@
 ﻿//※DB取得・設定は失敗時速やかに早期リターン
 
-using System.Diagnostics;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
 using Traincrew_MultiATS_Server.Repositories.LockCondition;
@@ -66,96 +65,96 @@ public class RendoService(
     /// </summary>
     private async Task SetRoute(Route route)
     {
-        //DB取得:stationID,nameが総括制御するてこの一覧を取得
-        // Todo: ここワンチャン統合できるかも？
-        // Todo: これ鎖状タイプ何？
-        //DB設定:stationID,nameが総括制御するてこの内部してほしい状態を反位に設定する
-
-        //stationID,nameの信号制御の一覧を取得
-        var rendoExecuteList = await lockConditionRepository
-            .GetConditionsByObjectIdAndType(route.Id, LockType.SignalControl);
-        // 該当オブジェクトを取得
-        var objectIds = rendoExecuteList
-            .Where(x => x.ObjectId.HasValue)
-            .Select(x => x.ObjectId.Value);
-        var objectList = await interlockingObjectRepository
-            .GetObjectByIdsWithState(objectIds);
-        var objectMap = objectList.ToDictionary(x => x.Id);
-        // Todo: 各オブジェクトの鎖状状態を取得する処理を追加
-
-        var switchingMachineMoveList = new List<(ulong, NR)>();
-        foreach (var lockCondition in rendoExecuteList)
-        {
-            switch (lockCondition.Type)
-            {
-                //lockCondition.type：鎖錠テーブルの各要素の種類    
-                //lockCondtion.teihan：鎖錠テーブルの各要素の目的定反状態
-                case "object":
-                    Debug.Assert(lockCondition.ObjectId != null, "lockCondition.type is object but lockCondition.ObjectId is null");
-                    // 該当オブジェクト
-                    var targetObject = objectMap[lockCondition.ObjectId.Value];
-                    switch (targetObject)
-                    {
-                        case TrackCircuit trackCircuit:
-                            //軌道回路要素のとき
-                            //Todo: DB取得:rendoExecute.idの軌道回路の鎖錠状態を取得
-                            var trackLock = NR.Normal;
-                            //DB取得:rendoExecute.idの軌道回路の短絡状態を取得          
-                            var trackOn = trackCircuit.TrackCircuitState.IsShortCircuit;
-                            if (trackLock != lockCondition.IsReverse || trackOn) return;
-                            break;
-                        case SwitchingMachine switchingMachine:
-                            //転てつ器要素のとき
-                            //後で転換するので、転換すべき転てつ器の情報をまとめておく
-                            switchingMachineMoveList.Add((switchingMachine.Id, lockCondition.IsReverse));
-                            break;
-                        default:
-                            // Routeの場合？
-                            //Todo: DB取得:rendoExecute.idのてこの定反状態を取得      
-                            var otherTeihan = NR.Normal;
-                            if (otherTeihan != lockCondition.IsReverse)
-                                //Todo: DB設定:rendoExecute.idに定反転換指令を出す
-                                return;
-                            break;
-                    }
-
-                    break;
-                case "timer":
-                    // Todo: どうする？
-                    break;
-            }
-        }
-
-        var AllPoint = false;
-        foreach (var (id, isReverse) in switchingMachineMoveList)
-        {
-            // Todo: 転轍機処理をSwitchingMachineServiceに移動
-            /*
-            var switchingMachine = objectMap[id] as SwitchingMachine;
-            Debug.Assert(switchingMachine != null, "object is not SwitchingMachine"); 
-            //DB取得:point.idのてこの定反状態を取得     
-            var pointTeihan = switchingMachine.SwitchingMachineState.IsReverse;
-            if (pointTeihan != point.Item3)
-            {
-                //DB設定:point.id内部指示をpoint.Item3へ変更      
-                AllPoint = true;
-            }
-            */ 
-        }
-
-        //ポイント転換確認
-        if (AllPoint) return;
-
-        // Todo: 鎖状状態リストを作成
-        foreach (var rendoExecute in rendoExecuteList)
-        {
-            //rendoExecute.type：鎖錠テーブルの各要素の種類    
-            //rendoExecute.name：鎖錠テーブルの各要素の種類            
-            //rendoExecute.id：鎖錠テーブルの各要素のid         
-
-            //DB設定:rendoExecute.idを鎖錠
-        }
-        // Todo: 最後にDB設定鎖状状態リストをInsert
+        // //DB取得:stationID,nameが総括制御するてこの一覧を取得
+        // // Todo: ここワンチャン統合できるかも？
+        // // Todo: これ鎖状タイプ何？
+        // //DB設定:stationID,nameが総括制御するてこの内部してほしい状態を反位に設定する
+        //
+        // //stationID,nameの信号制御の一覧を取得
+        // var rendoExecuteList = await lockConditionRepository
+        //     .GetConditionsByObjectIdAndType(route.Id, LockType.SignalControl);
+        // // 該当オブジェクトを取得
+        // var objectIds = rendoExecuteList
+        //     .Where(x => x.ObjectId.HasValue)
+        //     .Select(x => x.ObjectId.Value);
+        // var objectList = await interlockingObjectRepository
+        //     .GetObjectByIdsWithState(objectIds);
+        // var objectMap = objectList.ToDictionary(x => x.Id);
+        // // Todo: 各オブジェクトの鎖状状態を取得する処理を追加
+        //
+        // var switchingMachineMoveList = new List<(ulong, NR)>();
+        // foreach (var lockCondition in rendoExecuteList)
+        // {
+        //     switch (lockCondition.Type)
+        //     {
+        //         //lockCondition.type：鎖錠テーブルの各要素の種類    
+        //         //lockCondtion.teihan：鎖錠テーブルの各要素の目的定反状態
+        //         case "object":
+        //             Debug.Assert(lockCondition.ObjectId != null, "lockCondition.type is object but lockCondition.ObjectId is null");
+        //             // 該当オブジェクト
+        //             var targetObject = objectMap[lockCondition.ObjectId.Value];
+        //             switch (targetObject)
+        //             {
+        //                 case TrackCircuit trackCircuit:
+        //                     //軌道回路要素のとき
+        //                     //Todo: DB取得:rendoExecute.idの軌道回路の鎖錠状態を取得
+        //                     var trackLock = NR.Normal;
+        //                     //DB取得:rendoExecute.idの軌道回路の短絡状態を取得          
+        //                     var trackOn = trackCircuit.TrackCircuitState.IsShortCircuit;
+        //                     if (trackLock != lockCondition.IsReverse || trackOn) return;
+        //                     break;
+        //                 case SwitchingMachine switchingMachine:
+        //                     //転てつ器要素のとき
+        //                     //後で転換するので、転換すべき転てつ器の情報をまとめておく
+        //                     switchingMachineMoveList.Add((switchingMachine.Id, lockCondition.IsReverse));
+        //                     break;
+        //                 default:
+        //                     // Routeの場合？
+        //                     //Todo: DB取得:rendoExecute.idのてこの定反状態を取得      
+        //                     var otherTeihan = NR.Normal;
+        //                     if (otherTeihan != lockCondition.IsReverse)
+        //                         //Todo: DB設定:rendoExecute.idに定反転換指令を出す
+        //                         return;
+        //                     break;
+        //             }
+        //
+        //             break;
+        //         case "timer":
+        //             // Todo: どうする？
+        //             break;
+        //     }
+        // }
+        //
+        // var AllPoint = false;
+        // foreach (var (id, isReverse) in switchingMachineMoveList)
+        // {
+        //     // Todo: 転轍機処理をSwitchingMachineServiceに移動
+        //     /*
+        //     var switchingMachine = objectMap[id] as SwitchingMachine;
+        //     Debug.Assert(switchingMachine != null, "object is not SwitchingMachine"); 
+        //     //DB取得:point.idのてこの定反状態を取得     
+        //     var pointTeihan = switchingMachine.SwitchingMachineState.IsReverse;
+        //     if (pointTeihan != point.Item3)
+        //     {
+        //         //DB設定:point.id内部指示をpoint.Item3へ変更      
+        //         AllPoint = true;
+        //     }
+        //     */ 
+        // }
+        //
+        // //ポイント転換確認
+        // if (AllPoint) return;
+        //
+        // // Todo: 鎖状状態リストを作成
+        // foreach (var rendoExecute in rendoExecuteList)
+        // {
+        //     //rendoExecute.type：鎖錠テーブルの各要素の種類    
+        //     //rendoExecute.name：鎖錠テーブルの各要素の種類            
+        //     //rendoExecute.id：鎖錠テーブルの各要素のid         
+        //
+        //     //DB設定:rendoExecute.idを鎖錠
+        // }
+        // // Todo: 最後にDB設定鎖状状態リストをInsert
     }
 
     /// <summary>
