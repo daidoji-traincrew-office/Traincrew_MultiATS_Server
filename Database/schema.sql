@@ -233,6 +233,7 @@ CREATE TYPE nr AS ENUM ('reversed', 'normal');
 CREATE TYPE nrc AS ENUM ('reversed', 'center', 'normal');
 CREATE TYPE raise_drop AS ENUM ('raise', 'drop');
 CREATE TYPE lock_condition_type AS ENUM ('and', 'or', 'object');
+CREATE TYPE lcr as ENUM('left', 'center', 'right');
 
 -- 鎖状条件詳細(and, or, object)
 CREATE TABLE lock_condition
@@ -265,7 +266,7 @@ CREATE TABLE total_control
 CREATE TABLE lever_state
 (
     id          BIGINT PRIMARY KEY REFERENCES lever (ID), -- てこのID
-    is_reversed nrc NOT NULL                              -- てこの位置
+    is_reversed lcr NOT NULL                              -- てこの位置
 );
 
 -- 着点ボタン状態
