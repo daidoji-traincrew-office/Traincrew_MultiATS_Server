@@ -60,6 +60,7 @@ file class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Cancel
                 TrackCircuitState = new()
                 {
                     IsShortCircuit = false,
+                    IsLocked = false,
                     TrainNumber = ""
                 }
             });
