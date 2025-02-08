@@ -86,15 +86,15 @@ CREATE TABLE station
     is_passenger_station BOOLEAN      NOT NULL  -- 旅客駅かどうか
 );
 
-CREATE TYPE object_type AS ENUM ('route', 'switching_machine', 'track_circuit');
+CREATE TYPE object_type AS ENUM ('route', 'switching_machine', 'track_circuit', 'lever');
 
--- object(進路、転てつ機、軌道回路)を表す
--- 以上3つのIDの一元管理を行う
+-- object(進路、転てつ機、軌道回路、てこ)を表す
+-- 以上4つのIDの一元管理を行う
 -- Todo: 命名を連動オブジェクトなどに変更する
 CREATE TABLE interlocking_object
 (
     id          BIGSERIAL PRIMARY KEY,
-    type        object_type  NOT NULL,        -- 進路、転てつ機、軌道回路
+    type        object_type  NOT NULL,        -- 進路、転てつ機、軌道回路、てこ
     name        VARCHAR(100) NOT NULL UNIQUE, -- 名前
     description TEXT                          -- 説明
 );
@@ -112,9 +112,7 @@ CREATE TYPE lever_type AS ENUM ('route', 'switching_machine');
 CREATE TABLE lever
 (
     id         BIGINT PRIMARY KEY REFERENCES interlocking_object (id),
-    name       VARCHAR(100) UNIQUE                 NOT NULL, -- てこの名前
-    station_id VARCHAR(10) REFERENCES station (id) NOT NULL, -- 所属する停車場
-    type       lever_type                          NOT NULL  -- てこの種類 
+    lever_type lever_type NOT NULL -- てこの種類 
 );
 
 -- 着点ボタン
@@ -152,10 +150,10 @@ CREATE TABLE route_lever_destination_button
 (
     id                      BIGSERIAL PRIMARY KEY,
     route_id                BIGINT REFERENCES route (ID)                      NOT NULL, -- 進路のID
-    lever_name              VARCHAR(100) REFERENCES lever (name)              NOT NULL, -- てこの名前
+    lever_id                BIGINT REFERENCES lever (ID)                      NOT NULL, -- てこのID
     destination_button_name VARCHAR(100) REFERENCES destination_button (name) NOT NULL, -- 着点ボタンの名前
     UNIQUE (route_id),
-    UNIQUE (lever_name, destination_button_name)
+    UNIQUE (lever_id, destination_button_name)
 );
 
 -- 軌道回路
@@ -233,7 +231,7 @@ CREATE TYPE nr AS ENUM ('reversed', 'normal');
 CREATE TYPE nrc AS ENUM ('reversed', 'center', 'normal');
 CREATE TYPE raise_drop AS ENUM ('raise', 'drop');
 CREATE TYPE lock_condition_type AS ENUM ('and', 'or', 'object');
-CREATE TYPE lcr as ENUM('left', 'center', 'right');
+CREATE TYPE lcr as ENUM ('left', 'center', 'right');
 
 -- 鎖状条件詳細(and, or, object)
 CREATE TABLE lock_condition
