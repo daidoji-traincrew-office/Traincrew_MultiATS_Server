@@ -30,11 +30,34 @@ file class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Cancel
 {
     internal async Task Initialize()
     {
+        await InitStation();
         await InitTrackCircuit();
         await InitSignalType();
         await InitSignal();
         await InitNextSignal();
         await InitTrackCircuitSignal();
+    }
+
+    private async Task InitStation()
+    {
+        var stationNames = (await context.Stations
+            .Select(s => s.Name)
+            .ToListAsync(cancellationToken)).ToHashSet();
+        foreach (var station in DBBase.stationList)
+        {
+            if (stationNames.Contains(station.Name))
+            {
+                continue;
+            }
+
+            context.Stations.Add(new()
+            {
+                Id = station.Id,
+                Name = station.Name,
+                IsStation = station.IsStation,
+                IsPassengerStation = station.IsPassengerStation
+            });
+        }
     }
 
     private async Task InitTrackCircuit()

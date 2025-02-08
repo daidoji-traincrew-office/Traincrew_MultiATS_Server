@@ -7,16 +7,16 @@ public class JsonTrackCircuitData : TrackCircuitData
     public List<string> NextSignalNamesDown { get; init; } = [];
 }
 
-public class JsonSignalData: SignalData
+public class JsonSignalData : SignalData
 {
     public string TypeName { get; init; }
     public List<string>? NextSignalNames { get; init; } = null;
 }
 
-
 public class DBBasejson
 {
-    public List<JsonTrackCircuitData> trackCircuitList {get; set;}
-    public List<JsonSignalData> signalDataList {get; set;}
+    public List<Station> stationList { get; set; }
+    public List<JsonTrackCircuitData> trackCircuitList { get; set; }
+    public List<JsonSignalData> signalDataList { get; set; }
     public List<SignalTypeData> signalTypeList { get; set; }
 }

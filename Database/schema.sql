@@ -80,8 +80,10 @@ CREATE UNIQUE INDEX "IX_OpenIddictTokens_reference_id" ON "OpenIddictTokens" (re
 -- 停車場を表す
 CREATE TABLE station
 (
-    id   VARCHAR(10) PRIMARY KEY,
-    name VARCHAR(100) NOT NULL UNIQUE
+    id                   VARCHAR(10) PRIMARY KEY,
+    name                 VARCHAR(100) NOT NULL UNIQUE,
+    is_station           BOOLEAN      NOT NULL, -- 停車場かどうか
+    is_passenger_station BOOLEAN      NOT NULL  -- 旅客駅かどうか
 );
 
 CREATE TYPE object_type AS ENUM ('route', 'switching_machine', 'track_circuit');
@@ -92,12 +94,18 @@ CREATE TYPE object_type AS ENUM ('route', 'switching_machine', 'track_circuit');
 CREATE TABLE interlocking_object
 (
     id          BIGSERIAL PRIMARY KEY,
-    type        object_type  NOT NULL,               -- 進路、転てつ機、軌道回路
-    name        VARCHAR(100) NOT NULL,               -- 名前
-    station_id  VARCHAR(10) REFERENCES station (id), -- 所属する停車場
-    description TEXT,                                -- 説明
-    UNIQUE (station_id, name)
+    type        object_type  NOT NULL,        -- 進路、転てつ機、軌道回路
+    name        VARCHAR(100) NOT NULL UNIQUE, -- 名前
+    description TEXT                          -- 説明
 );
+
+CREATE TABLE station_interlocking_object
+(
+    station_id VARCHAR(10) REFERENCES station (id)        NOT NULL,
+    object_id  BIGINT REFERENCES interlocking_object (id) NOT NULL,
+    UNIQUE (station_id, object_id)
+);
+CREATE INDEX station_interlocking_object_station_id_index ON station_interlocking_object (station_id);
 
 -- てこ
 CREATE TYPE lever_type AS ENUM ('route', 'switching_machine');
@@ -246,9 +254,9 @@ CREATE TABLE lock_condition_object
 );
 CREATE TABLE total_control
 (
-    id                BIGSERIAL PRIMARY KEY,
-    source_route_id   BIGINT REFERENCES route (id) NOT NULL UNIQUE, -- 統括制御の元となる進路
-    target_route_id   BIGINT REFERENCES route (id) NOT NULL UNIQUE  -- 統括制御の対象となる進路
+    id              BIGSERIAL PRIMARY KEY,
+    source_route_id BIGINT REFERENCES route (id) NOT NULL UNIQUE, -- 統括制御の元となる進路
+    target_route_id BIGINT REFERENCES route (id) NOT NULL UNIQUE  -- 統括制御の対象となる進路
 );
 -- Todo: 統括制御のテーブルを作成する
 

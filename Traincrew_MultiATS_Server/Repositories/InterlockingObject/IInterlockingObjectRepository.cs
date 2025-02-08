@@ -15,5 +15,5 @@ public interface IInterlockingObjectRepository
      * @return 軌道回路、進路、転轍機リスト
      */
     public Task<List<Models.InterlockingObject>> GetObjectByIdsWithState(IEnumerable<ulong> ids);
-    public Task<Models.InterlockingObject> GetObject(string stationId, string name);
+    public Task<Models.InterlockingObject> GetObject(string name);
 }
