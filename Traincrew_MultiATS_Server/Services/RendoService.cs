@@ -26,7 +26,7 @@ public class RendoService(
 
         foreach (var RouteLeverDestinationButton in RouteLeverDestinationButtonList)
         {
-            // Todo: 鎖錠確認
+            // Todo: 鎖錠確認 進路の鎖錠欄の条件を満たしていない場合早期continue
 
             // Todo: CTC制御状態を確認する(CHR相当)
 
