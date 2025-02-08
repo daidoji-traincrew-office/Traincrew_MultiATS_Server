@@ -15,49 +15,56 @@ public class RendoService(
     ILockConditionRepository lockConditionRepository)
 {
     /// <summary>
-    ///     指示受付部
+    /// <strong>てこリレー回路</strong><br/>
+    /// てこやボタンの状態から、確保するべき進路を決定する。
     /// </summary>
-    /// <param name="stationId">駅ID</param>
-    /// <param name="name">てこ名称</param>
-    /// <param name="isR">定位反位</param>
-    public async Task SetTekoState(string stationId, string name, bool isR)
+    /// <returns></returns>
+    public async Task LevertoRouteState()
     {
-        //DB取得:stationIDの連動表情報取得　なかったら早期リターン
-        // Todo: NotFoundの場合の処理を追加
-        var rendoObj = await interlockingObjectRepository.GetObject(name);
+        // Todo: RouteLeverDestinationButtonを全取得
+        var RouteLeverDestinationButtonList = new List<RouteLeverDestinationButton>();
 
-        switch (rendoObj)
+        foreach (var RouteLeverDestinationButton in RouteLeverDestinationButtonList)
         {
-            //進路てこ
-            case Route route when isR:
-                await SetRoute(route);
-                break;
-            case Route route:
-                await ResetRoute(route);
-                break;
-            case SwitchingMachine:
-                //転てつてこ
-                break;
-            default:
-                //未定義type
-                Console.WriteLine("SetTekoState:未定義typeのてこを扱った");
-                return;
-        }
+            // Todo: 鎖錠確認
 
-        /*
-        switch (targetRendoTableObjType)
-        {
-            case "DirectionTeko":
-                //方向てこ
-                break;
-            case "AutoTeko":
-                //自動制御てこ・CTC切替てこ
-                break;
-            case "DirectionOpen":
-                //開放てこ
-                break;
+            // Todo: CTC制御状態を確認する(CHR相当)
+
+            // Todo:  RouteLeverDestinationButton.RouteIdの進路のRouteState.IsLeverRelayRaisedを取得
+            var isLeverRelayRaised = false;
+
+            // Todo: RouteLeverDestinationButton.LeverNameのレバー状態を取得
+            var leverState = LCR.Center;
+
+            if (leverState == LCR.Center)
+            {
+                if (isLeverRelayRaised)
+                {
+                    isLeverRelayRaised = false;
+                }
+                continue;
+            }
+            else if (leverState == LCR.Left || leverState == LCR.Right)
+            {
+                if (isLeverRelayRaised)
+                {
+                    continue;
+                }
+                // Todo: RouteLeverDestinationButton.DestinationButtonNameのDestinationButtonState.IsRaisedを取得
+                var isRaised = false;
+                if (isRaised)
+                {
+                    isLeverRelayRaised = true;
+                }
+            }
+            // Todo: RouteLeverDestinationButton.RouteIdの進路のRouteState.IsLeverRelayRaisedに変化あればisLeverRelayRaised代入
+
+            //ここから仮コード　本番に残さない
+
+            // Todo: RouteLeverDestinationButton.RouteIdの進路のRouteState.IsSignalControlRaisedに変化あればisLeverRelayRaised代入
+
+            //仮コードここまで
         }
-        */
     }
 
     /// <summary>
@@ -275,6 +282,6 @@ public class RendoService(
         //     //DB設定:stationID,nameの転換状態を転換終了時刻を現在時刻+転換必要時間に設定  
         // }
     }
-    
-    
+
+
 }
