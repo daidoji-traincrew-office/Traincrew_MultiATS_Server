@@ -1,21 +1,18 @@
-using Discord;
 using Discord.Rest;
 using Traincrew_MultiATS_Server.Exception.DiscordAuthenticationException;
 using Traincrew_MultiATS_Server.Models;
+using Traincrew_MultiATS_Server.Repositories.Discord;
 
 namespace Traincrew_MultiATS_Server.Services;
 
-public class DiscordService(IConfiguration configuration)
+public class DiscordService(IConfiguration configuration, IDiscordRepository discordRepository)
 {
+
     public async Task<(RestGuildUser, TraincrewRole)> DiscordAuthentication(string token)
     {
-        var guildId = configuration.GetValue<ulong>("Discord:GuildId");
         var beginnerRoleId = configuration.GetValue<ulong>("Discord:Roles:Beginner");
-        await using var client = new DiscordRestClient();
-        await client.LoginAsync(TokenType.Bearer, token);
-
+        var member =  await discordRepository.GetMemberByToken(token);
         // 運転会サーバーに所属しているか確認
-        var member = await client.GetCurrentUserGuildMemberAsync(guildId);
         if (member is null)
         {
             throw new DiscordAuthenticationException("You are not a member of the specific server.");
@@ -27,17 +24,26 @@ public class DiscordService(IConfiguration configuration)
             throw new DiscordAuthenticationException("You don't have the required role.");
         }
 
-        return (member, GetRole(member));
+        return (member, GetRole(member.RoleIds));
     }
 
-    private TraincrewRole GetRole(RestGuildUser member)
+    public async Task<TraincrewRole> GetRoleByMemberId(ulong memberId)
     {
-        var roleIds = new HashSet<ulong>(member.RoleIds);
+        // Todo: 本来はサーバー起動時にするべき
+        await discordRepository.Initialize().WaitAsync(TimeSpan.FromSeconds(1));
+        var member = await discordRepository.GetMember(memberId);
+        var roles = member.Roles.Select(role => role.Id).ToList();
+        return GetRole(roles);
+    }
+
+    private TraincrewRole GetRole(IReadOnlyCollection<ulong> roleIds)
+    {
+        var roleIdSet = new HashSet<ulong>(roleIds);
         var result = new TraincrewRole
         {
-            IsDriver = configuration.GetSection("Discord:Roles:Driver").Get<ulong[]>().Any(roleIds.Contains),
-            IsCommander = configuration.GetSection("Discord:Roles:Commander").Get<ulong[]>().Any(roleIds.Contains),
-            IsSignalman = configuration.GetSection("Discord:Roles:Signalman").Get<ulong[]>().Any(roleIds.Contains)
+            IsDriver = configuration.GetSection("Discord:Roles:Driver").Get<ulong[]>().Any(roleIdSet.Contains),
+            IsCommander = configuration.GetSection("Discord:Roles:Commander").Get<ulong[]>().Any(roleIdSet.Contains),
+            IsSignalman = configuration.GetSection("Discord:Roles:Signalman").Get<ulong[]>().Any(roleIdSet.Contains)
         };
         return result;
     }

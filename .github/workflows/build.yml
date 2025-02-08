@@ -1,8 +1,10 @@
-﻿on:
+﻿name: Build and push
+on:
   workflow_dispatch:  {}
   push:
     branches:
       - main
+      - feature/closure_signal
 
 jobs:
     build:
@@ -10,7 +12,10 @@ jobs:
         steps:
         - name: Checkout
           uses: actions/checkout@v2
-        
+        - name: Extract branch name
+          shell: bash
+          run: echo "branch=$(echo ${GITHUB_REF#refs/heads/} | sed 's|/|_|g')" >> $GITHUB_OUTPUT
+          id: extract_branch
         - name: Set up QEMU
           uses: docker/setup-qemu-action@v3.2.0
         
@@ -27,7 +32,7 @@ jobs:
           with:
             push: true
             platforms: linux/amd64,linux/arm64
-            tags: ${{ secrets.HARBOR_ENDPOINT }}
+            tags: "${{ secrets.HARBOR_ENDPOINT }}:${{ steps.extract_branch.outputs.branch }}"
             cache-from: type=gha
             cache-to: type=gha,mode=max
         
