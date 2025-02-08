@@ -7,11 +7,9 @@ namespace Traincrew_MultiATS_Server.Models;
 public class StationInterlockingObject
 {
     [Key]
-    [Column(Order = 0)]
     public required string StationId { get; set; }
 
     [Key]
-    [Column(Order = 1)]
     public required ulong ObjectId { get; set; }
 
     [ForeignKey("StationId")]

@@ -80,8 +80,10 @@ CREATE UNIQUE INDEX "IX_OpenIddictTokens_reference_id" ON "OpenIddictTokens" (re
 -- 停車場を表す
 CREATE TABLE station
 (
-    id   VARCHAR(10) PRIMARY KEY,
-    name VARCHAR(100) NOT NULL UNIQUE
+    id                   VARCHAR(10) PRIMARY KEY,
+    name                 VARCHAR(100) NOT NULL UNIQUE,
+    is_station           BOOLEAN      NOT NULL, -- 停車場かどうか
+    is_passenger_station BOOLEAN      NOT NULL  -- 旅客駅かどうか
 );
 
 CREATE TYPE object_type AS ENUM ('route', 'switching_machine', 'track_circuit');
