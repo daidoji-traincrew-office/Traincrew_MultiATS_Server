@@ -20,3 +20,6 @@ Traincrew_MultiATS_Server/appsettings.Development.json
 /Traincrew_MultiATS_Server
 /Traincrew_MultiATS_Server/Traincrew_MultiATS_Server.csproj.user
 /.gitignore
+data/
+Migrations/
+.DS_Store
