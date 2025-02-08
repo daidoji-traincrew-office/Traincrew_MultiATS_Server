@@ -18,6 +18,10 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<NextSignal> NextSignals { get; set; }
     public DbSet<TrackCircuitSignal> TrackCircuitSignals { get; set; }
     public DbSet<ProtectionZoneState> protectionZoneStates{ get; set; }
+    public DbSet<RouteLeverDestinationButton> RouteLeverDestinationButton { get; set; }
+    public DbSet<Button> Buttons { get; set; }
+    public DbSet<ButtonState> ButtonStates { get; set; }
+    
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

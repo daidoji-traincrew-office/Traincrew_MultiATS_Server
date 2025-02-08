@@ -8,5 +8,5 @@ public class LeverState
 {
     [Key]
     public ulong Id { get; set; }
-    public NRC IsReversed { get; set; }
+    public LCR IsReversed { get; set; }
 }

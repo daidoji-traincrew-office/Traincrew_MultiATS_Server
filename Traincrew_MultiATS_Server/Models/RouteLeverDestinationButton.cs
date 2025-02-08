@@ -8,7 +8,7 @@ public class RouteLeverDestinationButton
 {
     [Key]
     public ulong Id { get; set; }
-    public long RouteId { get; set; }
-    public string LeverName { get; set; }
+    public ulong RouteId { get; set; }
+    public ulong LeverId { get; set; }
     public string DestinationButtonName { get; set; }
 }
