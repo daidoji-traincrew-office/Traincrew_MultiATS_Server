@@ -19,7 +19,7 @@ public class RendoService(
     /// てこやボタンの状態から、確保するべき進路を決定する。
     /// </summary>
     /// <returns></returns>
-    public async Task LevertoRouteState()
+    private async Task LevertoRouteState()
     {
         // Todo: RouteLeverDestinationButtonを全取得
         var RouteLeverDestinationButtonList = new List<RouteLeverDestinationButton>();
@@ -61,9 +61,74 @@ public class RendoService(
 
             //ここから仮コード　本番に残さない
 
-            // Todo: RouteLeverDestinationButton.RouteIdの進路のRouteState.IsSignalControlRaisedに変化あればisLeverRelayRaised代入
+            //第二段階用
+            // Todo: [繋ぎ込み]RouteLeverDestinationButton.RouteIdの進路のRouteState.IsSignalControlRaisedに変化あればIsRouteRelayRaised代入
+
+            //第一段階用
+            // Todo: [繋ぎ込み]RouteLeverDestinationButton.RouteIdの進路のRouteState.IsSignalControlRaisedに変化あればisLeverRelayRaised代入
 
             //仮コードここまで
+        }
+    }
+
+    /// <summary>
+    /// <strong>進路照査リレー回路</strong><br/>
+    /// 現在の状態から、進路が確保されているか決定する。
+    /// </summary>
+    /// <returns></returns>   
+    public async Task RouteRelay()
+    {
+        // Todo: 何らかの形で全進路のリストが取れたとし、そのforeach内を想定
+
+        foreach (var hogehoge in hogeList)
+        {
+            // Todo: [繋ぎ込み]進路のRouteState.IsLeverRelayRaisedを取得   
+            var isLeverRelayRaised = false;
+            if (!isLeverRelayRaised)
+            {
+                continue;
+            }
+
+            // Todo: [繋ぎ込み]進路の鎖錠欄の条件を満たしているかを取得(転轍器では、目的方向で鎖錠・進路ではその進路のIsRouteRelayRaisedがFalse)   
+            var lockState = true;
+            if (!lockState)
+            {
+                continue;
+            }
+
+            // Todo: [繋ぎ込み]進路の信号制御欄の条件を満たしているか確認  
+            var signalControlState = true;
+            if (!signalControlState)
+            {
+                continue;
+            }
+
+
+            // Todo: 鎖錠確認 進路の鎖錠欄の条件を満たしていない場合早期continue
+        }
+    }
+
+    /// <summary>
+    /// <strong>信号制御リレー回路</strong><br/>
+    /// 現在の状態から、進行を指示する信号を現示してよいか決定する。
+    /// </summary>
+    /// <returns></returns>
+    public async Task SignalControl()
+    {
+        // Todo: 何らかの形で全進路のリストと紐づく信号機が取れたとし、そのforeach内を想定
+
+        foreach (var hogehoge in hogeList)
+        {
+            // Todo: [繋ぎ込み]進路のRouteState.IsRouteRelayRaisedを取得   
+            var isRouteRelayRaised = false;
+            if (!isRouteRelayRaised)
+            {
+                continue;
+            }
+
+            // Todo: [繋ぎ込み]進路の鎖錠欄のうち転轍器のてっさ鎖錠がかかっているか
+
+            // Todo: 鎖錠確認 進路の鎖錠欄の条件を満たしていない場合早期continue
         }
     }
 
