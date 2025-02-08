@@ -17,8 +17,6 @@ Traincrew_MultiATS_Server/appsettings.Development.json
 /.vs/Traincrew_MultiATS_Server/v17/.wsuo
 /.vs/Traincrew_MultiATS_Server/v17/DocumentLayout.backup.json
 /.vs/Traincrew_MultiATS_Server/v17/DocumentLayout.json
-/Traincrew_MultiATS_Server
-/Traincrew_MultiATS_Server/Traincrew_MultiATS_Server.csproj.user
 /.gitignore
 data/
 Migrations/
