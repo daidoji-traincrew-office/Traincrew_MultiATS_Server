@@ -113,6 +113,7 @@ CREATE TABLE lever
 (
     id         BIGINT PRIMARY KEY REFERENCES interlocking_object (id),
     lever_type lever_type NOT NULL -- てこの種類 
+    -- Todo: 転てつ機用のカラムを追加する
 );
 
 -- 着点ボタン
@@ -251,13 +252,24 @@ CREATE TABLE lock_condition_object
     is_reverse        nr                                         NOT NULL, -- 定反
     is_single_lock    BOOLEAN                                    NOT NULL  -- 片鎖状がどうか    
 );
+-- 統括制御テーブル
 CREATE TABLE total_control
 (
     id              BIGSERIAL PRIMARY KEY,
     source_route_id BIGINT REFERENCES route (id) NOT NULL UNIQUE, -- 統括制御の元となる進路
     target_route_id BIGINT REFERENCES route (id) NOT NULL UNIQUE  -- 統括制御の対象となる進路
 );
--- Todo: 統括制御のテーブルを作成する
+
+-- 転てつ機に対して要求元進路と要求向きのリスト
+CREATE TABLE switching_machine_route
+(
+    id                   BIGSERIAL PRIMARY KEY,
+    switching_machine_id BIGINT REFERENCES switching_machine (id) NOT NULL, -- 転てつ機のID
+    route_id             BIGINT REFERENCES route (id)             NOT NULL, -- 進路のID
+    is_reverse           nr                                       NOT NULL,  -- 定反
+    UNIQUE (switching_machine_id, route_id)
+);
+CREATE INDEX switching_machine_route_switching_machine_id_index ON switching_machine_route (switching_machine_id);
 
 -- ここから状態系
 -- てこ状態
@@ -292,7 +304,6 @@ CREATE TABLE switching_machine_state
     id                BIGINT PRIMARY KEY REFERENCES switching_machine (ID), -- 転てつ機のID
     is_switching      BOOLEAN NOT NULL,                                     -- 転換中
     is_reverse        nr      NOT NULL,                                     -- 定反
-    is_lever_reversed nrc     NOT NULL,                                     -- てこの位置
     switch_end_time   TIMESTAMP                                             -- 転換終了時刻
 );
 

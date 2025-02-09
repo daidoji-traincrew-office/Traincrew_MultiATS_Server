@@ -1,4 +1,4 @@
-h1:y8dcMxi+PoZ6HHSnBNGZtpJ2+cm2R08Fw/svnOD7zPg=
+h1:iNX8SHYjhY6FKJ5LH1CFQkwgiGb0YN9u8oalytdm8Ik=
 20241105144637_create_openiddict.sql h1:e3YP3bvDT2pkUc506P3fgKJoLzdNnzBgjkBNMKvEKoI=
 20241221070718_create_interlocking_tables.sql h1:bHtt4Hbmv5aMY0jvfDoG7eeY6IpChCnNrvSCAn9cdcU=
 20241221081310_switching_machine_reversed.sql h1:e7qP5i8sHtWVXpkbnbo3n/6smp6Z/lqQxwa4Yp+EQ1w=
@@ -13,3 +13,5 @@ h1:y8dcMxi+PoZ6HHSnBNGZtpJ2+cm2R08Fw/svnOD7zPg=
 20250208113211_add_station.sql h1:AhSdw68iZQcmTzYxJZErVnfkYIC2uE6ZwZCwUF9yyFY=
 20250208124721_add_lcr.sql h1:zF++rkLWBARA+UnbN9CryeaoBAbsTsYOaBZJ+yweeGw=
 20250208183631_modify_lever.sql h1:rQUaqVTEaCmNz64xw18aKTM+3zXAAbtn0lgTb4ncA0g=
+20250209134317_remove_lever_state_from_sm_state.sql h1:vBhH/InsgTKXiiyaidbKm51kxydzdc9uwxjDocAdE9I=
+20250209134355_add_switching_machine_route.sql h1:2jjMQtgnno4ARd69PPfDsnqgn51nEOICK8wazeKdb7o=
