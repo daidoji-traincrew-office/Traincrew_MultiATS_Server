@@ -1,5 +1,4 @@
-﻿//※DB取得・設定は失敗時速やかに早期リターン
-
+﻿using Microsoft.AspNetCore.Components.Forms;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.Button;
 using Traincrew_MultiATS_Server.Repositories.General;
@@ -9,6 +8,10 @@ using Traincrew_MultiATS_Server.Repositories.RouteLeverDestinationButton;
 using Route = Traincrew_MultiATS_Server.Models.Route;
 
 namespace Traincrew_MultiATS_Server.Services;
+
+// Todo: 全体的に、リストの取得は駅別に分けてもいいかもしれない
+// 駅の情報がはいってるならできるがなければ処理重になる
+
 
 /// <summary>
 ///     連動装置
@@ -38,13 +41,13 @@ public class RendoService(
         // Buttonを全取得
         var buttons = await buttonRepository.GetAllButtons();
         // 直接鎖状条件を取得
-        var lockConditions = await lockConditionRepository.GetConditionsByType(LockType.Lock); 
-        
+        var lockConditions = await lockConditionRepository.GetConditionsByType(LockType.Lock);
+
         // ここまで実行できればほぼほぼOOMしないはず
         foreach (var routeLeverDestinationButton in routeLeverDestinationButtonList)
         {
             // 進路でない場合 or 進路オブジェクトを取得できない場合はスキップ
-            if (!interlockingObjects.TryGetValue(routeLeverDestinationButton.RouteId, out var routeObject) 
+            if (!interlockingObjects.TryGetValue(routeLeverDestinationButton.RouteId, out var routeObject)
                 || routeObject is not Route route
                 || route.RouteState == null)
             {
@@ -52,7 +55,7 @@ public class RendoService(
             }
             var routeState = route.RouteState;
             // てこでない場合 or てこオブジェクトを取得できない場合はスキップ
-            if(!interlockingObjects.TryGetValue(routeLeverDestinationButton.LeverId, out var leverObject)
+            if (!interlockingObjects.TryGetValue(routeLeverDestinationButton.LeverId, out var leverObject)
                || leverObject is not Lever lever
                || lever.LeverState == null)
             {
@@ -76,7 +79,7 @@ public class RendoService(
             var isLeverRelayRaised = routeState.IsLeverRelayRaised;
 
             // てこ状態を取得
-            var leverState = lever.LeverState.IsReversed; 
+            var leverState = lever.LeverState.IsReversed;
 
             // てこが中立位置の場合
             if (leverState == LCR.Center)
@@ -119,6 +122,36 @@ public class RendoService(
     }
 
     /// <summary>
+    /// <strong>転てつ器制御回路</strong><br/>
+    /// 現在の状態から、転てつ器の状態を決定する。
+    /// </summary>
+    /// <returns></returns>   
+    private async Task SwitchingMachineControlRelay()
+    {
+        // Todo: [繋ぎ込み]SwitchingMachineのリストを取得
+        var switchingMachineList = new List<SwitchingMachine>();
+
+        var RequestNormal = false;
+        var RequestReverse = false;
+        foreach (var switchingMachine in switchingMachineList)
+        {
+            // Todo: モンニキに転てつ器番号←→要求してくる進路・定反のテーブルを作ってもらう        
+            // Todo: [繋ぎ込み]対応する転てつ器の要求進路一覧を取得
+            var switchingMachineRouteList = List<SwitchingMachineRoute>();
+
+            foreach (var switchingMachineRoute in switchingMachineRouteList)
+            {
+                // Todo: [繋ぎ込み]対応する進路のRouteState.IsLeverRelayRaisedを取得
+                var isLeverRelayRaised = false;
+                if (isLeverRelayRaised)
+                {
+                }
+            }
+            // Todo: [繋ぎ込み]対応する転てつ器のてっさ鎖錠欄の条件確認
+        }
+    }
+
+    /// <summary>
     /// <strong>進路照査リレー回路</strong><br/>
     /// 現在の状態から、進路が確保されているか決定する。
     /// </summary>
@@ -150,13 +183,13 @@ public class RendoService(
             {
                 return interlockingObject switch
                 {
-                    SwitchingMachine switchingMachine => 
-                        !switchingMachine.SwitchingMachineState.IsSwitching 
+                    SwitchingMachine switchingMachine =>
+                        !switchingMachine.SwitchingMachineState.IsSwitching
                         && switchingMachine.SwitchingMachineState.IsReverse == lockConditionObject.IsReverse,
                     Route route => route.RouteState.IsRouteRelayRaised == RaiseDrop.Drop,
-                    _ => false 
+                    _ => false
                 };
-            }); 
+            });
             if (!EvaluateLockConditions(directLockCondition[route.Id], interlockingObjects, predicate))
             {
                 continue;
@@ -227,15 +260,15 @@ public class RendoService(
             {
                 TrackCircuit trackCircuit => trackCircuit.TrackCircuitState.IsLocked,
                 // Todo: 他のオブジェクトの鎖状状態を取得する処理を追加
-                SwitchingMachine switchingMachine => 
-                    switchingMachine.SwitchingMachineState.IsSwitching 
+                SwitchingMachine switchingMachine =>
+                    switchingMachine.SwitchingMachineState.IsSwitching
                     || switchingMachine.SwitchingMachineState.IsReverse != lockConditionObject.IsReverse,
                 Route route => true,
                 _ => true
             };
         });
     }
-    
+
     /// <summary>
     /// <strong>鎖錠確認</strong><br/>
     /// 鎖状の条件を述語をもとに確認する
@@ -244,17 +277,17 @@ public class RendoService(
     private static bool EvaluateLockConditions(
         List<LockCondition> lockConditions,
         Dictionary<ulong, InterlockingObject> interlockingObjects,
-        Func<LockConditionObject,InterlockingObject, bool> predicate)
+        Func<LockConditionObject, InterlockingObject, bool> predicate)
     {
         var rootLockConditions = lockConditions.Where(lc => lc.ParentId == null).ToList();
         var childLockConditions = lockConditions
             .Where(lc => lc.ParentId != null)
             .GroupBy(lc => lc.ParentId!.Value)
             .ToDictionary(g => g.Key, g => g.ToList());
-        return rootLockConditions.All(lockCondition => 
+        return rootLockConditions.All(lockCondition =>
             EvaluateLockCondition(lockCondition, childLockConditions, interlockingObjects, predicate));
     }
-    
+
     /// <summary>
     /// <strong>鎖錠確認</strong><br/>
     /// 鎖状の条件を述語をもとに1つ確認する
@@ -263,7 +296,7 @@ public class RendoService(
     private static bool EvaluateLockCondition(LockCondition lockCondition,
         Dictionary<ulong, List<LockCondition>> childLockConditions,
         Dictionary<ulong, InterlockingObject> interlockingObjects,
-        Func<LockConditionObject,InterlockingObject, bool> predicate)
+        Func<LockConditionObject, InterlockingObject, bool> predicate)
     {
         switch (lockCondition.Type)
         {
@@ -280,11 +313,11 @@ public class RendoService(
             // And, Or以外だとこれしかないので、基本的にはこのルートには入らない想定
             return false;
         }
-        return interlockingObjects.TryGetValue(lockConditionObject.ObjectId, out var interlockingObject) 
+        return interlockingObjects.TryGetValue(lockConditionObject.ObjectId, out var interlockingObject)
                && predicate(lockConditionObject, interlockingObject);
     }
-    
- 
+
+
 
     /// <summary>
     ///     進路反位処理部
