@@ -65,7 +65,8 @@ public class RendoService(
             }
             // 鎖錠確認 進路の鎖錠欄の条件を満たしていない場合早期continue
             // Question: 対象はてこ・進路・軌道回路・転轍機のどれ？
-            if (!IsFree(lockConditions[routeLeverDestinationButton.RouteId], interlockingObjects))
+            // Ask: predicateを書こう
+            if (IsLocked(lockConditions[routeLeverDestinationButton.RouteId], interlockingObjects))
             {
                 continue;
             }
@@ -124,6 +125,11 @@ public class RendoService(
     /// <returns></returns>   
     public async Task RouteRelay()
     {
+        // Todo: この辺引数でいいのでは?
+        // 全てのObjectを取得
+        var interlockingObjects = await interlockingObjectRepository.GetAllWithState();
+        // 直接鎖状条件を取得
+        var directLockCondition = await lockConditionRepository.GetConditionsByType(LockType.Lock);
         // Todo: てこリレーが扛上している進路を全て取得
         // Todo: [繋ぎ込み]RouteState.IsLeverRelayRaisedがRaisedな進路を取得   
         List<Route> routes = [];
@@ -132,21 +138,32 @@ public class RendoService(
         foreach (var route in routes)
         {
             var routeState = route.RouteState!;
-            // Todo: [繋ぎ込み]進路のRouteState.IsLeverRelayRaisedを取得   
+            // てこリレーが落下している場合はスキップ
             var isLeverRelayRaised = routeState.IsLeverRelayRaised;
             if (isLeverRelayRaised == RaiseDrop.Drop)
             {
                 continue;
             }
 
-            // Todo: [繋ぎ込み]進路の鎖錠欄の条件を満たしているかを取得(転轍器では、目的方向で鎖錠・進路ではその進路のIsRouteRelayRaisedがFalse)   
-            var lockState = routeState.IsRouteRelayRaised;
-            if (lockState == RaiseDrop.Drop)
+            // 進路の鎖錠欄の条件を満たしているかを取得(転轍器では、目的方向で鎖錠・進路ではその進路のIsRouteRelayRaisedがFalse)   
+            var predicate = new Func<LockConditionObject, InterlockingObject, bool>((lockConditionObject, interlockingObject) =>
+            {
+                return interlockingObject switch
+                {
+                    SwitchingMachine switchingMachine => 
+                        !switchingMachine.SwitchingMachineState.IsSwitching 
+                        && switchingMachine.SwitchingMachineState.IsReverse == lockConditionObject.IsReverse,
+                    Route route => route.RouteState.IsRouteRelayRaised == RaiseDrop.Drop,
+                    _ => false 
+                };
+            }); 
+            if (!EvaluateLockConditions(directLockCondition[route.Id], interlockingObjects, predicate))
             {
                 continue;
             }
 
             // Todo: [繋ぎ込み]進路の信号制御欄の条件を満たしているか確認  
+            // Todo: 信号制御欄の条件はあるので、各オブジェクトに対し、どういう条件だったら満たしている？
             var signalControlState = true;
             if (!signalControlState)
             {
@@ -210,7 +227,9 @@ public class RendoService(
             {
                 TrackCircuit trackCircuit => trackCircuit.TrackCircuitState.IsLocked,
                 // Todo: 他のオブジェクトの鎖状状態を取得する処理を追加
-                SwitchingMachine switchingMachine => true,
+                SwitchingMachine switchingMachine => 
+                    switchingMachine.SwitchingMachineState.IsSwitching 
+                    || switchingMachine.SwitchingMachineState.IsReverse != lockConditionObject.IsReverse,
                 Route route => true,
                 _ => true
             };
@@ -219,58 +238,50 @@ public class RendoService(
     
     /// <summary>
     /// <strong>鎖錠確認</strong><br/>
-    /// 鎖状の条件を確認し、鎖状されていなければTrueを返す
+    /// 鎖状の条件を述語をもとに確認する
     /// </summary>
     /// <returns></returns>
-    private static bool IsFree(List<LockCondition> lockConditions, Dictionary<ulong, InterlockingObject> interlockingObjects)
+    private static bool EvaluateLockConditions(
+        List<LockCondition> lockConditions,
+        Dictionary<ulong, InterlockingObject> interlockingObjects,
+        Func<LockConditionObject,InterlockingObject, bool> predicate)
     {
         var rootLockConditions = lockConditions.Where(lc => lc.ParentId == null).ToList();
         var childLockConditions = lockConditions
             .Where(lc => lc.ParentId != null)
-            .GroupBy(lc => lc.ParentId.Value)
+            .GroupBy(lc => lc.ParentId!.Value)
             .ToDictionary(g => g.Key, g => g.ToList());
         return rootLockConditions.All(lockCondition => 
-            EvaluateLockConditions(lockCondition, childLockConditions, interlockingObjects));
+            EvaluateLockCondition(lockCondition, childLockConditions, interlockingObjects, predicate));
     }
     
     /// <summary>
     /// <strong>鎖錠確認</strong><br/>
-    /// 鎖状の条件を1つ確認し、鎖状されていなければTrueを返す
+    /// 鎖状の条件を述語をもとに1つ確認する
     /// </summary>
     /// <returns></returns>
-    private static bool EvaluateLockConditions(LockCondition lockCondition,
+    private static bool EvaluateLockCondition(LockCondition lockCondition,
         Dictionary<ulong, List<LockCondition>> childLockConditions,
-        Dictionary<ulong, InterlockingObject> interlockingObjects)
+        Dictionary<ulong, InterlockingObject> interlockingObjects,
+        Func<LockConditionObject,InterlockingObject, bool> predicate)
     {
         switch (lockCondition.Type)
         {
             case LockConditionType.And:
                 return childLockConditions[lockCondition.Id].All(childLockCondition =>
-                    EvaluateLockConditions(childLockCondition, childLockConditions, interlockingObjects));
+                    EvaluateLockCondition(childLockCondition, childLockConditions, interlockingObjects, predicate));
             case LockConditionType.Or:
                 return childLockConditions[lockCondition.Id].Any(childLockCondition =>
-                    EvaluateLockConditions(childLockCondition, childLockConditions, interlockingObjects));
+                    EvaluateLockCondition(childLockCondition, childLockConditions, interlockingObjects, predicate));
         }
 
         if (lockCondition is not LockConditionObject lockConditionObject)
         {
+            // And, Or以外だとこれしかないので、基本的にはこのルートには入らない想定
             return false;
         }
-
-        if (!interlockingObjects.TryGetValue(lockConditionObject.ObjectId, out var interlockingObject))
-        {
-            return false;
-        }
-
-        // 定位鎖状の場合は鎖状されているとみなす
-        return interlockingObject switch
-        {
-            TrackCircuit trackCircuit => !trackCircuit.TrackCircuitState.IsLocked,
-            // Todo: 他のオブジェクトの鎖状状態を取得する処理を追加
-            SwitchingMachine switchingMachine => true,
-            Route route => true,
-            _ => true
-        };
+        return interlockingObjects.TryGetValue(lockConditionObject.ObjectId, out var interlockingObject) 
+               && predicate(lockConditionObject, interlockingObject);
     }
     
  
