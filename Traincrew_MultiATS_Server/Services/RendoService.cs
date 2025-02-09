@@ -4,6 +4,7 @@ using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.Button;
 using Traincrew_MultiATS_Server.Repositories.General;
 using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
+using Traincrew_MultiATS_Server.Repositories.LockCondition;
 using Traincrew_MultiATS_Server.Repositories.RouteLeverDestinationButton;
 using Route = Traincrew_MultiATS_Server.Models.Route;
 
@@ -16,6 +17,7 @@ public class RendoService(
     IRouteLeverDestinationRepository routeLeverDestinationRepository,
     IInterlockingObjectRepository interlockingObjectRepository,
     IButtonRepository buttonRepository,
+    ILockConditionRepository lockConditionRepository,
     GeneralRepository generalRepository)
 {
     /// <summary>
@@ -35,8 +37,8 @@ public class RendoService(
         var interlockingObjects = await interlockingObjectRepository.GetAllWithState();
         // Buttonを全取得
         var buttons = await buttonRepository.GetAllButtons();
-        // Todo: 直接鎖状条件を取得
-        var lockConditions = new Dictionary<ulong, List<LockCondition>>();
+        // 直接鎖状条件を取得
+        var lockConditions = await lockConditionRepository.GetConditionsByType(LockType.Lock); 
         
         // ここまで実行できればほぼほぼOOMしないはず
         foreach (var routeLeverDestinationButton in routeLeverDestinationButtonList)
@@ -62,7 +64,8 @@ public class RendoService(
                 continue;
             }
             // 鎖錠確認 進路の鎖錠欄の条件を満たしていない場合早期continue
-            if (!IsLocked(lockConditions[routeLeverDestinationButton.RouteId], interlockingObjects))
+            // Question: 対象はてこ・進路・軌道回路・転轍機のどれ？
+            if (!IsFree(lockConditions[routeLeverDestinationButton.RouteId], interlockingObjects))
             {
                 continue;
             }
@@ -78,7 +81,6 @@ public class RendoService(
             if (leverState == LCR.Center)
             {
                 // リレーが上がっている場合は下げる
-                // Question: ボタン状態は？
                 if (isLeverRelayRaised == RaiseDrop.Raise)
                 {
                     routeState.IsLeverRelayRaised = RaiseDrop.Drop;
@@ -89,18 +91,19 @@ public class RendoService(
             // てこが倒れている場合
             if (leverState is LCR.Left or LCR.Right)
             {
+                // すでにてこリレーが上がっている場合はスキップ
                 if (isLeverRelayRaised == RaiseDrop.Raise)
                 {
                     continue;
                 }
                 var isRaised = button.ButtonState.IsRaised;
+                // 着点ボタンが押されている場合は、てこリレーを上げる
                 if (isRaised == RaiseDrop.Raise)
                 {
                     routeState.IsLeverRelayRaised = RaiseDrop.Raise;
                     await generalRepository.Save(routeState);
                 }
             }
-            // Todo: RouteLeverDestinationButton.RouteIdの進路のRouteState.IsLeverRelayRaisedに変化あればisLeverRelayRaised代入
 
             //ここから仮コード　本番に残さない
 
@@ -124,18 +127,21 @@ public class RendoService(
         // Todo: てこリレーが扛上している進路を全て取得
         // Todo: [繋ぎ込み]RouteState.IsLeverRelayRaisedがRaisedな進路を取得   
         List<Route> routes = [];
+        // Todo: 進路照査リレーが扛上している進路の信号制御欄を取得
+        var signalControlConditions = await lockConditionRepository.GetConditionsByType(LockType.SignalControl);
         foreach (var route in routes)
         {
+            var routeState = route.RouteState!;
             // Todo: [繋ぎ込み]進路のRouteState.IsLeverRelayRaisedを取得   
-            var isLeverRelayRaised = false;
-            if (!isLeverRelayRaised)
+            var isLeverRelayRaised = routeState.IsLeverRelayRaised;
+            if (isLeverRelayRaised == RaiseDrop.Drop)
             {
                 continue;
             }
 
             // Todo: [繋ぎ込み]進路の鎖錠欄の条件を満たしているかを取得(転轍器では、目的方向で鎖錠・進路ではその進路のIsRouteRelayRaisedがFalse)   
-            var lockState = true;
-            if (!lockState)
+            var lockState = routeState.IsRouteRelayRaised;
+            if (lockState == RaiseDrop.Drop)
             {
                 continue;
             }
@@ -161,25 +167,25 @@ public class RendoService(
     {
         // Todo: 進路照査リレーが扛上している進路及び信号機を取得
         // Todo: [繋ぎ込み]進路のRouteState.IsRouteRelayRaisedを取得   
+        // Todo: 進路照査リレーが扛上している進路の転轍機のてっさ鎖状を全取得
         List<Route> routes = [];
         foreach (var route in routes)
         {
             // Todo: [繋ぎ込み]進路のRouteState.IsRouteRelayRaisedを取得   
-            var isRouteRelayRaised = false;
-            if (!isRouteRelayRaised)
+            var isRouteRelayRaised = route.RouteState.IsRouteRelayRaised;
+            if (isRouteRelayRaised == RaiseDrop.Drop)
             {
                 continue;
             }
-
             // Todo: [繋ぎ込み]進路の鎖錠欄のうち転轍器のてっさ鎖錠がかかっているか
 
             // Todo: 鎖錠確認 進路の鎖錠欄の条件を満たしていない場合早期continue
         }
     }
-    
+
     /// <summary>
     /// <strong>鎖錠確認</strong><br/>
-    /// 鎖状の条件を確認し、鎖状されていればtrueを返す
+    /// 鎖状の条件を確認し、鎖状されていなければTrueを返す
     /// </summary>
     /// <returns></returns>
     private bool IsLocked(List<LockCondition> lockConditions, Dictionary<ulong, InterlockingObject> interlockingObjects)
@@ -210,8 +216,65 @@ public class RendoService(
             };
         });
     }
-        
     
+    /// <summary>
+    /// <strong>鎖錠確認</strong><br/>
+    /// 鎖状の条件を確認し、鎖状されていなければTrueを返す
+    /// </summary>
+    /// <returns></returns>
+    private static bool IsFree(List<LockCondition> lockConditions, Dictionary<ulong, InterlockingObject> interlockingObjects)
+    {
+        var rootLockConditions = lockConditions.Where(lc => lc.ParentId == null).ToList();
+        var childLockConditions = lockConditions
+            .Where(lc => lc.ParentId != null)
+            .GroupBy(lc => lc.ParentId.Value)
+            .ToDictionary(g => g.Key, g => g.ToList());
+        return rootLockConditions.All(lockCondition => 
+            EvaluateLockConditions(lockCondition, childLockConditions, interlockingObjects));
+    }
+    
+    /// <summary>
+    /// <strong>鎖錠確認</strong><br/>
+    /// 鎖状の条件を1つ確認し、鎖状されていなければTrueを返す
+    /// </summary>
+    /// <returns></returns>
+    private static bool EvaluateLockConditions(LockCondition lockCondition,
+        Dictionary<ulong, List<LockCondition>> childLockConditions,
+        Dictionary<ulong, InterlockingObject> interlockingObjects)
+    {
+        switch (lockCondition.Type)
+        {
+            case LockConditionType.And:
+                return childLockConditions[lockCondition.Id].All(childLockCondition =>
+                    EvaluateLockConditions(childLockCondition, childLockConditions, interlockingObjects));
+            case LockConditionType.Or:
+                return childLockConditions[lockCondition.Id].Any(childLockCondition =>
+                    EvaluateLockConditions(childLockCondition, childLockConditions, interlockingObjects));
+        }
+
+        if (lockCondition is not LockConditionObject lockConditionObject)
+        {
+            return false;
+        }
+
+        if (!interlockingObjects.TryGetValue(lockConditionObject.ObjectId, out var interlockingObject))
+        {
+            return false;
+        }
+
+        // 定位鎖状の場合は鎖状されているとみなす
+        return interlockingObject switch
+        {
+            TrackCircuit trackCircuit => !trackCircuit.TrackCircuitState.IsLocked,
+            // Todo: 他のオブジェクトの鎖状状態を取得する処理を追加
+            SwitchingMachine switchingMachine => true,
+            Route route => true,
+            _ => true
+        };
+    }
+    
+ 
+
     /// <summary>
     ///     進路反位処理部
     /// </summary>

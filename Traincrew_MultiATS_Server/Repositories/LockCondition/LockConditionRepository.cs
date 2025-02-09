@@ -1,4 +1,6 @@
+using Microsoft.EntityFrameworkCore;
 using Traincrew_MultiATS_Server.Data;
+using Traincrew_MultiATS_Server.Models;
 
 namespace Traincrew_MultiATS_Server.Repositories.LockCondition;
 
@@ -12,5 +14,15 @@ public class LockConditionRepository(ApplicationDbContext context) : ILockCondit
             .Select(l => l.LockCondition)
             .ToListAsync();
     }
-    */ 
+    */
+    public async Task<Dictionary<ulong, List<Models.LockCondition>>> GetConditionsByType(LockType type)
+    {
+        return await context.Locks
+            .Where(l => l.Type == type)
+            .Join(context.LockConditions, l => l.Id, lc => lc.LockId, (l, lc) => new { l.ObjectId, lc })
+            .GroupBy(x => x.ObjectId)
+            .ToDictionaryAsync(
+                x => x.Key, 
+                x => x.Select(y => y.lc).ToList());
+    }
 }
