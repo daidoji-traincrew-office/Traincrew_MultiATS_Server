@@ -122,22 +122,43 @@ public class RendoService(
     }
 
     /// <summary>
-    /// <strong>転てつ器制御回路</strong><br/>
-    /// 現在の状態から、転てつ器の状態を決定する。
+    /// <strong>転てつ器制御回路・転てつ器表示リレー回路</strong><br/>
+    /// 現在の状態から、転てつ器の状態を決定する。表示リレー回路直接は存在せず、IsSwitchingとIsReverseの組み合わせを毎度取得する。
     /// </summary>
     /// <returns></returns>   
-    private async Task SwitchingMachineControlRelay()
+    private async Task SwitchingMachineControl()
     {
+        // こいつは定常で全駅回すので駅ごとに分けるやつの対象外
         // Todo: [繋ぎ込み]SwitchingMachineのリストを取得
         var switchingMachineList = new List<SwitchingMachine>();
 
-        var RequestNormal = false;
-        var RequestReverse = false;
         foreach (var switchingMachine in switchingMachineList)
         {
+            // Todo: [繋ぎ込み]対応する転てつ器のてっさ鎖錠欄の条件確認(このとき、軌道回路は短絡していないかと同時に鎖錠されていないかも確認する)
+            var detectorLockState = false;
+
+            if (!detectorLockState)
+            {
+                // てっさ鎖錠領域に転換中に列車が来ると転換完了処理も通らないが、転換中の転てつ器に突っ込んだ結果転てつ器が壊れたとする。
+                continue;
+            }
+
+            // Todo: [繋ぎ込み]対応する転てつ器のSwitchingMachineStateを取得 
+            var switchingMachineState = new SwitchingMachineState();
+            if (switchingMachineState.IsSwitching || switchingMachineState.SwitchEndTime < DateTime.Now)
+            {
+                // Todo: [繋ぎ込み]対応する転てつ器のSwitchingMachineState.IsSwitchingをfalseにする 
+            }
+
+            // Todo: [繋ぎ込み]対応する転てつ器のてこ状態を取得
+            var leverState = LCR.Center;
+
+            var RequestNormal = leverState == LCR.Left;
+            var RequestReverse = leverState == LCR.Right;
+
             // Todo: モンニキに転てつ器番号←→要求してくる進路・定反のテーブルを作ってもらう        
             // Todo: [繋ぎ込み]対応する転てつ器の要求進路一覧を取得
-            var switchingMachineRouteList = List<SwitchingMachineRoute>();
+            var switchingMachineRouteList = new List<SwitchingMachineRoute>();
 
             foreach (var switchingMachineRoute in switchingMachineRouteList)
             {
@@ -145,9 +166,62 @@ public class RendoService(
                 var isLeverRelayRaised = false;
                 if (isLeverRelayRaised)
                 {
+                    if (/*対応する進路の定反向き == 定位*/)
+                    {
+                        RequestNormal = true;
+                    }
+                    else if (/*対応する進路の定反向き == 反位*/)
+                    {
+                        RequestReverse = true;
+                    }
+                    // Todo: 異常データ故障
                 }
             }
-            // Todo: [繋ぎ込み]対応する転てつ器のてっさ鎖錠欄の条件確認
+            if (RequestNormal == RequestReverse)
+            {
+                //何もしない
+            }
+            else if (RequestNormal)
+            {
+                if (switchingMachineState.IsSwitching)
+                {
+                    //転換中のとき
+                    // Todo: Zumi先生に動作確認中
+                }
+                else
+                {
+                    //転換中でないとき
+                    if (switchingMachineState.IsReverse == NR.Reversed)
+                    {
+                        // Todo: [繋ぎ込み]対応する転てつ器のSwitchingMachineState.IsReverseをNR.Normalにする      
+                        // Todo: [繋ぎ込み]対応する転てつ器のSwitchingMachineState.IsSwitchingをtrueにする  
+                        var switchMoveTIme = TimeSpan.FromSeconds(5);
+                        var SwitchEndTime = DateTime.Now + switchMoveTIme;
+                        // Todo: [繋ぎ込み]対応する転てつ器のSwitchingMachineState.SwitchEndTimeをSwitchEndTimeにする
+                    }
+                }
+            }
+            else if (RequestReverse)
+            {
+                if (switchingMachineState.IsSwitching)
+                {
+                    //転換中のとき
+                    // Todo: Zumi先生に動作確認中
+                }
+                else
+                {
+                    //転換中でないとき
+                    if (switchingMachineState.IsReverse == NR.Normal)
+                    {
+                        // Todo: [繋ぎ込み]対応する転てつ器のSwitchingMachineState.IsReverseをNR.Reverseにする    
+                        // Todo: [繋ぎ込み]対応する転てつ器のSwitchingMachineState.IsSwitchingをtrueにする  
+                        var switchMoveTIme = TimeSpan.FromSeconds(5);
+                        var SwitchEndTime = DateTime.Now + switchMoveTIme;
+                        // Todo: [繋ぎ込み]対応する転てつ器のSwitchingMachineState.SwitchEndTimeをSwitchEndTimeにする
+                    }
+                }
+            }
+            // Todo: 異常データ故障
         }
     }
 
