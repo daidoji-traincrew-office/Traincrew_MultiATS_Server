@@ -25,4 +25,9 @@ public class LockConditionRepository(ApplicationDbContext context) : ILockCondit
                 x => x.Key, 
                 x => x.Select(y => y.lc).ToList());
     }
+
+    public async Task<Dictionary<ulong, List<Models.LockCondition>>> GetConditionsByObjectIdsAndType(List<ulong> objectIds, LockType type)
+    {
+        throw new NotImplementedException();
+    }
 }

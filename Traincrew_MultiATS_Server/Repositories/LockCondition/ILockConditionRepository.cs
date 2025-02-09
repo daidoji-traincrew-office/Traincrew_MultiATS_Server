@@ -6,4 +6,5 @@ public interface ILockConditionRepository
 {
    // public Task<List<Models.LockCondition>> GetConditionsByObjectIdAndType(ulong objectId, LockType type);
    public Task<Dictionary<ulong, List<Models.LockCondition>>> GetConditionsByType(LockType type);
+   public Task<Dictionary<ulong, List<Models.LockCondition>>> GetConditionsByObjectIdsAndType(List<ulong> objectIds, LockType type);
 }
