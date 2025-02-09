@@ -120,12 +120,14 @@ public class RendoService(
         // こいつは定常で全駅回すので駅ごとに分けるやつの対象外
         // SwitchingMachineのリストを取得
         var switchingMachineList = await switchingMachineRepository.GetSwitchingMachinesWithState();
-        // Todo: てこを全取得
+        // Todo: [繋ぎ込み]てこを全取得
         Dictionary<ulong, Lever> levers = new();
-        // Todo: SwitchingMachineRouteのリストを取得
+        // Todo: [繋ぎ込み]SwitchingMachineRouteのリストを取得
         Dictionary<ulong, List<SwitchingMachineRoute>> switchingMachineRouteDict = new();
-        // Todo: 全進路を取得
+        // Todo: [繋ぎ込み]全進路を取得
         Dictionary<ulong, Route> routes = new();
+        // Todo: [繋ぎ込み]全軌道回路を取得
+        // Todo: [繋ぎ込み]全てっさ鎖錠欄を取得
 
         foreach (var switchingMachine in switchingMachineList)
         {
@@ -140,7 +142,7 @@ public class RendoService(
 
             // 対応する転てつ器のSwitchingMachineStateを取得 
             var switchingMachineState = switchingMachine.SwitchingMachineState;
-            // Todo: NowはRepositoryから呼ぶ
+            // Todo: [繋ぎ込み]NowはRepositoryから呼ぶ
             if (switchingMachineState.IsSwitching && switchingMachineState.SwitchEndTime < DateTime.Now)
             {
                 // 対応する転てつ器のSwitchingMachineState.IsSwitchingをfalseにする 
@@ -301,7 +303,7 @@ public class RendoService(
                 continue;
             }
 
-            // Todo: 鎖錠確認 進路の鎖錠欄の条件を満たしていない場合早期continue
+            // 鎖錠確認 進路の鎖錠欄の条件を満たしていない場合早期continue
             if (IsLocked(directLockCondition[route.Id], interlockingObjects))
             {
                 continue;
@@ -329,7 +331,7 @@ public class RendoService(
             .Where(x => x.Value is Route route && route.RouteState!.IsRouteRelayRaised == RaiseDrop.Raise)
             .Select(x => (x.Value as Route)!)
             .ToList();
-        // Todo: 進路照査リレーが扛上している信号機を取得
+        // Todo: [繋ぎ込み]進路照査リレーが扛上している信号機を取得
         // 進路照査リレーが扛上している進路の信号制御欄を取得
         var signalControlConditions = await lockConditionRepository.GetConditionsByObjectIdsAndType(
             routes.Select(x => x.Id).ToList(), LockType.SignalControl);
@@ -344,7 +346,7 @@ public class RendoService(
                 continue;
             }
 
-            // Todo: 鎖錠確認 進路の鎖錠欄の条件を満たしていない場合早期continue
+            // Todo: [繋ぎ込み]鎖錠確認 進路の鎖錠欄の条件を満たしていない場合早期continue
             if (IsLocked(directLockCondition[route.Id], interlockingObjects))
             {
                 continue;
