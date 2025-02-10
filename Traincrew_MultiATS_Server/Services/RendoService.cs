@@ -127,7 +127,7 @@ public class RendoService(
             .Where(x => x.Value is SwitchingMachine)
             .Select(x => x.Value as SwitchingMachine)
             .ToList();
-        // てこを全取得
+        // 転てつ機てこを全取得
         var levers = interlockingObjects
             .Where(x => x.Value is Lever { SwitchingMachineId: not null })
             .Select(x => x.Value as Lever)
@@ -136,7 +136,7 @@ public class RendoService(
         var switchingMachineRouteDict = (await switchingMachineRouteRepository.GetAll())
             .GroupBy(x => x.SwitchingMachineId)
             .ToDictionary(x => x.Key, x => x.ToList());
-            
+
         // 全進路を取得
         var routes = interlockingObjects
             .Where(x => x.Value is Route)
@@ -201,58 +201,35 @@ public class RendoService(
 
             if (RequestNormal)
             {
-                if (switchingMachineState.IsSwitching)
+                // 既に定位(or定位に転換中)の場合はスキップ
+                if (switchingMachineState.IsReverse == NR.Normal)
                 {
-                    //転換中のとき
-                    // Todo: Zumi先生に動作確認中
+                    continue;
                 }
-                else
-                {
-                    //転換中でないとき
-                    // 既に定位の場合はスキップ
-                    if (switchingMachineState.IsReverse == NR.Normal)
-                    {
-                        continue;
-                    }
 
-                    // 対応する転てつ器のSwitchingMachineState.IsReverseをNR.Normalにする      
-                    switchingMachineState.IsReverse = NR.Normal;
-                    // 対応する転てつ器のSwitchingMachineState.IsSwitchingをtrueにする  
-                    switchingMachineState.IsSwitching = true;
-                    var switchMoveTIme = TimeSpan.FromSeconds(5);
-                    var switchEndTime = now + switchMoveTIme;
-                    // 対応する転てつ器のSwitchingMachineState.SwitchEndTimeをSwitchEndTimeにする
-                    switchingMachineState.SwitchEndTime = switchEndTime;
-                    await generalRepository.Save(switchingMachineState);
-                }
+                // 対応する転てつ器のSwitchingMachineState.IsReverseをNR.Normalにする      
+                switchingMachineState.IsReverse = NR.Normal;
             }
             else if (RequestReverse)
             {
-                if (switchingMachineState.IsSwitching)
+                // 既に反位(or反位に転換中)の場合はスキップ
+                if (switchingMachineState.IsReverse == NR.Reversed)
                 {
-                    //転換中のとき
-                    // Todo: Zumi先生に動作確認中
+                    continue;
                 }
-                else
-                {
-                    //転換中でないとき
-                    // 既に反位の場合はスキップ
-                    if (switchingMachineState.IsReverse == NR.Reversed)
-                    {
-                        continue;
-                    }
 
-                    // 対応する転てつ器のSwitchingMachineState.IsReverseをNR.Reversedにする    
-                    switchingMachineState.IsReverse = NR.Reversed;
-                    // 対応する転てつ器のSwitchingMachineState.IsSwitchingをtrueにする  
-                    switchingMachineState.IsSwitching = true;
-                    var switchMoveTIme = TimeSpan.FromSeconds(5);
-                    var switchEndTime = now + switchMoveTIme;
-                    // 対応する転てつ器のSwitchingMachineState.SwitchEndTimeをSwitchEndTimeにする
-                    switchingMachineState.SwitchEndTime = switchEndTime;
-                    await generalRepository.Save(switchingMachineState);
-                }
+                // 対応する転てつ器のSwitchingMachineState.IsReverseをNR.Reversedにする    
+                switchingMachineState.IsReverse = NR.Reversed;
             }
+
+            // 対応する転てつ器のSwitchingMachineState.IsSwitchingをtrueにする  
+            switchingMachineState.IsSwitching = true;
+            // Todo: 転換時間を定数化する
+            var switchMoveTIme = TimeSpan.FromSeconds(5);
+            var switchEndTime = now + switchMoveTIme;
+            // 対応する転てつ器のSwitchingMachineState.SwitchEndTimeをSwitchEndTimeにする
+            switchingMachineState.SwitchEndTime = switchEndTime;
+            await generalRepository.Save(switchingMachineState);
         }
     }
 
@@ -365,7 +342,7 @@ public class RendoService(
             {
                 continue;
             }
-            
+
             // 鎖錠確認 進路の鎖錠欄の条件を満たしていない場合早期continue
             if (IsLocked(directLockCondition[route.Id], interlockingObjects))
             {
@@ -383,14 +360,14 @@ public class RendoService(
     private bool IsLocked(List<LockCondition> lockConditions, Dictionary<ulong, InterlockingObject> interlockingObjects)
     {
         // 対象が進路のものに限る
-        // 対象進路のisReverLevayRaisedがすべてDropであることを確認する
+        // 対象進路のisLeverRelayRaisedがすべてDropであることを確認する
         return !EvaluateLockConditions(lockConditions, interlockingObjects, Predicate);
 
         bool Predicate(LockConditionObject o, InterlockingObject interlockingObject)
         {
             return interlockingObject switch
             {
-                Route route => route.RouteState.IsRouteRelayRaised == RaiseDrop.Drop,
+                Route route => route.RouteState.IsLeverRelayRaised == RaiseDrop.Drop,
                 SwitchingMachine or Route or Lever => true,
                 _ => false
             };
@@ -401,6 +378,7 @@ public class RendoService(
         Dictionary<ulong, InterlockingObject> interlockingObjects)
     {
         return !EvaluateLockConditions(lockConditions, interlockingObjects, Predicate);
+
         // 軌道回路は短絡していないか、同時に鎖錠されていないか
         bool Predicate(LockConditionObject o, InterlockingObject interlockingObject)
         {
