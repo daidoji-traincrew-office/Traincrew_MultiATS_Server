@@ -6,5 +6,7 @@ namespace Traincrew_MultiATS_Server.Models;
 public class Lever: InterlockingObject
 {
     public LeverType LeverType { get; init; }
+    public ulong? SwitchingMachineId { get; init; }
+    public SwitchingMachine SwitchingMachine { get; init; }
     public LeverState LeverState { get; init; }
 }

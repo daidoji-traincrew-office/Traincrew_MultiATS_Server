@@ -111,9 +111,9 @@ CREATE INDEX station_interlocking_object_station_id_index ON station_interlockin
 CREATE TYPE lever_type AS ENUM ('route', 'switching_machine');
 CREATE TABLE lever
 (
-    id         BIGINT PRIMARY KEY REFERENCES interlocking_object (id),
-    lever_type lever_type NOT NULL -- てこの種類 
-    -- Todo: 転てつ機用のカラムを追加する
+    id                   BIGINT PRIMARY KEY REFERENCES interlocking_object (id),
+    lever_type           lever_type NOT NULL,                     -- てこの種類 
+    switching_machine_id BIGINT REFERENCES switching_machine (ID) --転てつ機のID
 );
 
 -- 着点ボタン
@@ -266,7 +266,7 @@ CREATE TABLE switching_machine_route
     id                   BIGSERIAL PRIMARY KEY,
     switching_machine_id BIGINT REFERENCES switching_machine (id) NOT NULL, -- 転てつ機のID
     route_id             BIGINT REFERENCES route (id)             NOT NULL, -- 進路のID
-    is_reverse           nr                                       NOT NULL,  -- 定反
+    is_reverse           nr                                       NOT NULL, -- 定反
     UNIQUE (switching_machine_id, route_id)
 );
 CREATE INDEX switching_machine_route_switching_machine_id_index ON switching_machine_route (switching_machine_id);
@@ -301,10 +301,10 @@ CREATE INDEX track_circuit_state_train_number_index ON track_circuit_state USING
 -- 転てつ機状態
 CREATE TABLE switching_machine_state
 (
-    id                BIGINT PRIMARY KEY REFERENCES switching_machine (ID), -- 転てつ機のID
-    is_switching      BOOLEAN NOT NULL,                                     -- 転換中
-    is_reverse        nr      NOT NULL,                                     -- 定反
-    switch_end_time   TIMESTAMP                                             -- 転換終了時刻
+    id              BIGINT PRIMARY KEY REFERENCES switching_machine (ID), -- 転てつ機のID
+    is_switching    BOOLEAN NOT NULL,                                     -- 転換中
+    is_reverse      nr      NOT NULL,                                     -- 定反
+    switch_end_time TIMESTAMP                                             -- 転換終了時刻
 );
 
 -- Todo: 進路状態

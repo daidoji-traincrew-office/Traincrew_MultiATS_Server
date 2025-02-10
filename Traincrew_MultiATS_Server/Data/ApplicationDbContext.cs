@@ -21,6 +21,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<RouteLeverDestinationButton> RouteLeverDestinationButton { get; set; }
     public DbSet<Button> Buttons { get; set; }
     public DbSet<ButtonState> ButtonStates { get; set; }
+    public DbSet<SwitchingMachineRoute> SwitchingMachineRoutes { get; set; }
     
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
