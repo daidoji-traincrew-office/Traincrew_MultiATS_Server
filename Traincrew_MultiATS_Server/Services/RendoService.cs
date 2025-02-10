@@ -324,13 +324,9 @@ public class RendoService(
             .Where(x => x.Value is Route route && route.RouteState!.IsRouteRelayRaised == RaiseDrop.Raise)
             .Select(x => (x.Value as Route)!)
             .ToList();
-        // Todo: [繋ぎ込み]上記進路と関係のある信号機を取得
         // 直接鎖状条件を取得
         var directLockCondition = await lockConditionRepository.GetConditionsByObjectIdsAndType(
             routes.Select(x => x.Id).ToList(), LockType.Lock);
-        // 進路照査リレーが扛上している進路の信号制御欄を取得
-        var signalControlConditions = await lockConditionRepository.GetConditionsByObjectIdsAndType(
-            routes.Select(x => x.Id).ToList(), LockType.SignalControl);
         // 進路照査リレーが扛上している進路の転轍機てっさ鎖状欄を取得
         var detectorLockConditions = await lockConditionRepository.GetConditionsByObjectIdsAndType(
             routes.Select(x => x.Id).ToList(), LockType.Detector);
