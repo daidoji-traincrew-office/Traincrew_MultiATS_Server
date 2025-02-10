@@ -38,7 +38,8 @@ public class RendoService(
         // RouteLeverDestinationButtonを全取得
         var routeLeverDestinationButtonList = await routeLeverDestinationRepository.GetAll();
         // InterlockingObjectを全取得
-        var interlockingObjects = await interlockingObjectRepository.GetAllWithState();
+        var interlockingObjects = (await interlockingObjectRepository.GetAllWithState())
+            .ToDictionary(obj => obj.Id);
         // Buttonを全取得
         var buttons = await buttonRepository.GetAllButtons();
         // 直接鎖状条件を取得
@@ -120,7 +121,8 @@ public class RendoService(
     {
         // InterlockingObjectを全取得
         // Todo: 全取得しなくても良いようにする
-        var interlockingObjects = await interlockingObjectRepository.GetAllWithState();
+        var interlockingObjects = (await interlockingObjectRepository.GetAllWithState())
+            .ToDictionary(obj => obj.Id);
         // こいつは定常で全駅回すので駅ごとに分けるやつの対象外
         // 転てつ機を全取得
         var switchingMachineList = interlockingObjects
@@ -241,7 +243,8 @@ public class RendoService(
     public async Task RouteRelay()
     {
         // 全てのObjectを取得
-        var interlockingObjects = await interlockingObjectRepository.GetAllWithState();
+        var interlockingObjects = (await interlockingObjectRepository.GetAllWithState())
+            .ToDictionary(obj => obj.Id);
         // 直接鎖状条件を取得
         var directLockCondition = await lockConditionRepository.GetConditionsByType(LockType.Lock);
         // てこリレーが扛上している進路を全て取得
@@ -317,7 +320,8 @@ public class RendoService(
     public async Task SignalControl()
     {
         // 全てのObjectを取得
-        var interlockingObjects = await interlockingObjectRepository.GetAllWithState();
+        var interlockingObjects = (await interlockingObjectRepository.GetAllWithState())
+            .ToDictionary(obj => obj.Id);
 
         // 進路照査リレーが扛上している進路を全て取得
         var routes = interlockingObjects

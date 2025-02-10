@@ -4,7 +4,7 @@ namespace Traincrew_MultiATS_Server.Repositories.InterlockingObject;
 public interface IInterlockingObjectRepository
 {
 
-    public Task<Dictionary<ulong, Models.InterlockingObject>> GetAllWithState();
+    public Task<List<Models.InterlockingObject>> GetAllWithState();
     /**
      * 軌道回路、進路、転轍機を取得する(状態なし)
      * @param ids IDリスト
