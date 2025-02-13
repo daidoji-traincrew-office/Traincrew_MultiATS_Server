@@ -223,12 +223,23 @@ public class RendoService(
                 // 対応する転てつ器のSwitchingMachineState.IsReverseをNR.Reversedにする    
                 switchingMachineState.IsReverse = NR.Reversed;
             }
+            
+            // Todo: 転換時間を定数化する
+            var switchMoveTime = TimeSpan.FromSeconds(5);
+            DateTime switchEndTime;
+            // 転換中の転てつ器が、転換を終了する前に反転した場合
+            if (switchingMachineState.IsSwitching && now < switchingMachineState.SwitchEndTime)
+            {
+                switchEndTime = now + (now - switchingMachineState.SwitchEndTime + switchMoveTime);
+            }
+            // 転換していない転てつ器が転換する場合
+            else
+            {
+                switchEndTime = now + switchMoveTime;
+            }
 
             // 対応する転てつ器のSwitchingMachineState.IsSwitchingをtrueにする  
             switchingMachineState.IsSwitching = true;
-            // Todo: 転換時間を定数化する
-            var switchMoveTIme = TimeSpan.FromSeconds(5);
-            var switchEndTime = now + switchMoveTIme;
             // 対応する転てつ器のSwitchingMachineState.SwitchEndTimeをSwitchEndTimeにする
             switchingMachineState.SwitchEndTime = switchEndTime;
             await generalRepository.Save(switchingMachineState);
