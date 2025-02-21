@@ -372,15 +372,15 @@ public class RendoService(
     {
         // 対象が進路のものに限る
         // 対象進路のisLeverRelayRaisedがすべてDropであることを確認する
-        return !EvaluateLockConditions(lockConditions, interlockingObjects, Predicate);
+        return EvaluateLockConditions(lockConditions, interlockingObjects, Predicate);
 
         bool Predicate(LockConditionObject o, InterlockingObject interlockingObject)
         {
             return interlockingObject switch
             {
-                Route route => route.RouteState.IsLeverRelayRaised == RaiseDrop.Drop,
-                SwitchingMachine or Route or Lever => true,
-                _ => false
+                Route route => route.RouteState.IsLeverRelayRaised != RaiseDrop.Drop,
+                SwitchingMachine or Route or Lever => false,
+                _ => true
             };
         }
     }
@@ -388,7 +388,7 @@ public class RendoService(
     private bool IsDetectorLocked(List<LockCondition> lockConditions,
         Dictionary<ulong, InterlockingObject> interlockingObjects)
     {
-        return !EvaluateLockConditions(lockConditions, interlockingObjects, Predicate);
+        return EvaluateLockConditions(lockConditions, interlockingObjects, Predicate);
 
         // 軌道回路は短絡していないか、同時に鎖錠されていないか
         bool Predicate(LockConditionObject o, InterlockingObject interlockingObject)
@@ -396,9 +396,9 @@ public class RendoService(
             return interlockingObject switch
             {
                 TrackCircuit trackCircuit =>
-                    trackCircuit.TrackCircuitState is { IsShortCircuit: false, IsLocked: false },
-                SwitchingMachine or Lever or Route => true,
-                _ => false
+                    trackCircuit.TrackCircuitState is not { IsShortCircuit: false, IsLocked: false },
+                SwitchingMachine or Lever or Route => false,
+                _ => true
             };
         }
     }
