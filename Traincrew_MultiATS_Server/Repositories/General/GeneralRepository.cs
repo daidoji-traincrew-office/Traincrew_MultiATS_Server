@@ -3,7 +3,7 @@ using Traincrew_MultiATS_Server.Data;
 
 namespace Traincrew_MultiATS_Server.Repositories.General;
 
-public class GeneralRepository(ApplicationDbContext context)
+public class GeneralRepository(ApplicationDbContext context) : IGeneralRepository
 {
     public async Task Save<T>(T entity)
     {
