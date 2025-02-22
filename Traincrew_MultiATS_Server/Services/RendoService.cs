@@ -26,14 +26,14 @@ public class RendoService(
     IButtonRepository buttonRepository,
     ILockConditionRepository lockConditionRepository,
     IDateTimeRepository dateTimeRepository,
-    GeneralRepository generalRepository)
+    IGeneralRepository generalRepository)
 {
     /// <summary>
     /// <strong>てこリレー回路</strong><br/>
     /// てこやボタンの状態から、確保するべき進路を決定する。
     /// </summary>
     /// <returns></returns>
-    private async Task LeverToRouteState()
+    public async Task LeverToRouteState()
     {
         // RouteLeverDestinationButtonを全取得
         var routeLeverDestinationButtonList = await routeLeverDestinationRepository.GetAll();
@@ -117,8 +117,11 @@ public class RendoService(
     /// 現在の状態から、転てつ器の状態を決定する。表示リレー回路直接は存在せず、IsSwitchingとIsReverseの組み合わせを毎度取得する。
     /// </summary>
     /// <returns></returns>   
-    private async Task SwitchingMachineControl()
+    public async Task SwitchingMachineControl()
     {
+        // Todo: クラスのstaticにしたほうが良いかも
+        var switchMoveTime = TimeSpan.FromSeconds(5);
+        var switchReturnTime = TimeSpan.FromMilliseconds(500);
         // InterlockingObjectを全取得
         // Todo: 全取得しなくても良いようにする
         var interlockingObjects = (await interlockingObjectRepository.GetAllWithState())
@@ -223,14 +226,11 @@ public class RendoService(
                 // 対応する転てつ器のSwitchingMachineState.IsReverseをNR.Reversedにする    
                 switchingMachineState.IsReverse = NR.Reversed;
             }
-            
-            // Todo: 転換時間を定数化する
-            var switchMoveTime = TimeSpan.FromSeconds(5);
             DateTime switchEndTime;
             // 転換中の転てつ器が、転換を終了する前に反転した場合
             if (switchingMachineState.IsSwitching && now < switchingMachineState.SwitchEndTime)
             {
-                switchEndTime = now + (now - switchingMachineState.SwitchEndTime + switchMoveTime);
+                switchEndTime = now + (now - switchingMachineState.SwitchEndTime + switchMoveTime + switchReturnTime);
             }
             // 転換していない転てつ器が転換する場合
             else
