@@ -7,7 +7,7 @@ namespace Traincrew_MultiATS_Server.Models;
 public class DestinationButtonState
 {
     [Key]
-    public required string Name { get; init; }
+    public string Name { get; init; }
     public RaiseDrop IsRaised { get; set; }
     public DateTime OperatedAt { get; set; }
 }

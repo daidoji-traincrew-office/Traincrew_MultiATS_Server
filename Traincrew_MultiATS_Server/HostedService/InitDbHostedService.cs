@@ -1,7 +1,12 @@
+using System.Globalization;
 using System.Text.Json;
+using System.Text.RegularExpressions;
+using CsvHelper;
+using CsvHelper.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.Models;
+using Route = Traincrew_MultiATS_Server.Models.Route;
 
 namespace Traincrew_MultiATS_Server.HostedService;
 
@@ -11,11 +16,49 @@ public class InitDbHostedService(IServiceScopeFactory serviceScopeFactory) : IHo
     {
         using var scope = serviceScopeFactory.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        // await InitDb(context, cancellationToken);
+        await InitRendoTable(context, cancellationToken);
+    }
+
+    private async Task InitDb(ApplicationDbContext context, CancellationToken cancellationToken)
+    {
         var jsonstring = await File.ReadAllTextAsync("./Data/DBBase.json", cancellationToken);
         var DBBase = JsonSerializer.Deserialize<DBBasejson>(jsonstring);
         if (DBBase != null)
         {
             var initializer = new DbInitializer(DBBase, context, cancellationToken);
+            await initializer.Initialize();
+        }
+    }
+
+    private async Task InitRendoTable(ApplicationDbContext context, CancellationToken cancellationToken)
+    {
+        var rendoTableDir = new DirectoryInfo("./Data/RendoTable");
+        if (!rendoTableDir.Exists)
+        {
+            return;
+        }
+
+        foreach (var file in rendoTableDir.EnumerateFiles())
+        {
+            if (file.Extension != ".csv")
+            {
+                continue;
+            }
+
+            var stationId = file.Name.Replace(".csv", "");
+            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                HasHeaderRecord = false,
+            };
+            using var reader = new StreamReader(file.FullName);
+            // ヘッダー行を読み飛ばす
+            await reader.ReadLineAsync(cancellationToken);
+            using var csv = new CsvReader(reader, config);
+            var records = await csv
+                .GetRecordsAsync<RendoTableCSV>(cancellationToken)
+                .ToListAsync(cancellationToken);
+            var initializer = new DbRendoTableInitializer(stationId, records, context, cancellationToken);
             await initializer.Initialize();
         }
     }
@@ -66,7 +109,7 @@ file class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Cancel
         var trackCircuitNames = (await context.TrackCircuits
             .Select(tc => tc.Name)
             .ToListAsync(cancellationToken)).ToHashSet();
-        
+
         foreach (var item in DBBase.trackCircuitList)
         {
             if (trackCircuitNames.Contains(item.Name))
@@ -101,7 +144,7 @@ file class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Cancel
         foreach (var signalData in DBBase.signalDataList)
         {
             // 既に登録済みの場合、スキップ
-            if (signalNames.Contains(signalData.Name)) 
+            if (signalNames.Contains(signalData.Name))
             {
                 continue;
             }
@@ -127,6 +170,7 @@ file class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Cancel
                 }
             });
         }
+
         await context.SaveChangesAsync(cancellationToken);
     }
 
@@ -301,4 +345,346 @@ file class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Cancel
 
         await context.SaveChangesAsync(cancellationToken);
     }
+}
+
+internal partial class DbRendoTableInitializer(
+    string stationId,
+    List<RendoTableCSV> rendoTableCsvs,
+    ApplicationDbContext context,
+    CancellationToken cancellationToken)
+{
+    const string NameSwitchingMachine = "転てつ器";
+
+    [GeneratedRegex(@"\d+")]
+    private static partial Regex RegexIntParse();
+    [GeneratedRegex(@"([^\)\s]+)")]
+    private static partial Regex RegexLockColumn();
+
+    internal async Task Initialize()
+    {
+        PreprocessCsv();
+        // await InitLever();
+        // await InitDestinationButtons();
+        // await InitRoutes();
+        await InitLocks(); // 追加
+    }
+
+    private void PreprocessCsv()
+    {
+        // ヒューマンリーダブルな空白や同上などの項目を補完し、後続の処理で扱いやすくする
+        var oldName = "";
+        var previousStart = "";
+        var preivousLockTime = "";
+        foreach (var rendoTableCsv in rendoTableCsvs)
+        {
+            if (string.IsNullOrWhiteSpace(rendoTableCsv.Name) || rendoTableCsv.Name.StartsWith('同'))
+            {
+                rendoTableCsv.Name = oldName; 
+            }
+            else
+            {
+                oldName = rendoTableCsv.Name;
+            }
+            if(string.IsNullOrWhiteSpace(rendoTableCsv.Start))
+            {
+                rendoTableCsv.Start = previousStart;
+            }
+            if(previousStart != rendoTableCsv.Start)
+            {
+                preivousLockTime = rendoTableCsv.ApproachTime;
+            }
+            else
+            {
+                rendoTableCsv.ApproachTime = preivousLockTime;
+            }
+            previousStart = rendoTableCsv.Start;
+        }
+    }
+
+    private async Task InitLever()
+    {
+        // 該当駅の全てのてこを取得
+        var leverNames = await context.Levers
+            .Where(l => l.Name.StartsWith(stationId))
+            .Select(l => l.Name)
+            .ToListAsync(cancellationToken);
+        foreach (var rendoTableCsv in rendoTableCsvs)
+        {
+            LeverType leverType;
+            if (rendoTableCsv.Name.EndsWith("信号機"))
+            {
+                leverType = LeverType.Route;
+            }
+            else if (rendoTableCsv.Name.StartsWith(NameSwitchingMachine))
+            {
+                leverType = LeverType.SwitchingMachine;
+            }
+            else
+            {
+                continue;
+            }
+
+            // 転てつ器の場合、転てつ器を登録
+            SwitchingMachine? switchingMachine = null;
+            if (leverType == LeverType.SwitchingMachine)
+            {
+                switchingMachine = new()
+                {
+                    Name = $"{stationId}_w{rendoTableCsv.Start}",
+                    TcName = "",
+                    Type = ObjectType.SwitchingMachine,
+                    SwitchingMachineState = new()
+                    {
+                        IsSwitching = false,
+                        IsReverse = NR.Normal,
+                        SwitchEndTime = DateTime.UtcNow.AddDays(-1)
+                    }
+                };
+            }
+
+            // てこを登録
+            var name = CalcLeverName(rendoTableCsv.Start);
+            if (rendoTableCsv.Start.Length > 0 && !leverNames.Contains(name))
+            {
+                context.Levers.Add(new()
+                {
+                    Name = name,
+                    Type = ObjectType.Lever,
+                    LeverType = leverType,
+                    SwitchingMachine = switchingMachine,
+                    LeverState = new()
+                    {
+                        IsReversed = LCR.Center
+                    }
+                });
+            }
+        }
+
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task InitDestinationButtons()
+    {
+        // 既存の着点ボタン名を一括取得
+        var existingButtonNames = await context.DestinationButtons
+            .Select(db => db.Name)
+            .ToListAsync(cancellationToken);
+
+        foreach (var rendoTableCsv in rendoTableCsvs)
+        {
+            if (string.IsNullOrWhiteSpace(rendoTableCsv.End) || rendoTableCsv.End is "L" or "R")
+            {
+                continue;
+            }
+
+            // ボタン名を生成
+            var buttonName = CalcButtonName(rendoTableCsv.End);
+            if (existingButtonNames.Contains(buttonName))
+            {
+                continue;
+            }
+
+            existingButtonNames.Add(buttonName);
+
+            // 着点ボタンを追加
+            context.DestinationButtons.Add(new()
+            {
+                Name = buttonName,
+                StationId = stationId,
+                DestinationButtonState = new()
+                {
+                    IsRaised = RaiseDrop.Drop,
+                    OperatedAt = DateTime.UtcNow.AddDays(-1)
+                }
+            });
+        }
+
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task InitRoutes()
+    {
+        // 既存の進路名を一括取得
+        var existingRouteNames = await context.Routes
+            .Select(r => r.Name)
+            .Where(r => r.StartsWith(stationId))
+            .ToListAsync(cancellationToken);
+        var leverDictionary = await context.Levers
+            .Where(l => l.Name.StartsWith(stationId))
+            .ToDictionaryAsync(l => l.Name, cancellationToken);
+
+        List<(Route, ulong, string)> routes = [];
+        foreach (var rendoTableCsv in rendoTableCsvs)
+        {
+            // RouteTypeを決定
+            RouteType routeType;
+            if (rendoTableCsv.Name.Contains("場内"))
+            {
+                routeType = RouteType.Arriving;
+            }
+            else if (rendoTableCsv.Name.Contains("出発"))
+            {
+                routeType = RouteType.Departure;
+            }
+            else if (rendoTableCsv.Name.Contains("誘導"))
+            {
+                routeType = RouteType.Guide;
+            }
+            else if (rendoTableCsv.Name.Contains("入換信号"))
+            {
+                routeType = RouteType.SwitchSignal;
+            }
+            else if (rendoTableCsv.Name.Contains("入換標識"))
+            {
+                routeType = RouteType.SwitchRoute;
+            }
+            else
+            {
+                continue;
+            }
+
+            // 進路名を生成
+            var routeName = CalcRouteName(rendoTableCsv.Start, rendoTableCsv.End);
+
+            if (existingRouteNames.Contains(routeName))
+            {
+                continue;
+            }
+
+            existingRouteNames.Add(routeName);
+
+            // 接近鎖状時素決定
+            var matches = RegexIntParse().Match(rendoTableCsv.ApproachTime);
+            var approachLockTime = int.Parse(matches.Value);
+
+            // 進路を追加
+            Route route = new()
+            {
+                Name = routeName,
+                TcName = "",
+                RouteType = routeType,
+                Root = "",
+                Indicator = "",
+                ApproachLockTime = approachLockTime,
+                RouteState = new()
+                {
+                    IsLeverRelayRaised = RaiseDrop.Drop,
+                    IsRouteRelayRaised = RaiseDrop.Drop,
+                    IsSignalControlRaised = RaiseDrop.Drop,
+                    IsApproachLockRaised = RaiseDrop.Drop,
+                    IsRouteLockRaised = RaiseDrop.Drop
+                }
+            };
+            var leverName = CalcLeverName(rendoTableCsv.Start);
+            var buttonName = CalcButtonName(rendoTableCsv.End);
+            if (!leverDictionary.TryGetValue(leverName, out var lever))
+            {
+                continue;
+            }
+
+            routes.Add((route, lever.Id, buttonName));
+            context.Routes.Add(route);
+        }
+
+        await context.SaveChangesAsync(cancellationToken);
+
+        // 進路とてこと着点ボタンの関連付けを追加
+        foreach (var (route, leverId, buttonName) in routes)
+        {
+            context.RouteLeverDestinationButtons.Add(new()
+            {
+                RouteId = route.Id,
+                LeverId = leverId,
+                DestinationButtonName = buttonName
+            });
+        }
+
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task InitLocks()
+    {
+        var interlockingObjects = await context.InterlockingObjects
+            .Where(io => io.Name.StartsWith(stationId))
+            .ToListAsync(cancellationToken);
+        var routes = interlockingObjects
+            .OfType<Route>()
+            .ToList();
+        var switchingMachines = interlockingObjects
+            .OfType<SwitchingMachine>()
+            .ToList();
+        foreach (var rendoTableCsv in rendoTableCsvs)
+        {
+            var routeName = CalcRouteName(rendoTableCsv.Start, rendoTableCsv.End); 
+            var route = routes.FirstOrDefault(r => r.Name == routeName);
+            if (route == null)
+            {
+                continue;
+            }
+            // Todo: CTC進路の場合と、その他の進路の場合で処理を分ける
+            // 鎖状欄を処理
+            var smLockItems = RegisterLockItems(rendoTableCsv.LockToSwitchingMachine);
+            var routeLockItems = RegisterLockItems(rendoTableCsv.LockToRoute);
+            // 信号制御欄を処理
+            var signalControlItems = RegisterLockItems(rendoTableCsv.SignalControl);
+            // Todo: 進路鎖状
+            // Todo: 接近鎖状
+        }
+        await context.SaveChangesAsync(cancellationToken);
+        
+        // Todo: 転てつ器のてっさ鎖状を処理する
+    }
+
+    private List<LockItem> RegisterLockItems(string lockString)
+    {
+        if (string.IsNullOrWhiteSpace(lockString))
+        {
+            return [];
+        }
+        var matches = RegexLockColumn().Matches(lockString);
+
+        return matches 
+            .Select(match =>
+            {
+                // Todo: 別駅所属の場合の処理
+                // 実際の行 (21) や 21 など
+                var column = match.Groups[0].Value;
+                // 対象となる物の名前 (21) -> 21
+                var group1 = match.Groups[1].Value;
+                var targetName = string.IsNullOrWhiteSpace(group1) ? match.Groups[2].Value : group1; 
+                // 反位かどうか
+                var isReverse = column.StartsWith('(');
+                return new LockItem
+                {
+                    Name = targetName,
+                    IsReverse = isReverse ? NR.Reversed : NR.Normal
+                };
+            })
+            .ToList();
+    }
+
+    private class LockItem
+    {
+        public string Name { get; set; }
+        public int RouteLockGroup { get; set; }
+        public NR IsReverse { get; set; }
+    }
+
+    private string CalcLeverName(string start)
+    {
+        return $"{stationId}_{start.Replace("R", "").Replace("L", "")}";
+    }
+
+    private string CalcButtonName(string end)
+    {
+        return $"{stationId}_{end.Replace("(", "").Replace(")", "")}P";
+    }
+
+    private string CalcRouteName(string start, string end)
+    {
+        var _end = end.StartsWith('(') ? "" :end;
+        return $"{stationId}_{start}{_end}";
+    }
+
+    
 }

@@ -1,6 +1,6 @@
 ﻿using Traincrew_MultiATS_Server.Models;
-using Traincrew_MultiATS_Server.Repositories.Button;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
+using Traincrew_MultiATS_Server.Repositories.DestinationButton;
 using Traincrew_MultiATS_Server.Repositories.General;
 using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
 using Traincrew_MultiATS_Server.Repositories.LockCondition;
@@ -23,7 +23,7 @@ public class RendoService(
     IInterlockingObjectRepository interlockingObjectRepository,
     ISwitchingMachineRepository switchingMachineRepository,
     ISwitchingMachineRouteRepository switchingMachineRouteRepository,
-    IButtonRepository buttonRepository,
+    IDestinationButtonRepository destinationButtonRepository,
     ILockConditionRepository lockConditionRepository,
     IDateTimeRepository dateTimeRepository,
     IGeneralRepository generalRepository)
@@ -41,7 +41,7 @@ public class RendoService(
         var interlockingObjects = (await interlockingObjectRepository.GetAllWithState())
             .ToDictionary(obj => obj.Id);
         // Buttonを全取得
-        var buttons = await buttonRepository.GetAllButtons();
+        var buttons = await destinationButtonRepository.GetAllButtons();
         // 直接鎖状条件を取得
         var lockConditions = await lockConditionRepository.GetConditionsByType(LockType.Lock);
 
@@ -91,7 +91,7 @@ public class RendoService(
                     continue;
                 }
 
-                var isRaised = button.ButtonState.IsRaised;
+                var isRaised = button.DestinationButtonState.IsRaised;
                 // 着点ボタンが押されている場合は、てこリレーを上げる
                 if (isRaised == RaiseDrop.Raise)
                 {
@@ -153,7 +153,8 @@ public class RendoService(
         foreach (var switchingMachine in switchingMachineList)
         {
             // 対応する転てつ器のてっさ鎖錠欄の条件確認
-            if (IsDetectorLocked(detectorLockConditions[switchingMachine.Id], interlockingObjects))
+            var detectorLockCondition = detectorLockConditions.GetValueOrDefault(switchingMachine.Id, []);
+            if (IsDetectorLocked(detectorLockCondition, interlockingObjects))
             {
                 // てっさ鎖錠領域に転換中に列車が来ると転換完了処理も通らないが、転換中の転てつ器に突っ込んだ結果転てつ器が壊れたとする。
                 continue;
@@ -173,8 +174,8 @@ public class RendoService(
             // 対応する転てつ器のてこ状態を取得
             var leverState = levers[switchingMachine.Id].LeverState.IsReversed;
 
-            var RequestNormal = leverState == LCR.Left;
-            var RequestReverse = leverState == LCR.Right;
+            var requestNormal = leverState == LCR.Left;
+            var requestReverse = leverState == LCR.Right;
 
             // 対応する転てつ器の要求進路一覧を取得
             var switchingMachineRouteList = switchingMachineRouteDict[switchingMachine.Id];
@@ -189,22 +190,22 @@ public class RendoService(
                     switch (switchingMachineRoute.IsReverse)
                     {
                         case NR.Normal:
-                            RequestNormal = true;
+                            requestNormal = true;
                             break;
                         case NR.Reversed:
-                            RequestReverse = true;
+                            requestReverse = true;
                             break;
                     }
                 }
             }
 
-            if (RequestNormal == RequestReverse)
+            if (requestNormal == requestReverse)
             {
                 //何もしない
                 continue;
             }
 
-            if (RequestNormal)
+            if (requestNormal)
             {
                 // 既に定位(or定位に転換中)の場合はスキップ
                 if (switchingMachineState.IsReverse == NR.Normal)
@@ -215,7 +216,7 @@ public class RendoService(
                 // 対応する転てつ器のSwitchingMachineState.IsReverseをNR.Normalにする      
                 switchingMachineState.IsReverse = NR.Normal;
             }
-            else if (RequestReverse)
+            else if (requestReverse)
             {
                 // 既に反位(or反位に転換中)の場合はスキップ
                 if (switchingMachineState.IsReverse == NR.Reversed)

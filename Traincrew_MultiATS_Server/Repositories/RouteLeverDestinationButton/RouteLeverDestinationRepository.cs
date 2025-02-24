@@ -7,6 +7,6 @@ public class RouteLeverDestinationRepository(ApplicationDbContext dbContext): IR
 {
     public Task<List<Models.RouteLeverDestinationButton>> GetAll()
     {
-        return dbContext.RouteLeverDestinationButton.ToListAsync();
+        return dbContext.RouteLeverDestinationButtons.ToListAsync();
     }
 }

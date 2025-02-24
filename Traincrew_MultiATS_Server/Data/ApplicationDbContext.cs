@@ -18,10 +18,10 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<NextSignal> NextSignals { get; set; }
     public DbSet<TrackCircuitSignal> TrackCircuitSignals { get; set; }
     public DbSet<ProtectionZoneState> protectionZoneStates{ get; set; }
-    public DbSet<RouteLeverDestinationButton> RouteLeverDestinationButton { get; set; }
-    public DbSet<Button> Buttons { get; set; }
-    public DbSet<ButtonState> ButtonStates { get; set; }
+    public DbSet<RouteLeverDestinationButton> RouteLeverDestinationButtons { get; set; }
     public DbSet<SwitchingMachineRoute> SwitchingMachineRoutes { get; set; }
+    public DbSet<Lever> Levers { get; set; }
+    public DbSet<DestinationButton> DestinationButtons { get; set; }
     
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -65,6 +65,14 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasForeignKey(tcs => tcs.SignalName)
             .HasPrincipalKey(s => s.Name);
         modelBuilder.Entity<ProtectionZoneState>();
+        modelBuilder.Entity<Lever>()
+            .HasOne(l => l.LeverState)
+            .WithOne()
+            .HasForeignKey<LeverState>(ls => ls.Id);
+        modelBuilder.Entity<DestinationButton>()
+            .HasOne(db => db.DestinationButtonState)
+            .WithOne()
+            .HasForeignKey<DestinationButtonState>(dbs => dbs.Name);
         
         // Convert all column names to snake_case 
         foreach (var entity in modelBuilder.Model.GetEntityTypes())
