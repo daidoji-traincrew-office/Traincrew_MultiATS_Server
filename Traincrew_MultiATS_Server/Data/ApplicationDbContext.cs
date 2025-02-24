@@ -13,6 +13,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<TrackCircuit> TrackCircuits { get; set; }
     public DbSet<Lock> Locks { get; set; }
     public DbSet<LockCondition> LockConditions { get; set; }
+    public DbSet<LockConditionObject> LockConditionObjects { get; set; }
     public DbSet<Signal> Signals { get; set; }
     public DbSet<SignalType> SignalTypes { get; set; }
     public DbSet<NextSignal> NextSignals { get; set; }
@@ -45,11 +46,17 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasOne(l => l.LockCondition)
             .WithOne(lc => lc.Lock)
             .HasForeignKey<LockCondition>(lc => lc.LockId);
-        modelBuilder.Entity<LockCondition>()
-            .HasOne(lc => lc.targetObject)
-            .WithMany(obj => obj.LockConditions)
-            .HasForeignKey(lc => lc.ObjectId);
         */
+        modelBuilder.Entity<LockCondition>()
+            .HasOne(lc => lc.Lock)
+            .WithMany()
+            .HasForeignKey(l => l.LockId)
+            .HasPrincipalKey(l => l.Id);
+        modelBuilder.Entity<LockConditionObject>()
+            .HasOne(lco => lco.Object)
+            .WithMany()
+            .HasForeignKey(lco => lco.ObjectId)
+            .HasPrincipalKey(o => o.Id);
         modelBuilder.Entity<Signal>()
             .HasOne(s => s.Type)
             .WithMany()

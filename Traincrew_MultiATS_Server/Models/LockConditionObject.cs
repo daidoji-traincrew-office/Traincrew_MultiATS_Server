@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
-using Traincrew_MultiATS_Server.Models;
+
+namespace Traincrew_MultiATS_Server.Models;
 
 [Table("lock_condition_object")]
 public class LockConditionObject: LockCondition
@@ -10,4 +11,3 @@ public class LockConditionObject: LockCondition
     public NR IsReverse { get; set; }
     public bool IsSingleLock { get; set; }
 }
-

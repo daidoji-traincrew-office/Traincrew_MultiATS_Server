@@ -16,7 +16,7 @@ public class InitDbHostedService(IServiceScopeFactory serviceScopeFactory) : IHo
     {
         using var scope = serviceScopeFactory.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        // await InitDb(context, cancellationToken);
+        await InitDb(context, cancellationToken);
         await InitRendoTable(context, cancellationToken);
     }
 
@@ -39,6 +39,7 @@ public class InitDbHostedService(IServiceScopeFactory serviceScopeFactory) : IHo
             return;
         }
 
+        List<DbRendoTableInitializer> initializers = [];
         foreach (var file in rendoTableDir.EnumerateFiles())
         {
             if (file.Extension != ".csv")
@@ -59,7 +60,13 @@ public class InitDbHostedService(IServiceScopeFactory serviceScopeFactory) : IHo
                 .GetRecordsAsync<RendoTableCSV>(cancellationToken)
                 .ToListAsync(cancellationToken);
             var initializer = new DbRendoTableInitializer(stationId, records, context, cancellationToken);
-            await initializer.Initialize();
+            initializers.Add(initializer);
+            // await initializer.InitializeObjects();
+        }
+
+        foreach (var initializer in initializers)
+        {
+            await initializer.InitializeLocks();
         }
     }
 
@@ -347,26 +354,56 @@ file class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Cancel
     }
 }
 
-internal partial class DbRendoTableInitializer(
-    string stationId,
-    List<RendoTableCSV> rendoTableCsvs,
-    ApplicationDbContext context,
-    CancellationToken cancellationToken)
+internal partial class DbRendoTableInitializer
 {
     const string NameSwitchingMachine = "転てつ器";
 
+    private static readonly Dictionary<string, List<string>> stationIdMap = new()
+    {
+        // 津崎: 浜園
+        { "TH71", ["TH70"] }
+    };
+
     [GeneratedRegex(@"\d+")]
     private static partial Regex RegexIntParse();
-    [GeneratedRegex(@"([^\)\s]+)")]
-    private static partial Regex RegexLockColumn();
 
-    internal async Task Initialize()
+    // 鎖状欄からてこ名を取得するための正規表現、[]が増えたときの対応のため、nameの番号は逆順にしてある
+    [GeneratedRegex(@"(?:\[{2}(?<name3>[^]]+?)\]{2})|(?:\[(?<name2>[^]]+?)\])|(?<name1r>\(\S+?\))|(?<name1>[^\s\(]+)")]
+    private static partial Regex RegexLockColumn();
+    
+    // ReSharper disable InconsistentNaming
+    private readonly string stationId;
+    private readonly List<RendoTableCSV> rendoTableCsvs;
+    private readonly ApplicationDbContext context;
+    private readonly CancellationToken cancellationToken;
+    private readonly List<string> otherStations;
+    // ReSharper restore InconsistentNaming
+
+    internal DbRendoTableInitializer(
+        string stationId,
+        List<RendoTableCSV> rendoTableCsvs,
+        ApplicationDbContext context,
+        CancellationToken cancellationToken)
+    {
+        this.stationId = stationId;
+        this.rendoTableCsvs = rendoTableCsvs;
+        this.context = context;
+        this.cancellationToken = cancellationToken;
+        otherStations = stationIdMap.GetValueOrDefault(stationId) ?? [];
+    }
+
+    internal async Task InitializeObjects()
     {
         PreprocessCsv();
-        // await InitLever();
-        // await InitDestinationButtons();
-        // await InitRoutes();
-        await InitLocks(); // 追加
+        await InitLever();
+        await InitDestinationButtons();
+        await InitRoutes();
+    }
+
+    internal async Task InitializeLocks()
+    {
+        PreprocessCsv();
+        await InitLocks();
     }
 
     private void PreprocessCsv()
@@ -379,17 +416,19 @@ internal partial class DbRendoTableInitializer(
         {
             if (string.IsNullOrWhiteSpace(rendoTableCsv.Name) || rendoTableCsv.Name.StartsWith('同'))
             {
-                rendoTableCsv.Name = oldName; 
+                rendoTableCsv.Name = oldName;
             }
             else
             {
                 oldName = rendoTableCsv.Name;
             }
-            if(string.IsNullOrWhiteSpace(rendoTableCsv.Start))
+
+            if (string.IsNullOrWhiteSpace(rendoTableCsv.Start))
             {
                 rendoTableCsv.Start = previousStart;
             }
-            if(previousStart != rendoTableCsv.Start)
+
+            if (previousStart != rendoTableCsv.Start)
             {
                 preivousLockTime = rendoTableCsv.ApproachTime;
             }
@@ -397,6 +436,7 @@ internal partial class DbRendoTableInitializer(
             {
                 rendoTableCsv.ApproachTime = preivousLockTime;
             }
+
             previousStart = rendoTableCsv.Start;
         }
     }
@@ -430,7 +470,7 @@ internal partial class DbRendoTableInitializer(
             {
                 switchingMachine = new()
                 {
-                    Name = $"{stationId}_w{rendoTableCsv.Start}",
+                    Name = CalcSwitchingMachineName(rendoTableCsv.Start), 
                     TcName = "",
                     Type = ObjectType.SwitchingMachine,
                     SwitchingMachineState = new()
@@ -604,61 +644,172 @@ internal partial class DbRendoTableInitializer(
 
     private async Task InitLocks()
     {
+        // 必要なオブジェクトを取得
         var interlockingObjects = await context.InterlockingObjects
-            .Where(io => io.Name.StartsWith(stationId))
+            .Where(io => io.Name.StartsWith(stationId) || otherStations.Any(s => io.Name.StartsWith(s)))
             .ToListAsync(cancellationToken);
+        // 進路のリスト
         var routes = interlockingObjects
             .OfType<Route>()
             .ToList();
+        // 転てつ器のリスト(鎖状欄用)
         var switchingMachines = interlockingObjects
             .OfType<SwitchingMachine>()
             .ToList();
+        // その他のオブジェクトのリスト(鎖状欄用)
+        var otherObjects = interlockingObjects
+            .Where(io => io is not SwitchingMachine)
+            .ToList();
         foreach (var rendoTableCsv in rendoTableCsvs)
         {
-            var routeName = CalcRouteName(rendoTableCsv.Start, rendoTableCsv.End); 
+            var routeName = CalcRouteName(rendoTableCsv.Start, rendoTableCsv.End);
             var route = routes.FirstOrDefault(r => r.Name == routeName);
             if (route == null)
             {
                 continue;
             }
+
             // Todo: CTC進路の場合と、その他の進路の場合で処理を分ける
             // 鎖状欄を処理
-            var smLockItems = RegisterLockItems(rendoTableCsv.LockToSwitchingMachine);
-            var routeLockItems = RegisterLockItems(rendoTableCsv.LockToRoute);
+            var lockToSm = RegisterLockItems(rendoTableCsv.LockToSwitchingMachine);
+            foreach(var lockItem in lockToSm)
+            {
+                var switchingMachine = switchingMachines
+                    .FirstOrDefault(sm => sm.Name == CalcSwitchingMachineName(lockItem.Name, lockItem.StationId));
+                if(switchingMachine == null)
+                {
+                    // Todo: エラーログ
+                    continue;
+                }
+                Lock lockObject = new()
+                {
+                    ObjectId = route.Id,
+                    Type = LockType.Lock
+                };
+                context.Locks.Add(lockObject);
+                context.LockConditionObjects.Add(new()
+                {
+                    Lock = lockObject,
+                    ObjectId = switchingMachine.Id,
+                    IsReverse = lockItem.IsReverse,
+                    Type = LockConditionType.Object
+                });
+                
+            }
+            var lockToRoute = RegisterLockItems(rendoTableCsv.LockToRoute);
+            foreach (var lockItem in lockToRoute)
+            {
+                // Todo:その他オブジェクトからの検索をちゃんと作る
+                // Todo: 当該駅以外の軌道回路 or てこの場合の処理
+                // まず進路から検索する
+                var targetObject = otherObjects
+                    .FirstOrDefault(o => o.Name == CalcRouteName(lockItem.Name, "", lockItem.StationId));
+                if (targetObject == null)
+                {
+                    continue;
+                }
+                Lock lockObject = new()
+                {
+                    ObjectId = route.Id,
+                    Type = LockType.Lock
+                };
+                context.Locks.Add(lockObject);
+                context.LockConditionObjects.Add(new()
+                {
+                    Lock = lockObject,
+                    ObjectId = targetObject.Id,
+                    IsReverse = lockItem.IsReverse,
+                    Type = LockConditionType.Object
+                });
+            }
             // 信号制御欄を処理
+            // Todo: 統括制御のための処理を追加
             var signalControlItems = RegisterLockItems(rendoTableCsv.SignalControl);
+            foreach(var lockItem in signalControlItems)
+            {
+                var targetObject = otherObjects
+                    .FirstOrDefault(o => o.Name == CalcRouteName(lockItem.Name, "", lockItem.StationId));
+                if (targetObject == null)
+                {
+                    continue;
+                }
+                Lock lockObject = new()
+                {
+                    ObjectId = route.Id,
+                    Type = LockType.SignalControl
+                };
+                context.Locks.Add(lockObject);
+                context.LockConditionObjects.Add(new()
+                {
+                    Lock = lockObject,
+                    ObjectId = targetObject.Id,
+                    IsReverse = lockItem.IsReverse,
+                    Type = LockConditionType.Object
+                });
+            }
             // Todo: 進路鎖状
             // Todo: 接近鎖状
         }
+
         await context.SaveChangesAsync(cancellationToken);
-        
+
         // Todo: 転てつ器のてっさ鎖状を処理する
     }
 
-    private List<LockItem> RegisterLockItems(string lockString)
+    private List<LockItem> RegisterLockItems(string lockString, bool isSwitchingMachine = false)
     {
         if (string.IsNullOrWhiteSpace(lockString))
         {
             return [];
         }
+
         var matches = RegexLockColumn().Matches(lockString);
 
-        return matches 
-            .Select(match =>
+        return matches
+            .SelectMany(match =>
             {
-                // Todo: 別駅所属の場合の処理
-                // 実際の行 (21) や 21 など
-                var column = match.Groups[0].Value;
-                // 対象となる物の名前 (21) -> 21
-                var group1 = match.Groups[1].Value;
-                var targetName = string.IsNullOrWhiteSpace(group1) ? match.Groups[2].Value : group1; 
-                // 反位かどうか
-                var isReverse = column.StartsWith('(');
-                return new LockItem
+                for (var i = 0; i < 3; i++)
                 {
-                    Name = targetName,
-                    IsReverse = isReverse ? NR.Reversed : NR.Normal
-                };
+                    // グループを取得 
+                    var group = match.Groups[$"name{i + 1}"];
+                    // 0番目の場合、反位パターンがあるのでそれも取得
+                    if (!group.Success && i == 0)
+                    {
+                        group = match.Groups[$"name{i + 1}r"];
+                    }
+
+                    // グループが取得できなかった場合、次のループへ
+                    if (!group.Success)
+                    {
+                        continue;
+                    }
+
+                    // 実際の行 (21) や 21 など
+                    var column = group.Value;
+                    var isReverse = column.StartsWith('(');
+                    // Objectの名前
+                    // 例 (21) -> 21
+                    // Todo: 片鎖状に対応する
+                    var targetName = isReverse ? column.Substring(1, column.Length - 2) : column;
+                    // 対象オブジェクトの駅ID
+                    var objectStationId = stationId;
+                    if (i > 0)
+                    {
+                        objectStationId = otherStations[i - 1];
+                    }
+                    return
+                    [
+                        new()
+                        {
+                            Name = targetName,
+                            StationId = objectStationId,
+                            IsReverse = isReverse ? NR.Reversed : NR.Normal
+                        }
+                    ];
+                }
+
+                // Todo: 例外吐かせた方が良い
+                return new List<LockItem>();
             })
             .ToList();
     }
@@ -666,25 +817,49 @@ internal partial class DbRendoTableInitializer(
     private class LockItem
     {
         public string Name { get; set; }
+        public string StationId { get; set; }
         public int RouteLockGroup { get; set; }
         public NR IsReverse { get; set; }
     }
-
-    private string CalcLeverName(string start)
+    
+    private SwitchingMachine? getFromSwitchingMachineByLockItem(LockItem item, List<SwitchingMachine> switchingMachines)
     {
+        return switchingMachines.FirstOrDefault(sm => sm.Name == CalcSwitchingMachineName(item.Name, item.StationId));
+    }
+    
+    private string CalcSwitchingMachineName(string start, string stationId = "")
+    {
+        if(stationId == "")
+        {
+            stationId = this.stationId;
+        }
+        return $"{stationId}_w{start}";
+    }
+
+    private string CalcLeverName(string start, string stationId = "")
+    {
+        if(stationId == "")
+        {
+            stationId = this.stationId;
+        }
         return $"{stationId}_{start.Replace("R", "").Replace("L", "")}";
     }
 
-    private string CalcButtonName(string end)
+    private string CalcButtonName(string end, string stationId = "")
     {
+        if(stationId == "")
+        {
+            stationId = this.stationId;
+        }
         return $"{stationId}_{end.Replace("(", "").Replace(")", "")}P";
     }
 
-    private string CalcRouteName(string start, string end)
+    private string CalcRouteName(string start, string end, string stationId = "")
     {
-        var _end = end.StartsWith('(') ? "" :end;
-        return $"{stationId}_{start}{_end}";
+        if(stationId == "")
+        {
+            stationId = this.stationId;
+        }
+        return $"{stationId}_{start}{(end.StartsWith('(') ? "" : end)}";
     }
-
-    
 }

@@ -247,7 +247,7 @@ CREATE INDEX lock_condition_lock_id_index ON lock_condition (lock_id);
 -- 鎖状条件のobjectの詳細
 CREATE TABLE lock_condition_object
 (
-    lock_condition_id BIGINT PRIMARY KEY REFERENCES lock_condition (ID),   -- 鎖状条件のID
+    id                BIGINT PRIMARY KEY REFERENCES lock_condition (ID),   -- 鎖状条件のID
     object_id         BIGINT REFERENCES interlocking_object (id) NOT NULL, -- 進路、転てつ機、軌道回路、てこのID
     timer_seconds     INT,                                                 -- タイマーの秒数
     is_reverse        nr                                         NOT NULL, -- 定反
