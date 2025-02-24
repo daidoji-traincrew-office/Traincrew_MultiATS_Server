@@ -374,7 +374,7 @@ internal partial class DbRendoTableInitializer
     // 信号制御欄から統括制御とそれ以外の部位に分けるための正規表現
     [GeneratedRegex(@"^(.*?)(?:(\(\([^\)\s]+\)\))\s*)*$")]
     private static partial Regex RegexSignalControl();
-    
+
     // ReSharper disable InconsistentNaming
     private readonly string stationId;
     private readonly List<RendoTableCSV> rendoTableCsvs;
@@ -474,7 +474,7 @@ internal partial class DbRendoTableInitializer
             {
                 switchingMachine = new()
                 {
-                    Name = CalcSwitchingMachineName(rendoTableCsv.Start), 
+                    Name = CalcSwitchingMachineName(rendoTableCsv.Start),
                     TcName = "",
                     Type = ObjectType.SwitchingMachine,
                     SwitchingMachineState = new()
@@ -649,151 +649,100 @@ internal partial class DbRendoTableInitializer
     private async Task InitLocks()
     {
         // 必要なオブジェクトを取得
+        // Todo: 接近鎖錠用に向けたオブジェクト取得
         var interlockingObjects = await context.InterlockingObjects
             .Where(io => io.Name.StartsWith(stationId) || otherStations.Any(s => io.Name.StartsWith(s)))
             .ToListAsync(cancellationToken);
-        // 進路のリスト
+        
+        // 進路のDict
         var routes = interlockingObjects
             .OfType<Route>()
-            .ToList();
-        // 転てつ器のリスト(鎖状欄用)
+            .ToDictionary(r => r.Name, r => r);
+        // 転てつ器のDict
         var switchingMachines = interlockingObjects
             .OfType<SwitchingMachine>()
-            .ToList();
-        // その他のオブジェクトのリスト(鎖状欄用)
+            .ToDictionary(sm => sm.Name, sm => sm);
+        // その他のオブジェクトのDict
         var otherObjects = interlockingObjects
             .Where(io => io is not SwitchingMachine)
-            .ToList();
+            .ToDictionary(io => io.Name, io => io);
+        
+        var searchSwitchingMachine = new Func<LockItem, InterlockingObject?>(
+            item => switchingMachines.GetValueOrDefault(CalcSwitchingMachineName(item.Name, item.StationId)));
+        var searchOtherObjects = new Func<LockItem, InterlockingObject?>(
+            item => otherObjects.GetValueOrDefault(CalcLeverName(item.Name, item.StationId)));
+
         foreach (var rendoTableCsv in rendoTableCsvs)
         {
             var routeName = CalcRouteName(rendoTableCsv.Start, rendoTableCsv.End);
-            var route = routes.FirstOrDefault(r => r.Name == routeName);
+            var route = routes.GetValueOrDefault(routeName);
             if (route == null)
             {
+                // Todo: Warningを出す
                 continue;
             }
-
             // Todo: CTC進路の場合と、その他の進路の場合で処理を分ける
-            // 鎖状欄を処理
-            var lockToSm = RegisterLockItems(rendoTableCsv.LockToSwitchingMachine);
-            foreach(var lockItem in lockToSm)
-            {
-                var switchingMachine = switchingMachines
-                    .FirstOrDefault(sm => sm.Name == CalcSwitchingMachineName(lockItem.Name, lockItem.StationId));
-                if(switchingMachine == null)
-                {
-                    // Todo: エラーログ
-                    continue;
-                }
-                Lock lockObject = new()
-                {
-                    ObjectId = route.Id,
-                    Type = LockType.Lock
-                };
-                context.Locks.Add(lockObject);
-                context.LockConditionObjects.Add(new()
-                {
-                    Lock = lockObject,
-                    ObjectId = switchingMachine.Id,
-                    IsReverse = lockItem.IsReverse,
-                    Type = LockConditionType.Object
-                });
-                
-            }
-            var lockToRoute = RegisterLockItems(rendoTableCsv.LockToRoute);
-            foreach (var lockItem in lockToRoute)
-            {
-                // Todo:その他オブジェクトからの検索をちゃんと作る
-                // Todo: 当該駅以外の軌道回路 or てこの場合の処理
-                // まず進路から検索する
-                var targetObject = otherObjects
-                    .FirstOrDefault(o => o.Name == CalcRouteName(lockItem.Name, "", lockItem.StationId));
-                if (targetObject == null)
-                {
-                    continue;
-                }
-                Lock lockObject = new()
-                {
-                    ObjectId = route.Id,
-                    Type = LockType.Lock
-                };
-                context.Locks.Add(lockObject);
-                context.LockConditionObjects.Add(new()
-                {
-                    Lock = lockObject,
-                    ObjectId = targetObject.Id,
-                    IsReverse = lockItem.IsReverse,
-                    Type = LockConditionType.Object
-                });
-            }
-            // 信号制御欄を処理
-            // Todo: 統括制御のための処理を追加
-            var signalControlItems = RegisterLockItems(rendoTableCsv.SignalControl);
-            foreach(var lockItem in signalControlItems)
-            {
-                var targetObject = otherObjects
-                    .FirstOrDefault(o => o.Name == CalcRouteName(lockItem.Name, "", lockItem.StationId));
-                if (targetObject == null)
-                {
-                    continue;
-                }
-                Lock lockObject = new()
-                {
-                    ObjectId = route.Id,
-                    Type = LockType.SignalControl
-                };
-                context.Locks.Add(lockObject);
-                context.LockConditionObjects.Add(new()
-                {
-                    Lock = lockObject,
-                    ObjectId = targetObject.Id,
-                    IsReverse = lockItem.IsReverse,
-                    Type = LockConditionType.Object
-                });
-            }
-            // Todo: 進路鎖状
-            // Todo: 接近鎖状
+            // 鎖錠欄(転てつ器)
+            RegisterLocks(rendoTableCsv.LockToSwitchingMachine, route.Id, searchSwitchingMachine, LockType.Lock);
+            // 鎖錠欄(そのほか)
+            RegisterLocks(rendoTableCsv.LockToRoute, route.Id, searchOtherObjects, LockType.Lock);
+            // 信号制御欄
+            // Todo: 統括制御
+            RegisterLocks(rendoTableCsv.SignalControl, route.Id, searchOtherObjects, LockType.SignalControl);
+            // Todo: 進路鎖錠
+            // Todo: 接近鎖錠
         }
 
         // 転てつ器のてっ査鎖錠を処理する
         foreach (var rendoTableCsv in rendoTableCsvs)
         {
-            var switchingMachineName = CalcSwitchingMachineName(rendoTableCsv.Start);
-            var switchingMachine = switchingMachines.FirstOrDefault(sm => sm.Name == switchingMachineName);
+            var switchingMachine = searchSwitchingMachine(new()
+            {
+                Name = rendoTableCsv.Start,
+                StationId = stationId
+            });
             if (switchingMachine == null)
             {
+                // Todo: Warningを出す
                 continue;
             }
-            var signalControlItems = RegisterLockItems(rendoTableCsv.SignalControl);
-            foreach (var lockItem in signalControlItems)
-            {
-                var targetObject = otherObjects
-                    .FirstOrDefault(o => o.Name == CalcRouteName(lockItem.Name, "", lockItem.StationId));
-                if (targetObject == null)
-                {
-                    continue;
-                }
 
-                Lock lockObject = new()
-                {
-                    ObjectId = switchingMachine.Id,
-                    Type = LockType.Detector
-                };
-                context.Locks.Add(lockObject);
-                context.LockConditionObjects.Add(new()
-                {
-                    Lock = lockObject,
-                    ObjectId = targetObject.Id,
-                    IsReverse = lockItem.IsReverse,
-                    Type = LockConditionType.Object
-                });
-            }
+            RegisterLocks(rendoTableCsv.SignalControl, switchingMachine.Id, searchOtherObjects, LockType.Detector);
         }
-        await context.SaveChangesAsync(cancellationToken);
 
+        await context.SaveChangesAsync(cancellationToken);
     }
 
-    private List<LockItem> RegisterLockItems(string lockString, bool isSwitchingMachine = false)
+    private void RegisterLocks(string lockString, ulong objectId, Func<LockItem, InterlockingObject?> searchTargetObjects,
+        LockType lockType)
+    {
+        var lockItems = CalcLockItems(lockString);
+        foreach (var lockItem in lockItems)
+        {
+            var targetObject = searchTargetObjects(lockItem);
+            if (targetObject == null)
+            {
+                // Todo: 例外を吐かせる
+                continue;
+            }
+
+            Lock lockObject = new()
+            {
+                ObjectId = objectId,
+                Type = lockType
+            };
+            context.Locks.Add(lockObject);
+            context.LockConditionObjects.Add(new()
+            {
+                Lock = lockObject,
+                ObjectId = targetObject.Id,
+                IsReverse = lockItem.IsReverse,
+                Type = LockConditionType.Object
+            });
+        }
+    }
+
+    private List<LockItem> CalcLockItems(string lockString)
     {
         if (string.IsNullOrWhiteSpace(lockString))
         {
@@ -858,45 +807,44 @@ internal partial class DbRendoTableInitializer
         public int RouteLockGroup { get; set; }
         public NR IsReverse { get; set; }
     }
-    
-    private SwitchingMachine? getFromSwitchingMachineByLockItem(LockItem item, List<SwitchingMachine> switchingMachines)
-    {
-        return switchingMachines.FirstOrDefault(sm => sm.Name == CalcSwitchingMachineName(item.Name, item.StationId));
-    }
-    
+
     private string CalcSwitchingMachineName(string start, string stationId = "")
     {
-        if(stationId == "")
+        if (stationId == "")
         {
             stationId = this.stationId;
         }
+
         return $"{stationId}_w{start}";
     }
 
     private string CalcLeverName(string start, string stationId = "")
     {
-        if(stationId == "")
+        if (stationId == "")
         {
             stationId = this.stationId;
         }
+
         return $"{stationId}_{start.Replace("R", "").Replace("L", "")}";
     }
 
     private string CalcButtonName(string end, string stationId = "")
     {
-        if(stationId == "")
+        if (stationId == "")
         {
             stationId = this.stationId;
         }
+
         return $"{stationId}_{end.Replace("(", "").Replace(")", "")}P";
     }
 
     private string CalcRouteName(string start, string end, string stationId = "")
     {
-        if(stationId == "")
+        if (stationId == "")
         {
             stationId = this.stationId;
         }
+
         return $"{stationId}_{start}{(end.StartsWith('(') ? "" : end)}";
     }
 }
