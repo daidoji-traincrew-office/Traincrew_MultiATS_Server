@@ -751,9 +751,42 @@ internal partial class DbRendoTableInitializer
             // Todo: 接近鎖状
         }
 
+        // 転てつ器のてっ査鎖錠を処理する
+        foreach (var rendoTableCsv in rendoTableCsvs)
+        {
+            var switchingMachineName = CalcSwitchingMachineName(rendoTableCsv.Start);
+            var switchingMachine = switchingMachines.FirstOrDefault(sm => sm.Name == switchingMachineName);
+            if (switchingMachine == null)
+            {
+                continue;
+            }
+            var signalControlItems = RegisterLockItems(rendoTableCsv.SignalControl);
+            foreach (var lockItem in signalControlItems)
+            {
+                var targetObject = otherObjects
+                    .FirstOrDefault(o => o.Name == CalcRouteName(lockItem.Name, "", lockItem.StationId));
+                if (targetObject == null)
+                {
+                    continue;
+                }
+
+                Lock lockObject = new()
+                {
+                    ObjectId = switchingMachine.Id,
+                    Type = LockType.Detector
+                };
+                context.Locks.Add(lockObject);
+                context.LockConditionObjects.Add(new()
+                {
+                    Lock = lockObject,
+                    ObjectId = targetObject.Id,
+                    IsReverse = lockItem.IsReverse,
+                    Type = LockConditionType.Object
+                });
+            }
+        }
         await context.SaveChangesAsync(cancellationToken);
 
-        // Todo: 転てつ器のてっさ鎖状を処理する
     }
 
     private List<LockItem> RegisterLockItems(string lockString, bool isSwitchingMachine = false)
