@@ -370,6 +370,10 @@ internal partial class DbRendoTableInitializer
     // 鎖状欄からてこ名を取得するための正規表現、[]が増えたときの対応のため、nameの番号は逆順にしてある
     [GeneratedRegex(@"(?:\[{2}(?<name3>[^]]+?)\]{2})|(?:\[(?<name2>[^]]+?)\])|(?<name1r>\(\S+?\))|(?<name1>[^\s\(]+)")]
     private static partial Regex RegexLockColumn();
+
+    // 信号制御欄から統括制御とそれ以外の部位に分けるための正規表現
+    [GeneratedRegex(@"^(.*?)(?:(\(\([^\)\s]+\)\))\s*)*$")]
+    private static partial Regex RegexSignalControl();
     
     // ReSharper disable InconsistentNaming
     private readonly string stationId;
