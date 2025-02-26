@@ -61,7 +61,7 @@ public class InitDbHostedService(IServiceScopeFactory serviceScopeFactory) : IHo
                 .ToListAsync(cancellationToken);
             var initializer = new DbRendoTableInitializer(stationId, records, context, cancellationToken);
             initializers.Add(initializer);
-            // await initializer.InitializeObjects();
+            await initializer.InitializeObjects();
         }
 
         foreach (var initializer in initializers)
@@ -361,7 +361,9 @@ internal partial class DbRendoTableInitializer
     private static readonly Dictionary<string, List<string>> stationIdMap = new()
     {
         // 津崎: 浜園
-        { "TH71", ["TH70"] }
+        { "TH71", ["TH70"] },
+        // 浜園: 津崎
+        { "TH70", ["TH71"]}
     };
 
     [GeneratedRegex(@"\d+")]
@@ -406,7 +408,7 @@ internal partial class DbRendoTableInitializer
 
     internal async Task InitializeLocks()
     {
-        PreprocessCsv();
+        // PreprocessCsv();
         await InitLocks();
     }
 
@@ -448,10 +450,10 @@ internal partial class DbRendoTableInitializer
     private async Task InitLever()
     {
         // 該当駅の全てのてこを取得
-        var leverNames = await context.Levers
+        var leverNames = (await context.Levers
             .Where(l => l.Name.StartsWith(stationId))
             .Select(l => l.Name)
-            .ToListAsync(cancellationToken);
+            .ToListAsync(cancellationToken)).ToHashSet();
         foreach (var rendoTableCsv in rendoTableCsvs)
         {
             LeverType leverType;
@@ -488,20 +490,22 @@ internal partial class DbRendoTableInitializer
 
             // てこを登録
             var name = CalcLeverName(rendoTableCsv.Start, stationId);
-            if (rendoTableCsv.Start.Length > 0 && !leverNames.Contains(name))
+            if (rendoTableCsv.Start.Length <= 0 || leverNames.Contains(name))
             {
-                context.Levers.Add(new()
-                {
-                    Name = name,
-                    Type = ObjectType.Lever,
-                    LeverType = leverType,
-                    SwitchingMachine = switchingMachine,
-                    LeverState = new()
-                    {
-                        IsReversed = LCR.Center
-                    }
-                });
+                continue;
             }
+            context.Levers.Add(new()
+            {
+                Name = name,
+                Type = ObjectType.Lever,
+                LeverType = leverType,
+                SwitchingMachine = switchingMachine,
+                LeverState = new()
+                {
+                    IsReversed = LCR.Center
+                }
+            });
+            leverNames.Add(name);
         }
 
         await context.SaveChangesAsync(cancellationToken);
@@ -599,7 +603,7 @@ internal partial class DbRendoTableInitializer
 
             // 接近鎖状時素決定
             var matches = RegexIntParse().Match(rendoTableCsv.ApproachTime);
-            var approachLockTime = int.Parse(matches.Value);
+            int? approachLockTime = matches.Success ? int.Parse(matches.Value): null;
 
             // 進路を追加
             Route route = new()
@@ -673,7 +677,7 @@ internal partial class DbRendoTableInitializer
         var searchOtherObjects = new Func<LockItem, Task<InterlockingObject?>>(item =>
             {
                 // 進路 or 軌道回路の場合はこちら
-                var key = CalcRouteName(item.Name, "", item.StationId);
+                var key = ConvertHalfWidthToFullWidth(CalcRouteName(item.Name, "", item.StationId));
                 var result = otherObjects.GetValueOrDefault(key);
                 if (result != null)
                 {
@@ -700,7 +704,8 @@ internal partial class DbRendoTableInitializer
             await RegisterLocks(rendoTableCsv.LockToRoute, route.Id, searchOtherObjects, LockType.Lock);
             // 信号制御欄
             // Todo: 統括制御
-            await RegisterLocks(rendoTableCsv.SignalControl, route.Id, searchOtherObjects, LockType.SignalControl);
+            var matchSignalControl = RegexSignalControl().Match(rendoTableCsv.SignalControl);
+            await RegisterLocks(matchSignalControl.Groups[1].Value, route.Id, searchOtherObjects, LockType.SignalControl);
             // Todo: 進路鎖錠
             // Todo: 接近鎖錠
         }
@@ -843,6 +848,11 @@ internal partial class DbRendoTableInitializer
         }
 
         return $"{stationId}_{end.Replace("(", "").Replace(")", "")}P";
+    }
+    
+    private string ConvertHalfWidthToFullWidth(string halfWidth)
+    {
+        return halfWidth.Replace('ｲ', 'イ').Replace('ﾛ', 'ロ'); 
     }
 
     private string CalcRouteName(string start, string end, string stationId)
