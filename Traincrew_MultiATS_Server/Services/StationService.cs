@@ -23,4 +23,26 @@ public class StationService
         // 駅を取得する
         return _stationRepository.GetStationByName(name);
     }
+
+    public async Task<string?> GetStationNameById(string id)
+    {
+        var station = await _stationRepository.GetStationById(id);
+        return station?.Name;
+    }
+
+    public async Task<List<string>> GetStationNamesByIds(List<string> ids)
+    {
+        var stationNames = new List<string>();
+
+        foreach (var id in ids)
+        {
+            var station = await _stationRepository.GetStationById(id);
+            if (station != null)
+            {
+                stationNames.Add(station.Name);
+            }
+        }
+
+        return stationNames;
+    }
 }
