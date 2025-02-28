@@ -14,7 +14,7 @@ public class SwitchingMachineService(
         var now = dateTimeRepository.GetNow();
         var switchingMachineIds = switchingMachineList.Select(x => x.Item1);
         var switchingMachines = await switchingMachineRepository
-            .GetSwitchingMachinesWithState(switchingMachineIds);
+            .GetSwitchingMachinesByIdsWithState(switchingMachineIds);
         var switchingMachineDic = switchingMachines.ToDictionary(x => x.Id);
         // Todo: 鎖状状態の取得と確認
         

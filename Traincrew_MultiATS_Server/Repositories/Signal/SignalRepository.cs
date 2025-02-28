@@ -5,6 +5,11 @@ namespace Traincrew_MultiATS_Server.Repositories.Signal;
 
 public class SignalRepository(ApplicationDbContext context) : ISignalRepository
 {
+    public async Task<List<Models.Signal>> GetAll()
+    {
+        return await context.Signals.ToListAsync();
+    }
+
     public async Task<List<Models.Signal>> GetSignalsByNamesForCalcIndication(List<string> signalNames)
     {
         return await context.Signals

@@ -13,11 +13,17 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<TrackCircuit> TrackCircuits { get; set; }
     public DbSet<Lock> Locks { get; set; }
     public DbSet<LockCondition> LockConditions { get; set; }
+    public DbSet<LockConditionObject> LockConditionObjects { get; set; }
     public DbSet<Signal> Signals { get; set; }
     public DbSet<SignalType> SignalTypes { get; set; }
     public DbSet<NextSignal> NextSignals { get; set; }
     public DbSet<TrackCircuitSignal> TrackCircuitSignals { get; set; }
     public DbSet<ProtectionZoneState> protectionZoneStates{ get; set; }
+    public DbSet<RouteLeverDestinationButton> RouteLeverDestinationButtons { get; set; }
+    public DbSet<SwitchingMachineRoute> SwitchingMachineRoutes { get; set; }
+    public DbSet<Lever> Levers { get; set; }
+    public DbSet<DestinationButton> DestinationButtons { get; set; }
+    
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -40,11 +46,17 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasOne(l => l.LockCondition)
             .WithOne(lc => lc.Lock)
             .HasForeignKey<LockCondition>(lc => lc.LockId);
-        modelBuilder.Entity<LockCondition>()
-            .HasOne(lc => lc.targetObject)
-            .WithMany(obj => obj.LockConditions)
-            .HasForeignKey(lc => lc.ObjectId);
         */
+        modelBuilder.Entity<LockCondition>()
+            .HasOne(lc => lc.Lock)
+            .WithMany()
+            .HasForeignKey(l => l.LockId)
+            .HasPrincipalKey(l => l.Id);
+        modelBuilder.Entity<LockConditionObject>()
+            .HasOne(lco => lco.Object)
+            .WithMany()
+            .HasForeignKey(lco => lco.ObjectId)
+            .HasPrincipalKey(o => o.Id);
         modelBuilder.Entity<Signal>()
             .HasOne(s => s.Type)
             .WithMany()
@@ -60,6 +72,14 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasForeignKey(tcs => tcs.SignalName)
             .HasPrincipalKey(s => s.Name);
         modelBuilder.Entity<ProtectionZoneState>();
+        modelBuilder.Entity<Lever>()
+            .HasOne(l => l.LeverState)
+            .WithOne()
+            .HasForeignKey<LeverState>(ls => ls.Id);
+        modelBuilder.Entity<DestinationButton>()
+            .HasOne(db => db.DestinationButtonState)
+            .WithOne()
+            .HasForeignKey<DestinationButtonState>(dbs => dbs.Name);
         
         // Convert all column names to snake_case 
         foreach (var entity in modelBuilder.Model.GetEntityTypes())

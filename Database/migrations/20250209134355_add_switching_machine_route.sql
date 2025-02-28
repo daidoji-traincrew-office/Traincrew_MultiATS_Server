@@ -1,0 +1,4 @@
+-- Create "switching_machine_route" table
+CREATE TABLE "switching_machine_route" ("id" bigserial NOT NULL, "switching_machine_id" bigint NOT NULL, "route_id" bigint NOT NULL, "is_reverse" "nr" NOT NULL, PRIMARY KEY ("id"), CONSTRAINT "switching_machine_route_switching_machine_id_route_id_key" UNIQUE ("switching_machine_id", "route_id"), CONSTRAINT "switching_machine_route_route_id_fkey" FOREIGN KEY ("route_id") REFERENCES "route" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION, CONSTRAINT "switching_machine_route_switching_machine_id_fkey" FOREIGN KEY ("switching_machine_id") REFERENCES "switching_machine" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION);
+-- Create index "switching_machine_route_switching_machine_id_index" to table: "switching_machine_route"
+CREATE INDEX "switching_machine_route_switching_machine_id_index" ON "switching_machine_route" ("switching_machine_id");

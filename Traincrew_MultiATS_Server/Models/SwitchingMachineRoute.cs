@@ -3,12 +3,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Traincrew_MultiATS_Server.Models;
 
-[Table("route_lever_destination_button")]
-public class RouteLeverDestinationButton
+[Table("switching_machine_route")]
+public class SwitchingMachineRoute
 {
     [Key]
     public ulong Id { get; set; }
+    public ulong SwitchingMachineId { get; set; }
     public ulong RouteId { get; set; }
-    public ulong LeverId { get; set; }
-    public string DestinationButtonName { get; set; }
+    public NR IsReverse { get; set; }
 }

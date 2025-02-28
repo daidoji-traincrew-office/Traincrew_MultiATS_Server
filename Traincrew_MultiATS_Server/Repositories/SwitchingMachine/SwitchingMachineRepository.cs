@@ -1,8 +1,16 @@
+using Microsoft.EntityFrameworkCore;
+using Traincrew_MultiATS_Server.Data;
+
 namespace Traincrew_MultiATS_Server.Repositories.SwitchingMachine;
 
-public class SwitchingMachineRepository : ISwitchingMachineRepository
+public class SwitchingMachineRepository(ApplicationDbContext context) : ISwitchingMachineRepository
 {
-    public async Task<List<Models.SwitchingMachine>> GetSwitchingMachinesWithState(IEnumerable<ulong> ids)
+    public Task<List<Models.SwitchingMachine>> GetSwitchingMachinesWithState()
+    {
+        return context.SwitchingMachines.Include(sm => sm.SwitchingMachineState).ToListAsync();
+    }
+
+    public async Task<List<Models.SwitchingMachine>> GetSwitchingMachinesByIdsWithState(IEnumerable<ulong> ids)
     {
         throw new NotImplementedException();
     }

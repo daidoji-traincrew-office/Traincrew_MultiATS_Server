@@ -5,6 +5,14 @@ namespace Traincrew_MultiATS_Server.Repositories.InterlockingObject;
 
 public class InterlockingObjectRepository(ApplicationDbContext context): IInterlockingObjectRepository
 {
+    public Task<List<Models.InterlockingObject>> GetAllWithState()
+    {
+        return context.InterlockingObjects
+            .Include(obj => ((Models.Route)obj).RouteState)
+            .Include(obj => ((Models.SwitchingMachine)obj).SwitchingMachineState)
+            .Include(obj => ((Models.TrackCircuit)obj).TrackCircuitState)
+            .ToListAsync();
+    }
     public Task<List<Models.InterlockingObject>> GetObjectByIds(IEnumerable<ulong> ids)
     {
         // Todo: 渡されたIDのオブジェクトが、かならず存在することを保証する

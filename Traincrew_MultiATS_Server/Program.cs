@@ -56,9 +56,13 @@ var dataSourceBuilder = new NpgsqlDataSourceBuilder(builder.Configuration.GetCon
 dataSourceBuilder.MapEnum<LockType>();
 dataSourceBuilder.MapEnum<NR>();
 dataSourceBuilder.MapEnum<NRC>();
+dataSourceBuilder.MapEnum<LCR>();
 dataSourceBuilder.MapEnum<ObjectType>();
 dataSourceBuilder.MapEnum<SignalIndication>();
 dataSourceBuilder.MapEnum<LockConditionType>();
+dataSourceBuilder.MapEnum<LeverType>();
+dataSourceBuilder.MapEnum<RouteType>();
+dataSourceBuilder.MapEnum<RaiseDrop>();
 var dataSource = dataSourceBuilder.Build();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
@@ -282,3 +286,5 @@ static void EnsureCertificateExists(string certificatePath, string subjectName, 
 
     File.WriteAllBytes(certificatePath, certificate.Export(X509ContentType.Pfx, string.Empty));
 }
+
+public partial class Program;
