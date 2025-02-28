@@ -51,7 +51,7 @@ namespace Traincrew_MultiATS_Server.Models
         /// 軌道回路情報リスト
         /// </summary>
         [JsonProperty("trackCircuitList")]
-        public List<InterlockingTrackCircuitData> TrackCircuits { get; set; }
+        public List<TrackCircuitData> TrackCircuits { get; set; }
 
         /// <summary>
         /// 転てつ器情報リスト
@@ -103,34 +103,6 @@ namespace Traincrew_MultiATS_Server.Models
         /// 方向てこの値
         /// </summary>
         public LCR State { get; set; } = LCR.Left;
-    }
-
-    /// <summary>
-    /// 軌道回路データクラス
-    /// </summary>
-    public class InterlockingTrackCircuitData
-    {
-        /// <summary>
-        /// 在線状態    
-        /// </summary>
-        public bool On { get; set; } = false;
-        /// <summary>
-        /// 鎖錠状態
-        /// </summary>
-        public bool Lock { get; set; } = false;
-        /// <summary>
-        /// 軌道回路を踏んだ列車の名前
-        /// </summary>
-        public string Last { get; set; } = null;
-        /// <summary>
-        /// 軌道回路名称
-        /// </summary>
-        public string Name { get; set; } = "";
-
-        public override string ToString()
-        {
-            return $"{Name}";
-        }
     }
 
     /// <summary>
