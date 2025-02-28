@@ -62,7 +62,7 @@ namespace Traincrew_MultiATS_Server.Models
         /// 信号機情報リスト
         /// </summary>
         [JsonProperty("signalDataList")]
-        public List<InterlockingSignalData> Signals { get; set; }
+        public List<SignalData> Signals { get; set; }
 
         /// <summary>
         /// 物理てこ情報リスト
@@ -118,23 +118,6 @@ namespace Traincrew_MultiATS_Server.Models
         /// 転てつ器名称
         /// </summary>
         public string Name { get; set; } = "";
-    }
-
-    /// <summary>
-    /// 信号機データクラス
-    /// </summary>
-    public class InterlockingSignalData
-    {
-        /// <summary>
-        /// 信号機名称
-        /// </summary>
-        [JsonProperty("Name")]
-        public string Name { get; init; } = "";
-        /// <summary>
-        /// 信号機現示
-        /// </summary>
-        [JsonProperty("phase")]
-        public Phase Phase { get; init; } = Phase.None;
     }
 
     /// <summary>
