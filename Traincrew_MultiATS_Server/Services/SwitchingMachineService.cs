@@ -37,4 +37,14 @@ public class SwitchingMachineService(
             */
         }
     }
+    public static InterlockingSwitchData ToInterlockingSwitchData(SwitchingMachine switchingMachine)
+    {
+        var state = switchingMachine.SwitchingMachineState;
+        
+        return new()
+        {
+            Name = switchingMachine.Name,
+            State = state.IsSwitching ? NRC.Center : state.IsReverse == NR.Normal ? NRC.Normal : NRC.Reversed
+        };
+    }
 }
