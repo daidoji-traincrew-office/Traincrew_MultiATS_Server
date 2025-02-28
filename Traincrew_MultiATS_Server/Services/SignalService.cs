@@ -81,6 +81,11 @@ public class SignalService(
         return result;
     }
 
+    public async Task<List<string>> GetSignalNamesByStationNames(List<string> stationIds)
+    {
+        return await signalRepository.GetSignalsByStationNames(stationIds);
+    }
+
     private static SignalIndication GetIndication(SignalType signalType, SignalIndication nextSignalIndication)
     {
         return nextSignalIndication switch
@@ -92,7 +97,7 @@ public class SignalService(
             _ => signalType.RIndication,
         };
     }
-    
+
     private static Phase ToPhase(SignalIndication indication)
     {
         return indication switch

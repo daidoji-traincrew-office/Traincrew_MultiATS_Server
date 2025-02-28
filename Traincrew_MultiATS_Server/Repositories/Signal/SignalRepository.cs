@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Polly;
 using Traincrew_MultiATS_Server.Data;
 
 namespace Traincrew_MultiATS_Server.Repositories.Signal;
@@ -28,6 +29,15 @@ public class SignalRepository(ApplicationDbContext context) : ISignalRepository
         return await context.TrackCircuitSignals
             .Where(tcs => trackCircuitNames.Contains(tcs.TrackCircuit.Name) && tcs.IsUp == isUp)
             .Select(tcs => tcs.SignalName)
+            .ToListAsync();
+    }
+
+    public async Task<List<string>> GetSignalsByStationNames(List<string> stationNames)
+    {
+        //Todo: 全体から文字列検索する仕様
+        return await context.Set<Models.Signal>()
+            .Where(signal => stationNames.Any(stationName => signal.Name.Contains(stationName)))
+            .Select(signal => signal.Name)
             .ToListAsync();
     }
 }
