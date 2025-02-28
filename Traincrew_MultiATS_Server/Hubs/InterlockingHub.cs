@@ -7,9 +7,11 @@ using OpenIddict.Validation.AspNetCore;
 namespace Traincrew_MultiATS_Server.Hubs;
 
 [Authorize(AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
-public class InterlockingHub(TrackCircuitService trackCircuitService) : Hub
+public class InterlockingHub(
+    TrackCircuitService trackCircuitService,
+    SignalService signalService) : Hub
 {
-    public async Task<Models.DataToInterlocking> SendData_Interlocking(Models.DataToInterlocking dataToInterlocking)
+    public async Task<Models.DataToInterlocking> SendData_Interlocking(Models.ConstantDataFromInterlocking clientData)
     {
         Models.DataToInterlocking response = new Models.DataToInterlocking();
         response.TrackCircuits = await trackCircuitService.GetAllTrackCircuitDataList();
@@ -20,8 +22,15 @@ public class InterlockingHub(TrackCircuitService trackCircuitService) : Hub
         // Todo: List<InterlockingSwitchData> Pointsを設定する
         // response.Points =                              
 
-        // Todo: List<InterlockingSignalData> Signalsを設定する
-        // response.Signals =                               
+        // Todo: List<string> clientData.ActiveStationsListの駅IDから、指定された駅にある信号機名称をList<string>で返すやつ
+        var signalNames = new List<string>();
+        // 現示計算
+        var signalIndications = await signalService.CalcSignalIndication(signalNames);
+        response.Signals = signalIndications.Select(pair => new SignalData
+        {
+            Name = pair.Key,
+            phase = pair.Value
+        }).ToList();
 
         // Todo: List<InterlockingLeverData> PhysicalLeversを設定する
         // response.PhysicalLevers =                           
