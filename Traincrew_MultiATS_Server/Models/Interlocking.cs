@@ -1,167 +1,197 @@
+using Newtonsoft.Json;
 using System.Collections.Generic;
 
 namespace Traincrew_MultiATS_Server.Models
 {
 
-	/// <summary>
-	/// 連動装置・送信用データクラス
-	/// </summary>
-	public class DataFromInterlocking
-	{
-		/// <summary>
-		/// 起動しているウィンドウの駅名
-		/// </summary>
-		public List<string> ActiveStationsList { get; set; }
-		/// <summary>
-		/// てこ・着点ボタン名
-		/// </summary>
-		public string PartsName { get; set; }
-		/// <summary>
-		/// てこの向き
-		/// </summary>
-		public int PartsValue { get; set; }
-	}
+    /// <summary>
+    /// 常時送信用データクラス
+    /// </summary>
+    public class ConstantDataFromInterlocking
+    {
+        /// <summary>
+        /// 常時送信用駅データリスト
+        /// </summary>
+        public List<string> ActiveStationsList { get; set; }
+    }
 
-	/// <summary>
-	/// 連動装置・受信用データクラス
-	/// </summary>
-	public class DataToInterlocking
-	{
-		public InterlockingAuthentication Authentication { get; set; }
-		public List<InterlockingPhysicalUI> PhysicalUIs { get; set; }
-		public List<InterlockingInternalUI> InternalUIs { get; set; }
-		public List<TrackCircuitData> TrackCircuitDataList { get; set; }
-		public List<InterlockingPoint> Points { get; set; }
-		public List<InterlockingSignal> Signals { get; set; }
-		public List<InterlockingLamp> Lamps { get; set; }
-		public List<InterlockingRetsuban> Retsubans { get; set; }
-	}
+    /// <summary>
+    /// イベント送信用データクラス(物理てこ)
+    /// </summary>
+    public class LeverEventDataFromInterlocking
+    {
+        /// <summary>
+        /// 物理てこデータ
+        /// </summary>
+        public InterlockingLeverData LeverData { get; set; }
+    }
 
-	/// <summary>
-	/// 連動装置・認証情報クラス
-	/// </summary>
-	public class InterlockingAuthentication
-	{
-		/// <summary>
-		/// 司令主任判定
-		/// </summary>
-		public bool IsCommander { get; set; }
-		/// <summary>
-		/// 信号係員判定
-		/// </summary>
-		public bool IsOperator { get; set; }
-	}
+    /// <summary>
+    /// イベント送信用データクラス(着点ボタン)
+    /// </summary>
+    public class ButtonEventDataFromInterlocking
+    {
+        /// <summary>
+        /// 着点ボタンデータ
+        /// </summary>
+        public DestinationButtonState DestinationButtonData { get; set; }
+    }
 
-	/// <summary>
-	/// 連動装置・物理UI情報クラス
-	/// </summary>
-	public class InterlockingPhysicalUI
-	{
-		/// <summary>
-		/// 名称
-		/// </summary>
-		public string Name { get; set; }
-		/// <summary>
-		/// UIの状態
-		/// </summary>
-		public int Value { get; set; }
-	}
+    /// <summary>
+    /// 受信用データクラス
+    /// </summary>
+    public class DataToInterlocking
+    {
+        /// <summary>
+        /// 認証情報リスト
+        /// </summary>
+        public TraincrewRole Authentications { get; set; }
 
-	/// <summary>
-	/// 連動装置・内部UI情報クラス
-	/// </summary>
-	public class InterlockingInternalUI
-	{
-		/// <summary>
-		/// 名称
-		/// </summary>
-		public string Name { get; set; }
-		/// <summary>
-		/// UIの状態
-		/// </summary>
-		public int Value { get; set; }
-	}
+        /// <summary>
+        /// 軌道回路情報リスト
+        /// </summary>
+        [JsonProperty("trackCircuitList")]
+        public List<InterlockingTrackCircuitData> TrackCircuits { get; set; }
 
-	/// <summary>
-	/// 連動装置・軌道回路情報クラス
-	/// </summary>
-	public class InterlockingTrackCircuit
-	{
-		/// <summary>
-		/// 名称
-		/// </summary>
-		public string Name { get; set; }
-		/// <summary>
-		/// 鎖錠判定
-		/// </summary>
-		public bool IsRouteSetting { get; set; }
-		/// <summary>
-		/// 在線判定
-		/// </summary>
-		public bool IsOnTrack { get; set; }
-		/// <summary>
-		/// 在線している列車番号
-		/// </summary>
-		public string Retsuban { get; set; }
-	}
+        /// <summary>
+        /// 転てつ器情報リスト
+        /// </summary>
+        public List<InterlockingSwitchData> Points { get; set; }
 
-	/// <summary>
-	/// 連動装置・転てつ器情報クラス
-	/// </summary>
-	public class InterlockingPoint
-	{
-		/// <summary>
-		/// 名称
-		/// </summary>
-		public string Name { get; set; }
-		/// <summary>
-		/// 反位判定
-		/// </summary>
-		public bool IsReversePosition { get; set; }
-	}
+        /// <summary>
+        /// 信号機情報リスト
+        /// </summary>
+        [JsonProperty("signalDataList")]
+        public List<InterlockingSignalData> Signals { get; set; }
 
-	/// <summary>
-	/// 連動装置・信号機情報クラス
-	/// </summary>
-	public class InterlockingSignal
-	{
-		/// <summary>
-		/// 名称
-		/// </summary>
-		public string Name { get; set; }
-		/// <summary>
-		/// 進行信号判定
-		/// </summary>
-		public bool IsProceedSignal { get; set; }
-	}
+        /// <summary>
+        /// 物理てこ情報リスト
+        /// </summary>
+        public List<InterlockingLeverData> PhysicalLevers { get; set; }
 
-	/// <summary>
-	/// 連動装置・ランプ情報クラス
-	/// </summary>
-	public class InterlockingLamp
-	{
-		/// <summary>
-		/// 名称
-		/// </summary>
-		public string Name { get; set; }
-		/// <summary>
-		/// 点灯判定
-		/// </summary>
-		public bool IsLighting { get; set; }
-	}
+        /// <summary>
+        /// 着点ボタン情報リスト
+        /// </summary>
+        public List<DestinationButtonState> PhysicalButtons { get; set; }
 
-	/// <summary>
-	/// 連動装置・列番情報クラス
-	/// </summary>
-	public class InterlockingRetsuban
-	{
-		/// <summary>
-		/// 名称
-		/// </summary>
-		public string Name { get; set; }
-		/// <summary>
-		/// 列車番号情報
-		/// </summary>
-		public string RetsubanText { get; set; }
-	}
+        /// <summary>
+        /// 方向てこ情報リスト
+        /// </summary>
+        public List<InterlockingDirectionData> Directions { get; set; }
+
+        /// <summary>
+        /// 列番情報リスト
+        /// </summary>
+        public List<InterlockingRetsubanData> Retsubans { get; set; }
+
+        /// <summary>
+        /// 表示灯情報リスト
+        /// </summary>
+        public List<Dictionary<string, bool>> Lamps { get; set; }
+    }
+
+    /// <summary>
+    /// 方向てこデータクラス
+    /// </summary>
+    public class InterlockingDirectionData
+    {
+        /// <summary>
+        /// 方向てこ名称
+        /// </summary>
+        public string Name { get; set; } = "";
+        /// <summary>
+        /// 方向てこの値
+        /// </summary>
+        public LCR State { get; set; } = LCR.Left;
+    }
+
+    /// <summary>
+    /// 軌道回路データクラス
+    /// </summary>
+    public class InterlockingTrackCircuitData
+    {
+        /// <summary>
+        /// 在線状態    
+        /// </summary>
+        public bool On { get; set; } = false;
+        /// <summary>
+        /// 鎖錠状態
+        /// </summary>
+        public bool Lock { get; set; } = false;
+        /// <summary>
+        /// 軌道回路を踏んだ列車の名前
+        /// </summary>
+        public string Last { get; set; } = null;
+        /// <summary>
+        /// 軌道回路名称
+        /// </summary>
+        public string Name { get; set; } = "";
+
+        public override string ToString()
+        {
+            return $"{Name}";
+        }
+    }
+
+    /// <summary>
+    /// 転てつ器データクラス
+    /// </summary>
+    public class InterlockingSwitchData
+    {
+        /// <summary>
+        /// 転てつ器状態
+        /// </summary>
+        public NRC State { get; set; } = NRC.Center;
+        /// <summary>
+        /// 転てつ器名称
+        /// </summary>
+        public string Name { get; set; } = "";
+    }
+
+    /// <summary>
+    /// 信号機データクラス
+    /// </summary>
+    public class InterlockingSignalData
+    {
+        /// <summary>
+        /// 信号機名称
+        /// </summary>
+        [JsonProperty("Name")]
+        public string Name { get; init; } = "";
+        /// <summary>
+        /// 信号機現示
+        /// </summary>
+        [JsonProperty("phase")]
+        public Phase Phase { get; init; } = Phase.None;
+    }
+
+    /// <summary>
+    /// 列番データクラス
+    /// </summary>
+    public class InterlockingRetsubanData
+    {
+        /// <summary>
+        /// 列番名称
+        /// </summary>
+        public string Name { get; set; } = "";
+        /// <summary>
+        /// 列番
+        /// </summary>
+        public string Retsuban { get; set; } = "";
+    }
+
+    /// <summary>
+    /// 物理てこデータクラス
+    /// </summary>
+    public class InterlockingLeverData
+    {
+        /// <summary>
+        /// 物理てこ名称
+        /// </summary>
+        public string Name { get; set; } = "";
+        /// <summary>
+        /// 物理てこの状態
+        /// </summary>
+        public LCR State { get; set; } = LCR.Center;
+    }
 }
