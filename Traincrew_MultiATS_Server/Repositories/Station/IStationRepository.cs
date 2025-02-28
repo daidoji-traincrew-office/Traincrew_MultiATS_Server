@@ -4,5 +4,5 @@ public interface IStationRepository
 {
     Task<Models.Station?> GetStationById(string id);
     Task<Models.Station?> GetStationByName(string name);
-    Task Save(Models.Station station);
+    Task<List<Models.Station>> GetStationByIds(IEnumerable<string> ids);
 }
