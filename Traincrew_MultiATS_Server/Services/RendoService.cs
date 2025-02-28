@@ -24,7 +24,7 @@ public class RendoService(
     {
         //DB取得:stationIDの連動表情報取得　なかったら早期リターン
         // Todo: NotFoundの場合の処理を追加
-        var rendoObj = await interlockingObjectRepository.GetObject(stationId, name);
+        var rendoObj = await interlockingObjectRepository.GetObject(name);
 
         switch (rendoObj)
         {

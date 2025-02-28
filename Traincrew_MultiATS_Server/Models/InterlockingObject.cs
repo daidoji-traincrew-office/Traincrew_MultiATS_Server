@@ -12,7 +12,6 @@ public abstract class InterlockingObject
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     [Key] 
     public ulong Id { get; set; }
-    public string? StationId { get; set; }
     public string  Name { get; set; }
     public ObjectType Type { get; set; }
     public string? Description { get; set; }

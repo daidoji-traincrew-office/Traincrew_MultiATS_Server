@@ -7,6 +7,8 @@ namespace Traincrew_MultiATS_Server.Models;
 public class Station
 {
     [Key] 
-    public string Id { get; set; }
-    public string Name { get; set; }
+    public required string Id { get; init; }
+    public required string Name { get; init; }
+    public required bool IsStation { get; init; }
+    public required bool IsPassengerStation { get; init; }
 }

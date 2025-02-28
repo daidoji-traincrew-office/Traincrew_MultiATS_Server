@@ -4,6 +4,16 @@ import json
 def remove_nashi(xs):
     return [x for x in xs if x != 'なし' and x != '']
 
+def parse_ox(ox):
+    return ox == 'O'
+
+class StationData:
+    def __init__(self, station_id, name, is_station, is_passenger_station):
+        self.Id = station_id
+        self.Name = name
+        self.IsStation = parse_ox(is_station)
+        self.IsPassengerStation = parse_ox(is_passenger_station)
+
 class TrackCircuitData:
     def __init__(self, name, NextSignalNamesUp, NextSignalNamesDown, protectionZone):
         self.Name = name
@@ -31,6 +41,7 @@ class SignalTypeData:
 
 class DBBasejson:
     def __init__(self):
+        self.stationList = []
         self.trackCircuitList = []
         self.signalDataList = []
         self.signalTypeList = []
@@ -54,6 +65,10 @@ def read_csv(file_path, data_class, *args):
 
 def main():
     db = DBBasejson()
+    db.stationList = read_csv(
+        '../Traincrew_MultiATS_Server/Data/駅・停車場.csv',
+        StationData, 0, 1, 2, 3
+    )
     db.trackCircuitList = read_csv(
         '../Traincrew_MultiATS_Server/Data/軌道回路に対する計算するべき信号機リスト.csv',
         TrackCircuitData, 0, [1, 2, 3, 4, 5], [7, 8, 9, 10, 11], 13
