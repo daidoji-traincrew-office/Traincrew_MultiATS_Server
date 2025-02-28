@@ -1,8 +1,8 @@
-using Microsoft.AspNetCore.SignalR;
-using Traincrew_MultiATS_Server.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.SignalR;
 using OpenIddict.Validation.AspNetCore;
-
+using Traincrew_MultiATS_Server.Models;
+using Traincrew_MultiATS_Server.Services;
 
 namespace Traincrew_MultiATS_Server.Hubs;
 
@@ -12,21 +12,21 @@ public class InterlockingHub(
     SignalService signalService,
     StationService stationService) : Hub
 {
-    public async Task<Models.DataToInterlocking> SendData_Interlocking(Models.ConstantDataFromInterlocking clientData)
+    public async Task<DataToInterlocking> SendData_Interlocking(ConstantDataFromInterlocking clientData)
     {
-        Models.DataToInterlocking response = new Models.DataToInterlocking();
+        DataToInterlocking response = new DataToInterlocking();
         response.TrackCircuits = await trackCircuitService.GetAllTrackCircuitDataList();
 
-        // Todo: TraincrewRole Authentications‚ğİ’è‚·‚é
+        // Todo: TraincrewRole Authenticationsã‚’è¨­å®šã™ã‚‹(roleèªè¨¼ãŒã©ã†ã«ã‹ãªã£ãŸã‚ãŸã‚Šã§ã¤ãªãã“ã‚€)
         // response.Authentications =                       
 
-        // Todo: List<InterlockingSwitchData> Points‚ğİ’è‚·‚é
+        // Todo: List<InterlockingSwitchData> Pointsã‚’è¨­å®šã™ã‚‹
         // response.Points =                              
 
-        // List<string> clientData.ActiveStationsList‚Ì‰wID‚©‚çAw’è‚³‚ê‚½‰w‚É‚ ‚éM†‹@–¼Ì‚ğList<string>‚Å•Ô‚·‚â‚Â
+        // List<string> clientData.ActiveStationsListã®é§…IDã‹ã‚‰ã€æŒ‡å®šã•ã‚ŒãŸé§…ã«ã‚ã‚‹ä¿¡å·æ©Ÿåç§°ã‚’List<string>ã§è¿”ã™ã‚„ã¤
         var stationNames = await stationService.GetStationNamesByIds(clientData.ActiveStationsList);
         var signalNames = await signalService.GetSignalNamesByStationNames(stationNames);
-        // ‚»‚ê‚ç‘S•”‚ÌM†‚ÌŒ»¦ŒvZ
+        // ãã‚Œã‚‰å…¨éƒ¨ã®ä¿¡å·ã®ç¾ç¤ºè¨ˆç®—
         var signalIndications = await signalService.CalcSignalIndication(signalNames);
         response.Signals = signalIndications.Select(pair => new SignalData
         {
@@ -34,19 +34,19 @@ public class InterlockingHub(
             phase = pair.Value
         }).ToList();
 
-        // Todo: List<InterlockingLeverData> PhysicalLevers‚ğİ’è‚·‚é
+        // Todo: List<InterlockingLeverData> PhysicalLeversã‚’è¨­å®šã™ã‚‹
         // response.PhysicalLevers =                           
 
-        // Todo: List<DestinationButtonState> PhysicalButtons‚ğİ’è‚·‚é
+        // Todo: List<DestinationButtonState> PhysicalButtonsã‚’è¨­å®šã™ã‚‹
         // response.PhysicalButtons =                        
 
-        // Todo: List<InterlockingDirectionData> Directions‚ğİ’è‚·‚é
+        // Todo: List<InterlockingDirectionData> Directionsã‚’è¨­å®šã™ã‚‹
         // response.PhysicalButtons =                          
 
-        // Todo: List<InterlockingRetsubanData> Retsubans‚ğİ’è‚·‚é
+        // Todo: List<InterlockingRetsubanData> Retsubansã‚’è¨­å®šã™ã‚‹
         // response.Retsubans =                              
 
-        // Todo: List<Dictionary<string, bool>> Lamps‚ğİ’è‚·‚é
+        // Todo: List<Dictionary<string, bool>> Lampsã‚’è¨­å®šã™ã‚‹
         // response.Lamps = 
         return response;
     }
