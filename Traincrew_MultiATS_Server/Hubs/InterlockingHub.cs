@@ -9,7 +9,8 @@ namespace Traincrew_MultiATS_Server.Hubs;
 [Authorize(AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
 public class InterlockingHub(
     TrackCircuitService trackCircuitService,
-    SignalService signalService) : Hub
+    SignalService signalService,
+    StationService stationService) : Hub
 {
     public async Task<Models.DataToInterlocking> SendData_Interlocking(Models.ConstantDataFromInterlocking clientData)
     {
@@ -22,9 +23,10 @@ public class InterlockingHub(
         // Todo: List<InterlockingSwitchData> Pointsを設定する
         // response.Points =                              
 
-        // Todo: List<string> clientData.ActiveStationsListの駅IDから、指定された駅にある信号機名称をList<string>で返すやつ
-        var signalNames = new List<string>();
-        // 現示計算
+        // List<string> clientData.ActiveStationsListの駅IDから、指定された駅にある信号機名称をList<string>で返すやつ
+        var stationNames = await stationService.GetStationNamesByIds(clientData.ActiveStationsList);
+        var signalNames = await signalService.GetSignalNamesByStationNames(stationNames);
+        // それら全部の信号の現示計算
         var signalIndications = await signalService.CalcSignalIndication(signalNames);
         response.Signals = signalIndications.Select(pair => new SignalData
         {
