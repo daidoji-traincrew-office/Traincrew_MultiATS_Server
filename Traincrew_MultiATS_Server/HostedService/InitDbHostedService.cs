@@ -721,7 +721,7 @@ internal partial class DbRendoTableInitializer
             });
             if (switchingMachine == null)
             {
-                // Todo: Warningを出す
+                // Todo: 例外を出す
                 continue;
             }
 
@@ -740,7 +740,7 @@ internal partial class DbRendoTableInitializer
             var targetObject = await searchTargetObjects(lockItem);
             if (targetObject == null)
             {
-                // Todo: 例外を吐かせる
+                // Todo: 例外を出す
                 continue;
             }
 
