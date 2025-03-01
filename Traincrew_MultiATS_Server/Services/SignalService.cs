@@ -109,4 +109,13 @@ public class SignalService(
             _ => Phase.R,
         };
     }
+
+    public static SignalData ToSignalData(string signalName, Phase phase)
+    {
+        return new()
+        {
+            Name = signalName,
+            phase = phase
+        };
+    }
 }

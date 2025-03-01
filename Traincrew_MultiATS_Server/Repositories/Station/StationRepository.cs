@@ -15,6 +15,13 @@ public class StationRepository(DbContextOptions<ApplicationDbContext> options, A
         return context.Stations.FirstOrDefaultAsync(s => s.Name == name);
     }
 
+    public Task<List<Models.Station>> GetStationByIds(IEnumerable<string> ids)
+    {
+        return context.Stations
+            .Where(s => ids.Contains(s.Id))
+            .ToListAsync();
+    }
+
     public async Task Save(Models.Station station)
     {
         await using var context = new ApplicationDbContext(options);
