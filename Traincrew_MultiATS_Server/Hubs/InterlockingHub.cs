@@ -62,4 +62,14 @@ public class InterlockingHub(
         };
         return response;
     }
+
+    public async Task SetPhysicalLeverData(InterlockingLeverData leverData)
+    {
+        await interlockingService.SetPhysicalLeverData(leverData);
+    }
+
+    public async Task SetDestinationButtonState(DestinationButtonState buttonData)
+    {
+        await interlockingService.SetDestinationButtonState(buttonData);
+    }
 }
