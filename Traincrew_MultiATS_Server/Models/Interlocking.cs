@@ -56,7 +56,7 @@ namespace Traincrew_MultiATS_Server.Models
         /// <summary>
         /// 転てつ器情報リスト
         /// </summary>
-        public List<InterlockingSwitchData> Points { get; set; }
+        public List<SwitchData> Points { get; set; }
 
         /// <summary>
         /// 信号機情報リスト
@@ -77,7 +77,7 @@ namespace Traincrew_MultiATS_Server.Models
         /// <summary>
         /// 方向てこ情報リスト
         /// </summary>
-        public List<InterlockingDirectionData> Directions { get; set; }
+        public List<DirectionData> Directions { get; set; }
 
         /// <summary>
         /// 列番情報リスト
@@ -91,24 +91,9 @@ namespace Traincrew_MultiATS_Server.Models
     }
 
     /// <summary>
-    /// 方向てこデータクラス
-    /// </summary>
-    public class InterlockingDirectionData
-    {
-        /// <summary>
-        /// 方向てこ名称
-        /// </summary>
-        public string Name { get; set; } = "";
-        /// <summary>
-        /// 方向てこの値
-        /// </summary>
-        public LCR State { get; set; } = LCR.Left;
-    }
-
-    /// <summary>
     /// 転てつ器データクラス
     /// </summary>
-    public class InterlockingSwitchData
+    public class SwitchData
     {
         /// <summary>
         /// 転てつ器状態
@@ -118,6 +103,21 @@ namespace Traincrew_MultiATS_Server.Models
         /// 転てつ器名称
         /// </summary>
         public string Name { get; set; } = "";
+    }
+
+    /// <summary>
+    /// 方向てこデータクラス
+    /// </summary>
+    public class DirectionData
+    {
+        /// <summary>
+        /// 方向てこ名称
+        /// </summary>
+        public string Name { get; set; } = "";
+        /// <summary>
+        /// 方向てこの値
+        /// </summary>
+        public LCR State { get; set; } = LCR.Left;
     }
 
     /// <summary>
