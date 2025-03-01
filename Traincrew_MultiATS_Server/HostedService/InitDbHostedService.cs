@@ -80,6 +80,7 @@ public class InitDbHostedService(IServiceScopeFactory serviceScopeFactory) : IHo
         {
             return;
         }
+
         await _tickService.Stop();
     }
 }
@@ -372,7 +373,7 @@ internal partial class DbRendoTableInitializer
         // 津崎: 浜園
         { "TH71", ["TH70"] },
         // 浜園: 津崎
-        { "TH70", ["TH71"]}
+        { "TH70", ["TH71"] }
     };
 
     [GeneratedRegex(@"\d+")]
@@ -503,6 +504,7 @@ internal partial class DbRendoTableInitializer
             {
                 continue;
             }
+
             context.Levers.Add(new()
             {
                 Name = name,
@@ -612,7 +614,7 @@ internal partial class DbRendoTableInitializer
 
             // 接近鎖状時素決定
             var matches = RegexIntParse().Match(rendoTableCsv.ApproachTime);
-            int? approachLockTime = matches.Success ? int.Parse(matches.Value): null;
+            int? approachLockTime = matches.Success ? int.Parse(matches.Value) : null;
 
             // 進路を追加
             Route route = new()
@@ -666,7 +668,11 @@ internal partial class DbRendoTableInitializer
         var interlockingObjects = await context.InterlockingObjects
             .Where(io => io.Name.StartsWith(stationId) || otherStations.Any(s => io.Name.StartsWith(s)))
             .ToListAsync(cancellationToken);
-        
+        var locks = (await context.Locks
+            .Select(l => l.ObjectId)
+            .ToListAsync(cancellationToken))
+            .ToHashSet();
+
         // 進路のDict
         var routes = interlockingObjects
             .OfType<Route>()
@@ -679,23 +685,24 @@ internal partial class DbRendoTableInitializer
         var otherObjects = interlockingObjects
             .Where(io => io is not SwitchingMachine)
             .ToDictionary(io => io.Name, io => io);
-        
+
         var searchSwitchingMachine = new Func<LockItem, Task<InterlockingObject?>>(
             item => Task.FromResult<InterlockingObject?>(
                 switchingMachines.GetValueOrDefault(CalcSwitchingMachineName(item.Name, item.StationId))));
         var searchOtherObjects = new Func<LockItem, Task<InterlockingObject?>>(item =>
+        {
+            // 進路 or 軌道回路の場合はこちら
+            var key = ConvertHalfWidthToFullWidth(CalcRouteName(item.Name, "", item.StationId));
+            var result = otherObjects.GetValueOrDefault(key);
+            if (result != null)
             {
-                // 進路 or 軌道回路の場合はこちら
-                var key = ConvertHalfWidthToFullWidth(CalcRouteName(item.Name, "", item.StationId));
-                var result = otherObjects.GetValueOrDefault(key);
-                if (result != null)
-                {
-                    return Task.FromResult<InterlockingObject?>(result);
-                }
-                // Todo: てこの場合、名前を整数部分のみにする
-                key = CalcLeverName(item.Name, item.StationId);
-                return Task.FromResult(otherObjects.GetValueOrDefault(key));
-            });
+                return Task.FromResult<InterlockingObject?>(result);
+            }
+
+            // Todo: てこの場合、名前を整数部分のみにする
+            key = CalcLeverName(item.Name, item.StationId);
+            return Task.FromResult(otherObjects.GetValueOrDefault(key));
+        });
 
         foreach (var rendoTableCsv in rendoTableCsvs)
         {
@@ -706,17 +713,25 @@ internal partial class DbRendoTableInitializer
                 // Todo: Warningを出す
                 continue;
             }
+            // 既に何らか登録済みの場合、Continue
+            if (locks.Contains(route.Id))
+            {
+                continue;
+            }
+
             // Todo: CTC進路の場合と、その他の進路の場合で処理を分ける
             // 鎖錠欄(転てつ器)
-            await RegisterLocks(rendoTableCsv.LockToSwitchingMachine, route.Id, searchSwitchingMachine, LockType.Lock);
+            await RegisterLocks(
+                rendoTableCsv.LockToSwitchingMachine, route.Id, searchSwitchingMachine, LockType.Lock, true);
             // 鎖錠欄(そのほか)
             await RegisterLocks(rendoTableCsv.LockToRoute, route.Id, searchOtherObjects, LockType.Lock);
-            
+
             // 信号制御欄
             var matchSignalControl = RegexSignalControl().Match(rendoTableCsv.SignalControl);
-            await RegisterLocks(matchSignalControl.Groups[1].Value, route.Id, searchOtherObjects, LockType.SignalControl);
+            await RegisterLocks(matchSignalControl.Groups[1].Value, route.Id, searchOtherObjects,
+                LockType.SignalControl);
             // 統括制御
-            foreach(Capture capture in matchSignalControl.Groups[2].Captures)
+            foreach (Capture capture in matchSignalControl.Groups[2].Captures)
             {
                 var rootRoute = routes.GetValueOrDefault(CalcRouteName(capture.Value, "", stationId));
                 if (rootRoute == null)
@@ -724,6 +739,7 @@ internal partial class DbRendoTableInitializer
                     // Todo: 例外を出す
                     continue;
                 }
+
                 route.RootId = rootRoute.Id;
                 context.Routes.Update(route);
             }
@@ -744,6 +760,11 @@ internal partial class DbRendoTableInitializer
                 // Todo: 例外を出す
                 continue;
             }
+            // 既に何らか登録済みの場合、Continue
+            if (locks.Contains(switchingMachine.Id))
+            {
+                continue;
+            }
 
             await RegisterLocks(rendoTableCsv.SignalControl, switchingMachine.Id, searchOtherObjects, LockType.Detector);
         }
@@ -751,8 +772,10 @@ internal partial class DbRendoTableInitializer
         await context.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task RegisterLocks(string lockString, ulong objectId, Func<LockItem, Task<InterlockingObject?>> searchTargetObjects,
-        LockType lockType)
+    private async Task RegisterLocks(string lockString, ulong objectId,
+        Func<LockItem, Task<InterlockingObject?>> searchTargetObjects,
+        LockType lockType,
+        bool registerSwitchingMachineRoute = false)
     {
         var lockItems = CalcLockItems(lockString);
         foreach (var lockItem in lockItems)
@@ -763,21 +786,37 @@ internal partial class DbRendoTableInitializer
                 // Todo: 例外を出す
                 continue;
             }
-
-            Lock lockObject = new()
+            AddLockObjects(objectId, lockType, targetObject, lockItem.IsReverse);
+            if(!registerSwitchingMachineRoute)
             {
-                ObjectId = objectId,
-                Type = lockType
+                continue;
+            }
+            var switchingMachineRoute = new SwitchingMachineRoute
+            {
+                SwitchingMachineId = targetObject.Id,
+                RouteId = objectId,
+                IsReverse = lockItem.IsReverse
             };
-            context.Locks.Add(lockObject);
-            context.LockConditionObjects.Add(new()
-            {
-                Lock = lockObject,
-                ObjectId = targetObject.Id,
-                IsReverse = lockItem.IsReverse,
-                Type = LockConditionType.Object
-            });
+            context.SwitchingMachineRoutes.Add(switchingMachineRoute);
         }
+        
+    }
+
+    private void AddLockObjects(ulong objectId, LockType lockType, InterlockingObject targetObject, NR isReverse)
+    {
+        Lock lockObject = new()
+        {
+            ObjectId = objectId,
+            Type = lockType
+        };
+        context.Locks.Add(lockObject);
+        context.LockConditionObjects.Add(new()
+        {
+            Lock = lockObject,
+            ObjectId = targetObject.Id,
+            IsReverse = isReverse,
+            Type = LockConditionType.Object
+        });
     }
 
     private List<LockItem> CalcLockItems(string lockString)
@@ -821,6 +860,7 @@ internal partial class DbRendoTableInitializer
                     {
                         objectStationId = otherStations[i - 1];
                     }
+
                     return
                     [
                         new()
@@ -870,10 +910,10 @@ internal partial class DbRendoTableInitializer
 
         return $"{stationId}_{end.Replace("(", "").Replace(")", "")}P";
     }
-    
+
     private string ConvertHalfWidthToFullWidth(string halfWidth)
     {
-        return halfWidth.Replace('ｲ', 'イ').Replace('ﾛ', 'ロ'); 
+        return halfWidth.Replace('ｲ', 'イ').Replace('ﾛ', 'ロ');
     }
 
     private string CalcRouteName(string start, string end, string stationId)
