@@ -199,6 +199,7 @@ CREATE TABLE signal
 --- 信号機と進路の関係(停車場内の信号機に設定する)
 CREATE TABLE signal_route
 (
+    id          BIGSERIAL PRIMARY KEY,
     signal_name VARCHAR(100) REFERENCES signal (name) NOT NULL,
     route_id    BIGINT UNIQUE REFERENCES route (id)   NOT NULL
 );
