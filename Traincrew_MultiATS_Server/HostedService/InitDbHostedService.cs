@@ -383,7 +383,7 @@ internal partial class DbRendoTableInitializer
     private static partial Regex RegexLockColumn();
 
     // 信号制御欄から統括制御とそれ以外の部位に分けるための正規表現
-    [GeneratedRegex(@"^(.*?)(?:(\(\([^\)\s]+\)\))\s*)*$")]
+    [GeneratedRegex(@"^(.*?)(?:\(\(([^\)\s]+)\)\)\s*)*$")]
     private static partial Regex RegexSignalControl();
 
     // ReSharper disable InconsistentNaming
@@ -721,6 +721,7 @@ internal partial class DbRendoTableInitializer
                 var rootRoute = routes.GetValueOrDefault(CalcRouteName(capture.Value, "", stationId));
                 if (rootRoute == null)
                 {
+                    // Todo: 例外を出す
                     continue;
                 }
                 route.RootId = rootRoute.Id;
