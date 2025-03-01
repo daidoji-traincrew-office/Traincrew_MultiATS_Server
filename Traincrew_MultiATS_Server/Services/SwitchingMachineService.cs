@@ -10,7 +10,7 @@ using Route = Traincrew_MultiATS_Server.Models.Route;
 namespace Traincrew_MultiATS_Server.Services;
 
 public class SwitchingMachineService(
-    DateTimeRepository dateTimeRepository,
+    IDateTimeRepository dateTimeRepository,
     ISwitchingMachineRepository switchingMachineRepository,
     IInterlockingObjectRepository interlockingObjectRepository,
     ISwitchingMachineRouteRepository switchingMachineRouteRepository,
