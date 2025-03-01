@@ -112,7 +112,8 @@ public class SwitchingMachineService(
             var requestReverse = leverState == LCR.Right;
 
             // 対応する転てつ器の要求進路一覧を取得
-            var switchingMachineRouteList = switchingMachineRouteDict[switchingMachine.Id];
+            // Todo: 全部データをちゃんと入れたら、デフォルト値を使わないようにする
+            var switchingMachineRouteList = switchingMachineRouteDict.GetValueOrDefault(switchingMachine.Id, []);
 
             foreach (var switchingMachineRoute in switchingMachineRouteList)
             {

@@ -28,7 +28,16 @@ public class TickService
     {
         using var scope = _serviceScopeFactory.CreateScope();
         var service = scope.ServiceProvider.GetRequiredService<SwitchingMachineService>();
-        await service.SwitchingMachineControl();
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<TickService>>();
+        try
+        {
+            await service.SwitchingMachineControl();
+        }
+        catch (System.Exception ex)
+        {
+            // Log the exception
+            logger.LogError(ex, "An error occurred while executing the task.");
+        }
     }
 
     public async Task Stop()
