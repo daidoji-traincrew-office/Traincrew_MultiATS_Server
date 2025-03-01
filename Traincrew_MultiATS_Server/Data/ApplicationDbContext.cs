@@ -33,6 +33,12 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasOne(r => r.RouteState)
             .WithOne(rs => rs.Route)
             .HasForeignKey<RouteState>(rs => rs.Id);
+
+        modelBuilder.Entity<Route>()
+            .HasOne(r => r.Root)
+            .WithMany()
+            .HasForeignKey(r => r.RootId);
+
         modelBuilder.Entity<SwitchingMachine>()
             .HasOne(sm => sm.SwitchingMachineState)
             .WithOne(sms => sms.SwitchingMachine)

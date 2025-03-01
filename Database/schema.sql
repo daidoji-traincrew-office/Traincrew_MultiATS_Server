@@ -123,7 +123,7 @@ CREATE TABLE route
     id                 BIGINT PRIMARY KEY REFERENCES interlocking_object (id),
     tc_name            VARCHAR(100) NOT NULL, -- Traincrewでの名前
     route_type         route_type   NOT NULL,
-    root               VARCHAR(100),          -- 親進路
+    root_id            BIGINT REFERENCES route (id), -- 親進路
     indicator          VARCHAR(10),           -- 進路表示機(Todo: ここに持たせるべきなのか?)
     approach_lock_time INT                    -- 接近鎖状の時間
 );
