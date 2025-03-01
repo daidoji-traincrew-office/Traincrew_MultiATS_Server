@@ -703,10 +703,15 @@ internal partial class DbRendoTableInitializer
             await RegisterLocks(rendoTableCsv.LockToSwitchingMachine, route.Id, searchSwitchingMachine, LockType.Lock);
             // 鎖錠欄(そのほか)
             await RegisterLocks(rendoTableCsv.LockToRoute, route.Id, searchOtherObjects, LockType.Lock);
+            
             // 信号制御欄
-            // Todo: 統括制御
             var matchSignalControl = RegexSignalControl().Match(rendoTableCsv.SignalControl);
             await RegisterLocks(matchSignalControl.Groups[1].Value, route.Id, searchOtherObjects, LockType.SignalControl);
+            // Todo: 統括制御
+            foreach(Capture capture in matchSignalControl.Groups[2].Captures)
+            {
+                
+            }
             // Todo: 進路鎖錠
             // Todo: 接近鎖錠
         }
