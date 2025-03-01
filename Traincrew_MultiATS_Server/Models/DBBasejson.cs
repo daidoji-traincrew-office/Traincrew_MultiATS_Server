@@ -11,6 +11,7 @@ public class JsonSignalData : SignalData
 {
     public string TypeName { get; init; }
     public List<string>? NextSignalNames { get; init; } = null;
+    public List<string>? RouteNames { get; init; } = null; // 追加
 }
 
 public class DBBasejson
