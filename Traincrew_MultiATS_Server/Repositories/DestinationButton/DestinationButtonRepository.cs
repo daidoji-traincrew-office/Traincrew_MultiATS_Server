@@ -15,7 +15,14 @@ public class DestinationButtonRepository(ApplicationDbContext context) : IDestin
 
     public async Task<Models.DestinationButton?> GetButtonByName(string name)
     {
-        return await context.Set<Models.DestinationButton>()
+        return await context.DestinationButtons
             .FirstOrDefaultAsync(button => button.Name == name);
+    }
+
+    public async Task<List<Models.DestinationButton?>> GetButtonsByStationNames(List<string> stationNames)
+    {
+        return await context.DestinationButtons
+            .Where(button => stationNames.Contains(button.Name))
+            .ToListAsync();
     }
 }

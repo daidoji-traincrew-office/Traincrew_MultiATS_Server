@@ -46,4 +46,16 @@ public class InterlockingService(
         buttonObject.DestinationButtonState.IsRaised = buttonData.IsRaised;
         await generalRepository.Save(buttonObject.DestinationButtonState);
     }
+
+    public async Task<List<DestinationButton>> GetDestinationButtons()
+    {
+        var buttons = await destinationButtonRepository.GetAllButtons();
+        return buttons.Values.ToList();
+    }
+
+    public async Task<List<DestinationButton>> GetDestinationButtonsByStationNames(List<string> stationNames)
+    {
+        var buttons = await destinationButtonRepository.GetButtonsByStationNames(stationNames);
+        return buttons.Where(button => button != null).Select(button => button!).ToList();
+    }
 }
