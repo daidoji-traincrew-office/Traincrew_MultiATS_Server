@@ -23,7 +23,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<SwitchingMachineRoute> SwitchingMachineRoutes { get; set; }
     public DbSet<Lever> Levers { get; set; }
     public DbSet<DestinationButton> DestinationButtons { get; set; }
-    
+    public DbSet<SignalRoute> SignalRoutes { get; internal set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
