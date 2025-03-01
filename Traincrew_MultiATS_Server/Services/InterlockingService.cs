@@ -21,12 +21,13 @@ public class InterlockingService(
     /// <exception cref="ArgumentException"></exception>
     public async Task SetPhysicalLeverData(InterlockingLeverData leverData)
     {
-        var lever = await interlockingObjectRepository.GetObject(leverData.Name);
+        var interlockingObject = await interlockingObjectRepository.GetObject(leverData.Name);
+        var lever = interlockingObject as Lever;
         if (lever == null)
         {
             throw new ArgumentException("Invalid lever name");
         }
-        lever.PhysicalLeverState.IsRaised = leverData.IsRaised;
+        lever.LeverState.IsReversed = leverData.State;
         await generalRepository.Save(lever);
     }
 
@@ -55,6 +56,15 @@ public class InterlockingService(
     public async Task<List<InterlockingObject>> GetObjectsByStationNames(List<string> stationNames)
     {
         return await interlockingObjectRepository.GetObjectsByStationNames(stationNames);
+    }
+
+    public static InterlockingLeverData ToLeverData(Lever lever)
+    {
+        return new InterlockingLeverData
+        {
+            Name = lever.Name,
+            State = lever.LeverState.IsReversed
+        };
     }
 
     public async Task<List<DestinationButton>> GetDestinationButtons()

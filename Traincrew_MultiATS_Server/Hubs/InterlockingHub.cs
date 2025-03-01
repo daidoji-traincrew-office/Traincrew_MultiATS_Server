@@ -10,13 +10,14 @@ namespace Traincrew_MultiATS_Server.Hubs;
 public class InterlockingHub(
     TrackCircuitService trackCircuitService,
     SignalService signalService,
-    StationService stationService) : Hub
+    StationService stationService,
+    InterlockingService interlockingService) : Hub
 {
     public async Task<DataToInterlocking> SendData_Interlocking(ConstantDataFromInterlocking clientData)
     {
-        // Todo: めんどいし、Interlocking全取得してOfTypeと変換作って動くようにする
-        List<InterlockingObject> interlockingObjects = [];
-        List<DestinationButton> destinationButtons = [];
+        // Todo: めんどいし、Interlocking全取得してOfTypeと変換作って動くようにする    
+        var interlockingObjects = await interlockingService.GetObjectsByStationNames(clientData.ActiveStationsList);
+        var destinationButtons = await interlockingService.GetDestinationButtonsByStationNames(clientData.ActiveStationsList);
         // List<string> clientData.ActiveStationsListの駅IDから、指定された駅にある信号機名称をList<string>で返すやつ
         var stationNames = await stationService.GetStationNamesByIds(clientData.ActiveStationsList);
         var signalNames = await signalService.GetSignalNamesByStationNames(stationNames);
@@ -27,28 +28,30 @@ public class InterlockingHub(
         {
             TrackCircuits = await trackCircuitService.GetAllTrackCircuitDataList(),
             // Todo: TraincrewRole Authenticationsを設定する(role認証がどうにかなったあたりでつなぎこむ)
-            // Authentications =                       
+            // Authentications =
             Points = interlockingObjects
                 .OfType<SwitchingMachine>()
                 .Select(SwitchingMachineService.ToSwitchData)
                 .ToList(),
+
             // Todo: List<InterlockingLeverData> PhysicalLeversを設定する
-            // Todo: 変換実装と、方向てこ以外のてこにフィルターする
             PhysicalLevers = interlockingObjects
                 .OfType<Lever>()
-                .Select(lever => new InterlockingLeverData())
+                .Select(InterlockingService.ToLeverData)
                 .ToList(),
+
             // Todo: List<DestinationButtonState> PhysicalButtonsを設定する
-            // Todo: こいつはまずレスポンス定義するところから
-            // PhysicalButtons = [] 
+            PhysicalButtons = destinationButtons
+                .Select(button => button.DestinationButtonState)
+                .ToList(),
 
             // Todo: List<InterlockingDirectionData> Directionsを設定する
             // Todo: 方向てこ実装、方向てこにフィルターする
-            Directions = [],
+            Directions = new List<DirectionData>(),
 
             // Todo: List<InterlockingRetsubanData> Retsubansを設定する
             // Todo: 列番表示の実装から
-            // Retsubans =                              
+            Retsubans = new List<InterlockingRetsubanData>(),
 
             // Todo: List<Dictionary<string, bool>> Lampsを設定する
             // Todo: これは何を設定すればええんや・・・？
