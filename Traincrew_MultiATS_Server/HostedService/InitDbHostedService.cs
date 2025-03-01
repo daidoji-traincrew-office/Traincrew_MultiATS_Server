@@ -6,13 +6,14 @@ using CsvHelper.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.Models;
+using Traincrew_MultiATS_Server.Scheduler;
 using Route = Traincrew_MultiATS_Server.Models.Route;
 
 namespace Traincrew_MultiATS_Server.HostedService;
 
 public class InitDbHostedService(IServiceScopeFactory serviceScopeFactory) : IHostedService
 {
-    private TickService? _tickService;
+    private readonly List<Scheduler.Scheduler> _schedulers = [];
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
@@ -21,7 +22,7 @@ public class InitDbHostedService(IServiceScopeFactory serviceScopeFactory) : IHo
         await InitDb(context, cancellationToken);
         await InitRendoTable(context, cancellationToken);
 
-        _tickService = new(serviceScopeFactory);
+        _schedulers.Add(new SwitchingMachineScheduler(serviceScopeFactory));
     }
 
     private async Task InitDb(ApplicationDbContext context, CancellationToken cancellationToken)
@@ -76,12 +77,7 @@ public class InitDbHostedService(IServiceScopeFactory serviceScopeFactory) : IHo
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        if (_tickService == null)
-        {
-            return;
-        }
-
-        await _tickService.Stop();
+        await Task.WhenAll(_schedulers.Select(s => s.Stop()));
     }
 }
 
