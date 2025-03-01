@@ -12,12 +12,16 @@ namespace Traincrew_MultiATS_Server.HostedService;
 
 public class InitDbHostedService(IServiceScopeFactory serviceScopeFactory) : IHostedService
 {
+    private TickService? _tickService;
+
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         using var scope = serviceScopeFactory.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         await InitDb(context, cancellationToken);
         await InitRendoTable(context, cancellationToken);
+
+        _tickService = new(serviceScopeFactory);
     }
 
     private async Task InitDb(ApplicationDbContext context, CancellationToken cancellationToken)
@@ -72,6 +76,7 @@ public class InitDbHostedService(IServiceScopeFactory serviceScopeFactory) : IHo
 
     public Task StopAsync(CancellationToken cancellationToken)
     {
+        _tickService?.Stop();
         return Task.CompletedTask; // 何もしない
     }
 }
@@ -612,7 +617,7 @@ internal partial class DbRendoTableInitializer
                 Name = routeName,
                 TcName = "",
                 RouteType = routeType,
-                Root = "",
+                RootId = null,
                 Indicator = "",
                 ApproachLockTime = approachLockTime,
                 RouteState = new()
@@ -707,10 +712,16 @@ internal partial class DbRendoTableInitializer
             // 信号制御欄
             var matchSignalControl = RegexSignalControl().Match(rendoTableCsv.SignalControl);
             await RegisterLocks(matchSignalControl.Groups[1].Value, route.Id, searchOtherObjects, LockType.SignalControl);
-            // Todo: 統括制御
+            // 統括制御
             foreach(Capture capture in matchSignalControl.Groups[2].Captures)
             {
-                
+                var rootRoute = routes.GetValueOrDefault(CalcRouteName(capture.Value, "", stationId));
+                if (rootRoute == null)
+                {
+                    continue;
+                }
+                route.RootId = rootRoute.Id;
+                context.Routes.Update(route);
             }
             // Todo: 進路鎖錠
             // Todo: 接近鎖錠
