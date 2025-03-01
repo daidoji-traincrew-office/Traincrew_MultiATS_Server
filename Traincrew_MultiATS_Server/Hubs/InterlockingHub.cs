@@ -41,7 +41,7 @@ public class InterlockingHub(
         // response.PhysicalButtons =                        
 
         // Todo: List<InterlockingDirectionData> Directions‚ğİ’è‚·‚é
-        // response.PhysicalButtons =                          
+        // response.Directions =                          
 
         // Todo: List<InterlockingRetsubanData> Retsubans‚ğİ’è‚·‚é
         // response.Retsubans =                              
