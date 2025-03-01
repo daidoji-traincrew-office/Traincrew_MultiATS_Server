@@ -30,7 +30,7 @@ public class InterlockingHub(
             // Authentications =                       
             Points = interlockingObjects
                 .OfType<SwitchingMachine>()
-                .Select(SwitchingMachineService.ToInterlockingSwitchData)
+                .Select(SwitchingMachineService.ToSwitchData)
                 .ToList(),
             // Todo: List<InterlockingLeverData> PhysicalLeversを設定する
             // Todo: 変換実装と、方向てこ以外のてこにフィルターする

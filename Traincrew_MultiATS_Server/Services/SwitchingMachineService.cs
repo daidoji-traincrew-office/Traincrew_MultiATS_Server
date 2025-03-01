@@ -37,7 +37,7 @@ public class SwitchingMachineService(
             */
         }
     }
-    public static InterlockingSwitchData ToInterlockingSwitchData(SwitchingMachine switchingMachine)
+    public static SwitchData ToSwitchData(SwitchingMachine switchingMachine)
     {
         var state = switchingMachine.SwitchingMachineState;
         
