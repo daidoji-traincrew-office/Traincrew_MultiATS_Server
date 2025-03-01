@@ -31,9 +31,9 @@ public class TickService
         await service.SwitchingMachineControl();
     }
 
-    public void Stop()
+    public async Task Stop()
     {
-        _cancellationTokenSource.Cancel();
-        _task.Wait();
+        await _cancellationTokenSource.CancelAsync();
+        await _task;
     }
 }

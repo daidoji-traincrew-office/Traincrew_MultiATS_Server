@@ -74,10 +74,13 @@ public class InitDbHostedService(IServiceScopeFactory serviceScopeFactory) : IHo
         }
     }
 
-    public Task StopAsync(CancellationToken cancellationToken)
+    public async Task StopAsync(CancellationToken cancellationToken)
     {
-        _tickService?.Stop();
-        return Task.CompletedTask; // 何もしない
+        if (_tickService == null)
+        {
+            return;
+        }
+        await _tickService.Stop();
     }
 }
 
