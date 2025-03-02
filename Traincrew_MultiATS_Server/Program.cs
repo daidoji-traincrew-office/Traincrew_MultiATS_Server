@@ -281,6 +281,7 @@ app.MapControllers();
 
 app.MapHub<TrainHub>("/hub/train");
 app.MapHub<TIDHub>("/hub/TID");
+app.MapHub<InterlockingHub>("/hub/interlocking");
 
 app.Run();
 return;
