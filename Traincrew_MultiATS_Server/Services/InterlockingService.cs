@@ -1,12 +1,12 @@
 using Traincrew_MultiATS_Server.Models;
-using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
 using Traincrew_MultiATS_Server.Repositories.DestinationButton;
 using Traincrew_MultiATS_Server.Repositories.General;
+using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
 
 namespace Traincrew_MultiATS_Server.Services;
 
 /// <summary>
-/// ˜A“®‘•’u‘•’u‘ì
+/// é€£å‹•è£…ç½®è£…ç½®å“
 /// </summary>
 public class InterlockingService(
         IInterlockingObjectRepository interlockingObjectRepository,
@@ -14,7 +14,7 @@ public class InterlockingService(
         IGeneralRepository generalRepository)
 {
     /// <summary>
-    /// ƒŒƒo[‚Ì•¨—ó‘Ô‚ğİ’è‚·‚é
+    /// ãƒ¬ãƒãƒ¼ã®ç‰©ç†çŠ¶æ…‹ã‚’è¨­å®šã™ã‚‹
     /// </summary>
     /// <param name="leverData"></param>
     /// <returns></returns>
@@ -32,7 +32,7 @@ public class InterlockingService(
     }
 
     /// <summary>
-    /// ’…“_ƒ{ƒ^ƒ“‚Ì•¨—ó‘Ô‚ğİ’è‚·‚é
+    /// ç€ç‚¹ãƒœã‚¿ãƒ³ã®ç‰©ç†çŠ¶æ…‹ã‚’è¨­å®šã™ã‚‹
     /// </summary>
     /// <param name="buttonData"></param>
     /// <returns></returns>     
