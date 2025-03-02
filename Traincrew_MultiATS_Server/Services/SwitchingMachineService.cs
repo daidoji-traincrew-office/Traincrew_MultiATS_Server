@@ -151,15 +151,21 @@ public class SwitchingMachineService(
             await generalRepository.Save(switchingMachineState);
         }
     }
-    
+
     public static SwitchData ToSwitchData(SwitchingMachine switchingMachine)
     {
         var state = switchingMachine.SwitchingMachineState;
-        
+
         return new()
         {
             Name = switchingMachine.Name,
             State = state.IsSwitching ? NRC.Center : state.IsReverse == NR.Normal ? NRC.Normal : NRC.Reversed
         };
+    }
+
+    public async Task<List<SwitchingMachine>> GetAllSwitchingMachines()
+    {
+        var switchingMachines = await switchingMachineRepository.GetSwitchingMachinesWithState();
+        return switchingMachines;
     }
 }
