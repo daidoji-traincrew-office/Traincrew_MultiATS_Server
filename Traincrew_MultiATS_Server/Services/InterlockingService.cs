@@ -2,6 +2,7 @@ using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.DestinationButton;
 using Traincrew_MultiATS_Server.Repositories.General;
 using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
+using Traincrew_MultiATS_Server.Repositories.Lever;
 
 namespace Traincrew_MultiATS_Server.Services;
 
@@ -11,7 +12,8 @@ namespace Traincrew_MultiATS_Server.Services;
 public class InterlockingService(
         IInterlockingObjectRepository interlockingObjectRepository,
         IDestinationButtonRepository destinationButtonRepository,
-        IGeneralRepository generalRepository)
+        IGeneralRepository generalRepository,
+        ILeverRepository leverRepository)
 {
     /// <summary>
     /// レバーの物理状態を設定する
@@ -21,8 +23,7 @@ public class InterlockingService(
     /// <exception cref="ArgumentException"></exception>
     public async Task SetPhysicalLeverData(InterlockingLeverData leverData)
     {
-        var interlockingObject = await interlockingObjectRepository.GetObject(leverData.Name);
-        var lever = interlockingObject as Lever;
+        var lever = await leverRepository.GetLeverByNameWitState(leverData.Name); 
         if (lever == null)
         {
             throw new ArgumentException("Invalid lever name");

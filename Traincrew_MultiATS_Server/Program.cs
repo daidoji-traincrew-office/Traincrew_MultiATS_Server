@@ -16,6 +16,7 @@ using Traincrew_MultiATS_Server.Repositories.DestinationButton;
 using Traincrew_MultiATS_Server.Repositories.Discord;
 using Traincrew_MultiATS_Server.Repositories.General;
 using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
+using Traincrew_MultiATS_Server.Repositories.Lever;
 using Traincrew_MultiATS_Server.Repositories.LockCondition;
 using Traincrew_MultiATS_Server.Repositories.NextSignal;
 using Traincrew_MultiATS_Server.Repositories.Protection;
@@ -207,6 +208,7 @@ builder.Services
     .AddScoped<IGeneralRepository, GeneralRepository>()
     .AddScoped<IInterlockingObjectRepository, InterlockingObjectRepository>()
     .AddScoped<ILockConditionRepository, LockConditionRepository>()
+    .AddScoped<ILeverRepository, LeverRepository>()
     .AddScoped<INextSignalRepository, NextSignalRepository>()
     .AddScoped<IProtectionRepository, ProtectionRepository>()
     // .AddScoped<IRouteRepository, RouteRepository>() Todo: 作る
