@@ -55,7 +55,7 @@ public class InterlockingHub(
 
             // Todo: List<Dictionary<string, bool>> Lampsを設定する
             // Todo: これは何を設定すればええんや・・・？
-            // response.Lamps = 
+            Lamps = [],
             Signals = signalIndications
                 .Select(pair => SignalService.ToSignalData(pair.Key, pair.Value))
                 .ToList()
