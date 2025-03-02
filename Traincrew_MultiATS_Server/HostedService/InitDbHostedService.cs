@@ -31,7 +31,10 @@ public class InitDbHostedService(IServiceScopeFactory serviceScopeFactory) : IHo
             // Todo: 進路と信号の紐づけを作る
         }
 
-        _schedulers.Add(new SwitchingMachineScheduler(serviceScopeFactory));
+        _schedulers.AddRange([
+            new SwitchingMachineScheduler(serviceScopeFactory),
+            new RendoScheduler(serviceScopeFactory),
+        ]);
     }
 
     private async Task<DbInitializer?> CreateDBInitializer(ApplicationDbContext context, CancellationToken cancellationToken)
