@@ -923,7 +923,7 @@ internal partial class DbRendoTableInitializer
 
     private string CalcSwitchingMachineName(string start, string stationId)
     {
-        return $"{stationId}_w{start}";
+        return $"{stationId}_W{start}";
     }
 
     private string CalcLeverName(string start, string stationId)
