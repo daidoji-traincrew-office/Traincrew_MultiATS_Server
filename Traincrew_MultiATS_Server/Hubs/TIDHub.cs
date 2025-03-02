@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using OpenIddict.Validation.AspNetCore;
+using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Services;
 
 namespace Traincrew_MultiATS_Server.Hubs;
@@ -9,15 +10,17 @@ namespace Traincrew_MultiATS_Server.Hubs;
 public class TIDHub(TrackCircuitService trackCircuitService,
     SwitchingMachineService switchingMachineService) : Hub
 {
-    public async Task<Models.ConstantDataToTID> SendData_TID()
+    public async Task<ConstantDataToTID> SendData_TID()
     {
-        List<TrackCircuitData> trackCircuitDataList = await trackCircuitService.GetAllTrackCircuitDataList();
-        return new Models.ConstantDataToTID()
+        var trackCircuitDataList = await trackCircuitService.GetAllTrackCircuitDataList();
+        var switchingMachineDataList = (await switchingMachineService.GetAllSwitchingMachines())
+            .Select(SwitchingMachineService.ToSwitchData)
+            .ToList();
+        return new()
         {
             TrackCircuitDatas = trackCircuitDataList,
-            SwitchDatas = (await switchingMachineService.GetAllSwitchingMachines())
-                .Select(SwitchingMachineService.ToSwitchData).ToList(),
-            DirectionDatas = new List<Models.DirectionData>()
+            SwitchDatas = switchingMachineDataList,
+            DirectionDatas = [] 
         };
     }
 }
