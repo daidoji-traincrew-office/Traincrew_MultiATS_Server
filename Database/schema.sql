@@ -201,7 +201,8 @@ CREATE TABLE signal_route
 (
     id          BIGSERIAL PRIMARY KEY,
     signal_name VARCHAR(100) REFERENCES signal (name) NOT NULL,
-    route_id    BIGINT UNIQUE REFERENCES route (id)   NOT NULL
+    route_id    BIGINT REFERENCES route (id)   NOT NULL,
+    UNIQUE (signal_name, route_id)
 );
 CREATE INDEX signal_route_signal_name_index ON signal_route (signal_name);
 
