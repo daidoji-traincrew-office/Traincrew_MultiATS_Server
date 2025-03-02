@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Polly;
 using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.Models;
 
@@ -31,6 +30,7 @@ public class InterlockingObjectRepository(ApplicationDbContext context) : IInter
             .Include(obj => ((Models.Route)obj).RouteState)
             .Include(obj => ((Models.SwitchingMachine)obj).SwitchingMachineState)
             .Include(obj => ((Models.TrackCircuit)obj).TrackCircuitState)
+            .Include(obj => ((Lever)obj).LeverState)
             .ToListAsync();
     }
     public Task<Models.InterlockingObject> GetObject(string name)
@@ -40,10 +40,14 @@ public class InterlockingObjectRepository(ApplicationDbContext context) : IInter
             .FirstAsync();
     }
 
-    public async Task<List<Models.InterlockingObject>> GetObjectsByStationNames(List<string> stationNames)
+    public async Task<List<Models.InterlockingObject>> GetObjectsByStationNamesWithState(List<string> stationNames)
     {
         return await context.InterlockingObjects
             .Where(obj => stationNames.Any(stationName => obj.Name.Contains(stationName)))
+            .Include(obj => ((Models.Route)obj).RouteState)
+            .Include(obj => ((Models.SwitchingMachine)obj).SwitchingMachineState)
+            .Include(obj => ((Models.TrackCircuit)obj).TrackCircuitState)
+            .Include(obj => ((Lever)obj).LeverState)
             .ToListAsync();
     }
 }

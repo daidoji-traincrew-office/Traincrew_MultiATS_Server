@@ -55,7 +55,7 @@ public class InterlockingService(
 
     public async Task<List<InterlockingObject>> GetObjectsByStationNames(List<string> stationNames)
     {
-        return await interlockingObjectRepository.GetObjectsByStationNames(stationNames);
+        return await interlockingObjectRepository.GetObjectsByStationNamesWithState(stationNames);
     }
 
     public static InterlockingLeverData ToLeverData(Lever lever)
