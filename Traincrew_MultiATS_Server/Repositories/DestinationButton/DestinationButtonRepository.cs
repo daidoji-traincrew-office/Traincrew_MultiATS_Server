@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Polly;
 using Traincrew_MultiATS_Server.Data;
 
 namespace Traincrew_MultiATS_Server.Repositories.DestinationButton;
@@ -16,12 +15,14 @@ public class DestinationButtonRepository(ApplicationDbContext context) : IDestin
     public async Task<Models.DestinationButton?> GetButtonByName(string name)
     {
         return await context.DestinationButtons
+            .Include(b => b.DestinationButtonState)
             .FirstOrDefaultAsync(button => button.Name == name);
     }
 
     public async Task<List<Models.DestinationButton?>> GetButtonsByStationNames(List<string> stationNames)
     {
         return await context.DestinationButtons
+            .Include(b => b.DestinationButtonState)
             .Where(button => stationNames.Contains(button.Name))
             .ToListAsync();
     }
