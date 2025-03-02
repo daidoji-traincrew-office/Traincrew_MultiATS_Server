@@ -685,6 +685,7 @@ internal partial class DbRendoTableInitializer
         // 進路とてこと着点ボタンの関連付けを追加
         foreach (var (route, leverId, buttonName) in routes)
         {
+            // Todo: 単線区間の進路は、着点がないことに注意
             context.RouteLeverDestinationButtons.Add(new()
             {
                 RouteId = route.Id,
