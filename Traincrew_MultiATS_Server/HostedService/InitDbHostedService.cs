@@ -19,21 +19,26 @@ public class InitDbHostedService(IServiceScopeFactory serviceScopeFactory) : IHo
     {
         using var scope = serviceScopeFactory.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        await InitDb(context, cancellationToken);
+        var dbInitializer = await CreateDBInitializer(context, cancellationToken);
+        if (dbInitializer != null)
+        {
+            await dbInitializer.Initialize();
+        }
         await InitRendoTable(context, cancellationToken);
+        if (dbInitializer != null)
+        {
+            await dbInitializer.InitializeSignalRoute();
+            // Todo: 進路と信号の紐づけを作る
+        }
 
         _schedulers.Add(new SwitchingMachineScheduler(serviceScopeFactory));
     }
 
-    private async Task InitDb(ApplicationDbContext context, CancellationToken cancellationToken)
+    private async Task<DbInitializer?> CreateDBInitializer(ApplicationDbContext context, CancellationToken cancellationToken)
     {
         var jsonstring = await File.ReadAllTextAsync("./Data/DBBase.json", cancellationToken);
         var DBBase = JsonSerializer.Deserialize<DBBasejson>(jsonstring);
-        if (DBBase != null)
-        {
-            var initializer = new DbInitializer(DBBase, context, cancellationToken);
-            await initializer.Initialize();
-        }
+        return DBBase != null ? new DbInitializer(DBBase, context, cancellationToken) : null;
     }
 
     private async Task InitRendoTable(ApplicationDbContext context, CancellationToken cancellationToken)
@@ -81,7 +86,7 @@ public class InitDbHostedService(IServiceScopeFactory serviceScopeFactory) : IHo
     }
 }
 
-file class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, CancellationToken cancellationToken)
+internal class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, CancellationToken cancellationToken)
 {
     internal async Task Initialize()
     {
@@ -91,6 +96,37 @@ file class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Cancel
         await InitSignal();
         await InitNextSignal();
         await InitTrackCircuitSignal();
+    }
+
+    internal async Task InitializeSignalRoute()
+    {
+        var signalRoutes = await context.SignalRoutes
+            .Include(sr => sr.Route)
+            .ToListAsync(cancellationToken);
+        var routes = await context.Routes
+            .ToDictionaryAsync(r => r.Name, cancellationToken);
+        foreach (var signal in DBBase.signalDataList)
+        {
+            foreach (var routeName in signal.RouteNames)
+            {
+                // Todo: FW 全探索なので改善したほうがいいかも
+                if(signalRoutes.Any(sr => sr.SignalName == signal.Name && sr.Route.Name == routeName))
+                {
+                    continue;
+                }
+                if (!routes.TryGetValue(routeName, out var route))
+                {
+                    // Todo: 例外を出す
+                    continue;
+                }
+                context.SignalRoutes.Add(new()
+                {
+                    SignalName = signal.Name,
+                    RouteId = route.Id
+                });
+            }
+        }
+        await context.SaveChangesAsync(cancellationToken);
     }
 
     private async Task InitStation()
