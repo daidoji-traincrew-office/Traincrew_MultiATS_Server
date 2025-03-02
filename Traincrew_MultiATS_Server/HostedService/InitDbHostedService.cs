@@ -6,6 +6,7 @@ using CsvHelper.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.Models;
+using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Scheduler;
 using Route = Traincrew_MultiATS_Server.Models.Route;
 
@@ -19,16 +20,16 @@ public class InitDbHostedService(IServiceScopeFactory serviceScopeFactory) : IHo
     {
         using var scope = serviceScopeFactory.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var datetimeRepository = scope.ServiceProvider.GetRequiredService<IDateTimeRepository>();
         var dbInitializer = await CreateDBInitializer(context, cancellationToken);
         if (dbInitializer != null)
         {
             await dbInitializer.Initialize();
         }
-        await InitRendoTable(context, cancellationToken);
+        await InitRendoTable(context, datetimeRepository, cancellationToken);
         if (dbInitializer != null)
         {
             await dbInitializer.InitializeSignalRoute();
-            // Todo: 進路と信号の紐づけを作る
         }
 
         _schedulers.AddRange([
@@ -44,7 +45,10 @@ public class InitDbHostedService(IServiceScopeFactory serviceScopeFactory) : IHo
         return DBBase != null ? new DbInitializer(DBBase, context, cancellationToken) : null;
     }
 
-    private async Task InitRendoTable(ApplicationDbContext context, CancellationToken cancellationToken)
+    private async Task InitRendoTable(
+        ApplicationDbContext context,
+        IDateTimeRepository dateTimeRepository,
+        CancellationToken cancellationToken)
     {
         var rendoTableDir = new DirectoryInfo("./Data/RendoTable");
         if (!rendoTableDir.Exists)
@@ -72,7 +76,7 @@ public class InitDbHostedService(IServiceScopeFactory serviceScopeFactory) : IHo
             var records = await csv
                 .GetRecordsAsync<RendoTableCSV>(cancellationToken)
                 .ToListAsync(cancellationToken);
-            var initializer = new DbRendoTableInitializer(stationId, records, context, cancellationToken);
+            var initializer = new DbRendoTableInitializer(stationId, records, context, dateTimeRepository, cancellationToken);
             initializers.Add(initializer);
             await initializer.InitializeObjects();
         }
@@ -426,6 +430,7 @@ internal partial class DbRendoTableInitializer
     private readonly string stationId;
     private readonly List<RendoTableCSV> rendoTableCsvs;
     private readonly ApplicationDbContext context;
+    private readonly IDateTimeRepository dateTimeRepository;
     private readonly CancellationToken cancellationToken;
     private readonly List<string> otherStations;
     // ReSharper restore InconsistentNaming
@@ -434,11 +439,13 @@ internal partial class DbRendoTableInitializer
         string stationId,
         List<RendoTableCSV> rendoTableCsvs,
         ApplicationDbContext context,
+        IDateTimeRepository dateTimeRepository,
         CancellationToken cancellationToken)
     {
         this.stationId = stationId;
         this.rendoTableCsvs = rendoTableCsvs;
         this.context = context;
+        this.dateTimeRepository = dateTimeRepository;
         this.cancellationToken = cancellationToken;
         otherStations = stationIdMap.GetValueOrDefault(stationId) ?? [];
     }
@@ -528,7 +535,7 @@ internal partial class DbRendoTableInitializer
                     {
                         IsSwitching = false,
                         IsReverse = NR.Normal,
-                        SwitchEndTime = DateTime.UtcNow.AddDays(-1)
+                        SwitchEndTime = dateTimeRepository.GetNow().AddDays(-1) 
                     }
                 };
             }
@@ -588,7 +595,7 @@ internal partial class DbRendoTableInitializer
                 DestinationButtonState = new()
                 {
                     IsRaised = RaiseDrop.Drop,
-                    OperatedAt = DateTime.UtcNow.AddDays(-1)
+                    OperatedAt = dateTimeRepository.GetNow().AddDays(-1)
                 }
             });
         }
