@@ -53,8 +53,6 @@ def read_csv(file_path, data_class, *args):
         reader = csv.reader(csvfile)
         next(reader)  # Skip header
         for row in reader:
-            if row[0] == 'なし':
-                continue
             init_args = []
             for arg in args:
                 if isinstance(arg, list):
@@ -77,7 +75,7 @@ def main():
     db.signalDataList = [e for e in read_csv(
         '../Traincrew_MultiATS_Server/Data/信号リスト.csv',
         SignalData, 0, 1, [2, 3, 4, 5, 6], [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
-    ) if e.TypeName != 'なし']
+    ) if e.Name != 'なし']
     db.signalTypeList = read_csv(
         '../Traincrew_MultiATS_Server/Data/信号何灯式リスト.csv',
         SignalTypeData, 0, 1, 2, 3, 4, 5

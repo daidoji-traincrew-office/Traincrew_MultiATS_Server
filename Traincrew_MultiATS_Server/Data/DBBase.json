@@ -3902,6 +3902,405 @@
     ],
     "signalDataList": [
         {
+            "Name": "JR浜園上り出発3R",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "JR浜園上り出発4R",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "JR浜園下り出発3L",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "JR浜園下り出発4L",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "JR浜園場内1L",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "JR浜園場内2L",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "三石上り出発14R",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "三石上り出発15R",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "三石上り場内12R",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "三石上り場内13R",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "三石下り出発12L",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "三石下り出発13L",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "三石下り場内14L",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "三石下り場内15L",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "三郷上り出発13R",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "三郷上り場内12R",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "三郷下り出発12L",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "三郷下り場内14L",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "上吉沢上り出発14R",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "上吉沢上り出発15R",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "上吉沢上り場内12R",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "上吉沢上り場内13R",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "上吉沢下り出発12L",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "上吉沢下り出発13L",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "上吉沢下り場内14L",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "上吉沢下り場内15L",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "下吉沢上り出発14R",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "下吉沢上り出発14R中継",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "下吉沢上り出発15R",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "下吉沢上り場内12R",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "下吉沢上り場内13R",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "下吉沢下り出発12L",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "下吉沢下り出発13L",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "下吉沢下り場内14L",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "下吉沢下り場内15L",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "二木戸上り出発13R",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "二木戸上り場内12R",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "二木戸下り出発12L",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "二木戸下り場内14L",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "名田上り出発14R",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "名田上り出発15R",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "名田上り場内12R",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "名田上り場内13R",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "名田下り出発12L",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "名田下り出発13L",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "名田下り場内14L",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "名田下り場内15L",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "大路上り出発4L",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "大路上り出発5L",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "大路上り場内8L",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "大路上り場内9L",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "大路上り場内10LB",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "大路上り場内10LC",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "大路下り出発6R",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "大路下り出発7R",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "大路下り場内2R",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "大路下り場内3R",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
             "Name": "大道寺上り出発7R",
             "phase": 1,
             "TypeName": "4灯YG式",
@@ -6292,6 +6691,139 @@
             "RouteNames": []
         },
         {
+            "Name": "上り閉塞282",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "上り閉塞288",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "上り閉塞306",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "上り閉塞312",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "上り閉塞314",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "上り閉塞320",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "上り閉塞324",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "上り閉塞334",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "上り閉塞336",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "上り閉塞346",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "上り閉塞360",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "上り閉塞372",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "上り閉塞384",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "上り閉塞398",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "上り閉塞404",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "上り閉塞406",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "上り閉塞416",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "上り閉塞420",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "上り閉塞424",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
             "Name": "下り閉塞7",
             "phase": 1,
             "TypeName": "4灯YY式G無",
@@ -6768,6 +7300,14 @@
         }
     ],
     "signalTypeList": [
+        {
+            "Name": "なし",
+            "RIndication": "R",
+            "YYIndication": "R",
+            "YIndication": "R",
+            "YGIndication": "R",
+            "GIndication": "R"
+        },
         {
             "Name": "2灯式",
             "RIndication": "G",
