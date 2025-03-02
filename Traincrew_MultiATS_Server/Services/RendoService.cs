@@ -211,18 +211,31 @@ public class RendoService(
         // 直接鎖状条件を取得
         var directLockCondition = await lockConditionRepository.GetConditionsByObjectIdsAndType(
             routes.Select(x => x.Id).ToList(), LockType.Lock);
-        // 進路照査リレーが扛上している進路の転轍機てっさ鎖状欄を取得
-        var detectorLockConditions = await lockConditionRepository.GetConditionsByObjectIdsAndType(
-            routes.Select(x => x.Id).ToList(), LockType.Detector);
+        // 信号制御欄を取得
+        var signalControlConditions = await lockConditionRepository.GetConditionsByObjectIdsAndType(
+            routes.Select(x => x.Id).ToList(), LockType.SignalControl);
+        // Forget: 進路が定反を転換する転てつ器のてっさ鎖錠が落下している(進路照査リレーでみているため)
 
         foreach (var route in routes)
         {
-            // 進路の鎖錠欄のうち転轍器のてっさ鎖錠がかかっているか
-            if (IsDetectorLocked(detectorLockConditions[route.Id], interlockingObjects))
+            // 信号制御欄の条件を満たしているか
+            var predicate = new Func<LockConditionObject, InterlockingObject, bool>((o, interlockingObject) =>
+            {
+                return interlockingObject switch
+                {
+                    // 軌道回路が短絡していないこと
+                    TrackCircuit trackCircuit => !trackCircuit.TrackCircuitState.IsShortCircuit,
+                    // 進路のてこリレーが落下していること
+                    Route targetRoute => targetRoute.RouteState.IsLeverRelayRaised == RaiseDrop.Drop,
+                    SwitchingMachine or Lever => true,
+                    _ => false
+                };
+            });
+            if (!EvaluateLockConditions(signalControlConditions[route.Id], interlockingObjects, predicate))
             {
                 continue;
             }
-
+            
             // 鎖錠確認 進路の鎖錠欄の条件を満たしていない場合早期continue
             if (IsLocked(directLockCondition[route.Id], interlockingObjects))
             {
