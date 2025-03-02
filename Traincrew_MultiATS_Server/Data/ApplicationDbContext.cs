@@ -31,7 +31,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
         modelBuilder.Entity<Route>()
             .HasOne(r => r.RouteState)
-            .WithOne(rs => rs.Route)
+            .WithOne()
             .HasForeignKey<RouteState>(rs => rs.Id);
 
         modelBuilder.Entity<Route>()
