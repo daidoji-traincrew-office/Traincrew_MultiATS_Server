@@ -4,5 +4,6 @@ public enum ObjectType
 {
     Route,
     SwitchingMachine,
-    TrackCircuit 
+    TrackCircuit,
+    Lever
 }

@@ -8,7 +8,8 @@ public class LockCondition
 {
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     [Key]
-    public ulong Id { get; set; }
+    public ulong Id { get; init; }
+    public Lock? Lock { get; set; }
     public ulong LockId { get; set; }
     public ulong? ParentId { get; set; }
     public LockConditionType Type { get; set; }

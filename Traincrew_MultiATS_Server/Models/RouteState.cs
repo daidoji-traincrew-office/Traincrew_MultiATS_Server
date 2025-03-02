@@ -8,10 +8,10 @@ public class RouteState
 {
     [Key]
     public ulong Id { get; init; }
-    public bool IsLeverRelayRaised { get; set; }
-    public bool IsRouteRelayRaised { get; set; }
-    public bool IsSignalControlRaised { get; set; }
-    public bool IsApproachLockRaised { get; set; }
-    public bool IsRouteLockRaised { get; set; }
+    public RaiseDrop IsLeverRelayRaised { get; set; }
+    public RaiseDrop IsRouteRelayRaised { get; set; }
+    public RaiseDrop IsSignalControlRaised { get; set; }
+    public RaiseDrop IsApproachLockRaised { get; set; }
+    public RaiseDrop IsRouteLockRaised { get; set; }
     public Route? Route { get; set; }
 }

@@ -7,7 +7,7 @@ namespace Traincrew_MultiATS_Server.Models;
  * 連動に必要な装置を表す
  */
 [Table("interlocking_object")]
-public abstract class InterlockingObject
+public class InterlockingObject
 {
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     [Key] 
@@ -15,5 +15,4 @@ public abstract class InterlockingObject
     public string  Name { get; set; }
     public ObjectType Type { get; set; }
     public string? Description { get; set; }
-    public virtual ICollection<LockCondition> LockConditions { get; set; } 
 }

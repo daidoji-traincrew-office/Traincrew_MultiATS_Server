@@ -14,5 +14,4 @@ public class Signal
     public SignalState SignalState { get; init; }
     public ulong? TrackCircuitId { get; init; }
     public TrackCircuit? TrackCircuit { get; init; } 
-    public Route? Route { get; init; }
 }

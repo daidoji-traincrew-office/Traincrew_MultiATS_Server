@@ -7,6 +7,6 @@ namespace Traincrew_MultiATS_Server.Models;
 public class LeverState
 {
     [Key]
-    public ulong Id { get; set; }
-    public NRC IsReversed { get; set; }
+    public ulong Id { get; init; }
+    public LCR IsReversed { get; set; }
 }

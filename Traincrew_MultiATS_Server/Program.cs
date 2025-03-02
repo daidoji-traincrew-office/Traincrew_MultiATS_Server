@@ -11,13 +11,20 @@ using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.HostedService;
 using Traincrew_MultiATS_Server.Hubs;
 using Traincrew_MultiATS_Server.Models;
+using Traincrew_MultiATS_Server.Repositories.Datetime;
+using Traincrew_MultiATS_Server.Repositories.DestinationButton;
 using Traincrew_MultiATS_Server.Repositories.Discord;
+using Traincrew_MultiATS_Server.Repositories.General;
 using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
 using Traincrew_MultiATS_Server.Repositories.LockCondition;
 using Traincrew_MultiATS_Server.Repositories.NextSignal;
 using Traincrew_MultiATS_Server.Repositories.Protection;
+using Traincrew_MultiATS_Server.Repositories.RouteLeverDestinationButton;
 using Traincrew_MultiATS_Server.Repositories.Signal;
+using Traincrew_MultiATS_Server.Repositories.SignalRoute;
 using Traincrew_MultiATS_Server.Repositories.Station;
+using Traincrew_MultiATS_Server.Repositories.SwitchingMachine;
+using Traincrew_MultiATS_Server.Repositories.SwitchingMachineRoute;
 using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
 using Traincrew_MultiATS_Server.Services;
 using static OpenIddict.Abstractions.OpenIddictConstants;
@@ -56,9 +63,13 @@ var dataSourceBuilder = new NpgsqlDataSourceBuilder(builder.Configuration.GetCon
 dataSourceBuilder.MapEnum<LockType>();
 dataSourceBuilder.MapEnum<NR>();
 dataSourceBuilder.MapEnum<NRC>();
+dataSourceBuilder.MapEnum<LCR>();
 dataSourceBuilder.MapEnum<ObjectType>();
 dataSourceBuilder.MapEnum<SignalIndication>();
 dataSourceBuilder.MapEnum<LockConditionType>();
+dataSourceBuilder.MapEnum<LeverType>();
+dataSourceBuilder.MapEnum<RouteType>();
+dataSourceBuilder.MapEnum<RaiseDrop>();
 var dataSource = dataSourceBuilder.Build();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
@@ -198,9 +209,18 @@ builder.Services
     .AddScoped<ISignalRepository, SignalRepository>()
     .AddScoped<INextSignalRepository, NextSignalRepository>()
     .AddScoped<IProtectionRepository, ProtectionRepository>()
+    .AddScoped<ISignalRouteRepository, SignalRouteRepository>()
+    .AddScoped<IDateTimeRepository, DateTimeRepository>()
+    .AddScoped<IDestinationButtonRepository, DestinationButtonRepository>()
+    .AddScoped<IRouteLeverDestinationRepository, RouteLeverDestinationRepository>() 
+    .AddScoped<ISwitchingMachineRepository, SwitchingMachineRepository>()
+    .AddScoped<ISwitchingMachineRouteRepository, SwitchingMachineRouteRepository>()
+    .AddScoped<IGeneralRepository, GeneralRepository>()
     .AddScoped<StationService>()
     .AddScoped<TrackCircuitService>()
     .AddScoped<ProtectionService>()
+    .AddScoped<RendoService>()
+    .AddScoped<SwitchingMachineService>() 
     .AddSingleton<DiscordService>()
     .AddScoped<SignalService>()
     .AddSingleton<IDiscordRepository, DiscordRepository>();
@@ -282,3 +302,5 @@ static void EnsureCertificateExists(string certificatePath, string subjectName, 
 
     File.WriteAllBytes(certificatePath, certificate.Export(X509ContentType.Pfx, string.Empty));
 }
+
+public partial class Program;

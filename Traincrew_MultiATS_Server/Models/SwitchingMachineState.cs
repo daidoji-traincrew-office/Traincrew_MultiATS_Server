@@ -8,7 +8,6 @@ public class SwitchingMachineState
     public ulong Id { get; set; }
     public bool IsSwitching { get; set; }
     public NR IsReverse { get; set; }
-    public NRC IsLeverReversed { get; set; }
-    public DateTime? SwitchEndTime { get; set; }
+    public DateTime SwitchEndTime { get; set; }
     public virtual SwitchingMachine SwitchingMachine { get; set; }
 }
