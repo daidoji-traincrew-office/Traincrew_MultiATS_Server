@@ -13,5 +13,4 @@ public class RouteState
     public RaiseDrop IsSignalControlRaised { get; set; }
     public RaiseDrop IsApproachLockRaised { get; set; }
     public RaiseDrop IsRouteLockRaised { get; set; }
-    public Route? Route { get; set; }
 }

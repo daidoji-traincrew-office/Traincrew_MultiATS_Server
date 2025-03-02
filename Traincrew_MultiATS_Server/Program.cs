@@ -20,6 +20,7 @@ using Traincrew_MultiATS_Server.Repositories.Lever;
 using Traincrew_MultiATS_Server.Repositories.LockCondition;
 using Traincrew_MultiATS_Server.Repositories.NextSignal;
 using Traincrew_MultiATS_Server.Repositories.Protection;
+using Traincrew_MultiATS_Server.Repositories.Route;
 using Traincrew_MultiATS_Server.Repositories.RouteLeverDestinationButton;
 using Traincrew_MultiATS_Server.Repositories.Signal;
 using Traincrew_MultiATS_Server.Repositories.SignalRoute;
@@ -211,7 +212,7 @@ builder.Services
     .AddScoped<ILeverRepository, LeverRepository>()
     .AddScoped<INextSignalRepository, NextSignalRepository>()
     .AddScoped<IProtectionRepository, ProtectionRepository>()
-    // .AddScoped<IRouteRepository, RouteRepository>() Todo: 作る
+    .AddScoped<IRouteRepository, RouteRepository>() 
     .AddScoped<IRouteLeverDestinationRepository, RouteLeverDestinationRepository>() 
     .AddScoped<ISignalRepository, SignalRepository>()
     .AddScoped<ISignalRouteRepository, SignalRouteRepository>()
