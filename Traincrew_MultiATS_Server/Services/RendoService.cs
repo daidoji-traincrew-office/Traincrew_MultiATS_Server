@@ -55,9 +55,12 @@ public class RendoService(
             var lever = (interlockingObjects[routeLeverDestinationButton.LeverId] as Lever)!;
             // 対象ボタン
             var button = buttons[routeLeverDestinationButton.DestinationButtonName];
+            
+            
 
             // 鎖錠確認 進路の鎖錠欄の条件を満たしていない場合早期continue
-            if (IsLocked(lockConditions[routeLeverDestinationButton.RouteId], interlockingObjects))
+            if (!lockConditions.TryGetValue(routeLeverDestinationButton.RouteId, out var value) 
+                || IsLocked(value, interlockingObjects))
             {
                 continue;
             }

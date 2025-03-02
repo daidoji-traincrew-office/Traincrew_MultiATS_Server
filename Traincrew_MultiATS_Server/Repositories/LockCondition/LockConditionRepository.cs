@@ -28,6 +28,12 @@ public class LockConditionRepository(ApplicationDbContext context) : ILockCondit
 
     public async Task<Dictionary<ulong, List<Models.LockCondition>>> GetConditionsByObjectIdsAndType(List<ulong> objectIds, LockType type)
     {
-        throw new NotImplementedException();
+        return await context.Locks
+            .Where(l => objectIds.Contains(l.ObjectId) && l.Type == type)
+            .Join(context.LockConditions, l => l.Id, lc => lc.LockId, (l, lc) => new { l.ObjectId, lc })
+            .GroupBy(x => x.ObjectId)
+            .ToDictionaryAsync(
+                x => x.Key, 
+                x => x.Select(y => y.lc).ToList());
     }
 }
