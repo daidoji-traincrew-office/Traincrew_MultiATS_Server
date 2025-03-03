@@ -62,6 +62,8 @@ public class RendoService(
             if (!lockConditions.TryGetValue(routeLeverDestinationButton.RouteId, out var value)
                 || IsLocked(value, interlockingObjects))
             {
+                routeState.IsLeverRelayRaised = RaiseDrop.Drop;
+                await generalRepository.Save(routeState);
                 continue;
             }
 
