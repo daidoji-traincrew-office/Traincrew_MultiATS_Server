@@ -57,7 +57,6 @@ public class RendoService(
             var button = buttons[routeLeverDestinationButton.DestinationButtonName];
 
 
-
             // 鎖錠確認 進路の鎖錠欄の条件を満たしていない場合早期continue
             if (!lockConditions.TryGetValue(routeLeverDestinationButton.RouteId, out var value)
                 || IsLocked(value, interlockingObjects))
@@ -127,18 +126,36 @@ public class RendoService(
         // 全てのObjectを取得
         var interlockingObjects = (await interlockingObjectRepository.GetAllWithState())
             .ToDictionary(obj => obj.Id);
-        // 直接鎖状条件を取得
-        var directLockCondition = await lockConditionRepository.GetConditionsByType(LockType.Lock);
-        // てこリレーが扛上している進路を全て取得
-        var routes = interlockingObjects
-            .Where(x => x.Value is Route route && route.RouteState!.IsLeverRelayRaised == RaiseDrop.Raise)
-            .Select(x => (x.Value as Route)!)
+        // 全進路リスト
+        var allRoutes = interlockingObjects
+            .Select(x => x.Value)
+            .OfType<Route>()
             .ToList();
+        // 操作対象の進路を全て取得(てこリレーと進路照査リレーの扛上/落下状態が異なる進路)
+        var routes = allRoutes
+            .Where(route => route.RouteState!.IsRouteRelayRaised != route.RouteState!.IsLeverRelayRaised)
+            .ToList();
+        // その中のうち、てこリレーが扛上している(かつ、進路照査リレーが落下している)進路のIDを全て取得
+        var raisedRoutesIds = routes
+            .Where(route => route.RouteState!.IsLeverRelayRaised == RaiseDrop.Raise)
+            .Select(route => route.Id)
+            .ToList();
+        // てこリレーが扛上している進路の直接鎖状条件を取得
+        var directLockCondition = await lockConditionRepository.GetConditionsByObjectIdsAndType(
+            raisedRoutesIds, LockType.Lock);
         // てこリレーが扛上している進路の信号制御欄を取得
         var signalControlConditions = await lockConditionRepository.GetConditionsByObjectIdsAndType(
-            routes.Select(x => x.Id).ToList(), LockType.SignalControl);
+            raisedRoutesIds, LockType.SignalControl);
         foreach (var route in routes)
         {
+            // てこリレーが落下している場合、進路リレーを落下させてcontinue
+            if (route.RouteState.IsLeverRelayRaised == RaiseDrop.Drop)
+            {
+                route.RouteState.IsRouteRelayRaised = RaiseDrop.Drop;
+                await generalRepository.Save(route.RouteState);
+                continue;
+            }
+
             // 進路の鎖錠欄の条件を満たしているかを取得
             // 転轍器では、目的方向で鎖錠していること
             // 進路ではその進路の進路リレーが扛上していないこと
@@ -155,8 +172,6 @@ public class RendoService(
             };
             if (!EvaluateLockConditions(directLockCondition[route.Id], interlockingObjects, predicate))
             {
-                route.RouteState.IsRouteRelayRaised = RaiseDrop.Drop;
-                await generalRepository.Save(route.RouteState);
                 continue;
             }
 
@@ -181,8 +196,6 @@ public class RendoService(
                 EvaluateLockConditions(signalControlConditions[route.Id], interlockingObjects, predicate);
             if (!signalControlState)
             {
-                route.RouteState.IsRouteRelayRaised = RaiseDrop.Drop;
-                await generalRepository.Save(route.RouteState);
                 continue;
             }
 
@@ -210,22 +223,37 @@ public class RendoService(
         // 全てのObjectを取得
         var interlockingObjects = (await interlockingObjectRepository.GetAllWithState())
             .ToDictionary(obj => obj.Id);
-
-        // 進路照査リレーが扛上している進路を全て取得
-        var routes = interlockingObjects
-            .Where(x => x.Value is Route route && route.RouteState!.IsRouteRelayRaised == RaiseDrop.Raise)
-            .Select(x => (x.Value as Route)!)
+        // 全進路リスト
+        var allRoutes = interlockingObjects
+            .Select(x => x.Value)
+            .OfType<Route>()
+            .ToList();
+        // 操作対象の進路を全て取得(進路照査リレーが扛上している or 信号制御リレーが落下している進路)
+        var routes = allRoutes
+            .Where(route => route.RouteState!.IsRouteRelayRaised != route.RouteState!.IsSignalControlRaised)
+            .ToList();
+        // その中のうち、進路照査リレーが扛上している(かつ、信号制御リレーが落下している)進路のIDを全て取得 
+        var raisedRoutesIds = routes
+            .Where(route => route.RouteState!.IsRouteRelayRaised == RaiseDrop.Raise)
+            .Select(route => route.Id)
             .ToList();
         // 直接鎖状条件を取得
         var directLockCondition = await lockConditionRepository.GetConditionsByObjectIdsAndType(
-            routes.Select(x => x.Id).ToList(), LockType.Lock);
+            raisedRoutesIds, LockType.Lock);
         // 信号制御欄を取得
         var signalControlConditions = await lockConditionRepository.GetConditionsByObjectIdsAndType(
-            routes.Select(x => x.Id).ToList(), LockType.SignalControl);
+            raisedRoutesIds, LockType.SignalControl);
         // Forget: 進路が定反を転換する転てつ器のてっさ鎖錠が落下している(進路照査リレーでみているため)
 
         foreach (var route in routes)
         {
+            // 進路照査リレーが落下している場合、信号制御リレーを落下させてcontinue
+            if(route.RouteState.IsRouteRelayRaised == RaiseDrop.Drop)
+            {
+                route.RouteState.IsSignalControlRaised = RaiseDrop.Drop;
+                await generalRepository.Save(route.RouteState);
+                continue;
+            }
             // 信号制御欄の条件を満たしているか
             var predicate = new Func<LockConditionObject, InterlockingObject, bool>((o, interlockingObject) =>
             {
@@ -241,16 +269,12 @@ public class RendoService(
             });
             if (!EvaluateLockConditions(signalControlConditions[route.Id], interlockingObjects, predicate))
             {
-                route.RouteState.IsSignalControlRaised = RaiseDrop.Drop;
-                await generalRepository.Save(route.RouteState);
                 continue;
             }
-            
+
             // 鎖錠確認 進路の鎖錠欄の条件を満たしていない場合早期continue
             if (IsLocked(directLockCondition[route.Id], interlockingObjects))
             {
-                route.RouteState.IsSignalControlRaised = RaiseDrop.Drop;
-                await generalRepository.Save(route.RouteState);
                 continue;
             }
             // Question: 鎖状確認 信号制御欄の条件を満たしているか確認?
