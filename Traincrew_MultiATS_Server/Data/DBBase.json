@@ -1291,18 +1291,6 @@
             "ProtectionZone": null
         },
         {
-            "Name": "TH58_1RBT",
-            "Last": "",
-            "On": false,
-            "NextSignalNamesUp": [
-                "赤山町上り出発7R"
-            ],
-            "NextSignalNamesDown": [
-                "赤山町下り出発4L"
-            ],
-            "ProtectionZone": 11
-        },
-        {
             "Name": "TH58_2RAT",
             "Last": "",
             "On": false,
@@ -1312,6 +1300,18 @@
             ],
             "NextSignalNamesDown": [
                 "赤山町下り出発3L"
+            ],
+            "ProtectionZone": 11
+        },
+        {
+            "Name": "TH58_2RBT",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [
+                "赤山町上り出発7R"
+            ],
+            "NextSignalNamesDown": [
+                "赤山町下り出発4L"
             ],
             "ProtectionZone": 11
         },
@@ -1904,7 +1904,7 @@
             "ProtectionZone": 6
         },
         {
-            "Name": "TH65_6T",
+            "Name": "TH65_5T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [
@@ -1914,7 +1914,7 @@
             "ProtectionZone": 6
         },
         {
-            "Name": "TH65_7T",
+            "Name": "TH65_6T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [
@@ -4846,7 +4846,7 @@
                 "新野崎下り場内4L"
             ],
             "RouteNames": [
-                "TH67_10LC"
+                "TH67_10LSC"
             ]
         },
         {
@@ -4857,7 +4857,7 @@
                 "新野崎下り場内5L"
             ],
             "RouteNames": [
-                "TH67_10LD"
+                "TH67_10LSD"
             ]
         },
         {
