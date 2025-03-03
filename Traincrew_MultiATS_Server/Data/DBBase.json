@@ -3208,7 +3208,8 @@
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [
-                "上り閉塞8"
+                "上り閉塞8",
+                "上り閉塞8中継"
             ],
             "NextSignalNamesDown": [],
             "ProtectionZone": 1
@@ -3572,7 +3573,8 @@
             "On": false,
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
-                "下り閉塞7"
+                "下り閉塞7",
+                "下り閉塞7中継"
             ],
             "ProtectionZone": 1
         },
