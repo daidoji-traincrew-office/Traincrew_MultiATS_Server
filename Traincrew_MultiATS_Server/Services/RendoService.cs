@@ -179,6 +179,7 @@ public class RendoService(
                     !switchingMachine.SwitchingMachineState.IsSwitching
                     && switchingMachine.SwitchingMachineState.IsReverse == lockConditionObject.IsReverse,
                 Route route => route.RouteState.IsRouteRelayRaised == RaiseDrop.Drop,
+                TrackCircuit trackCircuit => !trackCircuit.TrackCircuitState.IsShortCircuit,
                 _ => false
             };
         };
