@@ -55,11 +55,11 @@ public class RendoService(
             var lever = (interlockingObjects[routeLeverDestinationButton.LeverId] as Lever)!;
             // 対象ボタン
             var button = buttons[routeLeverDestinationButton.DestinationButtonName];
-            
-            
+
+
 
             // 鎖錠確認 進路の鎖錠欄の条件を満たしていない場合早期continue
-            if (!lockConditions.TryGetValue(routeLeverDestinationButton.RouteId, out var value) 
+            if (!lockConditions.TryGetValue(routeLeverDestinationButton.RouteId, out var value)
                 || IsLocked(value, interlockingObjects))
             {
                 continue;
@@ -153,6 +153,8 @@ public class RendoService(
             };
             if (!EvaluateLockConditions(directLockCondition[route.Id], interlockingObjects, predicate))
             {
+                route.RouteState.IsRouteRelayRaised = RaiseDrop.Drop;
+                await generalRepository.Save(route.RouteState);
                 continue;
             }
 
@@ -177,12 +179,16 @@ public class RendoService(
                 EvaluateLockConditions(signalControlConditions[route.Id], interlockingObjects, predicate);
             if (!signalControlState)
             {
+                route.RouteState.IsRouteRelayRaised = RaiseDrop.Drop;
+                await generalRepository.Save(route.RouteState);
                 continue;
             }
 
             // 鎖錠確認 進路の鎖錠欄の条件を満たしていない場合早期continue
             if (IsLocked(directLockCondition[route.Id], interlockingObjects))
             {
+                route.RouteState.IsRouteRelayRaised = RaiseDrop.Drop;
+                await generalRepository.Save(route.RouteState);
                 continue;
             }
 
@@ -220,12 +226,16 @@ public class RendoService(
             // 進路の鎖錠欄のうち転轍器のてっさ鎖錠がかかっているか
             if (IsDetectorLocked(detectorLockConditions[route.Id], interlockingObjects))
             {
+                route.RouteState.IsSignalControlRaised = RaiseDrop.Drop;
+                await generalRepository.Save(route.RouteState);
                 continue;
             }
 
             // 鎖錠確認 進路の鎖錠欄の条件を満たしていない場合早期continue
             if (IsLocked(directLockCondition[route.Id], interlockingObjects))
             {
+                route.RouteState.IsSignalControlRaised = RaiseDrop.Drop;
+                await generalRepository.Save(route.RouteState);
                 continue;
             }
             // Question: 鎖状確認 信号制御欄の条件を満たしているか確認?
