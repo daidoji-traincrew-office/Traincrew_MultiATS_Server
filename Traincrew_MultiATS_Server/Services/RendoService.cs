@@ -312,7 +312,8 @@ public class RendoService(
         {
             return interlockingObject switch
             {
-                Route route => route.RouteState.IsLeverRelayRaised != RaiseDrop.Drop,
+                Route route => route.RouteState.IsLeverRelayRaised == RaiseDrop.Raise,
+                TrackCircuit trackCircuit => trackCircuit.TrackCircuitState.IsShortCircuit,
                 SwitchingMachine or Route or Lever => false,
                 _ => true
             };
