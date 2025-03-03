@@ -299,12 +299,6 @@ public class RendoService(
         // Question: 鎖状確認 信号制御欄の条件を満たしているか確認?
 
         // 進路のRouteState.IsSignalControlRaisedを扛上させる
-        if (route.RouteState.IsRouteRelayRaised == RaiseDrop.Raise)
-        {
-            return RaiseDrop.Drop;
-        }
-        route.RouteState.IsSignalControlRaised = RaiseDrop.Raise;
-        await generalRepository.Save(route.RouteState);
         return RaiseDrop.Raise;
     }
 
