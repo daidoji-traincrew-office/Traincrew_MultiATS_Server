@@ -9,5 +9,7 @@ public class DestinationButtonState
     [Key]
     public string Name { get; init; }
     public RaiseDrop IsRaised { get; set; }
+   
+    [Column(TypeName = "timestamp without time zone")]
     public DateTime OperatedAt { get; set; }
 }

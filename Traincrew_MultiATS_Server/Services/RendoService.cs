@@ -271,7 +271,7 @@ public class RendoService(
             {
                 continue;
             }
-
+            
             // 鎖錠確認 進路の鎖錠欄の条件を満たしていない場合早期continue
             if (IsLocked(directLockCondition[route.Id], interlockingObjects))
             {
