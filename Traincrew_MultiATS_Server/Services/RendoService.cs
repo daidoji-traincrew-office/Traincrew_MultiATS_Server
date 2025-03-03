@@ -131,9 +131,10 @@ public class RendoService(
             .Select(x => x.Value)
             .OfType<Route>()
             .ToList();
-        // 操作対象の進路を全て取得(てこリレーと進路照査リレーの扛上/落下状態が異なる進路)
+        // 操作対象の進路を全て取得(てこリレーと進路照査リレーどちらかが扛上している進路)
         var routes = allRoutes
-            .Where(route => route.RouteState!.IsRouteRelayRaised != route.RouteState!.IsLeverRelayRaised)
+            .Where(route => route.RouteState.IsLeverRelayRaised == RaiseDrop.Raise 
+                            || route.RouteState.IsRouteRelayRaised == RaiseDrop.Raise)
             .ToList();
         // その中のうち、てこリレーが扛上している(かつ、進路照査リレーが落下している)進路のIDを全て取得
         var raisedRoutesIds = routes
@@ -228,9 +229,10 @@ public class RendoService(
             .Select(x => x.Value)
             .OfType<Route>()
             .ToList();
-        // 操作対象の進路を全て取得(進路照査リレーが扛上している or 信号制御リレーが落下している進路)
+        // 操作対象の進路を全て取得(進路照査リレーと信号制御リレーどちらかが扛上している進路)
         var routes = allRoutes
-            .Where(route => route.RouteState!.IsRouteRelayRaised != route.RouteState!.IsSignalControlRaised)
+            .Where(route => route.RouteState.IsRouteRelayRaised == RaiseDrop.Raise 
+                            || route.RouteState.IsSignalControlRaised == RaiseDrop.Raise)
             .ToList();
         // その中のうち、進路照査リレーが扛上している(かつ、信号制御リレーが落下している)進路のIDを全て取得 
         var raisedRoutesIds = routes
@@ -279,9 +281,14 @@ public class RendoService(
             }
             // Question: 鎖状確認 信号制御欄の条件を満たしているか確認?
 
-            // 進路のRouteState.IsSignalControlRaisedをRaiseにする
+            // 進路のRouteState.IsSignalControlRaisedを扛上させる
+            if (route.RouteState.IsRouteRelayRaised == RaiseDrop.Raise)
+            {
+                continue;
+            }
             route.RouteState.IsSignalControlRaised = RaiseDrop.Raise;
             await generalRepository.Save(route.RouteState);
+
         }
     }
 
