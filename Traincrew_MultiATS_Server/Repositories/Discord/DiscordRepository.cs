@@ -13,7 +13,15 @@ public class DiscordRepository(IConfiguration configuration) : IDiscordRepositor
 
     internal async Task Initialize()
     {
+        // BOTがすでに起動済みなら何もしない
+        if(_client.LoginState == LoginState.LoggedIn)
+        {
+            return;
+        }
         var token = configuration.GetSection("Discord:BotToken").Get<string>();
+        // そもそもトークンがおかしいならさっさと落とす
+        TokenUtils.ValidateToken(TokenType.Bot, token);
+        
         TaskCompletionSource tcs = new();
         _client.Ready += () =>
         {
@@ -28,7 +36,8 @@ public class DiscordRepository(IConfiguration configuration) : IDiscordRepositor
         };
         await _client.LoginAsync(TokenType.Bot, token);
         await _client.StartAsync();
-        await tcs.Task;
+        // さすがに10秒もあればBOTは起動するだろという想定
+        await tcs.Task.WaitAsync(TimeSpan.FromSeconds(10));
     }
 
     internal async Task Logout()
