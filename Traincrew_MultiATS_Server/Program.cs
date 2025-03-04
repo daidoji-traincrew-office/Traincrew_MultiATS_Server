@@ -287,10 +287,6 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 app.UseHttpLogging();
-app.UseRouting();
-app.UseCors();
-app.UseAuthentication();
-app.UseAuthorization();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -301,6 +297,10 @@ else
     app.UseForwardedHeaders();
     app.UseHsts();
 }
+app.UseRouting();
+app.UseCors();
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Create a new application registration matching the values configured in MultiATS_Client.
 // Note: in a real world application, this step should be part of a setup script.
