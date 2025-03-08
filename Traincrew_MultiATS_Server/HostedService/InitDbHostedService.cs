@@ -85,7 +85,7 @@ public class InitDbHostedService(IServiceScopeFactory serviceScopeFactory) : IHo
         }
 
         var changedEntriesCopy = context.ChangeTracker.Entries()
-            .Where(e => e.State is 
+            .Where(e => e.State is
                 EntityState.Added or EntityState.Modified or EntityState.Deleted or EntityState.Unchanged)
             .ToList();
 
@@ -210,7 +210,7 @@ internal class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Ca
     {
         // 軌道回路情報を取得
         var trackCircuits = await context.TrackCircuits
-            .Select(tc => new{tc.Id, tc.Name})
+            .Select(tc => new { tc.Id, tc.Name })
             .ToDictionaryAsync(tc => tc.Name, tc => tc.Id, cancellationToken);
         // 既に登録済みの信号情報を取得
         var signalNames = (await context.Signals
@@ -231,6 +231,7 @@ internal class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Ca
                 var trackCircuitName = $"{signalData.Name.Replace("閉塞", "")}T";
                 trackCircuits.TryGetValue(trackCircuitName, out trackCircuitId);
             }
+
             context.Signals.Add(new()
             {
                 Name = signalData.Name,
@@ -426,24 +427,32 @@ internal partial class DbRendoTableInitializer
 {
     const string NameSwitchingMachine = "転てつ器";
 
-    private static readonly Dictionary<string, List<string>> stationIdMap = new()
+    private static readonly Dictionary<string, List<string>> StationIdMap = new()
     {
-        // 津崎: 浜園
-        { "TH71", ["TH70"] },
+        // 大道寺: 江ノ原検車区、藤江
+        { "TH65", ["TH66S", "TH64"] },
+        // 江ノ原検車区: 大道寺
+        { "TH66S", ["TH65"] },
         // 浜園: 津崎
-        { "TH70", ["TH71"] }
+        { "TH70", ["TH71"] },
+        // 津崎: 浜園
+        { "TH71", ["TH70"] }
     };
 
     [GeneratedRegex(@"\d+")]
     private static partial Regex RegexIntParse();
 
-    // 鎖状欄からてこ名を取得するための正規表現、[]が増えたときの対応のため、nameの番号は逆順にしてある
-    [GeneratedRegex(@"(?:\[{2}(?<name3>[^]]+?)\]{2})|(?:\[(?<name2>[^]]+?)\])|(?<name1r>\(\S+?\))|(?<name1>[^\s\(]+)")]
-    private static partial Regex RegexLockColumn();
+    // てこ名を抽出するための正規表現
+    [GeneratedRegex(@"(\d+)(?:R|L)(Z?)")]
+    private static partial Regex RegexLeverParse();
 
     // 信号制御欄から統括制御とそれ以外の部位に分けるための正規表現
     [GeneratedRegex(@"^(.*?)(?:\(\(([^\)\s]+)\)\)\s*)*$")]
     private static partial Regex RegexSignalControl();
+
+    // 連動図表の鎖錠欄の諸々のトークンを抽出するための正規表現
+    [GeneratedRegex(@"\[\[|\]\]|\(\(|\)\)|\[|\]|\{|\}|\(|\)|但|又は|[A-Z\dｲﾛ秒]+")]
+    private static partial Regex TokenRegex();
 
     // ReSharper disable InconsistentNaming
     private readonly string stationId;
@@ -466,7 +475,7 @@ internal partial class DbRendoTableInitializer
         this.context = context;
         this.dateTimeRepository = dateTimeRepository;
         this.cancellationToken = cancellationToken;
-        otherStations = stationIdMap.GetValueOrDefault(stationId) ?? [];
+        otherStations = StationIdMap.GetValueOrDefault(stationId) ?? [];
     }
 
     internal async Task InitializeObjects()
@@ -794,10 +803,10 @@ internal partial class DbRendoTableInitializer
             }
 
             // 進路(複数)の場合
-            var match = RegexIntParse().Match(item.Name);
+            var match = RegexLeverParse().Match(item.Name);
             if (match.Success)
             {
-                var leverName = CalcLeverName(RegexIntParse().Match(item.Name).Value, item.StationId);
+                var leverName = CalcLeverName(match.Groups[1].Value + match.Groups[2].Value, item.StationId);
                 var routeIds = leverToRoute.GetValueOrDefault(leverName);
                 if (routeIds != null)
                 {
@@ -934,69 +943,160 @@ internal partial class DbRendoTableInitializer
 
     private List<LockItem> CalcLockItems(string lockString)
     {
-        if (string.IsNullOrWhiteSpace(lockString))
+        var tokens = TokenRegex().Matches(lockString)
+            .Select(m => m.Value)
+            .ToList();
+        var enumerator = tokens.GetEnumerator();
+        enumerator.MoveNext();
+        return ParseToken(ref enumerator, stationId, false, false);
+    }
+
+    private List<LockItem> ParseToken(ref List<string>.Enumerator enumerator, string stationId, bool isReverse, bool isTotalControl)
+    {
+        List<LockItem> result = [];
+        // なぜかCanBeNullなはずなのにそれを無視してしまうので
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+        while (enumerator.Current != null)
         {
-            return [];
-        }
-
-        var matches = RegexLockColumn().Matches(lockString);
-
-        return matches
-            .SelectMany(match =>
+            var token = enumerator.Current;
+            // 括弧とじならbreakし、再起元に判断を委ねる
+            if (token is ")" or "]" or "]]" or "}")
             {
-                for (var i = 0; i < 3; i++)
+                break;    
+            }
+            LockItem item;
+            if (token == "{")
+            {
+                enumerator.MoveNext();
+                var child = ParseToken(ref enumerator, stationId, isReverse, isTotalControl);
+                if (enumerator.Current != "}")
                 {
-                    // グループを取得 
-                    var group = match.Groups[$"name{i + 1}"];
-                    // 0番目の場合、反位パターンがあるのでそれも取得
-                    if (!group.Success && i == 0)
-                    {
-                        group = match.Groups[$"name{i + 1}r"];
-                    }
-
-                    // グループが取得できなかった場合、次のループへ
-                    if (!group.Success)
-                    {
-                        continue;
-                    }
-
-                    // 実際の行 (21) や 21 など
-                    var column = group.Value;
-                    var isReverse = column.StartsWith('(');
-                    // Objectの名前
-                    // 例 (21) -> 21
-                    // Todo: 片鎖状に対応する
-                    var targetName = isReverse ? column.Substring(1, column.Length - 2) : column;
-                    // 対象オブジェクトの駅ID
-                    var objectStationId = stationId;
-                    if (i > 0)
-                    {
-                        objectStationId = otherStations[i - 1];
-                    }
-
-                    return
-                    [
-                        new()
-                        {
-                            Name = targetName,
-                            StationId = objectStationId,
-                            IsReverse = isReverse ? NR.Reversed : NR.Normal
-                        }
-                    ];
+                    throw new InvalidOperationException("}が閉じられていません");
+                }
+                enumerator.MoveNext();
+                result.AddRange(child);
+            }
+            else if (token == "((")
+            {
+                // 統括制御の処理を追加
+                enumerator.MoveNext();
+                var child = ParseToken(ref enumerator, stationId, isReverse, true);
+                if (enumerator.Current != "))")
+                {
+                    throw new InvalidOperationException("))が閉じられていません");
                 }
 
-                // Todo: 例外吐かせた方が良い
-                return new List<LockItem>();
-            })
-            .ToList();
+                enumerator.MoveNext();
+                result.AddRange(child);
+            }
+            else if (token.StartsWith('['))
+            {
+                var count = token.Length;
+                var targetStationId = StationIdMap[this.stationId][count - 1];
+                enumerator.MoveNext();
+                var child = ParseToken(ref enumerator, targetStationId, isReverse, isTotalControl);
+                if (enumerator.Current.Length != count && enumerator.Current.All(c => c == ']'))
+                {
+                    throw new InvalidOperationException("]が閉じられていません");
+                }
+
+                enumerator.MoveNext();
+                result.AddRange(child);
+            }
+            else if (token == "(")
+            {
+                enumerator.MoveNext();
+                var target = ParseToken(ref enumerator, stationId, true, isTotalControl);
+                if (target.Count != 1)
+                {
+                    throw new InvalidOperationException("反位の対象がないか、複数あります");
+                }
+
+                if (enumerator.Current is not ")")
+                {
+                    throw new InvalidOperationException(")が閉じられていません");
+                }
+
+                enumerator.MoveNext();
+                item = target[0];
+                result.Add(item);
+            }
+            else if (token == "但")
+            {
+                var left = result;
+                enumerator.MoveNext();
+                var right = ParseToken(ref enumerator, stationId, isReverse, isTotalControl);
+                List<LockItem> child = new();
+                if (left.Count == 1)
+                {
+                    child.Add(left[0]);
+                }
+                else
+                {
+                    child.Add(new()
+                    {
+                        Name = "or",
+                        StationId = stationId,
+                        IsReverse = isReverse ? NR.Reversed : NR.Normal,
+                        Children = left
+                    });
+                }
+
+                if (right.Count == 1)
+                {
+                    child.Add(right[0]);
+                }
+                else
+                {
+                    child.Add(new()
+                    {
+                        Name = "or",
+                        StationId = stationId,
+                        IsReverse = isReverse ? NR.Reversed : NR.Normal,
+                        Children = right
+                    });
+                }
+
+                result =
+                [
+                    new()
+                    {
+                        Name = "and",
+                        StationId = stationId,
+                        IsReverse = isReverse ? NR.Reversed : NR.Normal,
+                        Children = child
+                    }
+                ];
+            }
+            else if (token == "又は")
+            {
+                enumerator.MoveNext();
+            }
+            else
+            {
+                item = new()
+                {
+                    Name = token,
+                    StationId = stationId,
+                    isTotalControl = isTotalControl,
+                    IsReverse = isReverse ? NR.Reversed : NR.Normal
+                };
+                result.Add(item);
+                enumerator.MoveNext();
+            }
+        }
+
+        return result;
     }
 
     private class LockItem
     {
         public string Name { get; set; }
         public string StationId { get; set; }
+        public bool isTotalControl { get; set; }
         public int RouteLockGroup { get; set; }
         public NR IsReverse { get; set; }
+        public List<LockItem> Children { get; set; } = [];
     }
 
     private string CalcSwitchingMachineName(string start, string stationId)
