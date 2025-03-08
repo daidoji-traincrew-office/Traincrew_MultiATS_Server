@@ -58,6 +58,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .WithMany()
             .HasForeignKey(l => l.LockId)
             .HasPrincipalKey(l => l.Id);
+        modelBuilder.Entity<LockCondition>()
+            .HasOne(lc => lc.Parent)
+            .WithMany()
+            .HasForeignKey(lc => lc.ParentId)
+            .HasPrincipalKey(lc => lc.Id);
         modelBuilder.Entity<LockConditionObject>()
             .HasOne(lco => lco.Object)
             .WithMany()

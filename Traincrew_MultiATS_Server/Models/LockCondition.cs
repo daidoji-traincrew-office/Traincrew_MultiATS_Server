@@ -11,6 +11,7 @@ public class LockCondition
     public ulong Id { get; init; }
     public Lock? Lock { get; set; }
     public ulong LockId { get; set; }
+    public LockCondition? Parent { get; set; }
     public ulong? ParentId { get; set; }
     public LockConditionType Type { get; set; }
 }
