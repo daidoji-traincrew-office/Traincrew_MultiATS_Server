@@ -423,9 +423,11 @@ internal class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Ca
     }
 }
 
-internal partial class DbRendoTableInitializer
+public partial class DbRendoTableInitializer
 {
     const string NameSwitchingMachine = "転てつ器";
+    private const string NameAnd = "and";
+    private const string NameOr = "or";
 
     private static readonly Dictionary<string, List<string>> StationIdMap = new()
     {
@@ -463,7 +465,7 @@ internal partial class DbRendoTableInitializer
     private readonly List<string> otherStations;
     // ReSharper restore InconsistentNaming
 
-    internal DbRendoTableInitializer(
+    public DbRendoTableInitializer(
         string stationId,
         List<RendoTableCSV> rendoTableCsvs,
         ApplicationDbContext context,
@@ -898,6 +900,44 @@ internal partial class DbRendoTableInitializer
         var lockItems = CalcLockItems(lockString);
         foreach (var lockItem in lockItems)
         {
+            Lock lockObject = new()
+            {
+                ObjectId = objectId,
+                Type = lockType
+            };
+            context.Locks.Add(lockObject);
+            LockCondition? root = null;
+            // And/Or条件の処理
+            if (lockItem.Name == NameOr)
+            {
+                root = new()
+                {
+                    Lock = lockObject,
+                    Type = LockConditionType.Or
+                };
+            }
+
+            if (lockItem.Name == NameAnd)
+            {
+                root = new()
+                {
+                    Lock = lockObject,
+                    Type = LockConditionType.And
+                };
+            }
+
+            if (root != null)
+            {
+                context.LockConditions.Add(root);
+                foreach (var child in lockItem.Children)
+                {
+                    await RegisterLocksInner(child, root, searchTargetObjects);
+                }
+
+                continue;
+            }
+
+            // 単一オブジェクトに対する処理
             var targetObjects = await searchTargetObjects(lockItem);
             if (targetObjects.Count == 0)
             {
@@ -907,7 +947,13 @@ internal partial class DbRendoTableInitializer
 
             foreach (var targetObject in targetObjects)
             {
-                AddLockObjects(objectId, lockType, targetObject, lockItem.IsReverse);
+                context.LockConditionObjects.Add(new()
+                {
+                    Lock = lockObject,
+                    ObjectId = targetObject.Id,
+                    IsReverse = lockItem.IsReverse,
+                    Type = LockConditionType.Object
+                });
                 if (!registerSwitchingMachineRoute)
                 {
                     continue;
@@ -924,24 +970,81 @@ internal partial class DbRendoTableInitializer
         }
     }
 
-    private void AddLockObjects(ulong objectId, LockType lockType, InterlockingObject targetObject, NR isReverse)
+    private async Task RegisterLocksInner(LockItem item, LockCondition parent,
+        Func<LockItem, Task<List<InterlockingObject>>> searchTargetObjects)
     {
-        Lock lockObject = new()
+        LockCondition? current = null;
+        if (item.Name == NameOr)
         {
-            ObjectId = objectId,
-            Type = lockType
+            current = new()
+            {
+                Lock = parent.Lock,
+                Type = LockConditionType.Or,
+                Parent = parent
+            };
+        }
+
+        if (item.Name == NameAnd)
+        {
+            current = new()
+            {
+                Lock = parent.Lock,
+                Type = LockConditionType.And,
+                Parent = parent
+            };
+        }
+
+        if (current != null)
+        {
+            context.LockConditions.Add(current);
+            foreach (var child in item.Children)
+            {
+                await RegisterLocksInner(child, current, searchTargetObjects);
+            }
+
+            return;
+        }
+
+        // 単一オブジェクトに対する処理
+        var targetObjects = await searchTargetObjects(item);
+        if (targetObjects.Count == 0)
+        {
+            throw new InvalidOperationException("対象のオブジェクトが見つかりません");
+        }
+
+        if (targetObjects.Count == 1)
+        {
+            context.LockConditionObjects.Add(new()
+            {
+                Lock = parent.Lock,
+                ObjectId = targetObjects[0].Id,
+                Parent = parent,
+                IsReverse = item.IsReverse,
+                Type = LockConditionType.Object
+            });
+            return;
+        }
+
+        current = new()
+        {
+            Lock = parent.Lock,
+            Type = LockConditionType.Or,
+            Parent = parent
         };
-        context.Locks.Add(lockObject);
-        context.LockConditionObjects.Add(new()
+        foreach (var targetObject in targetObjects)
         {
-            Lock = lockObject,
-            ObjectId = targetObject.Id,
-            IsReverse = isReverse,
-            Type = LockConditionType.Object
-        });
+            context.LockConditionObjects.Add(new()
+            {
+                Lock = current.Lock,
+                Parent = current,
+                ObjectId = targetObject.Id,
+                IsReverse = item.IsReverse,
+                Type = LockConditionType.Object
+            });
+        }
     }
 
-    private List<LockItem> CalcLockItems(string lockString)
+    public List<LockItem> CalcLockItems(string lockString)
     {
         var tokens = TokenRegex().Matches(lockString)
             .Select(m => m.Value)
@@ -951,7 +1054,8 @@ internal partial class DbRendoTableInitializer
         return ParseToken(ref enumerator, stationId, false, false);
     }
 
-    private List<LockItem> ParseToken(ref List<string>.Enumerator enumerator, string stationId, bool isReverse, bool isTotalControl)
+    private List<LockItem> ParseToken(ref List<string>.Enumerator enumerator, string stationId, bool isReverse,
+        bool isTotalControl)
     {
         List<LockItem> result = [];
         // なぜかCanBeNullなはずなのにそれを無視してしまうので
@@ -962,8 +1066,9 @@ internal partial class DbRendoTableInitializer
             // 括弧とじならbreakし、再起元に判断を委ねる
             if (token is ")" or "]" or "]]" or "}")
             {
-                break;    
+                break;
             }
+
             LockItem item;
             if (token == "{")
             {
@@ -973,6 +1078,7 @@ internal partial class DbRendoTableInitializer
                 {
                     throw new InvalidOperationException("}が閉じられていません");
                 }
+
                 enumerator.MoveNext();
                 result.AddRange(child);
             }
@@ -1035,7 +1141,7 @@ internal partial class DbRendoTableInitializer
                 {
                     child.Add(new()
                     {
-                        Name = "or",
+                        Name = NameOr,
                         StationId = stationId,
                         IsReverse = isReverse ? NR.Reversed : NR.Normal,
                         Children = left
@@ -1050,7 +1156,7 @@ internal partial class DbRendoTableInitializer
                 {
                     child.Add(new()
                     {
-                        Name = "or",
+                        Name = NameOr,
                         StationId = stationId,
                         IsReverse = isReverse ? NR.Reversed : NR.Normal,
                         Children = right
@@ -1061,7 +1167,7 @@ internal partial class DbRendoTableInitializer
                 [
                     new()
                     {
-                        Name = "and",
+                        Name = NameAnd,
                         StationId = stationId,
                         IsReverse = isReverse ? NR.Reversed : NR.Normal,
                         Children = child
@@ -1089,7 +1195,7 @@ internal partial class DbRendoTableInitializer
         return result;
     }
 
-    private class LockItem
+    public class LockItem
     {
         public string Name { get; set; }
         public string StationId { get; set; }
