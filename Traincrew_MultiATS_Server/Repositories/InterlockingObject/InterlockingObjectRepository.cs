@@ -42,7 +42,7 @@ public class InterlockingObjectRepository(ApplicationDbContext context) : IInter
     public async Task<List<Models.InterlockingObject>> GetObjectsByStationIdsWithState(List<string> stationIds)
     {
         return await context.InterlockingObjects
-            .Where(obj => stationIds.Any(stationName => obj.Name.Contains(stationName)))
+            .Where(obj => stationIds.Any(stationId => obj.Name.Contains(stationId)))
             .Include(obj => ((Models.Route)obj).RouteState)
             .Include(obj => ((Models.SwitchingMachine)obj).SwitchingMachineState)
             .Include(obj => ((Models.TrackCircuit)obj).TrackCircuitState)
