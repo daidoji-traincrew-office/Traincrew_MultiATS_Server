@@ -55,20 +55,23 @@ public class RendoService(
             var lever = (interlockingObjects[routeLeverDestinationButton.LeverId] as Lever)!;
             // 対象ボタン
             var button = buttons[routeLeverDestinationButton.DestinationButtonName];
-
+            // てこリレーが扛上しているかどうか
+            var isLeverRelayRaised = routeState.IsLeverRelayRaised;
 
             // 鎖錠確認 進路の鎖錠欄の条件を満たしていない場合早期continue
             if (!lockConditions.TryGetValue(routeLeverDestinationButton.RouteId, out var value)
                 || IsLocked(value, interlockingObjects))
             {
-                routeState.IsLeverRelayRaised = RaiseDrop.Drop;
-                await generalRepository.Save(routeState);
+                if(isLeverRelayRaised == RaiseDrop.Raise)
+                {
+                    routeState.IsLeverRelayRaised = RaiseDrop.Drop;
+                    await generalRepository.Save(routeState);
+                }
                 continue;
             }
 
             // Todo: CTC制御状態を確認する(CHR相当)
 
-            var isLeverRelayRaised = routeState.IsLeverRelayRaised;
 
             // てこ状態を取得
             var leverState = lever.LeverState.IsReversed;
