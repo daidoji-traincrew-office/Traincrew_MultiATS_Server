@@ -1176,6 +1176,7 @@ public partial class DbRendoTableInitializer
             }
             else if (token == "又は")
             {
+                // 又は条件は、何も書かなかった場合と同義なので、処理を持たせずスキップでOK
                 enumerator.MoveNext();
             }
             else
