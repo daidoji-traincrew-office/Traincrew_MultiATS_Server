@@ -88,10 +88,10 @@ public class SignalService(
         cache[signalName] = result;
         return result;
     }
-
-    public async Task<List<string>> GetSignalNamesByStationNames(List<string> stationIds)
+    
+    public async Task<List<string>> GetSignalNamesByStationIds(List<string> stationIds)
     {
-        return await signalRepository.GetSignalsByStationNames(stationIds);
+        return await signalRepository.GetSignalNamesByStationIds(stationIds);
     }
 
     private static SignalIndication GetIndication(SignalType signalType, SignalIndication nextSignalIndication)

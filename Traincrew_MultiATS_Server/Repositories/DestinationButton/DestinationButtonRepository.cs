@@ -19,11 +19,11 @@ public class DestinationButtonRepository(ApplicationDbContext context) : IDestin
             .FirstOrDefaultAsync(button => button.Name == name);
     }
 
-    public async Task<List<Models.DestinationButton?>> GetButtonsByStationNames(List<string> stationNames)
+    public async Task<List<Models.DestinationButton>> GetButtonsByStationIds(List<string> stationIds)
     {
         return await context.DestinationButtons
             .Include(b => b.DestinationButtonState)
-            .Where(button => stationNames.Contains(button.Name))
+            .Where(button => stationIds.Contains(button.StationId))
             .ToListAsync();
     }
 }

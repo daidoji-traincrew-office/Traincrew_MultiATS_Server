@@ -216,6 +216,9 @@ internal class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Ca
         var signalNames = (await context.Signals
             .Select(s => s.Name)
             .ToListAsync(cancellationToken)).ToHashSet();
+        // 駅マスタを取得
+        var stations = await context.Stations
+            .ToListAsync(cancellationToken);
         // 信号情報登録
         foreach (var signalData in DBBase.signalDataList)
         {
@@ -232,9 +235,15 @@ internal class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Ca
                 trackCircuits.TryGetValue(trackCircuitName, out trackCircuitId);
             }
 
+            var stationId = stations
+                .Where(s => signalData.Name.StartsWith(s.Name))
+                .Select(s => s.Id)
+                .FirstOrDefault();
+
             context.Signals.Add(new()
             {
                 Name = signalData.Name,
+                StationId = stationId,
                 TrackCircuitId = trackCircuitId > 0 ? trackCircuitId : null,
                 TypeName = signalData.TypeName,
                 SignalState = new()

@@ -192,9 +192,11 @@ CREATE TABLE signal_type
 CREATE TABLE signal
 (
     name             VARCHAR(100) PRIMARY KEY                   NOT NULL,
+    station_id       VARCHAR(10) REFERENCES station (id),                 -- 所属する停車場(線間閉塞の場合は設定されない)
     type             VARCHAR(100) REFERENCES signal_type (name) NOT NULL, -- 信号機の種類(4灯式とか)
     track_circuit_id BIGINT REFERENCES track_circuit (ID)                 -- 閉そく信号機の軌道回路
 );
+CREATE INDEX signal_station_id_index ON signal (station_id);
 
 --- 信号機と進路の関係(停車場内の信号機に設定する)
 CREATE TABLE signal_route

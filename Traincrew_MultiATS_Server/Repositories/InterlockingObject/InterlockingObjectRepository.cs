@@ -39,10 +39,10 @@ public class InterlockingObjectRepository(ApplicationDbContext context) : IInter
             .FirstAsync();
     }
 
-    public async Task<List<Models.InterlockingObject>> GetObjectsByStationNamesWithState(List<string> stationNames)
+    public async Task<List<Models.InterlockingObject>> GetObjectsByStationIdsWithState(List<string> stationIds)
     {
         return await context.InterlockingObjects
-            .Where(obj => stationNames.Any(stationName => obj.Name.Contains(stationName)))
+            .Where(obj => stationIds.Any(stationId => obj.Name.Contains(stationId)))
             .Include(obj => ((Models.Route)obj).RouteState)
             .Include(obj => ((Models.SwitchingMachine)obj).SwitchingMachineState)
             .Include(obj => ((Models.TrackCircuit)obj).TrackCircuitState)
