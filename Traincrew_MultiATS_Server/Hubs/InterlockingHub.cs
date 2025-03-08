@@ -19,8 +19,7 @@ public class InterlockingHub(
         var interlockingObjects = await interlockingService.GetObjectsByStationIds(clientData.ActiveStationsList);
         var destinationButtons = await interlockingService.GetDestinationButtonsByStationIds(clientData.ActiveStationsList);
         // List<string> clientData.ActiveStationsListの駅IDから、指定された駅にある信号機名称をList<string>で返すやつ
-        var stationNames = await stationService.GetStationNamesByIds(clientData.ActiveStationsList);
-        var signalNames = await signalService.GetSignalNamesByStationNames(stationNames);
+        var signalNames = await signalService.GetSignalNamesByStationIds(clientData.ActiveStationsList);
         // それら全部の信号の現示計算
         var signalIndications = await signalService.CalcSignalIndication(signalNames);
 

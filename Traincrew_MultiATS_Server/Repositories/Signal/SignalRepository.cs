@@ -29,11 +29,10 @@ public class SignalRepository(ApplicationDbContext context) : ISignalRepository
             .ToListAsync();
     }
 
-    public async Task<List<string>> GetSignalsByStationNames(List<string> stationNames)
+    public async Task<List<string>> GetSignalNamesByStationIds(List<string> stationIds)
     {
-        //Todo: 現状駅の対応がないので、 それを実装する必要がある
-        return await context.Set<Models.Signal>()
-            .Where(signal => stationNames.Any(stationName => signal.Name.Contains(stationName)))
+        return await context.Signals
+            .Where(signal => stationIds.Contains(signal.StationId))
             .Select(signal => signal.Name)
             .ToListAsync();
     }
