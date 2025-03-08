@@ -59,14 +59,14 @@ public class InterlockingService(
         return await interlockingObjectRepository.GetAllWithState();
     }
 
-    public async Task<List<InterlockingObject>> GetObjectsByStationNames(List<string> stationNames)
+    public async Task<List<InterlockingObject>> GetObjectsByStationIds(List<string> stationNames)
     {
-        return await interlockingObjectRepository.GetObjectsByStationNamesWithState(stationNames);
+        return await interlockingObjectRepository.GetObjectsByStationIdsWithState(stationNames);
     }
 
     public static InterlockingLeverData ToLeverData(Lever lever)
     {
-        return new InterlockingLeverData
+        return new()
         {
             Name = lever.Name,
             State = lever.LeverState.IsReversed
@@ -79,9 +79,8 @@ public class InterlockingService(
         return buttons.Values.ToList();
     }
 
-    public async Task<List<DestinationButton>> GetDestinationButtonsByStationNames(List<string> stationNames)
+    public async Task<List<DestinationButton>> GetDestinationButtonsByStationIds(List<string> stationNames)
     {
-        var buttons = await destinationButtonRepository.GetButtonsByStationNames(stationNames);
-        return buttons.Where(button => button != null).Select(button => button!).ToList();
+        return await destinationButtonRepository.GetButtonsByStationIds(stationNames);
     }
 }

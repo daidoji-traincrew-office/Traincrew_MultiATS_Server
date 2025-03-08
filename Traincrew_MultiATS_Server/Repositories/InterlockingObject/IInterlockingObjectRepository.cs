@@ -18,5 +18,5 @@ public interface IInterlockingObjectRepository
      */
     public Task<List<Models.InterlockingObject>> GetObjectByIdsWithState(IEnumerable<ulong> ids);
     public Task<Models.InterlockingObject> GetObject(string name);
-    public Task<List<Models.InterlockingObject>> GetObjectsByStationNamesWithState(List<string> stationNames);
+    public Task<List<Models.InterlockingObject>> GetObjectsByStationIdsWithState(List<string> stationNames);
 }

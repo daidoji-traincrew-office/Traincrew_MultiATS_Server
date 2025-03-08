@@ -16,8 +16,8 @@ public class InterlockingHub(
     public async Task<DataToInterlocking> SendData_Interlocking(ConstantDataFromInterlocking clientData)
     {
         // Todo: めんどいし、Interlocking全取得してOfTypeと変換作って動くようにする    
-        var interlockingObjects = await interlockingService.GetObjectsByStationNames(clientData.ActiveStationsList);
-        var destinationButtons = await interlockingService.GetDestinationButtonsByStationNames(clientData.ActiveStationsList);
+        var interlockingObjects = await interlockingService.GetObjectsByStationIds(clientData.ActiveStationsList);
+        var destinationButtons = await interlockingService.GetDestinationButtonsByStationIds(clientData.ActiveStationsList);
         // List<string> clientData.ActiveStationsListの駅IDから、指定された駅にある信号機名称をList<string>で返すやつ
         var stationNames = await stationService.GetStationNamesByIds(clientData.ActiveStationsList);
         var signalNames = await signalService.GetSignalNamesByStationNames(stationNames);

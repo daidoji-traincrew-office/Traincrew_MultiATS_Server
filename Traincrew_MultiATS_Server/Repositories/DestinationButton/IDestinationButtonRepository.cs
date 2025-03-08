@@ -4,5 +4,5 @@ public interface IDestinationButtonRepository
 {
     Task<Dictionary<string, Models.DestinationButton>> GetAllButtons();
     Task<Models.DestinationButton?> GetButtonByName(string name);
-    Task<List<Models.DestinationButton?>> GetButtonsByStationNames(List<string> stationNames);
+    Task<List<Models.DestinationButton>> GetButtonsByStationIds(List<string> stationIds);
 }
