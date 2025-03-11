@@ -121,11 +121,11 @@ CREATE TYPE route_type AS ENUM ('arriving', 'departure', 'guide', 'switch_signal
 CREATE TABLE route
 (
     id                 BIGINT PRIMARY KEY REFERENCES interlocking_object (id),
-    tc_name            VARCHAR(100) NOT NULL, -- Traincrewでの名前
+    tc_name            VARCHAR(100) NOT NULL,        -- Traincrewでの名前
     route_type         route_type   NOT NULL,
     root_id            BIGINT REFERENCES route (id), -- 親進路
-    indicator          VARCHAR(10),           -- 進路表示機(Todo: ここに持たせるべきなのか?)
-    approach_lock_time INT                    -- 接近鎖状の時間
+    indicator          VARCHAR(10),                  -- 進路表示機(Todo: ここに持たせるべきなのか?)
+    approach_lock_time INT                           -- 接近鎖状の時間
 );
 
 -- 進路の親子関係
@@ -203,7 +203,7 @@ CREATE TABLE signal_route
 (
     id          BIGSERIAL PRIMARY KEY,
     signal_name VARCHAR(100) REFERENCES signal (name) NOT NULL,
-    route_id    BIGINT REFERENCES route (id)   NOT NULL,
+    route_id    BIGINT REFERENCES route (id)          NOT NULL,
     UNIQUE (signal_name, route_id)
 );
 CREATE INDEX signal_route_signal_name_index ON signal_route (signal_name);
@@ -265,12 +265,15 @@ CREATE TABLE lock_condition_object
     is_single_lock BOOLEAN                                    NOT NULL  -- 片鎖状がどうか    
 );
 -- 統括制御テーブル
-CREATE TABLE total_control
+CREATE TABLE throw_out_control 
 (
-    id              BIGSERIAL PRIMARY KEY,
-    source_route_id BIGINT REFERENCES route (id) NOT NULL UNIQUE, -- 統括制御の元となる進路
-    target_route_id BIGINT REFERENCES route (id) NOT NULL UNIQUE  -- 統括制御の対象となる進路
+    id                 BIGSERIAL PRIMARY KEY,
+    source_route_id    BIGINT REFERENCES route (id) NOT NULL, -- 統括制御の元となる進路
+    target_route_id    BIGINT REFERENCES route (id) NOT NULL, -- 統括制御の対象となる進路
+    condition_lever_id BIGINT REFERENCES lever (id)           -- 統括制御の条件のてこ
 );
+CREATE INDEX throw_out_control_source_route_id_index ON throw_out_control (source_route_id);
+CREATE INDEX throw_out_control_target_route_id_index ON throw_out_control (target_route_id);
 
 -- 転てつ機に対して要求元進路と要求向きのリスト
 CREATE TABLE switching_machine_route

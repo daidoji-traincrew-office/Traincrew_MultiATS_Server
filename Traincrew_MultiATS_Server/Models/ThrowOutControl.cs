@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Traincrew_MultiATS_Server.Models;
 
-public class TotalControl
+public class ThrowOutControl
 {
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     [Key]
@@ -12,4 +12,6 @@ public class TotalControl
     public Route? SourceRoute { get; init; }
     public ulong TargetRouteId { get; init; }
     public Route? TargetRoute { get; init; }
+    public ulong? ConditionLeverId { get; init; }
+    public Lever? ConditionLever { get; init; }
 }
