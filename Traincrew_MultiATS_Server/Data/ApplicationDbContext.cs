@@ -24,6 +24,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Lever> Levers { get; set; }
     public DbSet<DestinationButton> DestinationButtons { get; set; }
     public DbSet<SignalRoute> SignalRoutes { get; internal set; }
+    public DbSet<ThrowOutControl> ThrowOutControls { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
