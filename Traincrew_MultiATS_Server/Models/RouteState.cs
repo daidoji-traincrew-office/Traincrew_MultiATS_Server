@@ -13,5 +13,7 @@ public class RouteState
     public RaiseDrop IsSignalControlRaised { get; set; }
     public RaiseDrop IsApproachLockRaised { get; set; }
     public RaiseDrop IsRouteLockRaised { get; set; }
+    public RaiseDrop IsThrowOutXRRelayRaised { get; set; }
+    public RaiseDrop IsThrowOutYSRelayRaised { get; set; }
     public Route? Route { get; set; }
 }
