@@ -46,7 +46,7 @@ public class DiscordRepository(IConfiguration configuration) : IDiscordRepositor
         await _client.LogoutAsync();
     }
 
-    public Task<SocketGuildUser> GetMember(ulong memberId)
+    public Task<SocketGuildUser?> GetMember(ulong memberId)
     {
         var guild = _client.GetGuild(configuration.GetValue<ulong>("Discord:GuildId"));
         return Task.FromResult(guild.GetUser(memberId));

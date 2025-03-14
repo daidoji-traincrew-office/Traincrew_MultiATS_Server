@@ -7,8 +7,8 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using OpenIddict.Abstractions;
+using OpenIddict.Client.AspNetCore;
 using OpenIddict.Server.AspNetCore;
-using Traincrew_MultiATS_Server.Exception.DiscordAuthenticationException;
 using Traincrew_MultiATS_Server.Services;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 using static OpenIddict.Client.WebIntegration.OpenIddictClientWebIntegrationConstants;
@@ -41,10 +41,41 @@ public class AuthenticationController(ILogger<AuthenticationController> logger, 
 
             return Results.Challenge(properties, [Providers.Discord]);
         }
-       
+
         // クッキーの認証情報を削除
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-
+        // ユーザーIDを取得
+        var userId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId is null)
+        {
+            // ユーザーIDが取得できない場合はUnauthorizedを返す
+            return Results.Forbid(
+                authenticationSchemes: new List<string>{OpenIddictServerAspNetCoreDefaults.AuthenticationScheme},
+                properties: new(new Dictionary<string, string?>
+                {
+                    [OpenIddictClientAspNetCoreConstants.Properties.Error] = 
+                        Errors.ServerError,
+                    [OpenIddictClientAspNetCoreConstants.Properties.ErrorDescription] = 
+                        "ユーザーIDが見つかりませんでした。これが表示されるとしたらおそらくバグです。たぶん。"
+                }));
+        }
+        // ユーザーIDからそのDiscordユーザーが運転会に参加可能か調べる
+        var canAuthenticate = await discordService.IsUserCanAuthenticate(ulong.Parse(userId));
+        if (canAuthenticate)
+        {
+            // 運転会に参加できない場合はUnauthorizedを返す
+            return Results.Forbid(
+                authenticationSchemes: new List<string>{OpenIddictServerAspNetCoreDefaults.AuthenticationScheme},
+                properties: new(new Dictionary<string, string?>
+                {
+                    [OpenIddictClientAspNetCoreConstants.Properties.Error] =
+                        Errors.UnauthorizedClient,
+                    [OpenIddictClientAspNetCoreConstants.Properties.ErrorDescription] = 
+                        "運転会サーバーに所属していないか、入鋏ロールがついていません。司令主任にお問い合わせください。"
+                }));
+        }
+        
+        
         // Create the claims-based identity that will be used by OpenIddict to generate tokens.
         var identity = new ClaimsIdentity(
             authenticationType: TokenValidationParameters.DefaultAuthenticationType,
@@ -78,13 +109,16 @@ public class AuthenticationController(ILogger<AuthenticationController> logger, 
         }
 
         // Discordのトークンを取得
-        var token = result.Properties.GetTokenValue("backchannel_access_token");
-        if (token is null)
+        var authenticationToken = result.Properties
+            .GetTokens()
+            .FirstOrDefault(token => token.Name is OpenIddictClientAspNetCoreConstants.Tokens.BackchannelAccessToken);
+        if (authenticationToken is null)
         {
             return Results.BadRequest();
         }
+        var token = authenticationToken.Value;
 
-        // Traincrewサーバーにユーザーが所属しているか確認
+        // Memberを取得
         RestGuildUser member;
         try
         {
@@ -94,10 +128,6 @@ public class AuthenticationController(ILogger<AuthenticationController> logger, 
         {
             _logger.LogError(e, "Discord authentication failed.");
             return Results.BadRequest("Discord authentication failed.");
-        }
-        catch (DiscordAuthenticationException e)
-        {
-            return Results.BadRequest(e.Message);
         }
 
         // Build an identity based on the external claims and that will be used to create the authentication cookie.
@@ -126,7 +156,7 @@ public class AuthenticationController(ILogger<AuthenticationController> logger, 
         //
         // For scenarios where the default sign-in handler configured in the ASP.NET Core
         // authentication options shouldn't be used, a specific scheme can be specified here.
-        return Results.SignIn(new ClaimsPrincipal(identity), properties);
+        return Results.SignIn(new(identity), properties);
     }
 
     [HttpGet("success")]

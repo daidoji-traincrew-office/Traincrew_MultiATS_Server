@@ -9,26 +9,25 @@ public class DiscordService(IConfiguration configuration, IDiscordRepository dis
 {
     public async Task<RestGuildUser> DiscordAuthentication(string token)
     {
-        var beginnerRoleId = configuration.GetValue<ulong>("Discord:Roles:Beginner");
         var member =  await discordRepository.GetMemberByToken(token);
-        // 運転会サーバーに所属しているか確認
-        if (member is null)
-        {
-            throw new DiscordAuthenticationException("You are not a member of the specific server.");
-        }
-
-        // 最低限、入鋏ロールを持っているか確認する
-        if (!member.RoleIds.Contains(beginnerRoleId))
-        {
-            throw new DiscordAuthenticationException("You don't have the required role.");
-        }
-
         return member;
+    }
+
+    public async Task<bool> IsUserCanAuthenticate(ulong userId)
+    {
+        var beginnerRoleId = configuration.GetValue<ulong>("Discord:Roles:Beginner");
+        var member =  await discordRepository.GetMember(userId);
+        // 運転会サーバーに所属しているか、入鋏ロールを持っているか確認
+        return member is not null && member.Roles.Any(x => x.Id == beginnerRoleId);
     }
 
     public async Task<TraincrewRole> GetRoleByMemberId(ulong memberId)
     {
         var member = await discordRepository.GetMember(memberId);
+        if (member is null)
+        {
+            throw new DiscordAuthenticationException($"Member ID: {memberId} not found.");
+        }
         var roles = member.Roles.Select(role => role.Id).ToList();
         return GetRole(roles);
     }
