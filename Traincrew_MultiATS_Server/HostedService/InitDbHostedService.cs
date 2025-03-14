@@ -170,7 +170,11 @@ internal class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Ca
                 {
                     IsShortCircuit = false,
                     IsLocked = false,
-                    TrainNumber = ""
+                    TrainNumber = "",
+                    IsCorrectionDropRelayRaised = RaiseDrop.Drop,
+                    IsCorrectionRaiseRelayRaised = RaiseDrop.Drop,
+                    DroppedAt = null,
+                    RaisedAt = null,
                 }
             });
         }
