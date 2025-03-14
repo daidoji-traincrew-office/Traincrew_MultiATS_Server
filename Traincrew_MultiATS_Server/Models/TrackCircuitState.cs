@@ -9,4 +9,10 @@ public class TrackCircuitState
     public required string TrainNumber { get; set; }
     public bool IsShortCircuit { get; set; }
     public bool IsLocked { get; set; }
+    public RaiseDrop IsCorrectionRaiseRelayRaised { get; set; }
+    [Column(TypeName = "timestamp without time zone")]
+    public DateTime? RaisedAt { get; set; }
+    public RaiseDrop IsCorrectionDropRelayRaised { get; set; }
+    [Column(TypeName = "timestamp without time zone")]
+    public DateTime? DroppedAt { get; set; }
 }
