@@ -305,10 +305,14 @@ CREATE TABLE destination_button_state
 -- 軌道回路状態
 CREATE TABLE track_circuit_state
 (
-    id               BIGINT PRIMARY KEY REFERENCES track_circuit (ID), -- 軌道回路のID
-    train_number     VARCHAR(100),                                     -- 列車番号
-    is_short_circuit BOOLEAN NOT NULL,                                 -- 短絡状態
-    is_locked        BOOLEAN NOT NULL                                  -- 鎖状しているかどうか
+    id                               BIGINT PRIMARY KEY REFERENCES track_circuit (ID), -- 軌道回路のID
+    train_number                     VARCHAR(100),                                     -- 列車番号
+    is_short_circuit                 BOOLEAN    NOT NULL,                              -- 短絡状態
+    is_locked                        BOOLEAN    NOT NULL,                              -- 鎖状しているかどうか
+    is_correction_raise_relay_raised raise_drop NOT NULL DEFAULT 'drop',               -- 不正扛上補正リレー
+    raised_at                        TIMESTAMP DEFAULT NULL,                           -- 軌道回路を扛上させるタイミング
+    is_correction_drop_relay_raised  raise_drop NOT NULL DEFAULT 'drop',               -- 不正落下補正リレー
+    dropped_at                       TIMESTAMP DEFAULT NULL                            -- 軌道回路を落下させるタイミング
 );
 CREATE INDEX track_circuit_state_train_number_index ON track_circuit_state USING hash (train_number);
 
