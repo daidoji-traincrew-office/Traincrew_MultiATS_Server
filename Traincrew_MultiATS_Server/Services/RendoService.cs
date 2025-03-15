@@ -108,7 +108,7 @@ public class RendoService(
             if (hasSourceThrowOutRoute)
             {
                 var isThrowOutXRRelayRaised =
-                    IsLocked(lockCondition, interlockingObjects)
+                    !IsLocked(lockCondition, interlockingObjects)
                     &&
                     sourceThrowOutRoutes
                         //各進路の根本レバーの状態を取得し、いずれかが倒れているか
@@ -189,7 +189,7 @@ public class RendoService(
             }
 
             var isLeverRelayRaised =
-                IsLocked(lockCondition, interlockingObjects)
+                !IsLocked(lockCondition, interlockingObjects)
                 &&
                 (
                     (
