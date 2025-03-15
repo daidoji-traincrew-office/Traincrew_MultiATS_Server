@@ -156,12 +156,13 @@ public class RendoService(
                     .Select(tc => tc.TrackCircuitState)
                     .ToList();
                 var isThrowOutYSRelayRaised =
-                    lockRouteStates.All(rs => rs.IsRouteLockRaised == RaiseDrop.Raise)
-                    &&
+                    // Todo:　進路鎖錠実装時にコメントアウト解除
+                    // lockRouteStates.All(rs => rs.IsRouteLockRaised == RaiseDrop.Raise)
+                    // &&
                     (
                         sourceThrowOutRoutes.All(
                             r =>
-                                r.RouteState.IsRouteLockRaised == RaiseDrop.Drop
+                                r.RouteState.IsRouteLockRaised == RaiseDrop.Raise
                                 &&
                                 r.RouteState.IsSignalControlRaised == RaiseDrop.Drop
                         )
