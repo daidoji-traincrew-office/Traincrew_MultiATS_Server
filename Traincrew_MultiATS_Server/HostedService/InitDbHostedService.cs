@@ -855,37 +855,7 @@ public partial class DbRendoTableInitializer
             var matchSignalControl = RegexSignalControl().Match(rendoTableCsv.SignalControl);
             await RegisterLocks(matchSignalControl.Groups[1].Value, route.Id, searchOtherObjects,
                 LockType.SignalControl);
-            // 統括制御
-            // Todo: 単線区間は別なロジックを組む必要がある
-            foreach (Capture capture in matchSignalControl.Groups[2].Captures)
-            {
-                var matchLever = RegexLeverParse().Match(capture.Value);
-                var totalLeverName = matchLever.Value;
-                var totalButtonName = capture.Value[matchLever.Length..];
-                var totalRoutes = routes
-                    .Where(
-                        // 駅ID + 統括制御欄に書かれている進路名のてこ部分(ex: TH65_1R)で始まり
-                        r => r.Name.StartsWith(CalcRouteName(totalLeverName, "", stationId)) 
-                             // 着点ボタン名で終わる
-                             && r.Name.EndsWith(totalButtonName))
-                    .ToList();
-                if (totalRoutes.Count != 1)
-                {
-                    
-                    throw new InvalidOperationException(
-                        $"統括制御に該当する進路が0つまたは2つ以上あります。: {string.Join(", ", totalRoutes.Select(r => r.Name))}");
-                }
-
-                var throwOutControl = new ThrowOutControl
-                {
-                    // 大道寺で言うなら
-                    // こっちに1RTA等々が入る
-                    SourceRouteId = totalRoutes[0].Id,
-                    // こっちに2RA等々が入る
-                    TargetRouteId = route.Id,
-                };
-                context.ThrowOutControls.Add(throwOutControl);
-            }
+            // 統括制御は、サーバーマスタから読み込む
             // Todo: 進路鎖錠
             // Todo: 接近鎖錠
         }
