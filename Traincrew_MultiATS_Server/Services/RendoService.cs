@@ -83,8 +83,8 @@ public class RendoService(
             var lever = (interlockingObjects[routeLeverDestinationButton.LeverId] as Lever)!;
             // 対象ボタン
             var button = buttons[routeLeverDestinationButton.DestinationButtonName];
-
-
+            // 鎖錠条件 
+            var lockCondition = lockConditions.GetValueOrDefault(route.Id, []); 
 
             // Todo: 駅扱いてこ繋ぎ込み
             var CTCControlState = RaiseDrop.Drop;
@@ -108,7 +108,7 @@ public class RendoService(
             if (hasSourceThrowOutRoute)
             {
                 var isThrowOutXRRelayRaised =
-                    (!lockConditions.TryGetValue(routeLeverDestinationButton.RouteId, out var lockCondition) || IsLocked(lockCondition, interlockingObjects))
+                    IsLocked(lockCondition, interlockingObjects)
                     &&
                     sourceThrowOutRoutes
                         //各進路の根本レバーの状態を取得し、いずれかが倒れているか
@@ -183,7 +183,7 @@ public class RendoService(
             }
 
             var isLeverRelayRaised =
-                (!lockConditions.TryGetValue(routeLeverDestinationButton.RouteId, out var lockCondition) || IsLocked(lockCondition, interlockingObjects))
+                IsLocked(lockCondition, interlockingObjects)
                 &&
                 (
                     (
