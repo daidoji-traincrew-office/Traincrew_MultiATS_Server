@@ -56,10 +56,10 @@ public class RendoService(
         // 統括制御テーブルを取得
         var throwOutControls = await throwOutControlRepository.GetAll();
         var sourceThrowOutControls = throwOutControls
-            .GroupBy(c => c.SourceRouteId)
+            .GroupBy(c => c.TargetRouteId)
             .ToDictionary(g => g.Key, g => g.ToList());
         var targetThrowOutControls = throwOutControls
-            .GroupBy(c => c.TargetRouteId)
+            .GroupBy(c => c.SourceRouteId)
             .ToDictionary(g => g.Key, g => g.ToList());
 
         // ここまで実行できればほぼほぼOOMしないはず
@@ -70,13 +70,13 @@ public class RendoService(
             var routeState = route.RouteState!;
             // この進路に対して総括制御「する」進路
             var sourceThrowOutRoutes = sourceThrowOutControls.GetValueOrDefault(route.Id, [])
-                .Select(toc => interlockingObjects[toc.TargetRouteId])
+                .Select(toc => interlockingObjects[toc.SourceRouteId])
                 .OfType<Route>()
                 .ToList();
             var hasSourceThrowOutRoute = sourceThrowOutRoutes.Count != 0;
             // この進路に対して総括制御「される」進路
             var targetThrowOutRoutes = targetThrowOutControls.GetValueOrDefault(route.Id, [])
-                .Select(toc => interlockingObjects[toc.SourceRouteId])
+                .Select(toc => interlockingObjects[toc.TargetRouteId])
                 .OfType<Route>()
                 .ToList();
             // 対象てこ
