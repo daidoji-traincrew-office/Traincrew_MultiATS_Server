@@ -15,5 +15,4 @@ public class RouteState
     public RaiseDrop IsRouteLockRaised { get; set; }
     public RaiseDrop IsThrowOutXRRelayRaised { get; set; }
     public RaiseDrop IsThrowOutYSRelayRaised { get; set; }
-    public Route? Route { get; set; }
 }
