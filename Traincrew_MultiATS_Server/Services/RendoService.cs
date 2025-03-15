@@ -85,17 +85,6 @@ public class RendoService(
             var button = buttons[routeLeverDestinationButton.DestinationButtonName];
 
 
-            // 鎖錠確認 進路の鎖錠欄の条件を満たしていない場合早期continue
-            if (!lockConditions.TryGetValue(routeLeverDestinationButton.RouteId, out var lockCondition)
-                || IsLocked(lockCondition, interlockingObjects))
-            {
-                if(routeState.IsLeverRelayRaised == RaiseDrop.Raise)
-                {
-                    routeState.IsLeverRelayRaised = RaiseDrop.Drop;
-                    await generalRepository.Save(routeState);
-                }
-                continue;
-            }
 
             // Todo: 駅扱いてこ繋ぎ込み
             var CTCControlState = RaiseDrop.Drop;
@@ -119,6 +108,8 @@ public class RendoService(
             if (hasSourceThrowOutRoute)
             {
                 var isThrowOutXRRelayRaised =
+                    (!lockConditions.TryGetValue(routeLeverDestinationButton.RouteId, out var lockCondition) || IsLocked(lockCondition, interlockingObjects))
+                    &&
                     sourceThrowOutRoutes
                         //各進路の根本レバーの状態を取得し、いずれかが倒れているか
                         .Select(r => routeLevers[r.Id])
@@ -192,6 +183,8 @@ public class RendoService(
             }
 
             var isLeverRelayRaised =
+                (!lockConditions.TryGetValue(routeLeverDestinationButton.RouteId, out var lockCondition) || IsLocked(lockCondition, interlockingObjects))
+                &&
                 (
                     (
                         routeState is { IsThrowOutYSRelayRaised: RaiseDrop.Drop, IsThrowOutXRRelayRaised: RaiseDrop.Drop }
@@ -247,7 +240,7 @@ public class RendoService(
             .ToList();
         // 操作対象の進路を全て取得(てこリレーと進路照査リレーどちらかが扛上している進路)
         var routes = allRoutes
-            .Where(route => route.RouteState.IsLeverRelayRaised == RaiseDrop.Raise 
+            .Where(route => route.RouteState.IsLeverRelayRaised == RaiseDrop.Raise
                             || route.RouteState.IsRouteRelayRaised == RaiseDrop.Raise)
             .ToList();
         // その中のうち、てこリレーが扛上している(かつ、進路照査リレーが落下している)進路のIDを全て取得
@@ -352,7 +345,7 @@ public class RendoService(
             .ToList();
         // 操作対象の進路を全て取得(進路照査リレーと信号制御リレーどちらかが扛上している進路)
         var routes = allRoutes
-            .Where(route => route.RouteState.IsRouteRelayRaised == RaiseDrop.Raise 
+            .Where(route => route.RouteState.IsRouteRelayRaised == RaiseDrop.Raise
                             || route.RouteState.IsSignalControlRaised == RaiseDrop.Raise)
             .ToList();
         // その中のうち、進路照査リレーが扛上している(かつ、信号制御リレーが落下している)進路のIDを全て取得 
@@ -384,7 +377,7 @@ public class RendoService(
     private async Task<RaiseDrop> ProcessSignalControl(Route route, Dictionary<ulong, List<LockCondition>> directLockCondition, Dictionary<ulong, List<LockCondition>> signalControlConditions, Dictionary<ulong, InterlockingObject> interlockingObjects)
     {
         // 進路照査リレーが落下している場合、信号制御リレーを落下させてcontinue
-        if(route.RouteState.IsRouteRelayRaised == RaiseDrop.Drop)
+        if (route.RouteState.IsRouteRelayRaised == RaiseDrop.Drop)
         {
             return RaiseDrop.Drop;
         }
@@ -405,7 +398,7 @@ public class RendoService(
         {
             return RaiseDrop.Drop;
         }
-        
+
         // 鎖錠確認 進路の鎖錠欄の条件を満たしていない場合早期continue
         if (IsLocked(directLockCondition[route.Id], interlockingObjects))
         {
