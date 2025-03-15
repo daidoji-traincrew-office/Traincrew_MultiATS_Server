@@ -7422,5 +7422,127 @@
             "YGIndication": "G",
             "GIndication": "G"
         }
+    ],
+    "throwOutControlList": [
+        {
+            "SourceRouteName": "TH75_6L",
+            "TargetRouteName": "TH75_2L",
+            "LeverConditionName": ""
+        },
+        {
+            "SourceRouteName": "TH75_1RE",
+            "TargetRouteName": "TH75_5RA",
+            "LeverConditionName": ""
+        },
+        {
+            "SourceRouteName": "TH75_1RE",
+            "TargetRouteName": "TH75_5RB",
+            "LeverConditionName": ""
+        },
+        {
+            "SourceRouteName": "TH67_10LSC",
+            "TargetRouteName": "TH67_4L",
+            "LeverConditionName": ""
+        },
+        {
+            "SourceRouteName": "TH67_10LSD",
+            "TargetRouteName": "TH67_5L",
+            "LeverConditionName": ""
+        },
+        {
+            "SourceRouteName": "TH67_25LC",
+            "TargetRouteName": "TH67_21L",
+            "LeverConditionName": ""
+        },
+        {
+            "SourceRouteName": "TH67_25LD",
+            "TargetRouteName": "TH67_22L",
+            "LeverConditionName": ""
+        },
+        {
+            "SourceRouteName": "TH65_1RTA",
+            "TargetRouteName": "TH65_2R",
+            "LeverConditionName": ""
+        },
+        {
+            "SourceRouteName": "TH65_1RTB",
+            "TargetRouteName": "TH65_3R",
+            "LeverConditionName": ""
+        },
+        {
+            "SourceRouteName": "TH65_1RTC",
+            "TargetRouteName": "TH65_4R",
+            "LeverConditionName": ""
+        },
+        {
+            "SourceRouteName": "TH65_13LSC",
+            "TargetRouteName": "TH65_11L",
+            "LeverConditionName": ""
+        },
+        {
+            "SourceRouteName": "TH65_13LSD",
+            "TargetRouteName": "TH65_12L",
+            "LeverConditionName": ""
+        },
+        {
+            "SourceRouteName": "TH64_12L",
+            "TargetRouteName": "TH65_14L",
+            "LeverConditionName": "TH65_99N"
+        },
+        {
+            "SourceRouteName": "TH64_13L",
+            "TargetRouteName": "TH65_14L",
+            "LeverConditionName": "TH65_99N"
+        },
+        {
+            "SourceRouteName": "TH65_7R",
+            "TargetRouteName": "TH65_14R",
+            "LeverConditionName": "TH65_99N"
+        },
+        {
+            "SourceRouteName": "TH65_8R",
+            "TargetRouteName": "TH65_14R",
+            "LeverConditionName": "TH65_99N"
+        },
+        {
+            "SourceRouteName": "TH65_9R",
+            "TargetRouteName": "TH65_14R",
+            "LeverConditionName": "TH65_99N"
+        },
+        {
+            "SourceRouteName": "TH65_10R",
+            "TargetRouteName": "TH65_14R",
+            "LeverConditionName": "TH65_99N"
+        },
+        {
+            "SourceRouteName": "TH65_29LSC",
+            "TargetRouteName": "TH65_27L",
+            "LeverConditionName": ""
+        },
+        {
+            "SourceRouteName": "TH65_31LSC",
+            "TargetRouteName": "TH65_27L",
+            "LeverConditionName": ""
+        },
+        {
+            "SourceRouteName": "TH65_32LSC",
+            "TargetRouteName": "TH65_27L",
+            "LeverConditionName": ""
+        },
+        {
+            "SourceRouteName": "TH65_29LSD",
+            "TargetRouteName": "TH65_28L",
+            "LeverConditionName": ""
+        },
+        {
+            "SourceRouteName": "TH65_31LSD",
+            "TargetRouteName": "TH65_28L",
+            "LeverConditionName": ""
+        },
+        {
+            "SourceRouteName": "TH65_32LSD",
+            "TargetRouteName": "TH65_28L",
+            "LeverConditionName": ""
+        }
     ]
 }

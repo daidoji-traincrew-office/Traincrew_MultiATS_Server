@@ -14,10 +14,18 @@ public class JsonSignalData : SignalData
     public List<string>? RouteNames { get; init; } = null;
 }
 
+public class ThrowOutControlData
+{
+    public string SourceRouteName { get; init; } = "";
+    public string TargetRouteName { get; init; } = "";
+    public string LeverConditionName { get; init; } = "";
+}
+
 public class DBBasejson
 {
     public List<Station> stationList { get; set; }
     public List<JsonTrackCircuitData> trackCircuitList { get; set; }
     public List<JsonSignalData> signalDataList { get; set; }
     public List<SignalTypeData> signalTypeList { get; set; }
+    public List<ThrowOutControlData> throwOutControlList { get; set; }
 }
