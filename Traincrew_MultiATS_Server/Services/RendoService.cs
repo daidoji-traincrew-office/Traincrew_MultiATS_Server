@@ -203,7 +203,7 @@ public class RendoService(
                 )
                 &&
                 (
-                    button.DestinationButtonState.IsRaised != RaiseDrop.Raise
+                    button.DestinationButtonState.IsRaised == RaiseDrop.Raise
                     ||
                     (
                         routeState.IsLeverRelayRaised == RaiseDrop.Raise
