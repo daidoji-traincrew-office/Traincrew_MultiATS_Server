@@ -879,10 +879,10 @@ public partial class DbRendoTableInitializer
                 var throwOutControl = new ThrowOutControl
                 {
                     // 大道寺で言うなら
-                    // こっちに2RA等々が入る
-                    SourceRouteId = route.Id,
                     // こっちに1RTA等々が入る
-                    TargetRouteId = totalRoutes[0].Id,
+                    SourceRouteId = totalRoutes[0].Id,
+                    // こっちに2RA等々が入る
+                    TargetRouteId = route.Id,
                 };
                 context.ThrowOutControls.Add(throwOutControl);
             }
