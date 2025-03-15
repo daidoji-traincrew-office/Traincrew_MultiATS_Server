@@ -69,13 +69,13 @@ public class RendoService(
             var route = (interlockingObjects[routeLeverDestinationButton.RouteId] as Route)!;
             var routeState = route.RouteState!;
             // この進路に対して総括制御「する」進路
-            var sourceThrowOutRoutes = sourceThrowOutControls[route.Id]
+            var sourceThrowOutRoutes = sourceThrowOutControls.GetValueOrDefault(route.Id, [])
                 .Select(toc => interlockingObjects[toc.TargetRouteId])
                 .OfType<Route>()
                 .ToList();
             var hasSourceThrowOutRoute = sourceThrowOutRoutes.Count != 0;
             // この進路に対して総括制御「される」進路
-            var targetThrowOutRoutes = targetThrowOutControls[route.Id]
+            var targetThrowOutRoutes = targetThrowOutControls.GetValueOrDefault(route.Id, [])
                 .Select(toc => interlockingObjects[toc.SourceRouteId])
                 .OfType<Route>()
                 .ToList();
