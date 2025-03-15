@@ -84,7 +84,7 @@ public class RendoService(
             // 対象ボタン
             var button = buttons[routeLeverDestinationButton.DestinationButtonName];
             // 鎖錠条件 
-            var lockCondition = lockConditions.GetValueOrDefault(route.Id, []); 
+            var lockCondition = lockConditions.GetValueOrDefault(route.Id, []);
 
             // Todo: 駅扱いてこ繋ぎ込み
             var CTCControlState = RaiseDrop.Drop;
@@ -128,11 +128,14 @@ public class RendoService(
                     (
                         routeState.IsLeverRelayRaised == RaiseDrop.Drop ||
                         routeState.IsThrowOutXRRelayRaised == RaiseDrop.Raise
-                    ) ? RaiseDrop.Raise : RaiseDrop.Drop;
+                    )
+                        ? RaiseDrop.Raise
+                        : RaiseDrop.Drop;
                 if (routeState.IsThrowOutXRRelayRaised != isThrowOutXRRelayRaised)
                 {
                     isChanged = true;
                 }
+
                 routeState.IsThrowOutXRRelayRaised = isThrowOutXRRelayRaised;
 
                 // 自進路の鎖錠欄に書かれている進路のRouteStateを取得
@@ -174,11 +177,14 @@ public class RendoService(
                             &&
                             signalControlLockTrackCircuitState.All(tcs => !tcs.IsShortCircuit)
                         )
-                    ) ? RaiseDrop.Raise : RaiseDrop.Drop;
+                    )
+                        ? RaiseDrop.Raise
+                        : RaiseDrop.Drop;
                 if (routeState.IsThrowOutYSRelayRaised != isThrowOutYSRelayRaised)
                 {
                     isChanged = true;
                 }
+
                 routeState.IsThrowOutYSRelayRaised = isThrowOutYSRelayRaised;
             }
 
@@ -187,7 +193,8 @@ public class RendoService(
                 &&
                 (
                     (
-                        routeState is { IsThrowOutYSRelayRaised: RaiseDrop.Drop, IsThrowOutXRRelayRaised: RaiseDrop.Drop }
+                        routeState is
+                            { IsThrowOutYSRelayRaised: RaiseDrop.Drop, IsThrowOutXRRelayRaised: RaiseDrop.Drop }
                         &&
                         leverState is LCR.Left or LCR.Right
                     )
@@ -208,17 +215,21 @@ public class RendoService(
                         &&
                         r.RouteState.IsThrowOutXRRelayRaised == RaiseDrop.Raise
                     )
-                ) ? RaiseDrop.Raise : RaiseDrop.Drop;
+                )
+                    ? RaiseDrop.Raise
+                    : RaiseDrop.Drop;
             if (routeState.IsLeverRelayRaised != isLeverRelayRaised)
             {
                 isChanged = true;
             }
+
             routeState.IsLeverRelayRaised = isLeverRelayRaised;
 
             if (!isChanged)
             {
                 continue;
             }
+
             await generalRepository.Save(routeState);
         }
     }
@@ -257,17 +268,22 @@ public class RendoService(
         foreach (var route in routes)
         {
             // Todo: Refactor これ全部条件渡す必要なくね？
-            var result = await ProcessRouteRelay(route, directLockCondition, signalControlConditions, interlockingObjects);
+            var result =
+                await ProcessRouteRelay(route, directLockCondition, signalControlConditions, interlockingObjects);
             if (route.RouteState.IsRouteRelayRaised == result)
             {
                 continue;
             }
+
             route.RouteState.IsRouteRelayRaised = result;
             await generalRepository.Save(route.RouteState);
         }
     }
 
-    private async Task<RaiseDrop> ProcessRouteRelay(Route route, Dictionary<ulong, List<LockCondition>> directLockCondition, Dictionary<ulong, List<LockCondition>> signalControlConditions, Dictionary<ulong, InterlockingObject> interlockingObjects)
+    private async Task<RaiseDrop> ProcessRouteRelay(Route route,
+        Dictionary<ulong, List<LockCondition>> directLockCondition,
+        Dictionary<ulong, List<LockCondition>> signalControlConditions,
+        Dictionary<ulong, InterlockingObject> interlockingObjects)
     {
         // てこリレーが落下している場合、進路リレーを落下させてcontinue
         if (route.RouteState.IsLeverRelayRaised == RaiseDrop.Drop)
@@ -324,6 +340,7 @@ public class RendoService(
         {
             return RaiseDrop.Drop;
         }
+
         // 進路のRouteState.IsRouteRelayRaisedをRaiseにする
         return RaiseDrop.Raise;
     }
@@ -364,23 +381,29 @@ public class RendoService(
         foreach (var route in routes)
         {
             // Todo: Refactor これ全部条件渡す必要なくね？
-            var result = await ProcessSignalControl(route, directLockCondition, signalControlConditions, interlockingObjects);
+            var result = await ProcessSignalControl(route, directLockCondition, signalControlConditions,
+                interlockingObjects);
             if (route.RouteState.IsSignalControlRaised == result)
             {
                 continue;
             }
+
             route.RouteState.IsSignalControlRaised = result;
             await generalRepository.Save(route.RouteState);
         }
     }
 
-    private async Task<RaiseDrop> ProcessSignalControl(Route route, Dictionary<ulong, List<LockCondition>> directLockCondition, Dictionary<ulong, List<LockCondition>> signalControlConditions, Dictionary<ulong, InterlockingObject> interlockingObjects)
+    private async Task<RaiseDrop> ProcessSignalControl(Route route,
+        Dictionary<ulong, List<LockCondition>> directLockCondition,
+        Dictionary<ulong, List<LockCondition>> signalControlConditions,
+        Dictionary<ulong, InterlockingObject> interlockingObjects)
     {
         // 進路照査リレーが落下している場合、信号制御リレーを落下させてcontinue
         if (route.RouteState.IsRouteRelayRaised == RaiseDrop.Drop)
         {
             return RaiseDrop.Drop;
         }
+
         // 信号制御欄の条件を満たしているか
         var predicate = new Func<LockConditionObject, InterlockingObject, bool>((o, interlockingObject) =>
         {
