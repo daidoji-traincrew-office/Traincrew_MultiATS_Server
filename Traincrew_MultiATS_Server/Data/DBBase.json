@@ -1291,18 +1291,6 @@
             "ProtectionZone": null
         },
         {
-            "Name": "TH58_1RBT",
-            "Last": "",
-            "On": false,
-            "NextSignalNamesUp": [
-                "赤山町上り出発7R"
-            ],
-            "NextSignalNamesDown": [
-                "赤山町下り出発4L"
-            ],
-            "ProtectionZone": 11
-        },
-        {
             "Name": "TH58_2RAT",
             "Last": "",
             "On": false,
@@ -1312,6 +1300,18 @@
             ],
             "NextSignalNamesDown": [
                 "赤山町下り出発3L"
+            ],
+            "ProtectionZone": 11
+        },
+        {
+            "Name": "TH58_2RBT",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [
+                "赤山町上り出発7R"
+            ],
+            "NextSignalNamesDown": [
+                "赤山町下り出発4L"
             ],
             "ProtectionZone": 11
         },
@@ -1904,7 +1904,7 @@
             "ProtectionZone": 6
         },
         {
-            "Name": "TH65_6T",
+            "Name": "TH65_5T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [
@@ -1914,7 +1914,7 @@
             "ProtectionZone": 6
         },
         {
-            "Name": "TH65_7T",
+            "Name": "TH65_6T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [
@@ -3156,7 +3156,7 @@
             "ProtectionZone": 1
         },
         {
-            "Name": "TH76_24イT",
+            "Name": "TH76_24T",
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [
@@ -3208,7 +3208,8 @@
             "Last": "",
             "On": false,
             "NextSignalNamesUp": [
-                "上り閉塞8"
+                "上り閉塞8",
+                "上り閉塞8中継"
             ],
             "NextSignalNamesDown": [],
             "ProtectionZone": 1
@@ -3572,7 +3573,8 @@
             "On": false,
             "NextSignalNamesUp": [],
             "NextSignalNamesDown": [
-                "下り閉塞7"
+                "下り閉塞7",
+                "下り閉塞7中継"
             ],
             "ProtectionZone": 1
         },
@@ -3904,338 +3906,401 @@
         {
             "Name": "JR浜園上り出発3R",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "JR浜園上り出発4R",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "JR浜園下り出発3L",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "JR浜園下り出発4L",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "JR浜園場内1L",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "JR浜園場内2L",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "三石上り出発14R",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "三石上り出発15R",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "三石上り場内12R",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "三石上り場内13R",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "三石下り出発12L",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "三石下り出発13L",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "三石下り場内14L",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "三石下り場内15L",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "三郷上り出発13R",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "三郷上り場内12R",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "三郷下り出発12L",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "三郷下り場内14L",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "上吉沢上り出発14R",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "上吉沢上り出発15R",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "上吉沢上り場内12R",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "上吉沢上り場内13R",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "上吉沢下り出発12L",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "上吉沢下り出発13L",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "上吉沢下り場内14L",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "上吉沢下り場内15L",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "下吉沢上り出発14R",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
+        },
+        {
+            "Name": "下吉沢上り出発14R中継",
+            "phase": 1,
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "下吉沢上り出発15R",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "下吉沢上り場内12R",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "下吉沢上り場内13R",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "下吉沢下り出発12L",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "下吉沢下り出発13L",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "下吉沢下り場内14L",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "下吉沢下り場内15L",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "二木戸上り出発13R",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "二木戸上り場内12R",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "二木戸下り出発12L",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "二木戸下り場内14L",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "名田上り出発14R",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "名田上り出発15R",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "名田上り場内12R",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "名田上り場内13R",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "名田下り出発12L",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "名田下り出発13L",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "名田下り場内14L",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "名田下り場内15L",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "大路上り出発4L",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "大路上り出発5L",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "大路上り場内8L",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "大路上り場内9L",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "大路上り場内10LB",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "大路上り場内10LC",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "大路下り出発6R",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "大路下り出発7R",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "大路下り場内2R",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "大路下り場内3R",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "大道寺上り出発7R",
@@ -4243,6 +4308,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "上り閉塞166"
+            ],
+            "RouteNames": [
+                "TH65_7R"
             ]
         },
         {
@@ -4251,6 +4319,9 @@
             "TypeName": "3灯式",
             "NextSignalNames": [
                 "上り閉塞166"
+            ],
+            "RouteNames": [
+                "TH65_8R"
             ]
         },
         {
@@ -4259,6 +4330,9 @@
             "TypeName": "3灯式",
             "NextSignalNames": [
                 "上り閉塞166"
+            ],
+            "RouteNames": [
+                "TH65_9R"
             ]
         },
         {
@@ -4267,6 +4341,9 @@
             "TypeName": "3灯式",
             "NextSignalNames": [
                 "上り閉塞166"
+            ],
+            "RouteNames": [
+                "TH65_10R"
             ]
         },
         {
@@ -4277,6 +4354,11 @@
                 "大道寺上り場内2R",
                 "大道寺上り場内3R",
                 "大道寺上り場内4R"
+            ],
+            "RouteNames": [
+                "TH65_1RTA",
+                "TH65_1RTB",
+                "TH65_1RTC"
             ]
         },
         {
@@ -4286,6 +4368,9 @@
             "NextSignalNames": [
                 "大道寺上り出発7R",
                 "大道寺入換21R"
+            ],
+            "RouteNames": [
+                "TH65_2R"
             ]
         },
         {
@@ -4295,6 +4380,9 @@
             "NextSignalNames": [
                 "大道寺上り出発8R",
                 "大道寺入換22R"
+            ],
+            "RouteNames": [
+                "TH65_3R"
             ]
         },
         {
@@ -4304,6 +4392,9 @@
             "NextSignalNames": [
                 "大道寺上り出発9R",
                 "大道寺入換23R"
+            ],
+            "RouteNames": [
+                "TH65_4R"
             ]
         },
         {
@@ -4313,6 +4404,9 @@
             "NextSignalNames": [
                 "江ノ原検車区下り場内5LD",
                 "江ノ原検車区下り場内5LE"
+            ],
+            "RouteNames": [
+                "TH65_5L"
             ]
         },
         {
@@ -4322,6 +4416,9 @@
             "NextSignalNames": [
                 "江ノ原検車区下り場内5LD",
                 "江ノ原検車区下り場内5LE"
+            ],
+            "RouteNames": [
+                "TH65_6L"
             ]
         },
         {
@@ -4330,6 +4427,9 @@
             "TypeName": "4灯YY式G無",
             "NextSignalNames": [
                 "大道寺下り出発5L"
+            ],
+            "RouteNames": [
+                "TH65_11L"
             ]
         },
         {
@@ -4338,6 +4438,9 @@
             "TypeName": "4灯YY式",
             "NextSignalNames": [
                 "大道寺下り出発6L"
+            ],
+            "RouteNames": [
+                "TH65_12L"
             ]
         },
         {
@@ -4346,6 +4449,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "大道寺下り場内11L"
+            ],
+            "RouteNames": [
+                "TH65_13LC"
             ]
         },
         {
@@ -4354,6 +4460,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "大道寺下り場内12L"
+            ],
+            "RouteNames": [
+                "TH65_13LD"
             ]
         },
         {
@@ -4363,13 +4472,21 @@
             "NextSignalNames": [
                 "大道寺下り場内13LC",
                 "大道寺下り場内13LD"
+            ],
+            "RouteNames": [
+                "TH65_13LC",
+                "TH65_13LD"
             ]
         },
         {
             "Name": "大道寺入換21R",
             "phase": 1,
             "TypeName": "入換信号機",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": [
+                "TH65_21RX",
+                "TH65_21RY"
+            ]
         },
         {
             "Name": "大道寺入換22R",
@@ -4377,6 +4494,11 @@
             "TypeName": "入換信号機",
             "NextSignalNames": [
                 "大道寺入換30R"
+            ],
+            "RouteNames": [
+                "TH65_22RX",
+                "TH65_22RY",
+                "TH65_22RE"
             ]
         },
         {
@@ -4385,6 +4507,11 @@
             "TypeName": "入換信号機",
             "NextSignalNames": [
                 "大道寺入換30R"
+            ],
+            "RouteNames": [
+                "TH65_23RX",
+                "TH65_23RY",
+                "TH65_23RE"
             ]
         },
         {
@@ -4393,6 +4520,11 @@
             "TypeName": "入換信号機",
             "NextSignalNames": [
                 "大道寺入換30R"
+            ],
+            "RouteNames": [
+                "TH65_24RX",
+                "TH65_24RY",
+                "TH65_24RE"
             ]
         },
         {
@@ -4401,6 +4533,11 @@
             "TypeName": "入換信号機",
             "NextSignalNames": [
                 "大道寺入換30R"
+            ],
+            "RouteNames": [
+                "TH65_25RX",
+                "TH65_25RY",
+                "TH65_25RE"
             ]
         },
         {
@@ -4409,19 +4546,30 @@
             "TypeName": "入換信号機",
             "NextSignalNames": [
                 "大道寺入換30R"
+            ],
+            "RouteNames": [
+                "TH65_26RX",
+                "TH65_26RY",
+                "TH65_26RE"
             ]
         },
         {
             "Name": "大道寺入換27L",
             "phase": 1,
             "TypeName": "入換信号機",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": [
+                "TH65_27L"
+            ]
         },
         {
             "Name": "大道寺入換28L",
             "phase": 1,
             "TypeName": "入換信号機",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": [
+                "TH65_28L"
+            ]
         },
         {
             "Name": "大道寺入換29L",
@@ -4430,13 +4578,23 @@
             "NextSignalNames": [
                 "大道寺入換27L",
                 "大道寺入換28L"
+            ],
+            "RouteNames": [
+                "TH65_29LB",
+                "TH65_29LC",
+                "TH65_29LD",
+                "TH65_29L5",
+                "TH65_29L6"
             ]
         },
         {
             "Name": "大道寺入換30R",
             "phase": 1,
             "TypeName": "入換信号機",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": [
+                "TH65_30R"
+            ]
         },
         {
             "Name": "大道寺入換31L",
@@ -4445,6 +4603,14 @@
             "NextSignalNames": [
                 "大道寺入換27L",
                 "大道寺入換28L"
+            ],
+            "RouteNames": [
+                "TH65_31LA",
+                "TH65_31LB",
+                "TH65_31LC",
+                "TH65_31LD",
+                "TH65_31L5",
+                "TH65_31L6"
             ]
         },
         {
@@ -4455,91 +4621,114 @@
                 "大道寺入換28L",
                 "大道寺入換27L",
                 "大道寺入換29L"
+            ],
+            "RouteNames": [
+                "TH65_32LA",
+                "TH65_32LB",
+                "TH65_32LC",
+                "TH65_32LD",
+                "TH65_32LE",
+                "TH65_32L5",
+                "TH65_32L6"
             ]
         },
         {
             "Name": "新大路上り出発4L",
             "phase": 1,
             "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "新大路上り出発5L",
             "phase": 1,
             "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "新大路上り場内10L",
             "phase": 1,
             "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "新大路上り場内11L",
             "phase": 1,
             "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "新大路上り場内12LC",
             "phase": 1,
             "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "新大路上り場内12LD",
             "phase": 1,
             "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "新大路下り出発6R",
             "phase": 1,
             "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "新大路下り出発7R",
             "phase": 1,
             "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "新大路下り出発8R",
             "phase": 1,
             "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "新大路下り出発9R",
             "phase": 1,
             "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "新大路下り場内1RA",
             "phase": 1,
             "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "新大路下り場内1RB",
             "phase": 1,
             "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "新大路下り場内2R",
             "phase": 1,
             "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "新大路下り場内3R",
             "phase": 1,
             "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "新野崎上り出発6R",
@@ -4547,6 +4736,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "上り閉塞136"
+            ],
+            "RouteNames": [
+                "TH67_6R"
             ]
         },
         {
@@ -4555,6 +4747,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "上り閉塞136"
+            ],
+            "RouteNames": [
+                "TH67_7R"
             ]
         },
         {
@@ -4563,6 +4758,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "上り閉塞136"
+            ],
+            "RouteNames": [
+                "TH67_8R"
             ]
         },
         {
@@ -4571,6 +4769,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "上り閉塞136"
+            ],
+            "RouteNames": [
+                "TH67_9R"
             ]
         },
         {
@@ -4579,6 +4780,9 @@
             "TypeName": "2灯式",
             "NextSignalNames": [
                 "新野崎上り出発8R"
+            ],
+            "RouteNames": [
+                "TH67_1RA"
             ]
         },
         {
@@ -4587,6 +4791,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "新野崎上り出発9R"
+            ],
+            "RouteNames": [
+                "TH67_1RB"
             ]
         },
         {
@@ -4595,6 +4802,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "下り閉塞123"
+            ],
+            "RouteNames": [
+                "TH67_2L"
             ]
         },
         {
@@ -4603,6 +4813,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "下り閉塞123"
+            ],
+            "RouteNames": [
+                "TH67_3L"
             ]
         },
         {
@@ -4611,6 +4824,9 @@
             "TypeName": "5灯式",
             "NextSignalNames": [
                 "新野崎下り出発2L"
+            ],
+            "RouteNames": [
+                "TH67_4L"
             ]
         },
         {
@@ -4619,6 +4835,9 @@
             "TypeName": "4灯YY式",
             "NextSignalNames": [
                 "新野崎下り出発3L"
+            ],
+            "RouteNames": [
+                "TH67_5L"
             ]
         },
         {
@@ -4627,6 +4846,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "新野崎下り場内4L"
+            ],
+            "RouteNames": [
+                "TH67_10LSC"
             ]
         },
         {
@@ -4635,31 +4857,46 @@
             "TypeName": "2灯式",
             "NextSignalNames": [
                 "新野崎下り場内5L"
+            ],
+            "RouteNames": [
+                "TH67_10LSD"
             ]
         },
         {
             "Name": "新野崎入換21L",
             "phase": 1,
             "TypeName": "入換信号機",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": [
+                "TH67_21L"
+            ]
         },
         {
             "Name": "新野崎入換22L",
             "phase": 1,
             "TypeName": "入換信号機",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": [
+                "TH67_22L"
+            ]
         },
         {
             "Name": "新野崎入換23R",
             "phase": 1,
             "TypeName": "入換信号機",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": [
+                "TH67_23R"
+            ]
         },
         {
             "Name": "新野崎入換24R",
             "phase": 1,
             "TypeName": "入換信号機",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": [
+                "TH67_24R"
+            ]
         },
         {
             "Name": "新野崎入換25L",
@@ -4668,6 +4905,10 @@
             "NextSignalNames": [
                 "新野崎入換21L",
                 "新野崎入換22L"
+            ],
+            "RouteNames": [
+                "TH67_25LC",
+                "TH67_25LD"
             ]
         },
         {
@@ -4676,13 +4917,19 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "上り閉塞238"
+            ],
+            "RouteNames": [
+                "TH61_5R"
             ]
         },
         {
             "Name": "日野森上り場内2RA",
             "phase": 1,
             "TypeName": "2灯式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": [
+                "TH61_2RA"
+            ]
         },
         {
             "Name": "日野森上り場内2RB",
@@ -4690,6 +4937,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "日野森上り出発5R"
+            ],
+            "RouteNames": [
+                "TH61_2RB"
             ]
         },
         {
@@ -4698,6 +4948,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "下り閉塞227"
+            ],
+            "RouteNames": [
+                "TH61_3L"
             ]
         },
         {
@@ -4706,6 +4959,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "下り閉塞227"
+            ],
+            "RouteNames": [
+                "TH61_4L"
             ]
         },
         {
@@ -4714,61 +4970,73 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "日野森下り出発4L"
+            ],
+            "RouteNames": [
+                "TH61_6L"
             ]
         },
         {
             "Name": "東井上り出発5R",
             "phase": 1,
             "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "東井上り出発6R",
             "phase": 1,
             "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "東井上り出発7R",
             "phase": 1,
             "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "東井上り場内1R",
             "phase": 1,
             "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "東井下り出発2L",
             "phase": 1,
             "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "東井下り出発3L",
             "phase": 1,
             "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "東井下り出発4L",
             "phase": 1,
             "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "東井下り場内8L",
             "phase": 1,
             "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "東井下り場内9L",
             "phase": 1,
             "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "水越上り出発14R",
@@ -4776,6 +5044,9 @@
             "TypeName": "3灯式",
             "NextSignalNames": [
                 "上り閉塞200"
+            ],
+            "RouteNames": [
+                "TH63_14R"
             ]
         },
         {
@@ -4784,6 +5055,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "上り閉塞200"
+            ],
+            "RouteNames": [
+                "TH63_15R"
             ]
         },
         {
@@ -4792,6 +5066,9 @@
             "TypeName": "中継（灯列）",
             "NextSignalNames": [
                 "水越上り出発15R"
+            ],
+            "RouteNames": [
+                "TH63_15R"
             ]
         },
         {
@@ -4800,6 +5077,9 @@
             "TypeName": "3灯式",
             "NextSignalNames": [
                 "水越上り出発14R"
+            ],
+            "RouteNames": [
+                "TH63_12R"
             ]
         },
         {
@@ -4808,6 +5088,9 @@
             "TypeName": "5灯式",
             "NextSignalNames": [
                 "水越上り出発15R"
+            ],
+            "RouteNames": [
+                "TH63_13R"
             ]
         },
         {
@@ -4816,6 +5099,9 @@
             "TypeName": "3灯式",
             "NextSignalNames": [
                 "下り閉塞193"
+            ],
+            "RouteNames": [
+                "TH63_12L"
             ]
         },
         {
@@ -4824,6 +5110,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "下り閉塞193"
+            ],
+            "RouteNames": [
+                "TH63_13L"
             ]
         },
         {
@@ -4832,6 +5121,9 @@
             "TypeName": "中継（灯列）",
             "NextSignalNames": [
                 "水越下り出発13L"
+            ],
+            "RouteNames": [
+                "TH63_13L"
             ]
         },
         {
@@ -4840,6 +5132,9 @@
             "TypeName": "4灯YY式",
             "NextSignalNames": [
                 "水越下り出発12L"
+            ],
+            "RouteNames": [
+                "TH63_14L"
             ]
         },
         {
@@ -4848,6 +5143,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "水越下り出発13L"
+            ],
+            "RouteNames": [
+                "TH63_15L"
             ]
         },
         {
@@ -4856,25 +5154,58 @@
             "TypeName": "入換信号機",
             "NextSignalNames": [
                 "江ノ原入換13R"
+            ],
+            "RouteNames": [
+                "TH66S_11R"
             ]
         },
         {
             "Name": "江ノ原入換13R",
             "phase": 1,
             "TypeName": "入換信号機",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": [
+                "TH66S_13RA",
+                "TH66S_13RB"
+            ]
         },
         {
             "Name": "江ノ原入換15L",
             "phase": 1,
             "TypeName": "入換信号機",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": [
+                "TH66S_15LN",
+                "TH66S_15L1",
+                "TH66S_15L2",
+                "TH66S_15L3",
+                "TH66S_15L4",
+                "TH66S_15L5",
+                "TH66S_15L6",
+                "TH66S_15L7",
+                "TH66S_15L8",
+                "TH66S_15L9",
+                "TH66S_15L13"
+            ]
         },
         {
             "Name": "江ノ原入換16L",
             "phase": 1,
             "TypeName": "入換信号機",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": [
+                "TH66S_16LN",
+                "TH66S_16L1",
+                "TH66S_16L2",
+                "TH66S_16L3",
+                "TH66S_16L4",
+                "TH66S_16L5",
+                "TH66S_16L6",
+                "TH66S_16L7",
+                "TH66S_16L8",
+                "TH66S_16L9",
+                "TH66S_16L13"
+            ]
         },
         {
             "Name": "江ノ原検車区上り出発2R",
@@ -4882,19 +5213,28 @@
             "TypeName": "3灯式",
             "NextSignalNames": [
                 "上り閉塞156"
+            ],
+            "RouteNames": [
+                "TH66S_2R"
             ]
         },
         {
             "Name": "江ノ原検車区上り場内1RA",
             "phase": 1,
             "TypeName": "2灯式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": [
+                "TH66S_1RA"
+            ]
         },
         {
             "Name": "江ノ原検車区上り場内1RB",
             "phase": 1,
             "TypeName": "2灯式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": [
+                "TH66S_1RB"
+            ]
         },
         {
             "Name": "江ノ原検車区上り場内1RC",
@@ -4902,25 +5242,37 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "上り閉塞156"
+            ],
+            "RouteNames": [
+                "TH66S_1RC"
             ]
         },
         {
             "Name": "江ノ原検車区下り出発3L",
             "phase": 1,
             "TypeName": "3灯式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": [
+                "TH66S_3L"
+            ]
         },
         {
             "Name": "江ノ原検車区下り出発4L",
             "phase": 1,
             "TypeName": "3灯式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": [
+                "TH66S_4L"
+            ]
         },
         {
             "Name": "江ノ原検車区下り場内5LD",
             "phase": 1,
             "TypeName": "2灯式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": [
+                "TH66S_5LD"
+            ]
         },
         {
             "Name": "江ノ原検車区下り場内5LE",
@@ -4928,13 +5280,17 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "下り閉塞151"
+            ],
+            "RouteNames": [
+                "TH66S_5LE"
             ]
         },
         {
             "Name": "江ノ原検車区内入換",
             "phase": 1,
             "TypeName": "入換信号機",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "津崎上り出発4R",
@@ -4942,6 +5298,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "上り閉塞86"
+            ],
+            "RouteNames": [
+                "TH71_4R"
             ]
         },
         {
@@ -4950,6 +5309,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "上り閉塞86"
+            ],
+            "RouteNames": [
+                "TH71_5R"
             ]
         },
         {
@@ -4958,6 +5320,9 @@
             "TypeName": "2灯式",
             "NextSignalNames": [
                 "津崎上り出発4R"
+            ],
+            "RouteNames": [
+                "TH71_1RA"
             ]
         },
         {
@@ -4966,6 +5331,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "津崎上り出発5R"
+            ],
+            "RouteNames": [
+                "TH71_1RB"
             ]
         },
         {
@@ -4975,6 +5343,10 @@
             "NextSignalNames": [
                 "津崎上り場内1RA",
                 "津崎上り場内1RB"
+            ],
+            "RouteNames": [
+                "TH71_1RA",
+                "TH71_1RB"
             ]
         },
         {
@@ -4983,6 +5355,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "下り閉塞75"
+            ],
+            "RouteNames": [
+                "TH71_2L"
             ]
         },
         {
@@ -4991,6 +5366,9 @@
             "TypeName": "中継（灯列）",
             "NextSignalNames": [
                 "津崎下り出発2L"
+            ],
+            "RouteNames": [
+                "TH71_2L"
             ]
         },
         {
@@ -4999,6 +5377,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "下り閉塞75"
+            ],
+            "RouteNames": [
+                "TH71_3L"
             ]
         },
         {
@@ -5007,6 +5388,9 @@
             "TypeName": "中継（灯列）",
             "NextSignalNames": [
                 "津崎上り出発5R"
+            ],
+            "RouteNames": [
+                "TH71_5R"
             ]
         },
         {
@@ -5015,6 +5399,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "津崎下り出発2L"
+            ],
+            "RouteNames": [
+                "TH71_6LC"
             ]
         },
         {
@@ -5023,6 +5410,9 @@
             "TypeName": "2灯式",
             "NextSignalNames": [
                 "津崎下り出発3L"
+            ],
+            "RouteNames": [
+                "TH71_6LD"
             ]
         },
         {
@@ -5032,14 +5422,21 @@
             "NextSignalNames": [
                 "津崎下り場内6LC",
                 "津崎下り場内6LD"
+            ],
+            "RouteNames": [
+                "TH71_6LC",
+                "TH71_6LD"
             ]
         },
         {
-            "Name": "浜園上り出発2R中継",
+            "Name": "浜園上り出発3R中継",
             "phase": 1,
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "浜園上り出発3R"
+            ],
+            "RouteNames": [
+                "TH70_3R"
             ]
         },
         {
@@ -5048,6 +5445,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "上り閉塞102"
+            ],
+            "RouteNames": [
+                "TH70_3R"
             ]
         },
         {
@@ -5056,6 +5456,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "上り閉塞102"
+            ],
+            "RouteNames": [
+                "TH70_4R"
             ]
         },
         {
@@ -5064,6 +5467,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "浜園上り出発3R"
+            ],
+            "RouteNames": [
+                "TH70_1R"
             ]
         },
         {
@@ -5072,6 +5478,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "浜園上り場内1R"
+            ],
+            "RouteNames": [
+                "TH70_1R"
             ]
         },
         {
@@ -5080,6 +5489,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "下り閉塞89"
+            ],
+            "RouteNames": [
+                "TH70_2L"
             ]
         },
         {
@@ -5088,6 +5500,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "浜園下り出発2L"
+            ],
+            "RouteNames": [
+                "TH70_2L"
             ]
         },
         {
@@ -5096,31 +5511,42 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "浜園下り出発2L"
+            ],
+            "RouteNames": [
+                "TH70_5L"
             ]
         },
         {
             "Name": "浜園入換11R",
             "phase": 1,
             "TypeName": "入換信号機",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": [
+                "TH70_11R"
+            ]
         },
         {
             "Name": "浜園入換12L",
             "phase": 1,
             "TypeName": "入換信号機",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": [
+                "TH70_12L"
+            ]
         },
         {
             "Name": "珠川上り出発11R",
             "phase": 1,
             "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "珠川下り出発11L",
             "phase": 1,
             "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "藤江上り出発14R",
@@ -5128,6 +5554,9 @@
             "TypeName": "3灯式",
             "NextSignalNames": [
                 "上り閉塞188"
+            ],
+            "RouteNames": [
+                "TH64_14R"
             ]
         },
         {
@@ -5136,6 +5565,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "上り閉塞188"
+            ],
+            "RouteNames": [
+                "TH64_15R"
             ]
         },
         {
@@ -5144,6 +5576,9 @@
             "TypeName": "中継（灯列）",
             "NextSignalNames": [
                 "藤江上り出発15R"
+            ],
+            "RouteNames": [
+                "TH64_15R"
             ]
         },
         {
@@ -5152,6 +5587,9 @@
             "TypeName": "3灯式",
             "NextSignalNames": [
                 "藤江上り出発14R"
+            ],
+            "RouteNames": [
+                "TH64_12R"
             ]
         },
         {
@@ -5160,6 +5598,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "藤江上り出発15R"
+            ],
+            "RouteNames": [
+                "TH64_13R"
             ]
         },
         {
@@ -5168,6 +5609,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "下り閉塞177"
+            ],
+            "RouteNames": [
+                "TH64_12L"
             ]
         },
         {
@@ -5176,6 +5620,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "下り閉塞177"
+            ],
+            "RouteNames": [
+                "TH64_13L"
             ]
         },
         {
@@ -5184,6 +5631,9 @@
             "TypeName": "中継（灯列）",
             "NextSignalNames": [
                 "藤江下り出発13L"
+            ],
+            "RouteNames": [
+                "TH64_13L"
             ]
         },
         {
@@ -5192,6 +5642,9 @@
             "TypeName": "3灯式",
             "NextSignalNames": [
                 "藤江下り出発12L"
+            ],
+            "RouteNames": [
+                "TH64_14L"
             ]
         },
         {
@@ -5200,6 +5653,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "藤江下り出発13L"
+            ],
+            "RouteNames": [
+                "TH64_15L"
             ]
         },
         {
@@ -5208,6 +5664,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "上り閉塞258"
+            ],
+            "RouteNames": [
+                "TH59_13R"
             ]
         },
         {
@@ -5216,6 +5675,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "西赤山上り出発13R"
+            ],
+            "RouteNames": [
+                "TH59_11R"
             ]
         },
         {
@@ -5224,6 +5686,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "下り閉塞249"
+            ],
+            "RouteNames": [
+                "TH59_12L"
             ]
         },
         {
@@ -5232,6 +5697,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "西赤山下り出発12L"
+            ],
+            "RouteNames": [
+                "TH59_13L"
             ]
         },
         {
@@ -5240,6 +5708,9 @@
             "TypeName": "3灯式",
             "NextSignalNames": [
                 "上り閉塞282"
+            ],
+            "RouteNames": [
+                "TH58_6R"
             ]
         },
         {
@@ -5248,6 +5719,9 @@
             "TypeName": "3灯式",
             "NextSignalNames": [
                 "上り閉塞282"
+            ],
+            "RouteNames": [
+                "TH58_7R"
             ]
         },
         {
@@ -5256,6 +5730,9 @@
             "TypeName": "3灯式",
             "NextSignalNames": [
                 "上り閉塞282"
+            ],
+            "RouteNames": [
+                "TH58_8R"
             ]
         },
         {
@@ -5266,6 +5743,11 @@
                 "赤山町上り出発6R",
                 "赤山町上り出発7R",
                 "赤山町上り出発8R"
+            ],
+            "RouteNames": [
+                "TH58_2RA",
+                "TH58_2RB",
+                "TH58_2RC"
             ]
         },
         {
@@ -5274,6 +5756,9 @@
             "TypeName": "3灯式",
             "NextSignalNames": [
                 "下り閉塞277"
+            ],
+            "RouteNames": [
+                "TH58_3L"
             ]
         },
         {
@@ -5282,6 +5767,9 @@
             "TypeName": "3灯式",
             "NextSignalNames": [
                 "下り閉塞277"
+            ],
+            "RouteNames": [
+                "TH58_4L"
             ]
         },
         {
@@ -5290,6 +5778,9 @@
             "TypeName": "3灯式",
             "NextSignalNames": [
                 "下り閉塞277"
+            ],
+            "RouteNames": [
+                "TH58_5L"
             ]
         },
         {
@@ -5300,25 +5791,40 @@
                 "赤山町下り出発3L",
                 "赤山町下り出発4L",
                 "赤山町下り出発5L"
+            ],
+            "RouteNames": [
+                "TH58_9LA",
+                "TH58_9LB",
+                "TH58_9LC"
             ]
         },
         {
             "Name": "赤山町入換31R",
             "phase": 1,
             "TypeName": "入換信号機",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": [
+                "TH58_31RD",
+                "TH58_31RE"
+            ]
         },
         {
             "Name": "赤山町入換32L",
             "phase": 1,
             "TypeName": "入換信号機",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": [
+                "TH58_32L"
+            ]
         },
         {
             "Name": "赤山町入換33L",
             "phase": 1,
             "TypeName": "入換信号機",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": [
+                "TH58_33L"
+            ]
         },
         {
             "Name": "館浜上り出発1R",
@@ -5326,6 +5832,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "上り閉塞6"
+            ],
+            "RouteNames": [
+                "TH76_1R"
             ]
         },
         {
@@ -5334,6 +5843,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "上り閉塞6"
+            ],
+            "RouteNames": [
+                "TH76_2R"
             ]
         },
         {
@@ -5342,6 +5854,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "上り閉塞6"
+            ],
+            "RouteNames": [
+                "TH76_3R"
             ]
         },
         {
@@ -5350,13 +5865,22 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "上り閉塞6"
+            ],
+            "RouteNames": [
+                "TH76_4R"
             ]
         },
         {
             "Name": "館浜下り場内5L",
             "phase": 1,
             "TypeName": "2灯式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": [
+                "TH76_5LA",
+                "TH76_5LB",
+                "TH76_5LC",
+                "TH76_5LD"
+            ]
         },
         {
             "Name": "館浜下り場内5L中継2",
@@ -5364,6 +5888,12 @@
             "TypeName": "中継（灯列）",
             "NextSignalNames": [
                 "館浜下り場内5L"
+            ],
+            "RouteNames": [
+                "TH76_5LA",
+                "TH76_5LB",
+                "TH76_5LC",
+                "TH76_5LD"
             ]
         },
         {
@@ -5372,6 +5902,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "上り閉塞26"
+            ],
+            "RouteNames": [
+                "TH75_7R"
             ]
         },
         {
@@ -5380,6 +5913,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "上り閉塞26"
+            ],
+            "RouteNames": [
+                "TH75_8R"
             ]
         },
         {
@@ -5388,13 +5924,20 @@
             "TypeName": "中継（灯列）",
             "NextSignalNames": [
                 "駒野上り出発8R"
+            ],
+            "RouteNames": [
+                "TH75_8R"
             ]
         },
         {
             "Name": "駒野上り場内1RD",
             "phase": 1,
             "TypeName": "2灯式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": [
+                "TH75_1RD5",
+                "TH75_1RD6"
+            ]
         },
         {
             "Name": "駒野上り場内1RE",
@@ -5403,6 +5946,9 @@
             "NextSignalNames": [
                 "駒野上り場内5RA",
                 "駒野上り場内5RB"
+            ],
+            "RouteNames": [
+                "TH75_1RE"
             ]
         },
         {
@@ -5411,6 +5957,9 @@
             "TypeName": "2灯式",
             "NextSignalNames": [
                 "駒野上り出発7R"
+            ],
+            "RouteNames": [
+                "TH75_5RA"
             ]
         },
         {
@@ -5419,6 +5968,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "駒野上り出発8R"
+            ],
+            "RouteNames": [
+                "TH75_5RB"
             ]
         },
         {
@@ -5427,6 +5979,9 @@
             "TypeName": "3灯式",
             "NextSignalNames": [
                 "下り閉塞9"
+            ],
+            "RouteNames": [
+                "TH75_3L"
             ]
         },
         {
@@ -5435,6 +5990,9 @@
             "TypeName": "3灯式",
             "NextSignalNames": [
                 "下り閉塞9"
+            ],
+            "RouteNames": [
+                "TH75_4L"
             ]
         },
         {
@@ -5443,6 +6001,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "駒野下り第二出発2L"
+            ],
+            "RouteNames": [
+                "TH75_6L"
             ]
         },
         {
@@ -5451,13 +6012,20 @@
             "TypeName": "中継（灯列）",
             "NextSignalNames": [
                 "駒野下り出発6L"
+            ],
+            "RouteNames": [
+                "TH75_6L"
             ]
         },
         {
             "Name": "駒野下り場内9LB",
             "phase": 1,
             "TypeName": "2灯式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": [
+                "TH75_9LA",
+                "TH75_9LB"
+            ]
         },
         {
             "Name": "駒野下り場内9LC",
@@ -5465,6 +6033,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "駒野下り出発6L"
+            ],
+            "RouteNames": [
+                "TH75_9LC"
             ]
         },
         {
@@ -5474,6 +6045,11 @@
             "NextSignalNames": [
                 "駒野下り場内9LB",
                 "駒野下り場内9LC"
+            ],
+            "RouteNames": [
+                "TH75_9LA",
+                "TH75_9LB",
+                "TH75_9LC"
             ]
         },
         {
@@ -5482,6 +6058,9 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "下り閉塞9"
+            ],
+            "RouteNames": [
+                "TH75_2L"
             ]
         },
         {
@@ -5492,19 +6071,31 @@
                 "駒野入換13R",
                 "駒野入換25R",
                 "駒野入換26R"
+            ],
+            "RouteNames": [
+                "TH75_11RD5",
+                "TH75_11RD6",
+                "TH75_11RE"
             ]
         },
         {
             "Name": "駒野入換12L",
             "phase": 1,
             "TypeName": "入換信号機",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": [
+                "TH75_12L"
+            ]
         },
         {
             "Name": "駒野入換13R",
             "phase": 1,
             "TypeName": "入換信号機",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": [
+                "TH75_13RA",
+                "TH75_13RB"
+            ]
         },
         {
             "Name": "駒野入換14L",
@@ -5512,6 +6103,9 @@
             "TypeName": "入換信号機",
             "NextSignalNames": [
                 "駒野入換12L"
+            ],
+            "RouteNames": [
+                "TH75_14L"
             ]
         },
         {
@@ -5522,25 +6116,39 @@
                 "駒野入換34L",
                 "駒野入換35L",
                 "駒野入換36L"
+            ],
+            "RouteNames": [
+                "TH75_15L4",
+                "TH75_15LD5",
+                "TH75_15LD6"
             ]
         },
         {
             "Name": "駒野入換24R",
             "phase": 1,
             "TypeName": "入換信号機",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": [
+                "TH75_24R"
+            ]
         },
         {
             "Name": "駒野入換25R",
             "phase": 1,
             "TypeName": "入換信号機",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": [
+                "TH75_25R"
+            ]
         },
         {
             "Name": "駒野入換26R",
             "phase": 1,
             "TypeName": "入換信号機",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": [
+                "TH75_26R"
+            ]
         },
         {
             "Name": "駒野入換27R",
@@ -5550,6 +6158,11 @@
                 "駒野入換24R",
                 "駒野入換25R",
                 "駒野入換26R"
+            ],
+            "RouteNames": [
+                "TH75_27R4",
+                "TH75_27RD5",
+                "TH75_27RD6"
             ]
         },
         {
@@ -5559,6 +6172,10 @@
             "NextSignalNames": [
                 "駒野入換25R",
                 "駒野入換26R"
+            ],
+            "RouteNames": [
+                "TH75_28RD5",
+                "TH75_28RD6"
             ]
         },
         {
@@ -5568,25 +6185,44 @@
             "NextSignalNames": [
                 "駒野入換25R",
                 "駒野入換26R"
+            ],
+            "RouteNames": [
+                "TH75_29RD5",
+                "TH75_29RD6"
             ]
         },
         {
             "Name": "駒野入換34L",
             "phase": 1,
             "TypeName": "入換信号機",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": [
+                "TH75_34L"
+            ]
         },
         {
             "Name": "駒野入換35L",
             "phase": 1,
             "TypeName": "入換信号機",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": [
+                "TH75_35L7",
+                "TH75_35L8",
+                "TH75_35L9",
+                "TH75_35LT"
+            ]
         },
         {
             "Name": "駒野入換36L",
             "phase": 1,
             "TypeName": "入換信号機",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": [
+                "TH75_36L7",
+                "TH75_36L8",
+                "TH75_36L9",
+                "TH75_36LT"
+            ]
         },
         {
             "Name": "高見沢上り出発14R",
@@ -5594,6 +6230,9 @@
             "TypeName": "3灯式",
             "NextSignalNames": [
                 "上り閉塞218"
+            ],
+            "RouteNames": [
+                "TH62_14R"
             ]
         },
         {
@@ -5602,6 +6241,9 @@
             "TypeName": "3灯式",
             "NextSignalNames": [
                 "上り閉塞218"
+            ],
+            "RouteNames": [
+                "TH62_15R"
             ]
         },
         {
@@ -5610,6 +6252,9 @@
             "TypeName": "3灯式",
             "NextSignalNames": [
                 "高見沢上り出発14R"
+            ],
+            "RouteNames": [
+                "TH62_12R"
             ]
         },
         {
@@ -5618,6 +6263,9 @@
             "TypeName": "3灯式",
             "NextSignalNames": [
                 "高見沢上り出発15R"
+            ],
+            "RouteNames": [
+                "TH62_13R"
             ]
         },
         {
@@ -5626,6 +6274,9 @@
             "TypeName": "3灯式",
             "NextSignalNames": [
                 "下り閉塞209"
+            ],
+            "RouteNames": [
+                "TH62_12L"
             ]
         },
         {
@@ -5634,6 +6285,9 @@
             "TypeName": "3灯式",
             "NextSignalNames": [
                 "下り閉塞209"
+            ],
+            "RouteNames": [
+                "TH62_13L"
             ]
         },
         {
@@ -5643,6 +6297,9 @@
             "NextSignalNames": [
                 "高見沢下り出発12L",
                 "高見沢下り出発13L"
+            ],
+            "RouteNames": [
+                "TH62_14L"
             ]
         },
         {
@@ -5652,6 +6309,9 @@
             "NextSignalNames": [
                 "高見沢下り出発12L",
                 "高見沢下り出発13L"
+            ],
+            "RouteNames": [
+                "TH62_15L"
             ]
         },
         {
@@ -5660,7 +6320,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "上り閉塞8"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞8中継",
@@ -5668,7 +6329,8 @@
             "TypeName": "中継（色灯4灯YG式）",
             "NextSignalNames": [
                 "上り閉塞8"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞8",
@@ -5677,7 +6339,8 @@
             "NextSignalNames": [
                 "駒野上り場内1RD",
                 "駒野上り場内1RE"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞26",
@@ -5685,7 +6348,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "上り閉塞30"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞30",
@@ -5693,7 +6357,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "上り閉塞36"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞36",
@@ -5701,7 +6366,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "上り閉塞42"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞42中継",
@@ -5709,7 +6375,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "上り閉塞42"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞42",
@@ -5717,7 +6384,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "上り閉塞48"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞48中継",
@@ -5725,7 +6393,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "上り閉塞48"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞48",
@@ -5733,7 +6402,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "上り閉塞56"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞56",
@@ -5741,7 +6411,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "上り閉塞62"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞62",
@@ -5749,7 +6420,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "上り閉塞68"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞68",
@@ -5757,7 +6429,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "上り閉塞74"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞74",
@@ -5766,7 +6439,8 @@
             "NextSignalNames": [
                 "津崎上り場内1RA",
                 "津崎上り場内1RB"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞86",
@@ -5774,7 +6448,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "上り閉塞92"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞92",
@@ -5782,7 +6457,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "浜園上り場内1R"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞102",
@@ -5790,7 +6466,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "上り閉塞108"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞108",
@@ -5798,7 +6475,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "上り閉塞114"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞114",
@@ -5806,7 +6484,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "上り閉塞120"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞120",
@@ -5814,7 +6493,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "上り閉塞124"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞124",
@@ -5823,7 +6503,8 @@
             "NextSignalNames": [
                 "新野崎上り場内1RA",
                 "新野崎上り場内1RB"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞124中継",
@@ -5831,7 +6512,8 @@
             "TypeName": "中継（灯列）",
             "NextSignalNames": [
                 "上り閉塞124"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞136",
@@ -5839,7 +6521,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "上り閉塞142"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞142",
@@ -5847,7 +6530,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "上り閉塞146"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞142中継",
@@ -5855,7 +6539,8 @@
             "TypeName": "中継（灯列）",
             "NextSignalNames": [
                 "上り閉塞142"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞146",
@@ -5865,7 +6550,8 @@
                 "江ノ原検車区上り場内1RA",
                 "江ノ原検車区上り場内1RB",
                 "江ノ原検車区上り場内1RC"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞156",
@@ -5873,7 +6559,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "大道寺上り場内1R"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞166",
@@ -5881,7 +6568,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "上り閉塞172"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞166中継",
@@ -5889,7 +6577,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "上り閉塞166"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞172",
@@ -5898,7 +6587,8 @@
             "NextSignalNames": [
                 "藤江上り場内12R",
                 "藤江上り場内13R"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞188",
@@ -5907,7 +6597,8 @@
             "NextSignalNames": [
                 "水越上り場内12R",
                 "水越上り場内13R"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞200",
@@ -5915,7 +6606,8 @@
             "TypeName": "3灯式",
             "NextSignalNames": [
                 "上り閉塞204"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞204",
@@ -5924,7 +6616,8 @@
             "NextSignalNames": [
                 "高見沢上り出発14R",
                 "高見沢上り出発15R"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞218",
@@ -5932,7 +6625,8 @@
             "TypeName": "3灯式",
             "NextSignalNames": [
                 "上り閉塞224"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞224",
@@ -5941,7 +6635,8 @@
             "NextSignalNames": [
                 "日野森上り場内2RA",
                 "日野森上り場内2RB"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞238",
@@ -5949,7 +6644,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "上り閉塞242"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞242",
@@ -5957,7 +6653,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "上り閉塞246"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞246",
@@ -5965,7 +6662,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "上り閉塞250"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞250",
@@ -5973,7 +6671,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "西赤山上り場内11R"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞258",
@@ -5981,7 +6680,8 @@
             "TypeName": "3灯式",
             "NextSignalNames": [
                 "上り閉塞268"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞268",
@@ -5989,121 +6689,141 @@
             "TypeName": "3灯式",
             "NextSignalNames": [
                 "赤山町上り場内2R"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞282",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞288",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞306",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞312",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞314",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞320",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞324",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞334",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞336",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞346",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞360",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞372",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞384",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞398",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞404",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞406",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞416",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞420",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "上り閉塞424",
             "phase": 1,
-            "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "TypeName": "なし",
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞7",
@@ -6111,7 +6831,8 @@
             "TypeName": "4灯YY式G無",
             "NextSignalNames": [
                 "館浜下り場内5L"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞7中継",
@@ -6119,7 +6840,8 @@
             "TypeName": "中継（色灯4灯YY式G無）",
             "NextSignalNames": [
                 "下り閉塞7"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞9",
@@ -6127,7 +6849,8 @@
             "TypeName": "5灯式",
             "NextSignalNames": [
                 "下り閉塞7"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞27",
@@ -6136,7 +6859,8 @@
             "NextSignalNames": [
                 "駒野下り場内9LB",
                 "駒野下り場内9LC"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞35",
@@ -6144,7 +6868,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "下り閉塞27"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞41",
@@ -6152,7 +6877,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "下り閉塞35"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞45",
@@ -6160,7 +6886,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "下り閉塞41"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞49",
@@ -6168,7 +6895,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "下り閉塞45"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞55",
@@ -6176,7 +6904,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "下り閉塞49"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞59",
@@ -6184,7 +6913,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "下り閉塞55"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞67",
@@ -6192,7 +6922,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "下り閉塞59"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞71",
@@ -6200,7 +6931,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "下り閉塞67"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞75",
@@ -6208,7 +6940,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "下り閉塞71"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞89",
@@ -6217,7 +6950,8 @@
             "NextSignalNames": [
                 "津崎下り場内6LC",
                 "津崎下り場内6LD"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞103",
@@ -6225,7 +6959,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "浜園下り場内5L"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞105",
@@ -6233,7 +6968,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "下り閉塞103"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞111",
@@ -6241,7 +6977,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "下り閉塞105"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞117",
@@ -6249,7 +6986,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "下り閉塞111"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞117中継",
@@ -6257,7 +6995,8 @@
             "TypeName": "中継（灯列）",
             "NextSignalNames": [
                 "下り閉塞117"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞123",
@@ -6265,7 +7004,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "下り閉塞117"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞137",
@@ -6274,7 +7014,8 @@
             "NextSignalNames": [
                 "新野崎下り場内10LC",
                 "新野崎下り場内10LD"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞143",
@@ -6282,7 +7023,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "下り閉塞137"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞145",
@@ -6290,7 +7032,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "下り閉塞143"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞151",
@@ -6298,7 +7041,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "下り閉塞145"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞171",
@@ -6307,7 +7051,8 @@
             "NextSignalNames": [
                 "大道寺下り場内13LC",
                 "大道寺下り場内13LD"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞177",
@@ -6315,7 +7060,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "下り閉塞171"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞193",
@@ -6324,7 +7070,8 @@
             "NextSignalNames": [
                 "藤江下り場内14L",
                 "藤江下り場内15L"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞203",
@@ -6333,7 +7080,8 @@
             "NextSignalNames": [
                 "水越下り場内15L",
                 "水越下り場内14L"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞209",
@@ -6341,7 +7089,8 @@
             "TypeName": "3灯式",
             "NextSignalNames": [
                 "下り閉塞203"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞223",
@@ -6350,7 +7099,8 @@
             "NextSignalNames": [
                 "高見沢下り場内14L",
                 "高見沢下り場内15L"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞227",
@@ -6358,7 +7108,8 @@
             "TypeName": "3灯式",
             "NextSignalNames": [
                 "下り閉塞223"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞237",
@@ -6366,7 +7117,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "日野森下り場内6L"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞241",
@@ -6374,7 +7126,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "下り閉塞237"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞245",
@@ -6382,7 +7135,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "下り閉塞241"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞249",
@@ -6390,7 +7144,8 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "下り閉塞245"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞267",
@@ -6398,7 +7153,8 @@
             "TypeName": "3灯式",
             "NextSignalNames": [
                 "西赤山下り場内13L"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞277",
@@ -6406,7 +7162,8 @@
             "TypeName": "3灯式",
             "NextSignalNames": [
                 "下り閉塞267"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞287",
@@ -6414,118 +7171,145 @@
             "TypeName": "4灯YG式",
             "NextSignalNames": [
                 "赤山町下り場内9L"
-            ]
+            ],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞295",
             "phase": 1,
             "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞305",
             "phase": 1,
             "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞311",
             "phase": 1,
             "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞313",
             "phase": 1,
             "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞317",
             "phase": 1,
             "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞323",
             "phase": 1,
             "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞333",
             "phase": 1,
             "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞335",
             "phase": 1,
             "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞341",
             "phase": 1,
             "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞351",
             "phase": 1,
             "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞365",
             "phase": 1,
             "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞377",
             "phase": 1,
             "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞389",
             "phase": 1,
             "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞397",
             "phase": 1,
             "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞403",
             "phase": 1,
             "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞405",
             "phase": 1,
             "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞419",
             "phase": 1,
             "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": []
         },
         {
             "Name": "下り閉塞425",
             "phase": 1,
             "TypeName": "4灯YG式",
-            "NextSignalNames": []
+            "NextSignalNames": [],
+            "RouteNames": []
         }
     ],
     "signalTypeList": [
+        {
+            "Name": "なし",
+            "RIndication": "R",
+            "YYIndication": "R",
+            "YIndication": "R",
+            "YGIndication": "R",
+            "GIndication": "R"
+        },
         {
             "Name": "2灯式",
             "RIndication": "G",

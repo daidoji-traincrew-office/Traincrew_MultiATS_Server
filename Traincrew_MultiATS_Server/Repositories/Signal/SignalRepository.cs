@@ -18,8 +18,6 @@ public class SignalRepository(ApplicationDbContext context) : ISignalRepository
             .Include(s => s.Type)
             .Include(s => s.TrackCircuit)
             .ThenInclude(t => t!.TrackCircuitState)
-            .Include(s => s.Route)
-            .ThenInclude(r => r!.RouteState)
             .ToListAsync();
     }
 
@@ -28,6 +26,14 @@ public class SignalRepository(ApplicationDbContext context) : ISignalRepository
         return await context.TrackCircuitSignals
             .Where(tcs => trackCircuitNames.Contains(tcs.TrackCircuit.Name) && tcs.IsUp == isUp)
             .Select(tcs => tcs.SignalName)
+            .ToListAsync();
+    }
+
+    public async Task<List<string>> GetSignalNamesByStationIds(List<string> stationIds)
+    {
+        return await context.Signals
+            .Where(signal => stationIds.Contains(signal.StationId))
+            .Select(signal => signal.Name)
             .ToListAsync();
     }
 }

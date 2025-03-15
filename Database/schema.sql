@@ -121,11 +121,11 @@ CREATE TYPE route_type AS ENUM ('arriving', 'departure', 'guide', 'switch_signal
 CREATE TABLE route
 (
     id                 BIGINT PRIMARY KEY REFERENCES interlocking_object (id),
-    tc_name            VARCHAR(100) NOT NULL, -- Traincrewでの名前
+    tc_name            VARCHAR(100) NOT NULL,        -- Traincrewでの名前
     route_type         route_type   NOT NULL,
-    root               VARCHAR(100),          -- 親進路
-    indicator          VARCHAR(10),           -- 進路表示機(Todo: ここに持たせるべきなのか?)
-    approach_lock_time INT                    -- 接近鎖状の時間
+    root_id            BIGINT REFERENCES route (id), -- 親進路
+    indicator          VARCHAR(10),                  -- 進路表示機(Todo: ここに持たせるべきなのか?)
+    approach_lock_time INT                           -- 接近鎖状の時間
 );
 
 -- 進路の親子関係
@@ -192,10 +192,21 @@ CREATE TABLE signal_type
 CREATE TABLE signal
 (
     name             VARCHAR(100) PRIMARY KEY                   NOT NULL,
+    station_id       VARCHAR(10) REFERENCES station (id),                 -- 所属する停車場(線間閉塞の場合は設定されない)
     type             VARCHAR(100) REFERENCES signal_type (name) NOT NULL, -- 信号機の種類(4灯式とか)
-    track_circuit_id BIGINT REFERENCES track_circuit (ID),                -- 閉そく信号機の軌道回路
-    route_id         BIGINT REFERENCES route (ID)                         -- 絶対信号機の進路
+    track_circuit_id BIGINT REFERENCES track_circuit (ID)                 -- 閉そく信号機の軌道回路
 );
+CREATE INDEX signal_station_id_index ON signal (station_id);
+
+--- 信号機と進路の関係(停車場内の信号機に設定する)
+CREATE TABLE signal_route
+(
+    id          BIGSERIAL PRIMARY KEY,
+    signal_name VARCHAR(100) REFERENCES signal (name) NOT NULL,
+    route_id    BIGINT REFERENCES route (id)          NOT NULL,
+    UNIQUE (signal_name, route_id)
+);
+CREATE INDEX signal_route_signal_name_index ON signal_route (signal_name);
 
 -- 次の信号リスト
 CREATE TABLE next_signal
@@ -247,19 +258,22 @@ CREATE INDEX lock_condition_lock_id_index ON lock_condition (lock_id);
 -- 鎖状条件のobjectの詳細
 CREATE TABLE lock_condition_object
 (
-    id                BIGINT PRIMARY KEY REFERENCES lock_condition (ID),   -- 鎖状条件のID
-    object_id         BIGINT REFERENCES interlocking_object (id) NOT NULL, -- 進路、転てつ機、軌道回路、てこのID
-    timer_seconds     INT,                                                 -- タイマーの秒数
-    is_reverse        nr                                         NOT NULL, -- 定反
-    is_single_lock    BOOLEAN                                    NOT NULL  -- 片鎖状がどうか    
+    id             BIGINT PRIMARY KEY REFERENCES lock_condition (ID),   -- 鎖状条件のID
+    object_id      BIGINT REFERENCES interlocking_object (id) NOT NULL, -- 進路、転てつ機、軌道回路、てこのID
+    timer_seconds  INT,                                                 -- タイマーの秒数
+    is_reverse     nr                                         NOT NULL, -- 定反
+    is_single_lock BOOLEAN                                    NOT NULL  -- 片鎖状がどうか    
 );
 -- 統括制御テーブル
-CREATE TABLE total_control
+CREATE TABLE throw_out_control 
 (
-    id              BIGSERIAL PRIMARY KEY,
-    source_route_id BIGINT REFERENCES route (id) NOT NULL UNIQUE, -- 統括制御の元となる進路
-    target_route_id BIGINT REFERENCES route (id) NOT NULL UNIQUE  -- 統括制御の対象となる進路
+    id                 BIGSERIAL PRIMARY KEY,
+    source_route_id    BIGINT REFERENCES route (id) NOT NULL, -- 統括制御の元となる進路
+    target_route_id    BIGINT REFERENCES route (id) NOT NULL, -- 統括制御の対象となる進路
+    condition_lever_id BIGINT REFERENCES lever (id)           -- 統括制御の条件のてこ
 );
+CREATE INDEX throw_out_control_source_route_id_index ON throw_out_control (source_route_id);
+CREATE INDEX throw_out_control_target_route_id_index ON throw_out_control (target_route_id);
 
 -- 転てつ機に対して要求元進路と要求向きのリスト
 CREATE TABLE switching_machine_route

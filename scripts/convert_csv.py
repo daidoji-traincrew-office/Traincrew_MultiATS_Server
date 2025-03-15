@@ -24,11 +24,12 @@ class TrackCircuitData:
         self.ProtectionZone = int(protectionZone) if protectionZone != '' else None
 
 class SignalData:
-    def __init__(self, name, type_name, next_signal_names):
+    def __init__(self, name, type_name, next_signal_names, route_names):
         self.Name = name
         self.phase = 1
         self.TypeName = type_name
         self.NextSignalNames = remove_nashi(next_signal_names)
+        self.RouteNames = remove_nashi(route_names)
 
 class SignalTypeData:
     def __init__(self, name, r_indication, yy_indication, y_indication, yg_indication, g_indication):
@@ -52,8 +53,6 @@ def read_csv(file_path, data_class, *args):
         reader = csv.reader(csvfile)
         next(reader)  # Skip header
         for row in reader:
-            if row[0] == 'なし':
-                continue
             init_args = []
             for arg in args:
                 if isinstance(arg, list):
@@ -73,10 +72,10 @@ def main():
         '../Traincrew_MultiATS_Server/Data/軌道回路に対する計算するべき信号機リスト.csv',
         TrackCircuitData, 0, [1, 2, 3, 4, 5], [7, 8, 9, 10, 11], 13
     )
-    db.signalDataList = read_csv(
+    db.signalDataList = [e for e in read_csv(
         '../Traincrew_MultiATS_Server/Data/信号リスト.csv',
-        SignalData, 0, 1, [2, 3, 4, 5, 6]
-    )
+        SignalData, 0, 1, [2, 3, 4, 5, 6], [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
+    ) if e.Name != 'なし']
     db.signalTypeList = read_csv(
         '../Traincrew_MultiATS_Server/Data/信号何灯式リスト.csv',
         SignalTypeData, 0, 1, 2, 3, 4, 5

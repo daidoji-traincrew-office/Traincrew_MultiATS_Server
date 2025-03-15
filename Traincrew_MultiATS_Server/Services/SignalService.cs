@@ -1,11 +1,14 @@
 ﻿using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.NextSignal;
 using Traincrew_MultiATS_Server.Repositories.Signal;
+using Traincrew_MultiATS_Server.Repositories.SignalRoute;
+using Route = Traincrew_MultiATS_Server.Models.Route;
 
 namespace Traincrew_MultiATS_Server.Services;
 
 public class SignalService(
     ISignalRepository signalRepository,
+    ISignalRouteRepository signalRouteRepository,
     INextSignalRepository nextSignalRepository)
 {
     public async Task<Dictionary<string, Phase>> CalcSignalIndication(List<string> signalNames)
@@ -15,6 +18,8 @@ public class SignalService(
         // その上で、必要な信号と情報をすべて取得する
         var signalList = await signalRepository.GetSignalsByNamesForCalcIndication(
             signalNames.Concat(nextSignals.Select(x => x.TargetSignalName)).ToList());
+        var routes = await signalRouteRepository.GetRoutesBySignalNames(
+            signalList.Select(x => x.Name));
         // 計算するべき全信号のリスト
         var signals = signalList.ToDictionary(x => x.Name);
         var nextSignalDict = nextSignals
@@ -24,7 +29,7 @@ public class SignalService(
                 g => g.Select(x => x.TargetSignalName).ToList()
             );
         var cache = new Dictionary<string, SignalIndication>();
-        signalNames.ForEach(name => CalcSignalIndication(name, signals, nextSignalDict, cache));
+        signalNames.ForEach(name => CalcSignalIndication(name, signals, nextSignalDict, routes, cache));
         // Todo: 無灯火時、無灯火と返すようにする
         // 信号機の現示を計算して返す
         return cache.ToDictionary(
@@ -43,6 +48,7 @@ public class SignalService(
         string signalName,
         Dictionary<string, Signal> signals,
         Dictionary<string, List<string>> nextSignalDict,
+        Dictionary<string, List<Route>> routeDict,
         Dictionary<string, SignalIndication> cache
     )
     {
@@ -53,10 +59,12 @@ public class SignalService(
         }
 
         var result = SignalIndication.R;
+        var routes = routeDict.GetValueOrDefault(signalName, []);
         if (
             // 信号機が存在している
             signals.TryGetValue(signalName, out var signal)
-            // Todo: 絶対信号機の場合、進路が空いている
+            // 絶対信号機の場合、信号制御リレーが扛上している
+            && (routes.Count == 0 || routes.Any(route => route.RouteState.IsSignalControlRaised == RaiseDrop.Raise))
             // 許容信号機の場合、対象軌道回路が短絡していない
             && !(signal.TrackCircuit?.TrackCircuitState.IsShortCircuit ?? false))
         {
@@ -64,7 +72,7 @@ public class SignalService(
             var nextSignalNames = nextSignalDict.GetValueOrDefault(signalName, []);
             // 次の信号機の情報を取得
             var nextSignalIndications = nextSignalNames
-                .Select(x => CalcSignalIndication(x, signals, nextSignalDict, cache))
+                .Select(x => CalcSignalIndication(x, signals, nextSignalDict, routeDict, cache))
                 .ToList();
             // 次の信号機の中で最も高い現示を取得
             var nextSignalIndication = SignalIndication.R;
@@ -80,6 +88,11 @@ public class SignalService(
         cache[signalName] = result;
         return result;
     }
+    
+    public async Task<List<string>> GetSignalNamesByStationIds(List<string> stationIds)
+    {
+        return await signalRepository.GetSignalNamesByStationIds(stationIds);
+    }
 
     private static SignalIndication GetIndication(SignalType signalType, SignalIndication nextSignalIndication)
     {
@@ -92,7 +105,7 @@ public class SignalService(
             _ => signalType.RIndication,
         };
     }
-    
+
     private static Phase ToPhase(SignalIndication indication)
     {
         return indication switch
@@ -102,6 +115,15 @@ public class SignalService(
             SignalIndication.Y => Phase.Y,
             SignalIndication.YY => Phase.YY,
             _ => Phase.R,
+        };
+    }
+
+    public static SignalData ToSignalData(string signalName, Phase phase)
+    {
+        return new()
+        {
+            Name = signalName,
+            phase = phase
         };
     }
 }

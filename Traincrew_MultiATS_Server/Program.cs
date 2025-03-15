@@ -11,13 +11,23 @@ using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.HostedService;
 using Traincrew_MultiATS_Server.Hubs;
 using Traincrew_MultiATS_Server.Models;
+using Traincrew_MultiATS_Server.Repositories.Datetime;
+using Traincrew_MultiATS_Server.Repositories.DestinationButton;
 using Traincrew_MultiATS_Server.Repositories.Discord;
+using Traincrew_MultiATS_Server.Repositories.General;
 using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
+using Traincrew_MultiATS_Server.Repositories.Lever;
 using Traincrew_MultiATS_Server.Repositories.LockCondition;
 using Traincrew_MultiATS_Server.Repositories.NextSignal;
 using Traincrew_MultiATS_Server.Repositories.Protection;
+using Traincrew_MultiATS_Server.Repositories.Route;
+using Traincrew_MultiATS_Server.Repositories.RouteLeverDestinationButton;
 using Traincrew_MultiATS_Server.Repositories.Signal;
+using Traincrew_MultiATS_Server.Repositories.SignalRoute;
 using Traincrew_MultiATS_Server.Repositories.Station;
+using Traincrew_MultiATS_Server.Repositories.SwitchingMachine;
+using Traincrew_MultiATS_Server.Repositories.SwitchingMachineRoute;
+using Traincrew_MultiATS_Server.Repositories.ThrowOutControl;
 using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
 using Traincrew_MultiATS_Server.Services;
 using static OpenIddict.Abstractions.OpenIddictConstants;
@@ -195,18 +205,31 @@ builder.Services.AddAuthorization()
     .AddCookie(options => { options.ExpireTimeSpan = TimeSpan.FromMinutes(10); });
 // DI周り
 builder.Services
-    .AddScoped<IStationRepository, StationRepository>()
+    .AddScoped<IDateTimeRepository, DateTimeRepository>()
+    .AddScoped<IDestinationButtonRepository, DestinationButtonRepository>()
+    .AddScoped<IGeneralRepository, GeneralRepository>()
     .AddScoped<IInterlockingObjectRepository, InterlockingObjectRepository>()
     .AddScoped<ILockConditionRepository, LockConditionRepository>()
-    .AddScoped<ITrackCircuitRepository, TrackCircuitRepository>()
-    .AddScoped<ISignalRepository, SignalRepository>()
+    .AddScoped<ILeverRepository, LeverRepository>()
     .AddScoped<INextSignalRepository, NextSignalRepository>()
     .AddScoped<IProtectionRepository, ProtectionRepository>()
-    .AddScoped<StationService>()
-    .AddScoped<TrackCircuitService>()
+    .AddScoped<IRouteRepository, RouteRepository>() 
+    .AddScoped<IRouteLeverDestinationRepository, RouteLeverDestinationRepository>() 
+    .AddScoped<ISignalRepository, SignalRepository>()
+    .AddScoped<ISignalRouteRepository, SignalRouteRepository>()
+    .AddScoped<IStationRepository, StationRepository>()
+    .AddScoped<ISwitchingMachineRepository, SwitchingMachineRepository>()
+    .AddScoped<ISwitchingMachineRouteRepository, SwitchingMachineRouteRepository>()
+    .AddScoped<IThrowOutControlRepository, ThrowOutControlRepository>()
+    .AddScoped<ITrackCircuitRepository, TrackCircuitRepository>()
+    .AddScoped<InterlockingService>()
     .AddScoped<ProtectionService>()
-    .AddSingleton<DiscordService>()
+    .AddScoped<RendoService>()
     .AddScoped<SignalService>()
+    .AddScoped<StationService>()
+    .AddScoped<SwitchingMachineService>() 
+    .AddScoped<TrackCircuitService>()
+    .AddSingleton<DiscordService>()
     .AddSingleton<IDiscordRepository, DiscordRepository>();
 // HostedServiceまわり
 builder.Services.AddHostedService<InitDbHostedService>();
@@ -265,6 +288,7 @@ app.MapControllers();
 
 app.MapHub<TrainHub>("/hub/train");
 app.MapHub<TIDHub>("/hub/TID");
+app.MapHub<InterlockingHub>("/hub/interlocking");
 
 app.Run();
 return;
