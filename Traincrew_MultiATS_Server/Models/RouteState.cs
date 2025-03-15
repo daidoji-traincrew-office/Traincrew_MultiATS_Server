@@ -13,6 +13,8 @@ public class RouteState
     public RaiseDrop IsSignalControlRaised { get; set; }
     public RaiseDrop IsApproachLockRaised { get; set; }
     public RaiseDrop IsRouteLockRaised { get; set; }
+    // ReSharper disable InconsistentNaming
     public RaiseDrop IsThrowOutXRRelayRaised { get; set; }
     public RaiseDrop IsThrowOutYSRelayRaised { get; set; }
+    // ReSharper restore InconsistentNaming
 }
