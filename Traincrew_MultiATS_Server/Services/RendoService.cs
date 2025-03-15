@@ -79,7 +79,7 @@ public class RendoService(
                 .Select(toc => interlockingObjects[toc.SourceRouteId])
                 .OfType<Route>()
                 .ToList();
-            var hasTargetThrowOutRoute = sourceThrowOutRoutes.Count != 0;
+            var hasTargetThrowOutRoute = targetThrowOutRoutes.Count != 0;
             // 対象てこ
             var lever = (interlockingObjects[routeLeverDestinationButton.LeverId] as Lever)!;
             // 対象ボタン
