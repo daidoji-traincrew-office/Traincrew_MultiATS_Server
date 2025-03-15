@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - feature/closure_signal
+      - feature/LeverRelayV2
 
 jobs:
     build:
