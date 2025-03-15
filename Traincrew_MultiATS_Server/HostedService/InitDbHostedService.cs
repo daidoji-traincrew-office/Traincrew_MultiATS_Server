@@ -480,6 +480,7 @@ internal class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Ca
                 TargetRouteId = targetRoute.Id
             });
         }
+        await context.SaveChangesAsync(cancellationToken);
     }
 }
 
