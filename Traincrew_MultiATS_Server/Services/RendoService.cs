@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using Traincrew_MultiATS_Server.Models;
+﻿using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.DestinationButton;
 using Traincrew_MultiATS_Server.Repositories.General;
@@ -8,6 +7,7 @@ using Traincrew_MultiATS_Server.Repositories.LockCondition;
 using Traincrew_MultiATS_Server.Repositories.RouteLeverDestinationButton;
 using Traincrew_MultiATS_Server.Repositories.SwitchingMachine;
 using Traincrew_MultiATS_Server.Repositories.SwitchingMachineRoute;
+using Traincrew_MultiATS_Server.Repositories.ThrowOutControl;
 using Route = Traincrew_MultiATS_Server.Models.Route;
 
 namespace Traincrew_MultiATS_Server.Services;
@@ -27,6 +27,7 @@ public class RendoService(
     IDestinationButtonRepository destinationButtonRepository,
     ILockConditionRepository lockConditionRepository,
     IDateTimeRepository dateTimeRepository,
+    IThrowOutControlRepository throwOutControlRepository,
     IGeneralRepository generalRepository)
 {
     /// <summary>
@@ -45,6 +46,14 @@ public class RendoService(
         var buttons = await destinationButtonRepository.GetAllButtons();
         // 直接鎖状条件を取得
         var lockConditions = await lockConditionRepository.GetConditionsByType(LockType.Lock);
+        // 統括制御テーブルを取得
+        var throwOutControls = await throwOutControlRepository.GetAll();
+        var sourceThrowOutControls = throwOutControls
+            .GroupBy(c => c.SourceRouteId)
+            .ToDictionary(g => g.Key, g => g.ToList());
+        var targetThrowOutControls = throwOutControls
+            .GroupBy(c => c.TargetRouteId)
+            .ToDictionary(g => g.Key, g => g.ToList());
 
         // ここまで実行できればほぼほぼOOMしないはず
         foreach (var routeLeverDestinationButton in routeLeverDestinationButtonList)
@@ -53,13 +62,17 @@ public class RendoService(
             var route = (interlockingObjects[routeLeverDestinationButton.RouteId] as Route)!;
             var routeState = route.RouteState!;
             // この進路に対して総括制御「する」進路
-            // Todo: この進路に対して総括制御「する」進路を取得する
-            var sourceThrowOutRoute = new List<Route>();
-            var hasSourceThrowOutRoute = sourceThrowOutRoute.Count != 0;
+            var sourceThrowOutRoutes = sourceThrowOutControls[route.Id]
+                .Select(c => interlockingObjects[c.TargetRouteId])
+                .OfType<Route>()
+                .ToList();
+            var hasSourceThrowOutRoute = sourceThrowOutRoutes.Count != 0;
             // この進路に対して総括制御「される」進路
-            // Todo: この進路に対して総括制御「される」進路を取得する
-            var targetThrowOutRoute = new List<Route>();
-            var hasTargetThrowOutRoute = sourceThrowOutRoute.Count != 0;
+            var targetThrowOutRoutes = targetThrowOutControls[route.Id]
+                .Select(c => interlockingObjects[c.SourceRouteId])
+                .OfType<Route>()
+                .ToList();
+            var hasTargetThrowOutRoute = sourceThrowOutRoutes.Count != 0;
             // 対象てこ
             var lever = (interlockingObjects[routeLeverDestinationButton.LeverId] as Lever)!;
             // 対象ボタン
@@ -96,11 +109,11 @@ public class RendoService(
             {
                 routeState.IsThrowOutXRRelayRaised =
                     (
-                        sourceThrowOutRoute.Any(/*各進路の根本レバーの状態を取得、倒れたらtrue*/)
+                        sourceThrowOutRoutes.Any(/*各進路の根本レバーの状態を取得、倒れたらtrue*/)
                         &&
                         (
                             (
-                                sourceThrowOutRoute.All(route => route.RouteState.IsLeverRelayRaised == RaiseDrop.Drop)
+                                sourceThrowOutRoutes.All(route => route.RouteState.IsLeverRelayRaised == RaiseDrop.Drop)
                                 &&
                                 leverState == LCR.Center
                             )
@@ -127,7 +140,7 @@ public class RendoService(
                         &&
                         (
                             (
-                                sourceThrowOutRoute.All(
+                                sourceThrowOutRoutes.All(
                                     route =>
                                         route.RouteState.IsRouteLockRaised == RaiseDrop.Drop
                                         &&
@@ -173,10 +186,10 @@ public class RendoService(
                             (
                                 hasTargetThrowOutRoute
                                 ||
-                                targetThrowOutRoute.All(route => route.RouteState.IsThrowOutXRRelayRaised == RaiseDrop.Drop))
+                                targetThrowOutRoutes.All(route => route.RouteState.IsThrowOutXRRelayRaised == RaiseDrop.Drop))
                         )
                         ||
-                        targetThrowOutRoute.Any(route =>
+                        targetThrowOutRoutes.Any(route =>
                             route.RouteState.IsLeverRelayRaised == RaiseDrop.Raise
                             &&
                             route.RouteState.IsThrowOutXRRelayRaised == RaiseDrop.Raise
