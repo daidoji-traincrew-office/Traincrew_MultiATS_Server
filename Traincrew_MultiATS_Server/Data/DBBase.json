@@ -4451,7 +4451,7 @@
                 "大道寺下り場内11L"
             ],
             "RouteNames": [
-                "TH65_13LC"
+                "TH65_13LSC"
             ]
         },
         {
@@ -4462,7 +4462,7 @@
                 "大道寺下り場内12L"
             ],
             "RouteNames": [
-                "TH65_13LD"
+                "TH65_13LSD"
             ]
         },
         {
@@ -4474,8 +4474,8 @@
                 "大道寺下り場内13LD"
             ],
             "RouteNames": [
-                "TH65_13LC",
-                "TH65_13LD"
+                "TH65_13LSC",
+                "TH65_13LSD"
             ]
         },
         {
@@ -4581,8 +4581,6 @@
             ],
             "RouteNames": [
                 "TH65_29LB",
-                "TH65_29LC",
-                "TH65_29LD",
                 "TH65_29L5",
                 "TH65_29L6"
             ]
@@ -4593,7 +4591,9 @@
             "TypeName": "入換信号機",
             "NextSignalNames": [],
             "RouteNames": [
-                "TH65_30R"
+                "TH65_30R",
+                "TH65_29LSC",
+                "TH65_29LSD"
             ]
         },
         {
@@ -4607,8 +4607,8 @@
             "RouteNames": [
                 "TH65_31LA",
                 "TH65_31LB",
-                "TH65_31LC",
-                "TH65_31LD",
+                "TH65_31LSC",
+                "TH65_31LSD",
                 "TH65_31L5",
                 "TH65_31L6"
             ]
@@ -4625,8 +4625,8 @@
             "RouteNames": [
                 "TH65_32LA",
                 "TH65_32LB",
-                "TH65_32LC",
-                "TH65_32LD",
+                "TH65_32LSC",
+                "TH65_32LSD",
                 "TH65_32LE",
                 "TH65_32L5",
                 "TH65_32L6"
