@@ -4581,6 +4581,8 @@
             ],
             "RouteNames": [
                 "TH65_29LB",
+                "TH65_29LSC",
+                "TH65_29LSD",
                 "TH65_29L5",
                 "TH65_29L6"
             ]
@@ -4591,9 +4593,7 @@
             "TypeName": "入換信号機",
             "NextSignalNames": [],
             "RouteNames": [
-                "TH65_30R",
-                "TH65_29LSC",
-                "TH65_29LSD"
+                "TH65_30R"
             ]
         },
         {
