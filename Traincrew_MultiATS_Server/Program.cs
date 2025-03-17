@@ -16,15 +16,18 @@ using Traincrew_MultiATS_Server.Repositories.DestinationButton;
 using Traincrew_MultiATS_Server.Repositories.Discord;
 using Traincrew_MultiATS_Server.Repositories.General;
 using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
+using Traincrew_MultiATS_Server.Repositories.Lever;
 using Traincrew_MultiATS_Server.Repositories.LockCondition;
 using Traincrew_MultiATS_Server.Repositories.NextSignal;
 using Traincrew_MultiATS_Server.Repositories.Protection;
+using Traincrew_MultiATS_Server.Repositories.Route;
 using Traincrew_MultiATS_Server.Repositories.RouteLeverDestinationButton;
 using Traincrew_MultiATS_Server.Repositories.Signal;
 using Traincrew_MultiATS_Server.Repositories.SignalRoute;
 using Traincrew_MultiATS_Server.Repositories.Station;
 using Traincrew_MultiATS_Server.Repositories.SwitchingMachine;
 using Traincrew_MultiATS_Server.Repositories.SwitchingMachineRoute;
+using Traincrew_MultiATS_Server.Repositories.ThrowOutControl;
 using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
 using Traincrew_MultiATS_Server.Services;
 using static OpenIddict.Abstractions.OpenIddictConstants;
@@ -207,15 +210,17 @@ builder.Services
     .AddScoped<IGeneralRepository, GeneralRepository>()
     .AddScoped<IInterlockingObjectRepository, InterlockingObjectRepository>()
     .AddScoped<ILockConditionRepository, LockConditionRepository>()
+    .AddScoped<ILeverRepository, LeverRepository>()
     .AddScoped<INextSignalRepository, NextSignalRepository>()
     .AddScoped<IProtectionRepository, ProtectionRepository>()
-    // .AddScoped<IRouteRepository, RouteRepository>() Todo: 作る
+    .AddScoped<IRouteRepository, RouteRepository>() 
     .AddScoped<IRouteLeverDestinationRepository, RouteLeverDestinationRepository>() 
     .AddScoped<ISignalRepository, SignalRepository>()
     .AddScoped<ISignalRouteRepository, SignalRouteRepository>()
     .AddScoped<IStationRepository, StationRepository>()
     .AddScoped<ISwitchingMachineRepository, SwitchingMachineRepository>()
     .AddScoped<ISwitchingMachineRouteRepository, SwitchingMachineRouteRepository>()
+    .AddScoped<IThrowOutControlRepository, ThrowOutControlRepository>()
     .AddScoped<ITrackCircuitRepository, TrackCircuitRepository>()
     .AddScoped<InterlockingService>()
     .AddScoped<ProtectionService>()

@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Traincrew_MultiATS_Server.Data;
-using Traincrew_MultiATS_Server.Models;
 
 namespace Traincrew_MultiATS_Server.Repositories.InterlockingObject;
 
@@ -12,7 +11,7 @@ public class InterlockingObjectRepository(ApplicationDbContext context) : IInter
             .Include(obj => ((Models.Route)obj).RouteState)
             .Include(obj => ((Models.SwitchingMachine)obj).SwitchingMachineState)
             .Include(obj => ((Models.TrackCircuit)obj).TrackCircuitState)
-            .Include(obj => ((Lever)obj).LeverState)
+            .Include(obj => ((Models.Lever)obj).LeverState)
             .ToListAsync();
     }
     public Task<List<Models.InterlockingObject>> GetObjectByIds(IEnumerable<ulong> ids)
@@ -30,7 +29,7 @@ public class InterlockingObjectRepository(ApplicationDbContext context) : IInter
             .Include(obj => ((Models.Route)obj).RouteState)
             .Include(obj => ((Models.SwitchingMachine)obj).SwitchingMachineState)
             .Include(obj => ((Models.TrackCircuit)obj).TrackCircuitState)
-            .Include(obj => ((Lever)obj).LeverState)
+            .Include(obj => ((Models.Lever)obj).LeverState)
             .ToListAsync();
     }
     public Task<Models.InterlockingObject> GetObject(string name)
@@ -40,14 +39,14 @@ public class InterlockingObjectRepository(ApplicationDbContext context) : IInter
             .FirstAsync();
     }
 
-    public async Task<List<Models.InterlockingObject>> GetObjectsByStationNamesWithState(List<string> stationNames)
+    public async Task<List<Models.InterlockingObject>> GetObjectsByStationIdsWithState(List<string> stationIds)
     {
         return await context.InterlockingObjects
-            .Where(obj => stationNames.Any(stationName => obj.Name.Contains(stationName)))
+            .Where(obj => stationIds.Any(stationId => obj.Name.Contains(stationId)))
             .Include(obj => ((Models.Route)obj).RouteState)
             .Include(obj => ((Models.SwitchingMachine)obj).SwitchingMachineState)
             .Include(obj => ((Models.TrackCircuit)obj).TrackCircuitState)
-            .Include(obj => ((Lever)obj).LeverState)
+            .Include(obj => ((Models.Lever)obj).LeverState)
             .ToListAsync();
     }
 }

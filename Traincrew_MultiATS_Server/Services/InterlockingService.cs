@@ -1,7 +1,9 @@
 using Traincrew_MultiATS_Server.Models;
+using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.DestinationButton;
 using Traincrew_MultiATS_Server.Repositories.General;
 using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
+using Traincrew_MultiATS_Server.Repositories.Lever;
 
 namespace Traincrew_MultiATS_Server.Services;
 
@@ -9,9 +11,11 @@ namespace Traincrew_MultiATS_Server.Services;
 /// 連動装置装置卓
 /// </summary>
 public class InterlockingService(
-        IInterlockingObjectRepository interlockingObjectRepository,
-        IDestinationButtonRepository destinationButtonRepository,
-        IGeneralRepository generalRepository)
+    IDateTimeRepository dateTimeRepository,
+    IInterlockingObjectRepository interlockingObjectRepository,
+    IDestinationButtonRepository destinationButtonRepository,
+    IGeneralRepository generalRepository,
+    ILeverRepository leverRepository)
 {
     /// <summary>
     /// レバーの物理状態を設定する
@@ -21,12 +25,12 @@ public class InterlockingService(
     /// <exception cref="ArgumentException"></exception>
     public async Task SetPhysicalLeverData(InterlockingLeverData leverData)
     {
-        var interlockingObject = await interlockingObjectRepository.GetObject(leverData.Name);
-        var lever = interlockingObject as Lever;
+        var lever = await leverRepository.GetLeverByNameWitState(leverData.Name);
         if (lever == null)
         {
             throw new ArgumentException("Invalid lever name");
         }
+
         lever.LeverState.IsReversed = leverData.State;
         await generalRepository.Save(lever);
     }
@@ -44,6 +48,8 @@ public class InterlockingService(
         {
             throw new ArgumentException("Invalid button name");
         }
+
+        buttonObject.DestinationButtonState.OperatedAt = dateTimeRepository.GetNow();
         buttonObject.DestinationButtonState.IsRaised = buttonData.IsRaised;
         await generalRepository.Save(buttonObject.DestinationButtonState);
     }
@@ -53,14 +59,14 @@ public class InterlockingService(
         return await interlockingObjectRepository.GetAllWithState();
     }
 
-    public async Task<List<InterlockingObject>> GetObjectsByStationNames(List<string> stationNames)
+    public async Task<List<InterlockingObject>> GetObjectsByStationIds(List<string> stationIds)
     {
-        return await interlockingObjectRepository.GetObjectsByStationNamesWithState(stationNames);
+        return await interlockingObjectRepository.GetObjectsByStationIdsWithState(stationIds);
     }
 
     public static InterlockingLeverData ToLeverData(Lever lever)
     {
-        return new InterlockingLeverData
+        return new()
         {
             Name = lever.Name,
             State = lever.LeverState.IsReversed
@@ -73,9 +79,8 @@ public class InterlockingService(
         return buttons.Values.ToList();
     }
 
-    public async Task<List<DestinationButton>> GetDestinationButtonsByStationNames(List<string> stationNames)
+    public async Task<List<DestinationButton>> GetDestinationButtonsByStationIds(List<string> stationNames)
     {
-        var buttons = await destinationButtonRepository.GetButtonsByStationNames(stationNames);
-        return buttons.Where(button => button != null).Select(button => button!).ToList();
+        return await destinationButtonRepository.GetButtonsByStationIds(stationNames);
     }
 }

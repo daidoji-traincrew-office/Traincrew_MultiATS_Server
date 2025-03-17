@@ -24,6 +24,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Lever> Levers { get; set; }
     public DbSet<DestinationButton> DestinationButtons { get; set; }
     public DbSet<SignalRoute> SignalRoutes { get; internal set; }
+    public DbSet<ThrowOutControl> ThrowOutControls { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -31,7 +32,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
         modelBuilder.Entity<Route>()
             .HasOne(r => r.RouteState)
-            .WithOne(rs => rs.Route)
+            .WithOne()
             .HasForeignKey<RouteState>(rs => rs.Id);
 
         modelBuilder.Entity<Route>()
@@ -58,6 +59,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .WithMany()
             .HasForeignKey(l => l.LockId)
             .HasPrincipalKey(l => l.Id);
+        modelBuilder.Entity<LockCondition>()
+            .HasOne(lc => lc.Parent)
+            .WithMany()
+            .HasForeignKey(lc => lc.ParentId)
+            .HasPrincipalKey(lc => lc.Id);
         modelBuilder.Entity<LockConditionObject>()
             .HasOne(lco => lco.Object)
             .WithMany()
@@ -86,7 +92,21 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasOne(db => db.DestinationButtonState)
             .WithOne()
             .HasForeignKey<DestinationButtonState>(dbs => dbs.Name);
-        
+        modelBuilder.Entity<ThrowOutControl>()
+            .HasOne(tc => tc.SourceRoute)
+            .WithMany()
+            .HasForeignKey(tc => tc.SourceRouteId)
+            .HasPrincipalKey(r => r.Id);
+        modelBuilder.Entity<ThrowOutControl>()
+            .HasOne(tc => tc.TargetRoute)
+            .WithMany()
+            .HasForeignKey(tc => tc.TargetRouteId)
+            .HasPrincipalKey(r => r.Id);
+        modelBuilder.Entity<ThrowOutControl>()
+            .HasOne(tc => tc.ConditionLever)
+            .WithMany()
+            .HasForeignKey(tc => tc.ConditionLeverId)
+            .HasPrincipalKey(l => l.Id);
         // Convert all column names to snake_case 
         foreach (var entity in modelBuilder.Model.GetEntityTypes())
         {

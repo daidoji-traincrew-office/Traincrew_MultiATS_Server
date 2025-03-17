@@ -12,5 +12,6 @@ public class LockState
     public ulong SourceObjectId { get; set; }
     public NR IsReverse { get; set; }
     public LockType Type { get; set; }
+    [Column(TypeName = "timestamp without time zone")]
     public DateTime? EndTime { get; set; }
 }
