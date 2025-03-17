@@ -47,6 +47,11 @@ public class RendoService(
                 rdb => rdb.RouteId,
                 rdb => (interlockingObjects[rdb.LeverId] as Lever)!
             );
+        var routesByLevers = routeLeverDestinationButtonList
+            .GroupBy(rdb => rdb.LeverId)
+            .ToDictionary(
+                g => g.Key,
+                g => g.Select(rdb => (interlockingObjects[rdb.RouteId] as Route)!).ToList());
         // Buttonを全取得
         var buttons = await destinationButtonRepository.GetAllButtons();
         // 直接鎖状条件を取得
@@ -89,10 +94,7 @@ public class RendoService(
             var lockCondition = lockConditions.GetValueOrDefault(route.Id, []);
 
             // 同一のレバーを持つ自分以外の進路を取得
-            var otherRoutes = routeLeverDestinationButtonList
-                .Where(rdb => rdb.LeverId == routeLeverDestinationButton.LeverId)
-                .Select(rdb => interlockingObjects[rdb.RouteId])
-                .OfType<Route>()
+            var otherRoutes = routesByLevers[routeLeverDestinationButton.LeverId]
                 .Where(r => r.Id != route.Id)
                 .ToList();
 
