@@ -55,9 +55,11 @@ public class RendoService(
         var signalControlConditions = await lockConditionRepository.GetConditionsByType(LockType.SignalControl);
         // 統括制御テーブルを取得
         var throwOutControls = await throwOutControlRepository.GetAll();
+        // 進路IDをキーにして、統括制御「する」進路をグループ化
         var sourceThrowOutControls = throwOutControls
             .GroupBy(c => c.TargetRouteId)
             .ToDictionary(g => g.Key, g => g.ToList());
+        // 進路IDをキーにして、統括制御「される」進路をグループ化
         var targetThrowOutControls = throwOutControls
             .GroupBy(c => c.SourceRouteId)
             .ToDictionary(g => g.Key, g => g.ToList());
@@ -85,6 +87,14 @@ public class RendoService(
             var button = buttons[routeLeverDestinationButton.DestinationButtonName];
             // 鎖錠条件 
             var lockCondition = lockConditions.GetValueOrDefault(route.Id, []);
+
+            // 同一のレバーを持つ自分以外の進路を取得
+            var otherRoutes = routeLeverDestinationButtonList
+                .Where(rdb => rdb.LeverId == routeLeverDestinationButton.LeverId)
+                .Select(rdb => interlockingObjects[rdb.RouteId])
+                .OfType<Route>()
+                .Where(r => r.Id != route.Id)
+                .ToList();
 
             // Todo: 駅扱いてこ繋ぎ込み
             var CTCControlState = RaiseDrop.Drop;
@@ -192,10 +202,12 @@ public class RendoService(
             var isLeverRelayRaised =
                 !IsLocked(lockCondition, interlockingObjects)
                 &&
+                otherRoutes.All(route => route.RouteState.IsLeverRelayRaised == RaiseDrop.Drop)
+                &&
                 (
                     (
                         routeState is
-                            { IsThrowOutYSRelayRaised: RaiseDrop.Drop, IsThrowOutXRRelayRaised: RaiseDrop.Drop }
+                        { IsThrowOutYSRelayRaised: RaiseDrop.Drop, IsThrowOutXRRelayRaised: RaiseDrop.Drop }
                         &&
                         leverState is LCR.Left or LCR.Right
                     )
