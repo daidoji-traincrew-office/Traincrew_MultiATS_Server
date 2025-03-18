@@ -265,7 +265,7 @@ CREATE TABLE lock_condition_object
     is_single_lock BOOLEAN                                    NOT NULL  -- 片鎖状がどうか    
 );
 -- 統括制御テーブル
-CREATE TABLE throw_out_control 
+CREATE TABLE throw_out_control
 (
     id                 BIGSERIAL PRIMARY KEY,
     source_route_id    BIGINT REFERENCES route (id) NOT NULL, -- 統括制御の元となる進路
@@ -322,15 +322,17 @@ CREATE TABLE switching_machine_state
     switch_end_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP          -- 転換終了時刻
 );
 
--- Todo: 進路状態
+-- 進路状態
 CREATE TABLE route_state
 (
-    id                       BIGINT PRIMARY KEY REFERENCES route (ID), -- 進路のID
-    is_lever_relay_raised    raise_drop NOT NULL,                      -- てこリレーが上がっているか
-    is_route_relay_raised    raise_drop NOT NULL,                      -- 進路照査リレーが上がっているか
-    is_signal_control_raised raise_drop NOT NULL,                      -- 信号制御リレーが上がっているか
-    is_approach_lock_raised  raise_drop NOT NULL,                      -- 接近鎖状が上がっているか
-    is_route_lock_raised     raise_drop NOT NULL                       -- 進路鎖状が上がっているか
+    id                           BIGINT PRIMARY KEY REFERENCES route (ID), -- 進路のID
+    is_lever_relay_raised        raise_drop NOT NULL,                      -- てこリレーが上がっているか
+    is_route_relay_raised        raise_drop NOT NULL,                      -- 進路照査リレーが上がっているか
+    is_signal_control_raised     raise_drop NOT NULL,                      -- 信号制御リレーが上がっているか
+    is_approach_lock_raised      raise_drop NOT NULL,                      -- 接近鎖状が上がっているか
+    is_route_lock_raised         raise_drop NOT NULL,                      -- 進路鎖状が上がっているか
+    is_throw_out_xr_relay_raised raise_drop NOT NULL,                      -- 統括制御リレーが上がっているか
+    is_throw_out_ys_relay_raised raise_drop NOT NULL                       -- 統括制御リレーが上がっているか
 );
 
 -- 信号機状態

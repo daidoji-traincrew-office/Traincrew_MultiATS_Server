@@ -3,8 +3,7 @@ on:
   workflow_dispatch:  {}
   push:
     branches:
-      - main
-      - feature/closure_signal
+      - *
 
 jobs:
     build:

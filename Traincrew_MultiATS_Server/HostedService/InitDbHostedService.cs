@@ -30,7 +30,7 @@ public class InitDbHostedService(IServiceScopeFactory serviceScopeFactory) : IHo
         await InitRendoTable(context, datetimeRepository, cancellationToken);
         if (dbInitializer != null)
         {
-            await dbInitializer.InitializeSignalRoute();
+            await dbInitializer.InitializePost();
         }
 
         _schedulers.AddRange([
@@ -118,38 +118,10 @@ internal class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Ca
         await InitTrackCircuitSignal();
     }
 
-    internal async Task InitializeSignalRoute()
+    internal async Task InitializePost()
     {
-        var signalRoutes = await context.SignalRoutes
-            .Include(sr => sr.Route)
-            .ToListAsync(cancellationToken);
-        var routes = await context.Routes
-            .ToDictionaryAsync(r => r.Name, cancellationToken);
-        foreach (var signal in DBBase.signalDataList)
-        {
-            foreach (var routeName in signal.RouteNames)
-            {
-                // Todo: FW 全探索なので改善したほうがいいかも
-                if (signalRoutes.Any(sr => sr.SignalName == signal.Name && sr.Route.Name == routeName))
-                {
-                    continue;
-                }
-
-                if (!routes.TryGetValue(routeName, out var route))
-                {
-                    // Todo: 例外を出す
-                    continue;
-                }
-
-                context.SignalRoutes.Add(new()
-                {
-                    SignalName = signal.Name,
-                    RouteId = route.Id
-                });
-            }
-        }
-
-        await context.SaveChangesAsync(cancellationToken);
+        await InitializeSignalRoute();
+        await InitializeThrowOutControl();
     }
 
     private async Task InitStation()
@@ -428,6 +400,86 @@ internal class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Ca
             }
         }
 
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task InitializeSignalRoute()
+    {
+        var signalRoutes = await context.SignalRoutes
+            .Include(sr => sr.Route)
+            .ToListAsync(cancellationToken);
+        var routes = await context.Routes
+            .ToDictionaryAsync(r => r.Name, cancellationToken);
+        foreach (var signal in DBBase.signalDataList)
+        {
+            foreach (var routeName in signal.RouteNames)
+            {
+                // Todo: FW 全探索なので改善したほうがいいかも
+                if (signalRoutes.Any(sr => sr.SignalName == signal.Name && sr.Route.Name == routeName))
+                {
+                    continue;
+                }
+
+                if (!routes.TryGetValue(routeName, out var route))
+                {
+                    // Todo: 例外を出す
+                    continue;
+                }
+
+                context.SignalRoutes.Add(new()
+                {
+                    SignalName = signal.Name,
+                    RouteId = route.Id
+                });
+            }
+        }
+
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task InitializeThrowOutControl()
+    {
+        var routesByName = await context.Routes
+            .ToDictionaryAsync(r => r.Name, cancellationToken);
+        var throwOutControlList = (await context.ThrowOutControls
+                .Include(toc => toc.SourceRoute)
+                .Include(toc => toc.TargetRoute)
+                .Select(toc => new { SourceRouteName = toc.SourceRoute.Name, TargetRouteName = toc.TargetRoute.Name })
+                .ToListAsync(cancellationToken))
+            .ToHashSet();
+        foreach (var throwOutControl in DBBase.throwOutControlList)
+        {
+            // 既に登録済みの場合、スキップ
+            if (throwOutControlList.Contains(
+                    new { throwOutControl.SourceRouteName, throwOutControl.TargetRouteName }))
+            {
+                continue;
+            }
+            
+            // Todo: 方向てこまで実装したらこのスキップを外す
+            if (!string.IsNullOrEmpty(throwOutControl.LeverConditionName))
+            {
+                continue;
+            }
+
+            // 進路名を取得
+            if (!routesByName.TryGetValue(throwOutControl.SourceRouteName, out var sourceRoute))
+            {
+                throw new InvalidOperationException($"進路名が見つかりません: {throwOutControl.SourceRouteName}");
+            }
+
+            if (!routesByName.TryGetValue(throwOutControl.TargetRouteName, out var targetRoute))
+            {
+                throw new InvalidOperationException($"進路名が見つかりません: {throwOutControl.TargetRouteName}");
+            }
+            // Todo: てこの条件をパースする
+
+            context.ThrowOutControls.Add(new()
+            {
+                SourceRouteId = sourceRoute.Id,
+                TargetRouteId = targetRoute.Id
+            });
+        }
         await context.SaveChangesAsync(cancellationToken);
     }
 }
@@ -855,19 +907,7 @@ public partial class DbRendoTableInitializer
             var matchSignalControl = RegexSignalControl().Match(rendoTableCsv.SignalControl);
             await RegisterLocks(matchSignalControl.Groups[1].Value, route.Id, searchOtherObjects,
                 LockType.SignalControl);
-            // 統括制御
-            foreach (Capture capture in matchSignalControl.Groups[2].Captures)
-            {
-                var rootRoute = routesByName.GetValueOrDefault(CalcRouteName(capture.Value, "", stationId));
-                if (rootRoute == null)
-                {
-                    // Todo: 例外を出す
-                    continue;
-                }
-
-                route.RootId = rootRoute.Id;
-                context.Routes.Update(route);
-            }
+            // 統括制御は、サーバーマスタから読み込む
             // Todo: 進路鎖錠
             // Todo: 接近鎖錠
         }
