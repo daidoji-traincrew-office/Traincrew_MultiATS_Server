@@ -61,7 +61,7 @@ public class AuthenticationController(ILogger<AuthenticationController> logger, 
         }
         // ユーザーIDからそのDiscordユーザーが運転会に参加可能か調べる
         var canAuthenticate = await discordService.IsUserCanAuthenticate(ulong.Parse(userId));
-        if (canAuthenticate)
+        if (!canAuthenticate)
         {
             // 運転会に参加できない場合はUnauthorizedを返す
             return Results.Forbid(
