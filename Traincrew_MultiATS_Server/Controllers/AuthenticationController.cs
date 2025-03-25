@@ -63,13 +63,13 @@ public class AuthenticationController(ILogger<AuthenticationController> logger, 
         var canAuthenticate = await discordService.IsUserCanAuthenticate(ulong.Parse(userId));
         if (!canAuthenticate)
         {
-            // 運転会に参加できない場合はUnauthorizedを返す
+            // 運転会に参加できない場合はAccessDeniedを返す
             return Results.Forbid(
                 authenticationSchemes: new List<string>{OpenIddictServerAspNetCoreDefaults.AuthenticationScheme},
                 properties: new(new Dictionary<string, string?>
                 {
                     [OpenIddictClientAspNetCoreConstants.Properties.Error] =
-                        Errors.UnauthorizedClient,
+                        Errors.AccessDenied,
                     [OpenIddictClientAspNetCoreConstants.Properties.ErrorDescription] = 
                         "運転会サーバーに所属していないか、入鋏ロールがついていません。司令主任にお問い合わせください。"
                 }));
