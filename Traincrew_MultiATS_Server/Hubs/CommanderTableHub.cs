@@ -35,7 +35,8 @@ public class CommanderTableHub(TrackCircuitService trackCircuitService) : Hub
     
     public async Task SendTrackCircuitData(TrackCircuitData trackCircuitData)
     {
-            
+        // 受け取ったtrackCircuitDataの値を設定する
+        await trackCircuitService.SetTrackCircuitData(trackCircuitData); 
     }
     
     public async Task DeleteTrain(string trainName)

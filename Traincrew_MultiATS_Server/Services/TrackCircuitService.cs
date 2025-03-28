@@ -1,9 +1,12 @@
 using Traincrew_MultiATS_Server.Models;
+using Traincrew_MultiATS_Server.Repositories.General;
 using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
 
 namespace Traincrew_MultiATS_Server.Services;
 
-public class TrackCircuitService(ITrackCircuitRepository trackCircuitRepository)
+public class TrackCircuitService(
+    ITrackCircuitRepository trackCircuitRepository,
+    IGeneralRepository generalRepository)
 {
     public async Task<List<TrackCircuitData>> GetAllTrackCircuitDataList()
     {
@@ -33,6 +36,22 @@ public class TrackCircuitService(ITrackCircuitRepository trackCircuitRepository)
             })
             .ToList();
         await trackCircuitRepository.SetTrackCircuitList(trackCircuit, trainNumber);
+    }
+
+
+    public async Task SetTrackCircuitData(TrackCircuitData trackCircuitData)
+    {
+        var trackCircuits = await trackCircuitRepository.GetTrackCircuitByName([trackCircuitData.Name]);
+        if (trackCircuits.Count == 0)
+        {
+            // Todo: 例外を吐いたほうが良いとされている
+            return;
+        }
+        var trackCircuitState = trackCircuits[0].TrackCircuitState;
+        trackCircuitState.IsLocked = trackCircuitData.IsLocked;
+        trackCircuitState.IsShortCircuit = trackCircuitData.On;
+        trackCircuitState.TrainNumber = trackCircuitData.Last;
+        await generalRepository.Save(trackCircuitState);
     }
 
     public async Task ClearTrackCircuitDataList(List<TrackCircuitData> trackCircuitData)
