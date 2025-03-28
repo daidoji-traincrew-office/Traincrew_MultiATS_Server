@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using OpenIddict.Validation.AspNetCore;
+using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Services;
 
 namespace Traincrew_MultiATS_Server.Hubs;
@@ -12,6 +13,31 @@ namespace Traincrew_MultiATS_Server.Hubs;
 )]
 public class CommanderTableHub(TrackCircuitService trackCircuitService) : Hub
 {
+    public async Task<DataToCommanderTable> SendData_CommanderTable()
+    {
+        return new()
+        {
+            TroubleDataList = [],
+            KokuchiDataList = [],
+            TrackCircuitDataList = await trackCircuitService.GetAllTrackCircuitDataList() 
+        };
+    }
+
+    public async Task SendTroubleData(TroubleData troubleData)
+    {
+        
+    }
+    
+    public async Task SendKokuchiData(KokuchiData kokuchiData)
+    {
+        
+    }
+    
+    public async Task SendTrackCircuitData(TrackCircuitData trackCircuitData)
+    {
+            
+    }
+    
     public async Task DeleteTrain(string trainName)
     {
         await trackCircuitService.ClearTrackCircuitByTrainNumber(trainName);
