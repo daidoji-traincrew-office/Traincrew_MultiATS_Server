@@ -65,12 +65,11 @@ public class TrackCircuitRepository(ApplicationDbContext context) : ITrackCircui
 
     public async Task ClearTrackCircuitListByTrainNumber(string trainNumber)
     {
-        await context.TrackCircuits
-            .Where(odj => odj.TrackCircuitState.TrainNumber == trainNumber)
+        await context.TrackCircuitStates
             .ExecuteUpdateAsync(
                 item => item
-                    .SetProperty(obj => obj.TrackCircuitState.IsShortCircuit, false)
-                    .SetProperty(obj => obj.TrackCircuitState.TrainNumber, "")
+                    .SetProperty(obj => obj.IsShortCircuit, false)
+                    .SetProperty(obj => obj.TrainNumber, "")
             );
     }
 }
