@@ -66,6 +66,7 @@ public class TrackCircuitRepository(ApplicationDbContext context) : ITrackCircui
     public async Task ClearTrackCircuitListByTrainNumber(string trainNumber)
     {
         await context.TrackCircuitStates
+            .Where(obj => obj.TrainNumber == trainNumber)
             .ExecuteUpdateAsync(
                 item => item
                     .SetProperty(obj => obj.IsShortCircuit, false)
