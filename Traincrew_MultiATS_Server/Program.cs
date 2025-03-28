@@ -340,7 +340,8 @@ List<IEndpointConventionBuilder> conventionBuilders =
     app.MapControllers(),
     app.MapHub<TrainHub>("/hub/train"),
     app.MapHub<TIDHub>("/hub/TID"),
-    app.MapHub<InterlockingHub>("/hub/interlocking")
+    app.MapHub<InterlockingHub>("/hub/interlocking"),
+    app.MapHub<CommanderTableHub>("/hub/commander_table"),
 ];
 if (!enableAuthorization)
 {

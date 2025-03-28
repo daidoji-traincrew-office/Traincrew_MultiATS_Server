@@ -46,6 +46,11 @@ public class TrackCircuitService(ITrackCircuitRepository trackCircuitRepository)
 
         await trackCircuitRepository.ClearTrackCircuitList(trackCircuit);
     }
+    
+    public async Task ClearTrackCircuitByTrainNumber(string trainNumber)
+    {
+        await trackCircuitRepository.ClearTrackCircuitListByTrainNumber(trainNumber);
+    }
 
     internal static TrackCircuitData ToTrackCircuitData(TrackCircuit trackCircuit)
     {
