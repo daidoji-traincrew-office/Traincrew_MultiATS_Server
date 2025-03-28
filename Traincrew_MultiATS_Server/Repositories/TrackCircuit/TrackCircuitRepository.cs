@@ -62,4 +62,15 @@ public class TrackCircuitRepository(ApplicationDbContext context) : ITrackCircui
         }
         await context.SaveChangesAsync();
     }
+
+    public async Task ClearTrackCircuitListByTrainNumber(string trainNumber)
+    {
+        await context.TrackCircuits
+            .Where(odj => odj.TrackCircuitState.TrainNumber == trainNumber)
+            .ExecuteUpdateAsync(
+                item => item
+                    .SetProperty(obj => obj.TrackCircuitState.IsShortCircuit, false)
+                    .SetProperty(obj => obj.TrackCircuitState.TrainNumber, "")
+            );
+    }
 }
