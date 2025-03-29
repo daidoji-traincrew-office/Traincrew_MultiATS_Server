@@ -455,7 +455,7 @@ internal class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Ca
             {
                 continue;
             }
-            
+
             // Todo: 方向てこまで実装したらこのスキップを外す
             if (!string.IsNullOrEmpty(throwOutControl.LeverConditionName))
             {
@@ -763,7 +763,8 @@ public partial class DbRendoTableInitializer
                     IsLeverRelayRaised = RaiseDrop.Drop,
                     IsRouteRelayRaised = RaiseDrop.Drop,
                     IsSignalControlRaised = RaiseDrop.Drop,
-                    IsApproachLockRaised = RaiseDrop.Drop,
+                    IsApproachLockMRRaised = RaiseDrop.Drop,
+                    IsApproachLockMSRaised = RaiseDrop.Drop,
                     IsRouteLockRaised = RaiseDrop.Drop
                 }
             };
