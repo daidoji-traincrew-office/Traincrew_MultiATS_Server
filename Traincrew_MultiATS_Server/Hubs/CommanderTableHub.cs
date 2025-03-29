@@ -18,7 +18,7 @@ public class CommanderTableHub(TrackCircuitService trackCircuitService) : Hub
         return new()
         {
             TroubleDataList = [],
-            KokuchiDataList = [],
+            OperationNotificationDataList = [],
             TrackCircuitDataList = await trackCircuitService.GetAllTrackCircuitDataList() 
         };
     }
@@ -28,9 +28,14 @@ public class CommanderTableHub(TrackCircuitService trackCircuitService) : Hub
         
     }
     
-    public async Task SendKokuchiData(KokuchiData kokuchiData)
+    public async Task SendKokuchiData(Dictionary<string, OperationNotificationData> operationNotificationDataDic)
     {
         
+    }
+    
+    public async Task SendOperationNotificationData(List<OperationNotificationData> operationNotificationData)
+    {
+        // Todo: Implement this method
     }
     
     public async Task SendTrackCircuitData(TrackCircuitData trackCircuitData)

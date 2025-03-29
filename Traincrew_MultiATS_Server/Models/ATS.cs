@@ -1,28 +1,11 @@
-public enum KokuchiType
-{
-    None,
-    Yokushi,
-    Tsuuchi,
-    TsuuchiKaijo,
-    Kaijo,
-    Shuppatsu,
-    ShuppatsuJikoku,
-    Torikeshi,
-    Tenmatsusho
-}
+using Traincrew_MultiATS_Server.Models;
 
-public class KokuchiData
+public class OperationNotificationData 
 {
-    public string DisplayData;
-    public DateTime OriginTime;
-    public KokuchiType Type;
-
-    public KokuchiData(KokuchiType Type, string DisplayData, DateTime OriginTime)
-    {
-        this.Type = Type;
-        this.DisplayData = DisplayData;
-        this.OriginTime = OriginTime;
-    }
+    public string DisplayName { get; init; }
+    public string Content { get; init; } 
+    public DateTime OriginTime { get; init; }
+    public OperationNotificationType Type { get; init; }
 }
 
 public class EmergencyLightData
@@ -119,7 +102,8 @@ public class DataFromServer
     //進路表示の表示はTC本体実装待ち　未決定
     public bool BougoState { get ; set; } = false;
     public List<EmergencyLightData> EmergencyLightDatas { get; set; } = [];
-    public Dictionary<string, KokuchiData> KokuchiDatas { get; set; } = new();
+    public Dictionary<string, OperationNotificationData> KokuchiDatas { get; set; } = new();
+    public OperationNotificationData? OperationNotificationData { get; set; } = null;
     public List<SignalData> NextSignalData { get; set; } = [];
     public List<SignalData> DoubleNextSignalData { get; set; } = [];
 }
