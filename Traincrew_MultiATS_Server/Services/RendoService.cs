@@ -395,15 +395,11 @@ public class RendoService(
                 &&
                 route.RouteState.IsRouteRelayRaised == RaiseDrop.Drop
                 &&
+                !(/*内方1軌道回路の親TRリレー*/)
                 (
-                    ApproachLockPlaceState == RaiseDrop.Raise
+                    /*その進路の駅に対応する<時素秒数>TER*/ == RaiseDrop.Raise
                     ||
-                    InTrackCircuitState == RaiseDrop.Drop
-                    ||
-                    (
-                        /*その進路の駅に対応する<時素秒数>TEN*/ == RaiseDrop.Raise
-                        &&
-                        isApproachLockMSRaised
+                    route.RouteState.IsApproachLockMSRaised == RaiseDrop.Raise
                     )
                     ||
                     route.RouteState.IsApproachLockMRRaised == RaiseDrop.Raise
@@ -435,6 +431,19 @@ public class RendoService(
             )
             ? RaiseDrop.Raise
             : RaiseDrop.Drop;
+
+            //　それぞれ現在と異なる場合、更新       
+
+            if (route.RouteState.IsApproachLockMSRaised != isApproachLockMSRaised)
+            {
+                route.RouteState.IsApproachLockMSRaised = isApproachLockMSRaised;
+                await generalRepository.Save(route.RouteState);
+            }
+
+            if (route.RouteState.IsApproachLockMRRaised != isApproachLockMRRaised)
+            {
+                route.RouteState.IsApproachLockMRRaised = isApproachLockMRRaised;
+                await generalRepository.Save(route.RouteState);
         }
     }
 
