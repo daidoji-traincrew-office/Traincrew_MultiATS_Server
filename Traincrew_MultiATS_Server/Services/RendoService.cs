@@ -1,4 +1,5 @@
-﻿using Traincrew_MultiATS_Server.Models;
+﻿using Microsoft.AspNetCore.Components.Forms;
+using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.DestinationButton;
 using Traincrew_MultiATS_Server.Repositories.General;
@@ -358,6 +359,85 @@ public class RendoService(
 
         // 進路のRouteState.IsRouteRelayRaisedをRaiseにする
         return RaiseDrop.Raise;
+    }
+
+    // Todo: 接近鎖錠リレー回路     
+    public async Task ApproachLockRelay()
+    {
+        // 全てのObjectを取得
+        var interlockingObjects = (await interlockingObjectRepository.GetAllWithState())
+            .ToDictionary(obj => obj.Id);
+        // 全進路リスト
+        var allRoutes = interlockingObjects
+            .Select(x => x.Value)
+            .OfType<Route>()
+            .ToList();
+        // 操作対象の進路を全て取得(進路照査が扛上している進路または接近鎖錠の掛かっている進路)
+        var routes = allRoutes
+            .Where(route => route.RouteState.IsRouteRelayRaised == RaiseDrop.Raise
+                            || route.RouteState.IsApproachLockMRRaised == RaiseDrop.Drop)
+            .ToList();
+
+        foreach (var route in routes)
+        {
+            // 接近鎖錠欄の接近区間の条件を満たしていれば扛上
+            // ・軌道回路が短絡していないこと
+            // ・進路の接近鎖錠MRリレーが図表記載方向であること
+            // ・転てつ器の記載方向鎖錠リレーが扛上していること
+            var ApproachLockPlaceState = RaiseDrop.Drop;
+
+            // 内方2回路分の軌道回路が短絡しているかどうか(直列)
+            // ・1軌道回路しかない場合は、その軌道回路が短絡しているかどうか
+            // ※軌道回路条件はB付リレーを使用
+            var InTrackCircuitState = RaiseDrop.Drop;
+
+            var isApproachLockMSRaised =
+            (
+                route.RouteState.IsSignalControlRaised == RaiseDrop.Drop
+                &&
+                route.RouteState.IsRouteRelayRaised == RaiseDrop.Drop
+                &&
+                (
+                    ApproachLockPlaceState == RaiseDrop.Raise
+                    ||
+                    InTrackCircuitState == RaiseDrop.Drop
+                    ||
+                    (
+                        /*その進路の駅に対応する<時素秒数>TEN*/ == RaiseDrop.Raise
+                        &&
+                        isApproachLockMSRaised
+                    )
+                    ||
+                    route.RouteState.IsApproachLockMRRaised == RaiseDrop.Raise
+                )
+            )
+            ? RaiseDrop.Raise
+            : RaiseDrop.Drop;
+
+            // Todo:停電対応
+            var isApproachLockMRRaised =
+            (
+                route.RouteState.IsSignalControlRaised == RaiseDrop.Drop
+                &&
+                route.RouteState.IsRouteRelayRaised == RaiseDrop.Drop
+                &&
+                (
+                    ApproachLockPlaceState == RaiseDrop.Raise
+                    ||
+                    InTrackCircuitState == RaiseDrop.Drop
+                    ||
+                    (
+                        /*その進路の駅に対応する<時素秒数>TEN*/ == RaiseDrop.Raise
+                        &&
+                        isApproachLockMSRaised
+                    )
+                    ||
+                    route.RouteState.IsApproachLockMRRaised == RaiseDrop.Raise
+                )
+            )
+            ? RaiseDrop.Raise
+            : RaiseDrop.Drop;
+        }
     }
 
     /// <summary>
