@@ -26,6 +26,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<DestinationButton> DestinationButtons { get; set; }
     public DbSet<SignalRoute> SignalRoutes { get; internal set; }
     public DbSet<ThrowOutControl> ThrowOutControls { get; set; }
+    public DbSet<OperationNotificationDisplay> OperationNotificationDisplays { get; set; }
+    public DbSet<OperationNotificationState> OperationNotificationStates { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -49,6 +51,16 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasOne(tc => tc.TrackCircuitState)
             .WithOne(tcs => tcs.TrackCircuit)
             .HasForeignKey<TrackCircuitState>(tcs => tcs.Id);
+        modelBuilder.Entity<TrackCircuit>()
+            .HasOne(tc => tc.OperationNotificationDisplay)
+            .WithMany()
+            .HasForeignKey(tc => tc.OperationNotificationDisplayName)
+            .HasPrincipalKey(ond => ond.Name);
+        modelBuilder.Entity<OperationNotificationDisplay>()
+            .HasOne(ond => ond.OperationNotificationState)
+            .WithOne()
+            .HasForeignKey<OperationNotificationState>(ons => ons.DisplayName)
+            .HasPrincipalKey<OperationNotificationDisplay>(ond => ond.Name);
         /*
         modelBuilder.Entity<Lock>()
             .HasOne(l => l.LockCondition)
