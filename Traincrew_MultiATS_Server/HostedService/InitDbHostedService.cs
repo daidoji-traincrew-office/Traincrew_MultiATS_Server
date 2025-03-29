@@ -834,7 +834,8 @@ public partial class DbRendoTableInitializer
                     IsLeverRelayRaised = RaiseDrop.Drop,
                     IsRouteRelayRaised = RaiseDrop.Drop,
                     IsSignalControlRaised = RaiseDrop.Drop,
-                    IsApproachLockRaised = RaiseDrop.Drop,
+                    IsApproachLockMRRaised = RaiseDrop.Drop,
+                    IsApproachLockMSRaised = RaiseDrop.Drop,
                     IsRouteLockRaised = RaiseDrop.Drop
                 }
             };
