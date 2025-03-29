@@ -11,7 +11,8 @@ public class RouteState
     public RaiseDrop IsLeverRelayRaised { get; set; }
     public RaiseDrop IsRouteRelayRaised { get; set; }
     public RaiseDrop IsSignalControlRaised { get; set; }
-    public RaiseDrop IsApproachLockRaised { get; set; }
+    public RaiseDrop IsApproachLockMRRaised { get; set; }
+    public RaiseDrop IsApproachLockMSRaised { get; set; }
     public RaiseDrop IsRouteLockRaised { get; set; }
     // ReSharper disable InconsistentNaming
     [Column("is_throw_out_xr_relay_raised")]
