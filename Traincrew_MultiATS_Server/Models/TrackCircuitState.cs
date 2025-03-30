@@ -13,6 +13,8 @@ public class TrackCircuitState
     /// </summary>
     public bool IsShortCircuit { get; set; }
     public bool IsLocked { get; set; }
+    [Column(TypeName = "timestamp without time zone")]
+    public DateTime? LockedAt { get; set; }
     /// <summary>
     /// 不正扛上補正済みリレー
     /// F付リレー
