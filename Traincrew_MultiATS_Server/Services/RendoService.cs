@@ -32,7 +32,7 @@ public class RendoService(
     IGeneralRepository generalRepository)
 {
     /// <summary>
-    /// <strong>てこリレー回路</strong><br/>
+    /// <strong>てこ反応リレー回路</strong><br/>
     /// てこやボタンの状態から、確保するべき進路を決定する。
     /// </summary>
     /// <returns></returns>
@@ -170,8 +170,8 @@ public class RendoService(
                     .ToList();
                 var isThrowOutYSRelayRaised =
                     // Todo:　進路鎖錠実装時にコメントアウト解除
-                    // lockRouteStates.All(rs => rs.IsRouteLockRaised == RaiseDrop.Raise)
-                    // &&
+                    lockRouteStates.All(rs => rs.IsRouteLockRaised == RaiseDrop.Raise)
+                    &&
                     (
                         sourceThrowOutRoutes.All(
                             r =>
@@ -257,6 +257,31 @@ public class RendoService(
     /// <returns></returns>   
     public async Task RouteRelay()
     {
+        // Todo: 下記実装より一部変更する
+        // 確認するべきものの疑似コードは以下
+        // var isRouteRelayRaised = 
+        // (
+        //     /*鎖錠欄転てつ器条件　転てつ器表示灯がどうか→転換中でなく、向きがあっている*/         
+        //     &&
+        //     /*鎖錠欄進路条件　接近鎖錠と進路鎖錠リレー扛上かどうか*/
+        //     &&
+        //     /*信号制御欄軌道条件　生軌道が短絡していないかどうか*/
+        //     &&
+        //     (
+        //         (
+        //             /*自進路YS扛上*/
+        //             &&
+        //             /*この進路に対して総括制御「する」進路の進路鎖錠リレー*/
+        //         )
+        //         ||
+        //         /*自進路YS落下*/
+        //     )
+        //     &&
+        //     /*てこ反条件　てこ反応リレーが扛上しているかどうか*/
+        // )
+
+
+        /*
         // 全てのObjectを取得
         var interlockingObjects = (await interlockingObjectRepository.GetAllWithState())
             .ToDictionary(obj => obj.Id);
@@ -294,6 +319,7 @@ public class RendoService(
             route.RouteState.IsRouteRelayRaised = result;
             await generalRepository.Save(route.RouteState);
         }
+        */
     }
 
     private async Task<RaiseDrop> ProcessRouteRelay(Route route,
@@ -309,7 +335,7 @@ public class RendoService(
 
         // 進路の鎖錠欄の条件を満たしているかを取得
         // 転轍器では、目的方向で鎖錠していること
-        // 進路ではその進路の進路リレーが扛上していないこと
+        // 進路ではその進路の接近鎖錠リレーと進路鎖錠リレーが扛上していないこと
         Func<LockConditionObject, InterlockingObject, bool> predicate = (lockConditionObject, interlockingObject) =>
         {
             return interlockingObject switch
@@ -317,7 +343,7 @@ public class RendoService(
                 SwitchingMachine switchingMachine =>
                     !switchingMachine.SwitchingMachineState.IsSwitching
                     && switchingMachine.SwitchingMachineState.IsReverse == lockConditionObject.IsReverse,
-                Route route => route.RouteState.IsRouteRelayRaised == RaiseDrop.Drop,
+                Route route => route.RouteState.IsApproachLockMRRaised == RaiseDrop.Raise && route.RouteState.IsRouteLockRaised == RaiseDrop.Raise,
                 TrackCircuit trackCircuit => !trackCircuit.TrackCircuitState.IsShortCircuit,
                 _ => false
             };
