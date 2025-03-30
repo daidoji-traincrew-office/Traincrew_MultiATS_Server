@@ -31,11 +31,6 @@ public class CommanderTableHub(
         
     }
     
-    public async Task SendKokuchiData(Dictionary<string, OperationNotificationData> operationNotificationDataDic)
-    {
-        
-    }
-    
     public async Task SendOperationNotificationData(OperationNotificationData operationNotificationData)
     {
         await operationNotificationService.SetOperationNotificationData(operationNotificationData);
