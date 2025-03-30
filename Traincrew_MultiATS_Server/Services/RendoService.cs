@@ -81,6 +81,9 @@ public class RendoService(
                 .Select(toc => interlockingObjects[toc.TargetRouteId])
                 .OfType<Route>()
                 .ToList();
+            // この進路に対して総括制御「される」進路ごとの、それに対して総括制御「する」進路
+
+
             // 対象てこ
             var lever = (interlockingObjects[routeLeverDestinationButton.LeverId] as Lever)!;
             // 対象ボタン
@@ -220,13 +223,12 @@ public class RendoService(
                     ||
                     (
                         routeState.IsLeverRelayRaised == RaiseDrop.Raise
-                        && targetThrowOutRoutes.All(r => r.RouteState.IsThrowOutXRRelayRaised == RaiseDrop.Drop)
+                        &&
+                        targetThrowOutRoutes.All(r => r.RouteState.IsThrowOutXRRelayRaised == RaiseDrop.Drop)
                     )
                     ||
                     targetThrowOutRoutes.Any(r =>
-                        r.RouteState.IsLeverRelayRaised == RaiseDrop.Raise
-                        &&
-                        r.RouteState.IsThrowOutXRRelayRaised == RaiseDrop.Raise
+                        EvaluateThrowOutConditionsForTargetRoute(r, interlockingObjects, throwOutControls)
                     )
                 )
                     ? RaiseDrop.Raise
@@ -245,6 +247,31 @@ public class RendoService(
 
             await generalRepository.Save(routeState);
         }
+    }
+
+    /// <summary>
+    /// てこ反応リレー回路中総括する進路の押し釦にパラするやつ
+    /// </summary>
+    private bool EvaluateThrowOutConditionsForTargetRoute(Route targetRoute, Dictionary<ulong, InterlockingObject> interlockingObjects, List<ThrowOutControl> throwOutControls)
+    {
+        // その進路に対して総括制御「する」進路を取得
+        var targetsourceThrowOutRoutes = throwOutControls
+            .Where(toc => toc.TargetRouteId == targetRoute.Id)
+            .Select(toc => interlockingObjects[toc.SourceRouteId])
+            .OfType<Route>()
+            .ToList();
+
+        // その進路に対して総括制御「する」進路のてこ反応リレーの落下を確認
+        var allLeverRelayDropped = targetsourceThrowOutRoutes.All(r => r.RouteState.IsLeverRelayRaised == RaiseDrop.Drop);
+
+        // その進路のてこ反応リレー扛上を確認
+        var leverRelayRaised = targetRoute.RouteState.IsLeverRelayRaised == RaiseDrop.Raise;
+
+        // その進路のXRリレー扛上を確認
+        var xrRelayRaised = targetRoute.RouteState.IsThrowOutXRRelayRaised == RaiseDrop.Raise;
+
+        // 全ての条件がtrue
+        return allLeverRelayDropped && leverRelayRaised && xrRelayRaised;
     }
 
     /// <summary>
