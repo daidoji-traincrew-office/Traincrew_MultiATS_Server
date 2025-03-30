@@ -21,6 +21,7 @@ using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
 using Traincrew_MultiATS_Server.Repositories.Lever;
 using Traincrew_MultiATS_Server.Repositories.LockCondition;
 using Traincrew_MultiATS_Server.Repositories.NextSignal;
+using Traincrew_MultiATS_Server.Repositories.OperationNotification;
 using Traincrew_MultiATS_Server.Repositories.Protection;
 using Traincrew_MultiATS_Server.Repositories.Route;
 using Traincrew_MultiATS_Server.Repositories.RouteLeverDestinationButton;
@@ -253,6 +254,7 @@ builder.Services
     .AddScoped<ILockConditionRepository, LockConditionRepository>()
     .AddScoped<ILeverRepository, LeverRepository>()
     .AddScoped<INextSignalRepository, NextSignalRepository>()
+    .AddScoped<IOperationNotificationRepository, OperationNotificationRepository>()
     .AddScoped<IProtectionRepository, ProtectionRepository>()
     .AddScoped<IRouteRepository, RouteRepository>() 
     .AddScoped<IRouteLeverDestinationRepository, RouteLeverDestinationRepository>() 
@@ -264,6 +266,7 @@ builder.Services
     .AddScoped<IThrowOutControlRepository, ThrowOutControlRepository>()
     .AddScoped<ITrackCircuitRepository, TrackCircuitRepository>()
     .AddScoped<InterlockingService>()
+    .AddScoped<OperationNotificationService>()
     .AddScoped<ProtectionService>()
     .AddScoped<RendoService>()
     .AddScoped<SignalService>()

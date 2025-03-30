@@ -4,7 +4,7 @@ public class OperationNotificationData
 {
     public string DisplayName { get; init; }
     public string Content { get; init; } 
-    public DateTime OriginTime { get; init; }
+    public DateTime OperatedAt { get; init; }
     public OperationNotificationType Type { get; init; }
 }
 

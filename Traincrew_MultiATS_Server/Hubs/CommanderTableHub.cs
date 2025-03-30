@@ -11,14 +11,17 @@ namespace Traincrew_MultiATS_Server.Hubs;
     AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme,
     Policy = "CommanderTablePolicy"
 )]
-public class CommanderTableHub(TrackCircuitService trackCircuitService) : Hub
+public class CommanderTableHub(
+    TrackCircuitService trackCircuitService,
+    OperationNotificationService operationNotificationService
+) : Hub
 {
     public async Task<DataToCommanderTable> SendData_CommanderTable()
     {
         return new()
         {
             TroubleDataList = [],
-            OperationNotificationDataList = [],
+            OperationNotificationDataList = await operationNotificationService.GetOperationNotificationData(),
             TrackCircuitDataList = await trackCircuitService.GetAllTrackCircuitDataList() 
         };
     }
@@ -33,9 +36,9 @@ public class CommanderTableHub(TrackCircuitService trackCircuitService) : Hub
         
     }
     
-    public async Task SendOperationNotificationData(List<OperationNotificationData> operationNotificationData)
+    public async Task SendOperationNotificationData(OperationNotificationData operationNotificationData)
     {
-        // Todo: Implement this method
+        await operationNotificationService.SetOperationNotificationData(operationNotificationData);
     }
     
     public async Task SendTrackCircuitData(TrackCircuitData trackCircuitData)
