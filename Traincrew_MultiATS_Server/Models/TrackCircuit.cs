@@ -10,7 +10,7 @@ public class TrackCircuit : InterlockingObject
     public virtual TrackCircuitState TrackCircuitState { get; set; }
 
     [Column("operation_notification_display_name")]
-    public string? OperationNotificationDisplayName { get; set; } // 告知機の名前 (Nullable)
+    public string? OperationNotificationDisplayName { get; set; } // 告知器の名前 (Nullable)
 
-    public virtual OperationNotificationDisplay? OperationNotificationDisplay { get; set; } // 告知機との関連
+    public virtual OperationNotificationDisplay? OperationNotificationDisplay { get; set; } // 告知器との関連
 }

@@ -19,6 +19,14 @@ public class OperationNotificationService(
             OperatedAt = display.OperationNotificationState.OperatedAt
         }).ToList();
     }
+    
+    public async Task<OperationNotificationData?> GetOperationNotificationDataByTrackCircuitIds(
+        List<ulong> trackCircuitIds)
+    {
+        var displays = await operationNotificationRepository.GetDisplayByTrackCircuitIds(trackCircuitIds);
+        // Todo: 実装する
+        return null;
+    }
 
     public async Task SetOperationNotificationData(OperationNotificationData operationNotificationData)
     {

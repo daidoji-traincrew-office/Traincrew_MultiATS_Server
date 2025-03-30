@@ -74,6 +74,7 @@ dataSourceBuilder.MapEnum<LockConditionType>();
 dataSourceBuilder.MapEnum<LeverType>();
 dataSourceBuilder.MapEnum<RouteType>();
 dataSourceBuilder.MapEnum<RaiseDrop>();
+dataSourceBuilder.MapEnum<OperationNotificationType>();
 var dataSource = dataSourceBuilder.Build();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {

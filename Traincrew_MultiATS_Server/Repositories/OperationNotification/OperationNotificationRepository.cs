@@ -12,6 +12,16 @@ public class OperationNotificationRepository(ApplicationDbContext context) : IOp
             .Include(d => d.OperationNotificationState)
             .ToListAsync();
     }
+    
+    public async Task<List<OperationNotificationDisplay?>> GetDisplayByTrackCircuitIds(List<ulong> trackCircuitIds)
+    {
+        return await context.TrackCircuits
+            .Where(tc => trackCircuitIds.Contains(tc.Id))
+            .Include(tc => tc.OperationNotificationDisplay)
+            .ThenInclude(d => d.OperationNotificationState)
+            .Select(tc => tc.OperationNotificationDisplay)
+            .ToListAsync();
+    }
 
     public async Task SaveState(OperationNotificationState state)
     {
