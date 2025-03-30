@@ -11,13 +11,7 @@ public class OperationNotificationService(
     public async Task<List<OperationNotificationData>> GetOperationNotificationData()
     {
         var displays = await operationNotificationRepository.GetAllDisplay();
-        return displays.Select(display => new OperationNotificationData
-        {
-            DisplayName = display.Name, 
-            Type = display.OperationNotificationState.Type,
-            Content = display.OperationNotificationState.Content,
-            OperatedAt = display.OperationNotificationState.OperatedAt
-        }).ToList();
+        return displays.Select(ToOperationNotificationData).ToList();
     }
     
     public async Task<OperationNotificationData?> GetOperationNotificationDataByTrackCircuitIds(
@@ -36,13 +30,7 @@ public class OperationNotificationService(
             // まだホームトラックに入りきってない場合、nullを返す
             return null;
         }
-        return new()
-        {
-            DisplayName = display.Name,
-            Type = display.OperationNotificationState.Type,
-            Content = display.OperationNotificationState.Content,
-            OperatedAt = display.OperationNotificationState.OperatedAt
-        };
+        return ToOperationNotificationData(display);
     }
 
     public async Task SetOperationNotificationData(OperationNotificationData operationNotificationData)
@@ -56,5 +44,17 @@ public class OperationNotificationService(
         };
 
         await operationNotificationRepository.SaveState(state);
+    }
+
+    private static OperationNotificationData ToOperationNotificationData(
+        OperationNotificationDisplay operationNotificationDisplay)
+    {
+        return new OperationNotificationData
+        {
+            DisplayName = operationNotificationDisplay.Name,
+            Type = operationNotificationDisplay.OperationNotificationState.Type,
+            Content = operationNotificationDisplay.OperationNotificationState.Content,
+            OperatedAt = operationNotificationDisplay.OperationNotificationState.OperatedAt
+        };
     }
 }
