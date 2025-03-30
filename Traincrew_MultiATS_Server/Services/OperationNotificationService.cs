@@ -49,7 +49,7 @@ public class OperationNotificationService(
     private static OperationNotificationData ToOperationNotificationData(
         OperationNotificationDisplay operationNotificationDisplay)
     {
-        return new OperationNotificationData
+        return new()
         {
             DisplayName = operationNotificationDisplay.Name,
             Type = operationNotificationDisplay.OperationNotificationState.Type,
