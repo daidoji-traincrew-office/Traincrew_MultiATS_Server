@@ -402,9 +402,6 @@ public class RendoService(
                     /*その進路の駅に対応する<時素秒数>TER*/ == RaiseDrop.Raise
                     ||
                     route.RouteState.IsApproachLockMSRaised == RaiseDrop.Raise
-                    )
-                    ||
-                    route.RouteState.IsApproachLockMRRaised == RaiseDrop.Raise
                 )
             )
             ? RaiseDrop.Raise
@@ -446,6 +443,44 @@ public class RendoService(
             {
                 route.RouteState.IsApproachLockMRRaised = isApproachLockMRRaised;
                 await generalRepository.Save(route.RouteState);
+            }
+        }
+    }
+
+
+    /// <summary>
+    /// <strong>進路鎖錠リレー回路</strong><br/>
+    /// 現在の状態から、軌道回路を鎖錠するか決定する。
+    /// </summary>
+    /// <returns></returns>
+    public async Task RouteLockRelay()
+    {
+        // 全てのObjectを取得
+        var interlockingObjects = (await interlockingObjectRepository.GetAllWithState())
+            .ToDictionary(obj => obj.Id);
+        // 全進路リスト
+        var allRoutes = interlockingObjects
+            .Select(x => x.Value)
+            .OfType<Route>()
+            .ToList();
+        // 操作対象の進路を全て取得(進路鎖錠が掛かっている回路または接近鎖錠の掛かっている回路)
+        var routes = allRoutes
+            .Where(route => route.RouteState.IsRouteLockRaised == RaiseDrop.Drop
+                            || route.RouteState.IsApproachLockMRRaised == RaiseDrop.Drop)
+            .ToList();
+
+
+        foreach (var route in routes)
+        {
+            // 進路鎖錠欄
+
+            // 信号制御欄
+
+            // 信号制御欄の末端回路が鎖錠されていない && 接近鎖錠されている && 進路鎖錠されていない → 一斉に軌道回路を鎖錠、進路鎖錠する
+
+            // 接近鎖錠が扛上しているとき
+            // 各接近鎖錠区切りごとに、前の軌道回路が鎖錠されていない && 自軌道回路全てが短絡されていない → 当該軌道回路を解錠する
+
         }
     }
 
