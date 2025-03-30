@@ -53,7 +53,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasForeignKey<TrackCircuitState>(tcs => tcs.Id);
         modelBuilder.Entity<TrackCircuit>()
             .HasOne(tc => tc.OperationNotificationDisplay)
-            .WithMany()
+            .WithMany(ond => ond.TrackCircuits)
             .HasForeignKey(tc => tc.OperationNotificationDisplayName)
             .HasPrincipalKey(ond => ond.Name);
         modelBuilder.Entity<OperationNotificationDisplay>()

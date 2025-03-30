@@ -19,6 +19,8 @@ public class OperationNotificationRepository(ApplicationDbContext context) : IOp
             .Where(tc => trackCircuitIds.Contains(tc.Id))
             .Include(tc => tc.OperationNotificationDisplay)
             .ThenInclude(d => d.OperationNotificationState)
+            .Include(tc => tc.OperationNotificationDisplay)
+            .ThenInclude(d => d.TrackCircuits)
             .Select(tc => tc.OperationNotificationDisplay)
             .ToListAsync();
     }

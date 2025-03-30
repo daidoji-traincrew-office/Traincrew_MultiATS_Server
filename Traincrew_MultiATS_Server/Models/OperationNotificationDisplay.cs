@@ -12,4 +12,5 @@ public class OperationNotificationDisplay
     public required bool IsUp { get; set; } // 上り
     public required bool IsDown { get; set; } // 下り
     public virtual OperationNotificationState? OperationNotificationState { get; set; } // 告知器の状態
+    public virtual List<TrackCircuit>? TrackCircuits { get; set; } // 告知器に関連する軌道回路
 }
