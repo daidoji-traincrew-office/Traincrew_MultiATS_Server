@@ -49,7 +49,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasForeignKey<SwitchingMachineState>(sms => sms.Id);
         modelBuilder.Entity<TrackCircuit>()
             .HasOne(tc => tc.TrackCircuitState)
-            .WithOne(tcs => tcs.TrackCircuit)
+            .WithOne()
             .HasForeignKey<TrackCircuitState>(tcs => tcs.Id);
         modelBuilder.Entity<TrackCircuit>()
             .HasOne(tc => tc.OperationNotificationDisplay)

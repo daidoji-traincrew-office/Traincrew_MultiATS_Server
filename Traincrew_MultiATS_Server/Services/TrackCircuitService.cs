@@ -10,8 +10,8 @@ public class TrackCircuitService(
 {
     public async Task<List<TrackCircuitData>> GetAllTrackCircuitDataList()
     {
-        List<TrackCircuit> trackCircuitsDb = await trackCircuitRepository.GetAllTrackCircuitList();
-        List<TrackCircuitData> trackCircuitDataList = trackCircuitsDb
+        var trackCircuitsDb = await trackCircuitRepository.GetAllTrackCircuitList();
+        var trackCircuitDataList = trackCircuitsDb
             .Select(ToTrackCircuitData)
             .ToList();
         return trackCircuitDataList;
@@ -77,7 +77,8 @@ public class TrackCircuitService(
         {
             Last = trackCircuit.TrackCircuitState.TrainNumber,
             Name = trackCircuit.Name,
-            On = trackCircuit.TrackCircuitState.IsShortCircuit
+            On = trackCircuit.TrackCircuitState.IsShortCircuit,
+            IsLocked = trackCircuit.TrackCircuitState.IsLocked
         };
     }
 }
