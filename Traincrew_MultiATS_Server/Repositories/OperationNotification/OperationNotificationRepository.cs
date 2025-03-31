@@ -12,7 +12,7 @@ public class OperationNotificationRepository(ApplicationDbContext context) : IOp
             .Include(d => d.OperationNotificationState)
             .ToListAsync();
     }
-    
+
     public async Task<List<OperationNotificationDisplay?>> GetDisplayByTrackCircuitIds(List<ulong> trackCircuitIds)
     {
         return await context.TrackCircuits
@@ -23,22 +23,5 @@ public class OperationNotificationRepository(ApplicationDbContext context) : IOp
             .ThenInclude(d => d.TrackCircuits)
             .Select(tc => tc.OperationNotificationDisplay)
             .ToListAsync();
-    }
-
-    public async Task SaveState(OperationNotificationState state)
-    {
-        var existingState = await context.OperationNotificationStates 
-            .FindAsync(state.DisplayName);
-
-        if (existingState != null)
-        {
-            context.Entry(existingState).CurrentValues.SetValues(state);
-        }
-        else
-        {
-            await context.Set<OperationNotificationState>().AddAsync(state);
-        }
-
-        await context.SaveChangesAsync();
     }
 }

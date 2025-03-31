@@ -6,5 +6,4 @@ public interface IOperationNotificationRepository
 {
     Task<List<OperationNotificationDisplay>> GetAllDisplay();
     Task<List<OperationNotificationDisplay?>> GetDisplayByTrackCircuitIds(List<ulong> trackCircuitIds);
-    Task SaveState(OperationNotificationState state);
 }

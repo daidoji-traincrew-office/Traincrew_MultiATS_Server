@@ -1,11 +1,13 @@
 ﻿using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
+using Traincrew_MultiATS_Server.Repositories.General;
 using Traincrew_MultiATS_Server.Repositories.OperationNotification;
 
 namespace Traincrew_MultiATS_Server.Services;
 
 public class OperationNotificationService(
     IOperationNotificationRepository operationNotificationRepository,
+    IGeneralRepository generalRepository,
     IDateTimeRepository dateTimeRepository)
 {
     public async Task<List<OperationNotificationData>> GetOperationNotificationData()
@@ -43,7 +45,7 @@ public class OperationNotificationService(
             OperatedAt = dateTimeRepository.GetNow()
         };
 
-        await operationNotificationRepository.SaveState(state);
+        await generalRepository.Save(state);
     }
 
     private static OperationNotificationData ToOperationNotificationData(
