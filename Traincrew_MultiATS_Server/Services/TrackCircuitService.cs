@@ -48,7 +48,7 @@ public class TrackCircuitService(
             return;
         }
         var trackCircuitState = trackCircuits[0].TrackCircuitState;
-        trackCircuitState.IsLocked = trackCircuitData.IsLocked;
+        trackCircuitState.IsLocked = trackCircuitData.Lock;
         trackCircuitState.IsShortCircuit = trackCircuitData.On;
         trackCircuitState.TrainNumber = trackCircuitData.Last;
         await generalRepository.Save(trackCircuitState);
@@ -78,7 +78,7 @@ public class TrackCircuitService(
             Last = trackCircuit.TrackCircuitState.TrainNumber,
             Name = trackCircuit.Name,
             On = trackCircuit.TrackCircuitState.IsShortCircuit,
-            IsLocked = trackCircuit.TrackCircuitState.IsLocked
+            Lock = trackCircuit.TrackCircuitState.IsLocked
         };
     }
 }
