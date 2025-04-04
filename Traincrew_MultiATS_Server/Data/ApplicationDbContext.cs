@@ -9,6 +9,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Station> Stations { get; set; }
     public DbSet<InterlockingObject> InterlockingObjects { get; set; }
     public DbSet<Route> Routes { get; set; }
+    public DbSet<RouteState> RouteStates { get; set; }
     public DbSet<SwitchingMachine> SwitchingMachines { get; set; }
     public DbSet<TrackCircuit> TrackCircuits { get; set; }
     public DbSet<TrackCircuitState> TrackCircuitStates { get; set; }

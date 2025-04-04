@@ -2,4 +2,22 @@
 
 public interface IRouteRepository
 {
+    /// <summary>
+    /// てこ反応リレーが落下しており かつ 進路照査リレーが扛上している進路に対し、進路照査リレーを落下させる
+    /// </summary>
+    Task DropRouteRelayWhereLeverRelayIsDropped();
+    /// <summary>
+    /// てこ反応リレーが扛上しているすべての進路IDを取得する 
+    /// </summary>
+    /// <returns> てこ反応リレーが扛上している進路のリスト </returns>
+    Task<List<ulong>> GetIdsWhereLeverRelayIsRaised();
+    /// <summary>
+    /// 進路照査リレーが落下しており かつ 信号制御リレーが扛上している進路に対し、信号制御リレーを落下させる
+    /// </summary>
+    Task DropSignalRelayWhereRouteRelayIsDropped();
+    /// <summary>
+    /// 進路照査リレーが扛上しているすべての進路IDを取得する
+    /// </summary>
+    /// <returns> 進路照査リレーが扛上している進路のリスト </returns>
+    Task<List<ulong>> GetIdsWhereRouteRelayIsRaised();
 }
