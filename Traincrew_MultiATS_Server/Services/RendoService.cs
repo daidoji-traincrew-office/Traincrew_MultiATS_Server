@@ -387,7 +387,7 @@ public class RendoService(
     public async Task ApproachLockRelay()
     {
         // 操作対象の進路を全て取得(進路照査が扛上している進路または接近鎖錠の掛かっている進路)
-        var routeIds = await routeRepository.GetIdsWhereRouteRelayOrApproachLockMRIsRaised();
+        var routeIds = await routeRepository.GetIdsWhereRouteRelayIsRaisedOrApproachLockMRIsDropped();
         
         // 関わる全てのObjectを取得 
         var objectIds = routeIds;
@@ -472,7 +472,7 @@ public class RendoService(
     public async Task RouteLockRelay()
     {
         // 操作対象の進路を全て取得(進路鎖錠が掛かっている回路または接近鎖錠の掛かっている回路)
-        var routeIds = await routeRepository.GetIdsWhereRouteLockRelayOrApproachLockMRIsRaised();
+        var routeIds = await routeRepository.GetIdsWhereRouteLockRelayIsRaisedOrApproachLockMRIsDropped();
         // 進路鎖錠欄を取得
         var routeLockConditions = await lockConditionRepository.GetConditionsByObjectIdsAndType(
             routeIds, LockType.Route);
