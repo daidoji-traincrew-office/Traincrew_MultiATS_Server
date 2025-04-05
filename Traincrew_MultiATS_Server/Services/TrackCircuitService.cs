@@ -1,14 +1,17 @@
 using Traincrew_MultiATS_Server.Models;
+using Traincrew_MultiATS_Server.Repositories.General;
 using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
 
 namespace Traincrew_MultiATS_Server.Services;
 
-public class TrackCircuitService(ITrackCircuitRepository trackCircuitRepository)
+public class TrackCircuitService(
+    ITrackCircuitRepository trackCircuitRepository,
+    IGeneralRepository generalRepository)
 {
     public async Task<List<TrackCircuitData>> GetAllTrackCircuitDataList()
     {
-        List<TrackCircuit> trackCircuitsDb = await trackCircuitRepository.GetAllTrackCircuitList();
-        List<TrackCircuitData> trackCircuitDataList = trackCircuitsDb
+        var trackCircuitsDb = await trackCircuitRepository.GetAllTrackCircuitList();
+        var trackCircuitDataList = trackCircuitsDb
             .Select(ToTrackCircuitData)
             .ToList();
         return trackCircuitDataList;
@@ -35,6 +38,22 @@ public class TrackCircuitService(ITrackCircuitRepository trackCircuitRepository)
         await trackCircuitRepository.SetTrackCircuitList(trackCircuit, trainNumber);
     }
 
+
+    public async Task SetTrackCircuitData(TrackCircuitData trackCircuitData)
+    {
+        var trackCircuits = await trackCircuitRepository.GetTrackCircuitByName([trackCircuitData.Name]);
+        if (trackCircuits.Count == 0)
+        {
+            // Todo: 例外を吐いたほうが良いとされている
+            return;
+        }
+        var trackCircuitState = trackCircuits[0].TrackCircuitState;
+        trackCircuitState.IsLocked = trackCircuitData.Lock;
+        trackCircuitState.IsShortCircuit = trackCircuitData.On;
+        trackCircuitState.TrainNumber = trackCircuitData.Last;
+        await generalRepository.Save(trackCircuitState);
+    }
+
     public async Task ClearTrackCircuitDataList(List<TrackCircuitData> trackCircuitData)
     {
         List<TrackCircuit> trackCircuit = trackCircuitData
@@ -58,7 +77,8 @@ public class TrackCircuitService(ITrackCircuitRepository trackCircuitRepository)
         {
             Last = trackCircuit.TrackCircuitState.TrainNumber,
             Name = trackCircuit.Name,
-            On = trackCircuit.TrackCircuitState.IsShortCircuit
+            On = trackCircuit.TrackCircuitState.IsShortCircuit,
+            Lock = trackCircuit.TrackCircuitState.IsLocked
         };
     }
 }

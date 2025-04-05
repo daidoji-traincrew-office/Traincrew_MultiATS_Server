@@ -30,6 +30,6 @@ public class TroubleData
 public class DataToCommanderTable
 {
     public List<TroubleData> TroubleDataList { get; set; }
-	public List<KokuchiData> KokuchiDataList { get; set; }
+	public List<OperationNotificationData> OperationNotificationDataList { get; set; }
 	public List<TrackCircuitData> TrackCircuitDataList { get; set; }
 }

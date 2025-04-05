@@ -9,5 +9,4 @@ public class TrackCircuitState
     public required string TrainNumber { get; set; }
     public bool IsShortCircuit { get; set; }
     public bool IsLocked { get; set; }
-    public virtual TrackCircuit TrackCircuit { get; set; }
 }
