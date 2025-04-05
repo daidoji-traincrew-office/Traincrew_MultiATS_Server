@@ -2,11 +2,13 @@ using System.Net;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using OpenIddict.Abstractions;
+using Traincrew_MultiATS_Server.Authentication;
 using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.HostedService;
 using Traincrew_MultiATS_Server.Hubs;
@@ -19,6 +21,7 @@ using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
 using Traincrew_MultiATS_Server.Repositories.Lever;
 using Traincrew_MultiATS_Server.Repositories.LockCondition;
 using Traincrew_MultiATS_Server.Repositories.NextSignal;
+using Traincrew_MultiATS_Server.Repositories.OperationNotification;
 using Traincrew_MultiATS_Server.Repositories.Protection;
 using Traincrew_MultiATS_Server.Repositories.Route;
 using Traincrew_MultiATS_Server.Repositories.RouteLeverDestinationButton;
@@ -33,15 +36,13 @@ using Traincrew_MultiATS_Server.Services;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
 var builder = WebApplication.CreateBuilder(args);
+var enableAuthorization =
+    !builder.Environment.IsDevelopment() || builder.Configuration.GetValue<bool>("EnableAuthorization");
 // Logging
-builder.Services.AddHttpLogging(options =>
-{
-   options.LoggingFields = HttpLoggingFields.RequestPropertiesAndHeaders;
-});
+builder.Services.AddHttpLogging(options => { options.LoggingFields = HttpLoggingFields.RequestPropertiesAndHeaders; });
 // Proxied headers
 if (!builder.Environment.IsDevelopment())
 {
-    
     builder.Services.Configure<ForwardedHeadersOptions>(options =>
     {
         options.ForwardedHeaders =
@@ -73,6 +74,7 @@ dataSourceBuilder.MapEnum<LockConditionType>();
 dataSourceBuilder.MapEnum<LeverType>();
 dataSourceBuilder.MapEnum<RouteType>();
 dataSourceBuilder.MapEnum<RaiseDrop>();
+dataSourceBuilder.MapEnum<OperationNotificationType>();
 var dataSource = dataSourceBuilder.Build();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
@@ -83,67 +85,18 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // SignalR
 builder.Services.AddSignalR();
 
-// 認証周り
-builder.Services.AddOpenIddict()
+// 認可周り
+// Cookie認可の設定
+builder.Services
+    .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options => { options.ExpireTimeSpan = TimeSpan.FromMinutes(10); });
+// OpenIddictの設定
+var openIddictBuilder = builder.Services.AddOpenIddict()
     // Register the OpenIddict core components.
     .AddCore(options =>
     {
         options.UseEntityFrameworkCore()
             .UseDbContext<ApplicationDbContext>();
-    })
-    // Register the OpenIddict client components.
-    .AddClient(options =>
-    {
-        // Enable the client credentials flow. 
-        options.AllowAuthorizationCodeFlow();
-
-        // Register the signing and encryption credentials used to protect
-        // sensitive data like the state tokens produced by OpenIddict.
-        if (builder.Environment.IsDevelopment())
-        {
-            options.AddDevelopmentEncryptionCertificate()
-                .AddDevelopmentSigningCertificate();
-        }
-        else
-        {
-            // Generate a certificate at startup and register it.
-            const string encryptionCertificatePath = "cert/client-encryption-certificate.pfx";
-            const string signingCertificatePath = "cert/client-signing-certificate.pfx";
-            EnsureCertificateExists(
-                encryptionCertificatePath,
-                "CN=Fabrikam Client Encryption Certificate",
-                X509KeyUsageFlags.KeyEncipherment);
-            EnsureCertificateExists(
-                signingCertificatePath,
-                "CN=Fabrikam Client Signing Certificate",
-                X509KeyUsageFlags.DigitalSignature);
-
-            options.AddEncryptionCertificate(
-                new X509Certificate2(encryptionCertificatePath, string.Empty));
-            options.AddSigningCertificate(
-                new X509Certificate2(signingCertificatePath, string.Empty));
-        }
-
-        // Register the ASP.NET Core host and configure the ASP.NET Core-specific options.
-        options.UseAspNetCore()
-            .EnableRedirectionEndpointPassthrough();
-
-        // Register the System.Net.Http integration and use the identity of the current
-        // assembly as a more specific user agent, which can be useful when dealing with
-        // providers that use the user agent as a way to throttle requests (e.g Reddit).
-        options.UseSystemNetHttp()
-            .SetProductInformation(typeof(Program).Assembly);
-
-        // Register the Web providers integrations.
-        options.UseWebProviders()
-            .AddDiscord(discord =>
-            {
-                discord.AddScopes("identify", "guilds", "guilds.members.read");
-                discord
-                    .SetClientId(builder.Configuration["Discord:ClientId"] ?? "")
-                    .SetClientSecret(builder.Configuration["Discord:ClientSecret"] ?? "")
-                    .SetRedirectUri("auth/callback");
-            });
     })
     // Register the OpenIddict server components.
     .AddServer(options =>
@@ -200,9 +153,99 @@ builder.Services.AddOpenIddict()
         // Register the ASP.NET Core host.
         options.UseAspNetCore();
     });
-builder.Services.AddAuthorization()
-    .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options => { options.ExpireTimeSpan = TimeSpan.FromMinutes(10); });
+
+// 認証を有効にする場合の設定
+if (enableAuthorization)
+{
+    // OpenIddictのクライアント設定を有効にする
+    openIddictBuilder
+        .AddClient(options =>
+        {
+            // Enable the client credentials flow. 
+            options.AllowAuthorizationCodeFlow();
+
+            // Register the signing and encryption credentials used to protect
+            // sensitive data like the state tokens produced by OpenIddict.
+            if (builder.Environment.IsDevelopment())
+            {
+                options.AddDevelopmentEncryptionCertificate()
+                    .AddDevelopmentSigningCertificate();
+            }
+            else
+            {
+                // Generate a certificate at startup and register it.
+                const string encryptionCertificatePath = "cert/client-encryption-certificate.pfx";
+                const string signingCertificatePath = "cert/client-signing-certificate.pfx";
+                EnsureCertificateExists(
+                    encryptionCertificatePath,
+                    "CN=Fabrikam Client Encryption Certificate",
+                    X509KeyUsageFlags.KeyEncipherment);
+                EnsureCertificateExists(
+                    signingCertificatePath,
+                    "CN=Fabrikam Client Signing Certificate",
+                    X509KeyUsageFlags.DigitalSignature);
+
+                options.AddEncryptionCertificate(
+                    new X509Certificate2(encryptionCertificatePath, string.Empty));
+                options.AddSigningCertificate(
+                    new X509Certificate2(signingCertificatePath, string.Empty));
+            }
+
+            // Register the ASP.NET Core host and configure the ASP.NET Core-specific options.
+            options.UseAspNetCore()
+                .EnableRedirectionEndpointPassthrough();
+
+            // Register the System.Net.Http integration and use the identity of the current
+            // assembly as a more specific user agent, which can be useful when dealing with
+            // providers that use the user agent as a way to throttle requests (e.g Reddit).
+            options.UseSystemNetHttp()
+                .SetProductInformation(typeof(Program).Assembly);
+
+            // Register the Web providers integrations.
+            options.UseWebProviders()
+                .AddDiscord(discord =>
+                {
+                    discord.AddScopes("identify", "guilds", "guilds.members.read");
+                    discord
+                        .SetClientId(builder.Configuration["Discord:ClientId"] ?? "")
+                        .SetClientSecret(builder.Configuration["Discord:ClientSecret"] ?? "")
+                        .SetRedirectUri("auth/callback");
+                });
+        });
+}
+
+builder.Services.AddAuthorization();
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("TrainPolicy", policy =>
+    {
+        policy.Requirements.Add(new DiscordRoleRequirement
+        {
+            Condition = role => role.IsDriver || role.IsConductor
+        });
+    })
+    .AddPolicy("TIDPolicy", policy =>
+    {
+        policy.Requirements.Add(new DiscordRoleRequirement
+        {
+            Condition = role => role.IsCommander || role.IsDriverManager
+        });
+    })
+    .AddPolicy("InterlockingPolicy", policy =>
+    {
+        policy.Requirements.Add(new DiscordRoleRequirement
+        {
+            Condition = role => role.IsSignalman
+        });
+    })
+    .AddPolicy("CommanderTablePolicy", policy =>
+    {
+        policy.Requirements.Add(new DiscordRoleRequirement
+        {
+            Condition = role => role.IsCommander
+        });
+    });
+
+
 // DI周り
 builder.Services
     .AddScoped<IDateTimeRepository, DateTimeRepository>()
@@ -212,6 +255,7 @@ builder.Services
     .AddScoped<ILockConditionRepository, LockConditionRepository>()
     .AddScoped<ILeverRepository, LeverRepository>()
     .AddScoped<INextSignalRepository, NextSignalRepository>()
+    .AddScoped<IOperationNotificationRepository, OperationNotificationRepository>()
     .AddScoped<IProtectionRepository, ProtectionRepository>()
     .AddScoped<IRouteRepository, RouteRepository>() 
     .AddScoped<IRouteLeverDestinationRepository, RouteLeverDestinationRepository>() 
@@ -223,6 +267,7 @@ builder.Services
     .AddScoped<IThrowOutControlRepository, ThrowOutControlRepository>()
     .AddScoped<ITrackCircuitRepository, TrackCircuitRepository>()
     .AddScoped<InterlockingService>()
+    .AddScoped<OperationNotificationService>()
     .AddScoped<ProtectionService>()
     .AddScoped<RendoService>()
     .AddScoped<SignalService>()
@@ -230,14 +275,22 @@ builder.Services
     .AddScoped<SwitchingMachineService>() 
     .AddScoped<TrackCircuitService>()
     .AddSingleton<DiscordService>()
-    .AddSingleton<IDiscordRepository, DiscordRepository>();
+    .AddSingleton<DiscordRepository>()
+    .AddSingleton<IDiscordRepository>(provider => provider.GetRequiredService<DiscordRepository>())
+    .AddSingleton<IAuthorizationHandler, DiscordRoleHandler>();
 // HostedServiceまわり
-builder.Services.AddHostedService<InitDbHostedService>();
-
+builder.Services
+    .AddHostedService<InitDbHostedService>();
+if (enableAuthorization)
+{
+    // 認可を使う場合はDiscord BOTの起動をする
+    builder.Services.AddHostedService<DiscordBotHostedService>();
+}
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+app.UseHttpLogging();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -248,24 +301,32 @@ else
     app.UseForwardedHeaders();
     app.UseHsts();
 }
-app.UseHttpLogging();
+app.UseRouting();
+app.UseCors();
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Create a new application registration matching the values configured in MultiATS_Client.
 // Note: in a real world application, this step should be part of a setup script.
-await using (var scope = app.Services.CreateAsyncScope())
+if (enableAuthorization)
 {
+    await using var scope = app.Services.CreateAsyncScope();
     var manager = scope.ServiceProvider.GetRequiredService<IOpenIddictApplicationManager>();
 
     if (await manager.FindByClientIdAsync("MultiATS_Client") == null)
     {
-        await manager.CreateAsync(new OpenIddictApplicationDescriptor
+        await manager.CreateAsync(new()
         {
             ApplicationType = ApplicationTypes.Native,
             ClientId = "MultiATS_Client",
             ClientType = ClientTypes.Public,
             RedirectUris =
             {
-                new Uri("http://localhost:49152/")
+                new("http://localhost:49152/"),
+                new("http://localhost:49153/"),
+                new("http://localhost:49154/"),
+                new("http://localhost:49155/"),
+                new("http://localhost:49156/")
             },
             Permissions =
             {
@@ -278,17 +339,18 @@ await using (var scope = app.Services.CreateAsyncScope())
     }
 }
 
-app.UseRouting();
-app.UseCors();
-
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.MapHub<TrainHub>("/hub/train");
-app.MapHub<TIDHub>("/hub/TID");
-app.MapHub<InterlockingHub>("/hub/interlocking");
+List<IEndpointConventionBuilder> conventionBuilders =
+[
+    app.MapControllers(),
+    app.MapHub<TrainHub>("/hub/train"),
+    app.MapHub<TIDHub>("/hub/TID"),
+    app.MapHub<InterlockingHub>("/hub/interlocking"),
+    app.MapHub<CommanderTableHub>("/hub/commander_table"),
+];
+if (!enableAuthorization)
+{
+    conventionBuilders.ForEach(conventionBuilder => conventionBuilder.AllowAnonymous());
+}
 
 app.Run();
 return;

@@ -23,7 +23,7 @@ public class LockConditionRepository(ApplicationDbContext context) : ILockCondit
             .GroupBy(x => x.ObjectId)
             .ToDictionaryAsync(
                 x => x.Key, 
-                x => x.Select(y => y.lc).ToList());
+                x => x.Select(y => y.lc).OrderBy(lc => lc.Id).ToList());
     }
 
     public async Task<Dictionary<ulong, List<Models.LockCondition>>> GetConditionsByObjectIdsAndType(List<ulong> objectIds, LockType type)
@@ -34,6 +34,6 @@ public class LockConditionRepository(ApplicationDbContext context) : ILockCondit
             .GroupBy(x => x.ObjectId)
             .ToDictionaryAsync(
                 x => x.Key, 
-                x => x.Select(y => y.lc).ToList());
+                x => x.Select(y => y.lc).OrderBy(lc => lc.Id).ToList());
     }
 }

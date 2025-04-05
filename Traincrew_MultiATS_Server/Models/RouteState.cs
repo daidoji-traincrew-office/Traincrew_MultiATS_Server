@@ -23,6 +23,7 @@ public class RouteState
     /// <summary>
     /// 接近鎖錠リレー(MR)
     /// </summary>
+    // ReSharper disable InconsistentNaming
     public RaiseDrop IsApproachLockMRRaised { get; set; }
     /// <summary>
     /// 接近鎖錠リレー(MS)
@@ -35,7 +36,6 @@ public class RouteState
     /// <summary>
     /// 総括反応リレー
     /// </summary>
-    // ReSharper disable InconsistentNaming
     [Column("is_throw_out_xr_relay_raised")]
     public RaiseDrop IsThrowOutXRRelayRaised { get; set; }
     /// <summary>

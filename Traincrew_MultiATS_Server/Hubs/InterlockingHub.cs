@@ -6,7 +6,11 @@ using Traincrew_MultiATS_Server.Services;
 
 namespace Traincrew_MultiATS_Server.Hubs;
 
-[Authorize(AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
+// 信号係員操作可・司令主任鍵使用可 
+[Authorize(
+    AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme,
+    Policy = "InterlockingPolicy"
+)]
 public class InterlockingHub(
     TrackCircuitService trackCircuitService,
     SignalService signalService,

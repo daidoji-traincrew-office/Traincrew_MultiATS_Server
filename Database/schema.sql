@@ -137,12 +137,23 @@ CREATE TABLE route_include
 );
 CREATE INDEX route_include_source_lever_id_index ON route_include (source_lever_id);
 
+-- 運転告知機
+CREATE TABLE operation_notification_display
+(
+    name       VARCHAR(100) PRIMARY KEY,                     -- 告知機の名前
+    station_id VARCHAR(10) REFERENCES station (id) NOT NULL, -- 所属する停車場
+    is_up      BOOLEAN                             NOT NULL, -- 上り
+    is_down    BOOLEAN                             NOT NULL  -- 下り
+);
+
 -- 軌道回路
 CREATE TABLE track_circuit
 (
-    id              BIGINT PRIMARY KEY REFERENCES interlocking_object (id),
-    protection_zone INT NOT NULL -- 防護無線区間
+    id                                  BIGINT PRIMARY KEY REFERENCES interlocking_object (id),
+    protection_zone                     INT NOT NULL,                                                  -- 防護無線区間
+    operation_notification_display_name VARCHAR(100) REFERENCES operation_notification_display (name)  -- 運転告知機の名前
 );
+CREATE INDEX track_circuit_operation_notification_display_name_index ON track_circuit (operation_notification_display_name);
 
 -- 転てつ機
 CREATE TABLE switching_machine
@@ -371,4 +382,24 @@ CREATE TABLE protection_zone_state
     protection_zone BIGINT       NOT NULL,
     train_number    VARCHAR(100) NOT NULL,
     UNIQUE (protection_zone, train_number)
+);
+
+-- 運転告知状態
+CREATE TYPE operation_notification_type AS ENUM (
+    'none',
+    'yokushi',
+    'tsuuchi',
+    'tsuuchi_kaijo',
+    'kaijo',
+    'shuppatsu',
+    'shuppatsu_jikoku',
+    'torikeshi',
+    'tenmatsusho'
+    );
+CREATE TABLE operation_notification_state
+(
+    display_name VARCHAR(100) REFERENCES operation_notification_display (name) PRIMARY KEY, -- 告知機の名前
+    type         operation_notification_type NOT NULL,                                      -- 告知種類 
+    content      TEXT                        NOT NULL,                                      -- 表示データ
+    operated_at  TIMESTAMP                   NOT NULL                                       -- 操作時刻
 );

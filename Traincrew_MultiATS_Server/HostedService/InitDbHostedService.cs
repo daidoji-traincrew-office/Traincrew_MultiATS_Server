@@ -33,9 +33,12 @@ public class InitDbHostedService(IServiceScopeFactory serviceScopeFactory) : IHo
             await dbInitializer.InitializePost();
         }
 
+        await InitOperationNotificationDisplay(context, datetimeRepository, cancellationToken);
+
         _schedulers.AddRange([
             new SwitchingMachineScheduler(serviceScopeFactory),
             new RendoScheduler(serviceScopeFactory),
+            new OperationNotificationScheduler(serviceScopeFactory),
         ]);
     }
 
@@ -98,6 +101,73 @@ public class InitDbHostedService(IServiceScopeFactory serviceScopeFactory) : IHo
         {
             await initializer.InitializeLocks();
         }
+    }
+
+    private async Task InitOperationNotificationDisplay(
+        ApplicationDbContext context,
+        IDateTimeRepository dateTimeRepository,
+        CancellationToken cancellationToken)
+    {
+        var file = new FileInfo("./Data/運転告知器.csv");
+        if (!file.Exists)
+        {
+            return;
+        }
+
+        var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+        {
+            HasHeaderRecord = false,
+        };
+        using var reader = new StreamReader(file.FullName);
+        // ヘッダー行を読み飛ばす
+        await reader.ReadLineAsync(cancellationToken);
+        using var csv = new CsvReader(reader, config);
+        csv.Context.RegisterClassMap<OperationNotificationDisplayCsvMap>();
+        var records = await csv
+            .GetRecordsAsync<OperationNotificationDisplayCsv>(cancellationToken)
+            .ToListAsync(cancellationToken);
+        var trackCircuitNames = records
+            .SelectMany(r => r.TrackCircuitNames)
+            .ToList();
+        var trackCircuits = await context.TrackCircuits
+            .Where(tc => trackCircuitNames.Contains(tc.Name))
+            .ToDictionaryAsync(tc => tc.Name, cancellationToken);
+        var operationNotificationDisplayNames = await context.OperationNotificationDisplays
+            .Select(ond => ond.Name)
+            .ToListAsync(cancellationToken);
+        foreach (var record in records)
+        {
+            var name = record.Name;
+            if (operationNotificationDisplayNames.Contains(name))
+            {
+                continue;
+            }
+
+            context.OperationNotificationDisplays.Add(new()
+            {
+                Name = name,
+                StationId = record.StationId,
+                IsUp = record.IsUp,
+                IsDown = record.IsDown,
+                OperationNotificationState = new()
+                {
+                    DisplayName = name,
+                    Type = OperationNotificationType.None,
+                    Content = "",
+                    OperatedAt = dateTimeRepository.GetNow().AddDays(-1)
+                }
+            });
+            foreach (var trackCircuitName in record.TrackCircuitNames)
+            {
+                if (!trackCircuits.TryGetValue(trackCircuitName, out var trackCircuit))
+                {
+                    continue;
+                }
+                trackCircuit.OperationNotificationDisplayName = name;
+                context.TrackCircuits.Update(trackCircuit);
+            }
+        }
+        await context.SaveChangesAsync(cancellationToken);
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
@@ -484,6 +554,7 @@ internal class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Ca
                 TargetRouteId = targetRoute.Id
             });
         }
+
         await context.SaveChangesAsync(cancellationToken);
     }
 }

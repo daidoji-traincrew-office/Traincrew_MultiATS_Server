@@ -15,7 +15,6 @@ public class TrackCircuitState
     public bool IsLocked { get; set; }
     [Column(TypeName = "timestamp without time zone")]
     public DateTime? AnLockedAt { get; set; }
-    public virtual TrackCircuit TrackCircuit { get; set; }
     /// <summary>
     /// 不正扛上補正済みリレー
     /// F付リレー

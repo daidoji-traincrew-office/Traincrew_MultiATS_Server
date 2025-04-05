@@ -9,8 +9,10 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Station> Stations { get; set; }
     public DbSet<InterlockingObject> InterlockingObjects { get; set; }
     public DbSet<Route> Routes { get; set; }
+    public DbSet<RouteState> RouteStates { get; set; }
     public DbSet<SwitchingMachine> SwitchingMachines { get; set; }
     public DbSet<TrackCircuit> TrackCircuits { get; set; }
+    public DbSet<TrackCircuitState> TrackCircuitStates { get; set; }
     public DbSet<Lock> Locks { get; set; }
     public DbSet<LockCondition> LockConditions { get; set; }
     public DbSet<LockConditionObject> LockConditionObjects { get; set; }
@@ -25,6 +27,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<DestinationButton> DestinationButtons { get; set; }
     public DbSet<SignalRoute> SignalRoutes { get; internal set; }
     public DbSet<ThrowOutControl> ThrowOutControls { get; set; }
+    public DbSet<OperationNotificationDisplay> OperationNotificationDisplays { get; set; }
+    public DbSet<OperationNotificationState> OperationNotificationStates { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -46,8 +50,18 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasForeignKey<SwitchingMachineState>(sms => sms.Id);
         modelBuilder.Entity<TrackCircuit>()
             .HasOne(tc => tc.TrackCircuitState)
-            .WithOne(tcs => tcs.TrackCircuit)
+            .WithOne()
             .HasForeignKey<TrackCircuitState>(tcs => tcs.Id);
+        modelBuilder.Entity<TrackCircuit>()
+            .HasOne(tc => tc.OperationNotificationDisplay)
+            .WithMany(ond => ond.TrackCircuits)
+            .HasForeignKey(tc => tc.OperationNotificationDisplayName)
+            .HasPrincipalKey(ond => ond.Name);
+        modelBuilder.Entity<OperationNotificationDisplay>()
+            .HasOne(ond => ond.OperationNotificationState)
+            .WithOne()
+            .HasForeignKey<OperationNotificationState>(ons => ons.DisplayName)
+            .HasPrincipalKey<OperationNotificationDisplay>(ond => ond.Name);
         /*
         modelBuilder.Entity<Lock>()
             .HasOne(l => l.LockCondition)
