@@ -29,7 +29,7 @@ public class InitDbHostedService(IServiceScopeFactory serviceScopeFactory) : IHo
 
         await InitRendoTable(context, datetimeRepository, cancellationToken);
         await InitOperationNotificationDisplay(context, datetimeRepository, cancellationToken);
-        
+
         if (dbInitializer != null)
         {
             await dbInitializer.InitializePost();
@@ -163,10 +163,12 @@ public class InitDbHostedService(IServiceScopeFactory serviceScopeFactory) : IHo
                 {
                     continue;
                 }
+
                 trackCircuit.OperationNotificationDisplayName = name;
                 context.TrackCircuits.Update(trackCircuit);
             }
         }
+
         await context.SaveChangesAsync(cancellationToken);
     }
 
@@ -227,9 +229,9 @@ internal class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Ca
         var stationTimerStates = (await context.StationTimerStates
             .Select(s => new { s.StationId, s.Seconds })
             .ToListAsync(cancellationToken)).ToHashSet();
-        foreach(var stationId in stationIds)
+        foreach (var stationId in stationIds)
         {
-            foreach (var seconds in new []{30, 60})
+            foreach (var seconds in new[] { 30, 60 })
             {
                 if (stationTimerStates.Contains(new { StationId = stationId, Seconds = seconds }))
                 {
@@ -246,6 +248,7 @@ internal class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Ca
                 });
             }
         }
+
         await context.SaveChangesAsync(cancellationToken);
     }
 
@@ -590,8 +593,8 @@ internal class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Ca
 
         await context.SaveChangesAsync(cancellationToken);
     }
-    
-    private async Task SetStationIdToInterlockingObject() 
+
+    private async Task SetStationIdToInterlockingObject()
     {
         var interlockingObjects = await context.InterlockingObjects
             .ToListAsync();
@@ -601,6 +604,7 @@ internal class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Ca
             {
                 continue;
             }
+
             var stationId = interlockingObject.Name.Substring(0, 4);
             interlockingObject.StationId = stationId;
         }
@@ -612,8 +616,11 @@ internal class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Ca
 public partial class DbRendoTableInitializer
 {
     const string NameSwitchingMachine = "転てつ器";
+    private const string PrefixTrackCircuitDown = "下り";
+    private const string PrefixTrackCircuitUp = "上り";
     private const string NameAnd = "and";
     private const string NameOr = "or";
+    private const string NameRouteLock = "routeLock";
 
     private static readonly Dictionary<string, List<string>> StationIdMap = new()
     {
@@ -621,10 +628,16 @@ public partial class DbRendoTableInitializer
         { "TH65", ["TH66S", "TH64"] },
         // 江ノ原検車区: 大道寺
         { "TH66S", ["TH65"] },
+        // 新野崎: 
+        { "TH67", [] },
         // 浜園: 津崎
         { "TH70", ["TH71"] },
         // 津崎: 浜園
-        { "TH71", ["TH70"] }
+        { "TH71", ["TH70"] },
+        // 駒野: 館浜
+        { "TH75", ["TH76"] },
+        // 館浜: 駒野
+        { "TH76", ["TH75"] },
     };
 
     [GeneratedRegex(@"\d+")]
@@ -633,6 +646,10 @@ public partial class DbRendoTableInitializer
     // てこ名を抽出するための正規表現
     [GeneratedRegex(@"(\d+)(?:R|L)(Z?)")]
     private static partial Regex RegexLeverParse();
+    
+    // 閉塞軌道回路名を抽出するための正規表現
+    [GeneratedRegex(@"^(\d+)T$")]
+    private static partial Regex RegexClosureTrackCircuitParse();
 
     // 信号制御欄から統括制御とそれ以外の部位に分けるための正規表現
     [GeneratedRegex(@"^(.*?)(?:\(\(([^\)\s]+)\)\)\s*)*$")]
@@ -641,7 +658,7 @@ public partial class DbRendoTableInitializer
     // 連動図表の鎖錠欄の諸々のトークンを抽出するための正規表現
     [GeneratedRegex(@"\[\[|\]\]|\(\(|\)\)|\[|\]|\{|\}|\(|\)|但|又は|[A-Z\dｲﾛ秒]+")]
     private static partial Regex TokenRegex();
-
+    
     // ReSharper disable InconsistentNaming
     private readonly string stationId;
     private readonly List<RendoTableCSV> rendoTableCsvs;
@@ -686,6 +703,7 @@ public partial class DbRendoTableInitializer
         var oldName = "";
         var previousStart = "";
         var preivousLockTime = "";
+        var previousApproachLock = "";
         foreach (var rendoTableCsv in rendoTableCsvs)
         {
             if (string.IsNullOrWhiteSpace(rendoTableCsv.Name) || rendoTableCsv.Name.StartsWith('同'))
@@ -702,15 +720,18 @@ public partial class DbRendoTableInitializer
                 rendoTableCsv.Start = previousStart;
             }
 
+            // てこ番が違う場合
             if (previousStart != rendoTableCsv.Start)
             {
                 preivousLockTime = rendoTableCsv.ApproachTime;
+                previousApproachLock = rendoTableCsv.ApproachLock;
             }
             else
             {
                 rendoTableCsv.ApproachTime = preivousLockTime;
+                rendoTableCsv.ApproachLock = previousApproachLock;
             }
-
+            
             previousStart = rendoTableCsv.Start;
         }
     }
@@ -1005,7 +1026,38 @@ public partial class DbRendoTableInitializer
 
             return Task.FromResult<List<InterlockingObject>>([]);
         });
+        var searchObjectsForApproachLock = new Func<LockItem, Task<List<InterlockingObject>>>(async item =>
+        {
+            var result = await searchOtherObjects(item);
+            if (result.Count > 0)
+            {
+                return result;
+            }
+            // 接近鎖錠の場合、閉塞軌道回路も探す
+            var match = RegexClosureTrackCircuitParse().Match(item.Name);
+            string trackCircuitName;
+            // 閉塞軌道回路
+            if(match.Success)
+            {
+                var trackCircuitNumber = int.Parse(match.Groups[1].Value);
+                var prefix = trackCircuitNumber % 2 == 0 ? PrefixTrackCircuitUp : PrefixTrackCircuitDown;
+                trackCircuitName = $"{prefix}{trackCircuitNumber}T";
+            }
+            // 単線の諸々軌道回路
+            else
+            {
+               trackCircuitName = item.Name; 
+            }
+            var trackCircuit = await context.TrackCircuits 
+                .FirstOrDefaultAsync(tc => tc.Name == trackCircuitName, cancellationToken: cancellationToken);
+            if (trackCircuit != null)
+            {
+                return [trackCircuit];
+            }
+            return [];
+        });
 
+        int? approachLockTime = null;
         foreach (var rendoTableCsv in rendoTableCsvs)
         {
             var routeName = CalcRouteName(rendoTableCsv.Start, rendoTableCsv.End, stationId);
@@ -1034,8 +1086,25 @@ public partial class DbRendoTableInitializer
             await RegisterLocks(matchSignalControl.Groups[1].Value, route.Id, searchOtherObjects,
                 LockType.SignalControl);
             // 統括制御は、サーバーマスタから読み込む
-            // Todo: 進路鎖錠
-            // Todo: 接近鎖錠
+            // 進路鎖錠
+            await RegisterLocks(rendoTableCsv.RouteLock, route.Id, searchOtherObjects,
+                LockType.Route, isRouteLock: true);
+
+            // 接近鎖錠
+            // Todo: 大道寺13Lの進路は山線用進路なので、一旦スルー(パースするとエラーが出るので)
+            if (stationId == "TH65" && rendoTableCsv.Start == "13L")
+            {
+                continue;
+            }
+            // 接近鎖錠時素をパース
+            var matchApproachLockTime = RegexIntParse().Match(rendoTableCsv.ApproachTime);
+            if (matchApproachLockTime.Success)
+            {
+                approachLockTime = int.Parse(matchApproachLockTime.Value);
+            }
+
+            await RegisterLocks(rendoTableCsv.ApproachLock, route.Id, searchObjectsForApproachLock,
+                LockType.Approach, approachLockTime: approachLockTime);
         }
 
         // 転てつ器のてっ査鎖錠を処理する
@@ -1070,15 +1139,18 @@ public partial class DbRendoTableInitializer
     private async Task RegisterLocks(string lockString, ulong objectId,
         Func<LockItem, Task<List<InterlockingObject>>> searchTargetObjects,
         LockType lockType,
-        bool registerSwitchingMachineRoute = false)
+        bool registerSwitchingMachineRoute = false,
+        bool isRouteLock = false,
+        int? approachLockTime = null)
     {
-        var lockItems = CalcLockItems(lockString);
+        var lockItems = CalcLockItems(lockString, isRouteLock);
         foreach (var lockItem in lockItems)
         {
             Lock lockObject = new()
             {
                 ObjectId = objectId,
-                Type = lockType
+                Type = lockType,
+                ApproachLockTime = approachLockTime,
             };
             context.Locks.Add(lockObject);
             LockCondition? root = null;
@@ -1218,20 +1290,22 @@ public partial class DbRendoTableInitializer
             });
         }
     }
-    
-    
 
-    public List<LockItem> CalcLockItems(string lockString)
+
+    public List<LockItem> CalcLockItems(string lockString, bool isRouteLock)
     {
         var tokens = TokenRegex().Matches(lockString)
             .Select(m => m.Value)
             .ToList();
         var enumerator = tokens.GetEnumerator();
         enumerator.MoveNext();
-        return ParseToken(ref enumerator, stationId, false, false);
+        return ParseToken(ref enumerator, stationId, isRouteLock, false, false);
     }
 
-    private List<LockItem> ParseToken(ref List<string>.Enumerator enumerator, string stationId, bool isReverse,
+    private List<LockItem> ParseToken(ref List<string>.Enumerator enumerator,
+        string stationId,
+        bool isRouteLock,
+        bool isReverse,
         bool isTotalControl)
     {
         List<LockItem> result = [];
@@ -1250,7 +1324,7 @@ public partial class DbRendoTableInitializer
             if (token == "{")
             {
                 enumerator.MoveNext();
-                var child = ParseToken(ref enumerator, stationId, isReverse, isTotalControl);
+                var child = ParseToken(ref enumerator, stationId, isRouteLock, isReverse, isTotalControl);
                 if (enumerator.Current != "}")
                 {
                     throw new InvalidOperationException("}が閉じられていません");
@@ -1263,7 +1337,7 @@ public partial class DbRendoTableInitializer
             {
                 // 統括制御の処理を追加
                 enumerator.MoveNext();
-                var child = ParseToken(ref enumerator, stationId, isReverse, true);
+                var child = ParseToken(ref enumerator, stationId, isRouteLock, isReverse, true);
                 if (enumerator.Current != "))")
                 {
                     throw new InvalidOperationException("))が閉じられていません");
@@ -1277,7 +1351,7 @@ public partial class DbRendoTableInitializer
                 var count = token.Length;
                 var targetStationId = StationIdMap[this.stationId][count - 1];
                 enumerator.MoveNext();
-                var child = ParseToken(ref enumerator, targetStationId, isReverse, isTotalControl);
+                var child = ParseToken(ref enumerator, targetStationId, isRouteLock, isReverse, isTotalControl);
                 if (enumerator.Current.Length != count && enumerator.Current.All(c => c == ']'))
                 {
                     throw new InvalidOperationException("]が閉じられていません");
@@ -1288,9 +1362,15 @@ public partial class DbRendoTableInitializer
             }
             else if (token == "(")
             {
+                // 進路鎖錠パース時は進路鎖錠のグループ、それ以外の場合は反位鎖錠
                 enumerator.MoveNext();
-                var target = ParseToken(ref enumerator, stationId, true, isTotalControl);
-                if (target.Count != 1)
+                var target = ParseToken(
+                    ref enumerator,
+                    stationId,
+                    isRouteLock,
+                    !isRouteLock, // 進路鎖状なら定位を渡す、それ以外なら反位を渡す 
+                    isTotalControl);
+                if (!isRouteLock && target.Count != 1)
                 {
                     throw new InvalidOperationException("反位の対象がないか、複数あります");
                 }
@@ -1299,16 +1379,28 @@ public partial class DbRendoTableInitializer
                 {
                     throw new InvalidOperationException(")が閉じられていません");
                 }
-
                 enumerator.MoveNext();
-                item = target[0];
+                if (isRouteLock)
+                {
+                    item = new()
+                    {
+                        Name = NameRouteLock,
+                        StationId = stationId,
+                        IsReverse = isReverse ? NR.Reversed : NR.Normal,
+                        Children = target
+                    };
+                }
+                else
+                {
+                    item = target[0];
+                }
                 result.Add(item);
             }
             else if (token == "但")
             {
                 var left = result;
                 enumerator.MoveNext();
-                var right = ParseToken(ref enumerator, stationId, isReverse, isTotalControl);
+                var right = ParseToken(ref enumerator, stationId, isRouteLock, isReverse, isTotalControl);
                 List<LockItem> child = new();
                 if (left.Count == 1)
                 {

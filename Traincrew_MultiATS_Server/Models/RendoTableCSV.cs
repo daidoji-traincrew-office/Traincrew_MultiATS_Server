@@ -19,7 +19,7 @@ public class RendoTableCSV
     [Index(10)]
     public string RouteLock { get; init; }
     [Index(11)]
-    public string ApproachLock { get; init; }
+    public string ApproachLock { get; set; }
     [Index(12)]
     public string ApproachTime { get; set; }
 }
