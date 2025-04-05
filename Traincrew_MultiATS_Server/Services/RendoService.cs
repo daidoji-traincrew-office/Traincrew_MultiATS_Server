@@ -479,6 +479,7 @@ public class RendoService(
         // 信号制御欄を取得
         var signalControlConditions = await lockConditionRepository.GetConditionsByObjectIdsAndType(
             routeIds, LockType.SignalControl);
+        // Todo: 進路鎖錠するべき軌道回路のリストを取得
         // 関わる全てのObjectを取得
         var objectIds = routeIds
             .Union(routeLockConditions.Values.SelectMany(ExtractObjectIdsFromLockCondtions))
