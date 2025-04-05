@@ -38,6 +38,7 @@ public class InitDbHostedService(IServiceScopeFactory serviceScopeFactory) : IHo
         _schedulers.AddRange([
             new SwitchingMachineScheduler(serviceScopeFactory),
             new RendoScheduler(serviceScopeFactory),
+            new OperationNotificationScheduler(serviceScopeFactory),
         ]);
     }
 

@@ -10,6 +10,7 @@ public class OperationNotificationService(
     IGeneralRepository generalRepository,
     IDateTimeRepository dateTimeRepository)
 {
+    static readonly int kaijoTime = 20;
     public async Task<List<OperationNotificationData>> GetOperationNotificationData()
     {
         var displays = await operationNotificationRepository.GetAllDisplay();
@@ -46,6 +47,13 @@ public class OperationNotificationService(
         };
 
         await generalRepository.Save(state);
+    }
+
+    public async Task SetNoneWhereKaijoAndSpendMuchTime()
+    {
+        var now = dateTimeRepository.GetNow();
+        var operatedAt = now.AddMinutes(-kaijoTime);
+        await operationNotificationRepository.SetNoneWhereKaijoAndOperatedBeforeOrEqual(operatedAt);
     }
 
     private static OperationNotificationData ToOperationNotificationData(
