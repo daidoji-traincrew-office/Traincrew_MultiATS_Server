@@ -49,11 +49,11 @@ public class OperationNotificationService(
         await generalRepository.Save(state);
     }
 
-    public async Task SetNoneWhereKaijoAndSpendMuchTime()
+    public async Task SetNoneWhereKaijoOrTorikeshiAndSpendMuchTime()
     {
         var now = dateTimeRepository.GetNow();
         var operatedAt = now.AddSeconds(-kaijoTime);
-        await operationNotificationRepository.SetNoneWhereKaijoAndOperatedBeforeOrEqual(operatedAt);
+        await operationNotificationRepository.SetNoneWhereKaijoOrTorikeshiAndOperatedBeforeOrEqual(operatedAt);
     }
 
     private static OperationNotificationData ToOperationNotificationData(

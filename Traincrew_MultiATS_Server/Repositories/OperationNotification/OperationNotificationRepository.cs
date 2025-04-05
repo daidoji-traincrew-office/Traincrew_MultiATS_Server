@@ -25,10 +25,11 @@ public class OperationNotificationRepository(ApplicationDbContext context) : IOp
             .ToListAsync();
     }
 
-    public async Task SetNoneWhereKaijoAndOperatedBeforeOrEqual(DateTime operatedAt)
+    public async Task SetNoneWhereKaijoOrTorikeshiAndOperatedBeforeOrEqual(DateTime operatedAt)
     {
         await context.OperationNotificationStates
-            .Where(s => s.Type == OperationNotificationType.Kaijo && s.OperatedAt <= operatedAt)
+            .Where(s => 
+                (s.Type ==  OperationNotificationType.Kaijo || s.Type == OperationNotificationType.Torikeshi) && s.OperatedAt <= operatedAt)
             .ExecuteUpdateAsync(s => s
                 .SetProperty(ons => ons.Type, OperationNotificationType.None)
                 .SetProperty(ons => ons.Content, string.Empty)

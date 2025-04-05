@@ -6,5 +6,5 @@ public interface IOperationNotificationRepository
 {
     Task<List<OperationNotificationDisplay>> GetAllDisplay();
     Task<List<OperationNotificationDisplay?>> GetDisplayByTrackCircuitIds(List<ulong> trackCircuitIds);
-    Task SetNoneWhereKaijoAndOperatedBeforeOrEqual(DateTime operatedAt);
+    Task SetNoneWhereKaijoOrTorikeshiAndOperatedBeforeOrEqual(DateTime operatedAt);
 }

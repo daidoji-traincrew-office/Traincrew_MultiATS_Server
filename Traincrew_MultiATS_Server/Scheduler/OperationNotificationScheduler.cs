@@ -8,6 +8,6 @@ public class OperationNotificationScheduler(IServiceScopeFactory serviceScopeFac
     protected override async Task ExecuteTaskAsync(IServiceScope scope)
     {
         var service = scope.ServiceProvider.GetRequiredService<OperationNotificationService>();
-        await service.SetNoneWhereKaijoAndSpendMuchTime();
+        await service.SetNoneWhereKaijoOrTorikeshiAndSpendMuchTime();
     }
 }
