@@ -389,13 +389,21 @@ public class RendoService(
         // 操作対象の進路を全て取得(進路照査が扛上している進路または接近鎖錠の掛かっている進路)
         var routeIds = await routeRepository.GetIdsWhereRouteRelayIsRaisedOrApproachLockMRIsDropped();
         
+        // 接近鎖錠条件を取得
+        var approachLockConditions = await lockConditionRepository.GetConditionsByObjectIdsAndType(
+            routeIds, LockType.Approach);
+        
         // 関わる全てのObjectを取得 
-        var objectIds = routeIds;
+        var objectIds = routeIds
+            .Union(approachLockConditions.Values.SelectMany(ExtractObjectIdsFromLockCondtions))
+            .Distinct()
+            .ToList();
         var interlockingObjects = (await interlockingObjectRepository.GetObjectByIdsWithState(objectIds))
             .ToDictionary(obj => obj.Id);
         foreach (var routeId in routeIds)
         {
             var route = (interlockingObjects[routeId] as Route)!;
+            var approachLockCondition = approachLockConditions.GetValueOrDefault(route.Id, []);
         //     // 接近鎖錠欄の接近区間の条件を満たしていれば扛上
         //     // ・軌道回路が短絡していないこと
         //     // ・進路の接近鎖錠MRリレーが図表記載方向であること
