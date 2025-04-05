@@ -150,8 +150,8 @@ CREATE TABLE operation_notification_display
 CREATE TABLE track_circuit
 (
     id                                  BIGINT PRIMARY KEY REFERENCES interlocking_object (id),
-    protection_zone                     INT NOT NULL,                                                  -- 防護無線区間
-    operation_notification_display_name VARCHAR(100) REFERENCES operation_notification_display (name)  -- 運転告知機の名前
+    protection_zone                     INT NOT NULL,                                                 -- 防護無線区間
+    operation_notification_display_name VARCHAR(100) REFERENCES operation_notification_display (name) -- 運転告知機の名前
 );
 CREATE INDEX track_circuit_operation_notification_display_name_index ON track_circuit (operation_notification_display_name);
 
@@ -320,10 +320,11 @@ CREATE TABLE track_circuit_state
     train_number                     VARCHAR(100),                                     -- 列車番号
     is_short_circuit                 BOOLEAN    NOT NULL,                              -- 短絡状態
     is_locked                        BOOLEAN    NOT NULL,                              -- 鎖状しているかどうか
+    unlocked_at                      TIMESTAMP           DEFAULT NULL,                 -- 鎖状解除時刻
     is_correction_raise_relay_raised raise_drop NOT NULL DEFAULT 'drop',               -- 不正扛上補正リレー
-    raised_at                        TIMESTAMP DEFAULT NULL,                           -- 軌道回路を扛上させるタイミング
+    raised_at                        TIMESTAMP           DEFAULT NULL,                 -- 軌道回路を扛上させるタイミング
     is_correction_drop_relay_raised  raise_drop NOT NULL DEFAULT 'drop',               -- 不正落下補正リレー
-    dropped_at                       TIMESTAMP DEFAULT NULL                            -- 軌道回路を落下させるタイミング
+    dropped_at                       TIMESTAMP           DEFAULT NULL                  -- 軌道回路を落下させるタイミング
 );
 CREATE INDEX track_circuit_state_train_number_index ON track_circuit_state USING hash (train_number);
 
@@ -344,7 +345,8 @@ CREATE TABLE route_state
     is_lever_relay_raised        raise_drop NOT NULL,                      -- てこリレーが上がっているか
     is_route_relay_raised        raise_drop NOT NULL,                      -- 進路照査リレーが上がっているか
     is_signal_control_raised     raise_drop NOT NULL,                      -- 信号制御リレーが上がっているか
-    is_approach_lock_raised      raise_drop NOT NULL,                      -- 接近鎖状が上がっているか
+    is_approach_lock_mr_raised   raise_drop NOT NULL,                      -- 接近鎖状が上がっているか
+    is_approach_lock_ms_raised   raise_drop NOT NULL,                      -- 接近鎖状が上がっているか
     is_route_lock_raised         raise_drop NOT NULL,                      -- 進路鎖状が上がっているか
     is_throw_out_xr_relay_raised raise_drop NOT NULL,                      -- 統括制御リレーが上がっているか
     is_throw_out_ys_relay_raised raise_drop NOT NULL                       -- 統括制御リレーが上がっているか
