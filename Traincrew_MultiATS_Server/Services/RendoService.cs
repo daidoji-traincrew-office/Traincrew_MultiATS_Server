@@ -363,18 +363,18 @@ public class RendoService(
         {
             return RaiseDrop.Drop;
         }
-        
+
         // 統括制御の条件を満たしているか確認
-        if(!(
-               (
-                   // 自進路YS扛上
-                   route.RouteState.IsThrowOutYSRelayRaised == RaiseDrop.Raise
-                   // Todo: この進路に対して統括制御「する」進路の進路鎖錠リレー 
-                   // && sourceThrowOutRoutes.Any(r => r.RouteState.IsRouteLockRaised) 
-                ) 
-               // 自進路YS落下
-               || route.RouteState.IsThrowOutYSRelayRaised == RaiseDrop.Drop)
-        )
+        if (!(
+                (
+                    // 自進路YS扛上
+                    route.RouteState.IsThrowOutYSRelayRaised == RaiseDrop.Raise
+                    // Todo: この進路に対して統括制御「する」進路の進路鎖錠リレー 
+                    // && sourceThrowOutRoutes.Any(r => r.RouteState.IsRouteLockRaised) 
+                )
+                // 自進路YS落下
+                || route.RouteState.IsThrowOutYSRelayRaised == RaiseDrop.Drop)
+           )
         {
             return RaiseDrop.Drop;
         }
@@ -388,11 +388,11 @@ public class RendoService(
     {
         // 操作対象の進路を全て取得(進路照査が扛上している進路または接近鎖錠の掛かっている進路)
         var routeIds = await routeRepository.GetIdsWhereRouteRelayIsRaisedOrApproachLockMRIsDropped();
-        
+
         // 接近鎖錠条件を取得
         var approachLockConditions = await lockConditionRepository.GetConditionsByObjectIdsAndType(
             routeIds, LockType.Approach);
-        
+
         // 関わる全てのObjectを取得 
         var objectIds = routeIds
             .Union(approachLockConditions.Values.SelectMany(ExtractObjectIdsFromLockCondtions))
@@ -404,70 +404,71 @@ public class RendoService(
         {
             var route = (interlockingObjects[routeId] as Route)!;
             var approachLockCondition = approachLockConditions.GetValueOrDefault(route.Id, []);
-        //     // 接近鎖錠欄の接近区間の条件を満たしていれば扛上
-        //     // ・軌道回路が短絡していないこと
-        //     // ・進路の接近鎖錠MRリレーが図表記載方向であること
-        //     // ・転てつ器の記載方向鎖錠リレーが扛上していること
-        //     var ApproachLockPlaceState = RaiseDrop.Drop;
-        //
-        //     // 内方2回路分の軌道回路が短絡しているかどうか(直列)
-        //     // ・1軌道回路しかない場合は、その軌道回路が短絡しているかどうか
-        //     // ※軌道回路条件はB付リレーを使用
-        //     var InTrackCircuitState = RaiseDrop.Drop;
-        //
-        //     var isApproachLockMSRaised =
-        //     (
-        //         route.RouteState.IsSignalControlRaised == RaiseDrop.Drop
-        //         &&
-        //         route.RouteState.IsRouteRelayRaised == RaiseDrop.Drop
-        //         &&
-        //         !(/*内方1軌道回路の親TRリレー*/)
-        //         (
-        //             /*その進路の駅に対応する<時素秒数>TER*/ == RaiseDrop.Raise
-        //             ||
-        //             route.RouteState.IsApproachLockMSRaised == RaiseDrop.Raise
-        //         )
-        //     )
-        //     ? RaiseDrop.Raise
-        //     : RaiseDrop.Drop;
-        //
-        //     // Todo:停電対応
-        //     var isApproachLockMRRaised =
-        //     (
-        //         route.RouteState.IsSignalControlRaised == RaiseDrop.Drop
-        //         &&
-        //         route.RouteState.IsRouteRelayRaised == RaiseDrop.Drop
-        //         &&
-        //         (
-        //             ApproachLockPlaceState == RaiseDrop.Raise
-        //             ||
-        //             InTrackCircuitState == RaiseDrop.Drop
-        //             ||
-        //             (
-        //                 /*その進路の駅に対応する<時素秒数>TEN*/ == RaiseDrop.Raise
-        //                 &&
-        //                 isApproachLockMSRaised
-        //             )
-        //             ||
-        //             route.RouteState.IsApproachLockMRRaised == RaiseDrop.Raise
-        //         )
-        //     )
-        //     ? RaiseDrop.Raise
-        //     : RaiseDrop.Drop;
-        //
-        //     //　それぞれ現在と異なる場合、更新       
-        //
-        //     if (route.RouteState.IsApproachLockMSRaised != isApproachLockMSRaised)
-        //     {
-        //         route.RouteState.IsApproachLockMSRaised = isApproachLockMSRaised;
-        //         await generalRepository.Save(route.RouteState);
-        //     }
-        //
-        //     if (route.RouteState.IsApproachLockMRRaised != isApproachLockMRRaised)
-        //     {
-        //         route.RouteState.IsApproachLockMRRaised = isApproachLockMRRaised;
-        //         await generalRepository.Save(route.RouteState);
-        //     }
+            
+            // 接近鎖錠欄の接近区間の条件を満たしていれば扛上
+            var approachLockPlaceState =
+                CalcApproachLockPlaceState(approachLockCondition, interlockingObjects)
+                    ? RaiseDrop.Raise
+                    : RaiseDrop.Drop;
+            var isApproachLockMSRaised = RaiseDrop.Drop;
+            var isApproachLockMRRaised = RaiseDrop.Drop;
+            //
+            //     // 内方2回路分の軌道回路が短絡しているかどうか(直列)
+            //     // ・1軌道回路しかない場合は、その軌道回路が短絡しているかどうか
+            //     // ※軌道回路条件はB付リレーを使用
+            //     var InTrackCircuitState = RaiseDrop.Drop;
+            //
+            //     var isApproachLockMSRaised =
+            //     (
+            //         route.RouteState.IsSignalControlRaised == RaiseDrop.Drop
+            //         &&
+            //         route.RouteState.IsRouteRelayRaised == RaiseDrop.Drop
+            //         &&
+            //         !(/*内方1軌道回路の親TRリレー*/)
+            //         (
+            //             /*その進路の駅に対応する<時素秒数>TER*/ == RaiseDrop.Raise
+            //             ||
+            //             route.RouteState.IsApproachLockMSRaised == RaiseDrop.Raise
+            //         )
+            //     )
+            //     ? RaiseDrop.Raise
+            //     : RaiseDrop.Drop;
+            //
+            //     // Todo:停電対応
+            //     var isApproachLockMRRaised =
+            //     (
+            //         route.RouteState.IsSignalControlRaised == RaiseDrop.Drop
+            //         &&
+            //         route.RouteState.IsRouteRelayRaised == RaiseDrop.Drop
+            //         &&
+            //         (
+            //             ApproachLockPlaceState == RaiseDrop.Raise
+            //             ||
+            //             InTrackCircuitState == RaiseDrop.Drop
+            //             ||
+            //             (
+            //                 /*その進路の駅に対応する<時素秒数>TEN*/ == RaiseDrop.Raise
+            //                 &&
+            //                 isApproachLockMSRaised
+            //             )
+            //             ||
+            //             route.RouteState.IsApproachLockMRRaised == RaiseDrop.Raise
+            //         )
+            //     )
+            //     ? RaiseDrop.Raise
+            //     : RaiseDrop.Drop;
+            //
+
+            //　それぞれ現在と異なる場合、更新       
+            if (route.RouteState.IsApproachLockMSRaised == isApproachLockMSRaised
+                && route.RouteState.IsApproachLockMRRaised == isApproachLockMRRaised)
+            {
+                continue;
+            }
+
+            route.RouteState.IsApproachLockMSRaised = isApproachLockMSRaised;
+            route.RouteState.IsApproachLockMRRaised = isApproachLockMRRaised;
+            await generalRepository.Save(route.RouteState);
         }
     }
 
@@ -514,7 +515,7 @@ public class RendoService(
                 .LastOrDefault()!;
             var lastTrackCircuit = interlockingObjects[lastTrackCircuitCondition.ObjectId] as TrackCircuit;
             // 信号制御欄の末端回路が鎖錠されていない && 接近鎖錠されている && 進路鎖錠されていない → 一斉に軌道回路を鎖錠、進路鎖錠する
-            if (!lastTrackCircuit.TrackCircuitState.IsLocked 
+            if (!lastTrackCircuit.TrackCircuitState.IsLocked
                 && route.RouteState.IsApproachLockMRRaised == RaiseDrop.Drop
                 && route.RouteState.IsRouteLockRaised == RaiseDrop.Raise)
             {
@@ -656,6 +657,33 @@ public class RendoService(
                     trackCircuit.TrackCircuitState is not { IsShortCircuit: false, IsLocked: false },
                 SwitchingMachine or Lever or Route => false,
                 _ => true
+            };
+        }
+    }
+
+    internal static bool CalcApproachLockPlaceState(
+        List<LockCondition> lockConditions,
+        Dictionary<ulong, InterlockingObject> interlockingObjects)
+    {
+        return EvaluateLockConditions(lockConditions, interlockingObjects, Predicate);
+
+        // 接近鎖錠欄の接近区間の条件を満たしていれば扛上
+        // ・軌道回路が短絡していないこと
+        // ・進路の接近鎖錠MRリレーが図表記載方向であること(定位=drop, 反位=raise)
+        // ・転てつ器の記載方向鎖錠リレーが扛上していること(定位=定位, 反位=反位)
+        bool Predicate(LockConditionObject o, InterlockingObject interlockingObject)
+        {
+            return interlockingObject switch
+            {
+                TrackCircuit trackCircuit => !trackCircuit.TrackCircuitState.IsShortCircuit,
+                Route route => (route.RouteState.IsApproachLockMRRaised == RaiseDrop.Drop &&
+                                o.IsReverse == NR.Normal)
+                               || (route.RouteState.IsApproachLockMRRaised == RaiseDrop.Raise &&
+                                   o.IsReverse == NR.Reversed),
+                SwitchingMachine switchingMachine => !switchingMachine.SwitchingMachineState.IsSwitching &&
+                                                     switchingMachine.SwitchingMachineState.IsReverse ==
+                                                     o.IsReverse,
+                _ => false
             };
         }
     }
