@@ -656,7 +656,7 @@ public partial class DbRendoTableInitializer
     private static partial Regex RegexSignalControl();
 
     // 連動図表の鎖錠欄の諸々のトークンを抽出するための正規表現
-    [GeneratedRegex(@"\[\[|\]\]|\(\(|\)\)|\[|\]|\{|\}|\(|\)|但|又は|[A-Z\dｲﾛ秒]+")]
+    [GeneratedRegex(@"\[\[|\]\]|\(\(|\)\)|\[|\]|\{|\}|\(|\)|但\s+\d+秒|但|又は|[A-Z\dｲﾛ]+")]
     private static partial Regex TokenRegex();
     
     // ReSharper disable InconsistentNaming
@@ -1144,16 +1144,27 @@ public partial class DbRendoTableInitializer
         int? approachLockTime = null)
     {
         var lockItems = CalcLockItems(lockString, isRouteLock);
-        for(var i = 0; i < lockItems.Count; i++)
+        // 進路鎖錠の場合、各アイテムに進路鎖錠グループを持たせてflattenする
+        if (isRouteLock)
         {
-            var lockItem = lockItems[i];
-            int? routeLockGroup = isRouteLock ? i + 1 : null;
+            lockItems = lockItems
+                .SelectMany((item, index) => item.Name == NameRouteLock
+                    ? item.Children.Select(c =>
+                    {
+                        c.RouteLockGroup = index + 1;
+                        return c;
+                    })
+                    : [item])
+                .ToList();
+        }
+        foreach (var lockItem in lockItems)
+        {
             Lock lockObject = new()
             {
                 ObjectId = objectId,
                 Type = lockType,
                 ApproachLockTime = approachLockTime,
-                RouteLockGroup = routeLockGroup,
+                RouteLockGroup = lockItem.RouteLockGroup,
             };
             context.Locks.Add(lockObject);
             LockCondition? root = null;
@@ -1202,6 +1213,7 @@ public partial class DbRendoTableInitializer
                     Lock = lockObject,
                     ObjectId = targetObject.Id,
                     IsReverse = lockItem.IsReverse,
+                    TimerSeconds = lockItem.TimerSeconds,
                     Type = LockConditionType.Object
                 });
                 if (!registerSwitchingMachineRoute)
@@ -1269,6 +1281,7 @@ public partial class DbRendoTableInitializer
                 Lock = parent.Lock,
                 ObjectId = targetObjects[0].Id,
                 Parent = parent,
+                TimerSeconds = item.TimerSeconds,
                 IsReverse = item.IsReverse,
                 Type = LockConditionType.Object
             });
@@ -1288,6 +1301,7 @@ public partial class DbRendoTableInitializer
                 Lock = current.Lock,
                 Parent = current,
                 ObjectId = targetObject.Id,
+                TimerSeconds = item.TimerSeconds,
                 IsReverse = item.IsReverse,
                 Type = LockConditionType.Object
             });
@@ -1399,6 +1413,13 @@ public partial class DbRendoTableInitializer
                 }
                 result.Add(item);
             }
+            else if (token.StartsWith("但") && token.EndsWith("秒"))
+            {
+                result[^1].TimerSeconds = int.Parse(RegexIntParse()
+                    .Match(token)
+                    .Value);
+                enumerator.MoveNext();
+            }
             else if (token == "但")
             {
                 var left = result;
@@ -1473,7 +1494,8 @@ public partial class DbRendoTableInitializer
         public string Name { get; set; }
         public string StationId { get; set; }
         public bool isTotalControl { get; set; }
-        public int RouteLockGroup { get; set; }
+        public int? RouteLockGroup { get; set; }
+        public int? TimerSeconds { get; set; }
         public NR IsReverse { get; set; }
         public List<LockItem> Children { get; set; } = [];
     }
