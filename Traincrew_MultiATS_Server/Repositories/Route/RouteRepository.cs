@@ -46,7 +46,7 @@ public class RouteRepository(ApplicationDbContext context): IRouteRepository
             .ToListAsync();
     }
 
-    public async Task<List<ulong>> GetIdsWhereRouteLockRelayOrApproachLockMRIsRaised()
+    public async Task<List<ulong>> GetIdsWhereRouteLockRelayIsRaisedOrApproachLockMRIsDropped()
     {
         return await context.Routes
             .Include(r => r.RouteState)
@@ -55,7 +55,7 @@ public class RouteRepository(ApplicationDbContext context): IRouteRepository
             .ToListAsync();
     }
 
-    public async Task<List<ulong>> GetIdsWhereRouteRelayOrApproachLockMRIsRaised()
+    public async Task<List<ulong>> GetIdsWhereRouteRelayIsRaisedOrApproachLockMRIsDropped()
     {
         return await context.Routes
             .Include(r => r.RouteState)
