@@ -52,7 +52,7 @@ public class OperationNotificationService(
     public async Task SetNoneWhereKaijoAndSpendMuchTime()
     {
         var now = dateTimeRepository.GetNow();
-        var operatedAt = now.AddMinutes(-kaijoTime);
+        var operatedAt = now.AddSeconds(-kaijoTime);
         await operationNotificationRepository.SetNoneWhereKaijoAndOperatedBeforeOrEqual(operatedAt);
     }
 
