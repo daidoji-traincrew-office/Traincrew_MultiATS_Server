@@ -28,12 +28,12 @@ public class InitDbHostedService(IServiceScopeFactory serviceScopeFactory) : IHo
         }
 
         await InitRendoTable(context, datetimeRepository, cancellationToken);
+        await InitOperationNotificationDisplay(context, datetimeRepository, cancellationToken);
+        
         if (dbInitializer != null)
         {
             await dbInitializer.InitializePost();
         }
-
-        await InitOperationNotificationDisplay(context, datetimeRepository, cancellationToken);
 
         _schedulers.AddRange([
             new SwitchingMachineScheduler(serviceScopeFactory),
@@ -193,6 +193,7 @@ internal class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Ca
     {
         await InitializeSignalRoute();
         await InitializeThrowOutControl();
+        await SetStationIdToInterlockingObject();
     }
 
     private async Task InitStation()
@@ -588,6 +589,23 @@ internal class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Ca
         }
 
         await context.SaveChangesAsync(cancellationToken);
+    }
+    
+    private async Task SetStationIdToInterlockingObject() 
+    {
+        var interlockingObjects = await context.InterlockingObjects
+            .ToListAsync();
+        foreach (var interlockingObject in interlockingObjects)
+        {
+            if (!interlockingObject.Name.StartsWith("TH"))
+            {
+                continue;
+            }
+            var stationId = interlockingObject.Name.Substring(0, 4);
+            interlockingObject.StationId = stationId;
+        }
+
+        await context.SaveChangesAsync();
     }
 }
 
@@ -1200,6 +1218,8 @@ public partial class DbRendoTableInitializer
             });
         }
     }
+    
+    
 
     public List<LockItem> CalcLockItems(string lockString)
     {

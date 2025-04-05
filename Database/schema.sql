@@ -96,6 +96,7 @@ CREATE TABLE interlocking_object
     id          BIGSERIAL PRIMARY KEY,
     type        object_type  NOT NULL,        -- 進路、転てつ機、軌道回路、てこ
     name        VARCHAR(100) NOT NULL UNIQUE, -- 名前
+    station_id  VARCHAR(10) REFERENCES station (id), -- 所属する停車場
     description TEXT                          -- 説明
 );
 
