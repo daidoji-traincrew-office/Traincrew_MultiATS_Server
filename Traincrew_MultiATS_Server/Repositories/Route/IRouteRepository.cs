@@ -20,4 +20,9 @@ public interface IRouteRepository
     /// </summary>
     /// <returns> 進路照査リレーが扛上している進路のリスト </returns>
     Task<List<ulong>> GetIdsWhereRouteRelayIsRaised();
+    /// <summary>
+    /// 進路鎖錠または接近鎖状の掛かっているすべての進路IDを取得する
+    /// </summary>
+    /// <returns> 進路鎖錠または接近鎖状の掛かっている進路のリスト </returns>
+    Task<List<ulong>> GetIdsWhereRouteLockRelayOrApproachLockMRIsRaised();
 }
