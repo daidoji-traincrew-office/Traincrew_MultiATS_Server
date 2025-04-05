@@ -12,5 +12,6 @@ public class Lock
     public ulong ObjectId { get; set; }
     public InterlockingObject Object { get; set; }
     public LockType Type { get; set; }
+    public int? ApproachLockTime { get; set; }
     public int? RouteLockGroup { get; set; }
 }

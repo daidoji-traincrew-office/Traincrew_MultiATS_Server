@@ -94,10 +94,10 @@ CREATE TYPE object_type AS ENUM ('route', 'switching_machine', 'track_circuit', 
 CREATE TABLE interlocking_object
 (
     id          BIGSERIAL PRIMARY KEY,
-    type        object_type  NOT NULL,        -- 進路、転てつ機、軌道回路、てこ
-    name        VARCHAR(100) NOT NULL UNIQUE, -- 名前
+    type        object_type  NOT NULL,               -- 進路、転てつ機、軌道回路、てこ
+    name        VARCHAR(100) NOT NULL UNIQUE,        -- 名前
     station_id  VARCHAR(10) REFERENCES station (id), -- 所属する停車場
-    description TEXT                          -- 説明
+    description TEXT                                 -- 説明
 );
 
 CREATE TABLE station_interlocking_object
@@ -245,10 +245,11 @@ CREATE TABLE track_circuit_signal
 -- 各進路、転てつ機の鎖状条件(すべての鎖状条件をここにいれる)
 CREATE TABLE lock
 (
-    id               BIGSERIAL PRIMARY KEY,
-    object_id        BIGINT REFERENCES interlocking_object (id), -- 進路、転てつ機、軌道回路のID
-    type             lock_type NOT NULL,                         -- 鎖状の種類
-    route_lock_group INT                                         -- 進路鎖状のグループ(カッコで囲まれてるやつを同じ数字にする)
+    id                 BIGSERIAL PRIMARY KEY,
+    object_id          BIGINT REFERENCES interlocking_object (id), -- 進路、転てつ機、軌道回路のID
+    type               lock_type NOT NULL,                         -- 鎖状の種類
+    approach_lock_time INT,                                        -- 接近鎖状の時間
+    route_lock_group   INT                                         -- 進路鎖状のグループ(カッコで囲まれてるやつを同じ数字にする)
 );
 CREATE INDEX lock_object_id_type_index ON lock (object_id, type);
 
@@ -299,10 +300,11 @@ CREATE TABLE switching_machine_route
 CREATE INDEX switching_machine_route_switching_machine_id_index ON switching_machine_route (switching_machine_id);
 
 -- 進路鎖錠で鎖状するべき軌道回路のリスト
-CREATE TABLE route_lock_track_circuit(
+CREATE TABLE route_lock_track_circuit
+(
     id               BIGSERIAL PRIMARY KEY,
-    route_id         BIGINT REFERENCES route (id) NOT NULL, -- 進路のID
-    track_circuit_id BIGINT REFERENCES track_circuit (ID)  NOT NULL, -- 軌道回路のID
+    route_id         BIGINT REFERENCES route (id)         NOT NULL, -- 進路のID
+    track_circuit_id BIGINT REFERENCES track_circuit (ID) NOT NULL, -- 軌道回路のID
     UNIQUE (route_id, track_circuit_id)
 );
 
