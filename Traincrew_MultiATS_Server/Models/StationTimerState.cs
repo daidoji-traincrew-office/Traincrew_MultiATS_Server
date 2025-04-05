@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Traincrew_MultiATS_Server.Models;
 
+[Table("station_timer_state")]
 public class StationTimerState
 {
     [Key]
