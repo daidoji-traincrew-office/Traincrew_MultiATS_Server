@@ -220,6 +220,7 @@ internal class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Ca
     private async Task InitStationTimerState()
     {
         var stationIds = (await context.Stations
+            .Where(s => s.IsStation)
             .Select(s => s.Id)
             .ToListAsync(cancellationToken)).ToHashSet();
         var stationTimerStates = (await context.StationTimerStates
