@@ -298,6 +298,18 @@ CREATE TABLE switching_machine_route
 CREATE INDEX switching_machine_route_switching_machine_id_index ON switching_machine_route (switching_machine_id);
 
 -- ここから状態系
+-- 駅時素状態
+CREATE TABLE station_timer_state
+(
+    id                  BIGSERIAL PRIMARY KEY,
+    station_id          VARCHAR(10) NOT NULL REFERENCES station (id), -- 駅のID
+    seconds             INT         NOT NULL,                         -- 駅時素の秒数
+    is_teu_relay_raised raise_drop  NOT NULL DEFAULT 'drop',
+    is_ten_relay_raised raise_drop  NOT NULL DEFAULT 'drop',
+    is_ter_relay_raised raise_drop  NOT NULL DEFAULT 'drop',
+    UNIQUE (station_id, seconds)
+);
+
 -- てこ状態
 CREATE TABLE lever_state
 (

@@ -7,6 +7,7 @@ namespace Traincrew_MultiATS_Server.Data;
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 {
     public DbSet<Station> Stations { get; set; }
+    public DbSet<StationTimerState> StationTimerStates { get; set; }
     public DbSet<InterlockingObject> InterlockingObjects { get; set; }
     public DbSet<Route> Routes { get; set; }
     public DbSet<RouteState> RouteStates { get; set; }
@@ -20,7 +21,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<SignalType> SignalTypes { get; set; }
     public DbSet<NextSignal> NextSignals { get; set; }
     public DbSet<TrackCircuitSignal> TrackCircuitSignals { get; set; }
-    public DbSet<ProtectionZoneState> protectionZoneStates{ get; set; }
+    public DbSet<ProtectionZoneState> protectionZoneStates { get; set; }
     public DbSet<RouteLeverDestinationButton> RouteLeverDestinationButtons { get; set; }
     public DbSet<SwitchingMachineRoute> SwitchingMachineRoutes { get; set; }
     public DbSet<Lever> Levers { get; set; }
@@ -33,6 +34,12 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<StationTimerState>()
+            .HasOne<Station>()
+            .WithMany()
+            .HasForeignKey(st => st.StationId)
+            .HasPrincipalKey(s => s.Id);
 
         modelBuilder.Entity<Route>()
             .HasOne(r => r.RouteState)
@@ -128,6 +135,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             {
                 continue;
             }
+
             foreach (var property in entity.GetProperties())
             {
                 var columnAttribute = property.GetAnnotations()
@@ -136,6 +144,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                 {
                     continue;
                 }
+
                 property.SetColumnName(ToSnakeCase(property.Name));
             }
         }

@@ -181,6 +181,7 @@ internal class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Ca
     internal async Task Initialize()
     {
         await InitStation();
+        await InitStationTimerState();
         await InitTrackCircuit();
         await InitSignalType();
         await InitSignal();
@@ -214,6 +215,36 @@ internal class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Ca
                 IsPassengerStation = station.IsPassengerStation
             });
         }
+    }
+
+    private async Task InitStationTimerState()
+    {
+        var stationIds = (await context.Stations
+            .Select(s => s.Id)
+            .ToListAsync(cancellationToken)).ToHashSet();
+        var stationTimerStates = (await context.StationTimerStates
+            .Select(s => new { s.StationId, s.Seconds })
+            .ToListAsync(cancellationToken)).ToHashSet();
+        foreach(var stationId in stationIds)
+        {
+            foreach (var seconds in new []{30, 60})
+            {
+                if (stationTimerStates.Contains(new { StationId = stationId, Seconds = seconds }))
+                {
+                    continue;
+                }
+
+                context.StationTimerStates.Add(new()
+                {
+                    StationId = stationId,
+                    Seconds = seconds,
+                    IsTeuRelayRaised = RaiseDrop.Drop,
+                    IsTenRelayRaised = RaiseDrop.Drop,
+                    IsTerRelayRaised = RaiseDrop.Drop
+                });
+            }
+        }
+        await context.SaveChangesAsync(cancellationToken);
     }
 
     private async Task InitTrackCircuit()
