@@ -386,22 +386,16 @@ public class RendoService(
     // Todo: 接近鎖錠リレー回路     
     public async Task ApproachLockRelay()
     {
-        // 全てのObjectを取得
+        // 操作対象の進路を全て取得(進路照査が扛上している進路または接近鎖錠の掛かっている進路)
+        var routeIds = await routeRepository.GetIdsWhereRouteRelayOrApproachLockMRIsRaised();
+        
+        // 関わる全てのObjectを取得 
+        var objectIds = routeIds;
         var interlockingObjects = (await interlockingObjectRepository.GetAllWithState())
             .ToDictionary(obj => obj.Id);
-        // 全進路リスト
-        var allRoutes = interlockingObjects
-            .Select(x => x.Value)
-            .OfType<Route>()
-            .ToList();
-        // 操作対象の進路を全て取得(進路照査が扛上している進路または接近鎖錠の掛かっている進路)
-        var routes = allRoutes
-            .Where(route => route.RouteState.IsRouteRelayRaised == RaiseDrop.Raise
-                            || route.RouteState.IsApproachLockMRRaised == RaiseDrop.Drop)
-            .ToList();
-
-        foreach (var route in routes)
+        foreach (var routeId in routeIds)
         {
+            var route = (interlockingObjects[routeId] as Route)!;
         //     // 接近鎖錠欄の接近区間の条件を満たしていれば扛上
         //     // ・軌道回路が短絡していないこと
         //     // ・進路の接近鎖錠MRリレーが図表記載方向であること
