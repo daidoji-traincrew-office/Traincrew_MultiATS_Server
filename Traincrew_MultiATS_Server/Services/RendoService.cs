@@ -6,6 +6,7 @@ using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
 using Traincrew_MultiATS_Server.Repositories.LockCondition;
 using Traincrew_MultiATS_Server.Repositories.Route;
 using Traincrew_MultiATS_Server.Repositories.RouteLeverDestinationButton;
+using Traincrew_MultiATS_Server.Repositories.Station;
 using Traincrew_MultiATS_Server.Repositories.SwitchingMachine;
 using Traincrew_MultiATS_Server.Repositories.SwitchingMachineRoute;
 using Traincrew_MultiATS_Server.Repositories.ThrowOutControl;
@@ -26,6 +27,7 @@ public class RendoService(
     IInterlockingObjectRepository interlockingObjectRepository,
     ISwitchingMachineRepository switchingMachineRepository,
     ISwitchingMachineRouteRepository switchingMachineRouteRepository,
+    IStationRepository stationRepository,
     IDestinationButtonRepository destinationButtonRepository,
     ILockConditionRepository lockConditionRepository,
     IDateTimeRepository dateTimeRepository,
@@ -400,9 +402,21 @@ public class RendoService(
             .ToList();
         var interlockingObjects = (await interlockingObjectRepository.GetObjectByIdsWithState(objectIds))
             .ToDictionary(obj => obj.Id);
-        foreach (var routeId in routeIds)
+        // 対象進路リスト
+        var routes = routeIds
+            .Select(routeId => interlockingObjects[routeId])
+            .OfType<Route>()
+            .ToList();
+        // 必要な時素を取得
+        var stationIds = routes
+            .Select(r => r.StationId)
+            .OfType<string>()
+            .Distinct()
+            .ToList();
+        var stationTimerStates = await stationRepository
+            .GetTimerStatesByStationIds(stationIds);
+        foreach (var route in routes)
         {
-            var route = (interlockingObjects[routeId] as Route)!;
             var approachLockCondition = approachLockConditions.GetValueOrDefault(route.Id, []);
 
             // 接近鎖錠欄の接近区間の条件を満たしているか

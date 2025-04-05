@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Traincrew_MultiATS_Server.Data;
+using Traincrew_MultiATS_Server.Models;
 
 namespace Traincrew_MultiATS_Server.Repositories.Station;
 
@@ -19,6 +20,13 @@ public class StationRepository(DbContextOptions<ApplicationDbContext> options, A
     {
         return context.Stations
             .Where(s => ids.Contains(s.Id))
+            .ToListAsync();
+    }
+
+    public async Task<List<StationTimerState>> GetTimerStatesByStationIds(IEnumerable<string> stationIds)
+    {
+        return await context.StationTimerStates
+            .Where(s => stationIds.Contains(s.StationId))
             .ToListAsync();
     }
 
