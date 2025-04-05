@@ -391,7 +391,7 @@ public class RendoService(
         
         // 関わる全てのObjectを取得 
         var objectIds = routeIds;
-        var interlockingObjects = (await interlockingObjectRepository.GetAllWithState())
+        var interlockingObjects = (await interlockingObjectRepository.GetObjectByIdsWithState(objectIds))
             .ToDictionary(obj => obj.Id);
         foreach (var routeId in routeIds)
         {
