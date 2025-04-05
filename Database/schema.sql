@@ -298,6 +298,14 @@ CREATE TABLE switching_machine_route
 );
 CREATE INDEX switching_machine_route_switching_machine_id_index ON switching_machine_route (switching_machine_id);
 
+-- 進路鎖錠で鎖状するべき軌道回路のリスト
+CREATE TABLE route_lock_track_circuit(
+    id               BIGSERIAL PRIMARY KEY,
+    route_id         BIGINT REFERENCES route (id) NOT NULL, -- 進路のID
+    track_circuit_id BIGINT REFERENCES track_circuit (ID)  NOT NULL, -- 軌道回路のID
+    UNIQUE (route_id, track_circuit_id)
+);
+
 -- ここから状態系
 -- 駅時素状態
 CREATE TABLE station_timer_state
