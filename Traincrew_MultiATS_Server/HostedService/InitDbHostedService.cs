@@ -1144,13 +1144,16 @@ public partial class DbRendoTableInitializer
         int? approachLockTime = null)
     {
         var lockItems = CalcLockItems(lockString, isRouteLock);
-        foreach (var lockItem in lockItems)
+        for(var i = 0; i < lockItems.Count; i++)
         {
+            var lockItem = lockItems[i];
+            int? routeLockGroup = isRouteLock ? i + 1 : null;
             Lock lockObject = new()
             {
                 ObjectId = objectId,
                 Type = lockType,
                 ApproachLockTime = approachLockTime,
+                RouteLockGroup = routeLockGroup,
             };
             context.Locks.Add(lockObject);
             LockCondition? root = null;
