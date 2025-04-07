@@ -377,8 +377,8 @@ public class RendoService(
                 (
                     // 自進路YS扛上
                     route.RouteState.IsThrowOutYSRelayRaised == RaiseDrop.Raise
-                    // Todo: この進路に対して統括制御「する」進路の進路鎖錠リレー 
-                    // && sourceThrowOutRoutes.Any(r => r.RouteState.IsRouteLockRaised) 
+                    // この進路に対して統括制御「する」進路の進路鎖錠リレーが落下している
+                    && sourceThrowOutRoutes.Any(r => r.RouteState.IsRouteLockRaised == RaiseDrop.Drop) 
                 )
                 // 自進路YS落下
                 || route.RouteState.IsThrowOutYSRelayRaised == RaiseDrop.Drop)
