@@ -3,13 +3,16 @@ using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.DestinationButton;
 using Traincrew_MultiATS_Server.Repositories.General;
 using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
+using Traincrew_MultiATS_Server.Repositories.Lock;
 using Traincrew_MultiATS_Server.Repositories.LockCondition;
 using Traincrew_MultiATS_Server.Repositories.Route;
 using Traincrew_MultiATS_Server.Repositories.RouteLeverDestinationButton;
+using Traincrew_MultiATS_Server.Repositories.RouteLockTrackCircuit;
 using Traincrew_MultiATS_Server.Repositories.Station;
 using Traincrew_MultiATS_Server.Repositories.SwitchingMachine;
 using Traincrew_MultiATS_Server.Repositories.SwitchingMachineRoute;
 using Traincrew_MultiATS_Server.Repositories.ThrowOutControl;
+using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
 using Route = Traincrew_MultiATS_Server.Models.Route;
 
 namespace Traincrew_MultiATS_Server.Services;
@@ -29,9 +32,12 @@ public class RendoService(
     ISwitchingMachineRouteRepository switchingMachineRouteRepository,
     IStationRepository stationRepository,
     IDestinationButtonRepository destinationButtonRepository,
+    ILockRepository lockRepository,
     ILockConditionRepository lockConditionRepository,
     IDateTimeRepository dateTimeRepository,
     IThrowOutControlRepository throwOutControlRepository,
+    ITrackCircuitRepository trackCircuitRepository,
+    IRouteLockTrackCircuitRepository routeLockTrackCircuitRepository,
     IGeneralRepository generalRepository)
 {
     /// <summary>
@@ -394,6 +400,8 @@ public class RendoService(
         // 接近鎖錠条件を取得
         var approachLockConditions = await lockConditionRepository.GetConditionsByObjectIdsAndType(
             routeIds, LockType.Approach);
+        // 進路鎖錠するべき軌道回路IDを取得
+        var routeLockTrackCircuitList = await routeLockTrackCircuitRepository.GetByRouteIds(routeIds);
 
         // 関わる全てのObjectを取得 
         var objectIds = routeIds
@@ -413,14 +421,20 @@ public class RendoService(
             .OfType<string>()
             .Distinct()
             .ToList();
-        var stationTimerStates = await stationRepository
-            .GetTimerStatesByStationIds(stationIds);
+        var stationTimerStates = (await stationRepository
+            .GetTimerStatesByStationIds(stationIds))
+            .ToDictionary(s => (s.StationId, s.Seconds));
         foreach (var route in routes)
         {
+            // 接近鎖錠条件
             var approachLockCondition = approachLockConditions.GetValueOrDefault(route.Id, []);
 
             // 接近鎖錠欄の接近区間の条件を満たしているか
             var approachLockPlaceState = CalcApproachLockPlaceState(approachLockCondition, interlockingObjects);
+            
+            // 対応する時素を取得
+            var stationTimerState = stationTimerStates[
+                (route.StationId, route.ApproachLockTime!.Value)];
 
             // 内方2回路分の軌道回路が短絡しているかどうか(直列) => 進路鎖錠するべき軌道回路リストの先頭２つ
             // ・1軌道回路しかない場合は、その軌道回路が短絡しているかどうか
@@ -437,7 +451,7 @@ public class RendoService(
                     ||
                     inTrackCircuitState == RaiseDrop.Drop
                     ||
-                    (false // Todo: *その進路の駅に対応する<時素秒数>TEN*/ == RaiseDrop.Raise
+                    (stationTimerState.IsTenRelayRaised == RaiseDrop.Raise
                      && route.RouteState.IsApproachLockMSRaised == RaiseDrop.Raise)
                     || route.RouteState.IsApproachLockMRRaised == RaiseDrop.Raise
                 )
@@ -455,7 +469,7 @@ public class RendoService(
                     ||
                     inTrackCircuitState == RaiseDrop.Drop
                     ||
-                    (false //Todo: *その進路の駅に対応する<時素秒数>TEN*/ == RaiseDrop.Raise
+                    (stationTimerState.IsTenRelayRaised == RaiseDrop.Raise
                      && isApproachLockMSRaised == RaiseDrop.Raise)
                     ||
                     route.RouteState.IsApproachLockMRRaised == RaiseDrop.Raise
@@ -487,6 +501,8 @@ public class RendoService(
         // 進路鎖錠欄を取得
         var routeLockConditions = await lockConditionRepository.GetConditionsByObjectIdsAndType(
             routeIds, LockType.Route);
+        // 進路鎖錠するべき軌道回路IDを取得
+        var routeLockTrackCircuitList = await routeLockTrackCircuitRepository.GetByRouteIds(routeIds);
         // 信号制御欄を取得
         var signalControlConditions = await lockConditionRepository.GetConditionsByObjectIdsAndType(
             routeIds, LockType.SignalControl);
@@ -495,10 +511,18 @@ public class RendoService(
         var objectIds = routeIds
             .Union(routeLockConditions.Values.SelectMany(ExtractObjectIdsFromLockCondtions))
             .Union(signalControlConditions.Values.SelectMany(ExtractObjectIdsFromLockCondtions))
+            .Union(routeLockTrackCircuitList.Select(rltc => rltc.TrackCircuitId))
             .Distinct()
             .ToList();
         var interlockingObjects = (await interlockingObjectRepository.GetObjectByIdsWithState(objectIds))
             .ToDictionary(obj => obj.Id);
+        var routeLockTrackCircuits = routeLockTrackCircuitList
+            .GroupBy(rltc => rltc.RouteId)
+            .ToDictionary(
+                g => g.Key,
+                g => g.Select(rltc => interlockingObjects[rltc.TrackCircuitId])
+                    .OfType<TrackCircuit>()
+                    .ToList());
 
         foreach (var routeId in routeIds)
         {
@@ -506,6 +530,8 @@ public class RendoService(
             var route = (interlockingObjects[routeId] as Route)!;
             // 進路鎖錠欄
             var routeLockCondition = routeLockConditions.GetValueOrDefault(route.Id, []);
+            // 進路鎖錠するべき軌道回路リスト
+            var routeLockTrackCircuit = routeLockTrackCircuits.GetValueOrDefault(route.Id, []);
             // 信号制御欄
             var signalControlCondition = signalControlConditions.GetValueOrDefault(route.Id, []);
 
