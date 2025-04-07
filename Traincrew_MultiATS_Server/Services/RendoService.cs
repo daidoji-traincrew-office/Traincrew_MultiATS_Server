@@ -68,6 +68,8 @@ public class RendoService(
         var lockConditions = await lockConditionRepository.GetConditionsByType(LockType.Lock);
         // 信号制御条件を取得
         var signalControlConditions = await lockConditionRepository.GetConditionsByType(LockType.SignalControl);
+        // 接近鎖錠欄を取得
+        var approachLockConditions = await lockConditionRepository.GetConditionsByType(LockType.Approach);
         // 統括制御テーブルを取得
         var throwOutControls = await throwOutControlRepository.GetAll();
         // 進路IDをキーにして、統括制御「する」進路をグループ化
@@ -169,6 +171,9 @@ public class RendoService(
                     .OfType<RouteState>()
                     .ToList();
                 // Todo: 自進路の接近鎖錠欄に書かれている条件のうち最終の条件の状態を取得 短絡していない/短絡しているが秒数が経過している
+                var finalApproachLockCondition = approachLockConditions[route.Id]
+                    .OfType<LockConditionObject>()
+                    .Last();
                 var finalApproachTrackState = true;
                 // 自進路の信号制御欄に書かれている条件に書かれている軌道回路の状態を取得
                 var signalControlLockTrackCircuitState = signalControlConditions[route.Id]
@@ -514,6 +519,9 @@ public class RendoService(
         // 進路鎖錠欄を取得
         var routeLockConditions = await lockConditionRepository.GetConditionsByObjectIdsAndType(
             routeIds, LockType.Route);
+        // 接近鎖錠欄を取得
+        var approachLockConditions = await lockConditionRepository.GetConditionsByObjectIdsAndType(
+            routeIds, LockType.Approach);
         // 進路鎖錠するべき軌道回路IDを取得
         var routeLockTrackCircuitList = await routeLockTrackCircuitRepository.GetByRouteIds(routeIds);
         // 信号制御欄を取得
@@ -523,6 +531,7 @@ public class RendoService(
         var objectIds = routeIds
             .Union(routeLockConditions.Values.SelectMany(ExtractObjectIdsFromLockCondtions))
             .Union(signalControlConditions.Values.SelectMany(ExtractObjectIdsFromLockCondtions))
+            .Union(approachLockConditions.Values.SelectMany(ExtractObjectIdsFromLockCondtions))
             .Union(routeLockTrackCircuitList.Select(rltc => rltc.TrackCircuitId))
             .Distinct()
             .ToList();
