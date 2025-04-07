@@ -547,9 +547,13 @@ public class RendoService(
                 && route.RouteState.IsApproachLockMRRaised == RaiseDrop.Drop
                 && route.RouteState.IsRouteLockRaised == RaiseDrop.Raise)
             {
-                // Todo: 一斉に軌道回路を鎖錠、進路鎖錠する
+                //  一斉に軌道回路を鎖錠、進路鎖錠する
                 // 軌道回路Lock
+                routeLockTrackCircuit.ForEach(tc => tc.TrackCircuitState.IsShortCircuit = true);
+                await generalRepository.SaveAll(routeLockTrackCircuit.Select(tc => tc.TrackCircuitState));
                 // IsRouteLockRaisedをDropにする
+                route.RouteState.IsRouteLockRaised = RaiseDrop.Drop;
+                await generalRepository.Save(route.RouteState);
             }
 
             // 接近鎖錠が扛上しているとき
