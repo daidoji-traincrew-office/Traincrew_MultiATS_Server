@@ -437,7 +437,7 @@ public class RendoService(
             var stationTimerState = stationTimerStates[
                 (route.StationId, route.ApproachLockTime!.Value)];
 
-            // 内方2回路分の軌道回路が短絡しているかどうか(直列) => 進路鎖錠するべき軌道回路リストの先頭２つ
+            // Todo: 内方2回路分の軌道回路が短絡しているかどうか(直列) => 進路鎖錠するべき軌道回路リストの先頭２つ
             // ・1軌道回路しかない場合は、その軌道回路が短絡しているかどうか
             // ※軌道回路条件はB付リレーを使用
             var inTrackCircuitState = RaiseDrop.Drop;
@@ -507,7 +507,6 @@ public class RendoService(
         // 信号制御欄を取得
         var signalControlConditions = await lockConditionRepository.GetConditionsByObjectIdsAndType(
             routeIds, LockType.SignalControl);
-        // Todo: 進路鎖錠するべき軌道回路のリストを取得
         // 関わる全てのObjectを取得
         var objectIds = routeIds
             .Union(routeLockConditions.Values.SelectMany(ExtractObjectIdsFromLockCondtions))
@@ -548,7 +547,7 @@ public class RendoService(
                 && route.RouteState.IsApproachLockMRRaised == RaiseDrop.Drop
                 && route.RouteState.IsRouteLockRaised == RaiseDrop.Raise)
             {
-                // 一斉に軌道回路を鎖錠、進路鎖錠する
+                // Todo: 一斉に軌道回路を鎖錠、進路鎖錠する
                 // 軌道回路Lock
                 // IsRouteLockRaisedをDropにする
             }
@@ -556,7 +555,7 @@ public class RendoService(
             // 接近鎖錠が扛上しているとき
             if (route.RouteState.IsApproachLockMRRaised == RaiseDrop.Raise)
             {
-                // 各接近鎖錠区切りごとに、前の軌道回路が鎖錠されていない && 自軌道回路全てが短絡されていない → 当該軌道回路を解錠する
+                // Todo: 各接近鎖錠区切りごとに、前の軌道回路が鎖錠されていない && 自軌道回路全てが短絡されていない → 当該軌道回路を解錠する
                 // 区切りに対して時間条件が存在する場合、前の軌道回路が解錠された瞬間+既定秒数をAnLockedAtに記録し、AnLockdAtを過ぎたら解錠、解錠されたらAnLockedAtをnullにする    
                 // 進路鎖錠欄に書かれている軌道回路のすべての軌道回路が鎖錠解除された場合、進路鎖錠リレーを扛上させる+進路鎖錠するべき軌道回路のリストを全解除する
             }
