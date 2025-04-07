@@ -172,12 +172,28 @@ public class InitDbHostedService(IServiceScopeFactory serviceScopeFactory) : IHo
         await context.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task InitRouteLockTrackCircuit(
+    private async Task InitRouteCsv(
         ApplicationDbContext context,
         CancellationToken cancellationToken)
     {
-        // Todo: 読み込み部分を作る
-        List<RouteLockTrackCircuitCsv> records = [];
+        var file = new FileInfo("./Data/進路.csv");
+        if (!file.Exists)
+        {
+            return;
+        }
+
+        var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+        {
+            HasHeaderRecord = false,
+        };
+        using var reader = new StreamReader(file.FullName);
+        // ヘッダー行を読み飛ばす
+        await reader.ReadLineAsync(cancellationToken);
+        using var csv = new CsvReader(reader, config);
+        csv.Context.RegisterClassMap<RouteLockTrackCircuitCsvMap>();
+        var records = await csv
+            .GetRecordsAsync<RouteLockTrackCircuitCsv>(cancellationToken)
+            .ToListAsync(cancellationToken);
         var routes = await context.Routes
             .Select(r => new { r.Name, r.Id })
             .ToDictionaryAsync(r => r.Name, r => r.Id, cancellationToken);
