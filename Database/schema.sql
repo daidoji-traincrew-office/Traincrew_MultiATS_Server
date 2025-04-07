@@ -248,7 +248,6 @@ CREATE TABLE lock
     id                 BIGSERIAL PRIMARY KEY,
     object_id          BIGINT REFERENCES interlocking_object (id), -- 進路、転てつ機、軌道回路のID
     type               lock_type NOT NULL,                         -- 鎖状の種類
-    approach_lock_time INT,                                        -- 接近鎖状の時間
     route_lock_group   INT                                         -- 進路鎖状のグループ(カッコで囲まれてるやつを同じ数字にする)
 );
 CREATE INDEX lock_object_id_type_index ON lock (object_id, type);

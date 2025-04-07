@@ -1096,15 +1096,8 @@ public partial class DbRendoTableInitializer
             {
                 continue;
             }
-            // 接近鎖錠時素をパース
-            var matchApproachLockTime = RegexIntParse().Match(rendoTableCsv.ApproachTime);
-            if (matchApproachLockTime.Success)
-            {
-                approachLockTime = int.Parse(matchApproachLockTime.Value);
-            }
-
             await RegisterLocks(rendoTableCsv.ApproachLock, route.Id, searchObjectsForApproachLock,
-                LockType.Approach, approachLockTime: approachLockTime);
+                LockType.Approach);
         }
 
         // 転てつ器のてっ査鎖錠を処理する
@@ -1140,8 +1133,7 @@ public partial class DbRendoTableInitializer
         Func<LockItem, Task<List<InterlockingObject>>> searchTargetObjects,
         LockType lockType,
         bool registerSwitchingMachineRoute = false,
-        bool isRouteLock = false,
-        int? approachLockTime = null)
+        bool isRouteLock = false)
     {
         var lockItems = CalcLockItems(lockString, isRouteLock);
         // 進路鎖錠の場合、各アイテムに進路鎖錠グループを持たせてflattenする
@@ -1163,7 +1155,6 @@ public partial class DbRendoTableInitializer
             {
                 ObjectId = objectId,
                 Type = lockType,
-                ApproachLockTime = approachLockTime,
                 RouteLockGroup = lockItem.RouteLockGroup,
             };
             context.Locks.Add(lockObject);
