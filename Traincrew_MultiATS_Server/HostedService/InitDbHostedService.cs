@@ -172,6 +172,54 @@ public class InitDbHostedService(IServiceScopeFactory serviceScopeFactory) : IHo
         await context.SaveChangesAsync(cancellationToken);
     }
 
+    private async Task InitRouteLockTrackCircuit(
+        ApplicationDbContext context,
+        CancellationToken cancellationToken)
+    {
+        // Todo: 読み込み部分を作る
+        List<RouteLockTrackCircuitCsv> records = [];
+        var routes = await context.Routes
+            .Select(r => new { r.Name, r.Id })
+            .ToDictionaryAsync(r => r.Name, r => r.Id, cancellationToken);
+        var trackCircuits = await context.TrackCircuits
+            .Select(tc => new { tc.Name, tc.Id })
+            .ToDictionaryAsync(tc => tc.Name, tc => tc.Id, cancellationToken);
+        var routeLockTrackCircuits = (await context.RouteLockTrackCircuits
+            .Select(r => new { r.RouteId, r.TrackCircuitId })
+            .ToListAsync(cancellationToken)).ToHashSet();
+        foreach (var record in records)
+        {
+            // 該当進路が登録されていない場合スキップ
+            if (!routes.TryGetValue(record.RouteName, out var routeId))
+            {
+                continue;
+            }
+
+            foreach (var trackCircuitName in record.TrackCircuitNames)
+            {
+                // 該当軌道回路が登録されていない場合スキップ
+                if (!trackCircuits.TryGetValue(trackCircuitName, out var trackCircuitId))
+                {
+                    continue;
+                }
+
+                // 既に登録済みの場合、スキップ
+                if (routeLockTrackCircuits.Contains(new { RouteId = routeId, TrackCircuitId = trackCircuitId }))
+                {
+                    continue;
+                }
+
+                context.RouteLockTrackCircuits.Add(new()
+                {
+                    RouteId = routeId,
+                    TrackCircuitId = trackCircuitId
+                });
+            }
+        }
+        await context.SaveChangesAsync(cancellationToken);
+            
+    }
+
     public async Task StopAsync(CancellationToken cancellationToken)
     {
         await Task.WhenAll(_schedulers.Select(s => s.Stop()));
