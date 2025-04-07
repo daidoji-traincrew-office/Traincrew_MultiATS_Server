@@ -24,10 +24,12 @@ public class RouteState
     /// 接近鎖錠リレー(MR)
     /// </summary>
     // ReSharper disable InconsistentNaming
+    [Column("is_approach_lock_mr_raised")]
     public RaiseDrop IsApproachLockMRRaised { get; set; }
     /// <summary>
     /// 接近鎖錠リレー(MS)
     /// </summary>
+    [Column("is_approach_lock_ms_raised")]
     public RaiseDrop IsApproachLockMSRaised { get; set; }
     /// <summary>
     /// 進路鎖錠リレー(実在しない)
