@@ -406,6 +406,7 @@ public class RendoService(
         // 関わる全てのObjectを取得 
         var objectIds = routeIds
             .Union(approachLockConditions.Values.SelectMany(ExtractObjectIdsFromLockCondtions))
+            .Union(routeLockTrackCircuitList.Select(rltc => rltc.TrackCircuitId))
             .Distinct()
             .ToList();
         var interlockingObjects = (await interlockingObjectRepository.GetObjectByIdsWithState(objectIds))
