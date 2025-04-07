@@ -10,6 +10,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<StationTimerState> StationTimerStates { get; set; }
     public DbSet<InterlockingObject> InterlockingObjects { get; set; }
     public DbSet<Route> Routes { get; set; }
+    public DbSet<RouteLockTrackCircuit> RouteLockTrackCircuits { get; set; }
     public DbSet<RouteState> RouteStates { get; set; }
     public DbSet<SwitchingMachine> SwitchingMachines { get; set; }
     public DbSet<TrackCircuit> TrackCircuits { get; set; }
@@ -77,7 +78,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         */
         modelBuilder.Entity<LockCondition>()
             .HasOne(lc => lc.Lock)
-            .WithMany()
+            .WithMany(l => l.LockConditions)
             .HasForeignKey(l => l.LockId)
             .HasPrincipalKey(l => l.Id);
         modelBuilder.Entity<LockCondition>()
