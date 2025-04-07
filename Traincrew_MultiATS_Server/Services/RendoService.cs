@@ -425,6 +425,14 @@ public class RendoService(
         var stationTimerStates = (await stationRepository
             .GetTimerStatesByStationIds(stationIds))
             .ToDictionary(s => (s.StationId, s.Seconds));
+        // 進路鎖錠するべき軌道回路リスト
+        var routeLockTrackCircuits = routeLockTrackCircuitList
+            .GroupBy(rltc => rltc.RouteId)
+            .ToDictionary(
+                g => g.Key,
+                g => g.Select(rltc => interlockingObjects[rltc.TrackCircuitId])
+                    .OfType<TrackCircuit>()
+                    .ToList());
         foreach (var route in routes)
         {
             // 接近鎖錠条件
@@ -437,10 +445,14 @@ public class RendoService(
             var stationTimerState = stationTimerStates[
                 (route.StationId, route.ApproachLockTime!.Value)];
 
-            // Todo: 内方2回路分の軌道回路が短絡しているかどうか(直列) => 進路鎖錠するべき軌道回路リストの先頭２つ
+            // 内方2回路分の軌道回路が短絡しているかどうか(直列) => 進路鎖錠するべき軌道回路リストの先頭２つ
             // ・1軌道回路しかない場合は、その軌道回路が短絡しているかどうか
             // ※軌道回路条件はB付リレーを使用
-            var inTrackCircuitState = RaiseDrop.Drop;
+            var inTrackCircuitState = routeLockTrackCircuits.GetValueOrDefault(route.Id, [])
+                .Take(2)
+                .Any(trackCircuit => trackCircuit.TrackCircuitState.IsShortCircuit)
+                ? RaiseDrop.Raise
+                : RaiseDrop.Drop;
 
             var isApproachLockMSRaised =
                 route.RouteState.IsSignalControlRaised == RaiseDrop.Drop
@@ -535,15 +547,9 @@ public class RendoService(
             // 信号制御欄
             var signalControlCondition = signalControlConditions.GetValueOrDefault(route.Id, []);
 
-            // 信号制御欄の末端回路(条件ないものに限る)
-            var lastTrackCircuitCondition = signalControlCondition
-                .Where(lc => lc.ParentId == null)
-                .OfType<LockConditionObject>()
-                .OrderBy(lco => lco.Id)
-                .LastOrDefault()!;
-            var lastTrackCircuit = interlockingObjects[lastTrackCircuitCondition.ObjectId] as TrackCircuit;
-            // 信号制御欄の末端回路が鎖錠されていない && 接近鎖錠されている && 進路鎖錠されていない → 一斉に軌道回路を鎖錠、進路鎖錠する
-            if (!lastTrackCircuit.TrackCircuitState.IsLocked
+            // Todo: ここで見るべき条件は？
+            // ?? && 接近鎖錠されている && 進路鎖錠されていない → 一斉に軌道回路を鎖錠、進路鎖錠する
+            if (true // Todo: ロジックを書き直す
                 && route.RouteState.IsApproachLockMRRaised == RaiseDrop.Drop
                 && route.RouteState.IsRouteLockRaised == RaiseDrop.Raise)
             {
