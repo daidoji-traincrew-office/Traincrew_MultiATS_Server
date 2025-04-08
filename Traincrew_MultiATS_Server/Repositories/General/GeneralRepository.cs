@@ -14,7 +14,10 @@ public class GeneralRepository(ApplicationDbContext context) : IGeneralRepositor
 
     public async Task SaveAll<T>(IEnumerable<T> entities)
     {
-        context.UpdateRange(entities);
+        foreach (var entity in entities)
+        {
+            context.Update(entity);
+        }
         await context.SaveChangesAsync();
         foreach (var entity in entities)
         {
@@ -30,7 +33,10 @@ public class GeneralRepository(ApplicationDbContext context) : IGeneralRepositor
 
     public async Task DeleteAll<T>(IEnumerable<T> entities)
     {
-        context.RemoveRange(entities);
+        foreach (var entity in entities)
+        {
+            context.Remove(entity); 
+        }
         await context.SaveChangesAsync();
     }
 }
