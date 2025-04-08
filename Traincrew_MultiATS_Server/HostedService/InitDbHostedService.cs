@@ -244,8 +244,11 @@ public class InitDbHostedService(IServiceScopeFactory serviceScopeFactory) : IHo
     }
 }
 
-internal class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, IDateTimeRepository dateTimeRepository, CancellationToken cancellationToken)
+internal partial class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, IDateTimeRepository dateTimeRepository, CancellationToken cancellationToken)
 {
+    [GeneratedRegex(@"^(TH(\d{1,2}S?))_")]
+    private static partial Regex RegexStationId();
+    
     internal async Task Initialize()
     {
         await InitStation();
