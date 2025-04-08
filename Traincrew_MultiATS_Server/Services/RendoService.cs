@@ -170,11 +170,12 @@ public class RendoService(
                     .Select(r => r.RouteState)
                     .OfType<RouteState>()
                     .ToList();
-                // Todo: 自進路の接近鎖錠欄に書かれている条件のうち最終の軌道回路条件の状態を取得 鎖錠していない
+                // 自進路の接近鎖錠欄に書かれている条件のうち最終の軌道回路条件の状態を取得 鎖錠していない
                 var finalApproachLockCondition = approachLockConditions[route.Id]
                     .OfType<LockConditionObject>()
-                    .Last();
-                var finalApproachTrackState = true;
+                    .Last(c => interlockingObjects[c.ObjectId] is TrackCircuit);
+                var finalApproachTrackState = !(interlockingObjects[finalApproachLockCondition.ObjectId] as TrackCircuit)
+                    .TrackCircuitState.IsLocked;
                 // 自進路の信号制御欄に書かれている条件に書かれている軌道回路の状態を取得
                 var signalControlLockTrackCircuitState = signalControlConditions[route.Id]
                     .OfType<LockConditionObject>()
