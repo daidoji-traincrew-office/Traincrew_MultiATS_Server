@@ -174,8 +174,9 @@ public class RendoService(
                 var finalApproachLockCondition = approachLockConditions[route.Id]
                     .OfType<LockConditionObject>()
                     .Last(c => interlockingObjects[c.ObjectId] is TrackCircuit);
-                var finalApproachTrackState = !(interlockingObjects[finalApproachLockCondition.ObjectId] as TrackCircuit)
-                    .TrackCircuitState.IsLocked;
+                var finalApproachTrackState =
+                    !(interlockingObjects[finalApproachLockCondition.ObjectId] as TrackCircuit)
+                        .TrackCircuitState.IsLocked;
                 // 自進路の信号制御欄に書かれている条件に書かれている軌道回路の状態を取得
                 var signalControlLockTrackCircuitState = signalControlConditions[route.Id]
                     .OfType<LockConditionObject>()
@@ -225,7 +226,7 @@ public class RendoService(
                 (
                     (
                         routeState is
-                        { IsThrowOutYSRelayRaised: RaiseDrop.Drop, IsThrowOutXRRelayRaised: RaiseDrop.Drop }
+                            { IsThrowOutYSRelayRaised: RaiseDrop.Drop, IsThrowOutXRRelayRaised: RaiseDrop.Drop }
                         &&
                         leverState is LCR.Left or LCR.Right
                     )
@@ -429,7 +430,7 @@ public class RendoService(
             .Distinct()
             .ToList();
         var stationTimerStates = (await stationRepository
-            .GetTimerStatesByStationIds(stationIds))
+                .GetTimerStatesByStationIds(stationIds))
             .ToDictionary(s => (s.StationId, s.Seconds));
         // 進路鎖錠するべき軌道回路リスト
         var routeLockTrackCircuits = routeLockTrackCircuitList
@@ -518,7 +519,7 @@ public class RendoService(
         // 操作対象の進路を全て取得(進路鎖錠が掛かっている回路または接近鎖錠の掛かっている回路)
         var routeIds = await routeRepository.GetIdsWhereRouteLockRelayIsRaisedOrApproachLockMRIsDropped();
         // 進路鎖錠欄を取得
-        var routeLockConditions = await lockConditionRepository.GetConditionsByObjectIdsAndType(
+        var routeLockConditions = await lockRepository.GetByObjectIdsAndType(
             routeIds, LockType.Route);
         // 接近鎖錠欄を取得
         var approachLockConditions = await lockConditionRepository.GetConditionsByObjectIdsAndType(
@@ -527,7 +528,9 @@ public class RendoService(
         var routeLockTrackCircuitList = await routeLockTrackCircuitRepository.GetByRouteIds(routeIds);
         // 関わる全てのObjectを取得
         var objectIds = routeIds
-            .Union(routeLockConditions.Values.SelectMany(ExtractObjectIdsFromLockCondtions))
+            .Union(routeLockConditions.Values
+                .SelectMany(locks => locks.Select(l => l.LockConditions))
+                .SelectMany(ExtractObjectIdsFromLockCondtions))
             .Union(approachLockConditions.Values.SelectMany(ExtractObjectIdsFromLockCondtions))
             .Union(routeLockTrackCircuitList.Select(rltc => rltc.TrackCircuitId))
             .Distinct()
@@ -547,7 +550,7 @@ public class RendoService(
             // 対象進路
             var route = (interlockingObjects[routeId] as Route)!;
             // 進路鎖錠欄
-            var routeLockCondition = routeLockConditions.GetValueOrDefault(route.Id, []);
+            var routeLocks = routeLockConditions.GetValueOrDefault(route.Id, []);
             // 進路鎖錠するべき軌道回路リスト
             var routeLockTrackCircuit = routeLockTrackCircuits.GetValueOrDefault(route.Id, []);
 
@@ -568,9 +571,82 @@ public class RendoService(
             // 接近鎖錠が扛上しているとき
             if (route.RouteState.IsApproachLockMRRaised == RaiseDrop.Raise)
             {
-                // Todo: 各進路鎖錠区切りごとに、前の軌道回路が鎖錠されていない && 自軌道回路全てが短絡されていない → 当該軌道回路を解錠する 
+                // 各進路鎖錠区切りごとに、前の軌道回路が鎖錠されていない && 自軌道回路全てが短絡されていない → 当該軌道回路を解錠する 
                 // 区切りに対して時間条件が存在する場合、前の軌道回路が解錠された瞬間+既定秒数をUnlockedAtに記録し、UnlockedAtを過ぎたら解錠、解錠されたらUnlockedAtをnullにする    
+
+                foreach (var routeLock in routeLocks)
+                {
+                    var routeLockCondition = routeLock.LockConditions;
+                    var targetTrackCircuits = routeLockCondition
+                        .OfType<LockConditionObject>()
+                        .Select(l => interlockingObjects[l.ObjectId])
+                        .OfType<TrackCircuit>()
+                        .ToList();
+                    // 当該軌道回路が全部解錠されている
+                    if (targetTrackCircuits.All(tc => !tc.TrackCircuitState.IsLocked))
+                    {
+                        continue;
+                    }
+
+                    // 自軌道回路いずれかが短絡している
+                    if (targetTrackCircuits.Any(tc => tc.TrackCircuitState.IsShortCircuit))
+                    {
+                        // 時間条件があれば取得する
+                        var timerSeconds = routeLockCondition
+                            .OfType<LockConditionObject>()
+                            .FirstOrDefault(lco => lco.TimerSeconds != null)
+                            ?.TimerSeconds;
+                        // 時間条件がなければbreak
+                        if (timerSeconds == null)
+                        {
+                            break;
+                        }
+
+                        // 時間条件が存在し、UnlockedAtがnull => now+時間条件をUnlockedAtに設定してBreak
+                        if (targetTrackCircuits.Any(tc => tc.TrackCircuitState.UnlockedAt == null))
+                        {
+                            targetTrackCircuits.ForEach(tc => tc.TrackCircuitState.UnlockedAt =
+                                dateTimeRepository.GetNow() +
+                                TimeSpan.FromSeconds(timerSeconds.Value));
+                            await generalRepository.SaveAll(targetTrackCircuits.Select(tc => tc.TrackCircuitState));
+                            break;
+                        }
+
+                        // 時間条件が存在し、UnlockedAt > now => Break
+                        if (targetTrackCircuits.Any(tc =>
+                                tc.TrackCircuitState.UnlockedAt > dateTimeRepository.GetNow()))
+                        {
+                            break;
+                        }
+                    }
+
+                    // 対象軌道回路を解錠、UnlockedAtをnullにする
+                    targetTrackCircuits.ForEach(tc =>
+                    {
+                        tc.TrackCircuitState.IsLocked = false;
+                        tc.TrackCircuitState.UnlockedAt = null;
+                    });
+                    await generalRepository.SaveAll(targetTrackCircuits.Select(tc => tc.TrackCircuitState));
+                }
+
                 // 進路鎖錠欄に書かれている軌道回路のすべての軌道回路が鎖錠解除された場合、進路鎖錠リレーを扛上させる+進路鎖錠するべき軌道回路のリストを全解除する
+                
+                // 進路鎖錠欄に書かれている軌道回路のいずれかの軌道回路が鎖状されている場合、スキップ
+                if (!routeLocks
+                        .SelectMany(l => l.LockConditions)
+                        .OfType<LockConditionObject>()
+                        .Select(l => interlockingObjects[l.ObjectId])
+                        .All(io => io is TrackCircuit { TrackCircuitState.IsLocked: false }))
+                {
+                    continue;
+                }
+
+                // 進路鎖錠するべき軌道回路のリストを全解除する
+                routeLockTrackCircuit.ForEach(tc => tc.TrackCircuitState.IsShortCircuit = false);
+                await generalRepository.SaveAll(routeLockTrackCircuit.Select(tc => tc.TrackCircuitState));
+                // 進路鎖錠リレーを扛上させる
+                route.RouteState.IsRouteLockRaised = RaiseDrop.Raise;
+                await generalRepository.Save(route.RouteState);
             }
         }
     }
