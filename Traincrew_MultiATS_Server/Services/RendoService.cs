@@ -184,7 +184,7 @@ public class RendoService(
                     .Select(tc => tc.TrackCircuitState)
                     .ToList();
                 var isThrowOutYSRelayRaised =
-                    // Todo: 進路鎖錠実装時にコメントアウト解除した（下2行）　進路鎖錠なしで動確取る場合は再度コメントアウト
+                    // 進路鎖錠実装時にコメントアウト解除した（下2行）　進路鎖錠なしで動確取る場合は再度コメントアウト
                     lockRouteStates.All(rs => rs.IsRouteLockRaised == RaiseDrop.Raise)
                     &&
                     (
