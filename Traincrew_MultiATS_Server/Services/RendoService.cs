@@ -449,8 +449,24 @@ public class RendoService(
             var approachLockPlaceState = CalcApproachLockPlaceState(approachLockCondition, interlockingObjects);
 
             // 対応する時素を取得
-            var stationTimerState = stationTimerStates[
-                (route.StationId, route.ApproachLockTime!.Value)];
+            StationTimerState? stationTimerState = null;
+            if (route.ApproachLockTime != null)
+            {
+                stationTimerState = stationTimerStates.GetValueOrDefault((route.StationId, route.ApproachLockTime.Value));
+            }
+
+            // もし取得できなければ、一旦デフォルト値を設定
+            if (stationTimerStates == null)
+            {
+                stationTimerState = new()
+                {
+                    IsTenRelayRaised = RaiseDrop.Drop,
+                    IsTerRelayRaised = RaiseDrop.Drop,
+                    IsTeuRelayRaised = RaiseDrop.Drop,
+                    Seconds = 0,
+                    StationId = route.StationId,
+                };
+            }
 
             // 内方2回路分の軌道回路が短絡しているかどうか(直列) => 進路鎖錠するべき軌道回路リストの先頭２つ
             // ・1軌道回路しかない場合は、その軌道回路が短絡しているかどうか
