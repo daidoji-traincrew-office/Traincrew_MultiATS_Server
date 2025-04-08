@@ -561,7 +561,7 @@ public class RendoService(
             {
                 //  一斉に軌道回路を鎖錠、進路鎖錠する
                 // 軌道回路Lock
-                routeLockTrackCircuit.ForEach(tc => tc.TrackCircuitState.IsShortCircuit = true);
+                routeLockTrackCircuit.ForEach(tc => tc.TrackCircuitState.IsLocked = true);
                 await generalRepository.SaveAll(routeLockTrackCircuit.Select(tc => tc.TrackCircuitState));
                 // IsRouteLockRaisedをDropにする
                 route.RouteState.IsRouteLockRaised = RaiseDrop.Drop;
@@ -630,7 +630,7 @@ public class RendoService(
                 }
 
                 // 進路鎖錠欄に書かれている軌道回路のすべての軌道回路が鎖錠解除された場合、進路鎖錠リレーを扛上させる+進路鎖錠するべき軌道回路のリストを全解除する
-                
+
                 // 進路鎖錠欄に書かれている軌道回路のいずれかの軌道回路が鎖状されている場合、スキップ
                 if (!routeLocks
                         .SelectMany(l => l.LockConditions)
@@ -642,7 +642,11 @@ public class RendoService(
                 }
 
                 // 進路鎖錠するべき軌道回路のリストを全解除する
-                routeLockTrackCircuit.ForEach(tc => tc.TrackCircuitState.IsShortCircuit = false);
+                routeLockTrackCircuit.ForEach(tc =>
+                {
+                    tc.TrackCircuitState.IsLocked = false;
+                    tc.TrackCircuitState.UnlockedAt = null;
+                });
                 await generalRepository.SaveAll(routeLockTrackCircuit.Select(tc => tc.TrackCircuitState));
                 // 進路鎖錠リレーを扛上させる
                 route.RouteState.IsRouteLockRaised = RaiseDrop.Raise;
