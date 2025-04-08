@@ -525,13 +525,9 @@ public class RendoService(
             routeIds, LockType.Approach);
         // 進路鎖錠するべき軌道回路IDを取得
         var routeLockTrackCircuitList = await routeLockTrackCircuitRepository.GetByRouteIds(routeIds);
-        // 信号制御欄を取得
-        var signalControlConditions = await lockConditionRepository.GetConditionsByObjectIdsAndType(
-            routeIds, LockType.SignalControl);
         // 関わる全てのObjectを取得
         var objectIds = routeIds
             .Union(routeLockConditions.Values.SelectMany(ExtractObjectIdsFromLockCondtions))
-            .Union(signalControlConditions.Values.SelectMany(ExtractObjectIdsFromLockCondtions))
             .Union(approachLockConditions.Values.SelectMany(ExtractObjectIdsFromLockCondtions))
             .Union(routeLockTrackCircuitList.Select(rltc => rltc.TrackCircuitId))
             .Distinct()
@@ -554,12 +550,9 @@ public class RendoService(
             var routeLockCondition = routeLockConditions.GetValueOrDefault(route.Id, []);
             // 進路鎖錠するべき軌道回路リスト
             var routeLockTrackCircuit = routeLockTrackCircuits.GetValueOrDefault(route.Id, []);
-            // 信号制御欄
-            var signalControlCondition = signalControlConditions.GetValueOrDefault(route.Id, []);
-
 
             // 進路鎖錠取るべきリストの末端回路が鎖錠されていない && 接近鎖錠されている && 進路鎖錠されていない → 一斉に軌道回路を鎖錠、進路鎖錠する
-            if (true // Todo: ロジックを書き直す
+            if (!(routeLockTrackCircuit.LastOrDefault()?.TrackCircuitState.IsLocked ?? true)
                 && route.RouteState.IsApproachLockMRRaised == RaiseDrop.Drop
                 && route.RouteState.IsRouteLockRaised == RaiseDrop.Raise)
             {
