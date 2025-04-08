@@ -170,7 +170,7 @@ public class RendoService(
                     .Select(r => r.RouteState)
                     .OfType<RouteState>()
                     .ToList();
-                // Todo: 自進路の接近鎖錠欄に書かれている条件のうち最終の条件の状態を取得 短絡していない/短絡しているが秒数が経過している
+                // Todo: 自進路の接近鎖錠欄に書かれている条件のうち最終の軌道回路条件の状態を取得 鎖錠していない
                 var finalApproachLockCondition = approachLockConditions[route.Id]
                     .OfType<LockConditionObject>()
                     .Last();
@@ -183,7 +183,7 @@ public class RendoService(
                     .Select(tc => tc.TrackCircuitState)
                     .ToList();
                 var isThrowOutYSRelayRaised =
-                    // Todo:　進路鎖錠実装時にコメントアウト解除
+                    // Todo:　進路鎖錠実装時にコメントアウト解除した（下2行）　進路鎖錠なしで動確取る場合は再度コメントアウト
                     lockRouteStates.All(rs => rs.IsRouteLockRaised == RaiseDrop.Raise)
                     &&
                     (
@@ -224,7 +224,7 @@ public class RendoService(
                 (
                     (
                         routeState is
-                            { IsThrowOutYSRelayRaised: RaiseDrop.Drop, IsThrowOutXRRelayRaised: RaiseDrop.Drop }
+                        { IsThrowOutYSRelayRaised: RaiseDrop.Drop, IsThrowOutXRRelayRaised: RaiseDrop.Drop }
                         &&
                         leverState is LCR.Left or LCR.Right
                     )
@@ -383,7 +383,7 @@ public class RendoService(
                     // 自進路YS扛上
                     route.RouteState.IsThrowOutYSRelayRaised == RaiseDrop.Raise
                     // この進路に対して統括制御「する」進路の進路鎖錠リレーが落下している
-                    && sourceThrowOutRoutes.Any(r => r.RouteState.IsRouteLockRaised == RaiseDrop.Drop) 
+                    && sourceThrowOutRoutes.Any(r => r.RouteState.IsRouteLockRaised == RaiseDrop.Drop)
                 )
                 // 自進路YS落下
                 || route.RouteState.IsThrowOutYSRelayRaised == RaiseDrop.Drop)
@@ -445,7 +445,7 @@ public class RendoService(
 
             // 接近鎖錠欄の接近区間の条件を満たしているか
             var approachLockPlaceState = CalcApproachLockPlaceState(approachLockCondition, interlockingObjects);
-            
+
             // 対応する時素を取得
             var stationTimerState = stationTimerStates[
                 (route.StationId, route.ApproachLockTime!.Value)];
@@ -556,8 +556,7 @@ public class RendoService(
             // 信号制御欄
             var signalControlCondition = signalControlConditions.GetValueOrDefault(route.Id, []);
 
-            // Todo: ここで見るべき条件は？
-            // ?? && 接近鎖錠されている && 進路鎖錠されていない → 一斉に軌道回路を鎖錠、進路鎖錠する
+            // 進路鎖錠取るべきリストの末端回路が鎖錠されていない && 接近鎖錠されている && 進路鎖錠されていない → 一斉に軌道回路を鎖錠、進路鎖錠する
             if (true // Todo: ロジックを書き直す
                 && route.RouteState.IsApproachLockMRRaised == RaiseDrop.Drop
                 && route.RouteState.IsRouteLockRaised == RaiseDrop.Raise)
@@ -574,7 +573,7 @@ public class RendoService(
             // 接近鎖錠が扛上しているとき
             if (route.RouteState.IsApproachLockMRRaised == RaiseDrop.Raise)
             {
-                // Todo: 各接近鎖錠区切りごとに、前の軌道回路が鎖錠されていない && 自軌道回路全てが短絡されていない → 当該軌道回路を解錠する
+                // Todo: 各進路鎖錠区切りごとに、前の軌道回路が鎖錠されていない && 自軌道回路全てが短絡されていない → 当該軌道回路を解錠する
                 // 区切りに対して時間条件が存在する場合、前の軌道回路が解錠された瞬間+既定秒数をUnlockedAtに記録し、UnlockedAtを過ぎたら解錠、解錠されたらUnlockedAtをnullにする    
                 // 進路鎖錠欄に書かれている軌道回路のすべての軌道回路が鎖錠解除された場合、進路鎖錠リレーを扛上させる+進路鎖錠するべき軌道回路のリストを全解除する
             }
