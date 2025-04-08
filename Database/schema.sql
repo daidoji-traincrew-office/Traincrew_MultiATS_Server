@@ -317,6 +317,7 @@ CREATE TABLE station_timer_state
     is_teu_relay_raised raise_drop  NOT NULL DEFAULT 'drop',
     is_ten_relay_raised raise_drop  NOT NULL DEFAULT 'drop',
     is_ter_relay_raised raise_drop  NOT NULL DEFAULT 'drop',
+    teu_relay_raised_at TIMESTAMP   NOT NULL,
     UNIQUE (station_id, seconds)
 );
 

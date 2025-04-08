@@ -21,7 +21,7 @@ public class InitDbHostedService(IServiceScopeFactory serviceScopeFactory) : IHo
         using var scope = serviceScopeFactory.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         var datetimeRepository = scope.ServiceProvider.GetRequiredService<IDateTimeRepository>();
-        var dbInitializer = await CreateDBInitializer(context, cancellationToken);
+        var dbInitializer = await CreateDBInitializer(context, datetimeRepository, cancellationToken);
         if (dbInitializer != null)
         {
             await dbInitializer.Initialize();
@@ -43,11 +43,12 @@ public class InitDbHostedService(IServiceScopeFactory serviceScopeFactory) : IHo
     }
 
     private async Task<DbInitializer?> CreateDBInitializer(ApplicationDbContext context,
+        IDateTimeRepository dateTimeRepository,
         CancellationToken cancellationToken)
     {
         var jsonstring = await File.ReadAllTextAsync("./Data/DBBase.json", cancellationToken);
         var DBBase = JsonSerializer.Deserialize<DBBasejson>(jsonstring);
-        return DBBase != null ? new DbInitializer(DBBase, context, cancellationToken) : null;
+        return DBBase != null ? new DbInitializer(DBBase, context, dateTimeRepository, cancellationToken) : null;
     }
 
     private async Task InitRendoTable(
@@ -242,7 +243,7 @@ public class InitDbHostedService(IServiceScopeFactory serviceScopeFactory) : IHo
     }
 }
 
-internal class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, CancellationToken cancellationToken)
+internal class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, IDateTimeRepository dateTimeRepository, CancellationToken cancellationToken)
 {
     internal async Task Initialize()
     {
@@ -308,7 +309,8 @@ internal class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, Ca
                     Seconds = seconds,
                     IsTeuRelayRaised = RaiseDrop.Drop,
                     IsTenRelayRaised = RaiseDrop.Drop,
-                    IsTerRelayRaised = RaiseDrop.Drop
+                    IsTerRelayRaised = RaiseDrop.Drop,
+                    TeuRelayRaisedAt = dateTimeRepository.GetNow() 
                 });
             }
         }
