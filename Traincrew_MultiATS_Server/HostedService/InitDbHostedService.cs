@@ -29,6 +29,7 @@ public class InitDbHostedService(IServiceScopeFactory serviceScopeFactory) : IHo
 
         await InitRendoTable(context, datetimeRepository, cancellationToken);
         await InitOperationNotificationDisplay(context, datetimeRepository, cancellationToken);
+        await InitRouteCsv(context, cancellationToken);
 
         if (dbInitializer != null)
         {
@@ -666,13 +667,15 @@ internal class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, ID
             .ToListAsync();
         foreach (var interlockingObject in interlockingObjects)
         {
-            if (!interlockingObject.Name.StartsWith("TH"))
+            var match = RegexStationId().Match(interlockingObject.Name);
+            if (!match.Success)
             {
                 continue;
             }
-
-            var stationId = interlockingObject.Name.Substring(0, 4);
+            
+            var stationId = match.Groups[1].Value;
             interlockingObject.StationId = stationId;
+            context.Update(interlockingObject);
         }
 
         await context.SaveChangesAsync();
