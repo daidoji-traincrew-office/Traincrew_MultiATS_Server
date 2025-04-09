@@ -727,11 +727,25 @@ public class RendoService(
         List<LockCondition> signalControlCondition,
         Dictionary<ulong, InterlockingObject> interlockingObjects)
     {
-        // 進路照査リレーが落下している場合、信号制御リレーを落下させてcontinue
+        // 進路照査リレーが落下している場合、信号制御リレーを落下させる
         if (route.RouteState.IsRouteRelayRaised == RaiseDrop.Drop)
         {
             return RaiseDrop.Drop;
         }
+
+        // 接近鎖錠リレーが向上している場合、信号制御リレーを落下させる
+        if (route.RouteState.IsApproachLockMRRaised == RaiseDrop.Raise || route.RouteState.IsApproachLockMSRaised == RaiseDrop.Raise)
+        {
+            return RaiseDrop.Drop;
+        }
+
+        // 進路鎖錠リレーが向上している場合、信号制御リレーを落下させる
+        if (route.RouteState.IsRouteLockRaised == RaiseDrop.Raise)
+        {
+            return RaiseDrop.Drop;
+        }
+
+        // Todo: 自進路の接近鎖錠見る
 
         // 信号制御欄の条件を満たしているか
         var predicate = new Func<LockConditionObject, InterlockingObject, bool>((o, interlockingObject) =>
