@@ -584,8 +584,10 @@ public class RendoService(
                 await generalRepository.Save(route.RouteState);
             }
 
-            // 接近鎖錠が扛上しているとき
-            if (route.RouteState.IsApproachLockMRRaised == RaiseDrop.Raise)
+            // 接近鎖錠が扛上して、かつ進路鎖錠リレーが落下している場合
+            if (
+                route.RouteState.IsApproachLockMRRaised == RaiseDrop.Raise
+                && route.RouteState.IsRouteLockRaised == RaiseDrop.Drop)
             {
                 // 各進路鎖錠区切りごとに、前の軌道回路が鎖錠されていない && 自軌道回路全てが短絡されていない → 当該軌道回路を解錠する 
                 // 区切りに対して時間条件が存在する場合、前の軌道回路が解錠された瞬間+既定秒数をUnlockedAtに記録し、UnlockedAtを過ぎたら解錠、解錠されたらUnlockedAtをnullにする    
