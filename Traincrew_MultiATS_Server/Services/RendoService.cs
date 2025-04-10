@@ -794,7 +794,7 @@ public class RendoService(
         }
     }
 
-    internal static bool IsDetectorAnLocked(List<LockCondition> lockConditions,
+    internal static bool IsDetectorUnlocked(List<LockCondition> lockConditions,
         Dictionary<ulong, InterlockingObject> interlockingObjects)
     {
         return EvaluateLockConditions(lockConditions, interlockingObjects, Predicate);
