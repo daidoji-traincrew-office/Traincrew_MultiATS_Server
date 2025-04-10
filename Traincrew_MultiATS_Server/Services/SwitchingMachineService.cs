@@ -57,8 +57,9 @@ public class SwitchingMachineService(
         foreach (var switchingMachine in switchingMachineList)
         {
             // 対応する転てつ器のてっさ鎖錠欄の条件確認
-            var detectorLockCondition = detectorLockConditions.GetValueOrDefault(switchingMachine.Id, []);
-            if (RendoService.IsDetectorLocked(detectorLockCondition, interlockingObjectDic))
+            var detectorLockCondition = detectorLockConditions.GetValueOrDefault(switchingMachine.Id, new List<LockCondition>());
+
+            if (!RendoService.IsDetectorAnLocked(detectorLockCondition, interlockingObjectDic))
             {
                 // てっさ鎖錠領域に転換中に列車が来ると転換完了処理も通らないが、転換中の転てつ器に突っ込んだ結果転てつ器が壊れたとする。
                 continue;

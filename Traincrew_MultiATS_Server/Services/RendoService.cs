@@ -794,7 +794,7 @@ public class RendoService(
         }
     }
 
-    internal static bool IsDetectorLocked(List<LockCondition> lockConditions,
+    internal static bool IsDetectorAnLocked(List<LockCondition> lockConditions,
         Dictionary<ulong, InterlockingObject> interlockingObjects)
     {
         return EvaluateLockConditions(lockConditions, interlockingObjects, Predicate);
@@ -805,7 +805,7 @@ public class RendoService(
             return interlockingObject switch
             {
                 TrackCircuit trackCircuit =>
-                    trackCircuit.TrackCircuitState is not { IsShortCircuit: false, IsLocked: false },
+                    trackCircuit.TrackCircuitState is { IsShortCircuit: false, IsLocked: false },
                 SwitchingMachine or Lever or Route => false,
                 _ => true
             };
