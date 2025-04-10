@@ -191,7 +191,7 @@ public class RendoService(
                     (
                         sourceThrowOutRoutes.All(
                             r =>
-                                r.RouteState.IsRouteLockRaised == RaiseDrop.Raise
+                                r.RouteState.IsRouteLockRaised == RaiseDrop.Drop
                                 &&
                                 r.RouteState.IsSignalControlRaised == RaiseDrop.Drop
                         )
