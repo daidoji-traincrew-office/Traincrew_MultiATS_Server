@@ -589,10 +589,10 @@ public class RendoService(
             {
                 // 各進路鎖錠区切りごとに、前の軌道回路が鎖錠されていない && 自軌道回路全てが短絡されていない → 当該軌道回路を解錠する 
                 // 区切りに対して時間条件が存在する場合、前の軌道回路が解錠された瞬間+既定秒数をUnlockedAtに記録し、UnlockedAtを過ぎたら解錠、解錠されたらUnlockedAtをnullにする    
-
-                foreach (var routeLock in routeLocks)
+                
+                foreach (var routeLockGroup in routeLocks.GroupBy(l => l.RouteLockGroup).OrderBy(g => g.Key))
                 {
-                    var routeLockCondition = routeLock.LockConditions;
+                    var routeLockCondition = routeLockGroup.SelectMany(l => l.LockConditions).ToList();
                     var targetTrackCircuits = routeLockCondition
                         .OfType<LockConditionObject>()
                         .Select(l => interlockingObjects[l.ObjectId])
