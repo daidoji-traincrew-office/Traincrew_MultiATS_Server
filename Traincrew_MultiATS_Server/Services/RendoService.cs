@@ -498,7 +498,7 @@ public class RendoService(
             var approachLockCondition = approachLockConditions.GetValueOrDefault(route.Id, []);
 
             // 接近鎖錠欄の接近区間の条件を満たしているか
-            var approachLockPlaceState = !ShouldApproachLock(approachLockCondition, interlockingObjects);
+            var approachLockPlaceState = ShouldApproachLock(approachLockCondition, interlockingObjects);
 
             // 対応する時素を取得
             StationTimerState? stationTimerState = null;
@@ -524,18 +524,11 @@ public class RendoService(
             // 内方2回路分の軌道回路が短絡しているかどうか(直列) => 進路鎖錠するべき軌道回路リストの先頭２つ
             // ・1軌道回路しかない場合は、その軌道回路が短絡しているかどうか
             // ※軌道回路条件はB付リレーを使用
-            var inTwoTrackCircuitState = routeLockTrackCircuits.GetValueOrDefault(route.Id, [])
+            var inTrackCircuitState = routeLockTrackCircuits.GetValueOrDefault(route.Id, [])
                 .Take(2)
                 .Any(trackCircuit => trackCircuit.TrackCircuitState.IsShortCircuit)
-                ? RaiseDrop.Raise
-                : RaiseDrop.Drop;
-
-            // ※軌道回路条件は親TRを使用
-            var inOneTrackCircuitState = routeLockTrackCircuits.GetValueOrDefault(route.Id, [])
-                .Take(2)
-                .Any(trackCircuit => trackCircuit.TrackCircuitState.IsShortCircuit)
-                ? RaiseDrop.Raise
-                : RaiseDrop.Drop;
+                ? RaiseDrop.Drop
+                : RaiseDrop.Raise;
 
             var isApproachLockMSRaised =
                 route.RouteState.IsSignalControlRaised == RaiseDrop.Drop
@@ -543,8 +536,6 @@ public class RendoService(
                 route.RouteState.IsRouteRelayRaised == RaiseDrop.Drop
                 &&
                 route.RouteState.IsApproachLockMRRaised == RaiseDrop.Drop
-                &&
-                inOneTrackCircuitState == RaiseDrop.Raise
                 &&
                 (
                     stationTimerState.IsTerRelayRaised == RaiseDrop.Raise
@@ -563,10 +554,10 @@ public class RendoService(
                 (
                     approachLockPlaceState
                     ||
-                    inTwoTrackCircuitState == RaiseDrop.Drop
+                    inTrackCircuitState == RaiseDrop.Drop
                     ||
                     (stationTimerState.IsTenRelayRaised == RaiseDrop.Raise
-                     && isApproachLockMSRaised == RaiseDrop.Raise)
+                     && route.RouteState.IsApproachLockMSRaised == RaiseDrop.Raise)
                     ||
                     route.RouteState.IsApproachLockMRRaised == RaiseDrop.Raise
                 )
