@@ -22,8 +22,12 @@ public class InterlockingService(
     public async Task<Dictionary<string, bool>> GetLamps(List<string> stationIds)
     {
         // Todo: 一旦仮でFalse
-        var pwrFailure = stationIds.ToDictionary(stationId => stationId, _ => false);
-        var ctcFailure = stationIds.ToDictionary(stationId => stationId, _ => false);
+        var pwrFailure = stationIds.ToDictionary(
+            stationId => $"{stationId}_PWR-FAILURE",
+            _ => false);
+        var ctcFailure = stationIds.ToDictionary(
+            stationId => $"{stationId}_CTC-FAILURE",
+            _ => false);
         // 駅の時素状態を取得
         var stationTimerStates = (await stationRepository.GetTimerStatesByStationIds(stationIds))
             .ToDictionary(
