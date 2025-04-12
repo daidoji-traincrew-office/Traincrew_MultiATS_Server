@@ -324,7 +324,7 @@ internal partial class DbInitializer(
                     Seconds = seconds,
                     IsTeuRelayRaised = RaiseDrop.Drop,
                     IsTenRelayRaised = RaiseDrop.Drop,
-                    IsTerRelayRaised = RaiseDrop.Drop,
+                    IsTerRelayRaised = RaiseDrop.Raise,
                 });
             }
         }

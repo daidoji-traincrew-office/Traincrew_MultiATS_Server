@@ -316,7 +316,7 @@ CREATE TABLE station_timer_state
     seconds             INT         NOT NULL,                         -- 駅時素の秒数
     is_teu_relay_raised raise_drop  NOT NULL DEFAULT 'drop',
     is_ten_relay_raised raise_drop  NOT NULL DEFAULT 'drop',
-    is_ter_relay_raised raise_drop  NOT NULL DEFAULT 'drop',
+    is_ter_relay_raised raise_drop  NOT NULL DEFAULT 'raise',
     teu_relay_raised_at TIMESTAMP   NULL DEFAULT NULL,
     UNIQUE (station_id, seconds)
 );
