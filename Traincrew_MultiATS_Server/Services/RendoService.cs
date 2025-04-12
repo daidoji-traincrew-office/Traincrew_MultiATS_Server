@@ -365,6 +365,91 @@ public class RendoService(
         return RaiseDrop.Raise;
     }
 
+    /// <summary>
+    /// 時素リレー回路
+    /// </summary>
+    public async Task TimerRelay()
+    {
+        // 接近鎖錠MSが扛上している進路を全部取ってくる
+        var routes = await routeRepository.GetWhereApproachLockMSRelayIsRaised();
+        // 進路の接近鎖錠MSリレーが扛上している進路が持っている駅とタイマーのセット
+        var setStationAndApproachLockTime = routes
+            .Select(r => (r.StationId, r.ApproachLockTime)).ToHashSet();
+        // 駅の全タイマーを取ってくる
+        // Todo: 全ての駅のタイマーを取ってこなくても良いようにする(必要な分だけ見る)
+        var stationTimerStates = (await stationRepository.GetAllTimerStates())
+            .ToDictionary(s => (s.StationId, s.Seconds));
+        // ループ
+        foreach (var stationTimerState in stationTimerStates.Values)
+        {
+            var isTeuRelayRaised = RaiseDrop.Drop;
+            RaiseDrop isTenRelayRaised;
+            RaiseDrop isTerRelayRaised;
+            DateTime? teuRelayRaisedAt = null;
+
+            // 当該駅で、接近鎖錠MSリレーが扛上している進路があるかチェック
+            var hasRoute =
+                setStationAndApproachLockTime.Contains((stationTimerState.StationId, stationTimerState.Seconds));
+
+            // 扛上している進路がある場合
+            if (hasRoute)
+            {
+                if (stationTimerState.TeuRelayRaisedAt == null)
+                {
+                    isTeuRelayRaised = RaiseDrop.Drop;
+                    teuRelayRaisedAt = dateTimeRepository.GetNow().AddSeconds(stationTimerState.Seconds);
+                }
+            }
+            else
+            {
+                isTeuRelayRaised = RaiseDrop.Drop;
+                teuRelayRaisedAt = null;
+            }
+
+            if (teuRelayRaisedAt != null && teuRelayRaisedAt < dateTimeRepository.GetNow())
+            {
+                isTeuRelayRaised = RaiseDrop.Raise;
+            }
+
+            if (teuRelayRaisedAt != null)
+            {
+                // 時素リレーが上がりきった場合
+                if (isTeuRelayRaised == RaiseDrop.Raise)
+                {
+                    isTenRelayRaised = RaiseDrop.Raise;
+                    isTerRelayRaised = RaiseDrop.Drop;
+                }
+                // 時素リレーが上がりきってない場合
+                else
+                {
+                    isTenRelayRaised = RaiseDrop.Drop;
+                    isTerRelayRaised = RaiseDrop.Drop;
+                }
+            }
+            // 時素リレーが落ちた時
+            else
+            {
+                isTenRelayRaised = RaiseDrop.Drop;
+                isTerRelayRaised = RaiseDrop.Raise;
+            }
+
+            // それぞれ現在と異なる場合、更新
+            if (stationTimerState.IsTeuRelayRaised == isTeuRelayRaised
+                && stationTimerState.IsTenRelayRaised == isTenRelayRaised
+                && stationTimerState.IsTerRelayRaised == isTerRelayRaised
+                && stationTimerState.TeuRelayRaisedAt == teuRelayRaisedAt)
+            {
+                continue;
+            }
+            stationTimerState.IsTeuRelayRaised = isTeuRelayRaised;
+            stationTimerState.IsTenRelayRaised = isTenRelayRaised;
+            stationTimerState.IsTerRelayRaised = isTerRelayRaised;
+            stationTimerState.TeuRelayRaisedAt = teuRelayRaisedAt;
+            await generalRepository.Save(stationTimerState);
+        }
+    }
+
+
     // Todo: 接近鎖錠リレー回路     
     public async Task ApproachLockRelay()
     {
@@ -942,6 +1027,7 @@ public class RendoService(
                 {
                     throw new InvalidOperationException("Not条件は1つの条件に対してのみ適用される必要があります。");
                 }
+
                 return !EvaluateLockCondition(
                     childLockCondition.First(), childLockConditions, interlockingObjects, predicate);
             }
