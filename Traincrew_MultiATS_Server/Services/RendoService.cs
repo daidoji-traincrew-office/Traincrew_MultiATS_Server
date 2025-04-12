@@ -413,7 +413,7 @@ public class RendoService(
             var approachLockCondition = approachLockConditions.GetValueOrDefault(route.Id, []);
 
             // 接近鎖錠欄の接近区間の条件を満たしているか
-            var approachLockPlaceState = CalcApproachLockPlaceState(approachLockCondition, interlockingObjects);
+            var approachLockPlaceState = !ShouldApproachLock(approachLockCondition, interlockingObjects);
 
             // 対応する時素を取得
             StationTimerState? stationTimerState = null;
@@ -804,7 +804,8 @@ public class RendoService(
                 !switchingMachine.SwitchingMachineState.IsSwitching
                 && switchingMachine.SwitchingMachineState.IsReverse == o.IsReverse,
             // 接近鎖錠と進路鎖錠リレー扛上かどうか
-            Route route => route.RouteState is { IsApproachLockMRRaised: RaiseDrop.Raise, IsRouteLockRaised: RaiseDrop.Raise },
+            Route route => route.RouteState is
+                { IsApproachLockMRRaised: RaiseDrop.Raise, IsRouteLockRaised: RaiseDrop.Raise },
             // 軌道回路が短絡していないこと
             TrackCircuit trackCircuit => !trackCircuit.TrackCircuitState.IsShortCircuit,
             _ => false
@@ -867,32 +868,34 @@ public class RendoService(
         };
     }
 
-
-    public static bool CalcApproachLockPlaceState(
+    /// <summary>
+    /// 接近鎖錠欄の条件から、接近区画に列車が接近しているか確認する
+    /// </summary>
+    private static bool ShouldApproachLock(
         List<LockCondition> lockConditions,
         Dictionary<ulong, InterlockingObject> interlockingObjects)
     {
-        return EvaluateLockConditions(lockConditions, interlockingObjects, Predicate);
+        return !EvaluateLockConditions(lockConditions, interlockingObjects, ShouldApproachLockPredicate);
+    }
 
-        // 接近鎖錠欄の接近区間の条件を満たしていれば扛上
-        // ・軌道回路が短絡していないこと
-        // ・進路の接近鎖錠MRリレーが図表記載方向であること(定位=drop, 反位=raise)
-        // ・転てつ器の記載方向鎖錠リレーが扛上していること(定位=定位, 反位=反位)
-        bool Predicate(LockConditionObject o, InterlockingObject interlockingObject)
+    private static bool ShouldApproachLockPredicate(
+        LockConditionObject o, InterlockingObject interlockingObject)
+    {
+        return interlockingObject switch
         {
-            return interlockingObject switch
-            {
-                TrackCircuit trackCircuit => !trackCircuit.TrackCircuitState.IsShortCircuit,
-                Route route => (route.RouteState.IsApproachLockMRRaised == RaiseDrop.Drop &&
-                                o.IsReverse == NR.Normal)
-                               || (route.RouteState.IsApproachLockMRRaised == RaiseDrop.Raise &&
-                                   o.IsReverse == NR.Reversed),
-                SwitchingMachine switchingMachine => !switchingMachine.SwitchingMachineState.IsSwitching &&
-                                                     switchingMachine.SwitchingMachineState.IsReverse ==
-                                                     o.IsReverse,
-                _ => false
-            };
-        }
+            // 軌道回路が短絡していないこと
+            TrackCircuit trackCircuit => !trackCircuit.TrackCircuitState.IsShortCircuit,
+            // 進路の接近鎖錠MRリレーが図表記載方向であること(定位=drop, 反位=raise)
+            Route route => (route.RouteState.IsApproachLockMRRaised == RaiseDrop.Drop &&
+                            o.IsReverse == NR.Normal)
+                           || (route.RouteState.IsApproachLockMRRaised == RaiseDrop.Raise &&
+                               o.IsReverse == NR.Reversed),
+            // 転てつ器が転換中でなく、目的方向であること
+            SwitchingMachine switchingMachine => !switchingMachine.SwitchingMachineState.IsSwitching &&
+                                                 switchingMachine.SwitchingMachineState.IsReverse ==
+                                                 o.IsReverse,
+            _ => false
+        };
     }
 
     /// <summary>
