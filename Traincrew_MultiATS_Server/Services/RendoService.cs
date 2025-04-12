@@ -385,7 +385,7 @@ public class RendoService(
             var isTeuRelayRaised = RaiseDrop.Drop;
             RaiseDrop isTenRelayRaised;
             RaiseDrop isTerRelayRaised;
-            DateTime? teuRelayRaisedAt = null;
+            var teuRelayRaisedAt = stationTimerState.TeuRelayRaisedAt;
 
             // 当該駅で、接近鎖錠MSリレーが扛上している進路があるかチェック
             var hasRoute =
@@ -394,7 +394,7 @@ public class RendoService(
             // 扛上している進路がある場合
             if (hasRoute)
             {
-                if (stationTimerState.TeuRelayRaisedAt == null)
+                if (teuRelayRaisedAt == null)
                 {
                     isTeuRelayRaised = RaiseDrop.Drop;
                     teuRelayRaisedAt = dateTimeRepository.GetNow().AddSeconds(stationTimerState.Seconds);
@@ -498,7 +498,7 @@ public class RendoService(
             var approachLockCondition = approachLockConditions.GetValueOrDefault(route.Id, []);
 
             // 接近鎖錠欄の接近区間の条件を満たしているか
-            var approachLockPlaceState = ShouldApproachLock(approachLockCondition, interlockingObjects);
+            var approachLockPlaceState = !ShouldApproachLock(approachLockCondition, interlockingObjects);
 
             // 対応する時素を取得
             StationTimerState? stationTimerState = null;
@@ -509,7 +509,7 @@ public class RendoService(
             }
 
             // もし取得できなければ、一旦デフォルト値を設定
-            if (stationTimerStates == null)
+            if (stationTimerState == null)
             {
                 stationTimerState = new()
                 {
