@@ -4,7 +4,7 @@ using Traincrew_MultiATS_Server.Models;
 
 namespace Traincrew_MultiATS_Server.Repositories.Route;
 
-public class RouteRepository(ApplicationDbContext context): IRouteRepository
+public class RouteRepository(ApplicationDbContext context) : IRouteRepository
 {
     public async Task DropRouteRelayWhereLeverRelayIsDropped()
     {
@@ -50,10 +50,9 @@ public class RouteRepository(ApplicationDbContext context): IRouteRepository
     {
         return await context.Routes
             .Include(r => r.RouteState)
-            .Where(r => 
-                r.RouteState.IsRouteLockRaised == RaiseDrop.Drop 
-                || r.RouteState.IsApproachLockMRRaised == RaiseDrop.Drop
-                || r.RouteState.IsApproachLockMSRaised == RaiseDrop.Raise)
+            .Where(r =>
+                r.RouteState.IsRouteLockRaised == RaiseDrop.Drop
+                || r.RouteState.IsApproachLockMRRaised == RaiseDrop.Drop)
             .Select(r => r.Id)
             .ToListAsync();
     }
@@ -62,14 +61,17 @@ public class RouteRepository(ApplicationDbContext context): IRouteRepository
     {
         return await context.Routes
             .Include(r => r.RouteState)
-            .Where(r => r.RouteState.IsRouteRelayRaised == RaiseDrop.Raise || r.RouteState.IsApproachLockMRRaised == RaiseDrop.Drop)
+            .Where(r =>
+                r.RouteState.IsRouteRelayRaised == RaiseDrop.Raise
+                || r.RouteState.IsApproachLockMRRaised == RaiseDrop.Drop
+                || r.RouteState.IsApproachLockMSRaised == RaiseDrop.Raise)
             .Select(r => r.Id)
             .ToListAsync();
     }
 
     public async Task<List<Models.Route>> GetWhereApproachLockMSRelayIsRaised()
     {
-        return await context.Routes 
+        return await context.Routes
             .Include(r => r.RouteState)
             .Where(r => r.RouteState.IsApproachLockMSRaised == RaiseDrop.Raise)
             .ToListAsync();
