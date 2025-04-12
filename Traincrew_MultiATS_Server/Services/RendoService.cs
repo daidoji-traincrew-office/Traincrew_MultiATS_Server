@@ -935,6 +935,16 @@ public class RendoService(
             case LockConditionType.Or:
                 return childLockConditions[lockCondition.Id].Any(childLockCondition =>
                     EvaluateLockCondition(childLockCondition, childLockConditions, interlockingObjects, predicate));
+            case LockConditionType.Not:
+            {
+                var childLockCondition = childLockConditions[lockCondition.Id];
+                if (childLockCondition.Count != 1)
+                {
+                    throw new InvalidOperationException("Not条件は1つの条件に対してのみ適用される必要があります。");
+                }
+                return !EvaluateLockCondition(
+                    childLockCondition.First(), childLockConditions, interlockingObjects, predicate);
+            }
         }
 
         if (lockCondition is not LockConditionObject lockConditionObject)
