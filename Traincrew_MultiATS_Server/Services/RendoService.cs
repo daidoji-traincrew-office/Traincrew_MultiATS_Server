@@ -226,7 +226,7 @@ public class RendoService(
                 (
                     (
                         routeState is
-                            { IsThrowOutYSRelayRaised: RaiseDrop.Drop, IsThrowOutXRRelayRaised: RaiseDrop.Drop }
+                        { IsThrowOutYSRelayRaised: RaiseDrop.Drop, IsThrowOutXRRelayRaised: RaiseDrop.Drop }
                         &&
                         leverState is LCR.Left or LCR.Right
                     )
@@ -524,7 +524,14 @@ public class RendoService(
             // 内方2回路分の軌道回路が短絡しているかどうか(直列) => 進路鎖錠するべき軌道回路リストの先頭２つ
             // ・1軌道回路しかない場合は、その軌道回路が短絡しているかどうか
             // ※軌道回路条件はB付リレーを使用
-            var inTrackCircuitState = routeLockTrackCircuits.GetValueOrDefault(route.Id, [])
+            var inTwoTrackCircuitState = routeLockTrackCircuits.GetValueOrDefault(route.Id, [])
+                .Take(2)
+                .Any(trackCircuit => trackCircuit.TrackCircuitState.IsShortCircuit)
+                ? RaiseDrop.Raise
+                : RaiseDrop.Drop;
+
+            // ※軌道回路条件は親TRを使用
+            var inOneTrackCircuitState = routeLockTrackCircuits.GetValueOrDefault(route.Id, [])
                 .Take(2)
                 .Any(trackCircuit => trackCircuit.TrackCircuitState.IsShortCircuit)
                 ? RaiseDrop.Raise
@@ -535,14 +542,12 @@ public class RendoService(
                 &&
                 route.RouteState.IsRouteRelayRaised == RaiseDrop.Drop
                 &&
+                inOneTrackCircuitState == RaiseDrop.Raise
+                &&
                 (
-                    approachLockPlaceState
+                    stationTimerState.IsTerRelayRaised == RaiseDrop.Raise
                     ||
-                    inTrackCircuitState == RaiseDrop.Drop
-                    ||
-                    (stationTimerState.IsTenRelayRaised == RaiseDrop.Raise
-                     && route.RouteState.IsApproachLockMSRaised == RaiseDrop.Raise)
-                    || route.RouteState.IsApproachLockMRRaised == RaiseDrop.Raise
+                    route.RouteState.IsApproachLockMSRaised == RaiseDrop.Raise
                 )
                     ? RaiseDrop.Raise
                     : RaiseDrop.Drop;
@@ -556,7 +561,7 @@ public class RendoService(
                 (
                     approachLockPlaceState
                     ||
-                    inTrackCircuitState == RaiseDrop.Drop
+                    inTwoTrackCircuitState == RaiseDrop.Drop
                     ||
                     (stationTimerState.IsTenRelayRaised == RaiseDrop.Raise
                      && isApproachLockMSRaised == RaiseDrop.Raise)
@@ -890,7 +895,7 @@ public class RendoService(
                 && switchingMachine.SwitchingMachineState.IsReverse == o.IsReverse,
             // 接近鎖錠と進路鎖錠リレー扛上かどうか
             Route route => route.RouteState is
-                { IsApproachLockMRRaised: RaiseDrop.Raise, IsRouteLockRaised: RaiseDrop.Raise },
+            { IsApproachLockMRRaised: RaiseDrop.Raise, IsRouteLockRaised: RaiseDrop.Raise },
             // 軌道回路が短絡していないこと
             TrackCircuit trackCircuit => !trackCircuit.TrackCircuitState.IsShortCircuit,
             _ => false
@@ -1021,16 +1026,16 @@ public class RendoService(
                 return childLockConditions[lockCondition.Id].Any(childLockCondition =>
                     EvaluateLockCondition(childLockCondition, childLockConditions, interlockingObjects, predicate));
             case LockConditionType.Not:
-            {
-                var childLockCondition = childLockConditions[lockCondition.Id];
-                if (childLockCondition.Count != 1)
                 {
-                    throw new InvalidOperationException("Not条件は1つの条件に対してのみ適用される必要があります。");
-                }
+                    var childLockCondition = childLockConditions[lockCondition.Id];
+                    if (childLockCondition.Count != 1)
+                    {
+                        throw new InvalidOperationException("Not条件は1つの条件に対してのみ適用される必要があります。");
+                    }
 
-                return !EvaluateLockCondition(
-                    childLockCondition.First(), childLockConditions, interlockingObjects, predicate);
-            }
+                    return !EvaluateLockCondition(
+                        childLockCondition.First(), childLockConditions, interlockingObjects, predicate);
+                }
         }
 
         if (lockCondition is not LockConditionObject lockConditionObject)
