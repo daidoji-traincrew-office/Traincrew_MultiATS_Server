@@ -325,7 +325,6 @@ internal partial class DbInitializer(
                     IsTeuRelayRaised = RaiseDrop.Drop,
                     IsTenRelayRaised = RaiseDrop.Drop,
                     IsTerRelayRaised = RaiseDrop.Drop,
-                    TeuRelayRaisedAt = dateTimeRepository.GetNow()
                 });
             }
         }
