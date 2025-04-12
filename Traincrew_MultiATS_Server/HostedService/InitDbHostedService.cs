@@ -1291,6 +1291,10 @@ public partial class DbRendoTableInitializer
         // or か and か not の場合、
         if (current != null)
         {
+            if (item.Children.Count == 0)
+            {
+                return;
+            }
             context.LockConditions.Add(current);
             foreach (var child in item.Children)
             {
@@ -1351,6 +1355,7 @@ public partial class DbRendoTableInitializer
             Type = LockConditionType.And,
             Parent = parent
         };
+        context.LockConditions.Add(current);
         foreach (var targetObject in targetObjects)
         {
             context.LockConditionObjects.Add(new()
