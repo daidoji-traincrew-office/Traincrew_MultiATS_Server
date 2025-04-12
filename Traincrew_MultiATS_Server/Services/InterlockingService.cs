@@ -4,6 +4,7 @@ using Traincrew_MultiATS_Server.Repositories.DestinationButton;
 using Traincrew_MultiATS_Server.Repositories.General;
 using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
 using Traincrew_MultiATS_Server.Repositories.Lever;
+using Traincrew_MultiATS_Server.Repositories.Station;
 
 namespace Traincrew_MultiATS_Server.Services;
 
@@ -15,8 +16,26 @@ public class InterlockingService(
     IInterlockingObjectRepository interlockingObjectRepository,
     IDestinationButtonRepository destinationButtonRepository,
     IGeneralRepository generalRepository,
+    IStationRepository stationRepository,
     ILeverRepository leverRepository)
 {
+    public async Task<Dictionary<string, bool>> GetLamps(List<string> stationIds)
+    {
+        // Todo: 一旦仮でFalse
+        var pwrFailure = stationIds.ToDictionary(stationId => stationId, _ => false);
+        var ctcFailure = stationIds.ToDictionary(stationId => stationId, _ => false);
+        // 駅の時素状態を取得
+        var stationTimerStates = (await stationRepository.GetTimerStatesByStationIds(stationIds))
+            .ToDictionary(
+                timerState => $"{timerState.StationId}_{timerState.Seconds}TEK",
+                timerState => timerState is { IsTenRelayRaised: RaiseDrop.Drop, IsTerRelayRaised: RaiseDrop.Drop });
+
+        return pwrFailure
+            .Concat(ctcFailure)
+            .Concat(stationTimerStates)
+            .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+    }
+    
     /// <summary>
     /// レバーの物理状態を設定する
     /// </summary>
@@ -53,6 +72,7 @@ public class InterlockingService(
         buttonObject.DestinationButtonState.IsRaised = buttonData.IsRaised;
         await generalRepository.Save(buttonObject.DestinationButtonState);
     }
+    
 
     public async Task<List<InterlockingObject>> GetInterlockingObjects()
     {

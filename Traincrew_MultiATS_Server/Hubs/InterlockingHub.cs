@@ -26,6 +26,7 @@ public class InterlockingHub(
         var signalNames = await signalService.GetSignalNamesByStationIds(clientData.ActiveStationsList);
         // それら全部の信号の現示計算
         var signalIndications = await signalService.CalcSignalIndication(signalNames);
+        var lamps = await interlockingService.GetLamps(clientData.ActiveStationsList);
 
         var response = new DataToInterlocking
         {
@@ -56,9 +57,9 @@ public class InterlockingHub(
             // Todo: 列番表示の実装から
             Retsubans = new List<InterlockingRetsubanData>(),
 
-            // Todo: List<Dictionary<string, bool>> Lampsを設定する
-            // Todo: これは何を設定すればええんや・・・？
-            Lamps = [],
+            // 各ランプの状態 
+            Lamps = lamps,
+            
             Signals = signalIndications
                 .Select(pair => SignalService.ToSignalData(pair.Key, pair.Value))
                 .ToList()

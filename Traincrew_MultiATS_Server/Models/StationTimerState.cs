@@ -15,5 +15,5 @@ public class StationTimerState
     public RaiseDrop IsTenRelayRaised { get; set; }
     public RaiseDrop IsTerRelayRaised { get; set; }
     [Column(TypeName = "timestamp without time zone")]
-    public DateTime TeuRelayRaisedAt { get; set; }
+    public DateTime? TeuRelayRaisedAt { get; set; }
 }
