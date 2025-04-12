@@ -542,6 +542,8 @@ public class RendoService(
                 &&
                 route.RouteState.IsRouteRelayRaised == RaiseDrop.Drop
                 &&
+                route.RouteState.IsApproachLockMRRaised == RaiseDrop.Drop
+                &&
                 inOneTrackCircuitState == RaiseDrop.Raise
                 &&
                 (
