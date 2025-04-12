@@ -751,15 +751,25 @@ public class RendoService(
         // 信号制御欄を取得
         var signalControlConditions = await lockConditionRepository.GetConditionsByObjectIdsAndType(
             routeIds, LockType.SignalControl);
-
+        // 進路鎖錠するべき軌道回路IDを取得
+        var routeLockTrackCircuitList = await routeLockTrackCircuitRepository.GetByRouteIds(routeIds);
+        
         // 関わる全てのObjectを取得
         var objectIds = routeIds
             .Union(directLockConditions.Values.SelectMany(ExtractObjectIdsFromLockCondtions))
             .Union(signalControlConditions.Values.SelectMany(ExtractObjectIdsFromLockCondtions))
+            .Union(routeLockTrackCircuitList.Select(rltc => rltc.TrackCircuitId))
             .Distinct()
             .ToList();
         var interlockingObjects = (await interlockingObjectRepository.GetObjectByIdsWithState(objectIds))
             .ToDictionary(obj => obj.Id);
+        var routeLockTrackCircuitDictionary = routeLockTrackCircuitList
+            .GroupBy(rltc => rltc.RouteId)
+            .ToDictionary(
+                g => g.Key,
+                g => g.Select(rltc => interlockingObjects[rltc.TrackCircuitId])
+                    .OfType<TrackCircuit>()
+                    .ToList());
 
         // Forget: 進路が定反を転換する転てつ器のてっさ鎖錠が落下している(進路照査リレーでみているため)
 
@@ -771,8 +781,10 @@ public class RendoService(
             var directLockCondition = directLockConditions.GetValueOrDefault(routeId, []);
             // 信号制御条件
             var signalControlCondition = signalControlConditions.GetValueOrDefault(routeId, []);
-            var result = await ProcessSignalControl(route, directLockCondition, signalControlCondition,
-                interlockingObjects);
+            // 進路鎖錠するべき軌道回路リスト
+            var routeLockTrackCircuit = routeLockTrackCircuitDictionary.GetValueOrDefault(routeId, []);
+            var result = ProcessSignalControl(route, directLockCondition, signalControlCondition,
+                routeLockTrackCircuit, interlockingObjects);
             // 変更があれば、DBに保存する
             if (route.RouteState.IsSignalControlRaised == result)
             {
@@ -784,9 +796,10 @@ public class RendoService(
         }
     }
 
-    private async Task<RaiseDrop> ProcessSignalControl(Route route,
+    private RaiseDrop ProcessSignalControl(Route route,
         List<LockCondition> directLockCondition,
         List<LockCondition> signalControlCondition,
+        List<TrackCircuit> routeLockTrackCircuit,
         Dictionary<ulong, InterlockingObject> interlockingObjects)
     {
         // 進路照査リレーが落下している場合、信号制御リレーを落下させる
@@ -807,20 +820,24 @@ public class RendoService(
         {
             return RaiseDrop.Drop;
         }
+        // 進路鎖錠するべき軌道回路のいずれかが鎖状されていない場合、信号制御リレーを落下させる
+        // Todo: 自分によって鎖状されているかどうか確認する
+        if (routeLockTrackCircuit.Any(tc => tc.TrackCircuitState.IsLocked))
+        {
+            return RaiseDrop.Drop;
+        }
 
-        // Todo: 自進路の接近鎖錠見る
-
-        if (MustIndicateStopSignal(signalControlCondition, interlockingObjects))
+        // 信号制御欄の条件を満たしていない場合早期continue
+        if (MustIndicateStopSignalBySignalControlConditions(signalControlCondition, interlockingObjects))
         {
             return RaiseDrop.Drop;
         }
 
         // 鎖錠確認 進路の鎖錠欄の条件を満たしていない場合早期continue
-        if (IsLocked(directLockCondition, interlockingObjects))
+        if (MustIndicateStopSignalByDirectLockConditions(directLockCondition, interlockingObjects))
         {
             return RaiseDrop.Drop;
         }
-        // Question: 鎖状確認 信号制御欄の条件を満たしているか確認?
 
         // 進路のRouteState.IsSignalControlRaisedを扛上させる
         return RaiseDrop.Raise;
@@ -844,8 +861,8 @@ public class RendoService(
     {
         return interlockingObject switch
         {
-            // 進路の進路鎖錠リレーが落下していること
-            Route route => route.RouteState.IsRouteLockRaised == RaiseDrop.Drop,
+            // 進路のてこ反応リレーが落下していること
+            Route route => route.RouteState.IsLeverRelayRaised == RaiseDrop.Drop,
             // 軌道回路が短絡してないこと
             TrackCircuit trackCircuit => !trackCircuit.TrackCircuitState.IsShortCircuit,
             // 転てつ器は鎖錠欄通りの転換命令が出れば良いので、ここでは確認しなくてOK
@@ -937,7 +954,7 @@ public class RendoService(
     /// <summary>
     /// 進路の信号制御欄から、停止を指示する現示を現示する必要があるか確認する
     /// </summary>
-    private static bool MustIndicateStopSignal(
+    private static bool MustIndicateStopSignalBySignalControlConditions(
         List<LockCondition> lockConditions,
         Dictionary<ulong, InterlockingObject> interlockingObjects)
     {
@@ -957,6 +974,27 @@ public class RendoService(
             // Todo: 転てつ器、てこ => 仮で一旦除外
             SwitchingMachine or Lever => true,
             _ => false
+        };
+    }
+    
+    private static bool MustIndicateStopSignalByDirectLockConditions(
+        List<LockCondition> lockConditions,
+        Dictionary<ulong, InterlockingObject> interlockingObjects)
+    {
+        return !EvaluateLockConditions(lockConditions, interlockingObjects,
+            MustIndicateStopSignalByDirectLockConditionsPredicate);
+    }
+
+    private static bool MustIndicateStopSignalByDirectLockConditionsPredicate(LockConditionObject o, InterlockingObject interlockingObject)
+    {
+        return interlockingObject switch
+        {
+            // 転てつ器が転換中でなく、目的方向であること
+            SwitchingMachine switchingMachine => 
+                !switchingMachine.SwitchingMachineState.IsSwitching
+                && switchingMachine.SwitchingMachineState.IsReverse == o.IsReverse,
+            // それ以外はTrueを返す
+            _ => true
         };
     }
 
