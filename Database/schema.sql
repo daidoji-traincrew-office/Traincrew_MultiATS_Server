@@ -255,7 +255,7 @@ CREATE INDEX lock_object_id_type_index ON lock (object_id, type);
 CREATE TYPE nr AS ENUM ('reversed', 'normal');
 CREATE TYPE nrc AS ENUM ('reversed', 'center', 'normal');
 CREATE TYPE raise_drop AS ENUM ('raise', 'drop');
-CREATE TYPE lock_condition_type AS ENUM ('and', 'or', 'object');
+CREATE TYPE lock_condition_type AS ENUM ('and', 'or', 'not', 'object');
 CREATE TYPE lcr as ENUM ('left', 'center', 'right');
 
 -- 鎖状条件詳細(and, or, object)
@@ -264,7 +264,7 @@ CREATE TABLE lock_condition
     id        BIGSERIAL PRIMARY KEY,
     lock_id   BIGINT REFERENCES lock (ID) NOT NULL,  -- 鎖状のID(グラフの根、鎖状条件の一番上の階層)
     parent_id BIGINT REFERENCES lock_condition (ID), -- 親のID(いれば)
-    type      lock_condition_type         NOT NULL   -- 鎖状条件の種類(and, or, object)
+    type      lock_condition_type         NOT NULL   -- 鎖状条件の種類(and, or, not, object)
 );
 CREATE INDEX lock_condition_lock_id_index ON lock_condition (lock_id);
 -- 鎖状条件のobjectの詳細
