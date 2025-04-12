@@ -823,7 +823,7 @@ public class RendoService(
         }
         // 進路鎖錠するべき軌道回路のいずれかが鎖状されていない場合、信号制御リレーを落下させる
         // Todo: 自分によって鎖状されているかどうか確認する
-        if (routeLockTrackCircuit.Any(tc => tc.TrackCircuitState.IsLocked))
+        if (routeLockTrackCircuit.Any(tc => !tc.TrackCircuitState.IsLocked))
         {
             return RaiseDrop.Drop;
         }
