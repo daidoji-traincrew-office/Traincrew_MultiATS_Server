@@ -23,6 +23,12 @@ public class StationRepository(DbContextOptions<ApplicationDbContext> options, A
             .ToListAsync();
     }
 
+    public async Task<List<StationTimerState>> GetAllTimerStates()
+    {
+        return await context.StationTimerStates
+            .ToListAsync();
+    }
+
     public async Task<List<StationTimerState>> GetTimerStatesByStationIds(IEnumerable<string> stationIds)
     {
         return await context.StationTimerStates

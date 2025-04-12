@@ -63,4 +63,12 @@ public class RouteRepository(ApplicationDbContext context): IRouteRepository
             .Select(r => r.Id)
             .ToListAsync();
     }
+
+    public async Task<List<Models.Route>> GetWhereApproachLockMSRelayIsRaised()
+    {
+        return await context.Routes 
+            .Include(r => r.RouteState)
+            .Where(r => r.RouteState.IsApproachLockMSRaised == RaiseDrop.Raise)
+            .ToListAsync();
+    }
 }
