@@ -537,23 +537,6 @@ public class RendoService(
                 ? RaiseDrop.Drop
                 : RaiseDrop.Raise;
 
-            var isApproachLockMSRaised =
-                route.RouteState.IsSignalControlRaised == RaiseDrop.Drop
-                &&
-                route.RouteState.IsRouteRelayRaised == RaiseDrop.Drop
-                &&
-                route.RouteState.IsApproachLockMRRaised == RaiseDrop.Drop
-                &&
-                inOneTrackCircuitState == RaiseDrop.Raise
-                &&
-                (
-                    stationTimerState.IsTerRelayRaised == RaiseDrop.Raise
-                    ||
-                    route.RouteState.IsApproachLockMSRaised == RaiseDrop.Raise
-                )
-                    ? RaiseDrop.Raise
-                    : RaiseDrop.Drop;
-
             // Todo:停電対応
             var isApproachLockMRRaised =
                 route.RouteState.IsSignalControlRaised == RaiseDrop.Drop
@@ -572,6 +555,24 @@ public class RendoService(
                 )
                     ? RaiseDrop.Raise
                     : RaiseDrop.Drop;
+
+            var isApproachLockMSRaised =
+                route.RouteState.IsSignalControlRaised == RaiseDrop.Drop
+                &&
+                route.RouteState.IsRouteRelayRaised == RaiseDrop.Drop
+                &&
+                isApproachLockMRRaised == RaiseDrop.Drop
+                &&
+                inOneTrackCircuitState == RaiseDrop.Raise
+                &&
+                (
+                    stationTimerState.IsTerRelayRaised == RaiseDrop.Raise
+                    ||
+                    route.RouteState.IsApproachLockMSRaised == RaiseDrop.Raise
+                )
+                    ? RaiseDrop.Raise
+                    : RaiseDrop.Drop;
+
             //　それぞれ現在と異なる場合、更新       
             if (route.RouteState.IsApproachLockMSRaised == isApproachLockMSRaised
                 && route.RouteState.IsApproachLockMRRaised == isApproachLockMRRaised)
@@ -753,7 +754,7 @@ public class RendoService(
             routeIds, LockType.SignalControl);
         // 進路鎖錠するべき軌道回路IDを取得
         var routeLockTrackCircuitList = await routeLockTrackCircuitRepository.GetByRouteIds(routeIds);
-        
+
         // 関わる全てのObjectを取得
         var objectIds = routeIds
             .Union(directLockConditions.Values.SelectMany(ExtractObjectIdsFromLockCondtions))
@@ -976,7 +977,7 @@ public class RendoService(
             _ => false
         };
     }
-    
+
     private static bool MustIndicateStopSignalByDirectLockConditions(
         List<LockCondition> lockConditions,
         Dictionary<ulong, InterlockingObject> interlockingObjects)
@@ -990,7 +991,7 @@ public class RendoService(
         return interlockingObject switch
         {
             // 転てつ器が転換中でなく、目的方向であること
-            SwitchingMachine switchingMachine => 
+            SwitchingMachine switchingMachine =>
                 !switchingMachine.SwitchingMachineState.IsSwitching
                 && switchingMachine.SwitchingMachineState.IsReverse == o.IsReverse,
             // それ以外はTrueを返す
