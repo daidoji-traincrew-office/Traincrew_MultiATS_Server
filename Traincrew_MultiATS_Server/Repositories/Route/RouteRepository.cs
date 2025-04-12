@@ -50,7 +50,10 @@ public class RouteRepository(ApplicationDbContext context): IRouteRepository
     {
         return await context.Routes
             .Include(r => r.RouteState)
-            .Where(r => r.RouteState.IsRouteLockRaised == RaiseDrop.Drop || r.RouteState.IsApproachLockMRRaised == RaiseDrop.Drop)
+            .Where(r => 
+                r.RouteState.IsRouteLockRaised == RaiseDrop.Drop 
+                || r.RouteState.IsApproachLockMRRaised == RaiseDrop.Drop
+                || r.RouteState.IsApproachLockMSRaised == RaiseDrop.Raise)
             .Select(r => r.Id)
             .ToListAsync();
     }
