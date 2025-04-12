@@ -94,9 +94,10 @@ CREATE TYPE object_type AS ENUM ('route', 'switching_machine', 'track_circuit', 
 CREATE TABLE interlocking_object
 (
     id          BIGSERIAL PRIMARY KEY,
-    type        object_type  NOT NULL,        -- 進路、転てつ機、軌道回路、てこ
-    name        VARCHAR(100) NOT NULL UNIQUE, -- 名前
-    description TEXT                          -- 説明
+    type        object_type  NOT NULL,               -- 進路、転てつ機、軌道回路、てこ
+    name        VARCHAR(100) NOT NULL UNIQUE,        -- 名前
+    station_id  VARCHAR(10) REFERENCES station (id), -- 所属する停車場
+    description TEXT                                 -- 説明
 );
 
 CREATE TABLE station_interlocking_object
@@ -150,8 +151,8 @@ CREATE TABLE operation_notification_display
 CREATE TABLE track_circuit
 (
     id                                  BIGINT PRIMARY KEY REFERENCES interlocking_object (id),
-    protection_zone                     INT NOT NULL,                                                  -- 防護無線区間
-    operation_notification_display_name VARCHAR(100) REFERENCES operation_notification_display (name)  -- 運転告知機の名前
+    protection_zone                     INT NOT NULL,                                                 -- 防護無線区間
+    operation_notification_display_name VARCHAR(100) REFERENCES operation_notification_display (name) -- 運転告知機の名前
 );
 CREATE INDEX track_circuit_operation_notification_display_name_index ON track_circuit (operation_notification_display_name);
 
@@ -244,17 +245,17 @@ CREATE TABLE track_circuit_signal
 -- 各進路、転てつ機の鎖状条件(すべての鎖状条件をここにいれる)
 CREATE TABLE lock
 (
-    id               BIGSERIAL PRIMARY KEY,
-    object_id        BIGINT REFERENCES interlocking_object (id), -- 進路、転てつ機、軌道回路のID
-    type             lock_type NOT NULL,                         -- 鎖状の種類
-    route_lock_group INT                                         -- 進路鎖状のグループ(カッコで囲まれてるやつを同じ数字にする)
+    id                 BIGSERIAL PRIMARY KEY,
+    object_id          BIGINT REFERENCES interlocking_object (id), -- 進路、転てつ機、軌道回路のID
+    type               lock_type NOT NULL,                         -- 鎖状の種類
+    route_lock_group   INT                                         -- 進路鎖状のグループ(カッコで囲まれてるやつを同じ数字にする)
 );
 CREATE INDEX lock_object_id_type_index ON lock (object_id, type);
 
 CREATE TYPE nr AS ENUM ('reversed', 'normal');
 CREATE TYPE nrc AS ENUM ('reversed', 'center', 'normal');
 CREATE TYPE raise_drop AS ENUM ('raise', 'drop');
-CREATE TYPE lock_condition_type AS ENUM ('and', 'or', 'object');
+CREATE TYPE lock_condition_type AS ENUM ('and', 'or', 'not', 'object');
 CREATE TYPE lcr as ENUM ('left', 'center', 'right');
 
 -- 鎖状条件詳細(and, or, object)
@@ -263,7 +264,7 @@ CREATE TABLE lock_condition
     id        BIGSERIAL PRIMARY KEY,
     lock_id   BIGINT REFERENCES lock (ID) NOT NULL,  -- 鎖状のID(グラフの根、鎖状条件の一番上の階層)
     parent_id BIGINT REFERENCES lock_condition (ID), -- 親のID(いれば)
-    type      lock_condition_type         NOT NULL   -- 鎖状条件の種類(and, or, object)
+    type      lock_condition_type         NOT NULL   -- 鎖状条件の種類(and, or, not, object)
 );
 CREATE INDEX lock_condition_lock_id_index ON lock_condition (lock_id);
 -- 鎖状条件のobjectの詳細
@@ -297,7 +298,29 @@ CREATE TABLE switching_machine_route
 );
 CREATE INDEX switching_machine_route_switching_machine_id_index ON switching_machine_route (switching_machine_id);
 
+-- 進路鎖錠で鎖状するべき軌道回路のリスト
+CREATE TABLE route_lock_track_circuit
+(
+    id               BIGSERIAL PRIMARY KEY,
+    route_id         BIGINT REFERENCES route (id)         NOT NULL, -- 進路のID
+    track_circuit_id BIGINT REFERENCES track_circuit (ID) NOT NULL, -- 軌道回路のID
+    UNIQUE (route_id, track_circuit_id)
+);
+
 -- ここから状態系
+-- 駅時素状態
+CREATE TABLE station_timer_state
+(
+    id                  BIGSERIAL PRIMARY KEY,
+    station_id          VARCHAR(10) NOT NULL REFERENCES station (id), -- 駅のID
+    seconds             INT         NOT NULL,                         -- 駅時素の秒数
+    is_teu_relay_raised raise_drop  NOT NULL DEFAULT 'drop',
+    is_ten_relay_raised raise_drop  NOT NULL DEFAULT 'drop',
+    is_ter_relay_raised raise_drop  NOT NULL DEFAULT 'raise',
+    teu_relay_raised_at TIMESTAMP   NULL DEFAULT NULL,
+    UNIQUE (station_id, seconds)
+);
+
 -- てこ状態
 CREATE TABLE lever_state
 (
@@ -316,10 +339,15 @@ CREATE TABLE destination_button_state
 -- 軌道回路状態
 CREATE TABLE track_circuit_state
 (
-    id               BIGINT PRIMARY KEY REFERENCES track_circuit (ID), -- 軌道回路のID
-    train_number     VARCHAR(100),                                     -- 列車番号
-    is_short_circuit BOOLEAN NOT NULL,                                 -- 短絡状態
-    is_locked        BOOLEAN NOT NULL                                  -- 鎖状しているかどうか
+    id                               BIGINT PRIMARY KEY REFERENCES track_circuit (ID), -- 軌道回路のID
+    train_number                     VARCHAR(100),                                     -- 列車番号
+    is_short_circuit                 BOOLEAN    NOT NULL,                              -- 短絡状態
+    is_locked                        BOOLEAN    NOT NULL,                              -- 鎖状しているかどうか
+    unlocked_at                      TIMESTAMP           DEFAULT NULL,                 -- 鎖状解除時刻
+    is_correction_raise_relay_raised raise_drop NOT NULL DEFAULT 'drop',               -- 不正扛上補正リレー
+    raised_at                        TIMESTAMP           DEFAULT NULL,                 -- 軌道回路を扛上させるタイミング
+    is_correction_drop_relay_raised  raise_drop NOT NULL DEFAULT 'drop',               -- 不正落下補正リレー
+    dropped_at                       TIMESTAMP           DEFAULT NULL                  -- 軌道回路を落下させるタイミング
 );
 CREATE INDEX track_circuit_state_train_number_index ON track_circuit_state USING hash (train_number);
 
@@ -340,7 +368,8 @@ CREATE TABLE route_state
     is_lever_relay_raised        raise_drop NOT NULL,                      -- てこリレーが上がっているか
     is_route_relay_raised        raise_drop NOT NULL,                      -- 進路照査リレーが上がっているか
     is_signal_control_raised     raise_drop NOT NULL,                      -- 信号制御リレーが上がっているか
-    is_approach_lock_raised      raise_drop NOT NULL,                      -- 接近鎖状が上がっているか
+    is_approach_lock_mr_raised   raise_drop NOT NULL,                      -- 接近鎖状が上がっているか
+    is_approach_lock_ms_raised   raise_drop NOT NULL,                      -- 接近鎖状が上がっているか
     is_route_lock_raised         raise_drop NOT NULL,                      -- 進路鎖状が上がっているか
     is_throw_out_xr_relay_raised raise_drop NOT NULL,                      -- 統括制御リレーが上がっているか
     is_throw_out_ys_relay_raised raise_drop NOT NULL                       -- 統括制御リレーが上がっているか

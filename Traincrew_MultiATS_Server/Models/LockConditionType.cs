@@ -4,5 +4,6 @@ public enum LockConditionType
 {
     And,
     Or,
+    Not,
     Object
 }

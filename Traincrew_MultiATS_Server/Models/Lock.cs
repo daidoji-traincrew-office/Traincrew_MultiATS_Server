@@ -13,4 +13,5 @@ public class Lock
     public InterlockingObject Object { get; set; }
     public LockType Type { get; set; }
     public int? RouteLockGroup { get; set; }
+    public List<LockCondition> LockConditions { get; set; }
 }
