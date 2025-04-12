@@ -524,8 +524,15 @@ public class RendoService(
             // 内方2回路分の軌道回路が短絡しているかどうか(直列) => 進路鎖錠するべき軌道回路リストの先頭２つ
             // ・1軌道回路しかない場合は、その軌道回路が短絡しているかどうか
             // ※軌道回路条件はB付リレーを使用
-            var inTrackCircuitState = routeLockTrackCircuits.GetValueOrDefault(route.Id, [])
+            var inTwoTrackCircuitState = routeLockTrackCircuits.GetValueOrDefault(route.Id, [])
                 .Take(2)
+                .Any(trackCircuit => trackCircuit.TrackCircuitState.IsShortCircuit)
+                ? RaiseDrop.Drop
+                : RaiseDrop.Raise;
+
+            // ※軌道回路条件はB付リレーを使用
+            var inOneTrackCircuitState = routeLockTrackCircuits.GetValueOrDefault(route.Id, [])
+                .Take(1)
                 .Any(trackCircuit => trackCircuit.TrackCircuitState.IsShortCircuit)
                 ? RaiseDrop.Drop
                 : RaiseDrop.Raise;
@@ -536,6 +543,8 @@ public class RendoService(
                 route.RouteState.IsRouteRelayRaised == RaiseDrop.Drop
                 &&
                 route.RouteState.IsApproachLockMRRaised == RaiseDrop.Drop
+                &&
+                inOneTrackCircuitState == RaiseDrop.Raise
                 &&
                 (
                     stationTimerState.IsTerRelayRaised == RaiseDrop.Raise
@@ -554,7 +563,7 @@ public class RendoService(
                 (
                     approachLockPlaceState
                     ||
-                    inTrackCircuitState == RaiseDrop.Drop
+                    inTwoTrackCircuitState == RaiseDrop.Drop
                     ||
                     (stationTimerState.IsTenRelayRaised == RaiseDrop.Raise
                      && route.RouteState.IsApproachLockMSRaised == RaiseDrop.Raise)
