@@ -12,7 +12,10 @@ using Route = Traincrew_MultiATS_Server.Models.Route;
 
 namespace Traincrew_MultiATS_Server.HostedService;
 
-public class InitDbHostedService(IServiceScopeFactory serviceScopeFactory) : IHostedService
+public class InitDbHostedService(
+    IServiceScopeFactory serviceScopeFactory,
+    ILoggerFactory loggerFactory
+    ) : IHostedService
 {
     private readonly List<Scheduler.Scheduler> _schedulers = [];
 
@@ -49,7 +52,8 @@ public class InitDbHostedService(IServiceScopeFactory serviceScopeFactory) : IHo
     {
         var jsonstring = await File.ReadAllTextAsync("./Data/DBBase.json", cancellationToken);
         var DBBase = JsonSerializer.Deserialize<DBBasejson>(jsonstring);
-        return DBBase != null ? new DbInitializer(DBBase, context, dateTimeRepository, cancellationToken) : null;
+        var logger = loggerFactory.CreateLogger<DbInitializer>();
+        return DBBase != null ? new DbInitializer(DBBase, context, dateTimeRepository, logger, cancellationToken) : null;
     }
 
     private async Task InitRendoTable(
@@ -62,6 +66,8 @@ public class InitDbHostedService(IServiceScopeFactory serviceScopeFactory) : IHo
         {
             return;
         }
+        
+        var logger = loggerFactory.CreateLogger<DbRendoTableInitializer>();
 
         List<DbRendoTableInitializer> initializers = [];
         foreach (var file in rendoTableDir.EnumerateFiles())
@@ -84,7 +90,7 @@ public class InitDbHostedService(IServiceScopeFactory serviceScopeFactory) : IHo
                 .GetRecordsAsync<RendoTableCSV>(cancellationToken)
                 .ToListAsync(cancellationToken);
             var initializer =
-                new DbRendoTableInitializer(stationId, records, context, dateTimeRepository, cancellationToken);
+                new DbRendoTableInitializer(stationId, records, context, dateTimeRepository, logger, cancellationToken);
             initializers.Add(initializer);
             await initializer.InitializeObjects();
         }
@@ -234,8 +240,8 @@ public class InitDbHostedService(IServiceScopeFactory serviceScopeFactory) : IHo
                 });
             }
         }
+
         await context.SaveChangesAsync(cancellationToken);
-            
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
@@ -244,11 +250,16 @@ public class InitDbHostedService(IServiceScopeFactory serviceScopeFactory) : IHo
     }
 }
 
-internal partial class DbInitializer(DBBasejson DBBase, ApplicationDbContext context, IDateTimeRepository dateTimeRepository, CancellationToken cancellationToken)
+internal partial class DbInitializer(
+    DBBasejson DBBase,
+    ApplicationDbContext context,
+    IDateTimeRepository dateTimeRepository,
+    ILogger<DbInitializer> logger,
+        CancellationToken cancellationToken)
 {
     [GeneratedRegex(@"^(TH(\d{1,2}S?))_")]
     private static partial Regex RegexStationId();
-    
+
     internal async Task Initialize()
     {
         await InitStation();
@@ -314,7 +325,7 @@ internal partial class DbInitializer(DBBasejson DBBase, ApplicationDbContext con
                     IsTeuRelayRaised = RaiseDrop.Drop,
                     IsTenRelayRaised = RaiseDrop.Drop,
                     IsTerRelayRaised = RaiseDrop.Drop,
-                    TeuRelayRaisedAt = dateTimeRepository.GetNow() 
+                    TeuRelayRaisedAt = dateTimeRepository.GetNow()
                 });
             }
         }
@@ -675,7 +686,7 @@ internal partial class DbInitializer(DBBasejson DBBase, ApplicationDbContext con
             {
                 continue;
             }
-            
+
             var stationId = match.Groups[1].Value;
             interlockingObject.StationId = stationId;
             context.Update(interlockingObject);
@@ -692,7 +703,7 @@ public partial class DbRendoTableInitializer
     private const string PrefixTrackCircuitUp = "上り";
     private const string NameAnd = "and";
     private const string NameOr = "or";
-    private const string NameRouteLock = "routeLock";
+    private const string NameNot = "not";
 
     private static readonly Dictionary<string, List<string>> StationIdMap = new()
     {
@@ -718,7 +729,7 @@ public partial class DbRendoTableInitializer
     // てこ名を抽出するための正規表現
     [GeneratedRegex(@"(\d+)(?:R|L)(Z?)")]
     private static partial Regex RegexLeverParse();
-    
+
     // 閉塞軌道回路名を抽出するための正規表現
     [GeneratedRegex(@"^(\d+)T$")]
     private static partial Regex RegexClosureTrackCircuitParse();
@@ -730,7 +741,7 @@ public partial class DbRendoTableInitializer
     // 連動図表の鎖錠欄の諸々のトークンを抽出するための正規表現
     [GeneratedRegex(@"\[\[|\]\]|\(\(|\)\)|\[|\]|\{|\}|\(|\)|但\s+\d+秒|但|又は|[A-Z\dｲﾛ]+")]
     private static partial Regex TokenRegex();
-    
+
     // ReSharper disable InconsistentNaming
     private readonly string stationId;
     private readonly List<RendoTableCSV> rendoTableCsvs;
@@ -738,6 +749,7 @@ public partial class DbRendoTableInitializer
     private readonly IDateTimeRepository dateTimeRepository;
     private readonly CancellationToken cancellationToken;
     private readonly List<string> otherStations;
+    private readonly ILogger<DbRendoTableInitializer> logger;
     // ReSharper restore InconsistentNaming
 
     public DbRendoTableInitializer(
@@ -745,12 +757,14 @@ public partial class DbRendoTableInitializer
         List<RendoTableCSV> rendoTableCsvs,
         ApplicationDbContext context,
         IDateTimeRepository dateTimeRepository,
+        ILogger<DbRendoTableInitializer> logger,
         CancellationToken cancellationToken)
     {
         this.stationId = stationId;
         this.rendoTableCsvs = rendoTableCsvs;
         this.context = context;
         this.dateTimeRepository = dateTimeRepository;
+        this.logger = logger;
         this.cancellationToken = cancellationToken;
         otherStations = StationIdMap.GetValueOrDefault(stationId) ?? [];
     }
@@ -803,7 +817,7 @@ public partial class DbRendoTableInitializer
                 rendoTableCsv.ApproachTime = preivousLockTime;
                 rendoTableCsv.ApproachLock = previousApproachLock;
             }
-            
+
             previousStart = rendoTableCsv.Start;
         }
     }
@@ -1105,11 +1119,12 @@ public partial class DbRendoTableInitializer
             {
                 return result;
             }
+
             // 接近鎖錠の場合、閉塞軌道回路も探す
             var match = RegexClosureTrackCircuitParse().Match(item.Name);
             string trackCircuitName;
             // 閉塞軌道回路
-            if(match.Success)
+            if (match.Success)
             {
                 var trackCircuitNumber = int.Parse(match.Groups[1].Value);
                 var prefix = trackCircuitNumber % 2 == 0 ? PrefixTrackCircuitUp : PrefixTrackCircuitDown;
@@ -1118,14 +1133,16 @@ public partial class DbRendoTableInitializer
             // 単線の諸々軌道回路
             else
             {
-               trackCircuitName = item.Name; 
+                trackCircuitName = item.Name;
             }
-            var trackCircuit = await context.TrackCircuits 
+
+            var trackCircuit = await context.TrackCircuits
                 .FirstOrDefaultAsync(tc => tc.Name == trackCircuitName, cancellationToken: cancellationToken);
             if (trackCircuit != null)
             {
                 return [trackCircuit];
             }
+
             return [];
         });
 
@@ -1168,6 +1185,7 @@ public partial class DbRendoTableInitializer
             {
                 continue;
             }
+
             await RegisterLocks(rendoTableCsv.ApproachLock, route.Id, searchObjectsForApproachLock,
                 LockType.Approach);
         }
@@ -1175,6 +1193,11 @@ public partial class DbRendoTableInitializer
         // 転てつ器のてっ査鎖錠を処理する
         foreach (var rendoTableCsv in rendoTableCsvs)
         {
+            // Todo: 江ノ原61~78転てつ器は、Traincrewが実装していないので、一旦スルーする
+            if (stationId == "TH66S" && rendoTableCsv.Start == "61")
+            {
+                break;
+            }
             var targetSwitchingMachines = await searchSwitchingMachine(new()
             {
                 Name = rendoTableCsv.Start,
@@ -1208,94 +1231,30 @@ public partial class DbRendoTableInitializer
         bool isRouteLock = false)
     {
         var lockItems = CalcLockItems(lockString, isRouteLock);
-        // 進路鎖錠の場合、各アイテムに進路鎖錠グループを持たせてflattenする
-        if (isRouteLock)
+
+        // ループは基本的に進路鎖状用で、それ以外の場合はループは１回のみ
+        for (var i = 0; i < lockItems.Count; i++)
         {
-            lockItems = lockItems
-                .SelectMany((item, index) => item.Name == NameRouteLock
-                    ? item.Children.Select(c =>
-                    {
-                        c.RouteLockGroup = index + 1;
-                        return c;
-                    })
-                    : [item])
-                .ToList();
-        }
-        foreach (var lockItem in lockItems)
-        {
+            var lockItem = lockItems[i];
             Lock lockObject = new()
             {
                 ObjectId = objectId,
                 Type = lockType,
-                RouteLockGroup = lockItem.RouteLockGroup,
+                RouteLockGroup = i + 1,
             };
             context.Locks.Add(lockObject);
-            LockCondition? root = null;
-            // And/Or条件の処理
-            if (lockItem.Name == NameOr)
-            {
-                root = new()
-                {
-                    Lock = lockObject,
-                    Type = LockConditionType.Or
-                };
-            }
 
-            if (lockItem.Name == NameAnd)
-            {
-                root = new()
-                {
-                    Lock = lockObject,
-                    Type = LockConditionType.And
-                };
-            }
-
-            if (root != null)
-            {
-                context.LockConditions.Add(root);
-                foreach (var child in lockItem.Children)
-                {
-                    await RegisterLocksInner(child, root, searchTargetObjects);
-                }
-
-                continue;
-            }
-
-            // 単一オブジェクトに対する処理
-            var targetObjects = await searchTargetObjects(lockItem);
-            if (targetObjects.Count == 0)
-            {
-                // Todo: 例外を出す
-                continue;
-            }
-
-            foreach (var targetObject in targetObjects)
-            {
-                context.LockConditionObjects.Add(new()
-                {
-                    Lock = lockObject,
-                    ObjectId = targetObject.Id,
-                    IsReverse = lockItem.IsReverse,
-                    TimerSeconds = lockItem.TimerSeconds,
-                    Type = LockConditionType.Object
-                });
-                if (!registerSwitchingMachineRoute)
-                {
-                    continue;
-                }
-
-                var switchingMachineRoute = new SwitchingMachineRoute
-                {
-                    SwitchingMachineId = targetObject.Id,
-                    RouteId = objectId,
-                    IsReverse = lockItem.IsReverse
-                };
-                context.SwitchingMachineRoutes.Add(switchingMachineRoute);
-            }
+            await RegisterLocksInner(
+                lockItem, lockObject, null,
+                registerSwitchingMachineRoute ? objectId : null, searchTargetObjects);
         }
     }
 
-    private async Task RegisterLocksInner(LockItem item, LockCondition parent,
+    private async Task RegisterLocksInner(
+        LockItem item,
+        Lock lockObject,
+        LockCondition? parent,
+        ulong? routeIdForSwitchingMachineRoute,
         Func<LockItem, Task<List<InterlockingObject>>> searchTargetObjects)
     {
         LockCondition? current = null;
@@ -1303,7 +1262,7 @@ public partial class DbRendoTableInitializer
         {
             current = new()
             {
-                Lock = parent.Lock,
+                Lock = lockObject,
                 Type = LockConditionType.Or,
                 Parent = parent
             };
@@ -1313,18 +1272,30 @@ public partial class DbRendoTableInitializer
         {
             current = new()
             {
-                Lock = parent.Lock,
+                Lock = lockObject,
                 Type = LockConditionType.And,
                 Parent = parent
             };
         }
 
+        if (item.Name == NameNot)
+        {
+            current = new()
+            {
+                Lock = lockObject,
+                Type = LockConditionType.Not,
+                Parent = parent
+            };
+        }
+
+        // or か and か not の場合、
         if (current != null)
         {
             context.LockConditions.Add(current);
             foreach (var child in item.Children)
             {
-                await RegisterLocksInner(child, current, searchTargetObjects);
+                await RegisterLocksInner(
+                    child, lockObject, current, routeIdForSwitchingMachineRoute, searchTargetObjects);
             }
 
             return;
@@ -1334,39 +1305,73 @@ public partial class DbRendoTableInitializer
         var targetObjects = await searchTargetObjects(item);
         if (targetObjects.Count == 0)
         {
-            throw new InvalidOperationException("対象のオブジェクトが見つかりません");
+            if (item.Name.EndsWith('Z'))
+            {
+                logger.Log(LogLevel.Warning,
+                    "誘導進路の進路名が見つかりません。処理をスキップします: {} {}", item.StationId, item.Name);
+                return;
+            }
+
+            if (item.Name.StartsWith("14") && item.StationId == "TH65")
+            {
+                // 大道寺14L/Rは、方向てこのためスルー
+                logger.Log(LogLevel.Warning, "大道寺14L/Rは方向てこです。処理をスキップします。: {Name}", item.Name);
+                return;
+            }
+            throw new InvalidOperationException($"対象のオブジェクトが見つかりません: {item.StationId} {item.Name}");
         }
 
         if (targetObjects.Count == 1)
         {
             context.LockConditionObjects.Add(new()
             {
-                Lock = parent.Lock,
+                Lock = lockObject,
                 ObjectId = targetObjects[0].Id,
                 Parent = parent,
                 TimerSeconds = item.TimerSeconds,
                 IsReverse = item.IsReverse,
                 Type = LockConditionType.Object
             });
+            if (routeIdForSwitchingMachineRoute != null && targetObjects[0] is SwitchingMachine switchingMachine)
+            {
+                context.SwitchingMachineRoutes.Add(new()
+                {
+                    IsReverse = item.IsReverse,
+                    RouteId = routeIdForSwitchingMachineRoute.Value,
+                    SwitchingMachineId = switchingMachine.Id,
+                });
+            }
+
             return;
         }
 
         current = new()
         {
-            Lock = parent.Lock,
-            Type = LockConditionType.Or,
+            Lock = lockObject,
+            Type = LockConditionType.And,
             Parent = parent
         };
         foreach (var targetObject in targetObjects)
         {
             context.LockConditionObjects.Add(new()
             {
-                Lock = current.Lock,
+                Lock = lockObject, 
                 Parent = current,
                 ObjectId = targetObject.Id,
                 TimerSeconds = item.TimerSeconds,
                 IsReverse = item.IsReverse,
                 Type = LockConditionType.Object
+            });
+            if (routeIdForSwitchingMachineRoute == null || targetObjects[0] is not SwitchingMachine switchingMachine)
+            {
+                continue;
+            }
+
+            context.SwitchingMachineRoutes.Add(new()
+            {
+                IsReverse = item.IsReverse,
+                RouteId = routeIdForSwitchingMachineRoute.Value,
+                SwitchingMachineId = switchingMachine.Id,
             });
         }
     }
@@ -1379,7 +1384,8 @@ public partial class DbRendoTableInitializer
             .ToList();
         var enumerator = tokens.GetEnumerator();
         enumerator.MoveNext();
-        return ParseToken(ref enumerator, stationId, isRouteLock, false, false);
+        var lockItems = ParseToken(ref enumerator, stationId, isRouteLock, false, false);
+        return isRouteLock ? lockItems : [GroupByAndIfMultipleCondition(lockItems)];
     }
 
     private List<LockItem> ParseToken(ref List<string>.Enumerator enumerator,
@@ -1403,6 +1409,7 @@ public partial class DbRendoTableInitializer
             LockItem item;
             if (token == "{")
             {
+                // 意味カッコ
                 enumerator.MoveNext();
                 var child = ParseToken(ref enumerator, stationId, isRouteLock, isReverse, isTotalControl);
                 if (enumerator.Current != "}")
@@ -1415,24 +1422,24 @@ public partial class DbRendoTableInitializer
             }
             else if (token == "((")
             {
-                // 統括制御の処理を追加
+                // 統括制御(連動図表からではなく、別CSVから取り込みなのでスキップ)
                 enumerator.MoveNext();
-                var child = ParseToken(ref enumerator, stationId, isRouteLock, isReverse, true);
+                ParseToken(ref enumerator, stationId, isRouteLock, isReverse, true);
                 if (enumerator.Current != "))")
                 {
                     throw new InvalidOperationException("))が閉じられていません");
                 }
 
                 enumerator.MoveNext();
-                result.AddRange(child);
             }
             else if (token.StartsWith('['))
             {
+                // 別駅所属のObject
                 var count = token.Length;
                 var targetStationId = StationIdMap[this.stationId][count - 1];
                 enumerator.MoveNext();
                 var child = ParseToken(ref enumerator, targetStationId, isRouteLock, isReverse, isTotalControl);
-                if (enumerator.Current.Length != count && enumerator.Current.All(c => c == ']'))
+                if (enumerator.Current.Length != count || enumerator.Current.Any(c => c != ']'))
                 {
                     throw new InvalidOperationException("]が閉じられていません");
                 }
@@ -1459,12 +1466,13 @@ public partial class DbRendoTableInitializer
                 {
                     throw new InvalidOperationException(")が閉じられていません");
                 }
+
                 enumerator.MoveNext();
                 if (isRouteLock)
                 {
                     item = new()
                     {
-                        Name = NameRouteLock,
+                        Name = NameAnd,
                         StationId = stationId,
                         IsReverse = isReverse ? NR.Reversed : NR.Normal,
                         Children = target
@@ -1474,10 +1482,12 @@ public partial class DbRendoTableInitializer
                 {
                     item = target[0];
                 }
+
                 result.Add(item);
             }
-            else if (token.StartsWith("但") && token.EndsWith("秒"))
+            else if (token.StartsWith('但') && token.EndsWith('秒'))
             {
+                // 時素条件
                 result[^1].TimerSeconds = int.Parse(RegexIntParse()
                     .Match(token)
                     .Value);
@@ -1485,45 +1495,28 @@ public partial class DbRendoTableInitializer
             }
             else if (token == "但")
             {
+                // 但条件(左辺 or not右辺)
                 var left = result;
                 enumerator.MoveNext();
                 var right = ParseToken(ref enumerator, stationId, isRouteLock, isReverse, isTotalControl);
-                List<LockItem> child = new();
-                if (left.Count == 1)
-                {
-                    child.Add(left[0]);
-                }
-                else
-                {
-                    child.Add(new()
+                List<LockItem> child =
+                [
+                    // 左辺
+                    GroupByAndIfMultipleCondition(left),
+                    // 右辺
+                    new()
                     {
-                        Name = NameOr,
+                        Name = NameNot,
                         StationId = stationId,
                         IsReverse = isReverse ? NR.Reversed : NR.Normal,
-                        Children = left
-                    });
-                }
-
-                if (right.Count == 1)
-                {
-                    child.Add(right[0]);
-                }
-                else
-                {
-                    child.Add(new()
-                    {
-                        Name = NameOr,
-                        StationId = stationId,
-                        IsReverse = isReverse ? NR.Reversed : NR.Normal,
-                        Children = right
-                    });
-                }
-
+                        Children = [GroupByAndIfMultipleCondition(right)]
+                    }
+                ];
                 result =
                 [
                     new()
                     {
-                        Name = NameAnd,
+                        Name = NameOr,
                         StationId = stationId,
                         IsReverse = isReverse ? NR.Reversed : NR.Normal,
                         Children = child
@@ -1532,8 +1525,35 @@ public partial class DbRendoTableInitializer
             }
             else if (token == "又は")
             {
-                // 又は条件は、何も書かなかった場合と同義なので、処理を持たせずスキップでOK
+                // Todo: or条件 
+                var left = result;
                 enumerator.MoveNext();
+                var right = ParseToken(ref enumerator, stationId, isRouteLock, isReverse, isTotalControl);
+                List<LockItem> child =
+                [
+                    GroupByAndIfMultipleCondition(left),
+                ];
+                // 右辺がorならそのまま子供を追加
+                if (right is [{ Name: NameOr }])
+                {
+                    child.AddRange(right[0].Children);
+                }
+                // それ以外ならグルーピングして追加
+                else
+                {
+                    child.Add(GroupByAndIfMultipleCondition(right));
+                }
+
+                result =
+                [
+                    new()
+                    {
+                        Name = NameOr,
+                        StationId = stationId,
+                        IsReverse = isReverse ? NR.Reversed : NR.Normal,
+                        Children = child
+                    }
+                ];
             }
             else
             {
@@ -1550,6 +1570,20 @@ public partial class DbRendoTableInitializer
         }
 
         return result;
+    }
+
+    private LockItem GroupByAndIfMultipleCondition(List<LockItem> lockItems)
+    {
+        if (lockItems.Count == 1)
+        {
+            return lockItems[0];
+        }
+
+        return new()
+        {
+            Children = lockItems,
+            Name = NameAnd
+        };
     }
 
     public class LockItem
