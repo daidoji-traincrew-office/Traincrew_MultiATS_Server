@@ -22,9 +22,13 @@ public interface IRouteRepository
     Task<List<ulong>> GetIdsWhereRouteRelayIsRaised();
     /// <summary>
     /// 進路鎖錠または接近鎖状の掛かっているすべての進路IDを取得する
+    /// 具体的には以下の条件に該当するリレーを取得する
+    /// - 進路鎖錠リレーが落下している
+    /// - 接近鎖状MRリレーが落下している
+    /// - 接近鎖状MSリレーが扛上している
     /// </summary>
     /// <returns> 進路鎖錠または接近鎖状の掛かっている進路のリスト </returns>
-    Task<List<ulong>> GetIdsWhereRouteLockRelayIsRaisedOrApproachLockMRIsDropped();
+    Task<List<ulong>> GetIdsForRouteRelay();
     /// <summary>
     /// 進路照査リレーが扛上している または 接近鎖状の掛かっているすべての進路IDを取得する
     /// </summary>
