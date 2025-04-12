@@ -335,46 +335,13 @@ public class RendoService(
         }
 
         // 進路の鎖錠欄の条件を満たしているかを取得
-        // 鎖錠欄転てつ器条件　転てつ器表示灯がどうか→転換中でなく、向きがあっている
-        // 鎖錠欄進路条件　接近鎖錠と進路鎖錠リレー扛上かどうか
-        Func<LockConditionObject, InterlockingObject, bool> predicate = (lockConditionObject, interlockingObject) =>
-        {
-            return interlockingObject switch
-            {
-                SwitchingMachine switchingMachine =>
-                    !switchingMachine.SwitchingMachineState.IsSwitching
-                    && switchingMachine.SwitchingMachineState.IsReverse == lockConditionObject.IsReverse,
-                Route route => route.RouteState.IsApproachLockMRRaised == RaiseDrop.Raise &&
-                               route.RouteState.IsRouteLockRaised == RaiseDrop.Raise,
-                TrackCircuit trackCircuit => !trackCircuit.TrackCircuitState.IsShortCircuit,
-                _ => false
-            };
-        };
-        if (!EvaluateLockConditions(directLockCondition, interlockingObjects, predicate))
+        if (!IsEnsuredRouteByDirectLockConditions(directLockCondition, interlockingObjects))
         {
             return RaiseDrop.Drop;
         }
 
         // 進路の信号制御欄の条件を満たしているか確認  
-        // 信号制御欄軌道条件　生軌道が短絡していないかどうか
-        // 転てつ器=>転換中でなく、目的方向であること
-        // Todo: 進路=>保留 (仮で一旦除外)
-        // Todo: てこ=>保留(仮で一旦除外)
-        predicate = (o, interlockingObject) =>
-        {
-            return interlockingObject switch
-            {
-                TrackCircuit trackCircuit => !trackCircuit.TrackCircuitState.IsShortCircuit,
-                SwitchingMachine switchingMachine =>
-                    !switchingMachine.SwitchingMachineState.IsSwitching
-                    && switchingMachine.SwitchingMachineState.IsReverse == o.IsReverse,
-                Route or Lever => true,
-                _ => false
-            };
-        };
-        var signalControlState =
-            EvaluateLockConditions(signalControlConditions, interlockingObjects, predicate);
-        if (!signalControlState)
+        if (!IsEnsuredRouteBySignalControlConditions(signalControlConditions, interlockingObjects))
         {
             return RaiseDrop.Drop;
         }
@@ -452,7 +419,8 @@ public class RendoService(
             StationTimerState? stationTimerState = null;
             if (route.ApproachLockTime != null)
             {
-                stationTimerState = stationTimerStates.GetValueOrDefault((route.StationId, route.ApproachLockTime.Value));
+                stationTimerState =
+                    stationTimerStates.GetValueOrDefault((route.StationId, route.ApproachLockTime.Value));
             }
 
             // もし取得できなければ、一旦デフォルト値を設定
@@ -591,7 +559,7 @@ public class RendoService(
             {
                 // 各進路鎖錠区切りごとに、前の軌道回路が鎖錠されていない && 自軌道回路全てが短絡されていない → 当該軌道回路を解錠する 
                 // 区切りに対して時間条件が存在する場合、前の軌道回路が解錠された瞬間+既定秒数をUnlockedAtに記録し、UnlockedAtを過ぎたら解錠、解錠されたらUnlockedAtをnullにする    
-                
+
                 foreach (var routeLockGroup in routeLocks.GroupBy(l => l.RouteLockGroup).OrderBy(g => g.Key))
                 {
                     var routeLockCondition = routeLockGroup.SelectMany(l => l.LockConditions).ToList();
@@ -736,7 +704,8 @@ public class RendoService(
         }
 
         // 接近鎖錠リレーが向上している場合、信号制御リレーを落下させる
-        if (route.RouteState.IsApproachLockMRRaised == RaiseDrop.Raise || route.RouteState.IsApproachLockMSRaised == RaiseDrop.Raise)
+        if (route.RouteState.IsApproachLockMRRaised == RaiseDrop.Raise ||
+            route.RouteState.IsApproachLockMSRaised == RaiseDrop.Raise)
         {
             return RaiseDrop.Drop;
         }
@@ -749,20 +718,7 @@ public class RendoService(
 
         // Todo: 自進路の接近鎖錠見る
 
-        // 信号制御欄の条件を満たしているか
-        var predicate = new Func<LockConditionObject, InterlockingObject, bool>((o, interlockingObject) =>
-        {
-            return interlockingObject switch
-            {
-                // 軌道回路が短絡していないこと
-                TrackCircuit trackCircuit => !trackCircuit.TrackCircuitState.IsShortCircuit,
-                // 進路のてこリレーが落下していること
-                Route targetRoute => targetRoute.RouteState.IsLeverRelayRaised == RaiseDrop.Drop,
-                SwitchingMachine or Lever => true,
-                _ => false
-            };
-        });
-        if (!EvaluateLockConditions(signalControlCondition, interlockingObjects, predicate))
+        if (MustIndicateStopSignal(signalControlCondition, interlockingObjects))
         {
             return RaiseDrop.Drop;
         }
@@ -778,41 +734,139 @@ public class RendoService(
         return RaiseDrop.Raise;
     }
 
-    private bool IsLocked(List<LockCondition> lockConditions, Dictionary<ulong, InterlockingObject> interlockingObjects)
+    /// <summary>
+    /// 進路の鎖錠欄から、進路が鎖錠されているか確認する 
+    /// </summary>
+    /// <param name="lockConditions"></param>
+    /// <param name="interlockingObjects"></param>
+    /// <returns></returns>
+    private static bool IsLocked(List<LockCondition> lockConditions,
+        Dictionary<ulong, InterlockingObject> interlockingObjects)
     {
         // 対象が進路のものに限る
         // 対象進路のisLeverRelayRaisedがすべてDropであることを確認する
-        return EvaluateLockConditions(lockConditions, interlockingObjects, Predicate);
-
-        bool Predicate(LockConditionObject o, InterlockingObject interlockingObject)
-        {
-            return interlockingObject switch
-            {
-                Route route => route.RouteState.IsLeverRelayRaised == RaiseDrop.Raise,
-                TrackCircuit trackCircuit => trackCircuit.TrackCircuitState.IsShortCircuit,
-                SwitchingMachine or Route or Lever => false,
-                _ => true
-            };
-        }
+        return !EvaluateLockConditions(lockConditions, interlockingObjects, IsLockedPredicate);
     }
 
-    internal static bool IsDetectorUnlocked(List<LockCondition> lockConditions,
+    private static bool IsLockedPredicate(LockConditionObject o, InterlockingObject interlockingObject)
+    {
+        return interlockingObject switch
+        {
+            // 進路の進路鎖錠リレーが落下していること
+            Route route => route.RouteState.IsRouteLockRaised == RaiseDrop.Drop,
+            // 軌道回路が短絡してないこと
+            TrackCircuit trackCircuit => !trackCircuit.TrackCircuitState.IsShortCircuit,
+            // 転てつ器は鎖錠欄通りの転換命令が出れば良いので、ここでは確認しなくてOK
+            SwitchingMachine => true,
+            Lever or _ => false
+        };
+    }
+
+    /// <summary>
+    /// 転てつ器のてっ査鎖錠欄から、転てつ器がてっ査鎖錠されているか確認する
+    /// </summary>
+    internal static bool IsDetectorLocked(List<LockCondition> lockConditions,
         Dictionary<ulong, InterlockingObject> interlockingObjects)
     {
-        return EvaluateLockConditions(lockConditions, interlockingObjects, Predicate);
-
-        // 軌道回路は短絡していないか、同時に鎖錠されていないか
-        bool Predicate(LockConditionObject o, InterlockingObject interlockingObject)
-        {
-            return interlockingObject switch
-            {
-                TrackCircuit trackCircuit =>
-                    trackCircuit.TrackCircuitState is { IsShortCircuit: false, IsLocked: false },
-                SwitchingMachine or Lever or Route => false,
-                _ => true
-            };
-        }
+        return !EvaluateLockConditions(lockConditions, interlockingObjects, IsDetectorLockedPredicate);
     }
+
+    private static bool IsDetectorLockedPredicate(LockConditionObject o, InterlockingObject interlockingObject)
+    {
+        // 軌道回路は短絡していないか、同時に鎖錠されていないか
+        return interlockingObject switch
+        {
+            TrackCircuit trackCircuit => trackCircuit.TrackCircuitState is { IsShortCircuit: false, IsLocked: false },
+            _ => false,
+        };
+    }
+
+    /// <summary>
+    /// 進路の鎖錠欄から、進路が確保されているか確認する
+    /// </summary>
+    private static bool IsEnsuredRouteByDirectLockConditions(
+        List<LockCondition> lockConditions,
+        Dictionary<ulong, InterlockingObject> interlockingObjects)
+    {
+        return EvaluateLockConditions(lockConditions, interlockingObjects,
+            IsEnsuredRouteByDirectLockConditionsPredicate);
+    }
+
+    private static bool IsEnsuredRouteByDirectLockConditionsPredicate(
+        LockConditionObject o, InterlockingObject interlockingObject)
+    {
+        // 鎖錠欄転てつ器条件　転換中でなく、向きがあっている
+        // 鎖錠欄進路条件　
+        return interlockingObject switch
+        {
+            // 転てつ器表示灯がどうか→転換中でなく、向きが合っている
+            SwitchingMachine switchingMachine =>
+                !switchingMachine.SwitchingMachineState.IsSwitching
+                && switchingMachine.SwitchingMachineState.IsReverse == o.IsReverse,
+            // 接近鎖錠と進路鎖錠リレー扛上かどうか
+            Route route => route.RouteState is { IsApproachLockMRRaised: RaiseDrop.Raise, IsRouteLockRaised: RaiseDrop.Raise },
+            // 軌道回路が短絡していないこと
+            TrackCircuit trackCircuit => !trackCircuit.TrackCircuitState.IsShortCircuit,
+            _ => false
+        };
+    }
+
+    /// <summary>
+    /// 進路の信号制御欄から、進路が確保されているか確認する
+    /// </summary>
+    private static bool IsEnsuredRouteBySignalControlConditions(
+        List<LockCondition> lockConditions,
+        Dictionary<ulong, InterlockingObject> interlockingObjects)
+    {
+        return EvaluateLockConditions(lockConditions, interlockingObjects,
+            IsEnsuredRouteBySignalControlConditionsPredicate);
+    }
+
+    private static bool IsEnsuredRouteBySignalControlConditionsPredicate(
+        LockConditionObject o, InterlockingObject interlockingObject)
+    {
+        // 信号制御欄軌道条件　生軌道が短絡していないかどうか
+        return interlockingObject switch
+        {
+            // 軌道回路が短絡していないこと
+            TrackCircuit trackCircuit => !trackCircuit.TrackCircuitState.IsShortCircuit,
+            // 転換中でなく、目的方向であること
+            SwitchingMachine switchingMachine =>
+                !switchingMachine.SwitchingMachineState.IsSwitching
+                && switchingMachine.SwitchingMachineState.IsReverse == o.IsReverse,
+            // Todo: 進路=>保留 (仮で一旦除外)
+            // Todo: てこ=>保留(仮で一旦除外)
+            Route or Lever => true,
+            _ => false
+        };
+    }
+
+    /// <summary>
+    /// 進路の信号制御欄から、停止を指示する現示を現示する必要があるか確認する
+    /// </summary>
+    private static bool MustIndicateStopSignal(
+        List<LockCondition> lockConditions,
+        Dictionary<ulong, InterlockingObject> interlockingObjects)
+    {
+        return !EvaluateLockConditions(lockConditions, interlockingObjects,
+            MustIndicateStopSignalPredicate);
+    }
+
+    private static bool MustIndicateStopSignalPredicate(
+        LockConditionObject o, InterlockingObject interlockingObject)
+    {
+        return interlockingObject switch
+        {
+            // 軌道回路が短絡していないこと
+            TrackCircuit trackCircuit => !trackCircuit.TrackCircuitState.IsShortCircuit,
+            // 進路のてこリレーが落下していること
+            Route targetRoute => targetRoute.RouteState.IsLeverRelayRaised == RaiseDrop.Drop,
+            // Todo: 転てつ器、てこ => 仮で一旦除外
+            SwitchingMachine or Lever => true,
+            _ => false
+        };
+    }
+
 
     public static bool CalcApproachLockPlaceState(
         List<LockCondition> lockConditions,
