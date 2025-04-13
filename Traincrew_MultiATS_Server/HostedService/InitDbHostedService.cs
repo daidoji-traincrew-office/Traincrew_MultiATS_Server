@@ -143,6 +143,7 @@ public class InitDbHostedService(
         var operationNotificationDisplayNames = await context.OperationNotificationDisplays
             .Select(ond => ond.Name)
             .ToListAsync(cancellationToken);
+        List<TrackCircuit> changedTrackCircuits = [];
         foreach (var record in records)
         {
             var name = record.Name;
@@ -174,10 +175,16 @@ public class InitDbHostedService(
 
                 trackCircuit.OperationNotificationDisplayName = name;
                 context.TrackCircuits.Update(trackCircuit);
+                changedTrackCircuits.Add(trackCircuit);
             }
         }
 
         await context.SaveChangesAsync(cancellationToken);
+        
+        foreach (var trackCircuit in changedTrackCircuits)
+        {
+            context.Entry(trackCircuit).State = EntityState.Detached;
+        }
     }
 
     private async Task InitRouteCsv(
