@@ -344,6 +344,7 @@ CREATE TABLE track_circuit_state
     is_short_circuit                 BOOLEAN    NOT NULL,                              -- 短絡状態
     is_locked                        BOOLEAN    NOT NULL,                              -- 鎖状しているかどうか
     unlocked_at                      TIMESTAMP           DEFAULT NULL,                 -- 鎖状解除時刻
+    locked_by                        BIGINT REFERENCES route (id) DEFAULT NULL,        -- 鎖状している進路のID
     is_correction_raise_relay_raised raise_drop NOT NULL DEFAULT 'drop',               -- 不正扛上補正リレー
     raised_at                        TIMESTAMP           DEFAULT NULL,                 -- 軌道回路を扛上させるタイミング
     is_correction_drop_relay_raised  raise_drop NOT NULL DEFAULT 'drop',               -- 不正落下補正リレー
