@@ -42,4 +42,5 @@ public interface IRouteRepository
     /// </summary>
     /// <returns> 接近鎖錠MSリレーが扛上している進路のリスト </returns>
     Task<List<Models.Route>> GetWhereApproachLockMSRelayIsRaised();
+
 }

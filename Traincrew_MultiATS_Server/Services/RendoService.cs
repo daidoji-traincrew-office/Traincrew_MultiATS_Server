@@ -1,4 +1,5 @@
-﻿using Traincrew_MultiATS_Server.Models;
+﻿using System.Threading.Tasks;
+using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.DestinationButton;
 using Traincrew_MultiATS_Server.Repositories.General;
@@ -1093,5 +1094,14 @@ public class RendoService(
         List<LockCondition> lockConditions)
     {
         return lockConditions.OfType<LockConditionObject>().Select(lc => lc.ObjectId).ToList();
+    }
+
+    public async Task<List<Route>> GetActiveRoutes()
+    {
+        var routeIds = await routeRepository.GetIdsWhereLeverRelayIsRaised();
+        var interlockingObjects = await interlockingObjectRepository.GetObjectByIdsWithState(routeIds);
+        return interlockingObjects
+            .OfType<Route>()
+            .ToList();
     }
 }

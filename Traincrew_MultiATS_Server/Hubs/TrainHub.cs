@@ -15,7 +15,8 @@ public class TrainHub(
     TrackCircuitService trackCircuitService,
     SignalService signalService,
     OperationNotificationService operationNotificationService,
-    ProtectionService protectionService) : Hub
+    ProtectionService protectionService,
+    RendoService rendoService) : Hub
 {
     public async Task<DataFromServer> SendData_ATS(DataToServer clientData)
     {
@@ -25,12 +26,12 @@ public class TrainHub(
         List<TrackCircuit> oldTrackCircuitList =
             await trackCircuitService.GetTrackCircuitsByTrainNumber(clientData.DiaName);
         List<TrackCircuitData> oldTrackCircuitDataList =
-            oldTrackCircuitList.Select(TrackCircuitService.ToTrackCircuitData).ToList(); 
+            oldTrackCircuitList.Select(TrackCircuitService.ToTrackCircuitData).ToList();
         List<TrackCircuitData> incrementalTrackCircuitDataList =
             clientData.OnTrackList.Except(oldTrackCircuitDataList).ToList();
         List<TrackCircuitData> decrementalTrackCircuitDataList =
             oldTrackCircuitDataList.Except(clientData.OnTrackList).ToList();
-        
+
         // 軌道回路を取得しようとする
         var trackCircuitList = await trackCircuitService.GetTrackCircuitsByNames(
             clientData.OnTrackList.Select(tcd => tcd.Name).ToList());
@@ -55,11 +56,11 @@ public class TrainHub(
         // 在線軌道回路の更新
         await trackCircuitService.SetTrackCircuitDataList(incrementalTrackCircuitDataList, clientData.DiaName);
         await trackCircuitService.ClearTrackCircuitDataList(decrementalTrackCircuitDataList);
-        
+
         // 運転告知器の表示
         serverData.OperationNotificationData = await operationNotificationService
             .GetOperationNotificationDataByTrackCircuitIds(trackCircuitList.Select(tc => tc.Id).ToList());
-        
+
         // 信号現示の計算
         // 上りか下りか判断(偶数なら上り、奇数なら下り)
         var lastDiaNumber = clientData.DiaName.Last(char.IsDigit) - '0';
@@ -71,9 +72,10 @@ public class TrainHub(
         var signalIndications = await signalService.CalcSignalIndication(signalNames);
         serverData.NextSignalData = signalIndications.Select(pair => new SignalData
         {
-           Name = pair.Key,
-           phase = pair.Value 
+            Name = pair.Key,
+            phase = pair.Value
         }).ToList();
+        serverData.RouteData = await rendoService.GetActiveRoutes();
         return serverData;
     }
 }
