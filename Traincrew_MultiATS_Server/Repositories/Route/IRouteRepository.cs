@@ -3,6 +3,10 @@
 public interface IRouteRepository
 {
     /// <summary>
+    /// IDから進路を取得する
+    /// </summary>
+    Task<List<Models.Route>> GetByIdsWithState(List<ulong> ids);
+    /// <summary>
     /// てこ反応リレーが落下しており かつ 進路照査リレーが扛上している進路に対し、進路照査リレーを落下させる
     /// </summary>
     Task DropRouteRelayWhereLeverRelayIsDropped();
