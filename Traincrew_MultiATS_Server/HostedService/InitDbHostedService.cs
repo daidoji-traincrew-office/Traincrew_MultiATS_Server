@@ -988,7 +988,7 @@ public partial class DbRendoTableInitializer
                 TcName = routeName,
                 RouteType = routeType,
                 RootId = null,
-                Indicator = "",
+                Indicator = rendoTableCsv.Indicator,
                 ApproachLockTime = approachLockTime,
                 RouteState = new()
                 {
