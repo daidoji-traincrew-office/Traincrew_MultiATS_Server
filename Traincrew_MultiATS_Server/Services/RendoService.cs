@@ -1016,11 +1016,11 @@ public class RendoService(
         {
             // 軌道回路が短絡していないこと
             TrackCircuit trackCircuit => !trackCircuit.TrackCircuitState.IsShortCircuit,
-            // 進路の接近鎖錠MRリレーが図表記載方向であること(定位=drop, 反位=raise)
-            Route route => (route.RouteState.IsApproachLockMRRaised == RaiseDrop.Drop &&
-                            o.IsReverse == NR.Normal)
-                           || (route.RouteState.IsApproachLockMRRaised == RaiseDrop.Raise &&
-                               o.IsReverse == NR.Reversed),
+            // 進路の接近鎖錠MRリレーが図表記載方向であること(定位=raise, 反位=drop)
+            Route route => (o.IsReverse == NR.Normal && 
+                            route.RouteState.IsApproachLockMRRaised == RaiseDrop.Raise) 
+                           || (o.IsReverse == NR.Reversed && 
+                               route.RouteState.IsApproachLockMRRaised == RaiseDrop.Raise),
             // 転てつ器が転換中でなく、目的方向であること
             SwitchingMachine switchingMachine => !switchingMachine.SwitchingMachineState.IsSwitching &&
                                                  switchingMachine.SwitchingMachineState.IsReverse ==
