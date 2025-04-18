@@ -66,7 +66,7 @@ public class InitDbHostedService(
         {
             return;
         }
-        
+
         var logger = loggerFactory.CreateLogger<DbRendoTableInitializer>();
 
         List<DbRendoTableInitializer> initializers = [];
@@ -988,13 +988,14 @@ public partial class DbRendoTableInitializer
             int? approachLockTime = matches.Success ? int.Parse(matches.Value) : null;
 
             // 進路を追加
+            // Todo: 将来的にTcNameを駅名+進路名にする
             Route route = new()
             {
                 Name = routeName,
-                TcName = "",
+                TcName = routeName,
                 RouteType = routeType,
                 RootId = null,
-                Indicator = "",
+                Indicator = rendoTableCsv.Indicator,
                 ApproachLockTime = approachLockTime,
                 RouteState = new()
                 {
@@ -1366,7 +1367,7 @@ public partial class DbRendoTableInitializer
         {
             context.LockConditionObjects.Add(new()
             {
-                Lock = lockObject, 
+                Lock = lockObject,
                 Parent = current,
                 ObjectId = targetObject.Id,
                 TimerSeconds = item.TimerSeconds,

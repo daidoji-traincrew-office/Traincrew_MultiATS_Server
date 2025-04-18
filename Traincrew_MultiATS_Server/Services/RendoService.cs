@@ -1094,4 +1094,11 @@ public class RendoService(
     {
         return lockConditions.OfType<LockConditionObject>().Select(lc => lc.ObjectId).ToList();
     }
+
+    public async Task<List<Route>> GetActiveRoutes()
+    {
+        var routeIds = await routeRepository.GetIdsWhereLeverRelayIsRaised();
+        var routes = await routeRepository.GetByIdsWithState(routeIds);
+        return routes;
+    }
 }
