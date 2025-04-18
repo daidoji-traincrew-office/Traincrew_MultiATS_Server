@@ -40,12 +40,19 @@ class SignalTypeData:
         self.YGIndication = yg_indication
         self.GIndication = g_indication
 
+class ThrowOutControlData:
+    def __init__(self, source_route_name, target_route_name, lever_condition_name):
+        self.SourceRouteName = source_route_name
+        self.TargetRouteName = target_route_name
+        self.LeverConditionName = lever_condition_name
+
 class DBBasejson:
     def __init__(self):
         self.stationList = []
         self.trackCircuitList = []
         self.signalDataList = []
         self.signalTypeList = []
+        self.throwOutControlList = []
 
 def read_csv(file_path, data_class, *args):
     data_list = []
@@ -79,6 +86,10 @@ def main():
     db.signalTypeList = read_csv(
         '../Traincrew_MultiATS_Server/Data/信号何灯式リスト.csv',
         SignalTypeData, 0, 1, 2, 3, 4, 5
+    )
+    db.throwOutControlList = read_csv(
+        '../Traincrew_MultiATS_Server/Data/総括制御ペア一覧.csv',
+        ThrowOutControlData, 0, 1, 2
     )
 
     with open('../Traincrew_MultiATS_Server/Data/DBBase.json', 'w', encoding='utf-8') as jsonfile:

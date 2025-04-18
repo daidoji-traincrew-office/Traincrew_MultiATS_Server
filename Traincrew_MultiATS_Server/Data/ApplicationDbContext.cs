@@ -7,10 +7,14 @@ namespace Traincrew_MultiATS_Server.Data;
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 {
     public DbSet<Station> Stations { get; set; }
+    public DbSet<StationTimerState> StationTimerStates { get; set; }
     public DbSet<InterlockingObject> InterlockingObjects { get; set; }
     public DbSet<Route> Routes { get; set; }
+    public DbSet<RouteLockTrackCircuit> RouteLockTrackCircuits { get; set; }
+    public DbSet<RouteState> RouteStates { get; set; }
     public DbSet<SwitchingMachine> SwitchingMachines { get; set; }
     public DbSet<TrackCircuit> TrackCircuits { get; set; }
+    public DbSet<TrackCircuitState> TrackCircuitStates { get; set; }
     public DbSet<Lock> Locks { get; set; }
     public DbSet<LockCondition> LockConditions { get; set; }
     public DbSet<LockConditionObject> LockConditionObjects { get; set; }
@@ -18,17 +22,25 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<SignalType> SignalTypes { get; set; }
     public DbSet<NextSignal> NextSignals { get; set; }
     public DbSet<TrackCircuitSignal> TrackCircuitSignals { get; set; }
-    public DbSet<ProtectionZoneState> protectionZoneStates{ get; set; }
+    public DbSet<ProtectionZoneState> protectionZoneStates { get; set; }
     public DbSet<RouteLeverDestinationButton> RouteLeverDestinationButtons { get; set; }
     public DbSet<SwitchingMachineRoute> SwitchingMachineRoutes { get; set; }
     public DbSet<Lever> Levers { get; set; }
     public DbSet<DestinationButton> DestinationButtons { get; set; }
     public DbSet<SignalRoute> SignalRoutes { get; internal set; }
     public DbSet<ThrowOutControl> ThrowOutControls { get; set; }
+    public DbSet<OperationNotificationDisplay> OperationNotificationDisplays { get; set; }
+    public DbSet<OperationNotificationState> OperationNotificationStates { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<StationTimerState>()
+            .HasOne<Station>()
+            .WithMany()
+            .HasForeignKey(st => st.StationId)
+            .HasPrincipalKey(s => s.Id);
 
         modelBuilder.Entity<Route>()
             .HasOne(r => r.RouteState)
@@ -46,8 +58,18 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasForeignKey<SwitchingMachineState>(sms => sms.Id);
         modelBuilder.Entity<TrackCircuit>()
             .HasOne(tc => tc.TrackCircuitState)
-            .WithOne(tcs => tcs.TrackCircuit)
+            .WithOne()
             .HasForeignKey<TrackCircuitState>(tcs => tcs.Id);
+        modelBuilder.Entity<TrackCircuit>()
+            .HasOne(tc => tc.OperationNotificationDisplay)
+            .WithMany(ond => ond.TrackCircuits)
+            .HasForeignKey(tc => tc.OperationNotificationDisplayName)
+            .HasPrincipalKey(ond => ond.Name);
+        modelBuilder.Entity<OperationNotificationDisplay>()
+            .HasOne(ond => ond.OperationNotificationState)
+            .WithOne()
+            .HasForeignKey<OperationNotificationState>(ons => ons.DisplayName)
+            .HasPrincipalKey<OperationNotificationDisplay>(ond => ond.Name);
         /*
         modelBuilder.Entity<Lock>()
             .HasOne(l => l.LockCondition)
@@ -56,7 +78,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         */
         modelBuilder.Entity<LockCondition>()
             .HasOne(lc => lc.Lock)
-            .WithMany()
+            .WithMany(l => l.LockConditions)
             .HasForeignKey(l => l.LockId)
             .HasPrincipalKey(l => l.Id);
         modelBuilder.Entity<LockCondition>()
@@ -114,6 +136,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             {
                 continue;
             }
+
             foreach (var property in entity.GetProperties())
             {
                 var columnAttribute = property.GetAnnotations()
@@ -122,6 +145,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                 {
                     continue;
                 }
+
                 property.SetColumnName(ToSnakeCase(property.Name));
             }
         }

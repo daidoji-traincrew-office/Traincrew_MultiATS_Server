@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Traincrew_MultiATS_Server.Models;
 
+[Table("throw_out_control")]
 public class ThrowOutControl
 {
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

@@ -6,10 +6,15 @@ using Traincrew_MultiATS_Server.Services;
 
 namespace Traincrew_MultiATS_Server.Hubs;
 
-[Authorize(AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
+// 運転士 or 車掌使用可能
+[Authorize(
+    AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme,
+    Policy = "TrainPolicy"
+)]
 public class TrainHub(
     TrackCircuitService trackCircuitService,
-    SignalService signalService, 
+    SignalService signalService,
+    OperationNotificationService operationNotificationService,
     ProtectionService protectionService) : Hub
 {
     public async Task<DataFromServer> SendData_ATS(DataToServer clientData)
@@ -50,6 +55,10 @@ public class TrainHub(
         // 在線軌道回路の更新
         await trackCircuitService.SetTrackCircuitDataList(incrementalTrackCircuitDataList, clientData.DiaName);
         await trackCircuitService.ClearTrackCircuitDataList(decrementalTrackCircuitDataList);
+        
+        // 運転告知器の表示
+        serverData.OperationNotificationData = await operationNotificationService
+            .GetOperationNotificationDataByTrackCircuitIds(trackCircuitList.Select(tc => tc.Id).ToList());
         
         // 信号現示の計算
         // 上りか下りか判断(偶数なら上り、奇数なら下り)

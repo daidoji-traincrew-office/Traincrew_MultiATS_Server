@@ -15,4 +15,5 @@ public class InterlockingObject
     public string  Name { get; set; }
     public ObjectType Type { get; set; }
     public string? Description { get; set; }
+    public string? StationId { get; set; }
 }
