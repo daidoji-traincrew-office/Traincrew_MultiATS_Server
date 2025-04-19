@@ -17,22 +17,21 @@ public class InterlockingHub(
     StationService stationService,
     InterlockingService interlockingService) : Hub
 {
-    public async Task<DataToInterlocking> SendData_Interlocking(ConstantDataFromInterlocking clientData)
+    public async Task<DataToInterlocking> SendData_Interlocking(List<string> activeStationsList)
     {
         // Todo: めんどいし、Interlocking全取得してOfTypeと変換作って動くようにする    
-        var interlockingObjects = await interlockingService.GetObjectsByStationIds(clientData.ActiveStationsList);
-        var destinationButtons = await interlockingService.GetDestinationButtonsByStationIds(clientData.ActiveStationsList);
+        var interlockingObjects = await interlockingService.GetObjectsByStationIds(activeStationsList);
+        var destinationButtons = await interlockingService.GetDestinationButtonsByStationIds(activeStationsList);
         // List<string> clientData.ActiveStationsListの駅IDから、指定された駅にある信号機名称をList<string>で返すやつ
-        var signalNames = await signalService.GetSignalNamesByStationIds(clientData.ActiveStationsList);
+        var signalNames = await signalService.GetSignalNamesByStationIds(activeStationsList);
         // それら全部の信号の現示計算
         var signalIndications = await signalService.CalcSignalIndication(signalNames);
-        var lamps = await interlockingService.GetLamps(clientData.ActiveStationsList);
+        var lamps = await interlockingService.GetLamps(activeStationsList);
 
         var response = new DataToInterlocking
         {
             TrackCircuits = await trackCircuitService.GetAllTrackCircuitDataList(),
-            // Todo: TraincrewRole Authenticationsを設定する(role認証がどうにかなったあたりでつなぎこむ)
-            // Authentications =
+
             Points = interlockingObjects
                 .OfType<SwitchingMachine>()
                 .Select(SwitchingMachineService.ToSwitchData)
@@ -43,6 +42,10 @@ public class InterlockingHub(
                 .OfType<Lever>()
                 .Select(InterlockingService.ToLeverData)
                 .ToList(),
+
+            // Todo: List<InterlockingKeyLeverData> PhysicalKeyLeversを設定する
+            // Todo: 鍵てこの実装
+            PhysicalKeyLevers = new List<InterlockingKeyLeverData>(),
 
             // Todo: List<DestinationButtonState> PhysicalButtonsを設定する
             PhysicalButtons = destinationButtons
@@ -59,7 +62,7 @@ public class InterlockingHub(
 
             // 各ランプの状態 
             Lamps = lamps,
-            
+
             Signals = signalIndications
                 .Select(pair => SignalService.ToSignalData(pair.Key, pair.Value))
                 .ToList()
@@ -67,13 +70,13 @@ public class InterlockingHub(
         return response;
     }
 
-    public async Task SetPhysicalLeverData(LeverEventDataFromInterlocking leverData)
+    public async Task SetPhysicalLeverData(InterlockingLeverData leverData)
     {
-        await interlockingService.SetPhysicalLeverData(leverData.LeverData);
+        await interlockingService.SetPhysicalLeverData(leverData);
     }
 
-    public async Task SetDestinationButtonState(ButtonEventDataFromInterlocking buttonData)
+    public async Task SetDestinationButtonState(DestinationButtonState buttonData)
     {
-        await interlockingService.SetDestinationButtonState(buttonData.DestinationButtonData);
+        await interlockingService.SetDestinationButtonState(buttonData);
     }
 }

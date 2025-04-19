@@ -1,41 +1,5 @@
-using Newtonsoft.Json;
-
 namespace Traincrew_MultiATS_Server.Models
 {
-
-    /// <summary>
-    /// 常時送信用データクラス
-    /// </summary>
-    public class ConstantDataFromInterlocking
-    {
-        /// <summary>
-        /// 常時送信用駅データリスト
-        /// </summary>
-        public List<string> ActiveStationsList { get; set; }
-    }
-
-    /// <summary>
-    /// イベント送信用データクラス(物理てこ)
-    /// </summary>
-    public class LeverEventDataFromInterlocking
-    {
-        /// <summary>
-        /// 物理てこデータ
-        /// </summary>
-        public InterlockingLeverData LeverData { get; set; }
-    }
-
-    /// <summary>
-    /// イベント送信用データクラス(着点ボタン)
-    /// </summary>
-    public class ButtonEventDataFromInterlocking
-    {
-        /// <summary>
-        /// 着点ボタンデータ
-        /// </summary>
-        public DestinationButtonState DestinationButtonData { get; set; }
-    }
-
     /// <summary>
     /// 受信用データクラス
     /// </summary>
