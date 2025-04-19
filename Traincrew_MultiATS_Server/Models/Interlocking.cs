@@ -62,6 +62,11 @@ namespace Traincrew_MultiATS_Server.Models
         public List<InterlockingLeverData> PhysicalLevers { get; set; }
 
         /// <summary>
+        /// 物理鍵てこ情報リスト
+        /// </summary>
+        public List<InterlockingKeyLeverData> PhysicalKeyLevers { get; set; }
+
+        /// <summary>
         /// 着点ボタン情報リスト
         /// </summary>
         public List<DestinationButtonState> PhysicalButtons { get; set; }
@@ -140,5 +145,24 @@ namespace Traincrew_MultiATS_Server.Models
         /// 物理てこの状態
         /// </summary>
         public LCR State { get; set; } = LCR.Center;
+    }
+
+    /// <summary>
+    /// 物理鍵てこデータクラス
+    /// </summary>
+    public class InterlockingKeyLeverData
+    {
+        /// <summary>
+        /// 物理鍵てこ名称
+        /// </summary>
+        public string Name { get; set; } = "";
+        /// <summary>
+        /// 物理鍵てこの状態
+        /// </summary>
+        public LNR State { get; set; } = LNR.Normal;
+        /// <summary>
+        /// 物理鍵てこの鍵挿入状態
+        /// </summary>
+        public bool IsKeyInserted { get; set; } = false;
     }
 }
