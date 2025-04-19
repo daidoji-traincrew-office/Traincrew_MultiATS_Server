@@ -1,4 +1,4 @@
-﻿namespace Traincrew_MultiATS_Server.Repositories.SwitchingMachine;
+namespace Traincrew_MultiATS_Server.Repositories.SwitchingMachine;
 using Datetime = DateTime;
 
 public interface ISwitchingMachineRepository

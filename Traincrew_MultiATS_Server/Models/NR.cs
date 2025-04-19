@@ -1,4 +1,4 @@
-﻿namespace Traincrew_MultiATS_Server.Models;
+namespace Traincrew_MultiATS_Server.Models;
 
 // ReSharper disable once InconsistentNaming
 public enum NR

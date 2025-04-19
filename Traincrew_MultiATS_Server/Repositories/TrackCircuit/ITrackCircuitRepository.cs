@@ -1,4 +1,4 @@
-﻿namespace Traincrew_MultiATS_Server.Repositories.TrackCircuit;
+namespace Traincrew_MultiATS_Server.Repositories.TrackCircuit;
 
 public interface ITrackCircuitRepository
 {

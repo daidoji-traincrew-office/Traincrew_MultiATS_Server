@@ -1,4 +1,4 @@
-﻿using Traincrew_MultiATS_Server.Services;
+using Traincrew_MultiATS_Server.Services;
 
 namespace Traincrew_MultiATS_Server.Scheduler;
 

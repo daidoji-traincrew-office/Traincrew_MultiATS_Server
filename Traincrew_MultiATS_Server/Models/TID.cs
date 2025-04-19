@@ -1,4 +1,4 @@
-﻿namespace Traincrew_MultiATS_Server.Models
+namespace Traincrew_MultiATS_Server.Models
 {
     /// <summary>
     /// 常時送信用データクラス

@@ -1,4 +1,4 @@
-﻿-- 全リセット用SQL
+-- 全リセット用SQL
 -- 実行注意！！！環境確認良いか？
 delete from switching_machine_route;
 delete from lock_condition_object;
