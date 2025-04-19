@@ -3,23 +3,16 @@ using Traincrew_MultiATS_Server.Data;
 
 namespace Traincrew_MultiATS_Server.Repositories.SwitchingMachineRoute;
 
-public class SwitchingMachineRouteRepository : ISwitchingMachineRouteRepository
+public class SwitchingMachineRouteRepository(ApplicationDbContext context) : ISwitchingMachineRouteRepository
 {
-    private readonly ApplicationDbContext _context;
-
-    public SwitchingMachineRouteRepository(ApplicationDbContext context)
-    {
-        _context = context;
-    }
-
     public Task<List<Models.SwitchingMachineRoute>> GetAll()
     {
-        return _context.SwitchingMachineRoutes.ToListAsync();
+        return context.SwitchingMachineRoutes.ToListAsync();
     }
 
     public async Task<List<Models.SwitchingMachineRoute>> GetBySwitchingMachineIds(List<ulong> switchingMachineIds)
     {
-        return await _context.SwitchingMachineRoutes
+        return await context.SwitchingMachineRoutes
             .Where(route => switchingMachineIds.Contains(route.SwitchingMachineId))
             .ToListAsync();
     }
