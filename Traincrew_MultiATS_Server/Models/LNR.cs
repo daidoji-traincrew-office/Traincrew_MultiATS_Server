@@ -1,9 +1,9 @@
-﻿namespace Traincrew_MultiATS_Server.Models
+﻿namespace Traincrew_MultiATS_Server.Models;
+
+// Todo: DBに反映
+public enum LNR
 {
-    public enum LNR
-    {
-        Left,
-        Normal,
-        Right
-    }
+    Left,
+    Normal,
+    Right
 }
