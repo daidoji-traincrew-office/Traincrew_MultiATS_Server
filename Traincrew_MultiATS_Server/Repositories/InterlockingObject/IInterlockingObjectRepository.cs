@@ -1,4 +1,4 @@
-﻿
+
 namespace Traincrew_MultiATS_Server.Repositories.InterlockingObject;
 
 public interface IInterlockingObjectRepository

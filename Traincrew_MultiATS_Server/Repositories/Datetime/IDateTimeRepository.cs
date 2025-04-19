@@ -1,4 +1,4 @@
-﻿namespace Traincrew_MultiATS_Server.Repositories.Datetime;
+namespace Traincrew_MultiATS_Server.Repositories.Datetime;
 
 public interface IDateTimeRepository
 {

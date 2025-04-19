@@ -1,4 +1,4 @@
-﻿using Traincrew_MultiATS_Server.Models;
+using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.Station;
 
 namespace Traincrew_MultiATS_Server.Services;

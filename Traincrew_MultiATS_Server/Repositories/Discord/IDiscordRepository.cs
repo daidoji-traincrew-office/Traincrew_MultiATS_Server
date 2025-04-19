@@ -1,4 +1,4 @@
-﻿using Discord.Rest;
+using Discord.Rest;
 using Discord.WebSocket;
 
 namespace Traincrew_MultiATS_Server.Repositories.Discord;

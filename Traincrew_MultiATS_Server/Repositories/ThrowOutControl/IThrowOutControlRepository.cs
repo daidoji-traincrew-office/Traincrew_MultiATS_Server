@@ -1,4 +1,4 @@
-﻿namespace Traincrew_MultiATS_Server.Repositories.ThrowOutControl;
+namespace Traincrew_MultiATS_Server.Repositories.ThrowOutControl;
 
 public interface IThrowOutControlRepository
 {
