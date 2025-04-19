@@ -42,14 +42,8 @@ namespace Traincrew_MultiATS_Server.Models
     public class DataToInterlocking
     {
         /// <summary>
-        /// 認証情報リスト
-        /// </summary>
-        public TraincrewRole Authentications { get; set; }
-
-        /// <summary>
         /// 軌道回路情報リスト
         /// </summary>
-        [JsonProperty("trackCircuitList")]
         public List<TrackCircuitData> TrackCircuits { get; set; }
 
         /// <summary>
@@ -60,7 +54,6 @@ namespace Traincrew_MultiATS_Server.Models
         /// <summary>
         /// 信号機情報リスト
         /// </summary>
-        [JsonProperty("signalDataList")]
         public List<SignalData> Signals { get; set; }
 
         /// <summary>
