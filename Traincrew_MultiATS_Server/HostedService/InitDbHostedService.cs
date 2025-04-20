@@ -15,7 +15,7 @@ namespace Traincrew_MultiATS_Server.HostedService;
 public class InitDbHostedService(
     IServiceScopeFactory serviceScopeFactory,
     ILoggerFactory loggerFactory
-    ) : IHostedService
+) : IHostedService
 {
     private readonly List<Scheduler.Scheduler> _schedulers = [];
 
@@ -53,7 +53,9 @@ public class InitDbHostedService(
         var jsonstring = await File.ReadAllTextAsync("./Data/DBBase.json", cancellationToken);
         var DBBase = JsonSerializer.Deserialize<DBBasejson>(jsonstring);
         var logger = loggerFactory.CreateLogger<DbInitializer>();
-        return DBBase != null ? new DbInitializer(DBBase, context, dateTimeRepository, logger, cancellationToken) : null;
+        return DBBase != null
+            ? new DbInitializer(DBBase, context, dateTimeRepository, logger, cancellationToken)
+            : null;
     }
 
     private async Task InitRendoTable(
@@ -108,6 +110,14 @@ public class InitDbHostedService(
         foreach (var initializer in initializers)
         {
             await initializer.InitializeLocks();
+        }
+        changedEntriesCopy = context.ChangeTracker.Entries()
+            .Where(e => e.State is
+                EntityState.Added or EntityState.Modified or EntityState.Deleted or EntityState.Unchanged)
+            .ToList();
+        foreach (var entry in changedEntriesCopy)
+        {
+            entry.State = EntityState.Detached;
         }
     }
 
@@ -180,7 +190,7 @@ public class InitDbHostedService(
         }
 
         await context.SaveChangesAsync(cancellationToken);
-        
+
         foreach (var trackCircuit in changedTrackCircuits)
         {
             context.Entry(trackCircuit).State = EntityState.Detached;
@@ -262,7 +272,7 @@ internal partial class DbInitializer(
     ApplicationDbContext context,
     IDateTimeRepository dateTimeRepository,
     ILogger<DbInitializer> logger,
-        CancellationToken cancellationToken)
+    CancellationToken cancellationToken)
 {
     [GeneratedRegex(@"^(TH(\d{1,2}S?))_")]
     private static partial Regex RegexStationId();
@@ -736,6 +746,10 @@ public partial class DbRendoTableInitializer
     [GeneratedRegex(@"(\d+)(?:R|L)(Z?)")]
     private static partial Regex RegexLeverParse();
 
+    // 軌道回路名を抽出するための正規表現
+    [GeneratedRegex(@"[A-Z\dｲﾛ]+T")]
+    private static partial Regex RegexTrackCircuitParse();
+
     // 閉塞軌道回路名を抽出するための正規表現
     [GeneratedRegex(@"^(\d+)T$")]
     private static partial Regex RegexClosureTrackCircuitParse();
@@ -1077,24 +1091,23 @@ public partial class DbRendoTableInitializer
                 g => g.Select(x => x.RouteId).ToList(),
                 cancellationToken
             );
-        var searchSwitchingMachine = new Func<LockItem, Task<List<InterlockingObject>>>(
-            item =>
+        var searchSwitchingMachine = new Func<LockItem, Task<List<InterlockingObject>>>(item =>
+        {
+            // Todo: もっときれいに書けるはず 
+            var targetObject =
+                switchingMachines.GetValueOrDefault(CalcSwitchingMachineName(item.Name, item.StationId));
+            List<InterlockingObject> result;
+            if (targetObject != null)
             {
-                // Todo: もっときれいに書けるはず 
-                var targetObject =
-                    switchingMachines.GetValueOrDefault(CalcSwitchingMachineName(item.Name, item.StationId));
-                List<InterlockingObject> result;
-                if (targetObject != null)
-                {
-                    result = [targetObject];
-                }
-                else
-                {
-                    result = [];
-                }
+                result = [targetObject];
+            }
+            else
+            {
+                result = [];
+            }
 
-                return Task.FromResult(result);
-            });
+            return Task.FromResult(result);
+        });
         var searchOtherObjects = new Func<LockItem, Task<List<InterlockingObject>>>(item =>
         {
             // 進路(単一) or 軌道回路の場合はこちら
@@ -1156,6 +1169,7 @@ public partial class DbRendoTableInitializer
         int? approachLockTime = null;
         foreach (var rendoTableCsv in rendoTableCsvs)
         {
+            // Todo: 通常進路と方向てこ/開放てこで処理を分ける
             var routeName = CalcRouteName(rendoTableCsv.Start, rendoTableCsv.End, stationId);
             var route = routesByName.GetValueOrDefault(routeName);
             if (route == null)
@@ -1195,6 +1209,8 @@ public partial class DbRendoTableInitializer
 
             await RegisterLocks(rendoTableCsv.ApproachLock, route.Id, searchObjectsForApproachLock,
                 LockType.Approach);
+            await RegisterFinalTrackCircuitId(
+                rendoTableCsv.ApproachLock, route, searchObjectsForApproachLock);
         }
 
         // 転てつ器のてっ査鎖錠を処理する
@@ -1302,6 +1318,7 @@ public partial class DbRendoTableInitializer
             {
                 return;
             }
+
             context.LockConditions.Add(current);
             foreach (var child in item.Children)
             {
@@ -1322,6 +1339,7 @@ public partial class DbRendoTableInitializer
                     "誘導進路の進路名が見つかりません。処理をスキップします: {} {}", item.StationId, item.Name);
                 return;
             }
+            // Todo: 方向てこ、開放てこに対する処理
 
             if (item.Name.StartsWith("14") && item.StationId == "TH65")
             {
@@ -1329,6 +1347,7 @@ public partial class DbRendoTableInitializer
                 logger.Log(LogLevel.Warning, "大道寺14L/Rは方向てこです。処理をスキップします。: {Name}", item.Name);
                 return;
             }
+
             throw new InvalidOperationException($"対象のオブジェクトが見つかりません: {item.StationId} {item.Name}");
         }
 
@@ -1386,6 +1405,56 @@ public partial class DbRendoTableInitializer
                 SwitchingMachineId = switchingMachine.Id,
             });
         }
+    }
+
+    private async Task RegisterFinalTrackCircuitId(string lockString, Route route,
+        Func<LockItem, Task<List<InterlockingObject>>> searchTargetObjects)
+    {
+        var lockItems = CalcLockItems(lockString, false);
+        if (lockItems.Count == 0)
+        {
+            return;
+        }
+        // 接近鎖錠のパース時はlockItemsが1つの想定
+        var lockItem = lockItems[0];
+        await RegisterFinalTrackCircuitIdInner(lockItem, route, searchTargetObjects);
+    }
+
+    private async Task<bool> RegisterFinalTrackCircuitIdInner(LockItem lockItem, Route route,
+        Func<LockItem, Task<List<InterlockingObject>>> searchTargetObjects)
+    {
+        List<InterlockingObject> targetObjects;
+        if(lockItem.Name is NameOr or NameAnd or NameNot)
+        {
+            // or, and, not の場合は、子どもを右から見ていって軌道回路っぽいやつを探す
+            var reversedChildren = lockItem.Children.ToList();
+            reversedChildren.Reverse();
+            foreach (var child in reversedChildren)
+            {
+                // 登録ができたらreturnする
+                if (await RegisterFinalTrackCircuitIdInner(child, route, searchTargetObjects))
+                {
+                    return true;
+                }
+            }
+        }
+        targetObjects = await searchTargetObjects(lockItem);
+        var reversedTargetObjects = targetObjects.ToList();
+        reversedTargetObjects.Reverse();
+        foreach (var targetObject in reversedTargetObjects)
+        {
+            if (targetObject is not TrackCircuit trackCircuit)
+            {
+                continue;
+            }
+
+            // 接近鎖錠欄の最終軌道回路を登録
+            route.ApproachLockFinalTrackCircuitId = trackCircuit.Id;
+            context.Update(route);
+            return true;
+        }
+        // 進路の最終閉塞軌道回路が見つからなかった
+        return false;
     }
 
 
