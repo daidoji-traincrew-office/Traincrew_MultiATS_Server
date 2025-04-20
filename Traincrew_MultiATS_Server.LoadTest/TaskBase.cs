@@ -1,9 +1,7 @@
-﻿using Microsoft.AspNetCore.SignalR.Client;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.IO;
-using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
-using System.Threading;
+using Microsoft.AspNetCore.SignalR.Client;
 
 namespace Traincrew_MultiATS_Server.LoadTest;
 
@@ -144,7 +142,7 @@ public abstract class TaskBase
     protected abstract int Delay { get; }
     protected abstract string Path { get; }
     protected abstract string Method { get; }
-    protected abstract Object  Object { get; }
+    protected abstract Object?  Object { get; }
     private readonly List<CancellationTokenSource> _cancellationTokens = [];
     
     // タスクを実行するメソッド
@@ -154,14 +152,21 @@ public abstract class TaskBase
         {
             // Todo: ServerAddress.csから取得できるようにしたほうが良いかな
             var connection = new HubConnectionBuilder()
-            .WithUrl($"https://localhost:5154/hub/{Path}" )
+            .WithUrl($"https://localhost:7232/hub/{Path}" )
             .WithAutomaticReconnect()
             .Build();
             await connection.StartAsync(token);
             while (true)
             {
                 var delay = Task.Delay(Delay, token);
-                await connection.InvokeAsync(Method,Object,token);
+                if (Object is null)
+                {
+                    await connection.InvokeAsync(Method,token);
+                }
+                else
+                {
+                    await connection.InvokeAsync(Method,Object,token);
+                }
                 await delay;
             }
         }
@@ -277,10 +282,10 @@ public class TID : TaskBase
     protected override int Delay => 333;
     protected override string Path => "TID";
     protected override string Method => "SendData_TID";
-    protected override object Object => GenerateData();
-    public Object GenerateData()
+    protected override object? Object => GenerateData();
+    public Object? GenerateData()
     {
-        return new Object();
+        return null;
     }
 }
 
