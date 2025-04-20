@@ -166,7 +166,7 @@ CREATE TABLE switching_machine
 -- 鎖状、信号制御、てっさ鎖状、進路鎖状、接近鎖状、保留鎖状
 CREATE TYPE lock_type AS ENUM ('lock', 'signal_control', 'detector', 'route', 'approach', 'stick');
 
--- てこ
+-- (転てつ器、進路)てこ
 CREATE TYPE lever_type AS ENUM ('route', 'switching_machine');
 CREATE TABLE lever
 (
@@ -175,6 +175,46 @@ CREATE TABLE lever
     switching_machine_id BIGINT REFERENCES switching_machine (ID) --転てつ機のID
 );
 
+CREATE TYPE lr as ENUM ('left', 'right');
+
+-- 方向てこの1方向
+CREATE TABLE direction_lever_direction
+(
+    id       BIGINT PRIMARY KEY REFERENCES interlocking_object (id), -- ID
+    lever_id BIGINT NOT NULL,                                        -- てこのID(循環参照となるため、Referenceは後で作る)
+    is_lr    lr     NOT NULL,                                        -- 左右の方向
+    UNIQUE (lever_id, is_lr)
+);
+
+-- 方向てこ
+CREATE TABLE direction_lever
+(
+    id                       BIGINT PRIMARY KEY REFERENCES interlocking_object (id), -- 進路のID
+    l_lock_lever_id          BIGINT REFERENCES direction_lever_direction (id),       -- Lてこに対する隣駅鎖錠てこ
+    l_single_locked_lever_id BIGINT REFERENCES direction_lever_direction (id),       -- Lてこに対する隣駅被片鎖状てこ
+    r_lock_lever_id          BIGINT REFERENCES direction_lever_direction (id),       -- Rてこに対する隣駅鎖錠てこ
+    r_single_locked_lever_id BIGINT REFERENCES direction_lever_direction (id)        -- Rてこに対する隣駅被片鎖状てこ
+);
+
+ALTER TABLE direction_lever_direction
+ADD CONSTRAINT direction_lever_direction_lever_id_fkey FOREIGN KEY (lever_id) REFERENCES direction_lever (id);
+
+
+-- 開放てこ
+CREATE TYPE nr AS ENUM ('reversed', 'normal');
+CREATE TABLE opening_lever
+(
+    id BIGINT PRIMARY KEY REFERENCES interlocking_object (id) -- ID
+);
+
+-- 開放てこの1方向
+CREATE TABLE opening_lever_direction
+(
+    id       BIGINT PRIMARY KEY REFERENCES interlocking_object (id), -- ID
+    lever_id BIGINT REFERENCES opening_lever (id) NOT NULL,          -- てこのID
+    is_nr    nr                                   NOT NULL,          -- 左右の方向
+    UNIQUE (lever_id, is_nr)
+);
 
 -- 進路に対するてこと着点ボタンのリスト
 CREATE TABLE route_lever_destination_button
@@ -245,14 +285,13 @@ CREATE TABLE track_circuit_signal
 -- 各進路、転てつ機の鎖状条件(すべての鎖状条件をここにいれる)
 CREATE TABLE lock
 (
-    id                 BIGSERIAL PRIMARY KEY,
-    object_id          BIGINT REFERENCES interlocking_object (id), -- 進路、転てつ機、軌道回路のID
-    type               lock_type NOT NULL,                         -- 鎖状の種類
-    route_lock_group   INT                                         -- 進路鎖状のグループ(カッコで囲まれてるやつを同じ数字にする)
+    id               BIGSERIAL PRIMARY KEY,
+    object_id        BIGINT REFERENCES interlocking_object (id), -- 進路、転てつ機、方向てこのID
+    type             lock_type NOT NULL,                         -- 鎖状の種類
+    route_lock_group INT                                         -- 進路鎖状のグループ(カッコで囲まれてるやつを同じ数字にする)
 );
 CREATE INDEX lock_object_id_type_index ON lock (object_id, type);
 
-CREATE TYPE nr AS ENUM ('reversed', 'normal');
 CREATE TYPE nrc AS ENUM ('reversed', 'center', 'normal');
 CREATE TYPE raise_drop AS ENUM ('raise', 'drop');
 CREATE TYPE lock_condition_type AS ENUM ('and', 'or', 'not', 'object');
@@ -317,7 +356,7 @@ CREATE TABLE station_timer_state
     is_teu_relay_raised raise_drop  NOT NULL DEFAULT 'drop',
     is_ten_relay_raised raise_drop  NOT NULL DEFAULT 'drop',
     is_ter_relay_raised raise_drop  NOT NULL DEFAULT 'raise',
-    teu_relay_raised_at TIMESTAMP   NULL DEFAULT NULL,
+    teu_relay_raised_at TIMESTAMP   NULL     DEFAULT NULL,
     UNIQUE (station_id, seconds)
 );
 
@@ -326,6 +365,27 @@ CREATE TABLE lever_state
 (
     id          BIGINT PRIMARY KEY REFERENCES lever (ID), -- てこのID
     is_reversed lcr NOT NULL                              -- てこの位置
+);
+
+-- 開放てこ状態
+CREATE TABLE opening_lever_state
+(
+    id              BIGINT PRIMARY KEY REFERENCES opening_lever (ID), -- てこのID
+    is_inserted_key BOOL NOT NULL DEFAULT 'false',                    -- 鍵が挿入されているか
+    is_reversed     nr   NOT NULL DEFAULT 'normal'                    -- てこの位置
+);
+
+-- 方向てこ状態
+CREATE TABLE direction_lever_state
+(
+    id                   BIGINT PRIMARY KEY REFERENCES direction_lever (ID), -- てこのID
+    is_fl_relay_raised   raise_drop NOT NULL DEFAULT 'drop',                 -- 運転方向鎖錠リレー
+    is_lfys_relay_raised raise_drop NOT NULL DEFAULT 'drop',                 -- L方向総括リレー
+    is_rfys_relay_raised raise_drop NOT NULL DEFAULT 'drop',                 -- R方向総括リレー
+    is_ly_relay_raised   raise_drop NOT NULL DEFAULT 'drop',                 -- L方向てこ反応リレー
+    is_ry_relay_raised   raise_drop NOT NULL DEFAULT 'drop',                 -- R方向てこ反応リレー
+    is_l_relay_raised    raise_drop NOT NULL DEFAULT 'drop',                 -- L方向てこリレー
+    is_r_relay_raised    raise_drop NOT NULL DEFAULT 'drop'                  -- R方向てこリレー
 );
 
 -- 着点ボタン状態
