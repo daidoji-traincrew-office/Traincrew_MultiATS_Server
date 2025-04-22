@@ -1,4 +1,4 @@
-﻿using NpgsqlTypes;
+using NpgsqlTypes;
 
 namespace Traincrew_MultiATS_Server.Models;
 // ReSharper disable once InconsistentNaming

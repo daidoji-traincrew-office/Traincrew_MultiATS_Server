@@ -1,4 +1,4 @@
-﻿using Traincrew_MultiATS_Server.Models;
+using Traincrew_MultiATS_Server.Models;
 
 namespace Traincrew_MultiATS_Server.Repositories.Lock;
 

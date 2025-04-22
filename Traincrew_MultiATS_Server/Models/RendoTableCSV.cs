@@ -1,4 +1,4 @@
-﻿using CsvHelper.Configuration.Attributes;
+using CsvHelper.Configuration.Attributes;
 
 namespace Traincrew_MultiATS_Server.Models;
 
@@ -6,6 +6,8 @@ public class RendoTableCSV
 {
     [Index(0)]
     public string Name { get; set; }
+    [Index(4)]
+    public string Indicator { get; set; }
     [Index(5)]
     public string Start { get; set; }
     [Index(6)]

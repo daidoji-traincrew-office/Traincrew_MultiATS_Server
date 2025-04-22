@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Traincrew_MultiATS_Server.Models;
 
@@ -12,4 +12,5 @@ public class Route : InterlockingObject
     public string? Indicator { get; set; }
     public int? ApproachLockTime { get; set; }
     public RouteState? RouteState { get; set; }
+    public ulong? ApproachLockFinalTrackCircuitId { get; set; }
 }

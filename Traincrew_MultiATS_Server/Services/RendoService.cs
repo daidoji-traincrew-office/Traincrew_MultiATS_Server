@@ -1,4 +1,4 @@
-﻿using Traincrew_MultiATS_Server.Models;
+using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.DestinationButton;
 using Traincrew_MultiATS_Server.Repositories.General;
@@ -170,13 +170,15 @@ public class RendoService(
                     .Select(r => r.RouteState)
                     .OfType<RouteState>()
                     .ToList();
-                // 自進路の接近鎖錠欄に書かれている条件のうち最終の軌道回路条件の状態を取得 鎖錠していない
-                var finalApproachLockCondition = approachLockConditions[route.Id]
-                    .OfType<LockConditionObject>()
-                    .Last(c => interlockingObjects[c.ObjectId] is TrackCircuit);
-                var finalApproachTrackState =
-                    !(interlockingObjects[finalApproachLockCondition.ObjectId] as TrackCircuit)
-                        .TrackCircuitState.IsLocked;
+                var approachLockFinalTrackCircuitId = route.ApproachLockFinalTrackCircuitId;
+                var finalApproachTrackState = false;
+                if (approachLockFinalTrackCircuitId != null 
+                    && interlockingObjects.TryGetValue(approachLockFinalTrackCircuitId.Value, out var finalApproachTrackCircuit))
+                {
+                    var finalTrackCircuit = (finalApproachTrackCircuit as TrackCircuit)!;
+                    // 自進路の接近鎖錠欄に書かれている条件のうち最終の軌道回路条件の状態を取得 鎖錠していない
+                    finalApproachTrackState = !finalTrackCircuit.TrackCircuitState.IsLocked;
+                }
                 // 自進路の信号制御欄に書かれている条件に書かれている軌道回路の状態を取得
                 var signalControlLockTrackCircuitState = signalControlConditions[route.Id]
                     .OfType<LockConditionObject>()
@@ -638,7 +640,10 @@ public class RendoService(
             {
                 //  一斉に軌道回路を鎖錠、進路鎖錠する
                 // 軌道回路Lock
-                routeLockTrackCircuit.ForEach(tc => tc.TrackCircuitState.IsLocked = true);
+                routeLockTrackCircuit.ForEach(tc => {
+                    tc.TrackCircuitState.IsLocked = true;
+                    tc.TrackCircuitState.LockedBy = route.Id;
+                });
                 await generalRepository.SaveAll(routeLockTrackCircuit.Select(tc => tc.TrackCircuitState));
                 // IsRouteLockRaisedをDropにする
                 route.RouteState.IsRouteLockRaised = RaiseDrop.Drop;
@@ -661,8 +666,8 @@ public class RendoService(
                         .Select(l => interlockingObjects[l.ObjectId])
                         .OfType<TrackCircuit>()
                         .ToList();
-                    // 当該軌道回路が全部解錠されている
-                    if (targetTrackCircuits.All(tc => !tc.TrackCircuitState.IsLocked))
+                    // 当該軌道回路を自分が鎖状していない(=全部解錠されている or 他進路が鎖状している)場合、スキップ
+                    if (targetTrackCircuits.All(tc => tc.TrackCircuitState.LockedBy != route.Id))  
                     {
                         continue;
                     }
@@ -703,6 +708,7 @@ public class RendoService(
                     targetTrackCircuits.ForEach(tc =>
                     {
                         tc.TrackCircuitState.IsLocked = false;
+                        tc.TrackCircuitState.LockedBy = null;
                         tc.TrackCircuitState.UnlockedAt = null;
                     });
                     await generalRepository.SaveAll(targetTrackCircuits.Select(tc => tc.TrackCircuitState));
@@ -710,23 +716,30 @@ public class RendoService(
 
                 // 進路鎖錠欄に書かれている軌道回路のすべての軌道回路が鎖錠解除された場合、進路鎖錠リレーを扛上させる+進路鎖錠するべき軌道回路のリストを全解除する
 
-                // 進路鎖錠欄に書かれている軌道回路のいずれかの軌道回路が鎖状されている場合、スキップ
-                if (!routeLocks
+                // 進路鎖錠欄に書かれている軌道回路のいずれかの軌道回路が自分によって鎖状されている場合、スキップ
+                if (routeLocks
                         .SelectMany(l => l.LockConditions)
                         .OfType<LockConditionObject>()
                         .Select(l => interlockingObjects[l.ObjectId])
-                        .All(io => io is TrackCircuit { TrackCircuitState.IsLocked: false }))
+                        .Any(io => io is TrackCircuit tc && tc.TrackCircuitState.LockedBy == route.Id))
                 {
                     continue;
                 }
 
-                // 進路鎖錠するべき軌道回路のリストを全解除する
-                routeLockTrackCircuit.ForEach(tc =>
+                // 進路鎖錠するべき軌道回路のうち、自分によって鎖状されている軌道回路を全解除する
+                var toUnlockedTrackCircuits = routeLockTrackCircuit
+                    .Where(tc => tc.TrackCircuitState.LockedBy == route.Id)
+                    .ToList();
+                toUnlockedTrackCircuits.ForEach(tc =>
                 {
                     tc.TrackCircuitState.IsLocked = false;
+                    tc.TrackCircuitState.LockedBy = null;
                     tc.TrackCircuitState.UnlockedAt = null;
                 });
-                await generalRepository.SaveAll(routeLockTrackCircuit.Select(tc => tc.TrackCircuitState));
+                if(toUnlockedTrackCircuits.Count > 0)
+                {
+                    await generalRepository.SaveAll(toUnlockedTrackCircuits.Select(tc => tc.TrackCircuitState));
+                }
                 // 進路鎖錠リレーを扛上させる
                 route.RouteState.IsRouteLockRaised = RaiseDrop.Raise;
                 await generalRepository.Save(route.RouteState);
@@ -1016,11 +1029,11 @@ public class RendoService(
         {
             // 軌道回路が短絡していないこと
             TrackCircuit trackCircuit => !trackCircuit.TrackCircuitState.IsShortCircuit,
-            // 進路の接近鎖錠MRリレーが図表記載方向であること(定位=drop, 反位=raise)
-            Route route => (route.RouteState.IsApproachLockMRRaised == RaiseDrop.Drop &&
-                            o.IsReverse == NR.Normal)
-                           || (route.RouteState.IsApproachLockMRRaised == RaiseDrop.Raise &&
-                               o.IsReverse == NR.Reversed),
+            // 進路の接近鎖錠MRリレーが図表記載方向であること(定位=raise, 反位=drop)
+            Route route => (o.IsReverse == NR.Normal && 
+                            route.RouteState.IsApproachLockMRRaised == RaiseDrop.Raise) 
+                           || (o.IsReverse == NR.Reversed && 
+                               route.RouteState.IsApproachLockMRRaised == RaiseDrop.Raise),
             // 転てつ器が転換中でなく、目的方向であること
             SwitchingMachine switchingMachine => !switchingMachine.SwitchingMachineState.IsSwitching &&
                                                  switchingMachine.SwitchingMachineState.IsReverse ==
@@ -1093,5 +1106,12 @@ public class RendoService(
         List<LockCondition> lockConditions)
     {
         return lockConditions.OfType<LockConditionObject>().Select(lc => lc.ObjectId).ToList();
+    }
+
+    public async Task<List<Route>> GetActiveRoutes()
+    {
+        var routeIds = await routeRepository.GetIdsWhereLeverRelayIsRaised();
+        var routes = await routeRepository.GetByIdsWithState(routeIds);
+        return routes;
     }
 }

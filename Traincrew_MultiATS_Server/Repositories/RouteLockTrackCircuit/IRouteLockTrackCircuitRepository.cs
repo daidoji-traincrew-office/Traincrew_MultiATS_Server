@@ -1,4 +1,4 @@
-﻿namespace Traincrew_MultiATS_Server.Repositories.RouteLockTrackCircuit;
+namespace Traincrew_MultiATS_Server.Repositories.RouteLockTrackCircuit;
 
 public interface IRouteLockTrackCircuitRepository
 {

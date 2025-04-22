@@ -115,29 +115,6 @@ CREATE TABLE destination_button
     station_id VARCHAR(10) REFERENCES station (id) NOT NULL -- 所属する停車場
 );
 
--- 進路
--- 場内信号機、出発信号機、誘導信号機、入換信号機、入換標識
-CREATE TYPE route_type AS ENUM ('arriving', 'departure', 'guide', 'switch_signal', 'switch_route');
-
-CREATE TABLE route
-(
-    id                 BIGINT PRIMARY KEY REFERENCES interlocking_object (id),
-    tc_name            VARCHAR(100) NOT NULL,        -- Traincrewでの名前
-    route_type         route_type   NOT NULL,
-    root_id            BIGINT REFERENCES route (id), -- 親進路
-    indicator          VARCHAR(10),                  -- 進路表示機(Todo: ここに持たせるべきなのか?)
-    approach_lock_time INT                           -- 接近鎖状の時間
-);
-
--- 進路の親子関係
-CREATE TABLE route_include
-(
-    source_lever_id BIGINT REFERENCES route (ID) NOT NULL,
-    target_lever_id BIGINT REFERENCES route (ID) NOT NULL,
-    UNIQUE (source_lever_id, target_lever_id)
-);
-CREATE INDEX route_include_source_lever_id_index ON route_include (source_lever_id);
-
 -- 運転告知機
 CREATE TABLE operation_notification_display
 (
@@ -155,6 +132,30 @@ CREATE TABLE track_circuit
     operation_notification_display_name VARCHAR(100) REFERENCES operation_notification_display (name) -- 運転告知機の名前
 );
 CREATE INDEX track_circuit_operation_notification_display_name_index ON track_circuit (operation_notification_display_name);
+
+-- 進路
+-- 場内信号機、出発信号機、誘導信号機、入換信号機、入換標識
+CREATE TYPE route_type AS ENUM ('arriving', 'departure', 'guide', 'switch_signal', 'switch_route');
+
+CREATE TABLE route
+(
+    id                                   BIGINT PRIMARY KEY REFERENCES interlocking_object (id),
+    tc_name                              VARCHAR(100) NOT NULL,               -- Traincrewでの名前
+    route_type                           route_type   NOT NULL,
+    root_id                              BIGINT REFERENCES route (id),        -- 親進路
+    indicator                            VARCHAR(10),                         -- 進路表示機(Todo: ここに持たせるべきなのか?)
+    approach_lock_time                   INT,                                 -- 接近鎖状の時間
+    approach_lock_final_track_circuit_id BIGINT REFERENCES track_circuit (id) -- 接近鎖錠欄の最後の軌道回路ID
+);
+
+-- 進路の親子関係
+CREATE TABLE route_include
+(
+    source_lever_id BIGINT REFERENCES route (ID) NOT NULL,
+    target_lever_id BIGINT REFERENCES route (ID) NOT NULL,
+    UNIQUE (source_lever_id, target_lever_id)
+);
+CREATE INDEX route_include_source_lever_id_index ON route_include (source_lever_id);
 
 -- 転てつ機
 CREATE TABLE switching_machine
@@ -245,10 +246,10 @@ CREATE TABLE track_circuit_signal
 -- 各進路、転てつ機の鎖状条件(すべての鎖状条件をここにいれる)
 CREATE TABLE lock
 (
-    id                 BIGSERIAL PRIMARY KEY,
-    object_id          BIGINT REFERENCES interlocking_object (id), -- 進路、転てつ機、軌道回路のID
-    type               lock_type NOT NULL,                         -- 鎖状の種類
-    route_lock_group   INT                                         -- 進路鎖状のグループ(カッコで囲まれてるやつを同じ数字にする)
+    id               BIGSERIAL PRIMARY KEY,
+    object_id        BIGINT REFERENCES interlocking_object (id), -- 進路、転てつ機、軌道回路のID
+    type             lock_type NOT NULL,                         -- 鎖状の種類
+    route_lock_group INT                                         -- 進路鎖状のグループ(カッコで囲まれてるやつを同じ数字にする)
 );
 CREATE INDEX lock_object_id_type_index ON lock (object_id, type);
 
@@ -317,7 +318,7 @@ CREATE TABLE station_timer_state
     is_teu_relay_raised raise_drop  NOT NULL DEFAULT 'drop',
     is_ten_relay_raised raise_drop  NOT NULL DEFAULT 'drop',
     is_ter_relay_raised raise_drop  NOT NULL DEFAULT 'raise',
-    teu_relay_raised_at TIMESTAMP   NULL DEFAULT NULL,
+    teu_relay_raised_at TIMESTAMP   NULL     DEFAULT NULL,
     UNIQUE (station_id, seconds)
 );
 
@@ -344,6 +345,7 @@ CREATE TABLE track_circuit_state
     is_short_circuit                 BOOLEAN    NOT NULL,                              -- 短絡状態
     is_locked                        BOOLEAN    NOT NULL,                              -- 鎖状しているかどうか
     unlocked_at                      TIMESTAMP           DEFAULT NULL,                 -- 鎖状解除時刻
+    locked_by                        BIGINT REFERENCES route (id) DEFAULT NULL,        -- 鎖状している進路のID
     is_correction_raise_relay_raised raise_drop NOT NULL DEFAULT 'drop',               -- 不正扛上補正リレー
     raised_at                        TIMESTAMP           DEFAULT NULL,                 -- 軌道回路を扛上させるタイミング
     is_correction_drop_relay_raised  raise_drop NOT NULL DEFAULT 'drop',               -- 不正落下補正リレー

@@ -1,4 +1,4 @@
-﻿namespace Traincrew_MultiATS_Server.Repositories.General;
+namespace Traincrew_MultiATS_Server.Repositories.General;
 
 public interface IGeneralRepository
 {

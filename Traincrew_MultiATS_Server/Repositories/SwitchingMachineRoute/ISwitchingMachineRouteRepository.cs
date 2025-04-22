@@ -1,4 +1,4 @@
-﻿namespace Traincrew_MultiATS_Server.Repositories.SwitchingMachineRoute;
+namespace Traincrew_MultiATS_Server.Repositories.SwitchingMachineRoute;
 
 public interface ISwitchingMachineRouteRepository
 {

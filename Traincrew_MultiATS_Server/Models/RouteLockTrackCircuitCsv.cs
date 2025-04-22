@@ -1,4 +1,4 @@
-﻿using CsvHelper;
+using CsvHelper;
 using CsvHelper.Configuration;
 
 namespace Traincrew_MultiATS_Server.Models;

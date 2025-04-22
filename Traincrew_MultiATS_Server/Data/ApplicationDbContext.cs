@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Traincrew_MultiATS_Server.Models;
 using Route = Traincrew_MultiATS_Server.Models.Route;
 

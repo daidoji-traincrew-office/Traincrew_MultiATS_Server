@@ -1,55 +1,13 @@
-using Newtonsoft.Json;
-
 namespace Traincrew_MultiATS_Server.Models
 {
-
-    /// <summary>
-    /// 常時送信用データクラス
-    /// </summary>
-    public class ConstantDataFromInterlocking
-    {
-        /// <summary>
-        /// 常時送信用駅データリスト
-        /// </summary>
-        public List<string> ActiveStationsList { get; set; }
-    }
-
-    /// <summary>
-    /// イベント送信用データクラス(物理てこ)
-    /// </summary>
-    public class LeverEventDataFromInterlocking
-    {
-        /// <summary>
-        /// 物理てこデータ
-        /// </summary>
-        public InterlockingLeverData LeverData { get; set; }
-    }
-
-    /// <summary>
-    /// イベント送信用データクラス(着点ボタン)
-    /// </summary>
-    public class ButtonEventDataFromInterlocking
-    {
-        /// <summary>
-        /// 着点ボタンデータ
-        /// </summary>
-        public DestinationButtonState DestinationButtonData { get; set; }
-    }
-
     /// <summary>
     /// 受信用データクラス
     /// </summary>
     public class DataToInterlocking
     {
         /// <summary>
-        /// 認証情報リスト
-        /// </summary>
-        public TraincrewRole Authentications { get; set; }
-
-        /// <summary>
         /// 軌道回路情報リスト
         /// </summary>
-        [JsonProperty("trackCircuitList")]
         public List<TrackCircuitData> TrackCircuits { get; set; }
 
         /// <summary>
@@ -60,13 +18,17 @@ namespace Traincrew_MultiATS_Server.Models
         /// <summary>
         /// 信号機情報リスト
         /// </summary>
-        [JsonProperty("signalDataList")]
         public List<SignalData> Signals { get; set; }
 
         /// <summary>
         /// 物理てこ情報リスト
         /// </summary>
         public List<InterlockingLeverData> PhysicalLevers { get; set; }
+
+        /// <summary>
+        /// 物理鍵てこ情報リスト
+        /// </summary>
+        public List<InterlockingKeyLeverData> PhysicalKeyLevers { get; set; }
 
         /// <summary>
         /// 着点ボタン情報リスト
@@ -147,5 +109,24 @@ namespace Traincrew_MultiATS_Server.Models
         /// 物理てこの状態
         /// </summary>
         public LCR State { get; set; } = LCR.Center;
+    }
+
+    /// <summary>
+    /// 物理鍵てこデータクラス
+    /// </summary>
+    public class InterlockingKeyLeverData
+    {
+        /// <summary>
+        /// 物理鍵てこ名称
+        /// </summary>
+        public string Name { get; set; } = "";
+        /// <summary>
+        /// 物理鍵てこの状態
+        /// </summary>
+        public LNR State { get; set; } = LNR.Normal;
+        /// <summary>
+        /// 物理鍵てこの鍵挿入状態
+        /// </summary>
+        public bool IsKeyInserted { get; set; } = false;
     }
 }

@@ -1,4 +1,4 @@
-﻿-- 鎖錠条件を確認する用SQL
+-- 鎖錠条件を確認する用SQL
 SELECT 
     io1.name, lock.type,
     lc.id, lc.parent_id,

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.Models;
 
@@ -6,6 +6,14 @@ namespace Traincrew_MultiATS_Server.Repositories.Route;
 
 public class RouteRepository(ApplicationDbContext context) : IRouteRepository
 {
+    public async Task<List<Models.Route>> GetByIdsWithState(List<ulong> ids)
+    {
+        return await context.Routes
+            .Include(r => r.RouteState)
+            .Where(r => ids.Contains(r.Id))
+            .ToListAsync();
+    }
+
     public async Task DropRouteRelayWhereLeverRelayIsDropped()
     {
         await context.RouteStates

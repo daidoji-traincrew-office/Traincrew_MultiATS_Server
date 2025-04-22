@@ -1,4 +1,4 @@
-﻿namespace Traincrew_MultiATS_Server.Repositories.NextSignal;
+namespace Traincrew_MultiATS_Server.Repositories.NextSignal;
 
 public interface INextSignalRepository
 {

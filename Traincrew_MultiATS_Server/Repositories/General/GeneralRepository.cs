@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Traincrew_MultiATS_Server.Data;
 
 namespace Traincrew_MultiATS_Server.Repositories.General;

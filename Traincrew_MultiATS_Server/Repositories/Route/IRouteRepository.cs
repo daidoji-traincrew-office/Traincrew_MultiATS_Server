@@ -1,7 +1,11 @@
-﻿namespace Traincrew_MultiATS_Server.Repositories.Route;
+namespace Traincrew_MultiATS_Server.Repositories.Route;
 
 public interface IRouteRepository
 {
+    /// <summary>
+    /// IDから進路を取得する
+    /// </summary>
+    Task<List<Models.Route>> GetByIdsWithState(List<ulong> ids);
     /// <summary>
     /// てこ反応リレーが落下しており かつ 進路照査リレーが扛上している進路に対し、進路照査リレーを落下させる
     /// </summary>
@@ -42,4 +46,5 @@ public interface IRouteRepository
     /// </summary>
     /// <returns> 接近鎖錠MSリレーが扛上している進路のリスト </returns>
     Task<List<Models.Route>> GetWhereApproachLockMSRelayIsRaised();
+
 }

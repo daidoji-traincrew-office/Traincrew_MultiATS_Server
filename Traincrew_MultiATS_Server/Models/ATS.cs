@@ -1,9 +1,9 @@
 namespace Traincrew_MultiATS_Server.Models;
 
-public class OperationNotificationData 
+public class OperationNotificationData
 {
     public string DisplayName { get; init; }
-    public string Content { get; init; } 
+    public string Content { get; init; }
     public DateTime OperatedAt { get; init; }
     public OperationNotificationType Type { get; init; }
 }
@@ -53,7 +53,7 @@ public class CarState
     public bool HasPantograph = false;
 }
 
-public class TrackCircuitData: IEquatable<TrackCircuitData>
+public class TrackCircuitData : IEquatable<TrackCircuitData>
 {
     public string Last { get; init; } // 軌道回路を踏んだ列車の名前
     public required string Name { get; init; }
@@ -91,19 +91,20 @@ public class DataToServer
     public string DiaName { get; init; }
     public List<TrackCircuitData> OnTrackList { get; init; }
 
-    public int PNotch{ get; init; }
+    public int PNotch { get; init; }
 
     //将来用
-    public float Speed{ get; init; }
+    public float Speed { get; init; }
 }
 
 public class DataFromServer
 {
     //進路表示の表示はTC本体実装待ち　未決定
-    public bool BougoState { get ; set; } = false;
+    public bool BougoState { get; set; } = false;
     public List<EmergencyLightData> EmergencyLightDatas { get; set; } = [];
     public Dictionary<string, OperationNotificationData> KokuchiDatas { get; set; } = new();
     public OperationNotificationData? OperationNotificationData { get; set; } = null;
     public List<SignalData> NextSignalData { get; set; } = [];
     public List<SignalData> DoubleNextSignalData { get; set; } = [];
+    public List<Route> RouteData { get; set; } = [];
 }
