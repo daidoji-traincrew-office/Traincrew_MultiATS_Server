@@ -315,6 +315,7 @@ internal partial class DbInitializer(
                 IsPassengerStation = station.IsPassengerStation
             });
         }
+        await context.SaveChangesAsync(cancellationToken);
     }
 
     private async Task InitStationTimerState()
