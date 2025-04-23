@@ -5251,7 +5251,9 @@
             "Name": "江ノ原検車区下り出発3L",
             "phase": 1,
             "TypeName": "3灯式",
-            "NextSignalNames": [],
+            "NextSignalNames": [
+                "下り閉塞151"
+            ],
             "RouteNames": [
                 "TH66S_3L"
             ]
@@ -5260,7 +5262,9 @@
             "Name": "江ノ原検車区下り出発4L",
             "phase": 1,
             "TypeName": "3灯式",
-            "NextSignalNames": [],
+            "NextSignalNames": [
+                "下り閉塞151"
+            ],
             "RouteNames": [
                 "TH66S_4L"
             ]
