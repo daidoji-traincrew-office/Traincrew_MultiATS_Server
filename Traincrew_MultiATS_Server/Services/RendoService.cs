@@ -449,6 +449,76 @@ public class RendoService(
         }
     }
 
+    /// <summary>
+    /// <strong>方向てこリレー回路</strong><br/>
+    /// </summary>
+    /// <returns></returns>
+    public async Task DirectionRelay()
+    {
+        // 方向てこを全取得
+        var directionLevers = new List<DirectionLever>();
+
+        // 総括制御を全取得
+        var throwOutControls = await throwOutControlRepository.GetAll();
+
+        // 総括されるオブジェクトをキーとして総括制御をグループ化
+        var targetThrowOutControls = throwOutControls
+            .GroupBy(c => c.TargetRouteId)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        // 方向てこごとにループ
+        foreach (var directionLever in directionLevers)
+        {
+            // 運転方向鎖錠リレー    
+            // 対応する鎖錠軌道回路を取得
+
+            // 対応軌道回路の短絡状態によって、FLリレーを扛上
+            var isFLRelayRaised = directionLever.DirectionLeverState.IsFlRelayRaised;
+
+            // 総括リレー
+            // 総括される進路のてこ反応リレーが扛上しているか(方向ごとに確認)
+            // 総括の条件てこの状態も確認する
+            var isLfysRelayRaised = directionLever.DirectionLeverState.IsLfysRelayRaised;
+            var isRfysRelayRaised = directionLever.DirectionLeverState.IsRfysRelayRaised;
+
+            // てこ反応リレー
+            // 対応する総括リレー扛上
+            // ||
+            // (
+            //     対応する開放てこR位置
+            //     &&
+            //     レバー本体がその向きかどうか
+            // )
+            // => Trueで向上
+            var isLyRelayRaised = directionLever.DirectionLeverState.IsLyRelayRaised;
+            var isRyRelayRaised = directionLever.DirectionLeverState.IsRyRelayRaised;
+
+            // 方向リレー
+            // 隣駅鎖錠の方向リレー扛上[非存在True]
+            // &&
+            // (
+            //      (
+            //          反応リレー扛上
+            //          &&
+            //          運転方向鎖錠リレー扛上
+            //      )
+            //      ||
+            //      隣駅被片鎖錠の方向リレー扛上[非存在False]
+            //      ||
+            //      (
+            //          運転方向鎖錠リレー落下
+            //          &&
+            //          自身扛上
+            //      )
+            //  )
+            //  &&
+            //  向き反対の方向リレー落下
+            //  => Trueで向上
+            var isLRelayRaised = directionLever.DirectionLeverState.IsLRelayRaised;
+            var isRRelayRaised = directionLever.DirectionLeverState.IsRRelayRaised;
+        }
+    }
+
 
     // Todo: 接近鎖錠リレー回路     
     public async Task ApproachLockRelay()
@@ -1017,9 +1087,9 @@ public class RendoService(
             // 軌道回路が短絡していないこと
             TrackCircuit trackCircuit => !trackCircuit.TrackCircuitState.IsShortCircuit,
             // 進路の接近鎖錠MRリレーが図表記載方向であること(定位=raise, 反位=drop)
-            Route route => (o.IsReverse == NR.Normal && 
-                            route.RouteState.IsApproachLockMRRaised == RaiseDrop.Raise) 
-                           || (o.IsReverse == NR.Reversed && 
+            Route route => (o.IsReverse == NR.Normal &&
+                            route.RouteState.IsApproachLockMRRaised == RaiseDrop.Raise)
+                           || (o.IsReverse == NR.Reversed &&
                                route.RouteState.IsApproachLockMRRaised == RaiseDrop.Raise),
             // 転てつ器が転換中でなく、目的方向であること
             SwitchingMachine switchingMachine => !switchingMachine.SwitchingMachineState.IsSwitching &&
