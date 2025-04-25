@@ -3,13 +3,18 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Traincrew_MultiATS_Server.Models;
 
 [Table("direction_lever")]
-public class DirectionLever: InterlockingObject
+public class DirectionLever : InterlockingObject
 {
+    /// <summary>
+    /// 開放てこのID
+    /// </summary>
+    public ulong OpeningLeverId { get; init; }
+
     /// <summary>
     /// Lてこに対する隣駅鎖錠てこ
     /// </summary>
     public ulong? LLockLeverId { get; init; }
-    
+
     /// <summary>
     /// Lてこに対する隣駅鎖状てこの方向
     /// </summary>

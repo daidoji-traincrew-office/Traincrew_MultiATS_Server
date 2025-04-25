@@ -177,10 +177,18 @@ CREATE TABLE lever
 
 CREATE TYPE lr as ENUM ('left', 'right');
 
+-- 開放てこ
+CREATE TYPE nr AS ENUM ('reversed', 'normal');
+CREATE TABLE opening_lever
+(
+    id BIGINT PRIMARY KEY REFERENCES interlocking_object (id) -- ID
+);
+
 -- 方向てこ
 CREATE TABLE direction_lever
 (
     id                              BIGINT PRIMARY KEY REFERENCES interlocking_object (id), -- 進路のID
+    opening_lever_id                BIGINT REFERENCES opening_lever (id),                   -- 開放てこのID
     l_lock_lever_id                 BIGINT REFERENCES direction_lever (id),                 -- Lてこに対する隣駅鎖錠てこ
     l_lock_lever_direction          lr,                                                     -- Lてこに対する隣駅鎖錠てこの方向
     l_single_locked_lever_id        BIGINT REFERENCES direction_lever (id),                 -- Lてこに対する隣駅被片鎖状てこ
@@ -189,13 +197,6 @@ CREATE TABLE direction_lever
     r_lock_lever_direction          lr,                                                     -- Rてこに対する隣駅鎖錠てこの方向
     r_single_locked_lever_id        BIGINT REFERENCES direction_lever (id),                 -- Rてこに対する隣駅被片鎖状てこ
     r_single_locked_lever_direction lr                                                      -- Rてこに対する隣駅被片鎖状てこの方向
-);
-
--- 開放てこ
-CREATE TYPE nr AS ENUM ('reversed', 'normal');
-CREATE TABLE opening_lever
-(
-    id BIGINT PRIMARY KEY REFERENCES interlocking_object (id) -- ID
 );
 
 -- 進路に対するてこと着点ボタンのリスト
@@ -365,6 +366,7 @@ CREATE TABLE opening_lever_state
 CREATE TABLE direction_lever_state
 (
     id                   BIGINT PRIMARY KEY REFERENCES direction_lever (ID), -- てこのID
+    is_lr                lr         NOT NULL DEFAULT 'left',                 -- 方向てこの方向
     is_fl_relay_raised   raise_drop NOT NULL DEFAULT 'drop',                 -- 運転方向鎖錠リレー
     is_lfys_relay_raised raise_drop NOT NULL DEFAULT 'drop',                 -- L方向総括リレー
     is_rfys_relay_raised raise_drop NOT NULL DEFAULT 'drop',                 -- R方向総括リレー

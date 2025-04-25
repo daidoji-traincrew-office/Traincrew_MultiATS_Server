@@ -10,8 +10,14 @@ public class DirectionLeverState
     /// ID
     /// </summary>
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    [Key] 
+    [Key]
     public ulong Id { get; init; }
+
+    /// <summary>
+    /// 方向てこの方向
+    /// </summary>
+    public LR isLr { get; set; } = LR.Left;
+
     /// <summary>
     /// 運転方向鎖錠リレー
     /// </summary>
