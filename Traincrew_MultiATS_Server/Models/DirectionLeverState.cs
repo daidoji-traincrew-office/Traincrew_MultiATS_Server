@@ -4,8 +4,14 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Traincrew_MultiATS_Server.Models;
 
 [Table("direction_lever_state")]
-public class DirectionLeverState: InterlockingObject
+public class DirectionLeverState
 {
+    /// <summary>
+    /// ID
+    /// </summary>
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    [Key] 
+    public ulong Id { get; init; }
     /// <summary>
     /// 運転方向鎖錠リレー
     /// </summary>

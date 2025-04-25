@@ -8,22 +8,42 @@ public class DirectionLever: InterlockingObject
     /// <summary>
     /// Lてこに対する隣駅鎖錠てこ
     /// </summary>
-    public ulong? LLockLeverId { get; set; }
+    public ulong? LLockLeverId { get; init; }
+    
+    /// <summary>
+    /// Lてこに対する隣駅鎖状てこの方向
+    /// </summary>
+    public LR? LLockLeverDirection { get; init; }
 
     /// <summary>
     /// Lてこに対する隣駅被片鎖状てこ
     /// </summary>
-    public ulong? LSingleLockedLeverId { get; set; }
+    public ulong? LSingleLockedLeverId { get; init; }
+
+    /// <summary>
+    /// Lてこに対する隣駅被片鎖状てこの方向
+    /// </summary>
+    public LR? LSingleLockedLeverDirection { get; init; }
 
     /// <summary>
     /// Rてこに対する隣駅鎖錠てこ
     /// </summary>
-    public ulong? RLockLeverId { get; set; }
+    public ulong? RLockLeverId { get; init; }
+
+    /// <summary>
+    /// Rてこに対する隣駅鎖状てこの方向
+    /// </summary>
+    public LR? RLockLeverDirection { get; init; }
 
     /// <summary>
     /// Rてこに対する隣駅被片鎖状てこ
     /// </summary>
-    public ulong? RSingleLockedLeverId { get; set; }
+    public ulong? RSingleLockedLeverId { get; init; }
 
-    public virtual DirectionLeverState? DirectionLeverState { get; set; }
+    /// <summary>
+    /// Rてこに対する隣駅被片鎖状てこの方向
+    /// </summary>
+    public LR? RSingleLockedLeverDirection { get; init; }
+
+    public virtual DirectionLeverState? DirectionLeverState { get; init; }
 }

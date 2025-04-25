@@ -32,7 +32,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<OperationNotificationDisplay> OperationNotificationDisplays { get; set; }
     public DbSet<OperationNotificationState> OperationNotificationStates { get; set; }
     public DbSet<DirectionLever> DirectionLevers { get; set; }
-    public DbSet<DirectionLeverDirection> DirectionLeverDirections { get; set; }
     public DbSet<OpeningLever> OpeningLevers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -138,13 +137,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .WithOne()
             .HasForeignKey<DirectionLeverState>(dls => dls.Id)
             .HasPrincipalKey<DirectionLever>(dl => dl.Id);
-
-        modelBuilder.Entity<DirectionLeverDirection>()
-            .HasOne(dld => dld.Lever)
-            .WithMany()
-            .HasForeignKey(dld => dld.LeverId)
-            .HasPrincipalKey(dl => dl.Id);
-
+        
         modelBuilder.Entity<OpeningLever>();
         // Convert all column names to snake_case 
         foreach (var entity in modelBuilder.Model.GetEntityTypes())
@@ -171,7 +164,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder
-            .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+            .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
+            .EnableSensitiveDataLogging();
     }
 
     private static string ToSnakeCase(string input)
