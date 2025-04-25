@@ -1,5 +1,6 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Traincrew_MultiATS_Server.Data;
+using Traincrew_MultiATS_Server.Models;
 
 namespace Traincrew_MultiATS_Server.Repositories.InterlockingObject;
 
@@ -30,6 +31,7 @@ public class InterlockingObjectRepository(ApplicationDbContext context) : IInter
             .Include(obj => ((Models.SwitchingMachine)obj).SwitchingMachineState)
             .Include(obj => ((Models.TrackCircuit)obj).TrackCircuitState)
             .Include(obj => ((Models.Lever)obj).LeverState)
+            .Include(obj => ((DirectionLever)obj).DirectionLeverState)
             .ToListAsync();
     }
     public Task<Models.InterlockingObject> GetObject(string name)
