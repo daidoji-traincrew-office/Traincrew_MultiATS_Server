@@ -585,11 +585,11 @@ public class RendoService(
             var LSingleLockedLeverIdState = RaiseDrop.Drop;
             if (directionLever.LSingleLockedLeverId.HasValue)
             {
-                if (directionLever.LLockLeverDirection == LR.Left)
+                if (directionLever.LSingleLockedLeverDirection == LR.Left)
                 {
                     LLockLeverState = ((DirectionLever)interlockingObjects[directionLever.LSingleLockedLeverId.Value]).DirectionLeverState.IsLRelayRaised;
                 }
-                else if (directionLever.LLockLeverDirection == LR.Right)
+                else if (directionLever.LSingleLockedLeverDirection == LR.Right)
                 {
                     LLockLeverState = ((DirectionLever)interlockingObjects[directionLever.LSingleLockedLeverId.Value]).DirectionLeverState.IsRRelayRaised;
                 }
@@ -622,13 +622,13 @@ public class RendoService(
                 ? RaiseDrop.Raise : RaiseDrop.Drop;
 
             var RLockLeverState = RaiseDrop.Raise;
-            if (directionLever.LLockLeverId.HasValue)
+            if (directionLever.RLockLeverId.HasValue)
             {
-                if (directionLever.LLockLeverDirection == LR.Left)
+                if (directionLever.RLockLeverDirection == LR.Left)
                 {
                     LLockLeverState = ((DirectionLever)interlockingObjects[directionLever.RLockLeverId.Value]).DirectionLeverState.IsLRelayRaised;
                 }
-                else if (directionLever.LLockLeverDirection == LR.Right)
+                else if (directionLever.RLockLeverDirection == LR.Right)
                 {
                     LLockLeverState = ((DirectionLever)interlockingObjects[directionLever.RLockLeverId.Value]).DirectionLeverState.IsRRelayRaised;
                 }
@@ -641,11 +641,11 @@ public class RendoService(
             var RSingleLockedLeverIdState = RaiseDrop.Drop;
             if (directionLever.RSingleLockedLeverId.HasValue)
             {
-                if (directionLever.LLockLeverDirection == LR.Left)
+                if (directionLever.RSingleLockedLeverDirection == LR.Left)
                 {
                     LLockLeverState = ((DirectionLever)interlockingObjects[directionLever.RSingleLockedLeverId.Value]).DirectionLeverState.IsLRelayRaised;
                 }
-                else if (directionLever.LLockLeverDirection == LR.Right)
+                else if (directionLever.RSingleLockedLeverDirection == LR.Right)
                 {
                     LLockLeverState = ((DirectionLever)interlockingObjects[directionLever.RSingleLockedLeverId.Value]).DirectionLeverState.IsRRelayRaised;
                 }
