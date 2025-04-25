@@ -41,7 +41,7 @@ public class ThrowOutControl
     /// <summary>
     /// てこ条件となる開放てこ
     /// </summary>
-    public OpeningLever? ConditionLever { get; init; }
+    public DirectionSelfControlLever? ConditionLever { get; init; }
     /// <summary>
     /// てこ条件の開放てこの向き
     /// </summary>

@@ -177,9 +177,9 @@ CREATE TABLE lever
 
 CREATE TYPE lr as ENUM ('left', 'right');
 
--- 開放てこ
+-- 開放てこ(方向てこ用)
 CREATE TYPE nr AS ENUM ('reversed', 'normal');
-CREATE TABLE opening_lever
+CREATE TABLE direction_self_control_lever
 (
     id BIGINT PRIMARY KEY REFERENCES interlocking_object (id) -- ID
 );
@@ -188,7 +188,7 @@ CREATE TABLE opening_lever
 CREATE TABLE direction_lever
 (
     id                              BIGINT PRIMARY KEY REFERENCES interlocking_object (id), -- 進路のID
-    opening_lever_id                BIGINT REFERENCES opening_lever (id),                   -- 開放てこのID
+    opening_lever_id                BIGINT REFERENCES direction_self_control_lever (id),    -- 開放てこのID
     l_lock_lever_id                 BIGINT REFERENCES direction_lever (id),                 -- Lてこに対する隣駅鎖錠てこ
     l_lock_lever_direction          lr,                                                     -- Lてこに対する隣駅鎖錠てこの方向
     l_single_locked_lever_id        BIGINT REFERENCES direction_lever (id),                 -- Lてこに対する隣駅被片鎖状てこ
@@ -307,7 +307,7 @@ CREATE TABLE throw_out_control
     source_lr          lr,                                                  -- 統括元が方向てこの場合、方向てこの向き
     target_id          BIGINT REFERENCES interlocking_object (id) NOT NULL, -- 統括先オブジェクトID
     target_lr          lr,                                                  -- 統括先が方向てこの場合、方向てこの向き
-    condition_lever_id BIGINT REFERENCES opening_lever (id),                -- てこ条件となる開放てこID
+    condition_lever_id BIGINT REFERENCES direction_self_control_lever (id), -- てこ条件となる開放てこID
     condition_nr       nr                                                   -- てこ条件の開放てこの向き
 );
 CREATE INDEX throw_out_control_source_id_index ON throw_out_control (source_id);
@@ -355,11 +355,11 @@ CREATE TABLE lever_state
 );
 
 -- 開放てこ状態
-CREATE TABLE opening_lever_state
+CREATE TABLE direction_self_control_lever_state
 (
-    id              BIGINT PRIMARY KEY REFERENCES opening_lever (ID), -- てこのID
-    is_inserted_key BOOL NOT NULL DEFAULT 'false',                    -- 鍵が挿入されているか
-    is_reversed     nr   NOT NULL DEFAULT 'normal'                    -- てこの位置
+    id              BIGINT PRIMARY KEY REFERENCES direction_self_control_lever (ID), -- てこのID
+    is_inserted_key BOOL NOT NULL DEFAULT 'false',                                   -- 鍵が挿入されているか
+    is_reversed     nr   NOT NULL DEFAULT 'normal'                                   -- てこの位置
 );
 
 -- 方向てこ状態
