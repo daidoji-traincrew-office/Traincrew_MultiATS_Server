@@ -21,6 +21,7 @@ public class InterlockingHub(
     {
         // Todo: めんどいし、Interlocking全取得してOfTypeと変換作って動くようにする    
         var interlockingObjects = await interlockingService.GetObjectsByStationIds(activeStationsList);
+        var allInterlockingObjects = await interlockingService.GetInterlockingObjects();
         var destinationButtons = await interlockingService.GetDestinationButtonsByStationIds(activeStationsList);
         // List<string> clientData.ActiveStationsListの駅IDから、指定された駅にある信号機名称をList<string>で返すやつ
         var signalNames = await signalService.GetSignalNamesByStationIds(activeStationsList);
@@ -32,12 +33,12 @@ public class InterlockingHub(
         {
             TrackCircuits = await trackCircuitService.GetAllTrackCircuitDataList(),
 
-            Points = interlockingObjects
+            Points = allInterlockingObjects
                 .OfType<SwitchingMachine>()
                 .Select(SwitchingMachineService.ToSwitchData)
                 .ToList(),
 
-            // Todo: List<InterlockingLeverData> PhysicalLeversを設定する
+            // Todo: 方向てこのほうのリストを連結する
             PhysicalLevers = interlockingObjects
                 .OfType<Lever>()
                 .Select(InterlockingService.ToLeverData)
@@ -47,16 +48,15 @@ public class InterlockingHub(
             // Todo: 鍵てこの実装
             PhysicalKeyLevers = new List<InterlockingKeyLeverData>(),
 
-            // Todo: List<DestinationButtonState> PhysicalButtonsを設定する
             PhysicalButtons = destinationButtons
                 .Select(button => button.DestinationButtonState)
                 .ToList(),
 
-            // Todo: List<InterlockingDirectionData> Directionsを設定する
-            // Todo: 方向てこ実装、方向てこにフィルターする
-            Directions = new List<DirectionData>(),
+            Directions = allInterlockingObjects
+                .OfType<DirectionLever>()
+                .Select(InterlockingService.ToDirectionData)
+                .ToList(),
 
-            // Todo: List<InterlockingRetsubanData> Retsubansを設定する
             // Todo: 列番表示の実装から
             Retsubans = new List<InterlockingRetsubanData>(),
 

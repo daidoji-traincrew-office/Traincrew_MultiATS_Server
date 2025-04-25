@@ -78,7 +78,7 @@ namespace Traincrew_MultiATS_Server.Models
         /// <summary>
         /// 方向てこの値
         /// </summary>
-        public LCR State { get; set; } = LCR.Left;
+        public LCR State { get; set; } = LCR.Center;
     }
 
     /// <summary>

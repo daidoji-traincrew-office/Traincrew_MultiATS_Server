@@ -39,7 +39,7 @@ public class InterlockingService(
             .Concat(stationTimerStates)
             .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
     }
-    
+
     /// <summary>
     /// レバーの物理状態を設定する
     /// </summary>
@@ -76,7 +76,7 @@ public class InterlockingService(
         buttonObject.DestinationButtonState.IsRaised = buttonData.IsRaised;
         await generalRepository.Save(buttonObject.DestinationButtonState);
     }
-    
+
 
     public async Task<List<InterlockingObject>> GetInterlockingObjects()
     {
@@ -106,5 +106,23 @@ public class InterlockingService(
     public async Task<List<DestinationButton>> GetDestinationButtonsByStationIds(List<string> stationNames)
     {
         return await destinationButtonRepository.GetButtonsByStationIds(stationNames);
+    }
+
+    public static DirectionData ToDirectionData(DirectionLever direction)
+    {
+        var state = LCR.Center;
+        if (direction.DirectionLeverState.IsLRelayRaised == RaiseDrop.Raise)
+        {
+            state = LCR.Left;
+        }
+        else if (direction.DirectionLeverState.IsRRelayRaised == RaiseDrop.Raise)
+        {
+            state = LCR.Right;
+        }
+        return new()
+        {
+            Name = direction.Name,
+            State = state
+        };
     }
 }
