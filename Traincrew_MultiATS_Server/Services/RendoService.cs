@@ -1,3 +1,4 @@
+using System.Linq;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.DestinationButton;
@@ -469,7 +470,7 @@ public class RendoService(
         var targetThrowOutControls = throwOutControls
             .GroupBy(c => c.TargetId)
             .ToDictionary(g => g.Key, g => g.ToList());
-        
+
         // 関わる全てのObjectを取得
         var objectIds = directionLeverIds
             .Union(lockConditionDict.Values.SelectMany(ExtractObjectIdsFromLockCondtions))
@@ -481,18 +482,41 @@ public class RendoService(
         foreach (var directionLeverId in directionLeverIds)
         {
             // DB制約的にDirectionLeverになるはず
-            var directionLever = (interlockingObjects[directionLeverId] as DirectionLever)!; 
+            var directionLever = (interlockingObjects[directionLeverId] as DirectionLever)!;
+            var directionLeverState = directionLever.DirectionLeverState;
             // 運転方向鎖錠リレー    
             // 対応する鎖錠軌道回路を取得
 
             // 対応軌道回路の短絡状態によって、FLリレーを扛上
-            var isFLRelayRaised = directionLever.DirectionLeverState.IsFlRelayRaised;
+            // Todo: まだわかってないからわかったら繋ぐ
+            var isFLRelayRaised = RaiseDrop.Raise;
 
-            // 総括リレー
+            // 総括リレー                                                            
             // 総括される進路のてこ反応リレーが扛上しているか(方向ごとに確認)
-            // 総括の条件てこの状態も確認する
-            var isLfysRelayRaised = directionLever.DirectionLeverState.IsLfysRelayRaised;
-            var isRfysRelayRaised = directionLever.DirectionLeverState.IsRfysRelayRaised;
+            var thisLeftThrowOutControls = targetThrowOutControls[directionLever.Id]
+                .Where(t => t.TargetLr == LR.Left)
+                .ToList();
+            var thisRightThrowOutControls = targetThrowOutControls[directionLever.Id]
+                .Where(t => t.TargetLr == LR.Left)
+                .ToList();
+            // thisLeftThrowOutControlsのSourceの進路のてこ反応リレー扛上と、ConditionLeverの状態を確認する
+
+            var isLfysRelayRaised = thisLeftThrowOutControls
+                .Any(t =>
+                ((Route)t.Source).RouteState.IsLeverRelayRaised == RaiseDrop.Raise
+                &&
+                // ((OpeningLever)t.ConditionLever).なにがしか == NR.Normal
+                true
+                ) ? RaiseDrop.Raise : RaiseDrop.Drop;
+
+            var isRfysRelayRaised = thisRightThrowOutControls
+                .Any(t =>
+                ((Route)t.Source).RouteState.IsLeverRelayRaised == RaiseDrop.Raise
+                &&
+                // ((OpeningLever)t.ConditionLever).なにがしか == NR.Normal         
+                true
+                ) ? RaiseDrop.Raise : RaiseDrop.Drop;
+
 
             // てこ反応リレー
             // 対応する総括リレー扛上
@@ -503,8 +527,22 @@ public class RendoService(
             //     レバー本体がその向きかどうか
             // )
             // => Trueで向上
-            var isLyRelayRaised = directionLever.DirectionLeverState.IsLyRelayRaised;
-            var isRyRelayRaised = directionLever.DirectionLeverState.IsRyRelayRaised;
+            var isLyRelayRaised =
+                isLfysRelayRaised == RaiseDrop.Raise
+                ||
+                (
+                    ((DirectionSelfControlLever)interlockingObjects[directionLever.DirectionSelfControlLeverId]).DirectionSelfControlLeverState.IsReversed == NR.Reversed
+                    &&
+                   directionLeverState.isLr == LR.Left
+                ) ? RaiseDrop.Raise : RaiseDrop.Drop;
+            var isRyRelayRaised =
+                isRfysRelayRaised == RaiseDrop.Raise
+                ||
+                (
+                    ((DirectionSelfControlLever)interlockingObjects[directionLever.DirectionSelfControlLeverId]).DirectionSelfControlLeverState.IsReversed == NR.Reversed
+                    &&
+                   directionLeverState.isLr == LR.Right
+                ) ? RaiseDrop.Raise : RaiseDrop.Drop;
 
             // 方向リレー
             // 隣駅鎖錠の方向リレー扛上[非存在True]
@@ -527,8 +565,137 @@ public class RendoService(
             //  &&
             //  向き反対の方向リレー落下
             //  => Trueで向上
-            var isLRelayRaised = directionLever.DirectionLeverState.IsLRelayRaised;
-            var isRRelayRaised = directionLever.DirectionLeverState.IsRRelayRaised;
+            var LLockLeverState = RaiseDrop.Raise;
+            if (directionLever.LLockLeverId.HasValue)
+            {
+                if (directionLever.LLockLeverDirection == LR.Left)
+                {
+                    LLockLeverState = ((DirectionLever)interlockingObjects[directionLever.LLockLeverId.Value]).DirectionLeverState.IsLRelayRaised;
+                }
+                else if (directionLever.LLockLeverDirection == LR.Right)
+                {
+                    LLockLeverState = ((DirectionLever)interlockingObjects[directionLever.LLockLeverId.Value]).DirectionLeverState.IsRRelayRaised;
+                }
+                else
+                {
+                    LLockLeverState = RaiseDrop.Drop;
+                }
+            }
+
+            var LSingleLockedLeverIdState = RaiseDrop.Drop;
+            if (directionLever.LSingleLockedLeverId.HasValue)
+            {
+                if (directionLever.LLockLeverDirection == LR.Left)
+                {
+                    LLockLeverState = ((DirectionLever)interlockingObjects[directionLever.LSingleLockedLeverId.Value]).DirectionLeverState.IsLRelayRaised;
+                }
+                else if (directionLever.LLockLeverDirection == LR.Right)
+                {
+                    LLockLeverState = ((DirectionLever)interlockingObjects[directionLever.LSingleLockedLeverId.Value]).DirectionLeverState.IsRRelayRaised;
+                }
+                else
+                {
+                    LLockLeverState = RaiseDrop.Drop;
+                }
+            }
+
+            var isLRelayRaised =
+                LLockLeverState == RaiseDrop.Raise
+                &&
+                (
+                    (
+                        isLyRelayRaised == RaiseDrop.Raise
+                        &&
+                        isFLRelayRaised == RaiseDrop.Raise
+                    )
+                    ||
+                    LSingleLockedLeverIdState == RaiseDrop.Raise
+                    ||
+                    (
+                        isFLRelayRaised == RaiseDrop.Raise
+                        &&
+                       directionLeverState.IsLRelayRaised == RaiseDrop.Raise
+                    )
+                )
+                &&
+               directionLeverState.IsRRelayRaised == RaiseDrop.Drop
+                ? RaiseDrop.Raise : RaiseDrop.Drop;
+
+            var RLockLeverState = RaiseDrop.Raise;
+            if (directionLever.LLockLeverId.HasValue)
+            {
+                if (directionLever.LLockLeverDirection == LR.Left)
+                {
+                    LLockLeverState = ((DirectionLever)interlockingObjects[directionLever.RLockLeverId.Value]).DirectionLeverState.IsLRelayRaised;
+                }
+                else if (directionLever.LLockLeverDirection == LR.Right)
+                {
+                    LLockLeverState = ((DirectionLever)interlockingObjects[directionLever.RLockLeverId.Value]).DirectionLeverState.IsRRelayRaised;
+                }
+                else
+                {
+                    LLockLeverState = RaiseDrop.Drop;
+                }
+            }
+
+            var RSingleLockedLeverIdState = RaiseDrop.Drop;
+            if (directionLever.RSingleLockedLeverId.HasValue)
+            {
+                if (directionLever.LLockLeverDirection == LR.Left)
+                {
+                    LLockLeverState = ((DirectionLever)interlockingObjects[directionLever.RSingleLockedLeverId.Value]).DirectionLeverState.IsLRelayRaised;
+                }
+                else if (directionLever.LLockLeverDirection == LR.Right)
+                {
+                    LLockLeverState = ((DirectionLever)interlockingObjects[directionLever.RSingleLockedLeverId.Value]).DirectionLeverState.IsRRelayRaised;
+                }
+                else
+                {
+                    LLockLeverState = RaiseDrop.Drop;
+                }
+            }
+
+            var isRRelayRaised =
+                LLockLeverState == RaiseDrop.Raise
+                &&
+                (
+                    (
+                        isLyRelayRaised == RaiseDrop.Raise
+                        &&
+                        isFLRelayRaised == RaiseDrop.Raise
+                    )
+                    ||
+                    LSingleLockedLeverIdState == RaiseDrop.Raise
+                    ||
+                    (
+                        isFLRelayRaised == RaiseDrop.Raise
+                        &&
+                       directionLeverState.IsLRelayRaised == RaiseDrop.Raise
+                    )
+                )
+                &&
+               directionLeverState.IsRRelayRaised == RaiseDrop.Drop
+                ? RaiseDrop.Raise : RaiseDrop.Drop;
+
+            // それぞれ現在と異なる場合、更新
+            if (isFLRelayRaised == directionLeverState.IsFlRelayRaised &&
+                isLfysRelayRaised == directionLeverState.IsLfysRelayRaised &&
+                isRfysRelayRaised == directionLeverState.IsRfysRelayRaised &&
+                isLyRelayRaised == directionLeverState.IsLyRelayRaised &&
+                isRyRelayRaised == directionLeverState.IsRyRelayRaised &&
+                isLRelayRaised == directionLeverState.IsLRelayRaised &&
+                isRRelayRaised == directionLeverState.IsRRelayRaised)
+            {
+                continue;
+            }
+            directionLeverState.IsFlRelayRaised = isFLRelayRaised;
+            directionLeverState.IsLfysRelayRaised = isLfysRelayRaised;
+            directionLeverState.IsRfysRelayRaised = isRfysRelayRaised;
+            directionLeverState.IsLyRelayRaised = isLyRelayRaised;
+            directionLeverState.IsRyRelayRaised = isRyRelayRaised;
+            directionLeverState.IsLRelayRaised = isLRelayRaised;
+            directionLeverState.IsRRelayRaised = isRRelayRaised;
+            await generalRepository.Save(directionLeverState);
         }
     }
 
