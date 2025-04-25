@@ -8,7 +8,7 @@ public class DirectionLever : InterlockingObject
     /// <summary>
     /// 開放てこのID
     /// </summary>
-    public ulong OpeningLeverId { get; init; }
+    public ulong DirectionSelfControlLeverId { get; init; }
 
     /// <summary>
     /// Lてこに対する隣駅鎖錠てこ

@@ -188,7 +188,7 @@ CREATE TABLE direction_self_control_lever
 CREATE TABLE direction_lever
 (
     id                              BIGINT PRIMARY KEY REFERENCES interlocking_object (id), -- 進路のID
-    opening_lever_id                BIGINT REFERENCES direction_self_control_lever (id),    -- 開放てこのID
+    direction_self_control_lever_id BIGINT REFERENCES direction_self_control_lever (id),    -- 開放てこのID
     l_lock_lever_id                 BIGINT REFERENCES direction_lever (id),                 -- Lてこに対する隣駅鎖錠てこ
     l_lock_lever_direction          lr,                                                     -- Lてこに対する隣駅鎖錠てこの方向
     l_single_locked_lever_id        BIGINT REFERENCES direction_lever (id),                 -- Lてこに対する隣駅被片鎖状てこ
