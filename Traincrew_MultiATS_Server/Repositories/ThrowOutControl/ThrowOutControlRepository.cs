@@ -11,17 +11,17 @@ public class ThrowOutControlRepository(ApplicationDbContext context) : IThrowOut
             .ToListAsync();
     }
     
-    public async Task<List<Models.ThrowOutControl>> GetBySourceRouteIds(List<ulong> sourceRouteIds)
+    public async Task<List<Models.ThrowOutControl>> GetBySourceIds(List<ulong> sourceIds)
     {
         return await context.ThrowOutControls
-            .Where(t => sourceRouteIds.Contains(t.SourceRouteId))
+            .Where(t => sourceIds.Contains(t.SourceId))
             .ToListAsync();
     }
     
-    public async Task<List<Models.ThrowOutControl>> GetByTargetRouteIds(List<ulong> targetRouteIds)
+    public async Task<List<Models.ThrowOutControl>> GetByTargetIds(List<ulong> targetIds)
     {
         return await context.ThrowOutControls
-            .Where(t => targetRouteIds.Contains(t.TargetRouteId))
+            .Where(t => targetIds.Contains(t.TargetId))
             .ToListAsync();
     }
 }

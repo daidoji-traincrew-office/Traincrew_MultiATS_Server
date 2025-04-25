@@ -117,15 +117,15 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .WithOne()
             .HasForeignKey<DestinationButtonState>(dbs => dbs.Name);
         modelBuilder.Entity<ThrowOutControl>()
-            .HasOne(tc => tc.SourceRoute)
+            .HasOne(tc => tc.Source)
             .WithMany()
-            .HasForeignKey(tc => tc.SourceRouteId)
-            .HasPrincipalKey(r => r.Id);
+            .HasForeignKey(tc => tc.SourceId)
+            .HasPrincipalKey(io => io.Id);
         modelBuilder.Entity<ThrowOutControl>()
-            .HasOne(tc => tc.TargetRoute)
+            .HasOne(tc => tc.Target)
             .WithMany()
-            .HasForeignKey(tc => tc.TargetRouteId)
-            .HasPrincipalKey(r => r.Id);
+            .HasForeignKey(tc => tc.TargetId)
+            .HasPrincipalKey(io => io.Id);
         modelBuilder.Entity<ThrowOutControl>()
             .HasOne(tc => tc.ConditionLever)
             .WithMany()

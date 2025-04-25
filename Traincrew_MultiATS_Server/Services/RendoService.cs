@@ -74,11 +74,11 @@ public class RendoService(
         var throwOutControls = await throwOutControlRepository.GetAll();
         // 進路IDをキーにして、統括制御「する」進路をグループ化
         var sourceThrowOutControls = throwOutControls
-            .GroupBy(c => c.TargetRouteId)
+            .GroupBy(c => c.TargetId)
             .ToDictionary(g => g.Key, g => g.ToList());
         // 進路IDをキーにして、統括制御「される」進路をグループ化
         var targetThrowOutControls = throwOutControls
-            .GroupBy(c => c.SourceRouteId)
+            .GroupBy(c => c.SourceId)
             .ToDictionary(g => g.Key, g => g.ToList());
 
         // ここまで実行できればほぼほぼOOMしないはず
@@ -89,13 +89,13 @@ public class RendoService(
             var routeState = route.RouteState!;
             // この進路に対して総括制御「する」進路
             var sourceThrowOutRoutes = sourceThrowOutControls.GetValueOrDefault(route.Id, [])
-                .Select(toc => interlockingObjects[toc.SourceRouteId])
+                .Select(toc => interlockingObjects[toc.SourceId])
                 .OfType<Route>()
                 .ToList();
             var hasSourceThrowOutRoute = sourceThrowOutRoutes.Count != 0;
             // この進路に対して総括制御「される」進路
             var targetThrowOutRoutes = targetThrowOutControls.GetValueOrDefault(route.Id, [])
-                .Select(toc => interlockingObjects[toc.TargetRouteId])
+                .Select(toc => interlockingObjects[toc.TargetId])
                 .OfType<Route>()
                 .ToList();
             // 対象てこ
@@ -279,9 +279,9 @@ public class RendoService(
         // そのうえで、てこ反応リレーが扛上している進路のIDを全取得する
         var routeIds = await routeRepository.GetIdsWhereLeverRelayIsRaised();
         // 上記進路に対して統括制御「する」進路の統括制御をすべて取得
-        var sourceThrowOutControlList = await throwOutControlRepository.GetByTargetRouteIds(routeIds);
+        var sourceThrowOutControlList = await throwOutControlRepository.GetByTargetIds(routeIds);
         var sourceThrowOutControlDictionary = sourceThrowOutControlList
-            .GroupBy(c => c.TargetRouteId)
+            .GroupBy(c => c.TargetId)
             .ToDictionary(g => g.Key, g => g.ToList());
         // てこリレーが扛上している進路の直接鎖状条件を取得
         var directLockConditions = await lockConditionRepository.GetConditionsByObjectIdsAndType(
@@ -292,7 +292,7 @@ public class RendoService(
 
         // 関わる全てのObjectを取得
         var objectIds = routeIds
-            .Union(sourceThrowOutControlList.Select(c => c.SourceRouteId))
+            .Union(sourceThrowOutControlList.Select(c => c.SourceId))
             .Union(directLockConditions.Values.SelectMany(ExtractObjectIdsFromLockCondtions))
             .Union(signalControlConditions.Values.SelectMany(ExtractObjectIdsFromLockCondtions))
             .Distinct()
@@ -305,7 +305,7 @@ public class RendoService(
             var route = (interlockingObjects[routeId] as Route)!;
             // この進路に対して総括制御「する」進路
             var sourceThrowOutRoutes = sourceThrowOutControlDictionary.GetValueOrDefault(route.Id, [])
-                .Select(toc => interlockingObjects[toc.SourceRouteId])
+                .Select(toc => interlockingObjects[toc.SourceId])
                 .OfType<Route>()
                 .ToList();
             var directLockCondition = directLockConditions.GetValueOrDefault(routeId, []);
@@ -463,7 +463,7 @@ public class RendoService(
 
         // 総括されるオブジェクトをキーとして総括制御をグループ化
         var targetThrowOutControls = throwOutControls
-            .GroupBy(c => c.TargetRouteId)
+            .GroupBy(c => c.TargetId)
             .ToDictionary(g => g.Key, g => g.ToList());
 
         // 方向てこごとにループ

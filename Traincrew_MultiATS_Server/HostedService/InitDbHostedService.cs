@@ -639,9 +639,9 @@ internal partial class DbInitializer(
         var routesByName = await context.Routes
             .ToDictionaryAsync(r => r.Name, cancellationToken);
         var throwOutControlList = (await context.ThrowOutControls
-                .Include(toc => toc.SourceRoute)
-                .Include(toc => toc.TargetRoute)
-                .Select(toc => new { SourceRouteName = toc.SourceRoute.Name, TargetRouteName = toc.TargetRoute.Name })
+                .Include(toc => toc.Source)
+                .Include(toc => toc.Target)
+                .Select(toc => new { SourceRouteName = toc.Source.Name, TargetRouteName = toc.Target.Name })
                 .ToListAsync(cancellationToken))
             .ToHashSet();
         foreach (var throwOutControl in DBBase.throwOutControlList)
@@ -673,8 +673,8 @@ internal partial class DbInitializer(
 
             context.ThrowOutControls.Add(new()
             {
-                SourceRouteId = sourceRoute.Id,
-                TargetRouteId = targetRoute.Id
+                SourceId = sourceRoute.Id,
+                TargetId = targetRoute.Id
             });
         }
 

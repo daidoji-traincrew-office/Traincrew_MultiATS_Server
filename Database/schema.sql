@@ -180,15 +180,15 @@ CREATE TYPE lr as ENUM ('left', 'right');
 -- 方向てこ
 CREATE TABLE direction_lever
 (
-    id                       BIGINT PRIMARY KEY REFERENCES interlocking_object (id), -- 進路のID
-    l_lock_lever_id          BIGINT REFERENCES direction_lever (id),       -- Lてこに対する隣駅鎖錠てこ
-    l_lock_lever_direction   lr,                                                    -- Lてこに対する隣駅鎖錠てこの方向
-    l_single_locked_lever_id BIGINT REFERENCES direction_lever (id),       -- Lてこに対する隣駅被片鎖状てこ
-    l_single_locked_lever_direction lr,                                             -- Lてこに対する隣駅被片鎖状てこの方向
-    r_lock_lever_id          BIGINT REFERENCES direction_lever (id),       -- Rてこに対する隣駅鎖錠てこ
-    r_lock_lever_direction   lr,                                                    -- Rてこに対する隣駅鎖錠てこの方向
-    r_single_locked_lever_id BIGINT REFERENCES direction_lever (id),       -- Rてこに対する隣駅被片鎖状てこ
-    r_single_locked_lever_direction lr                                              -- Rてこに対する隣駅被片鎖状てこの方向
+    id                              BIGINT PRIMARY KEY REFERENCES interlocking_object (id), -- 進路のID
+    l_lock_lever_id                 BIGINT REFERENCES direction_lever (id),                 -- Lてこに対する隣駅鎖錠てこ
+    l_lock_lever_direction          lr,                                                     -- Lてこに対する隣駅鎖錠てこの方向
+    l_single_locked_lever_id        BIGINT REFERENCES direction_lever (id),                 -- Lてこに対する隣駅被片鎖状てこ
+    l_single_locked_lever_direction lr,                                                     -- Lてこに対する隣駅被片鎖状てこの方向
+    r_lock_lever_id                 BIGINT REFERENCES direction_lever (id),                 -- Rてこに対する隣駅鎖錠てこ
+    r_lock_lever_direction          lr,                                                     -- Rてこに対する隣駅鎖錠てこの方向
+    r_single_locked_lever_id        BIGINT REFERENCES direction_lever (id),                 -- Rてこに対する隣駅被片鎖状てこ
+    r_single_locked_lever_direction lr                                                      -- Rてこに対する隣駅被片鎖状てこの方向
 );
 
 -- 開放てこ
@@ -302,12 +302,15 @@ CREATE TABLE lock_condition_object
 CREATE TABLE throw_out_control
 (
     id                 BIGSERIAL PRIMARY KEY,
-    source_route_id    BIGINT REFERENCES route (id) NOT NULL, -- 統括制御の元となる進路
-    target_route_id    BIGINT REFERENCES route (id) NOT NULL, -- 統括制御の対象となる進路
-    condition_lever_id BIGINT REFERENCES lever (id)           -- 統括制御の条件のてこ
+    source_id          BIGINT REFERENCES interlocking_object (id) NOT NULL, -- 統括元オブジェクトID
+    source_lr          lr,                                                  -- 統括元が方向てこの場合、方向てこの向き
+    target_id          BIGINT REFERENCES interlocking_object (id) NOT NULL, -- 統括先オブジェクトID
+    target_lr          lr,                                                  -- 統括先が方向てこの場合、方向てこの向き
+    condition_lever_id BIGINT REFERENCES opening_lever (id),                -- てこ条件となる開放てこID
+    condition_nr       nr                                                   -- てこ条件の開放てこの向き
 );
-CREATE INDEX throw_out_control_source_route_id_index ON throw_out_control (source_route_id);
-CREATE INDEX throw_out_control_target_route_id_index ON throw_out_control (target_route_id);
+CREATE INDEX throw_out_control_source_id_index ON throw_out_control (source_id);
+CREATE INDEX throw_out_control_target_id_index ON throw_out_control (target_id);
 
 -- 転てつ機に対して要求元進路と要求向きのリスト
 CREATE TABLE switching_machine_route
