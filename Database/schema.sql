@@ -177,43 +177,25 @@ CREATE TABLE lever
 
 CREATE TYPE lr as ENUM ('left', 'right');
 
--- 方向てこの1方向
-CREATE TABLE direction_lever_direction
-(
-    id       BIGINT PRIMARY KEY REFERENCES interlocking_object (id), -- ID
-    lever_id BIGINT NOT NULL,                                        -- てこのID(循環参照となるため、Referenceは後で作る)
-    is_lr    lr     NOT NULL,                                        -- 左右の方向
-    UNIQUE (lever_id, is_lr)
-);
-
 -- 方向てこ
 CREATE TABLE direction_lever
 (
     id                       BIGINT PRIMARY KEY REFERENCES interlocking_object (id), -- 進路のID
-    l_lock_lever_id          BIGINT REFERENCES direction_lever_direction (id),       -- Lてこに対する隣駅鎖錠てこ
-    l_single_locked_lever_id BIGINT REFERENCES direction_lever_direction (id),       -- Lてこに対する隣駅被片鎖状てこ
-    r_lock_lever_id          BIGINT REFERENCES direction_lever_direction (id),       -- Rてこに対する隣駅鎖錠てこ
-    r_single_locked_lever_id BIGINT REFERENCES direction_lever_direction (id)        -- Rてこに対する隣駅被片鎖状てこ
+    l_lock_lever_id          BIGINT REFERENCES direction_lever (id),       -- Lてこに対する隣駅鎖錠てこ
+    l_lock_lever_direction   lr,                                                    -- Lてこに対する隣駅鎖錠てこの方向
+    l_single_locked_lever_id BIGINT REFERENCES direction_lever (id),       -- Lてこに対する隣駅被片鎖状てこ
+    l_single_locked_lever_direction lr,                                             -- Lてこに対する隣駅被片鎖状てこの方向
+    r_lock_lever_id          BIGINT REFERENCES direction_lever (id),       -- Rてこに対する隣駅鎖錠てこ
+    r_lock_lever_direction   lr,                                                    -- Rてこに対する隣駅鎖錠てこの方向
+    r_single_locked_lever_id BIGINT REFERENCES direction_lever (id),       -- Rてこに対する隣駅被片鎖状てこ
+    r_single_locked_lever_direction lr                                              -- Rてこに対する隣駅被片鎖状てこの方向
 );
-
-ALTER TABLE direction_lever_direction
-ADD CONSTRAINT direction_lever_direction_lever_id_fkey FOREIGN KEY (lever_id) REFERENCES direction_lever (id);
-
 
 -- 開放てこ
 CREATE TYPE nr AS ENUM ('reversed', 'normal');
 CREATE TABLE opening_lever
 (
     id BIGINT PRIMARY KEY REFERENCES interlocking_object (id) -- ID
-);
-
--- 開放てこの1方向
-CREATE TABLE opening_lever_direction
-(
-    id       BIGINT PRIMARY KEY REFERENCES interlocking_object (id), -- ID
-    lever_id BIGINT REFERENCES opening_lever (id) NOT NULL,          -- てこのID
-    is_nr    nr                                   NOT NULL,          -- 左右の方向
-    UNIQUE (lever_id, is_nr)
 );
 
 -- 進路に対するてこと着点ボタンのリスト
@@ -313,7 +295,8 @@ CREATE TABLE lock_condition_object
     object_id      BIGINT REFERENCES interlocking_object (id) NOT NULL, -- 進路、転てつ機、軌道回路、てこのID
     timer_seconds  INT,                                                 -- タイマーの秒数
     is_reverse     nr                                         NOT NULL, -- 定反
-    is_single_lock BOOLEAN                                    NOT NULL  -- 片鎖状がどうか    
+    is_single_lock BOOLEAN                                    NOT NULL, -- 片鎖状がどうか    
+    is_lr          lr                                         NOT NULL  -- 方向てこの方向
 );
 -- 統括制御テーブル
 CREATE TABLE throw_out_control
