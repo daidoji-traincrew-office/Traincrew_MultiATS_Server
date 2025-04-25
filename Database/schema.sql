@@ -86,7 +86,7 @@ CREATE TABLE station
     is_passenger_station BOOLEAN      NOT NULL  -- 旅客駅かどうか
 );
 
-CREATE TYPE object_type AS ENUM ('route', 'switching_machine', 'track_circuit', 'lever');
+CREATE TYPE object_type AS ENUM ('route', 'switching_machine', 'track_circuit', 'lever', 'direction_lever', 'direction_self_control_lever');
 
 -- object(進路、転てつ機、軌道回路、てこ)を表す
 -- 以上4つのIDの一元管理を行う
