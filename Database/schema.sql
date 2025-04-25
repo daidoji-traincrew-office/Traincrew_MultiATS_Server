@@ -297,7 +297,7 @@ CREATE TABLE lock_condition_object
     timer_seconds  INT,                                                 -- タイマーの秒数
     is_reverse     nr                                         NOT NULL, -- 定反
     is_single_lock BOOLEAN                                    NOT NULL, -- 片鎖状がどうか    
-    is_lr          lr                                         NOT NULL  -- 方向てこの方向
+    is_lr          lr                                                   -- 方向てこの方向
 );
 -- 統括制御テーブル
 CREATE TABLE throw_out_control
