@@ -9,7 +9,6 @@ public class DirectionLeverState
     /// <summary>
     /// ID
     /// </summary>
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     [Key]
     public ulong Id { get; init; }
 

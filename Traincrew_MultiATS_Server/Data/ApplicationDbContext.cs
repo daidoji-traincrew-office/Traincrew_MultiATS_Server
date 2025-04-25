@@ -32,7 +32,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<OperationNotificationDisplay> OperationNotificationDisplays { get; set; }
     public DbSet<OperationNotificationState> OperationNotificationStates { get; set; }
     public DbSet<DirectionLever> DirectionLevers { get; set; }
-    public DbSet<OpeningLever> OpeningLevers { get; set; }
+    public DbSet<DirectionSelfControlLever> DirectionSelfControlLevers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -138,7 +138,13 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasForeignKey<DirectionLeverState>(dls => dls.Id)
             .HasPrincipalKey<DirectionLever>(dl => dl.Id);
         
-        modelBuilder.Entity<OpeningLever>();
+        modelBuilder.Entity<DirectionSelfControlLever>()
+            .HasOne(dsc => dsc.DirectionSelfControlLeverState)
+            .WithOne()
+            .HasForeignKey<DirectionSelfControlLeverState>(dscs => dscs.Id)
+            .HasPrincipalKey<DirectionSelfControlLever>(dsc => dsc.Id);
+
+        modelBuilder.Entity<DirectionSelfControlLever>();
         // Convert all column names to snake_case 
         foreach (var entity in modelBuilder.Model.GetEntityTypes())
         {
