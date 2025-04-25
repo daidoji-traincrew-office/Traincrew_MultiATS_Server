@@ -1,6 +1,7 @@
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.DestinationButton;
+using Traincrew_MultiATS_Server.Repositories.DirectionLever;
 using Traincrew_MultiATS_Server.Repositories.General;
 using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
 using Traincrew_MultiATS_Server.Repositories.Lock;
@@ -38,6 +39,7 @@ public class RendoService(
     IThrowOutControlRepository throwOutControlRepository,
     ITrackCircuitRepository trackCircuitRepository,
     IRouteLockTrackCircuitRepository routeLockTrackCircuitRepository,
+    IDirectionLeverRepository directionLeverRepository,
     IGeneralRepository generalRepository)
 {
     /// <summary>
@@ -64,7 +66,7 @@ public class RendoService(
                 g => g.Select(rdb => (interlockingObjects[rdb.RouteId] as Route)!).ToList());
         // Buttonを全取得
         var buttons = await destinationButtonRepository.GetAllButtons();
-        // 直接鎖状条件を取得
+        // 直接鎖錠条件を取得
         var lockConditions = await lockConditionRepository.GetConditionsByType(LockType.Lock);
         // 信号制御条件を取得
         var signalControlConditions = await lockConditionRepository.GetConditionsByType(LockType.SignalControl);
@@ -455,8 +457,10 @@ public class RendoService(
     /// <returns></returns>
     public async Task DirectionRelay()
     {
-        // 方向てこを全取得
-        var directionLevers = new List<DirectionLever>();
+        // 方向てこの全取得
+        var directionLeverIds = await directionLeverRepository.GetAllIds();
+        // 直接鎖錠条件を全取得
+        var lockConditionDict = await lockConditionRepository.GetConditionsByType(LockType.Lock);
 
         // 総括制御を全取得
         var throwOutControls = await throwOutControlRepository.GetAll();
@@ -465,10 +469,19 @@ public class RendoService(
         var targetThrowOutControls = throwOutControls
             .GroupBy(c => c.TargetId)
             .ToDictionary(g => g.Key, g => g.ToList());
+        
+        // 関わる全てのObjectを取得
+        var objectIds = directionLeverIds
+            .Union(lockConditionDict.Values.SelectMany(ExtractObjectIdsFromLockCondtions))
+            .ToList();
+        var interlockingObjects = (await interlockingObjectRepository.GetObjectByIdsWithState(objectIds))
+            .ToDictionary(obj => obj.Id);
 
         // 方向てこごとにループ
-        foreach (var directionLever in directionLevers)
+        foreach (var directionLeverId in directionLeverIds)
         {
+            // DB制約的にDirectionLeverになるはず
+            var directionLever = (interlockingObjects[directionLeverId] as DirectionLever)!; 
             // 運転方向鎖錠リレー    
             // 対応する鎖錠軌道回路を取得
 
