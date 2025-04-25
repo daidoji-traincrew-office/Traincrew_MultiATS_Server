@@ -4,5 +4,6 @@ namespace Traincrew_MultiATS_Server.Models;
 public enum LeverType
 {
     Route,
-    SwitchingMachine
+    SwitchingMachine,
+    Direction
 }
