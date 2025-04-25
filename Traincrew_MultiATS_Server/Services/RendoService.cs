@@ -484,6 +484,8 @@ public class RendoService(
             // DB制約的にDirectionLeverになるはず
             var directionLever = (interlockingObjects[directionLeverId] as DirectionLever)!;
             var directionLeverState = directionLever.DirectionLeverState;
+
+            var physicalLever = (interlockingObjects[directionLever.Id] as Lever)!;
             // 運転方向鎖錠リレー    
             // 対応する鎖錠軌道回路を取得
 
@@ -533,16 +535,18 @@ public class RendoService(
                 (
                     ((DirectionSelfControlLever)interlockingObjects[directionLever.DirectionSelfControlLeverId]).DirectionSelfControlLeverState.IsReversed == NR.Reversed
                     &&
-                   directionLeverState.isLr == LR.Left
-                ) ? RaiseDrop.Raise : RaiseDrop.Drop;
+                    physicalLever.LeverState.IsReversed == LCR.Left
+                )
+                ? RaiseDrop.Raise : RaiseDrop.Drop;
             var isRyRelayRaised =
                 isRfysRelayRaised == RaiseDrop.Raise
                 ||
                 (
                     ((DirectionSelfControlLever)interlockingObjects[directionLever.DirectionSelfControlLeverId]).DirectionSelfControlLeverState.IsReversed == NR.Reversed
                     &&
-                   directionLeverState.isLr == LR.Right
-                ) ? RaiseDrop.Raise : RaiseDrop.Drop;
+                    physicalLever.LeverState.IsReversed == LCR.Right
+                )
+                ? RaiseDrop.Raise : RaiseDrop.Drop;
 
             // 方向リレー
             // 隣駅鎖錠の方向リレー扛上[非存在True]
@@ -677,8 +681,19 @@ public class RendoService(
                directionLeverState.IsRRelayRaised == RaiseDrop.Drop
                 ? RaiseDrop.Raise : RaiseDrop.Drop;
 
+            var isLr = directionLeverState.isLr;
+            if (isLRelayRaised == RaiseDrop.Raise)
+            {
+                isLr = LR.Left;
+            }
+            else if (isRRelayRaised == RaiseDrop.Raise)
+            {
+                isLr = LR.Right;
+            }
+
             // それぞれ現在と異なる場合、更新
-            if (isFLRelayRaised == directionLeverState.IsFlRelayRaised &&
+            if (isLr == directionLeverState.isLr &&
+                isFLRelayRaised == directionLeverState.IsFlRelayRaised &&
                 isLfysRelayRaised == directionLeverState.IsLfysRelayRaised &&
                 isRfysRelayRaised == directionLeverState.IsRfysRelayRaised &&
                 isLyRelayRaised == directionLeverState.IsLyRelayRaised &&
@@ -688,6 +703,7 @@ public class RendoService(
             {
                 continue;
             }
+            directionLeverState.isLr = isLr;
             directionLeverState.IsFlRelayRaised = isFLRelayRaised;
             directionLeverState.IsLfysRelayRaised = isLfysRelayRaised;
             directionLeverState.IsRfysRelayRaised = isRfysRelayRaised;

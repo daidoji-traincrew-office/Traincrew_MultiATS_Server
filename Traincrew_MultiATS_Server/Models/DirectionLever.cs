@@ -6,6 +6,11 @@ namespace Traincrew_MultiATS_Server.Models;
 public class DirectionLever : InterlockingObject
 {
     /// <summary>
+    /// 物理てこのID
+    /// </summary>
+    public ulong LeverId { get; init; }
+
+    /// <summary>
     /// 開放てこのID
     /// </summary>
     public ulong DirectionSelfControlLeverId { get; init; }
