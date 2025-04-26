@@ -20,7 +20,6 @@ public class InterlockingHub(
     public async Task<DataToInterlocking> SendData_Interlocking(List<string> activeStationsList)
     {
         // Todo: めんどいし、Interlocking全取得してOfTypeと変換作って動くようにする    
-        var interlockingObjects = await interlockingService.GetObjectsByStationIds(activeStationsList);
         var allInterlockingObjects = await interlockingService.GetInterlockingObjects();
         var destinationButtons = await interlockingService.GetDestinationButtonsByStationIds(activeStationsList);
         // List<string> clientData.ActiveStationsListの駅IDから、指定された駅にある信号機名称をList<string>で返すやつ
@@ -31,7 +30,10 @@ public class InterlockingHub(
 
         var response = new DataToInterlocking
         {
-            TrackCircuits = await trackCircuitService.GetAllTrackCircuitDataList(),
+            TrackCircuits = allInterlockingObjects
+                .OfType<TrackCircuit>()
+                .Select(TrackCircuitService.ToTrackCircuitData)
+                .ToList(),
 
             Points = allInterlockingObjects
                 .OfType<SwitchingMachine>()
@@ -39,7 +41,7 @@ public class InterlockingHub(
                 .ToList(),
 
             // Todo: 方向てこのほうのリストを連結する
-            PhysicalLevers = interlockingObjects
+            PhysicalLevers = allInterlockingObjects
                 .OfType<Lever>()
                 .Select(InterlockingService.ToLeverData)
                 .ToList(),
