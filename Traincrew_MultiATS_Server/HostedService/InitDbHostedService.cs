@@ -860,7 +860,7 @@ public partial class DbRendoTableInitializer
 
             // てこがすでに存在する場合はcontinue
             var name = CalcLeverName(rendoTableCsv.Start, stationId);
-            if (rendoTableCsv.Start.Length <= 0 || leverNames.Contains(name))
+            if (rendoTableCsv.Start.Length <= 0 || !leverNames.Add(name))
             {
                 continue;
             }
@@ -895,7 +895,6 @@ public partial class DbRendoTableInitializer
                 }
             };
             context.Levers.Add(lever);
-            leverNames.Add(name);
 
             // 方向てこの場合、方向進路を登録
             if (leverType == LeverType.Direction)
