@@ -46,9 +46,11 @@ public class InterlockingHub(
                 .Select(InterlockingService.ToLeverData)
                 .ToList(),
 
-            // Todo: List<InterlockingKeyLeverData> PhysicalKeyLeversを設定する
-            // Todo: 鍵てこの実装
-            PhysicalKeyLevers = new List<InterlockingKeyLeverData>(),
+            // Todo: 駅扱てこの実装と両方渡し
+            PhysicalKeyLevers = allInterlockingObjects
+                .OfType<DirectionSelfControlLever>()
+                .Select(InterlockingService.ToKeyLeverData)
+                .ToList(),
 
             PhysicalButtons = destinationButtons
                 .Select(button => button.DestinationButtonState)
@@ -75,6 +77,11 @@ public class InterlockingHub(
     public async Task SetPhysicalLeverData(InterlockingLeverData leverData)
     {
         await interlockingService.SetPhysicalLeverData(leverData);
+    }
+
+    public async Task SetPhysicalKeyLeverData(InterlockingKeyLeverData keyLeverData)
+    {
+        await interlockingService.SetPhysicalKeyLeverData(keyLeverData);
     }
 
     public async Task SetDestinationButtonState(DestinationButtonState buttonData)
