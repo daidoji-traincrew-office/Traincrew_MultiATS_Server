@@ -671,7 +671,7 @@ internal partial class DbInitializer(
             {
                 throw new InvalidOperationException($"進路名が見つかりません: {throwOutControl.TargetRouteName}");
             }
-            // Todo: てこの条件をパースする
+            // Todo: てこ条件がある場合、該当する開放てこを探し、方向てこにも開放てこのリンクを設定する
 
             context.ThrowOutControls.Add(new()
             {
@@ -781,6 +781,7 @@ public partial class DbRendoTableInitializer
     {
         PreprocessCsv();
         await InitLever();
+        await InitDirectionSelfControlLever();
         await InitDestinationButtons();
         await InitRoutes();
     }
@@ -939,7 +940,7 @@ public partial class DbRendoTableInitializer
 
             // てこがすでに存在する場合はcontinue
             var name = CalcLeverName(rendoTableCsv.Start, stationId);
-            if (rendoTableCsv.Start.Length <= 0 || leverNames.Contains(name))
+            if (rendoTableCsv.Start.Length <= 0 || !leverNames.Add(name))
             {
                 continue;
             }
@@ -947,7 +948,12 @@ public partial class DbRendoTableInitializer
             context.DirectionSelfControlLevers.Add(new()
             {
                 Name = name,
-
+                Type = ObjectType.DirectionSelfControlLever,
+                DirectionSelfControlLeverState = new()
+                {
+                    IsInsertedKey = false,
+                    IsReversed = NR.Normal
+                }
             });
         }
 
@@ -1116,6 +1122,14 @@ public partial class DbRendoTableInitializer
             .ToDictionary(r => r.Name, r => r);
         var routesById = routes
             .ToDictionary(r => r.Id, r => r);
+        // 方向進路のDict
+        var directionRoutes = interlockingObjects
+            .OfType<DirectionRoute>()
+            .ToList();
+        var directionRoutesByName = directionRoutes
+            .ToDictionary(r => r.Name, r => r);
+        var directionRoutesById = directionRoutes
+            .ToDictionary(r => r.Id, r => r);
         // 転てつ器のDict
         var switchingMachines = interlockingObjects
             .OfType<SwitchingMachine>()
@@ -1155,15 +1169,39 @@ public partial class DbRendoTableInitializer
 
             return Task.FromResult(result);
         });
-        var searchOtherObjects = new Func<LockItem, Task<List<InterlockingObject>>>(item =>
+        var searchDirectionRoutes = new Func<LockItem, Task<List<InterlockingObject>>>(async item =>
+        {
+            // 方向進路
+            if (!(item.Name.EndsWith('L') || item.Name.EndsWith('R')))
+            {
+                return [];
+            }
+            var key = CalcDirectionLeverName(item.Name[..^1], item.StationId);
+            var value = otherObjects.GetValueOrDefault(key);
+
+            if (value != null)
+            {
+                return [value];
+            }
+            return [];
+        });
+        var searchOtherObjects = new Func<LockItem, Task<List<InterlockingObject>>>(async item =>
         {
             // 進路(単一) or 軌道回路の場合はこちら
             var key = ConvertHalfWidthToFullWidth(CalcRouteName(item.Name, "", item.StationId));
             var value = otherObjects.GetValueOrDefault(key);
             if (value != null)
             {
-                return Task.FromResult<List<InterlockingObject>>([value]);
+                return [value];
             }
+
+            // 方向進路の場合はこちら
+            var directionRoute = await searchDirectionRoutes(item);
+            if (directionRoute.Count != 0)
+            {
+                return directionRoute;
+            }
+            
 
             // 進路(複数)の場合
             var match = RegexLeverParse().Match(item.Name);
@@ -1173,11 +1211,11 @@ public partial class DbRendoTableInitializer
                 var routeIds = leverToRoute.GetValueOrDefault(leverName);
                 if (routeIds != null)
                 {
-                    return Task.FromResult(routeIds.Select(InterlockingObject (r) => routesById[r]).ToList());
+                    return routeIds.Select(InterlockingObject (r) => routesById[r]).ToList();
                 }
             }
 
-            return Task.FromResult<List<InterlockingObject>>([]);
+            return [];
         });
         var searchObjectsForApproachLock = new Func<LockItem, Task<List<InterlockingObject>>>(async item =>
         {
@@ -1214,14 +1252,14 @@ public partial class DbRendoTableInitializer
         });
 
         int? approachLockTime = null;
+        // 通常進路用の処理
         foreach (var rendoTableCsv in rendoTableCsvs)
         {
-            // Todo: 方向てこと通常進路で処理を変える
             var routeName = CalcRouteName(rendoTableCsv.Start, rendoTableCsv.End, stationId);
             var route = routesByName.GetValueOrDefault(routeName);
             if (route == null)
             {
-                // Todo: Warningを出す
+                // Todo: 通常進路であればエラーを出す 
                 continue;
             }
 
@@ -1231,7 +1269,6 @@ public partial class DbRendoTableInitializer
                 continue;
             }
 
-            // Todo: CTC進路の場合と、その他の進路の場合で処理を分ける
             // 鎖錠欄(転てつ器)
             await RegisterLocks(
                 rendoTableCsv.LockToSwitchingMachine, route.Id, searchSwitchingMachine, LockType.Lock, true);
@@ -1256,9 +1293,28 @@ public partial class DbRendoTableInitializer
 
             await RegisterLocks(rendoTableCsv.ApproachLock, route.Id, searchObjectsForApproachLock,
                 LockType.Approach);
+        }
 
-            // うまいことここらへんパースする方法を思いついていない
-            // DirectionSelfControlLeverId =  /*開放てこID*/,
+        // 方向進路用の処理
+        // 通常進路用の処理
+        foreach (var rendoTableCsv in rendoTableCsvs)
+        {
+            var routeName = CalcDirectionLeverName(rendoTableCsv.Start, stationId);
+            var route = directionRoutesByName.GetValueOrDefault(routeName);
+            if (route == null)
+            {
+                // Todo: 方向進路ならエラーを出す
+                continue;
+            }
+
+            // 鎖錠欄(軌道回路)
+            if (!locks.Contains(route.Id))
+            {
+                await RegisterLocks(rendoTableCsv.LockToRoute, route.Id, searchOtherObjects, LockType.Lock);
+            }
+
+            // 鎖錠欄
+
 
             // これ以降は相互参照なので、一旦登録してID得てから後から登録したほうがいいかも
             // LLockLeverId = /*Lてこに対する隣駅鎖錠てこ*/,
@@ -1269,6 +1325,8 @@ public partial class DbRendoTableInitializer
             // RLockLeverDirection = /*Rてこに対する隣駅鎖状てこの方向*/
             // RSingleLockedLeverId = /*Rてこに対する隣駅被片鎖状てこ*/
         }
+
+        // Todo: CTC進路用の処理
 
         // 転てつ器のてっ査鎖錠を処理する
         foreach (var rendoTableCsv in rendoTableCsvs)
