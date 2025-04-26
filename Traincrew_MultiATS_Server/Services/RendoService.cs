@@ -193,11 +193,10 @@ public class RendoService(
                     lockRouteStates.All(rs => rs.IsRouteLockRaised == RaiseDrop.Raise)
                     &&
                     (
-                        sourceThrowOutRoutes.All(
-                            r =>
-                                r.RouteState.IsRouteLockRaised == RaiseDrop.Drop
-                                &&
-                                r.RouteState.IsSignalControlRaised == RaiseDrop.Drop
+                        sourceThrowOutRoutes.All(r =>
+                            r.RouteState.IsRouteLockRaised == RaiseDrop.Drop
+                            &&
+                            r.RouteState.IsSignalControlRaised == RaiseDrop.Drop
                         )
                         ||
                         routeState.IsThrowOutXRRelayRaised == RaiseDrop.Raise
@@ -230,7 +229,7 @@ public class RendoService(
                 (
                     (
                         routeState is
-                        { IsThrowOutYSRelayRaised: RaiseDrop.Drop, IsThrowOutXRRelayRaised: RaiseDrop.Drop }
+                            { IsThrowOutYSRelayRaised: RaiseDrop.Drop, IsThrowOutXRRelayRaised: RaiseDrop.Drop }
                         &&
                         leverState is LCR.Left or LCR.Right
                     )
@@ -445,6 +444,7 @@ public class RendoService(
             {
                 continue;
             }
+
             stationTimerState.IsTeuRelayRaised = isTeuRelayRaised;
             stationTimerState.IsTenRelayRaised = isTenRelayRaised;
             stationTimerState.IsTerRelayRaised = isTerRelayRaised;
@@ -467,6 +467,7 @@ public class RendoService(
         var lockConditionDict = await lockConditionRepository.GetConditionsByType(LockType.Lock);
 
         // 総括制御を全取得
+        // Todo: 方向進路関係のものだけ取得するようにする
         var throwOutControls = await throwOutControlRepository.GetAll();
 
         // 総括されるオブジェクトをキーとして総括制御をグループ化
@@ -477,51 +478,64 @@ public class RendoService(
         // 関わる全てのObjectを取得
         var objectIds = directionRouteIds
             .Union(directionLeverIds)
+            .Union(throwOutControls.Select(toc => toc.SourceId))
+            .Union(throwOutControls.Select(toc => toc.ConditionLeverId).OfType<ulong>())
             .Union(lockConditionDict.Values.SelectMany(ExtractObjectIdsFromLockCondtions))
             .ToList();
         var interlockingObjects = (await interlockingObjectRepository.GetObjectByIdsWithState(objectIds))
             .ToDictionary(obj => obj.Id);
+        var directionSelfControlLevers = interlockingObjects
+            .Where(kvp => kvp.Value is DirectionSelfControlLever)
+            .ToDictionary(kvp => kvp.Key, kvp => kvp.Value as DirectionSelfControlLever);
 
         // 方向てこごとにループ
-        foreach (var directionLeverId in directionRouteIds)
+        foreach (var directionRouteId in directionRouteIds)
         {
             // DB制約的にDirectionRouteになるはず
-            var directionRoute = (interlockingObjects[directionLeverId] as DirectionRoute)!;
+            var directionRoute = (interlockingObjects[directionRouteId] as DirectionRoute)!;
             var directionRouteState = directionRoute.DirectionRouteState;
 
             var physicalLever = (interlockingObjects[directionRoute.LeverId] as Lever)!;
+            var directionSelfControlLever = directionSelfControlLevers[directionRoute.DirectionSelfControlLeverId];
+            
             // 運転方向鎖錠リレー    
             // 対応する鎖錠軌道回路を取得
+            var lockTrackCircuits = lockConditionDict[directionRouteId]
+                .OfType<LockConditionObject>()
+                .Select(lco => interlockingObjects[lco.ObjectId])
+                .OfType<TrackCircuit>();
 
             // 対応軌道回路の短絡状態によって、FLリレーを扛上
-            // Todo: まだわかってないからわかったら繋ぐ
-            var isFLRelayRaised = RaiseDrop.Raise;
+            var isFLRelayRaised = lockTrackCircuits.All(tc => !tc.TrackCircuitState.IsShortCircuit)
+                ? RaiseDrop.Raise
+                : RaiseDrop.Drop;
 
             // 総括リレー                                                            
             // 総括される進路のてこ反応リレーが扛上しているか(方向ごとに確認)
             var thisLeftThrowOutControls = targetThrowOutControls[directionRoute.Id]
                 .Where(t => t.TargetLr == LR.Left)
                 .ToList();
+            // Todo: ここRightでは？
             var thisRightThrowOutControls = targetThrowOutControls[directionRoute.Id]
                 .Where(t => t.TargetLr == LR.Left)
                 .ToList();
+
             // thisLeftThrowOutControlsのSourceの進路のてこ反応リレー扛上と、ConditionLeverの状態を確認する
+            bool PredicateIsYsRelayRaised(ThrowOutControl t) =>
+                (interlockingObjects[t.SourceId] as Route).RouteState.IsLeverRelayRaised == RaiseDrop.Raise
+                && t.ConditionLeverId.HasValue
+                && directionSelfControlLevers[t.ConditionLeverId.Value].DirectionSelfControlLeverState
+                    .IsReversed == NR.Normal;
 
             var isLfysRelayRaised = thisLeftThrowOutControls
-                .Any(t =>
-                ((Route)t.Source).RouteState.IsLeverRelayRaised == RaiseDrop.Raise
-                &&
-                // ((OpeningLever)t.ConditionLever).なにがしか == NR.Normal
-                true
-                ) ? RaiseDrop.Raise : RaiseDrop.Drop;
+                .Any(PredicateIsYsRelayRaised)
+                ? RaiseDrop.Raise
+                : RaiseDrop.Drop;
 
             var isRfysRelayRaised = thisRightThrowOutControls
-                .Any(t =>
-                ((Route)t.Source).RouteState.IsLeverRelayRaised == RaiseDrop.Raise
-                &&
-                // ((OpeningLever)t.ConditionLever).なにがしか == NR.Normal         
-                true
-                ) ? RaiseDrop.Raise : RaiseDrop.Drop;
+                .Any(PredicateIsYsRelayRaised)
+                ? RaiseDrop.Raise
+                : RaiseDrop.Drop;
 
 
             // てこ反応リレー
@@ -537,20 +551,22 @@ public class RendoService(
                 isLfysRelayRaised == RaiseDrop.Raise
                 ||
                 (
-                    ((DirectionSelfControlLever)interlockingObjects[directionRoute.DirectionSelfControlLeverId]).DirectionSelfControlLeverState.IsReversed == NR.Reversed
+                    directionSelfControlLever.DirectionSelfControlLeverState.IsReversed == NR.Reversed
                     &&
                     physicalLever.LeverState.IsReversed == LCR.Left
                 )
-                ? RaiseDrop.Raise : RaiseDrop.Drop;
+                    ? RaiseDrop.Raise
+                    : RaiseDrop.Drop;
             var isRyRelayRaised =
                 isRfysRelayRaised == RaiseDrop.Raise
                 ||
                 (
-                    ((DirectionSelfControlLever)interlockingObjects[directionRoute.DirectionSelfControlLeverId]).DirectionSelfControlLeverState.IsReversed == NR.Reversed
+                    directionSelfControlLever.DirectionSelfControlLeverState.IsReversed == NR.Reversed
                     &&
                     physicalLever.LeverState.IsReversed == LCR.Right
                 )
-                ? RaiseDrop.Raise : RaiseDrop.Drop;
+                    ? RaiseDrop.Raise
+                    : RaiseDrop.Drop;
 
             // 方向リレー
             // 隣駅鎖錠の方向リレー扛上[非存在True]
@@ -578,11 +594,13 @@ public class RendoService(
             {
                 if (directionRoute.LLockLeverDirection == LR.Left)
                 {
-                    LLockLeverState = ((DirectionRoute)interlockingObjects[directionRoute.LLockLeverId.Value]).DirectionRouteState.IsLRelayRaised;
+                    LLockLeverState = (interlockingObjects[directionRoute.LLockLeverId.Value] as DirectionRoute)
+                        .DirectionRouteState.IsLRelayRaised;
                 }
                 else if (directionRoute.LLockLeverDirection == LR.Right)
                 {
-                    LLockLeverState = ((DirectionRoute)interlockingObjects[directionRoute.LLockLeverId.Value]).DirectionRouteState.IsRRelayRaised;
+                    LLockLeverState = (interlockingObjects[directionRoute.LLockLeverId.Value] as DirectionRoute)
+                        .DirectionRouteState.IsRRelayRaised;
                 }
                 else
                 {
@@ -595,11 +613,13 @@ public class RendoService(
             {
                 if (directionRoute.LSingleLockedLeverDirection == LR.Left)
                 {
-                    LLockLeverState = ((DirectionRoute)interlockingObjects[directionRoute.LSingleLockedLeverId.Value]).DirectionRouteState.IsLRelayRaised;
+                    LLockLeverState = (interlockingObjects[directionRoute.LSingleLockedLeverId.Value] as DirectionRoute)
+                        .DirectionRouteState.IsLRelayRaised;
                 }
                 else if (directionRoute.LSingleLockedLeverDirection == LR.Right)
                 {
-                    LLockLeverState = ((DirectionRoute)interlockingObjects[directionRoute.LSingleLockedLeverId.Value]).DirectionRouteState.IsRRelayRaised;
+                    LLockLeverState = (interlockingObjects[directionRoute.LSingleLockedLeverId.Value] as DirectionRoute)
+                        .DirectionRouteState.IsRRelayRaised;
                 }
                 else
                 {
@@ -622,23 +642,26 @@ public class RendoService(
                     (
                         isFLRelayRaised == RaiseDrop.Raise
                         &&
-                       directionRouteState.IsLRelayRaised == RaiseDrop.Raise
+                        directionRouteState.IsLRelayRaised == RaiseDrop.Raise
                     )
                 )
                 &&
-               directionRouteState.IsRRelayRaised == RaiseDrop.Drop
-                ? RaiseDrop.Raise : RaiseDrop.Drop;
+                directionRouteState.IsRRelayRaised == RaiseDrop.Drop
+                    ? RaiseDrop.Raise
+                    : RaiseDrop.Drop;
 
             var RLockLeverState = RaiseDrop.Raise;
             if (directionRoute.RLockLeverId.HasValue)
             {
                 if (directionRoute.RLockLeverDirection == LR.Left)
                 {
-                    LLockLeverState = ((DirectionRoute)interlockingObjects[directionRoute.RLockLeverId.Value]).DirectionRouteState.IsLRelayRaised;
+                    LLockLeverState = (interlockingObjects[directionRoute.RLockLeverId.Value] as DirectionRoute)
+                        .DirectionRouteState.IsLRelayRaised;
                 }
                 else if (directionRoute.RLockLeverDirection == LR.Right)
                 {
-                    LLockLeverState = ((DirectionRoute)interlockingObjects[directionRoute.RLockLeverId.Value]).DirectionRouteState.IsRRelayRaised;
+                    LLockLeverState = (interlockingObjects[directionRoute.RLockLeverId.Value] as DirectionRoute)
+                        .DirectionRouteState.IsRRelayRaised;
                 }
                 else
                 {
@@ -651,11 +674,13 @@ public class RendoService(
             {
                 if (directionRoute.RSingleLockedLeverDirection == LR.Left)
                 {
-                    LLockLeverState = ((DirectionRoute)interlockingObjects[directionRoute.RSingleLockedLeverId.Value]).DirectionRouteState.IsLRelayRaised;
+                    LLockLeverState = (interlockingObjects[directionRoute.RSingleLockedLeverId.Value] as DirectionRoute)
+                        .DirectionRouteState.IsLRelayRaised;
                 }
                 else if (directionRoute.RSingleLockedLeverDirection == LR.Right)
                 {
-                    LLockLeverState = ((DirectionRoute)interlockingObjects[directionRoute.RSingleLockedLeverId.Value]).DirectionRouteState.IsRRelayRaised;
+                    LLockLeverState = (interlockingObjects[directionRoute.RSingleLockedLeverId.Value] as DirectionRoute)
+                        .DirectionRouteState.IsRRelayRaised;
                 }
                 else
                 {
@@ -678,12 +703,13 @@ public class RendoService(
                     (
                         isFLRelayRaised == RaiseDrop.Raise
                         &&
-                       directionRouteState.IsLRelayRaised == RaiseDrop.Raise
+                        directionRouteState.IsLRelayRaised == RaiseDrop.Raise
                     )
                 )
                 &&
-               directionRouteState.IsRRelayRaised == RaiseDrop.Drop
-                ? RaiseDrop.Raise : RaiseDrop.Drop;
+                directionRouteState.IsRRelayRaised == RaiseDrop.Drop
+                    ? RaiseDrop.Raise
+                    : RaiseDrop.Drop;
 
             var isLr = directionRouteState.isLr;
             if (isLRelayRaised == RaiseDrop.Raise)
@@ -707,6 +733,7 @@ public class RendoService(
             {
                 continue;
             }
+
             directionRouteState.isLr = isLr;
             directionRouteState.IsFlRelayRaised = isFLRelayRaised;
             directionRouteState.IsLfysRelayRaised = isLfysRelayRaised;
@@ -1091,6 +1118,7 @@ public class RendoService(
         {
             return RaiseDrop.Drop;
         }
+
         // 進路鎖錠するべき軌道回路のいずれかが鎖状されていない場合、信号制御リレーを落下させる
         // Todo: 自分によって鎖状されているかどうか確認する
         if (routeLockTrackCircuit.Any(tc => !tc.TrackCircuitState.IsLocked))
@@ -1185,7 +1213,7 @@ public class RendoService(
                 && switchingMachine.SwitchingMachineState.IsReverse == o.IsReverse,
             // 接近鎖錠と進路鎖錠リレー扛上かどうか
             Route route => route.RouteState is
-            { IsApproachLockMRRaised: RaiseDrop.Raise, IsRouteLockRaised: RaiseDrop.Raise },
+                { IsApproachLockMRRaised: RaiseDrop.Raise, IsRouteLockRaised: RaiseDrop.Raise },
             // 軌道回路が短絡していないこと
             TrackCircuit trackCircuit => !trackCircuit.TrackCircuitState.IsShortCircuit,
             _ => false
@@ -1256,7 +1284,8 @@ public class RendoService(
             MustIndicateStopSignalByDirectLockConditionsPredicate);
     }
 
-    private static bool MustIndicateStopSignalByDirectLockConditionsPredicate(LockConditionObject o, InterlockingObject interlockingObject)
+    private static bool MustIndicateStopSignalByDirectLockConditionsPredicate(LockConditionObject o,
+        InterlockingObject interlockingObject)
     {
         return interlockingObject switch
         {
@@ -1337,16 +1366,16 @@ public class RendoService(
                 return childLockConditions[lockCondition.Id].Any(childLockCondition =>
                     EvaluateLockCondition(childLockCondition, childLockConditions, interlockingObjects, predicate));
             case LockConditionType.Not:
+            {
+                var childLockCondition = childLockConditions[lockCondition.Id];
+                if (childLockCondition.Count != 1)
                 {
-                    var childLockCondition = childLockConditions[lockCondition.Id];
-                    if (childLockCondition.Count != 1)
-                    {
-                        throw new InvalidOperationException("Not条件は1つの条件に対してのみ適用される必要があります。");
-                    }
-
-                    return !EvaluateLockCondition(
-                        childLockCondition.First(), childLockConditions, interlockingObjects, predicate);
+                    throw new InvalidOperationException("Not条件は1つの条件に対してのみ適用される必要があります。");
                 }
+
+                return !EvaluateLockCondition(
+                    childLockCondition.First(), childLockConditions, interlockingObjects, predicate);
+            }
         }
 
         if (lockCondition is not LockConditionObject lockConditionObject)
