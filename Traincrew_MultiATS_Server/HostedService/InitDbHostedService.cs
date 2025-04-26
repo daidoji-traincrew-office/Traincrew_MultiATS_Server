@@ -1107,7 +1107,6 @@ public partial class DbRendoTableInitializer
     private async Task InitLocks()
     {
         // 必要なオブジェクトを取得
-        // Todo: 接近鎖錠用に向けたオブジェクト取得
         var interlockingObjects = await context.InterlockingObjects
             .Where(io => io.Name.StartsWith(stationId) || otherStations.Any(s => io.Name.StartsWith(s)))
             .ToListAsync(cancellationToken);
