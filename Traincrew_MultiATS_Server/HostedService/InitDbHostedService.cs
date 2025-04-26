@@ -1310,7 +1310,7 @@ public partial class DbRendoTableInitializer
             // 鎖錠欄(軌道回路)
             if (!locks.Contains(route.Id))
             {
-                await RegisterLocks(rendoTableCsv.LockToRoute, route.Id, searchOtherObjects, LockType.Lock);
+                await RegisterLocks(rendoTableCsv.LockToRoute, route.Id, searchObjectsForApproachLock, LockType.Lock);
             }
 
             // 鎖錠欄
