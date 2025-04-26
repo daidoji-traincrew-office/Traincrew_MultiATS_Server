@@ -167,7 +167,7 @@ CREATE TABLE switching_machine
 CREATE TYPE lock_type AS ENUM ('lock', 'signal_control', 'detector', 'route', 'approach', 'stick');
 
 -- (転てつ器、進路)てこ
-CREATE TYPE lever_type AS ENUM ('route', 'switching_machine', 'direction_lever');
+CREATE TYPE lever_type AS ENUM ('route', 'switching_machine', 'direction');
 CREATE TABLE lever
 (
     id                   BIGINT PRIMARY KEY REFERENCES interlocking_object (id),
