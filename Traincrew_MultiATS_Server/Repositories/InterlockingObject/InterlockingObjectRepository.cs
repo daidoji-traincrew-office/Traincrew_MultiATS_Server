@@ -12,6 +12,8 @@ public class InterlockingObjectRepository(ApplicationDbContext context) : IInter
             .Include(obj => ((Models.SwitchingMachine)obj).SwitchingMachineState)
             .Include(obj => ((Models.TrackCircuit)obj).TrackCircuitState)
             .Include(obj => ((Models.Lever)obj).LeverState)
+            .Include(obj => ((Models.DirectionRoute)obj).DirectionRouteState)
+            .Include(obj => ((Models.DirectionSelfControlLever)obj).DirectionSelfControlLeverState)
             .ToListAsync();
     }
     public Task<List<Models.InterlockingObject>> GetObjectByIds(IEnumerable<ulong> ids)
