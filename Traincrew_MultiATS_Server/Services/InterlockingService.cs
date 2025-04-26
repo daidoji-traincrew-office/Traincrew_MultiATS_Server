@@ -1,6 +1,8 @@
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.DestinationButton;
+using Traincrew_MultiATS_Server.Repositories.DirectionRoute;
+using Traincrew_MultiATS_Server.Repositories.DirectionSelfControlLever;
 using Traincrew_MultiATS_Server.Repositories.General;
 using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
 using Traincrew_MultiATS_Server.Repositories.Lever;
@@ -17,7 +19,9 @@ public class InterlockingService(
     IDestinationButtonRepository destinationButtonRepository,
     IGeneralRepository generalRepository,
     IStationRepository stationRepository,
-    ILeverRepository leverRepository)
+    ILeverRepository leverRepository,
+    IDirectionRouteRepository directionRouteRepository,
+    IDirectionSelfControlLeverRepository directionSelfControlLeverRepository)
 {
     public async Task<Dictionary<string, bool>> GetLamps(List<string> stationIds)
     {
@@ -48,7 +52,7 @@ public class InterlockingService(
     /// <exception cref="ArgumentException"></exception>
     public async Task SetPhysicalLeverData(InterlockingLeverData leverData)
     {
-        var lever = await leverRepository.GetLeverByNameWitState(leverData.Name);
+        var lever = await leverRepository.GetLeverByNameWithState(leverData.Name);
         if (lever == null)
         {
             throw new ArgumentException("Invalid lever name");
@@ -56,6 +60,25 @@ public class InterlockingService(
 
         lever.LeverState.IsReversed = leverData.State;
         await generalRepository.Save(lever);
+    }
+
+    /// <summary>
+    /// 鍵てこの物理状態を設定する
+    /// </summary>
+    /// <param name="keyLeverData"></param>
+    /// <returns></returns>
+    internal async Task SetPhysicalKeyLeverData(InterlockingKeyLeverData keyLeverData)
+    {
+        //駅扱の判定を先に入れる
+        var directionkeyLever = await directionSelfControlLeverRepository.GetDirectionSelfControlLeverByNameWithState(keyLeverData.Name);
+        if (directionkeyLever != null)
+        {
+            // Todo: 本当は鍵刺せるか確認しなければならない
+            directionkeyLever.DirectionSelfControlLeverState.IsInsertedKey = keyLeverData.IsKeyInserted;
+            directionkeyLever.DirectionSelfControlLeverState.IsReversed = keyLeverData.State == LNR.Right ? NR.Reversed : NR.Normal;
+            await generalRepository.Save(directionkeyLever);
+        }
+        throw new ArgumentException("Invalid key lever name");
     }
 
     /// <summary>
@@ -97,6 +120,16 @@ public class InterlockingService(
         };
     }
 
+    public static InterlockingKeyLeverData ToKeyLeverData(DirectionSelfControlLever lever)
+    {
+        return new()
+        {
+            Name = lever.Name,
+            State = lever.DirectionSelfControlLeverState.IsReversed == NR.Reversed ? LNR.Right : LNR.Left,
+            IsKeyInserted = lever.DirectionSelfControlLeverState.IsInsertedKey
+        };
+    }
+
     public async Task<List<DestinationButton>> GetDestinationButtons()
     {
         var buttons = await destinationButtonRepository.GetAllButtons();
@@ -111,11 +144,11 @@ public class InterlockingService(
     public static DirectionData ToDirectionData(DirectionRoute direction)
     {
         var state = LCR.Center;
-        if (direction.DirectionRouteState.IsLRelayRaised == RaiseDrop.Raise)
+        if (direction.DirectionRouteState.isLr == LR.Left)
         {
             state = LCR.Left;
         }
-        else if (direction.DirectionRouteState.IsRRelayRaised == RaiseDrop.Raise)
+        else if (direction.DirectionRouteState.isLr == LR.Right)
         {
             state = LCR.Right;
         }
