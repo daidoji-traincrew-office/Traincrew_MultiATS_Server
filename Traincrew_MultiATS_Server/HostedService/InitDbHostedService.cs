@@ -714,7 +714,19 @@ public partial class DbRendoTableInitializer
     private const string NameNot = "not";
 
     private static readonly Dictionary<string, List<string>> StationIdMap = new()
-    {
+    {               
+        // 赤山町: 西赤山、三郷
+        { "TH58", ["TH59", "TH57"] },   
+        // 西赤山: 赤山町
+        { "TH59", ["TH58"] },             
+        // 日野森: 高見沢
+        { "TH61", ["TH62"] },     
+        // 高見沢: 水越、日野森
+        { "TH62", ["TH63", "TH61"] },                    
+        // 水越: 藤江、高見沢
+        { "TH63", ["TH64", "TH62"] },
+        // 藤江: 大道寺、水越
+        { "TH64", ["TH65", "TH63"] },
         // 大道寺: 江ノ原検車区、藤江
         { "TH65", ["TH66S", "TH64"] },
         // 江ノ原検車区: 大道寺
@@ -891,7 +903,7 @@ public partial class DbRendoTableInitializer
                 SwitchingMachine = switchingMachine,
                 LeverState = new()
                 {
-                    IsReversed = LCR.Center
+                    IsReversed = leverType == LeverType.Direction ? LCR.Left : LCR.Center
                 }
             };
             context.Levers.Add(lever);
@@ -1202,7 +1214,7 @@ public partial class DbRendoTableInitializer
             {
                 return directionRoute;
             }
-            
+
 
             // 進路(複数)の場合
             var match = RegexLeverParse().Match(item.Name);
