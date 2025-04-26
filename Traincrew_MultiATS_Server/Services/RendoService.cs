@@ -462,7 +462,7 @@ public class RendoService(
         // 方向進路の全取得
         var directionRouteIds = await directionRouteRepository.GetAllIds();
         // 方向てこの全取得
-        var directionLeverIds = await leverRepository.GetAllDirectionLeverIds();
+        var directionLeverIds = await leverRepository.GetAllIds();
         // 直接鎖錠条件を全取得
         var lockConditionDict = await lockConditionRepository.GetConditionsByType(LockType.Lock);
 
