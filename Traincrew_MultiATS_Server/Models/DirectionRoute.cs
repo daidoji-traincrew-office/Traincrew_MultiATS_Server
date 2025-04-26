@@ -9,6 +9,11 @@ public class DirectionRoute : InterlockingObject
     /// 物理てこのID
     /// </summary>
     public ulong LeverId { get; init; }
+    
+    /// <summary>
+    /// 物理てこ
+    /// </summary>
+    public Lever? Lever { get; init; }
 
     /// <summary>
     /// 開放てこのID

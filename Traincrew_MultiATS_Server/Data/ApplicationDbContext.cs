@@ -137,6 +137,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .WithOne()
             .HasForeignKey<DirectionRouteState>(dls => dls.Id)
             .HasPrincipalKey<DirectionRoute>(dl => dl.Id);
+        modelBuilder.Entity<DirectionRoute>()
+            .HasOne(dl => dl.Lever)
+            .WithOne()
+            .HasForeignKey<Lever>(l => l.Id)
+            .HasPrincipalKey<DirectionRoute>(l => l.LeverId);
         
         modelBuilder.Entity<DirectionSelfControlLever>()
             .HasOne(dsc => dsc.DirectionSelfControlLeverState)

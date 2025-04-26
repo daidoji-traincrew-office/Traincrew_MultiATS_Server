@@ -15,7 +15,7 @@ namespace Traincrew_MultiATS_Server.HostedService;
 public class InitDbHostedService(
     IServiceScopeFactory serviceScopeFactory,
     ILoggerFactory loggerFactory
-    ) : IHostedService
+) : IHostedService
 {
     private readonly List<Scheduler.Scheduler> _schedulers = [];
 
@@ -53,7 +53,9 @@ public class InitDbHostedService(
         var jsonstring = await File.ReadAllTextAsync("./Data/DBBase.json", cancellationToken);
         var DBBase = JsonSerializer.Deserialize<DBBasejson>(jsonstring);
         var logger = loggerFactory.CreateLogger<DbInitializer>();
-        return DBBase != null ? new DbInitializer(DBBase, context, dateTimeRepository, logger, cancellationToken) : null;
+        return DBBase != null
+            ? new DbInitializer(DBBase, context, dateTimeRepository, logger, cancellationToken)
+            : null;
     }
 
     private async Task InitRendoTable(
@@ -262,7 +264,7 @@ internal partial class DbInitializer(
     ApplicationDbContext context,
     IDateTimeRepository dateTimeRepository,
     ILogger<DbInitializer> logger,
-        CancellationToken cancellationToken)
+    CancellationToken cancellationToken)
 {
     [GeneratedRegex(@"^(TH(\d{1,2}S?))_")]
     private static partial Regex RegexStationId();
@@ -855,7 +857,7 @@ public partial class DbRendoTableInitializer
                 continue;
             }
 
-            // てこがすでに存在しない場合はcontinue
+            // てこがすでに存在する場合はcontinue
             var name = CalcLeverName(rendoTableCsv.Start, stationId);
             if (rendoTableCsv.Start.Length <= 0 || leverNames.Contains(name))
             {
@@ -879,9 +881,8 @@ public partial class DbRendoTableInitializer
                     }
                 };
             }
-            // 方向てこの場合、方向進路を登録
 
-            context.Levers.Add(new()
+            Lever lever = new()
             {
                 Name = name,
                 Type = ObjectType.Lever,
@@ -891,8 +892,31 @@ public partial class DbRendoTableInitializer
                 {
                     IsReversed = LCR.Center
                 }
-            });
+            };
+            context.Levers.Add(lever);
             leverNames.Add(name);
+
+            // 方向てこの場合、方向進路を登録
+            if (leverType == LeverType.Direction)
+            {
+                DirectionRoute directionRoute = new()
+                {
+                    Lever = lever,
+                    Name = CalcDirectionLeverName(rendoTableCsv.Start, stationId),
+                    DirectionRouteState = new()
+                    {
+                        isLr = LR.Left,
+                        IsFlRelayRaised = RaiseDrop.Drop,
+                        IsLfysRelayRaised = RaiseDrop.Drop,
+                        IsRfysRelayRaised = RaiseDrop.Drop,
+                        IsLyRelayRaised = RaiseDrop.Drop,
+                        IsRyRelayRaised = RaiseDrop.Drop,
+                        IsLRelayRaised = RaiseDrop.Drop,
+                        IsRRelayRaised = RaiseDrop.Drop
+                    }
+                };
+                context.DirectionRoutes.Add(directionRoute);
+            }
         }
 
         await context.SaveChangesAsync(cancellationToken);
@@ -935,72 +959,6 @@ public partial class DbRendoTableInitializer
         }
 
         await context.SaveChangesAsync(cancellationToken);
-    }
-
-    // Todo: 方向てこパース
-    private async Task InitDirection()
-    {
-        // 既存の方向てこ名を全取得
-        var existingDirectionNames = await context.DirectionRoutes
-            .Select(r => r.Name)
-            .Where(r => r.StartsWith(stationId))
-            .ToListAsync(cancellationToken);
-        var leverDictionary = await context.Levers
-            .Where(l => l.Name.StartsWith(stationId))
-            .ToDictionaryAsync(l => l.Name, cancellationToken);
-        foreach (var rendoTableCsv in rendoTableCsvs)
-        {
-            if (!rendoTableCsv.Name.Contains("方向"))
-            {
-                continue;
-            }
-            // てこ名を生成
-            var directionName = CalcLeverName(rendoTableCsv.Start, stationId) + "F";
-
-            if (existingDirectionNames.Contains(directionName))
-            {
-                continue;
-            }
-
-            existingDirectionNames.Add(directionName);
-
-            var leverName = CalcLeverName(rendoTableCsv.Start, stationId);
-            if (!leverDictionary.TryGetValue(leverName, out var lever))
-            {
-                continue;
-            }
-
-            DirectionRoute directionRoute = new()
-            {
-                LeverId = lever.Id,
-
-                DirectionRouteState = new()
-                {
-                    isLr = LR.Left,
-                    IsFlRelayRaised = RaiseDrop.Drop,
-                    IsLfysRelayRaised = RaiseDrop.Drop,
-                    IsRfysRelayRaised = RaiseDrop.Drop,
-                    IsLyRelayRaised = RaiseDrop.Drop,
-                    IsRyRelayRaised = RaiseDrop.Drop,
-                    IsLRelayRaised = RaiseDrop.Drop,
-                    IsRRelayRaised = RaiseDrop.Drop
-                }
-
-                // うまいことここらへんパースする方法を思いついていない
-                // DirectionSelfControlLeverId =  /*開放てこID*/,
-
-                // これ以降は相互参照なので、一旦登録してID得てから後から登録したほうがいいかも
-                // LLockLeverId = /*Lてこに対する隣駅鎖錠てこ*/,
-                // LLockLeverDirection  = /*Lてこに対する隣駅鎖錠てこ*/,
-                // LSingleLockedLeverId = /*Lてこに対する隣駅被片鎖状てこの方向*/,
-                // LSingleLockedLeverDirection  = /*Lてこに対する隣駅被片鎖状てこの方向*/,
-                // RLockLeverId = /*Rてこに対する隣駅鎖錠てこ*/
-                // RLockLeverDirection = /*Rてこに対する隣駅鎖状てこの方向*/
-                // RSingleLockedLeverId = /*Rてこに対する隣駅被片鎖状てこ*/
-            };
-            // context.DirectionLevers.Add(directionLever);
-        }
-
     }
 
     private async Task InitRoutes()
@@ -1148,24 +1106,23 @@ public partial class DbRendoTableInitializer
                 g => g.Select(x => x.RouteId).ToList(),
                 cancellationToken
             );
-        var searchSwitchingMachine = new Func<LockItem, Task<List<InterlockingObject>>>(
-            item =>
+        var searchSwitchingMachine = new Func<LockItem, Task<List<InterlockingObject>>>(item =>
+        {
+            // Todo: もっときれいに書けるはず 
+            var targetObject =
+                switchingMachines.GetValueOrDefault(CalcSwitchingMachineName(item.Name, item.StationId));
+            List<InterlockingObject> result;
+            if (targetObject != null)
             {
-                // Todo: もっときれいに書けるはず 
-                var targetObject =
-                    switchingMachines.GetValueOrDefault(CalcSwitchingMachineName(item.Name, item.StationId));
-                List<InterlockingObject> result;
-                if (targetObject != null)
-                {
-                    result = [targetObject];
-                }
-                else
-                {
-                    result = [];
-                }
+                result = [targetObject];
+            }
+            else
+            {
+                result = [];
+            }
 
-                return Task.FromResult(result);
-            });
+            return Task.FromResult(result);
+        });
         var searchOtherObjects = new Func<LockItem, Task<List<InterlockingObject>>>(item =>
         {
             // 進路(単一) or 軌道回路の場合はこちら
@@ -1227,6 +1184,7 @@ public partial class DbRendoTableInitializer
         int? approachLockTime = null;
         foreach (var rendoTableCsv in rendoTableCsvs)
         {
+            // Todo: 方向てこと通常進路で処理を変える
             var routeName = CalcRouteName(rendoTableCsv.Start, rendoTableCsv.End, stationId);
             var route = routesByName.GetValueOrDefault(routeName);
             if (route == null)
@@ -1266,6 +1224,18 @@ public partial class DbRendoTableInitializer
 
             await RegisterLocks(rendoTableCsv.ApproachLock, route.Id, searchObjectsForApproachLock,
                 LockType.Approach);
+
+            // うまいことここらへんパースする方法を思いついていない
+            // DirectionSelfControlLeverId =  /*開放てこID*/,
+
+            // これ以降は相互参照なので、一旦登録してID得てから後から登録したほうがいいかも
+            // LLockLeverId = /*Lてこに対する隣駅鎖錠てこ*/,
+            // LLockLeverDirection  = /*Lてこに対する隣駅鎖錠てこ*/,
+            // LSingleLockedLeverId = /*Lてこに対する隣駅被片鎖状てこの方向*/,
+            // LSingleLockedLeverDirection  = /*Lてこに対する隣駅被片鎖状てこの方向*/,
+            // RLockLeverId = /*Rてこに対する隣駅鎖錠てこ*/
+            // RLockLeverDirection = /*Rてこに対する隣駅鎖状てこの方向*/
+            // RSingleLockedLeverId = /*Rてこに対する隣駅被片鎖状てこ*/
         }
 
         // 転てつ器のてっ査鎖錠を処理する
@@ -1276,6 +1246,7 @@ public partial class DbRendoTableInitializer
             {
                 break;
             }
+
             var targetSwitchingMachines = await searchSwitchingMachine(new()
             {
                 Name = rendoTableCsv.Start,
@@ -1373,6 +1344,7 @@ public partial class DbRendoTableInitializer
             {
                 return;
             }
+
             context.LockConditions.Add(current);
             foreach (var child in item.Children)
             {
@@ -1400,6 +1372,7 @@ public partial class DbRendoTableInitializer
                 logger.Log(LogLevel.Warning, "大道寺14L/Rは方向てこです。処理をスキップします。: {Name}", item.Name);
                 return;
             }
+
             throw new InvalidOperationException($"対象のオブジェクトが見つかりません: {item.StationId} {item.Name}");
         }
 
@@ -1692,6 +1665,16 @@ public partial class DbRendoTableInitializer
         }
 
         return $"{stationId}_{start.Replace("R", "").Replace("L", "")}";
+    }
+
+    private string CalcDirectionLeverName(string start, string stationId)
+    {
+        if (stationId == "")
+        {
+            stationId = this.stationId;
+        }
+
+        return $"{stationId}_{start}F";
     }
 
     private string CalcButtonName(string end, string stationId)
