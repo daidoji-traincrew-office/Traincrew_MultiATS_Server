@@ -108,14 +108,14 @@ public class InterlockingService(
         return await destinationButtonRepository.GetButtonsByStationIds(stationNames);
     }
 
-    public static DirectionData ToDirectionData(DirectionLever direction)
+    public static DirectionData ToDirectionData(DirectionRoute direction)
     {
         var state = LCR.Center;
-        if (direction.DirectionLeverState.IsLRelayRaised == RaiseDrop.Raise)
+        if (direction.DirectionRouteState.IsLRelayRaised == RaiseDrop.Raise)
         {
             state = LCR.Left;
         }
-        else if (direction.DirectionLeverState.IsRRelayRaised == RaiseDrop.Raise)
+        else if (direction.DirectionRouteState.IsRRelayRaised == RaiseDrop.Raise)
         {
             state = LCR.Right;
         }

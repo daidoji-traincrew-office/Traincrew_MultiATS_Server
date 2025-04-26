@@ -31,7 +31,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<ThrowOutControl> ThrowOutControls { get; set; }
     public DbSet<OperationNotificationDisplay> OperationNotificationDisplays { get; set; }
     public DbSet<OperationNotificationState> OperationNotificationStates { get; set; }
-    public DbSet<DirectionLever> DirectionLevers { get; set; }
+    public DbSet<DirectionRoute> DirectionRoutes { get; set; }
     public DbSet<DirectionSelfControlLever> DirectionSelfControlLevers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -132,11 +132,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasForeignKey(tc => tc.ConditionLeverId)
             .HasPrincipalKey(l => l.Id);
 
-        modelBuilder.Entity<DirectionLever>()
-            .HasOne(dl => dl.DirectionLeverState)
+        modelBuilder.Entity<DirectionRoute>()
+            .HasOne(dl => dl.DirectionRouteState)
             .WithOne()
-            .HasForeignKey<DirectionLeverState>(dls => dls.Id)
-            .HasPrincipalKey<DirectionLever>(dl => dl.Id);
+            .HasForeignKey<DirectionRouteState>(dls => dls.Id)
+            .HasPrincipalKey<DirectionRoute>(dl => dl.Id);
         
         modelBuilder.Entity<DirectionSelfControlLever>()
             .HasOne(dsc => dsc.DirectionSelfControlLeverState)

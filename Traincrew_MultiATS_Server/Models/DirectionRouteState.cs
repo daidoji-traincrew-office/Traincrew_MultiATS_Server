@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Traincrew_MultiATS_Server.Models;
 
 [Table("direction_lever_state")]
-public class DirectionLeverState
+public class DirectionRouteState
 {
     /// <summary>
     /// ID

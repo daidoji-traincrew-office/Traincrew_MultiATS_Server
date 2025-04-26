@@ -1,8 +1,7 @@
-using System.Linq;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.DestinationButton;
-using Traincrew_MultiATS_Server.Repositories.DirectionLever;
+using Traincrew_MultiATS_Server.Repositories.DirectionRoute;
 using Traincrew_MultiATS_Server.Repositories.General;
 using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
 using Traincrew_MultiATS_Server.Repositories.Lock;
@@ -40,7 +39,7 @@ public class RendoService(
     IThrowOutControlRepository throwOutControlRepository,
     ITrackCircuitRepository trackCircuitRepository,
     IRouteLockTrackCircuitRepository routeLockTrackCircuitRepository,
-    IDirectionLeverRepository directionLeverRepository,
+    IDirectionRouteRepository directionRouteRepository,
     IGeneralRepository generalRepository)
 {
     /// <summary>
@@ -459,7 +458,7 @@ public class RendoService(
     public async Task DirectionRelay()
     {
         // 方向てこの全取得
-        var directionLeverIds = await directionLeverRepository.GetAllIds();
+        var directionLeverIds = await directionRouteRepository.GetAllIds();
         // 直接鎖錠条件を全取得
         var lockConditionDict = await lockConditionRepository.GetConditionsByType(LockType.Lock);
 
@@ -482,8 +481,8 @@ public class RendoService(
         foreach (var directionLeverId in directionLeverIds)
         {
             // DB制約的にDirectionLeverになるはず
-            var directionLever = (interlockingObjects[directionLeverId] as DirectionLever)!;
-            var directionLeverState = directionLever.DirectionLeverState;
+            var directionLever = (interlockingObjects[directionLeverId] as DirectionRoute)!;
+            var directionLeverState = directionLever.DirectionRouteState;
 
             var physicalLever = (interlockingObjects[directionLever.Id] as Lever)!;
             // 運転方向鎖錠リレー    
@@ -574,11 +573,11 @@ public class RendoService(
             {
                 if (directionLever.LLockLeverDirection == LR.Left)
                 {
-                    LLockLeverState = ((DirectionLever)interlockingObjects[directionLever.LLockLeverId.Value]).DirectionLeverState.IsLRelayRaised;
+                    LLockLeverState = ((DirectionRoute)interlockingObjects[directionLever.LLockLeverId.Value]).DirectionRouteState.IsLRelayRaised;
                 }
                 else if (directionLever.LLockLeverDirection == LR.Right)
                 {
-                    LLockLeverState = ((DirectionLever)interlockingObjects[directionLever.LLockLeverId.Value]).DirectionLeverState.IsRRelayRaised;
+                    LLockLeverState = ((DirectionRoute)interlockingObjects[directionLever.LLockLeverId.Value]).DirectionRouteState.IsRRelayRaised;
                 }
                 else
                 {
@@ -591,11 +590,11 @@ public class RendoService(
             {
                 if (directionLever.LSingleLockedLeverDirection == LR.Left)
                 {
-                    LLockLeverState = ((DirectionLever)interlockingObjects[directionLever.LSingleLockedLeverId.Value]).DirectionLeverState.IsLRelayRaised;
+                    LLockLeverState = ((DirectionRoute)interlockingObjects[directionLever.LSingleLockedLeverId.Value]).DirectionRouteState.IsLRelayRaised;
                 }
                 else if (directionLever.LSingleLockedLeverDirection == LR.Right)
                 {
-                    LLockLeverState = ((DirectionLever)interlockingObjects[directionLever.LSingleLockedLeverId.Value]).DirectionLeverState.IsRRelayRaised;
+                    LLockLeverState = ((DirectionRoute)interlockingObjects[directionLever.LSingleLockedLeverId.Value]).DirectionRouteState.IsRRelayRaised;
                 }
                 else
                 {
@@ -630,11 +629,11 @@ public class RendoService(
             {
                 if (directionLever.RLockLeverDirection == LR.Left)
                 {
-                    LLockLeverState = ((DirectionLever)interlockingObjects[directionLever.RLockLeverId.Value]).DirectionLeverState.IsLRelayRaised;
+                    LLockLeverState = ((DirectionRoute)interlockingObjects[directionLever.RLockLeverId.Value]).DirectionRouteState.IsLRelayRaised;
                 }
                 else if (directionLever.RLockLeverDirection == LR.Right)
                 {
-                    LLockLeverState = ((DirectionLever)interlockingObjects[directionLever.RLockLeverId.Value]).DirectionLeverState.IsRRelayRaised;
+                    LLockLeverState = ((DirectionRoute)interlockingObjects[directionLever.RLockLeverId.Value]).DirectionRouteState.IsRRelayRaised;
                 }
                 else
                 {
@@ -647,11 +646,11 @@ public class RendoService(
             {
                 if (directionLever.RSingleLockedLeverDirection == LR.Left)
                 {
-                    LLockLeverState = ((DirectionLever)interlockingObjects[directionLever.RSingleLockedLeverId.Value]).DirectionLeverState.IsLRelayRaised;
+                    LLockLeverState = ((DirectionRoute)interlockingObjects[directionLever.RSingleLockedLeverId.Value]).DirectionRouteState.IsLRelayRaised;
                 }
                 else if (directionLever.RSingleLockedLeverDirection == LR.Right)
                 {
-                    LLockLeverState = ((DirectionLever)interlockingObjects[directionLever.RSingleLockedLeverId.Value]).DirectionLeverState.IsRRelayRaised;
+                    LLockLeverState = ((DirectionRoute)interlockingObjects[directionLever.RSingleLockedLeverId.Value]).DirectionRouteState.IsRRelayRaised;
                 }
                 else
                 {

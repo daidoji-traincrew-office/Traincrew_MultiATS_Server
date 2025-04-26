@@ -184,18 +184,18 @@ CREATE TABLE direction_self_control_lever
     id BIGINT PRIMARY KEY REFERENCES interlocking_object (id) -- ID
 );
 
--- 方向てこ
-CREATE TABLE direction_lever
+-- 方向進路
+CREATE TABLE direction_route
 (
-    id                              BIGINT PRIMARY KEY REFERENCES interlocking_object (id), -- 進路のID
+    id                              BIGINT PRIMARY KEY REFERENCES interlocking_object (id), 
     direction_self_control_lever_id BIGINT REFERENCES direction_self_control_lever (id),    -- 開放てこのID
-    l_lock_lever_id                 BIGINT REFERENCES direction_lever (id),                 -- Lてこに対する隣駅鎖錠てこ
+    l_lock_lever_id                 BIGINT REFERENCES direction_route (id),                 -- Lてこに対する隣駅鎖錠てこ
     l_lock_lever_direction          lr,                                                     -- Lてこに対する隣駅鎖錠てこの方向
-    l_single_locked_lever_id        BIGINT REFERENCES direction_lever (id),                 -- Lてこに対する隣駅被片鎖状てこ
+    l_single_locked_lever_id        BIGINT REFERENCES direction_route (id),                 -- Lてこに対する隣駅被片鎖状てこ
     l_single_locked_lever_direction lr,                                                     -- Lてこに対する隣駅被片鎖状てこの方向
-    r_lock_lever_id                 BIGINT REFERENCES direction_lever (id),                 -- Rてこに対する隣駅鎖錠てこ
+    r_lock_lever_id                 BIGINT REFERENCES direction_route (id),                 -- Rてこに対する隣駅鎖錠てこ
     r_lock_lever_direction          lr,                                                     -- Rてこに対する隣駅鎖錠てこの方向
-    r_single_locked_lever_id        BIGINT REFERENCES direction_lever (id),                 -- Rてこに対する隣駅被片鎖状てこ
+    r_single_locked_lever_id        BIGINT REFERENCES direction_route (id),                 -- Rてこに対する隣駅被片鎖状てこ
     r_single_locked_lever_direction lr                                                      -- Rてこに対する隣駅被片鎖状てこの方向
 );
 
@@ -363,9 +363,9 @@ CREATE TABLE direction_self_control_lever_state
 );
 
 -- 方向てこ状態
-CREATE TABLE direction_lever_state
+CREATE TABLE direction_route_state
 (
-    id                   BIGINT PRIMARY KEY REFERENCES direction_lever (ID), -- てこのID
+    id                   BIGINT PRIMARY KEY REFERENCES direction_route (ID), -- てこのID
     is_lr                lr         NOT NULL DEFAULT 'left',                 -- 方向てこの方向
     is_fl_relay_raised   raise_drop NOT NULL DEFAULT 'drop',                 -- 運転方向鎖錠リレー
     is_lfys_relay_raised raise_drop NOT NULL DEFAULT 'drop',                 -- L方向総括リレー

@@ -30,7 +30,7 @@ public class InterlockingObjectRepository(ApplicationDbContext context) : IInter
             .Include(obj => ((Models.SwitchingMachine)obj).SwitchingMachineState)
             .Include(obj => ((Models.TrackCircuit)obj).TrackCircuitState)
             .Include(obj => ((Models.Lever)obj).LeverState)
-            .Include(obj => ((Models.DirectionLever)obj).DirectionLeverState)
+            .Include(obj => ((Models.DirectionRoute)obj).DirectionRouteState)
             .ToListAsync();
     }
     public Task<Models.InterlockingObject> GetObject(string name)

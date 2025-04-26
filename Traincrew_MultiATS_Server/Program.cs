@@ -15,7 +15,7 @@ using Traincrew_MultiATS_Server.Hubs;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.DestinationButton;
-using Traincrew_MultiATS_Server.Repositories.DirectionLever;
+using Traincrew_MultiATS_Server.Repositories.DirectionRoute;
 using Traincrew_MultiATS_Server.Repositories.Discord;
 using Traincrew_MultiATS_Server.Repositories.General;
 using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
@@ -254,7 +254,7 @@ builder.Services.AddAuthorizationBuilder()
 builder.Services
     .AddScoped<IDateTimeRepository, DateTimeRepository>()
     .AddScoped<IDestinationButtonRepository, DestinationButtonRepository>()
-    .AddScoped<IDirectionLeverRepository, DirectionLeverRepository>()
+    .AddScoped<IDirectionRouteRepository, DirectionRouteRepository>()
     .AddScoped<IGeneralRepository, GeneralRepository>()
     .AddScoped<IInterlockingObjectRepository, InterlockingObjectRepository>()
     .AddScoped<ILockRepository, LockRepository>()

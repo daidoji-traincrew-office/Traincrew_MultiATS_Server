@@ -940,7 +940,7 @@ public partial class DbRendoTableInitializer
     private async Task InitDirection()
     {
         // 既存の方向てこ名を全取得
-        var existingDirectionNames = await context.DirectionLevers
+        var existingDirectionNames = await context.DirectionRoutes
             .Select(r => r.Name)
             .Where(r => r.StartsWith(stationId))
             .ToListAsync(cancellationToken);
@@ -969,11 +969,11 @@ public partial class DbRendoTableInitializer
                 continue;
             }
 
-            DirectionLever directionLever = new()
+            DirectionRoute directionRoute = new()
             {
                 LeverId = lever.Id,
 
-                DirectionLeverState = new()
+                DirectionRouteState = new()
                 {
                     isLr = LR.Left,
                     IsFlRelayRaised = RaiseDrop.Drop,

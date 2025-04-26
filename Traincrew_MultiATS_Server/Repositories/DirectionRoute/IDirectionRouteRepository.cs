@@ -1,6 +1,6 @@
-namespace Traincrew_MultiATS_Server.Repositories.DirectionLever;
+namespace Traincrew_MultiATS_Server.Repositories.DirectionRoute;
 
-public interface IDirectionLeverRepository
+public interface IDirectionRouteRepository
 {
     /// <summary>
     /// 全ての方向てこのIDを取得する。

@@ -2,8 +2,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Traincrew_MultiATS_Server.Models;
 
-[Table("direction_lever")]
-public class DirectionLever : InterlockingObject
+[Table("direction_route")]
+public class DirectionRoute : InterlockingObject
 {
     /// <summary>
     /// 物理てこのID
@@ -55,5 +55,5 @@ public class DirectionLever : InterlockingObject
     /// </summary>
     public LR? RSingleLockedLeverDirection { get; init; }
 
-    public virtual DirectionLeverState? DirectionLeverState { get; init; }
+    public virtual DirectionRouteState? DirectionRouteState { get; init; }
 }

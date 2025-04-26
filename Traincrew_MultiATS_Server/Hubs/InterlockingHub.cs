@@ -53,7 +53,7 @@ public class InterlockingHub(
                 .ToList(),
 
             Directions = allInterlockingObjects
-                .OfType<DirectionLever>()
+                .OfType<DirectionRoute>()
                 .Select(InterlockingService.ToDirectionData)
                 .ToList(),
 
