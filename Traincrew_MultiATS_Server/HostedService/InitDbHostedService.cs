@@ -1457,18 +1457,17 @@ public partial class DbRendoTableInitializer
                 return;
             }
 
-            if (item.Name.StartsWith("14") && item.StationId == "TH65")
-            {
-                // 大道寺14L/Rは、方向てこのためスルー
-                logger.Log(LogLevel.Warning, "大道寺14L/Rは方向てこです。処理をスキップします。: {Name}", item.Name);
-                return;
-            }
-
             throw new InvalidOperationException($"対象のオブジェクトが見つかりません: {item.StationId} {item.Name}");
         }
 
         if (targetObjects.Count == 1)
         {
+            // 方向てこだった場合、方向も指定する
+            LR? isLr = null;
+            if (targetObjects[0] is DirectionRoute)
+            {
+                isLr = item.Name.EndsWith('L') ? LR.Left : LR.Right;
+            }
             context.LockConditionObjects.Add(new()
             {
                 Lock = lockObject,
@@ -1476,6 +1475,7 @@ public partial class DbRendoTableInitializer
                 Parent = parent,
                 TimerSeconds = item.TimerSeconds,
                 IsReverse = item.IsReverse,
+                IsLR = isLr,
                 Type = LockConditionType.Object
             });
             if (routeIdForSwitchingMachineRoute != null && targetObjects[0] is SwitchingMachine switchingMachine)
@@ -1500,6 +1500,12 @@ public partial class DbRendoTableInitializer
         context.LockConditions.Add(current);
         foreach (var targetObject in targetObjects)
         {
+            // 方向てこだった場合、方向も指定する
+            LR? isLr = null;
+            if (targetObjects[0] is DirectionRoute)
+            {
+                isLr = item.Name.EndsWith('L') ? LR.Left : LR.Right;
+            }
             context.LockConditionObjects.Add(new()
             {
                 Lock = lockObject,
@@ -1507,6 +1513,7 @@ public partial class DbRendoTableInitializer
                 ObjectId = targetObject.Id,
                 TimerSeconds = item.TimerSeconds,
                 IsReverse = item.IsReverse,
+                IsLR = isLr,
                 Type = LockConditionType.Object
             });
             if (routeIdForSwitchingMachineRoute == null || targetObjects[0] is not SwitchingMachine switchingMachine)
