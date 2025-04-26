@@ -1314,7 +1314,7 @@ public partial class DbRendoTableInitializer
                 await RegisterLocks(rendoTableCsv.LockToRoute, route.Id, searchObjectsForApproachLock, LockType.Lock);
             }
 
-            // 鎖錠欄
+            // Todo: 鎖錠欄
 
 
             // これ以降は相互参照なので、一旦登録してID得てから後から登録したほうがいいかも
