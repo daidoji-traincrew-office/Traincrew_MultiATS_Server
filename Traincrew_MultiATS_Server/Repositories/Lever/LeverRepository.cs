@@ -11,4 +11,11 @@ public class LeverRepository(ApplicationDbContext context) : ILeverRepository
             .Include(lever => lever.LeverState)
             .FirstOrDefaultAsync(lever => lever.Name == name);
     }
+    
+    public async Task<List<ulong>> GetAllDirectionLeverIds()
+    {
+        return await context.DirectionRoutes
+            .Select(dl => dl.LeverId)
+            .ToListAsync();
+    }
 }
