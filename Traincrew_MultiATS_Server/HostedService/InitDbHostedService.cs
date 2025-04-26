@@ -902,6 +902,7 @@ public partial class DbRendoTableInitializer
                 DirectionRoute directionRoute = new()
                 {
                     Lever = lever,
+                    Type = ObjectType.DirectionRoute,
                     Name = CalcDirectionLeverName(rendoTableCsv.Start, stationId),
                     DirectionRouteState = new()
                     {
@@ -917,6 +918,37 @@ public partial class DbRendoTableInitializer
                 };
                 context.DirectionRoutes.Add(directionRoute);
             }
+        }
+
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task InitDirectionSelfControlLever()
+    {
+        // 該当駅の全てのてこを取得
+        var leverNames = (await context.DirectionSelfControlLevers
+            .Where(l => l.Name.StartsWith(stationId))
+            .Select(l => l.Name)
+            .ToListAsync(cancellationToken)).ToHashSet();
+        foreach (var rendoTableCsv in rendoTableCsvs)
+        {
+            if (!rendoTableCsv.Name.Contains("開放"))
+            {
+                continue;
+            }
+
+            // てこがすでに存在する場合はcontinue
+            var name = CalcLeverName(rendoTableCsv.Start, stationId);
+            if (rendoTableCsv.Start.Length <= 0 || leverNames.Contains(name))
+            {
+                continue;
+            }
+
+            context.DirectionSelfControlLevers.Add(new()
+            {
+                Name = name,
+
+            });
         }
 
         await context.SaveChangesAsync(cancellationToken);

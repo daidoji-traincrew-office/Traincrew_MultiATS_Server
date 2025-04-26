@@ -496,7 +496,7 @@ public class RendoService(
             var directionRouteState = directionRoute.DirectionRouteState;
 
             var physicalLever = (interlockingObjects[directionRoute.LeverId] as Lever)!;
-            var directionSelfControlLever = directionSelfControlLevers[directionRoute.DirectionSelfControlLeverId];
+            var directionSelfControlLever = directionSelfControlLevers[directionRoute.DirectionSelfControlLeverId.Value];
             
             // 運転方向鎖錠リレー    
             // 対応する鎖錠軌道回路を取得

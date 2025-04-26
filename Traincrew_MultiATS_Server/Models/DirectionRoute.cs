@@ -18,7 +18,7 @@ public class DirectionRoute : InterlockingObject
     /// <summary>
     /// 開放てこのID
     /// </summary>
-    public ulong DirectionSelfControlLeverId { get; init; }
+    public ulong? DirectionSelfControlLeverId { get; init; }
 
     /// <summary>
     /// Lてこに対する隣駅鎖錠てこ
