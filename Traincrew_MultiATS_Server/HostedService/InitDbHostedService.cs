@@ -855,6 +855,13 @@ public partial class DbRendoTableInitializer
                 continue;
             }
 
+            // てこがすでに存在しない場合はcontinue
+            var name = CalcLeverName(rendoTableCsv.Start, stationId);
+            if (rendoTableCsv.Start.Length <= 0 || leverNames.Contains(name))
+            {
+                continue;
+            }
+
             // 転てつ器の場合、転てつ器を登録
             SwitchingMachine? switchingMachine = null;
             if (leverType == LeverType.SwitchingMachine)
@@ -872,13 +879,7 @@ public partial class DbRendoTableInitializer
                     }
                 };
             }
-
-            // てこを登録
-            var name = CalcLeverName(rendoTableCsv.Start, stationId);
-            if (rendoTableCsv.Start.Length <= 0 || leverNames.Contains(name))
-            {
-                continue;
-            }
+            // 方向てこの場合、方向進路を登録
 
             context.Levers.Add(new()
             {
