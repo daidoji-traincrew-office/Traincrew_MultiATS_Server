@@ -1561,6 +1561,7 @@ public partial class DbRendoTableInitializer
             {
                 logger.Log(LogLevel.Warning,
                     "三郷駅です。処理をスキップします。{}", lockItem.Name);
+                return;
             }
             throw new InvalidOperationException($"対象の方向進路が見つかりません: {lockItem.StationId} {lockItem.Name}");
         }
