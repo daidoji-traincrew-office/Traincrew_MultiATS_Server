@@ -2,6 +2,7 @@ using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.DestinationButton;
 using Traincrew_MultiATS_Server.Repositories.DirectionRoute;
+using Traincrew_MultiATS_Server.Repositories.DirectionSelfControlLever;
 using Traincrew_MultiATS_Server.Repositories.General;
 using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
 using Traincrew_MultiATS_Server.Repositories.Lever;
@@ -41,6 +42,7 @@ public class RendoService(
     ITrackCircuitRepository trackCircuitRepository,
     IRouteLockTrackCircuitRepository routeLockTrackCircuitRepository,
     IDirectionRouteRepository directionRouteRepository,
+    IDirectionSelfControlLeverRepository directionSelfControlLeverRepository,
     ILeverRepository leverRepository,
     IGeneralRepository generalRepository)
 {
@@ -467,6 +469,8 @@ public class RendoService(
         var directionLeverIds = await leverRepository.GetAllIds();
         // 直接鎖錠条件を全取得
         var lockConditionDict = await lockConditionRepository.GetConditionsByType(LockType.Lock);
+        // 開放てこの全ID取得
+        var directionSelfControlLeverIds = await directionSelfControlLeverRepository.GetAllIds();
 
         // 総括制御を全取得
         // Todo: 方向進路関係のものだけ取得するようにする
@@ -480,6 +484,7 @@ public class RendoService(
         // 関わる全てのObjectを取得
         var objectIds = directionRouteIds
             .Union(directionLeverIds)
+            .Union(directionSelfControlLeverIds)
             .Union(throwOutControls.Select(toc => toc.SourceId))
             .Union(throwOutControls.Select(toc => toc.ConditionLeverId).OfType<ulong>())
             .Union(lockConditionDict.Values.SelectMany(ExtractObjectIdsFromLockCondtions))

@@ -16,4 +16,15 @@ public class DirectionSelfControlLeverRepository(ApplicationDbContext context) :
             .Include(lever => lever.DirectionSelfControlLeverState)
             .FirstOrDefaultAsync(lever => lever.Name == name);
     }
+    
+    /// <summary>
+    /// 全ての開放てこのIDを取得する。
+    /// </summary>
+    /// <returns>開放てこのIDのリスト。</returns>
+    public async Task<List<ulong>> GetAllIds()
+    {
+        return await context.DirectionSelfControlLevers
+            .Select(l => l.Id)
+            .ToListAsync();
+    }
 }
