@@ -1186,7 +1186,7 @@ public class RendoService(
             // 軌道回路が短絡してないこと
             TrackCircuit trackCircuit => !trackCircuit.TrackCircuitState.IsShortCircuit,
             // 転てつ器は鎖錠欄通りの転換命令が出れば良いので、ここでは確認しなくてOK
-            SwitchingMachine => true,
+            SwitchingMachine or DirectionRoute => true,
             Lever or _ => false
         };
     }
@@ -1237,6 +1237,7 @@ public class RendoService(
                 { IsApproachLockMRRaised: RaiseDrop.Raise, IsRouteLockRaised: RaiseDrop.Raise },
             // 軌道回路が短絡していないこと
             TrackCircuit trackCircuit => !trackCircuit.TrackCircuitState.IsShortCircuit,
+            DirectionRoute directionRoute => o.IsLR == LR.Left ? directionRoute.DirectionRouteState.IsLRelayRaised == RaiseDrop.Raise: directionRoute.DirectionRouteState.IsRRelayRaised == RaiseDrop.Raise,
             _ => false
         };
     }
