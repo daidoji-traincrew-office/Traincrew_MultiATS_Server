@@ -619,12 +619,12 @@ public class RendoService(
             {
                 if (directionRoute.LSingleLockedLeverDirection == LR.Left)
                 {
-                    LLockLeverState = (interlockingObjects[directionRoute.LSingleLockedLeverId.Value] as DirectionRoute)
+                    LSingleLockedLeverIdState = (interlockingObjects[directionRoute.LSingleLockedLeverId.Value] as DirectionRoute)
                         .DirectionRouteState.IsLRelayRaised;
                 }
                 else if (directionRoute.LSingleLockedLeverDirection == LR.Right)
                 {
-                    LLockLeverState = (interlockingObjects[directionRoute.LSingleLockedLeverId.Value] as DirectionRoute)
+                    LSingleLockedLeverIdState = (interlockingObjects[directionRoute.LSingleLockedLeverId.Value] as DirectionRoute)
                         .DirectionRouteState.IsRRelayRaised;
                 }
                 else
@@ -633,7 +633,47 @@ public class RendoService(
                 }
             }
 
+            var RLockLeverState = RaiseDrop.Raise;
+            if (directionRoute.RLockLeverId.HasValue)
+            {
+                if (directionRoute.RLockLeverDirection == LR.Left)
+                {
+                    RLockLeverState = (interlockingObjects[directionRoute.RLockLeverId.Value] as DirectionRoute)
+                        .DirectionRouteState.IsLRelayRaised;
+                }
+                else if (directionRoute.RLockLeverDirection == LR.Right)
+                {
+                    RLockLeverState = (interlockingObjects[directionRoute.RLockLeverId.Value] as DirectionRoute)
+                        .DirectionRouteState.IsRRelayRaised;
+                }
+                else
+                {
+                    RLockLeverState = RaiseDrop.Drop;
+                }
+            }
+
+            var RSingleLockedLeverIdState = RaiseDrop.Drop;
+            if (directionRoute.RSingleLockedLeverId.HasValue)
+            {
+                if (directionRoute.RSingleLockedLeverDirection == LR.Left)
+                {
+                    RSingleLockedLeverIdState = (interlockingObjects[directionRoute.RSingleLockedLeverId.Value] as DirectionRoute)
+                        .DirectionRouteState.IsLRelayRaised;
+                }
+                else if (directionRoute.RSingleLockedLeverDirection == LR.Right)
+                {
+                    RSingleLockedLeverIdState = (interlockingObjects[directionRoute.RSingleLockedLeverId.Value] as DirectionRoute)
+                        .DirectionRouteState.IsRRelayRaised;
+                }
+                else
+                {
+                    RSingleLockedLeverIdState = RaiseDrop.Drop;
+                }
+            }
+
             var isLRelayRaised =
+                (RLockLeverState == RaiseDrop.Drop || !directionRoute.LSingleLockedLeverId.HasValue)
+                &&
                 LLockLeverState == RaiseDrop.Raise
                 &&
                 (
@@ -646,7 +686,7 @@ public class RendoService(
                     LSingleLockedLeverIdState == RaiseDrop.Raise
                     ||
                     (
-                        isFLRelayRaised == RaiseDrop.Raise
+                        isFLRelayRaised == RaiseDrop.Drop
                         &&
                         directionRouteState.IsLRelayRaised == RaiseDrop.Raise
                     )
@@ -656,64 +696,28 @@ public class RendoService(
                     ? RaiseDrop.Raise
                     : RaiseDrop.Drop;
 
-            var RLockLeverState = RaiseDrop.Raise;
-            if (directionRoute.RLockLeverId.HasValue)
-            {
-                if (directionRoute.RLockLeverDirection == LR.Left)
-                {
-                    LLockLeverState = (interlockingObjects[directionRoute.RLockLeverId.Value] as DirectionRoute)
-                        .DirectionRouteState.IsLRelayRaised;
-                }
-                else if (directionRoute.RLockLeverDirection == LR.Right)
-                {
-                    LLockLeverState = (interlockingObjects[directionRoute.RLockLeverId.Value] as DirectionRoute)
-                        .DirectionRouteState.IsRRelayRaised;
-                }
-                else
-                {
-                    LLockLeverState = RaiseDrop.Drop;
-                }
-            }
-
-            var RSingleLockedLeverIdState = RaiseDrop.Drop;
-            if (directionRoute.RSingleLockedLeverId.HasValue)
-            {
-                if (directionRoute.RSingleLockedLeverDirection == LR.Left)
-                {
-                    LLockLeverState = (interlockingObjects[directionRoute.RSingleLockedLeverId.Value] as DirectionRoute)
-                        .DirectionRouteState.IsLRelayRaised;
-                }
-                else if (directionRoute.RSingleLockedLeverDirection == LR.Right)
-                {
-                    LLockLeverState = (interlockingObjects[directionRoute.RSingleLockedLeverId.Value] as DirectionRoute)
-                        .DirectionRouteState.IsRRelayRaised;
-                }
-                else
-                {
-                    LLockLeverState = RaiseDrop.Drop;
-                }
-            }
-
             var isRRelayRaised =
-                LLockLeverState == RaiseDrop.Raise
+                (LLockLeverState == RaiseDrop.Drop || !directionRoute.RSingleLockedLeverId.HasValue)
+                &&
+                RLockLeverState == RaiseDrop.Raise
                 &&
                 (
                     (
-                        isLyRelayRaised == RaiseDrop.Raise
+                        isRyRelayRaised == RaiseDrop.Raise
                         &&
                         isFLRelayRaised == RaiseDrop.Raise
                     )
                     ||
-                    LSingleLockedLeverIdState == RaiseDrop.Raise
+                    RSingleLockedLeverIdState == RaiseDrop.Raise
                     ||
                     (
-                        isFLRelayRaised == RaiseDrop.Raise
+                        isFLRelayRaised == RaiseDrop.Drop
                         &&
-                        directionRouteState.IsLRelayRaised == RaiseDrop.Raise
+                        directionRouteState.IsRRelayRaised == RaiseDrop.Raise
                     )
                 )
                 &&
-                directionRouteState.IsRRelayRaised == RaiseDrop.Drop
+                directionRouteState.IsLRelayRaised == RaiseDrop.Drop
                     ? RaiseDrop.Raise
                     : RaiseDrop.Drop;
 
