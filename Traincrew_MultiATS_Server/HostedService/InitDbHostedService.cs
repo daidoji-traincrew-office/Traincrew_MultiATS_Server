@@ -668,6 +668,7 @@ internal partial class DbInitializer(
 
             InterlockingObject target;
             LR? targetLr = null;
+            ulong? directionSelfControlLeverId = null;
             // 進路名を取得
             if (!routesByName.TryGetValue(throwOutControl.SourceRouteName, out var sourceRoute))
             {
@@ -691,7 +692,8 @@ internal partial class DbInitializer(
                 {
                     throw new InvalidOperationException($"開放てこが見つかりません: {throwOutControl.LeverConditionName[..^1]}");
                 }
-                directionRoute.DirectionSelfControlLeverId = directionSelfControlLever.Id;
+                directionSelfControlLeverId = directionSelfControlLever.Id;
+                directionRoute.DirectionSelfControlLeverId = directionSelfControlLeverId; 
                 context.DirectionRoutes.Update(directionRoute);
             }
             else
@@ -704,6 +706,7 @@ internal partial class DbInitializer(
                 SourceId = sourceRoute.Id,
                 TargetId = target.Id,
                 TargetLr = targetLr,
+                ConditionLeverId = directionSelfControlLeverId
             });
         }
 
