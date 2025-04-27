@@ -98,8 +98,7 @@ public class InitDbHostedService(
         }
 
         var changedEntriesCopy = context.ChangeTracker.Entries()
-            .Where(e => e.State is
-                EntityState.Added or EntityState.Modified or EntityState.Deleted or EntityState.Unchanged)
+            .Where(e => e.State is EntityState.Unchanged)
             .ToList();
 
         foreach (var entry in changedEntriesCopy)
@@ -110,6 +109,13 @@ public class InitDbHostedService(
         foreach (var initializer in initializers)
         {
             await initializer.InitializeLocks();
+        }
+        changedEntriesCopy = context.ChangeTracker.Entries()
+            .Where(e => e.State is EntityState.Unchanged)
+            .ToList();
+        foreach (var entry in changedEntriesCopy)
+        {
+            entry.State = EntityState.Detached;
         }
     }
 
