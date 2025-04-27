@@ -517,9 +517,8 @@ public class RendoService(
             var thisLeftThrowOutControls = targetThrowOutControls[directionRoute.Id]
                 .Where(t => t.TargetLr == LR.Left)
                 .ToList();
-            // Todo: ここRightでは？
             var thisRightThrowOutControls = targetThrowOutControls[directionRoute.Id]
-                .Where(t => t.TargetLr == LR.Left)
+                .Where(t => t.TargetLr == LR.Right)
                 .ToList();
 
             // thisLeftThrowOutControlsのSourceの進路のてこ反応リレー扛上と、ConditionLeverの状態を確認する
