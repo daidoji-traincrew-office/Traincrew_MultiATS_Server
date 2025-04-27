@@ -77,6 +77,7 @@ public class InterlockingService(
             directionkeyLever.DirectionSelfControlLeverState.IsInsertedKey = keyLeverData.IsKeyInserted;
             directionkeyLever.DirectionSelfControlLeverState.IsReversed = keyLeverData.State == LNR.Right ? NR.Reversed : NR.Normal;
             await generalRepository.Save(directionkeyLever);
+            return;
         }
         throw new ArgumentException("Invalid key lever name");
     }
