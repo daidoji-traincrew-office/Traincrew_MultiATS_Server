@@ -10,6 +10,8 @@ ALTER TABLE "direction_self_control_lever" DROP CONSTRAINT "opening_lever_id_fke
 ALTER TABLE "direction_lever" DROP CONSTRAINT "direction_lever_opening_lever_id_fkey", ADD CONSTRAINT "direction_lever_direction_self_control_lever_id_fkey" FOREIGN KEY ("direction_self_control_lever_id") REFERENCES "direction_self_control_lever" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
 -- Modify "direction_self_control_lever_state" table
 ALTER TABLE "direction_self_control_lever_state" DROP CONSTRAINT "opening_lever_state_id_fkey", ADD CONSTRAINT "direction_self_control_lever_state_id_fkey" FOREIGN KEY ("id") REFERENCES "direction_self_control_lever" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
+-- Modify "throw_out_control" table
+ALTER TABLE "throw_out_control" DROP CONSTRAINT "throw_out_control_condition_lever_id_fkey", ADD CONSTRAINT "throw_out_control_condition_lever_id_fkey" FOREIGN KEY ("condition_lever_id") REFERENCES "direction_self_control_lever" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
 -- Add value to enum type: "object_type"
 ALTER TYPE "object_type" ADD VALUE 'direction_route';
 -- Add value to enum type: "object_type"
