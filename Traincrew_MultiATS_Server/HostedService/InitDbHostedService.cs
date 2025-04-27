@@ -681,10 +681,10 @@ internal partial class DbInitializer(
                 target = targetRoute;
             }
             // 方向てこ
-            else if((throwOutControl.TargetRouteName.EndsWith('L') || throwOutControl.TargetRouteName.EndsWith('R'))
-                    && directionRouteByName.TryGetValue(throwOutControl.TargetRouteName[..^1]+'F', out var directionRoute))
+            else if ((throwOutControl.TargetRouteName.EndsWith('L') || throwOutControl.TargetRouteName.EndsWith('R'))
+                    && directionRouteByName.TryGetValue(throwOutControl.TargetRouteName[..^1] + 'F', out var directionRoute))
             {
-                target = directionRoute; 
+                target = directionRoute;
                 targetLr = throwOutControl.TargetRouteName.EndsWith('L') ? LR.Left : LR.Right;
                 // 該当する開放てこを探し、方向てこにも開放てこのリンクを設定する
                 if (!directionSelfControlLeverByName.TryGetValue(throwOutControl.LeverConditionName[..^1],
@@ -693,7 +693,7 @@ internal partial class DbInitializer(
                     throw new InvalidOperationException($"開放てこが見つかりません: {throwOutControl.LeverConditionName[..^1]}");
                 }
                 directionSelfControlLeverId = directionSelfControlLever.Id;
-                directionRoute.DirectionSelfControlLeverId = directionSelfControlLeverId; 
+                directionRoute.DirectionSelfControlLeverId = directionSelfControlLeverId;
                 context.DirectionRoutes.Update(directionRoute);
             }
             else
@@ -1133,10 +1133,14 @@ public partial class DbRendoTableInitializer
                 continue;
             }
 
-            // 単線以外の着点ボタンを登録していく
+            // 着点のない進路は着点をnullとして登録
             if (!string.IsNullOrWhiteSpace(rendoTableCsv.End))
             {
                 routes.Add((route, lever.Id, buttonName));
+            }
+            else
+            {
+                //routes.Add((route, lever.Id, null));
             }
             context.Routes.Add(route);
         }
@@ -1591,7 +1595,7 @@ public partial class DbRendoTableInitializer
         Func<LockItem, Task<List<InterlockingObject>>> searchTargetObjects)
     {
         List<InterlockingObject> targetObjects;
-        if(lockItem.Name is NameOr or NameAnd or NameNot)
+        if (lockItem.Name is NameOr or NameAnd or NameNot)
         {
             // or, and, not の場合は、子どもを右から見ていって軌道回路っぽいやつを探す
             var reversedChildren = lockItem.Children.ToList();
