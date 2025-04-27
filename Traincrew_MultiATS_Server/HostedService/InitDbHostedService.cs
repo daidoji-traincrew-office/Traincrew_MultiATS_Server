@@ -686,7 +686,7 @@ internal partial class DbInitializer(
             {
                 target = directionRoute; 
                 targetLr = throwOutControl.TargetRouteName.EndsWith('L') ? LR.Left : LR.Right;
-                // てこ条件がある場合、該当する開放てこを探し、方向てこにも開放てこのリンクを設定する
+                // 該当する開放てこを探し、方向てこにも開放てこのリンクを設定する
                 if (!directionSelfControlLeverByName.TryGetValue(throwOutControl.LeverConditionName[..^1],
                         out var directionSelfControlLever))
                 {
