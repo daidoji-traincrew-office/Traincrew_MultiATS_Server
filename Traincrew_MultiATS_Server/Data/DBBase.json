@@ -7720,42 +7720,37 @@
         },
         {
             "SourceRouteName": "TH58_3L",
-            "TargetRouteName": "TH59_1L",
+            "TargetRouteName": "TH58_1L",
             "LeverConditionName": "TH58_98N"
         },
         {
             "SourceRouteName": "TH58_4L",
-            "TargetRouteName": "TH59_1L",
+            "TargetRouteName": "TH58_1L",
             "LeverConditionName": "TH58_98N"
         },
         {
             "SourceRouteName": "TH58_5L",
-            "TargetRouteName": "TH59_1L",
+            "TargetRouteName": "TH58_1L",
             "LeverConditionName": "TH58_98N"
         },
         {
             "SourceRouteName": "TH59_13R",
-            "TargetRouteName": "TH59_1R",
+            "TargetRouteName": "TH58_1R",
             "LeverConditionName": "TH58_98N"
         },
         {
             "SourceRouteName": "TH58_6R",
-            "TargetRouteName": "TH59_10L",
+            "TargetRouteName": "TH58_10L",
             "LeverConditionName": "TH58_99N"
         },
         {
             "SourceRouteName": "TH58_7R",
-            "TargetRouteName": "TH59_10L",
+            "TargetRouteName": "TH58_10L",
             "LeverConditionName": "TH58_99N"
         },
         {
             "SourceRouteName": "TH58_8R",
-            "TargetRouteName": "TH59_10L",
-            "LeverConditionName": "TH58_99N"
-        },
-        {
-            "SourceRouteName": "TH57_12L",
-            "TargetRouteName": "TH59_1R",
+            "TargetRouteName": "TH58_10L",
             "LeverConditionName": "TH58_99N"
         }
     ]
