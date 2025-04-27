@@ -759,7 +759,7 @@ public partial class DbRendoTableInitializer
     private static partial Regex RegexSignalControl();
 
     // 連動図表の鎖錠欄の諸々のトークンを抽出するための正規表現
-    [GeneratedRegex(@"\[\[|\]\]|\(\(|\)\)|\[|\]|\{|\}|\(|\)|但\s+\d+秒|但|又は|[A-Z\dｲﾛ]+")]
+    [GeneratedRegex(@"\[\[|\]\]|\(\(|\)\)|\[|\]|\{|\}|\(|\)|「|」|但\s+\d+秒|但|又は|[A-Z\dｲﾛ]+")]
     private static partial Regex TokenRegex();
 
     // ReSharper disable InconsistentNaming
@@ -1549,7 +1549,7 @@ public partial class DbRendoTableInitializer
             .ToList();
         var enumerator = tokens.GetEnumerator();
         enumerator.MoveNext();
-        var lockItems = ParseToken(ref enumerator, stationId, isRouteLock, false, false);
+        var lockItems = ParseToken(ref enumerator, stationId, isRouteLock, false, false, false);
         return isRouteLock ? lockItems : [GroupByAndIfMultipleCondition(lockItems)];
     }
 
@@ -1557,7 +1557,8 @@ public partial class DbRendoTableInitializer
         string stationId,
         bool isRouteLock,
         bool isReverse,
-        bool isTotalControl)
+        bool isTotalControl,
+        bool isLocked)
     {
         List<LockItem> result = [];
         // なぜかCanBeNullなはずなのにそれを無視してしまうので
@@ -1566,7 +1567,7 @@ public partial class DbRendoTableInitializer
         {
             var token = enumerator.Current;
             // 括弧とじならbreakし、再起元に判断を委ねる
-            if (token is ")" or "]" or "]]" or "}")
+            if (token is ")" or "]" or "]]" or "}" or "」")
             {
                 break;
             }
@@ -1576,7 +1577,7 @@ public partial class DbRendoTableInitializer
             {
                 // 意味カッコ
                 enumerator.MoveNext();
-                var child = ParseToken(ref enumerator, stationId, isRouteLock, isReverse, isTotalControl);
+                var child = ParseToken(ref enumerator, stationId, isRouteLock, isReverse, isTotalControl, isLocked);
                 if (enumerator.Current != "}")
                 {
                     throw new InvalidOperationException("}が閉じられていません");
@@ -1589,7 +1590,7 @@ public partial class DbRendoTableInitializer
             {
                 // 統括制御(連動図表からではなく、別CSVから取り込みなのでスキップ)
                 enumerator.MoveNext();
-                ParseToken(ref enumerator, stationId, isRouteLock, isReverse, true);
+                ParseToken(ref enumerator, stationId, isRouteLock, isReverse, true, isLocked);
                 if (enumerator.Current != "))")
                 {
                     throw new InvalidOperationException("))が閉じられていません");
@@ -1603,7 +1604,7 @@ public partial class DbRendoTableInitializer
                 var count = token.Length;
                 var targetStationId = StationIdMap[this.stationId][count - 1];
                 enumerator.MoveNext();
-                var child = ParseToken(ref enumerator, targetStationId, isRouteLock, isReverse, isTotalControl);
+                var child = ParseToken(ref enumerator, targetStationId, isRouteLock, isReverse, isTotalControl, isLocked);
                 if (enumerator.Current.Length != count || enumerator.Current.Any(c => c != ']'))
                 {
                     throw new InvalidOperationException("]が閉じられていません");
@@ -1621,7 +1622,8 @@ public partial class DbRendoTableInitializer
                     stationId,
                     isRouteLock,
                     !isRouteLock, // 進路鎖状なら定位を渡す、それ以外なら反位を渡す 
-                    isTotalControl);
+                    isTotalControl, 
+                    isLocked);
                 if (!isRouteLock && target.Count != 1)
                 {
                     throw new InvalidOperationException("反位の対象がないか、複数あります");
@@ -1650,6 +1652,19 @@ public partial class DbRendoTableInitializer
 
                 result.Add(item);
             }
+            else if (token == "「")
+            {
+               // 被鎖錠
+               enumerator.MoveNext();
+               var child = ParseToken(ref enumerator, stationId, isRouteLock, isReverse, isTotalControl, true);
+               if (enumerator.Current != "」")
+               {
+                   throw new InvalidOperationException("」が閉じられていません");
+               }
+
+               enumerator.MoveNext();
+               result.AddRange(child);
+            }
             else if (token.StartsWith('但') && token.EndsWith('秒'))
             {
                 // 時素条件
@@ -1663,7 +1678,7 @@ public partial class DbRendoTableInitializer
                 // 但条件(左辺 or not右辺)
                 var left = result;
                 enumerator.MoveNext();
-                var right = ParseToken(ref enumerator, stationId, isRouteLock, isReverse, isTotalControl);
+                var right = ParseToken(ref enumerator, stationId, isRouteLock, isReverse, isTotalControl, isLocked);
                 List<LockItem> child =
                 [
                     // 左辺
@@ -1693,7 +1708,7 @@ public partial class DbRendoTableInitializer
                 // Todo: or条件 
                 var left = result;
                 enumerator.MoveNext();
-                var right = ParseToken(ref enumerator, stationId, isRouteLock, isReverse, isTotalControl);
+                var right = ParseToken(ref enumerator, stationId, isRouteLock, isReverse, isTotalControl, isLocked);
                 List<LockItem> child =
                 [
                     GroupByAndIfMultipleCondition(left),
@@ -1727,6 +1742,7 @@ public partial class DbRendoTableInitializer
                     Name = token,
                     StationId = stationId,
                     isTotalControl = isTotalControl,
+                    isLocked = isLocked,
                     IsReverse = isReverse ? NR.Reversed : NR.Normal
                 };
                 result.Add(item);
@@ -1756,7 +1772,7 @@ public partial class DbRendoTableInitializer
         public string Name { get; set; }
         public string StationId { get; set; }
         public bool isTotalControl { get; set; }
-        public int? RouteLockGroup { get; set; }
+        public bool isLocked { get; set; }
         public int? TimerSeconds { get; set; }
         public NR IsReverse { get; set; }
         public List<LockItem> Children { get; set; } = [];
