@@ -1182,21 +1182,15 @@ public partial class DbRendoTableInitializer
 
             return Task.FromResult(result);
         });
-        var searchDirectionRoutes = new Func<LockItem, Task<List<InterlockingObject>>>(async item =>
+        var searchDirectionRoutes = new Func<LockItem, Task<InterlockingObject?>>(async item =>
         {
             // 方向進路
             if (!(item.Name.EndsWith('L') || item.Name.EndsWith('R')))
             {
-                return [];
+                return null;
             }
             var key = CalcDirectionLeverName(item.Name[..^1], item.StationId);
-            var value = otherObjects.GetValueOrDefault(key);
-
-            if (value != null)
-            {
-                return [value];
-            }
-            return [];
+            return otherObjects.GetValueOrDefault(key);
         });
         var searchOtherObjects = new Func<LockItem, Task<List<InterlockingObject>>>(async item =>
         {
@@ -1210,9 +1204,9 @@ public partial class DbRendoTableInitializer
 
             // 方向進路の場合はこちら
             var directionRoute = await searchDirectionRoutes(item);
-            if (directionRoute.Count != 0)
+            if (directionRoute != null)
             {
-                return directionRoute;
+                return [directionRoute];
             }
 
 
@@ -1326,17 +1320,10 @@ public partial class DbRendoTableInitializer
                 await RegisterLocks(rendoTableCsv.LockToRoute, route.Id, searchObjectsForApproachLock, LockType.Lock);
             }
 
-            // Todo: 鎖錠欄
-
-
-            // これ以降は相互参照なので、一旦登録してID得てから後から登録したほうがいいかも
-            // LLockLeverId = /*Lてこに対する隣駅鎖錠てこ*/,
-            // LLockLeverDirection  = /*Lてこに対する隣駅鎖錠てこ*/,
-            // LSingleLockedLeverId = /*Lてこに対する隣駅被片鎖状てこの方向*/,
-            // LSingleLockedLeverDirection  = /*Lてこに対する隣駅被片鎖状てこの方向*/,
-            // RLockLeverId = /*Rてこに対する隣駅鎖錠てこ*/
-            // RLockLeverDirection = /*Rてこに対する隣駅鎖状てこの方向*/
-            // RSingleLockedLeverId = /*Rてこに対する隣駅被片鎖状てこ*/
+            // 鎖錠欄(鎖錠 または 被片鎖錠)
+            var isLr = rendoTableCsv.End == "L" ? LR.Left : LR.Right;
+            await RegisterDirectionRouteLock(rendoTableCsv.LockToSwitchingMachine, route, 
+                searchDirectionRoutes, isLr);
         }
 
         // Todo: CTC進路用の処理
@@ -1540,6 +1527,69 @@ public partial class DbRendoTableInitializer
                 SwitchingMachineId = switchingMachine.Id,
             });
         }
+    }
+    
+    private async Task RegisterDirectionRouteLock(string lockString, DirectionRoute route,
+        Func<LockItem, Task<InterlockingObject?>> searchTargetObjects,
+        LR isLr)
+    {
+        var lockItems = CalcLockItems(lockString, false);
+        if (lockItems.Count == 0)
+        {
+            logger.Log(LogLevel.Warning,
+                    "被片鎖錠てこも、鎖錠てこも見つかりません。処理をスキップします。{}", route.Name);
+            return;
+        }
+        if (lockItems.Count == 2)
+        {
+            logger.Log(LogLevel.Warning,
+                "被片鎖錠てこ または 鎖錠てこが複数見つかりました。処理をスキップします。{}", route.Name);
+            return;
+        }
+        
+        var lockItem = lockItems[0];
+        var item = await searchTargetObjects(lockItem);
+        if (item == null)
+        {
+            throw new InvalidOperationException($"対象の方向進路が見つかりません: {lockItem.StationId} {lockItem.Name}");
+        }
+        
+        var direction = lockItem.Name.EndsWith('L') ? LR.Left : LR.Right;
+
+        // Lてこに対する
+        if (isLr == LR.Left)
+        {
+            // 被片鎖錠 
+            if (lockItem.isLocked)
+            {
+                route.LSingleLockedLeverId = item.Id;
+                route.LSingleLockedLeverDirection = direction;
+            }
+            // 鎖錠
+            else
+            {
+               route.LLockLeverId = item.Id; 
+               route.LLockLeverDirection = direction;
+            }
+        }
+        // Rてこに対する
+        else
+        {
+            // 被片鎖錠 
+            if (lockItem.isLocked)
+            {
+                route.RSingleLockedLeverId = item.Id;
+                route.RSingleLockedLeverDirection = direction;
+            }
+            // 鎖錠
+            else
+            {
+               route.RLockLeverId = item.Id; 
+               route.RLockLeverDirection = direction;
+            }
+        }
+
+        context.Update(route);
     }
 
     public List<LockItem> CalcLockItems(string lockString, bool isRouteLock)

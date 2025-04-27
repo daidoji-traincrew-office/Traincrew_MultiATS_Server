@@ -18,47 +18,47 @@ public class DirectionRoute : InterlockingObject
     /// <summary>
     /// 開放てこのID
     /// </summary>
-    public ulong? DirectionSelfControlLeverId { get; init; }
+    public ulong? DirectionSelfControlLeverId { get; set; }
 
     /// <summary>
     /// Lてこに対する隣駅鎖錠てこ
     /// </summary>
-    public ulong? LLockLeverId { get; init; }
+    public ulong? LLockLeverId { get; set; }
 
     /// <summary>
     /// Lてこに対する隣駅鎖状てこの方向
     /// </summary>
-    public LR? LLockLeverDirection { get; init; }
+    public LR? LLockLeverDirection { get; set; }
 
     /// <summary>
     /// Lてこに対する隣駅被片鎖状てこ
     /// </summary>
-    public ulong? LSingleLockedLeverId { get; init; }
+    public ulong? LSingleLockedLeverId { get; set; }
 
     /// <summary>
     /// Lてこに対する隣駅被片鎖状てこの方向
     /// </summary>
-    public LR? LSingleLockedLeverDirection { get; init; }
+    public LR? LSingleLockedLeverDirection { get; set; }
 
     /// <summary>
     /// Rてこに対する隣駅鎖錠てこ
     /// </summary>
-    public ulong? RLockLeverId { get; init; }
+    public ulong? RLockLeverId { get; set; }
 
     /// <summary>
     /// Rてこに対する隣駅鎖状てこの方向
     /// </summary>
-    public LR? RLockLeverDirection { get; init; }
+    public LR? RLockLeverDirection { get; set; }
 
     /// <summary>
     /// Rてこに対する隣駅被片鎖状てこ
     /// </summary>
-    public ulong? RSingleLockedLeverId { get; init; }
+    public ulong? RSingleLockedLeverId { get; set; }
 
     /// <summary>
     /// Rてこに対する隣駅被片鎖状てこの方向
     /// </summary>
-    public LR? RSingleLockedLeverDirection { get; init; }
+    public LR? RSingleLockedLeverDirection { get; set; }
 
     public virtual DirectionRouteState? DirectionRouteState { get; init; }
 }
