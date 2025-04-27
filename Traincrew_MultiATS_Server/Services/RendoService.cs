@@ -486,7 +486,7 @@ public class RendoService(
             .ToDictionary(obj => obj.Id);
         var directionSelfControlLevers = interlockingObjects
             .Where(kvp => kvp.Value is DirectionSelfControlLever)
-            .ToDictionary(kvp => kvp.Key, kvp => kvp.Value as DirectionSelfControlLever);
+            .ToDictionary(kvp => kvp.Key, kvp => (kvp.Value as DirectionSelfControlLever)!);
 
         // 方向てこごとにループ
         foreach (var directionRouteId in directionRouteIds)
