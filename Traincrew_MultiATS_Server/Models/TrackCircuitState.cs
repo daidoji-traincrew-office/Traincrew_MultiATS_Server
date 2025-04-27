@@ -13,6 +13,7 @@ public class TrackCircuitState
     /// </summary>
     public bool IsShortCircuit { get; set; }
     public bool IsLocked { get; set; }
+    public ulong? LockedBy { get; set; }
     [Column(TypeName = "timestamp without time zone")]
     public DateTime? UnlockedAt { get; set; }
     /// <summary>
