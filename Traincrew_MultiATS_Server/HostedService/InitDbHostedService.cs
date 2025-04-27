@@ -647,6 +647,10 @@ internal partial class DbInitializer(
     {
         var routesByName = await context.Routes
             .ToDictionaryAsync(r => r.Name, cancellationToken);
+        var directionRouteByName = await context.DirectionRoutes
+            .ToDictionaryAsync(r => r.Name, cancellationToken);
+        var directionSelfControlLeverByName = await context.DirectionSelfControlLevers
+            .ToDictionaryAsync(r => r.Name, cancellationToken);
         var throwOutControlList = (await context.ThrowOutControls
                 .Include(toc => toc.Source)
                 .Include(toc => toc.Target)
@@ -662,32 +666,55 @@ internal partial class DbInitializer(
                 continue;
             }
 
-            // Todo: 方向てこまで実装したらこのスキップを外す
-            if (!string.IsNullOrEmpty(throwOutControl.LeverConditionName))
-            {
-                continue;
-            }
-
+            InterlockingObject target;
+            LR? targetLr = null;
             // 進路名を取得
             if (!routesByName.TryGetValue(throwOutControl.SourceRouteName, out var sourceRoute))
             {
                 throw new InvalidOperationException($"進路名が見つかりません: {throwOutControl.SourceRouteName}");
             }
 
-            if (!routesByName.TryGetValue(throwOutControl.TargetRouteName, out var targetRoute))
+            // 方向てこ以外
+            if (routesByName.TryGetValue(throwOutControl.TargetRouteName, out var targetRoute))
+            {
+                target = targetRoute;
+            }
+            // 方向てこ
+            else if((throwOutControl.TargetRouteName.EndsWith('L') || throwOutControl.TargetRouteName.EndsWith('R'))
+                    && directionRouteByName.TryGetValue(throwOutControl.TargetRouteName[..^1]+'F', out var directionRoute))
+            {
+                target = directionRoute; 
+                targetLr = throwOutControl.TargetRouteName.EndsWith('L') ? LR.Left : LR.Right;
+                // てこ条件がある場合、該当する開放てこを探し、方向てこにも開放てこのリンクを設定する
+                if (!directionSelfControlLeverByName.TryGetValue(throwOutControl.LeverConditionName[..^1],
+                        out var directionSelfControlLever))
+                {
+                    throw new InvalidOperationException($"開放てこが見つかりません: {throwOutControl.LeverConditionName[..^1]}");
+                }
+                directionRoute.DirectionSelfControlLeverId = directionSelfControlLever.Id;
+                context.DirectionRoutes.Update(directionRoute);
+            }
+            else
             {
                 throw new InvalidOperationException($"進路名が見つかりません: {throwOutControl.TargetRouteName}");
             }
-            // Todo: てこ条件がある場合、該当する開放てこを探し、方向てこにも開放てこのリンクを設定する
 
             context.ThrowOutControls.Add(new()
             {
                 SourceId = sourceRoute.Id,
-                TargetId = targetRoute.Id
+                TargetId = target.Id,
+                TargetLr = targetLr,
             });
         }
 
         await context.SaveChangesAsync(cancellationToken);
+        var changedEntriesCopy = context.ChangeTracker.Entries()
+            .Where(e => e.State is EntityState.Unchanged)
+            .ToList();
+        foreach (var entry in changedEntriesCopy)
+        {
+            entry.State = EntityState.Detached;
+        }
     }
 
     private async Task SetStationIdToInterlockingObject()
