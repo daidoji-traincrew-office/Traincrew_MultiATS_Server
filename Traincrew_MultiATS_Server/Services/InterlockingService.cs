@@ -125,7 +125,7 @@ public class InterlockingService(
         return new()
         {
             Name = lever.Name,
-            State = lever.DirectionSelfControlLeverState.IsReversed == NR.Reversed ? LNR.Right : LNR.Left,
+            State = lever.DirectionSelfControlLeverState.IsReversed == NR.Reversed ? LNR.Right : LNR.Normal,
             IsKeyInserted = lever.DirectionSelfControlLeverState.IsInsertedKey
         };
     }
