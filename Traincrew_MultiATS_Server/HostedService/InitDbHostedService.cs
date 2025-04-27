@@ -800,7 +800,7 @@ public partial class DbRendoTableInitializer
     private static partial Regex RegexSignalControl();
 
     // 連動図表の鎖錠欄の諸々のトークンを抽出するための正規表現
-    [GeneratedRegex(@"\[\[|\]\]|\(\(|\)\)|\[|\]|\{|\}|\(|\)|「|」|但\s+\d+秒|但|又は|[A-Z\dｲﾛ]+")]
+    [GeneratedRegex(@"\[\[|\]\]|\(\(|\)\)|\[|\]|\{|\}|\(|\)|｢|｣|但\s+\d+秒|但|又は|[A-Z\dｲﾛ]+")]
     private static partial Regex TokenRegex();
 
     // ReSharper disable InconsistentNaming
@@ -1718,7 +1718,7 @@ public partial class DbRendoTableInitializer
         {
             var token = enumerator.Current;
             // 括弧とじならbreakし、再起元に判断を委ねる
-            if (token is ")" or "]" or "]]" or "}" or "」")
+            if (token is ")" or "]" or "]]" or "}" or "｣")
             {
                 break;
             }
@@ -1803,14 +1803,14 @@ public partial class DbRendoTableInitializer
 
                 result.Add(item);
             }
-            else if (token == "「")
+            else if (token == "｢")
             {
                 // 被鎖錠
                 enumerator.MoveNext();
                 var child = ParseToken(ref enumerator, stationId, isRouteLock, isReverse, isTotalControl, true);
-                if (enumerator.Current != "」")
+                if (enumerator.Current != "｣")
                 {
-                    throw new InvalidOperationException("」が閉じられていません");
+                    throw new InvalidOperationException("｣が閉じられていません");
                 }
 
                 enumerator.MoveNext();
