@@ -1328,7 +1328,7 @@ public partial class DbRendoTableInitializer
 
             // 鎖錠欄(鎖錠 または 被片鎖錠)
             var isLr = rendoTableCsv.End == "L" ? LR.Left : LR.Right;
-            await RegisterDirectionRouteLock(rendoTableCsv.LockToSwitchingMachine, route, 
+            await RegisterDirectionRouteLock(rendoTableCsv.LockToSwitchingMachine, route,
                 searchDirectionRoutes, isLr);
         }
 
@@ -1534,7 +1534,7 @@ public partial class DbRendoTableInitializer
             });
         }
     }
-    
+
     private async Task RegisterDirectionRouteLock(string lockString, DirectionRoute route,
         Func<LockItem, Task<InterlockingObject?>> searchTargetObjects,
         LR isLr)
@@ -1552,14 +1552,19 @@ public partial class DbRendoTableInitializer
                 "被片鎖錠てこ または 鎖錠てこが複数見つかりました。処理をスキップします。{}", route.Name);
             return;
         }
-        
+
         var lockItem = lockItems[0];
         var item = await searchTargetObjects(lockItem);
         if (item == null)
         {
+            if (lockItem.StationId == "TH57")
+            {
+                logger.Log(LogLevel.Warning,
+                    "三郷駅です。処理をスキップします。{}", lockItem.Name);
+            }
             throw new InvalidOperationException($"対象の方向進路が見つかりません: {lockItem.StationId} {lockItem.Name}");
         }
-        
+
         var direction = lockItem.Name.EndsWith('L') ? LR.Left : LR.Right;
 
         // Lてこに対する
@@ -1574,8 +1579,8 @@ public partial class DbRendoTableInitializer
             // 鎖錠
             else
             {
-               route.LLockLeverId = item.Id; 
-               route.LLockLeverDirection = direction;
+                route.LLockLeverId = item.Id;
+                route.LLockLeverDirection = direction;
             }
         }
         // Rてこに対する
@@ -1590,8 +1595,8 @@ public partial class DbRendoTableInitializer
             // 鎖錠
             else
             {
-               route.RLockLeverId = item.Id; 
-               route.RLockLeverDirection = direction;
+                route.RLockLeverId = item.Id;
+                route.RLockLeverDirection = direction;
             }
         }
 
@@ -1678,7 +1683,7 @@ public partial class DbRendoTableInitializer
                     stationId,
                     isRouteLock,
                     !isRouteLock, // 進路鎖状なら定位を渡す、それ以外なら反位を渡す 
-                    isTotalControl, 
+                    isTotalControl,
                     isLocked);
                 if (!isRouteLock && target.Count != 1)
                 {
@@ -1710,16 +1715,16 @@ public partial class DbRendoTableInitializer
             }
             else if (token == "「")
             {
-               // 被鎖錠
-               enumerator.MoveNext();
-               var child = ParseToken(ref enumerator, stationId, isRouteLock, isReverse, isTotalControl, true);
-               if (enumerator.Current != "」")
-               {
-                   throw new InvalidOperationException("」が閉じられていません");
-               }
+                // 被鎖錠
+                enumerator.MoveNext();
+                var child = ParseToken(ref enumerator, stationId, isRouteLock, isReverse, isTotalControl, true);
+                if (enumerator.Current != "」")
+                {
+                    throw new InvalidOperationException("」が閉じられていません");
+                }
 
-               enumerator.MoveNext();
-               result.AddRange(child);
+                enumerator.MoveNext();
+                result.AddRange(child);
             }
             else if (token.StartsWith('但') && token.EndsWith('秒'))
             {
