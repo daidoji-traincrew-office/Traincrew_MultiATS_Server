@@ -1388,7 +1388,7 @@ public class RendoService(
             Route route => (o.IsReverse == NR.Normal &&
                             route.RouteState.IsApproachLockMRRaised == RaiseDrop.Raise)
                            || (o.IsReverse == NR.Reversed &&
-                               route.RouteState.IsApproachLockMRRaised == RaiseDrop.Raise),
+                               route.RouteState.IsApproachLockMRRaised == RaiseDrop.Drop),
             // 転てつ器が転換中でなく、目的方向であること
             SwitchingMachine switchingMachine => !switchingMachine.SwitchingMachineState.IsSwitching &&
                                                  switchingMachine.SwitchingMachineState.IsReverse ==
