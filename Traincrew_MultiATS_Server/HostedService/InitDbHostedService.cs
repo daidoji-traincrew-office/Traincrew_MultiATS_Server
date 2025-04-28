@@ -1062,7 +1062,7 @@ public partial class DbRendoTableInitializer
             .Where(l => l.Name.StartsWith(stationId))
             .ToDictionaryAsync(l => l.Name, cancellationToken);
 
-        List<(Route, ulong, string)> routes = [];
+        List<(Route, ulong, string?)> routes = [];
         foreach (var rendoTableCsv in rendoTableCsvs)
         {
             // RouteTypeを決定
@@ -1140,7 +1140,7 @@ public partial class DbRendoTableInitializer
             }
             else
             {
-                //routes.Add((route, lever.Id, null));
+                routes.Add((route, lever.Id, null));
             }
             context.Routes.Add(route);
         }
