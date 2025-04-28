@@ -784,7 +784,7 @@ public partial class DbRendoTableInitializer
     private static partial Regex RegexIntParse();
 
     // てこ名を抽出するための正規表現
-    [GeneratedRegex(@"(\d+)(?:R|L)(Z?)")]
+    [GeneratedRegex(@"(\d+)(R|L)(Z?)")]
     private static partial Regex RegexLeverParse();
 
     // 軌道回路名を抽出するための正規表現
@@ -1062,7 +1062,7 @@ public partial class DbRendoTableInitializer
             .Where(l => l.Name.StartsWith(stationId))
             .ToDictionaryAsync(l => l.Name, cancellationToken);
 
-        List<(Route, ulong, string?)> routes = [];
+        List<(Route, ulong, LR, string?)> routes = [];
         foreach (var rendoTableCsv in rendoTableCsvs)
         {
             // RouteTypeを決定
@@ -1126,7 +1126,9 @@ public partial class DbRendoTableInitializer
                     IsRouteLockRaised = RaiseDrop.Drop
                 }
             };
-            var leverName = CalcLeverName(rendoTableCsv.Start, stationId);
+            var match = RegexLeverParse().Match(rendoTableCsv.Start);
+            var leverName = CalcLeverName(match.Groups[1].Value + match.Groups[3].Value, stationId);
+            var direction = match.Groups[2].Value == "L" ? LR.Left: LR.Right;
             var buttonName = CalcButtonName(rendoTableCsv.End, stationId);
             if (!leverDictionary.TryGetValue(leverName, out var lever))
             {
@@ -1136,11 +1138,11 @@ public partial class DbRendoTableInitializer
             // 着点のない進路は着点をnullとして登録
             if (!string.IsNullOrWhiteSpace(rendoTableCsv.End))
             {
-                routes.Add((route, lever.Id, buttonName));
+                routes.Add((route, lever.Id, direction, buttonName));
             }
             else
             {
-                routes.Add((route, lever.Id, null));
+                routes.Add((route, lever.Id, direction, null));
             }
             context.Routes.Add(route);
         }
@@ -1148,12 +1150,13 @@ public partial class DbRendoTableInitializer
         await context.SaveChangesAsync(cancellationToken);
 
         // 進路とてこと着点ボタンの関連付けを追加
-        foreach (var (route, leverId, buttonName) in routes)
+        foreach (var (route, leverId, direction, buttonName) in routes)
         {
             context.RouteLeverDestinationButtons.Add(new()
             {
                 RouteId = route.Id,
                 LeverId = leverId,
+                Direction = direction,
                 DestinationButtonName = buttonName
             });
         }
@@ -1259,7 +1262,7 @@ public partial class DbRendoTableInitializer
             var match = RegexLeverParse().Match(item.Name);
             if (match.Success)
             {
-                var leverName = CalcLeverName(match.Groups[1].Value + match.Groups[2].Value, item.StationId);
+                var leverName = CalcLeverName(match.Groups[1].Value + match.Groups[3].Value, item.StationId);
                 var routeIds = leverToRoute.GetValueOrDefault(leverName);
                 if (routeIds != null)
                 {
