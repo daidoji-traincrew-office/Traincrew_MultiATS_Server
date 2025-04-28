@@ -579,6 +579,12 @@ public class RendoService(
                     &&
                     physicalLever.LeverState.IsReversed == LCR.Left
                 )
+                ||
+                (
+                    directionRouteState.IsRyRelayRaised == RaiseDrop.Drop
+                    &&
+                    directionRouteState.IsLyRelayRaised == RaiseDrop.Raise
+                )
                     ? RaiseDrop.Raise
                     : RaiseDrop.Drop;
             var isRyRelayRaised =
@@ -589,9 +595,31 @@ public class RendoService(
                     &&
                     physicalLever.LeverState.IsReversed == LCR.Right
                 )
+                ||
+                (
+                    directionRouteState.IsLyRelayRaised == RaiseDrop.Drop
+                    &&
+                    directionRouteState.IsRyRelayRaised == RaiseDrop.Raise
+                )
                     ? RaiseDrop.Raise
                     : RaiseDrop.Drop;
-
+            // 逆てこ反の動作確認のため、L方向2重確認
+            isLyRelayRaised =
+                isLfysRelayRaised == RaiseDrop.Raise
+                ||
+                (
+                    directionSelfControlLever.DirectionSelfControlLeverState.IsReversed == NR.Reversed
+                    &&
+                    physicalLever.LeverState.IsReversed == LCR.Left
+                )
+                ||
+                (
+                    directionRouteState.IsRyRelayRaised == RaiseDrop.Drop
+                    &&
+                    directionRouteState.IsLyRelayRaised == RaiseDrop.Raise
+                )
+                    ? RaiseDrop.Raise
+                    : RaiseDrop.Drop;
             // 方向リレー
             // 隣駅鎖錠の方向リレー扛上[非存在True]
             // &&
@@ -1365,6 +1393,7 @@ public class RendoService(
             SwitchingMachine switchingMachine => !switchingMachine.SwitchingMachineState.IsSwitching &&
                                                  switchingMachine.SwitchingMachineState.IsReverse ==
                                                  o.IsReverse,
+            DirectionRoute directionRoute => directionRoute.DirectionRouteState.isLr == o.IsLR,
             _ => false
         };
     }
