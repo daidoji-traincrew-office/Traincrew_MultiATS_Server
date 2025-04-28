@@ -1,3 +1,4 @@
+using Discord;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.DestinationButton;
@@ -248,7 +249,11 @@ public class RendoService(
                         routeState is
                         { IsThrowOutYSRelayRaised: RaiseDrop.Drop, IsThrowOutXRRelayRaised: RaiseDrop.Drop }
                         &&
-                        leverState is LCR.Left or LCR.Right
+                        (
+                            routeLeverDestinationButton.Direction == LR.Left && leverState == LCR.Left
+                            ||
+                            routeLeverDestinationButton.Direction == LR.Right && leverState == LCR.Right
+                        )
                     )
                     ||
                     routeState.IsThrowOutYSRelayRaised == RaiseDrop.Raise
