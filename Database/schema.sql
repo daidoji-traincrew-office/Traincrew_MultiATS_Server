@@ -208,8 +208,9 @@ CREATE TABLE route_lever_destination_button
     route_id                BIGINT REFERENCES route (ID) NOT NULL,             -- 進路のID
     lever_id                BIGINT REFERENCES lever (ID) NOT NULL,             -- てこのID
     destination_button_name VARCHAR(100) REFERENCES destination_button (name), -- 着点ボタンの名前
+    direction               lr NOT NULL,                                       -- 左右方向
     UNIQUE (route_id),
-    UNIQUE (lever_id, destination_button_name)
+    UNIQUE NULLS NOT DISTINCT (lever_id, destination_button_name, direction)
 );
 
 -- 信号
