@@ -208,7 +208,7 @@ CREATE TABLE route_lever_destination_button
     route_id                BIGINT REFERENCES route (ID) NOT NULL,             -- 進路のID
     lever_id                BIGINT REFERENCES lever (ID) NOT NULL,             -- てこのID
     destination_button_name VARCHAR(100) REFERENCES destination_button (name), -- 着点ボタンの名前
-    direction               lr NOT NULL,                                       -- 左右方向
+    direction               lr                           NOT NULL,             -- 左右方向
     UNIQUE (route_id),
     UNIQUE NULLS NOT DISTINCT (lever_id, destination_button_name, direction)
 );
@@ -229,10 +229,13 @@ CREATE TABLE signal_type
 --- 信号機
 CREATE TABLE signal
 (
-    name             VARCHAR(100) PRIMARY KEY                   NOT NULL,
-    station_id       VARCHAR(10) REFERENCES station (id),                 -- 所属する停車場(線間閉塞の場合は設定されない)
-    type             VARCHAR(100) REFERENCES signal_type (name) NOT NULL, -- 信号機の種類(4灯式とか)
-    track_circuit_id BIGINT REFERENCES track_circuit (ID)                 -- 閉そく信号機の軌道回路
+    name                     VARCHAR(100) PRIMARY KEY                   NOT NULL,
+    station_id               VARCHAR(10) REFERENCES station (id),                 -- 所属する停車場(線間閉塞の場合は設定されない)
+    type                     VARCHAR(100) REFERENCES signal_type (name) NOT NULL, -- 信号機の種類(4灯式とか)
+    track_circuit_id         BIGINT REFERENCES track_circuit (ID),                -- 閉そく信号機の軌道回路
+    direction_route_left_id  BIGINT REFERENCES direction_route (id),              -- 左方向進路
+    direction_route_right_id BIGINT REFERENCES direction_route (id),              -- 右方向進路
+    direction                lr                                                   -- LR向き
 );
 CREATE INDEX signal_station_id_index ON signal (station_id);
 
@@ -346,7 +349,7 @@ CREATE TABLE station_timer_state
     is_teu_relay_raised raise_drop  NOT NULL DEFAULT 'drop',
     is_ten_relay_raised raise_drop  NOT NULL DEFAULT 'drop',
     is_ter_relay_raised raise_drop  NOT NULL DEFAULT 'raise',
-    teu_relay_raised_at TIMESTAMP NULL     DEFAULT NULL,
+    teu_relay_raised_at TIMESTAMP   NULL     DEFAULT NULL,
     UNIQUE (station_id, seconds)
 );
 

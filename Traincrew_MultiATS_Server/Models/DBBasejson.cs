@@ -12,6 +12,10 @@ public class JsonSignalData : SignalData
     public string TypeName { get; init; }
     public List<string>? NextSignalNames { get; init; } = null;
     public List<string>? RouteNames { get; init; } = null;
+    public string? DirectionRouteLeft { get; init; } = null;
+    public string? DirectionRouteRight { get; init; } = null;
+    public string? Direction { get; init; } = null;
+    public string? TrackCircuitName { get; init; } = null;
 }
 
 public class ThrowOutControlData
