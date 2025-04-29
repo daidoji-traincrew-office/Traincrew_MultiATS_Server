@@ -281,13 +281,13 @@ internal partial class DbInitializer(
         await InitStationTimerState();
         await InitTrackCircuit();
         await InitSignalType();
-        await InitSignal();
-        await InitNextSignal();
-        await InitTrackCircuitSignal();
     }
 
     internal async Task InitializePost()
     {
+        await InitSignal();
+        await InitNextSignal();
+        await InitTrackCircuitSignal();
         await InitializeSignalRoute();
         await InitializeThrowOutControl();
         await SetStationIdToInterlockingObject();
@@ -428,14 +428,27 @@ internal partial class DbInitializer(
                 .FirstOrDefault();
 
             // 方向進路および方向の初期化
-            ulong? directionRouteLeftId = signalData.DirectionRouteLeft != null
-                ? directionRoutes.GetValueOrDefault(signalData.DirectionRouteLeft)
-                : null;
+            ulong? directionRouteLeftId = null;
+            ulong? directionRouteRightId = null;
+            if (signalData.DirectionRouteLeft != null)
+            {
+                if(!directionRoutes.TryGetValue(signalData.DirectionRouteLeft, out var directionRouteId))
+                {
+                    throw new InvalidOperationException($"方向進路が見つかりません: {signalData.DirectionRouteLeft}");
+                }
 
-            ulong? directionRouteRightId = signalData.DirectionRouteRight != null
-                ? directionRoutes.GetValueOrDefault(signalData.DirectionRouteRight)
-                : null;
+                directionRouteLeftId = directionRouteId;
+            }
+            if (signalData.DirectionRouteRight != null)
+            {
+                if(!directionRoutes.TryGetValue(signalData.DirectionRouteRight, out var directionRouteId))
+                {
+                    throw new InvalidOperationException($"方向進路が見つかりません: {signalData.DirectionRouteRight}");
+                }
 
+                directionRouteRightId = directionRouteId;
+            }
+            
             LR? direction = signalData.Direction != null
                 ? signalData.Direction == "L" ? LR.Left : signalData.Direction == "R" ? LR.Right : null
                 : null;
