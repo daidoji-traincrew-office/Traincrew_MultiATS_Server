@@ -397,6 +397,10 @@ internal partial class DbInitializer(
         // 駅マスタを取得
         var stations = await context.Stations
             .ToListAsync(cancellationToken);
+        // DirectionRoutesを事前に取得してDictionaryに格納
+        var directionRoutes = await context.DirectionRoutes
+            .ToDictionaryAsync(dr => dr.Name, dr => dr.Id, cancellationToken);
+
         // 信号情報登録
         foreach (var signalData in DBBase.signalDataList)
         {
@@ -406,7 +410,12 @@ internal partial class DbInitializer(
                 continue;
             }
 
+            // 軌道回路初期化
             ulong trackCircuitId = 0;
+            if (signalData.TrackCircuitName != null)
+            {
+                trackCircuits.TryGetValue(signalData.TrackCircuitName, out trackCircuitId);
+            }
             if (signalData.Name.StartsWith("上り閉塞") || signalData.Name.StartsWith("下り閉塞"))
             {
                 var trackCircuitName = $"{signalData.Name.Replace("閉塞", "")}T";
@@ -418,6 +427,19 @@ internal partial class DbInitializer(
                 .Select(s => s.Id)
                 .FirstOrDefault();
 
+            // 方向進路および方向の初期化
+            ulong? directionRouteLeftId = signalData.DirectionRouteLeft != null
+                ? directionRoutes.GetValueOrDefault(signalData.DirectionRouteLeft)
+                : null;
+
+            ulong? directionRouteRightId = signalData.DirectionRouteRight != null
+                ? directionRoutes.GetValueOrDefault(signalData.DirectionRouteRight)
+                : null;
+
+            LR? direction = signalData.Direction != null
+                ? signalData.Direction == "L" ? LR.Left : signalData.Direction == "R" ? LR.Right : null
+                : null;
+
             context.Signals.Add(new()
             {
                 Name = signalData.Name,
@@ -427,7 +449,10 @@ internal partial class DbInitializer(
                 SignalState = new()
                 {
                     IsLighted = true,
-                }
+                },
+                DirectionRouteLeftId = directionRouteLeftId,
+                DirectionRouteRightId = directionRouteRightId,
+                Direction = direction
             });
         }
 

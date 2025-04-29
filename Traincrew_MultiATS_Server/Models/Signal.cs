@@ -14,7 +14,9 @@ public class Signal
     public SignalType Type { get; init; }
     public SignalState SignalState { get; init; }
     public ulong? TrackCircuitId { get; init; }
-    public TrackCircuit? TrackCircuit { get; init; } 
+    public TrackCircuit? TrackCircuit { get; init; }
+    public ulong? DirectionRouteLeftId { get; init; } // 左方向進路ID
+    public ulong? DirectionRouteRightId { get; init; } // 右方向進路ID
     public DirectionRoute? DirectionRouteLeft { get; init; }
     public DirectionRoute? DirectionRouteRight { get; init; }
     public LR? Direction { get; init; }
