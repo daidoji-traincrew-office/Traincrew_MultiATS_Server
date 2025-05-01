@@ -175,8 +175,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder
-            .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
-            .EnableSensitiveDataLogging();
+            .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
     }
 
     private static string ToSnakeCase(string input)
