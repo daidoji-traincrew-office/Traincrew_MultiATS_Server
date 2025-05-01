@@ -82,7 +82,7 @@ public class InterlockingService(
         // 鍵を刺せるか確認
         var role = await discordService.GetRoleByMemberId(memberId);
         // 鍵を刺せないなら処理終了
-        if (role.IsAdministrator)
+        if (!role.IsAdministrator)
         {
             return false;
         }
