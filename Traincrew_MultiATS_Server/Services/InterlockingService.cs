@@ -15,6 +15,7 @@ namespace Traincrew_MultiATS_Server.Services;
 /// </summary>
 public class InterlockingService(
     IDateTimeRepository dateTimeRepository,
+    DiscordService discordService,
     IInterlockingObjectRepository interlockingObjectRepository,
     IDestinationButtonRepository destinationButtonRepository,
     IGeneralRepository generalRepository,
@@ -66,20 +67,31 @@ public class InterlockingService(
     /// 鍵てこの物理状態を設定する
     /// </summary>
     /// <param name="keyLeverData"></param>
+    /// <param name="memberId">DiscordのメンバーID</param>
     /// <returns></returns>
-    internal async Task SetPhysicalKeyLeverData(InterlockingKeyLeverData keyLeverData)
+    internal async Task<bool> SetPhysicalKeyLeverData(InterlockingKeyLeverData keyLeverData, ulong? memberId)
     {
         //駅扱の判定を先に入れる
-        var directionkeyLever = await directionSelfControlLeverRepository.GetDirectionSelfControlLeverByNameWithState(keyLeverData.Name);
-        if (directionkeyLever != null)
+        var directionkeyLever =
+            await directionSelfControlLeverRepository.GetDirectionSelfControlLeverByNameWithState(keyLeverData.Name);
+        if (directionkeyLever == null)
         {
-            // Todo: 本当は鍵刺せるか確認しなければならない
-            directionkeyLever.DirectionSelfControlLeverState.IsInsertedKey = keyLeverData.IsKeyInserted;
-            directionkeyLever.DirectionSelfControlLeverState.IsReversed = keyLeverData.State == LNR.Right ? NR.Reversed : NR.Normal;
-            await generalRepository.Save(directionkeyLever);
-            return;
+            throw new ArgumentException("Invalid key lever name");
         }
-        throw new ArgumentException("Invalid key lever name");
+
+        // 鍵を刺せるか確認
+        var role = await discordService.GetRoleByMemberId(memberId);
+        // 鍵を刺せないなら処理終了
+        if (role.IsAdministrator)
+        {
+            return false;
+        }
+        // 鍵てこを処理する
+        directionkeyLever.DirectionSelfControlLeverState.IsInsertedKey = keyLeverData.IsKeyInserted;
+        directionkeyLever.DirectionSelfControlLeverState.IsReversed =
+            keyLeverData.State == LNR.Right ? NR.Reversed : NR.Normal;
+        await generalRepository.Save(directionkeyLever);
+        return true;
     }
 
     /// <summary>
@@ -153,6 +165,7 @@ public class InterlockingService(
         {
             state = LCR.Right;
         }
+
         return new()
         {
             Name = direction.Name,

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 using OpenIddict.Validation.AspNetCore;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Services;
+using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace Traincrew_MultiATS_Server.Hubs;
 
@@ -79,9 +80,12 @@ public class InterlockingHub(
         await interlockingService.SetPhysicalLeverData(leverData);
     }
 
-    public async Task SetPhysicalKeyLeverData(InterlockingKeyLeverData keyLeverData)
+    public async Task<bool> SetPhysicalKeyLeverData(InterlockingKeyLeverData keyLeverData)
     {
-        await interlockingService.SetPhysicalKeyLeverData(keyLeverData);
+        // MemberIDを取得
+        var memberIdString = Context.User?.FindFirst(Claims.Subject)?.Value;
+        ulong? memberId = memberIdString != null ? ulong.Parse(memberIdString) : null;
+        return await interlockingService.SetPhysicalKeyLeverData(keyLeverData, memberId);
     }
 
     public async Task SetDestinationButtonState(DestinationButtonState buttonData)

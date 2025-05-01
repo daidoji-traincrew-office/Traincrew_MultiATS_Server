@@ -69,6 +69,7 @@ public class TrainHub(
         var signalNames = await signalService
             .GetSignalNamesByTrackCircuits(trackCircuitList, isUp);
         // 現示計算
+        // Todo: 1つ先の信号機までは最低限計算する
         var signalIndications = await signalService.CalcSignalIndication(signalNames);
         serverData.NextSignalData = signalIndications.Select(pair => new SignalData
         {

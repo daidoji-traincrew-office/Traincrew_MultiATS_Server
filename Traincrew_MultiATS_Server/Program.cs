@@ -283,7 +283,14 @@ builder.Services
     .AddScoped<StationService>()
     .AddScoped<SwitchingMachineService>()
     .AddScoped<TrackCircuitService>()
-    .AddSingleton<DiscordService>()
+    .AddSingleton(provider =>
+    {
+        var discordService = new DiscordService(
+            builder.Configuration,
+            provider.GetRequiredService<IDiscordRepository>(),
+            enableAuthorization);
+        return discordService;
+    })
     .AddSingleton<DiscordRepository>()
     .AddSingleton<IDiscordRepository>(provider => provider.GetRequiredService<DiscordRepository>())
     .AddSingleton<IAuthorizationHandler, DiscordRoleHandler>();
