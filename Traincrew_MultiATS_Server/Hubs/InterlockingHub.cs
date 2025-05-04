@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 using OpenIddict.Validation.AspNetCore;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Services;
+using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace Traincrew_MultiATS_Server.Hubs;
 
@@ -20,7 +21,7 @@ public class InterlockingHub(
     public async Task<DataToInterlocking> SendData_Interlocking(List<string> activeStationsList)
     {
         // Todo: めんどいし、Interlocking全取得してOfTypeと変換作って動くようにする    
-        var interlockingObjects = await interlockingService.GetObjectsByStationIds(activeStationsList);
+        var allInterlockingObjects = await interlockingService.GetInterlockingObjects();
         var destinationButtons = await interlockingService.GetDestinationButtonsByStationIds(activeStationsList);
         // List<string> clientData.ActiveStationsListの駅IDから、指定された駅にある信号機名称をList<string>で返すやつ
         var signalNames = await signalService.GetSignalNamesByStationIds(activeStationsList);
@@ -30,33 +31,37 @@ public class InterlockingHub(
 
         var response = new DataToInterlocking
         {
-            TrackCircuits = await trackCircuitService.GetAllTrackCircuitDataList(),
+            TrackCircuits = allInterlockingObjects
+                .OfType<TrackCircuit>()
+                .Select(TrackCircuitService.ToTrackCircuitData)
+                .ToList(),
 
-            Points = interlockingObjects
+            Points = allInterlockingObjects
                 .OfType<SwitchingMachine>()
                 .Select(SwitchingMachineService.ToSwitchData)
                 .ToList(),
 
-            // Todo: List<InterlockingLeverData> PhysicalLeversを設定する
-            PhysicalLevers = interlockingObjects
+            // Todo: 方向てこのほうのリストを連結する
+            PhysicalLevers = allInterlockingObjects
                 .OfType<Lever>()
                 .Select(InterlockingService.ToLeverData)
                 .ToList(),
 
-            // Todo: List<InterlockingKeyLeverData> PhysicalKeyLeversを設定する
-            // Todo: 鍵てこの実装
-            PhysicalKeyLevers = new List<InterlockingKeyLeverData>(),
+            // Todo: 駅扱てこの実装と両方渡し
+            PhysicalKeyLevers = allInterlockingObjects
+                .OfType<DirectionSelfControlLever>()
+                .Select(InterlockingService.ToKeyLeverData)
+                .ToList(),
 
-            // Todo: List<DestinationButtonState> PhysicalButtonsを設定する
             PhysicalButtons = destinationButtons
                 .Select(button => button.DestinationButtonState)
                 .ToList(),
 
-            // Todo: List<InterlockingDirectionData> Directionsを設定する
-            // Todo: 方向てこ実装、方向てこにフィルターする
-            Directions = new List<DirectionData>(),
+            Directions = allInterlockingObjects
+                .OfType<DirectionRoute>()
+                .Select(InterlockingService.ToDirectionData)
+                .ToList(),
 
-            // Todo: List<InterlockingRetsubanData> Retsubansを設定する
             // Todo: 列番表示の実装から
             Retsubans = new List<InterlockingRetsubanData>(),
 
@@ -73,6 +78,14 @@ public class InterlockingHub(
     public async Task SetPhysicalLeverData(InterlockingLeverData leverData)
     {
         await interlockingService.SetPhysicalLeverData(leverData);
+    }
+
+    public async Task<bool> SetPhysicalKeyLeverData(InterlockingKeyLeverData keyLeverData)
+    {
+        // MemberIDを取得
+        var memberIdString = Context.User?.FindFirst(Claims.Subject)?.Value;
+        ulong? memberId = memberIdString != null ? ulong.Parse(memberIdString) : null;
+        return await interlockingService.SetPhysicalKeyLeverData(keyLeverData, memberId);
     }
 
     public async Task SetDestinationButtonState(DestinationButtonState buttonData)

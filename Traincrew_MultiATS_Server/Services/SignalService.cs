@@ -66,7 +66,13 @@ public class SignalService(
             // 絶対信号機の場合、信号制御リレーが扛上している
             && (routes.Count == 0 || routes.Any(route => route.RouteState.IsSignalControlRaised == RaiseDrop.Raise))
             // 許容信号機の場合、対象軌道回路が短絡していない
-            && !(signal.TrackCircuit?.TrackCircuitState.IsShortCircuit ?? false))
+            && !(signal.TrackCircuit?.TrackCircuitState.IsShortCircuit ?? false)
+            // 単線区間の場合、方向が正しい
+            && (signal.DirectionRouteLeftId == null ||
+                signal.DirectionRouteLeft.DirectionRouteState.isLr == signal.Direction)
+            && (signal.DirectionRouteRightId == null ||
+                signal.DirectionRouteRight.DirectionRouteState.isLr == signal.Direction)
+        )
         {
             // 次の信号機名を取得
             var nextSignalNames = nextSignalDict.GetValueOrDefault(signalName, []);
@@ -88,7 +94,7 @@ public class SignalService(
         cache[signalName] = result;
         return result;
     }
-    
+
     public async Task<List<string>> GetSignalNamesByStationIds(List<string> stationIds)
     {
         return await signalRepository.GetSignalNamesByStationIds(stationIds);

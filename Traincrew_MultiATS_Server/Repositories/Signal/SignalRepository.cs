@@ -18,6 +18,10 @@ public class SignalRepository(ApplicationDbContext context) : ISignalRepository
             .Include(s => s.Type)
             .Include(s => s.TrackCircuit)
             .ThenInclude(t => t!.TrackCircuitState)
+            .Include(s => s.DirectionRouteLeft)
+            .ThenInclude(dr => dr.DirectionRouteState)
+            .Include(s => s.DirectionRouteRight)
+            .ThenInclude(dr => dr.DirectionRouteState)
             .ToListAsync();
     }
 

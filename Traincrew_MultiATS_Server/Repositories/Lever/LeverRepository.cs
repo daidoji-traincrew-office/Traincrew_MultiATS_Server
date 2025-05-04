@@ -5,10 +5,17 @@ namespace Traincrew_MultiATS_Server.Repositories.Lever;
 
 public class LeverRepository(ApplicationDbContext context) : ILeverRepository
 {
-    public async Task<Models.Lever?> GetLeverByNameWitState(string name)
+    public async Task<Models.Lever?> GetLeverByNameWithState(string name)
     {
         return await context.Levers
             .Include(lever => lever.LeverState)
             .FirstOrDefaultAsync(lever => lever.Name == name);
+    }
+
+    public async Task<List<ulong>?> GetAllIds()
+    {
+        return await context.Levers
+            .Select(lever => lever.Id)
+            .ToListAsync();
     }
 }

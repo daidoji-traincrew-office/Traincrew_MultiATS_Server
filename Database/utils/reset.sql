@@ -27,6 +27,12 @@ delete from operation_notification_display;
 delete from destination_button_state;
 delete from destination_button;
 
+delete from direction_route_state;
+delete from direction_route;
+
+delete from direction_self_control_lever_state;
+delete from direction_self_control_lever;
+
 delete from lever_state;
 delete from lever;
 

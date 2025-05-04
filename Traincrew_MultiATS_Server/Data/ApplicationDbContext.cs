@@ -31,6 +31,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<ThrowOutControl> ThrowOutControls { get; set; }
     public DbSet<OperationNotificationDisplay> OperationNotificationDisplays { get; set; }
     public DbSet<OperationNotificationState> OperationNotificationStates { get; set; }
+    public DbSet<DirectionRoute> DirectionRoutes { get; set; }
+    public DbSet<DirectionSelfControlLever> DirectionSelfControlLevers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -115,20 +117,39 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .WithOne()
             .HasForeignKey<DestinationButtonState>(dbs => dbs.Name);
         modelBuilder.Entity<ThrowOutControl>()
-            .HasOne(tc => tc.SourceRoute)
+            .HasOne(tc => tc.Source)
             .WithMany()
-            .HasForeignKey(tc => tc.SourceRouteId)
-            .HasPrincipalKey(r => r.Id);
+            .HasForeignKey(tc => tc.SourceId)
+            .HasPrincipalKey(io => io.Id);
         modelBuilder.Entity<ThrowOutControl>()
-            .HasOne(tc => tc.TargetRoute)
+            .HasOne(tc => tc.Target)
             .WithMany()
-            .HasForeignKey(tc => tc.TargetRouteId)
-            .HasPrincipalKey(r => r.Id);
+            .HasForeignKey(tc => tc.TargetId)
+            .HasPrincipalKey(io => io.Id);
         modelBuilder.Entity<ThrowOutControl>()
             .HasOne(tc => tc.ConditionLever)
             .WithMany()
             .HasForeignKey(tc => tc.ConditionLeverId)
             .HasPrincipalKey(l => l.Id);
+
+        modelBuilder.Entity<DirectionRoute>()
+            .HasOne(dl => dl.DirectionRouteState)
+            .WithOne()
+            .HasForeignKey<DirectionRouteState>(dls => dls.Id)
+            .HasPrincipalKey<DirectionRoute>(dl => dl.Id);
+        modelBuilder.Entity<DirectionRoute>()
+            .HasOne(dr => dr.Lever)
+            .WithOne()
+            .HasForeignKey<DirectionRoute>(dl => dl.LeverId)
+            .HasPrincipalKey<Lever>(l => l.Id);
+        
+        modelBuilder.Entity<DirectionSelfControlLever>()
+            .HasOne(dsc => dsc.DirectionSelfControlLeverState)
+            .WithOne()
+            .HasForeignKey<DirectionSelfControlLeverState>(dscs => dscs.Id)
+            .HasPrincipalKey<DirectionSelfControlLever>(dsc => dsc.Id);
+
+        modelBuilder.Entity<DirectionSelfControlLever>();
         // Convert all column names to snake_case 
         foreach (var entity in modelBuilder.Model.GetEntityTypes())
         {

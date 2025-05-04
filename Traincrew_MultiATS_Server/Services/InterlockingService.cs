@@ -1,6 +1,8 @@
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.DestinationButton;
+using Traincrew_MultiATS_Server.Repositories.DirectionRoute;
+using Traincrew_MultiATS_Server.Repositories.DirectionSelfControlLever;
 using Traincrew_MultiATS_Server.Repositories.General;
 using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
 using Traincrew_MultiATS_Server.Repositories.Lever;
@@ -13,11 +15,14 @@ namespace Traincrew_MultiATS_Server.Services;
 /// </summary>
 public class InterlockingService(
     IDateTimeRepository dateTimeRepository,
+    DiscordService discordService,
     IInterlockingObjectRepository interlockingObjectRepository,
     IDestinationButtonRepository destinationButtonRepository,
     IGeneralRepository generalRepository,
     IStationRepository stationRepository,
-    ILeverRepository leverRepository)
+    ILeverRepository leverRepository,
+    IDirectionRouteRepository directionRouteRepository,
+    IDirectionSelfControlLeverRepository directionSelfControlLeverRepository)
 {
     public async Task<Dictionary<string, bool>> GetLamps(List<string> stationIds)
     {
@@ -39,7 +44,7 @@ public class InterlockingService(
             .Concat(stationTimerStates)
             .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
     }
-    
+
     /// <summary>
     /// レバーの物理状態を設定する
     /// </summary>
@@ -48,7 +53,7 @@ public class InterlockingService(
     /// <exception cref="ArgumentException"></exception>
     public async Task SetPhysicalLeverData(InterlockingLeverData leverData)
     {
-        var lever = await leverRepository.GetLeverByNameWitState(leverData.Name);
+        var lever = await leverRepository.GetLeverByNameWithState(leverData.Name);
         if (lever == null)
         {
             throw new ArgumentException("Invalid lever name");
@@ -56,6 +61,37 @@ public class InterlockingService(
 
         lever.LeverState.IsReversed = leverData.State;
         await generalRepository.Save(lever);
+    }
+
+    /// <summary>
+    /// 鍵てこの物理状態を設定する
+    /// </summary>
+    /// <param name="keyLeverData"></param>
+    /// <param name="memberId">DiscordのメンバーID</param>
+    /// <returns></returns>
+    internal async Task<bool> SetPhysicalKeyLeverData(InterlockingKeyLeverData keyLeverData, ulong? memberId)
+    {
+        //駅扱の判定を先に入れる
+        var directionkeyLever =
+            await directionSelfControlLeverRepository.GetDirectionSelfControlLeverByNameWithState(keyLeverData.Name);
+        if (directionkeyLever == null)
+        {
+            throw new ArgumentException("Invalid key lever name");
+        }
+
+        // 鍵を刺せるか確認
+        var role = await discordService.GetRoleByMemberId(memberId);
+        // 鍵を刺せないなら処理終了
+        if (!role.IsAdministrator)
+        {
+            return false;
+        }
+        // 鍵てこを処理する
+        directionkeyLever.DirectionSelfControlLeverState.IsInsertedKey = keyLeverData.IsKeyInserted;
+        directionkeyLever.DirectionSelfControlLeverState.IsReversed =
+            keyLeverData.State == LNR.Right ? NR.Reversed : NR.Normal;
+        await generalRepository.Save(directionkeyLever);
+        return true;
     }
 
     /// <summary>
@@ -76,7 +112,7 @@ public class InterlockingService(
         buttonObject.DestinationButtonState.IsRaised = buttonData.IsRaised;
         await generalRepository.Save(buttonObject.DestinationButtonState);
     }
-    
+
 
     public async Task<List<InterlockingObject>> GetInterlockingObjects()
     {
@@ -97,6 +133,16 @@ public class InterlockingService(
         };
     }
 
+    public static InterlockingKeyLeverData ToKeyLeverData(DirectionSelfControlLever lever)
+    {
+        return new()
+        {
+            Name = lever.Name,
+            State = lever.DirectionSelfControlLeverState.IsReversed == NR.Reversed ? LNR.Right : LNR.Normal,
+            IsKeyInserted = lever.DirectionSelfControlLeverState.IsInsertedKey
+        };
+    }
+
     public async Task<List<DestinationButton>> GetDestinationButtons()
     {
         var buttons = await destinationButtonRepository.GetAllButtons();
@@ -106,5 +152,24 @@ public class InterlockingService(
     public async Task<List<DestinationButton>> GetDestinationButtonsByStationIds(List<string> stationNames)
     {
         return await destinationButtonRepository.GetButtonsByStationIds(stationNames);
+    }
+
+    public static DirectionData ToDirectionData(DirectionRoute direction)
+    {
+        var state = LCR.Center;
+        if (direction.DirectionRouteState.isLr == LR.Left)
+        {
+            state = LCR.Left;
+        }
+        else if (direction.DirectionRouteState.isLr == LR.Right)
+        {
+            state = LCR.Right;
+        }
+
+        return new()
+        {
+            Name = direction.Name,
+            State = state
+        };
     }
 }

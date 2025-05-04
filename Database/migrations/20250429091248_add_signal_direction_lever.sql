@@ -1,0 +1,2 @@
+-- Modify "signal" table
+ALTER TABLE "signal" ADD COLUMN "direction_route_left_id" bigint NULL, ADD COLUMN "direction_route_right_id" bigint NULL, ADD COLUMN "direction" "lr" NULL, ADD CONSTRAINT "signal_direction_route_left_id_fkey" FOREIGN KEY ("direction_route_left_id") REFERENCES "direction_route" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION, ADD CONSTRAINT "signal_direction_route_right_id_fkey" FOREIGN KEY ("direction_route_right_id") REFERENCES "direction_route" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION;

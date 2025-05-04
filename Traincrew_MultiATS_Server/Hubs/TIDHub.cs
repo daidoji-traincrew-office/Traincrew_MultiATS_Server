@@ -1,3 +1,4 @@
+using Discord;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using OpenIddict.Validation.AspNetCore;
@@ -11,7 +12,8 @@ namespace Traincrew_MultiATS_Server.Hubs;
 	Policy = "TIDPolicy"
 )]
 public class TIDHub(TrackCircuitService trackCircuitService,
-    SwitchingMachineService switchingMachineService) : Hub
+    SwitchingMachineService switchingMachineService,
+    InterlockingService interlockingService) : Hub
 {
     public async Task<ConstantDataToTID> SendData_TID()
     {
@@ -19,11 +21,16 @@ public class TIDHub(TrackCircuitService trackCircuitService,
         var switchingMachineDataList = (await switchingMachineService.GetAllSwitchingMachines())
             .Select(SwitchingMachineService.ToSwitchData)
             .ToList();
+        var allInterlockingObjects = await interlockingService.GetInterlockingObjects();
+        var directionDatas = allInterlockingObjects
+                .OfType<DirectionRoute>()
+                .Select(InterlockingService.ToDirectionData)
+                .ToList();
         return new()
         {
             TrackCircuitDatas = trackCircuitDataList,
             SwitchDatas = switchingMachineDataList,
-            DirectionDatas = [] 
+            DirectionDatas = directionDatas
         };
     }
 }

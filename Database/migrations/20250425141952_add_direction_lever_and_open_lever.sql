@@ -1,0 +1,13 @@
+-- Create enum type "lr"
+CREATE TYPE "lr" AS ENUM ('left', 'right');
+-- Modify "lock_condition_object" table
+ALTER TABLE "lock_condition_object" ADD COLUMN "is_lr" "lr";
+-- Create "direction_lever" table
+CREATE TABLE "direction_lever" ("id" bigint NOT NULL, "l_lock_lever_id" bigint NULL, "l_lock_lever_direction" "lr" NULL, "l_single_locked_lever_id" bigint NULL, "l_single_locked_lever_direction" "lr" NULL, "r_lock_lever_id" bigint NULL, "r_lock_lever_direction" "lr" NULL, "r_single_locked_lever_id" bigint NULL, "r_single_locked_lever_direction" "lr" NULL, PRIMARY KEY ("id"), CONSTRAINT "direction_lever_id_fkey" FOREIGN KEY ("id") REFERENCES "interlocking_object" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION, CONSTRAINT "direction_lever_l_lock_lever_id_fkey" FOREIGN KEY ("l_lock_lever_id") REFERENCES "direction_lever" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION, CONSTRAINT "direction_lever_l_single_locked_lever_id_fkey" FOREIGN KEY ("l_single_locked_lever_id") REFERENCES "direction_lever" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION, CONSTRAINT "direction_lever_r_lock_lever_id_fkey" FOREIGN KEY ("r_lock_lever_id") REFERENCES "direction_lever" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION, CONSTRAINT "direction_lever_r_single_locked_lever_id_fkey" FOREIGN KEY ("r_single_locked_lever_id") REFERENCES "direction_lever" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION);
+-- Create "direction_lever_state" table
+CREATE TABLE "direction_lever_state" ("id" bigint NOT NULL, "is_fl_relay_raised" "raise_drop" NOT NULL DEFAULT 'drop', "is_lfys_relay_raised" "raise_drop" NOT NULL DEFAULT 'drop', "is_rfys_relay_raised" "raise_drop" NOT NULL DEFAULT 'drop', "is_ly_relay_raised" "raise_drop" NOT NULL DEFAULT 'drop', "is_ry_relay_raised" "raise_drop" NOT NULL DEFAULT 'drop', "is_l_relay_raised" "raise_drop" NOT NULL DEFAULT 'drop', "is_r_relay_raised" "raise_drop" NOT NULL DEFAULT 'drop', PRIMARY KEY ("id"), CONSTRAINT "direction_lever_state_id_fkey" FOREIGN KEY ("id") REFERENCES "direction_lever" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION);
+-- Create "opening_lever" table
+CREATE TABLE "opening_lever" ("id" bigint NOT NULL, PRIMARY KEY ("id"), CONSTRAINT "opening_lever_id_fkey" FOREIGN KEY ("id") REFERENCES "interlocking_object" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION);
+-- Create "opening_lever_state" table
+CREATE TABLE "opening_lever_state" ("id" bigint NOT NULL, "is_inserted_key" boolean NOT NULL DEFAULT false, "is_reversed" "nr" NOT NULL DEFAULT 'normal', PRIMARY KEY ("id"), CONSTRAINT "opening_lever_state_id_fkey" FOREIGN KEY ("id") REFERENCES "opening_lever" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION);
+

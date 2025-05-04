@@ -5,7 +5,10 @@ using Traincrew_MultiATS_Server.Repositories.Discord;
 
 namespace Traincrew_MultiATS_Server.Services;
 
-public class DiscordService(IConfiguration configuration, IDiscordRepository discordRepository)
+public class DiscordService(
+    IConfiguration configuration,
+    IDiscordRepository discordRepository,
+    bool enableAuthorization)
 {
     public async Task<RestGuildUser> DiscordAuthentication(string token)
     {
@@ -21,9 +24,28 @@ public class DiscordService(IConfiguration configuration, IDiscordRepository dis
         return member is not null && member.Roles.Any(x => x.Id == beginnerRoleId);
     }
 
-    public async Task<TraincrewRole> GetRoleByMemberId(ulong memberId)
+    public async Task<TraincrewRole> GetRoleByMemberId(ulong? memberId)
     {
-        var member = await discordRepository.GetMember(memberId);
+        if (memberId == null)
+        {
+            // 認証が有効になっており、memberIdがnullの場合はエラーを返す
+            if (enableAuthorization)
+            {
+                throw new InvalidOperationException("Authorization is enabled, But memberId is null.");
+            }
+
+            // ローカルデバッグ用のTraincrewRoleを返す(全許可)
+            return new()
+            {
+                IsDriver = true,
+                IsDriverManager = true,
+                IsConductor = true,
+                IsCommander = true,
+                IsSignalman = true,
+                IsAdministrator = true
+            };
+        }
+        var member = await discordRepository.GetMember(memberId.Value);
         if (member is null)
         {
             throw new DiscordAuthenticationException($"Member ID: {memberId} not found.");

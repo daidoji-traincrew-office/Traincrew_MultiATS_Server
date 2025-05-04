@@ -9,6 +9,7 @@ public class RendoScheduler(IServiceScopeFactory serviceScopeFactory) : Schedule
     {
         var service = scope.ServiceProvider.GetRequiredService<RendoService>();
         await service.LeverToRouteState();
+        await service.DirectionRelay();
         await service.RouteLockRelay();
         await service.RouteRelay();
         await service.SignalControl();

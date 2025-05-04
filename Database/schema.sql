@@ -86,7 +86,7 @@ CREATE TABLE station
     is_passenger_station BOOLEAN      NOT NULL  -- 旅客駅かどうか
 );
 
-CREATE TYPE object_type AS ENUM ('route', 'switching_machine', 'track_circuit', 'lever');
+CREATE TYPE object_type AS ENUM ('route', 'switching_machine', 'track_circuit', 'lever', 'direction_route', 'direction_self_control_lever');
 
 -- object(進路、転てつ機、軌道回路、てこ)を表す
 -- 以上4つのIDの一元管理を行う
@@ -167,8 +167,8 @@ CREATE TABLE switching_machine
 -- 鎖状、信号制御、てっさ鎖状、進路鎖状、接近鎖状、保留鎖状
 CREATE TYPE lock_type AS ENUM ('lock', 'signal_control', 'detector', 'route', 'approach', 'stick');
 
--- てこ
-CREATE TYPE lever_type AS ENUM ('route', 'switching_machine');
+-- (転てつ器、進路)てこ
+CREATE TYPE lever_type AS ENUM ('route', 'switching_machine', 'direction');
 CREATE TABLE lever
 (
     id                   BIGINT PRIMARY KEY REFERENCES interlocking_object (id),
@@ -176,16 +176,41 @@ CREATE TABLE lever
     switching_machine_id BIGINT REFERENCES switching_machine (ID) --転てつ機のID
 );
 
+CREATE TYPE lr as ENUM ('left', 'right');
+
+-- 開放てこ(方向てこ用)
+CREATE TYPE nr AS ENUM ('reversed', 'normal');
+CREATE TABLE direction_self_control_lever
+(
+    id BIGINT PRIMARY KEY REFERENCES interlocking_object (id) -- ID
+);
+
+-- 方向進路
+CREATE TABLE direction_route
+(
+    id                              BIGINT PRIMARY KEY REFERENCES interlocking_object (id),
+    lever_id                        BIGINT REFERENCES lever (ID) NOT NULL,               -- てこのID;
+    direction_self_control_lever_id BIGINT REFERENCES direction_self_control_lever (id), -- 開放てこのID
+    l_lock_lever_id                 BIGINT REFERENCES direction_route (id),              -- Lてこに対する隣駅鎖錠てこ
+    l_lock_lever_direction          lr,                                                  -- Lてこに対する隣駅鎖錠てこの方向
+    l_single_locked_lever_id        BIGINT REFERENCES direction_route (id),              -- Lてこに対する隣駅被片鎖状てこ
+    l_single_locked_lever_direction lr,                                                  -- Lてこに対する隣駅被片鎖状てこの方向
+    r_lock_lever_id                 BIGINT REFERENCES direction_route (id),              -- Rてこに対する隣駅鎖錠てこ
+    r_lock_lever_direction          lr,                                                  -- Rてこに対する隣駅鎖錠てこの方向
+    r_single_locked_lever_id        BIGINT REFERENCES direction_route (id),              -- Rてこに対する隣駅被片鎖状てこ
+    r_single_locked_lever_direction lr                                                   -- Rてこに対する隣駅被片鎖状てこの方向
+);
 
 -- 進路に対するてこと着点ボタンのリスト
 CREATE TABLE route_lever_destination_button
 (
     id                      BIGSERIAL PRIMARY KEY,
-    route_id                BIGINT REFERENCES route (ID)                      NOT NULL, -- 進路のID
-    lever_id                BIGINT REFERENCES lever (ID)                      NOT NULL, -- てこのID
-    destination_button_name VARCHAR(100) REFERENCES destination_button (name) NOT NULL, -- 着点ボタンの名前
+    route_id                BIGINT REFERENCES route (ID) NOT NULL,             -- 進路のID
+    lever_id                BIGINT REFERENCES lever (ID) NOT NULL,             -- てこのID
+    destination_button_name VARCHAR(100) REFERENCES destination_button (name), -- 着点ボタンの名前
+    direction               lr                           NOT NULL,             -- 左右方向
     UNIQUE (route_id),
-    UNIQUE (lever_id, destination_button_name)
+    UNIQUE NULLS NOT DISTINCT (lever_id, destination_button_name, direction)
 );
 
 -- 信号
@@ -204,10 +229,13 @@ CREATE TABLE signal_type
 --- 信号機
 CREATE TABLE signal
 (
-    name             VARCHAR(100) PRIMARY KEY                   NOT NULL,
-    station_id       VARCHAR(10) REFERENCES station (id),                 -- 所属する停車場(線間閉塞の場合は設定されない)
-    type             VARCHAR(100) REFERENCES signal_type (name) NOT NULL, -- 信号機の種類(4灯式とか)
-    track_circuit_id BIGINT REFERENCES track_circuit (ID)                 -- 閉そく信号機の軌道回路
+    name                     VARCHAR(100) PRIMARY KEY                   NOT NULL,
+    station_id               VARCHAR(10) REFERENCES station (id),                 -- 所属する停車場(線間閉塞の場合は設定されない)
+    type                     VARCHAR(100) REFERENCES signal_type (name) NOT NULL, -- 信号機の種類(4灯式とか)
+    track_circuit_id         BIGINT REFERENCES track_circuit (ID),                -- 閉そく信号機の軌道回路
+    direction_route_left_id  BIGINT REFERENCES direction_route (id),              -- 左方向進路
+    direction_route_right_id BIGINT REFERENCES direction_route (id),              -- 右方向進路
+    direction                lr                                                   -- LR向き
 );
 CREATE INDEX signal_station_id_index ON signal (station_id);
 
@@ -247,13 +275,12 @@ CREATE TABLE track_circuit_signal
 CREATE TABLE lock
 (
     id               BIGSERIAL PRIMARY KEY,
-    object_id        BIGINT REFERENCES interlocking_object (id), -- 進路、転てつ機、軌道回路のID
+    object_id        BIGINT REFERENCES interlocking_object (id), -- 進路、転てつ機、方向てこのID
     type             lock_type NOT NULL,                         -- 鎖状の種類
     route_lock_group INT                                         -- 進路鎖状のグループ(カッコで囲まれてるやつを同じ数字にする)
 );
 CREATE INDEX lock_object_id_type_index ON lock (object_id, type);
 
-CREATE TYPE nr AS ENUM ('reversed', 'normal');
 CREATE TYPE nrc AS ENUM ('reversed', 'center', 'normal');
 CREATE TYPE raise_drop AS ENUM ('raise', 'drop');
 CREATE TYPE lock_condition_type AS ENUM ('and', 'or', 'not', 'object');
@@ -275,18 +302,22 @@ CREATE TABLE lock_condition_object
     object_id      BIGINT REFERENCES interlocking_object (id) NOT NULL, -- 進路、転てつ機、軌道回路、てこのID
     timer_seconds  INT,                                                 -- タイマーの秒数
     is_reverse     nr                                         NOT NULL, -- 定反
-    is_single_lock BOOLEAN                                    NOT NULL  -- 片鎖状がどうか    
+    is_single_lock BOOLEAN                                    NOT NULL, -- 片鎖状がどうか    
+    is_lr          lr                                                   -- 方向てこの方向
 );
 -- 統括制御テーブル
 CREATE TABLE throw_out_control
 (
     id                 BIGSERIAL PRIMARY KEY,
-    source_route_id    BIGINT REFERENCES route (id) NOT NULL, -- 統括制御の元となる進路
-    target_route_id    BIGINT REFERENCES route (id) NOT NULL, -- 統括制御の対象となる進路
-    condition_lever_id BIGINT REFERENCES lever (id)           -- 統括制御の条件のてこ
+    source_id          BIGINT REFERENCES interlocking_object (id) NOT NULL, -- 統括元オブジェクトID
+    source_lr          lr,                                                  -- 統括元が方向てこの場合、方向てこの向き
+    target_id          BIGINT REFERENCES interlocking_object (id) NOT NULL, -- 統括先オブジェクトID
+    target_lr          lr,                                                  -- 統括先が方向てこの場合、方向てこの向き
+    condition_lever_id BIGINT REFERENCES direction_self_control_lever (id), -- てこ条件となる開放てこID
+    condition_nr       nr                                                   -- てこ条件の開放てこの向き
 );
-CREATE INDEX throw_out_control_source_route_id_index ON throw_out_control (source_route_id);
-CREATE INDEX throw_out_control_target_route_id_index ON throw_out_control (target_route_id);
+CREATE INDEX throw_out_control_source_id_index ON throw_out_control (source_id);
+CREATE INDEX throw_out_control_target_id_index ON throw_out_control (target_id);
 
 -- 転てつ機に対して要求元進路と要求向きのリスト
 CREATE TABLE switching_machine_route
@@ -329,6 +360,28 @@ CREATE TABLE lever_state
     is_reversed lcr NOT NULL                              -- てこの位置
 );
 
+-- 開放てこ状態
+CREATE TABLE direction_self_control_lever_state
+(
+    id              BIGINT PRIMARY KEY REFERENCES direction_self_control_lever (ID), -- てこのID
+    is_inserted_key BOOL NOT NULL DEFAULT 'false',                                   -- 鍵が挿入されているか
+    is_reversed     nr   NOT NULL DEFAULT 'normal'                                   -- てこの位置
+);
+
+-- 方向てこ状態
+CREATE TABLE direction_route_state
+(
+    id                   BIGINT PRIMARY KEY REFERENCES direction_route (ID), -- てこのID
+    is_lr                lr         NOT NULL DEFAULT 'left',                 -- 方向てこの方向
+    is_fl_relay_raised   raise_drop NOT NULL DEFAULT 'drop',                 -- 運転方向鎖錠リレー
+    is_lfys_relay_raised raise_drop NOT NULL DEFAULT 'drop',                 -- L方向総括リレー
+    is_rfys_relay_raised raise_drop NOT NULL DEFAULT 'drop',                 -- R方向総括リレー
+    is_ly_relay_raised   raise_drop NOT NULL DEFAULT 'drop',                 -- L方向てこ反応リレー
+    is_ry_relay_raised   raise_drop NOT NULL DEFAULT 'drop',                 -- R方向てこ反応リレー
+    is_l_relay_raised    raise_drop NOT NULL DEFAULT 'drop',                 -- L方向てこリレー
+    is_r_relay_raised    raise_drop NOT NULL DEFAULT 'drop'                  -- R方向てこリレー
+);
+
 -- 着点ボタン状態
 CREATE TABLE destination_button_state
 (
@@ -344,12 +397,12 @@ CREATE TABLE track_circuit_state
     train_number                     VARCHAR(100),                                     -- 列車番号
     is_short_circuit                 BOOLEAN    NOT NULL,                              -- 短絡状態
     is_locked                        BOOLEAN    NOT NULL,                              -- 鎖状しているかどうか
-    unlocked_at                      TIMESTAMP           DEFAULT NULL,                 -- 鎖状解除時刻
+    unlocked_at                      TIMESTAMP                    DEFAULT NULL,        -- 鎖状解除時刻
     locked_by                        BIGINT REFERENCES route (id) DEFAULT NULL,        -- 鎖状している進路のID
-    is_correction_raise_relay_raised raise_drop NOT NULL DEFAULT 'drop',               -- 不正扛上補正リレー
-    raised_at                        TIMESTAMP           DEFAULT NULL,                 -- 軌道回路を扛上させるタイミング
-    is_correction_drop_relay_raised  raise_drop NOT NULL DEFAULT 'drop',               -- 不正落下補正リレー
-    dropped_at                       TIMESTAMP           DEFAULT NULL                  -- 軌道回路を落下させるタイミング
+    is_correction_raise_relay_raised raise_drop NOT NULL          DEFAULT 'drop',      -- 不正扛上補正リレー
+    raised_at                        TIMESTAMP                    DEFAULT NULL,        -- 軌道回路を扛上させるタイミング
+    is_correction_drop_relay_raised  raise_drop NOT NULL          DEFAULT 'drop',      -- 不正落下補正リレー
+    dropped_at                       TIMESTAMP                    DEFAULT NULL         -- 軌道回路を落下させるタイミング
 );
 CREATE INDEX track_circuit_state_train_number_index ON track_circuit_state USING hash (train_number);
 

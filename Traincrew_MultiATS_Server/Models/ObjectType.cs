@@ -5,5 +5,7 @@ public enum ObjectType
     Route,
     SwitchingMachine,
     TrackCircuit,
-    Lever
+    Lever,
+    DirectionRoute,
+    DirectionSelfControlLever
 }

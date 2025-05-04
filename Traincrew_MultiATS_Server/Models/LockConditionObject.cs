@@ -10,4 +10,10 @@ public class LockConditionObject: LockCondition
     public int? TimerSeconds { get; set; }
     public NR IsReverse { get; set; }
     public bool IsSingleLock { get; set; }
+
+    /// <summary>
+    /// 方向てこの向き
+    /// </summary>
+    [Column("is_lr")]
+    public LR? IsLR { get; set; }
 }

@@ -15,6 +15,8 @@ using Traincrew_MultiATS_Server.Hubs;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.DestinationButton;
+using Traincrew_MultiATS_Server.Repositories.DirectionRoute;
+using Traincrew_MultiATS_Server.Repositories.DirectionSelfControlLever;
 using Traincrew_MultiATS_Server.Repositories.Discord;
 using Traincrew_MultiATS_Server.Repositories.General;
 using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
@@ -77,6 +79,7 @@ dataSourceBuilder.MapEnum<LeverType>();
 dataSourceBuilder.MapEnum<RouteType>();
 dataSourceBuilder.MapEnum<RaiseDrop>();
 dataSourceBuilder.MapEnum<OperationNotificationType>();
+dataSourceBuilder.MapEnum<LR>();
 var dataSource = dataSourceBuilder.Build();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
@@ -252,6 +255,8 @@ builder.Services.AddAuthorizationBuilder()
 builder.Services
     .AddScoped<IDateTimeRepository, DateTimeRepository>()
     .AddScoped<IDestinationButtonRepository, DestinationButtonRepository>()
+    .AddScoped<IDirectionRouteRepository, DirectionRouteRepository>()
+    .AddScoped<IDirectionSelfControlLeverRepository, DirectionSelfControlLeverRepository>()
     .AddScoped<IGeneralRepository, GeneralRepository>()
     .AddScoped<IInterlockingObjectRepository, InterlockingObjectRepository>()
     .AddScoped<ILockRepository, LockRepository>()
@@ -260,8 +265,8 @@ builder.Services
     .AddScoped<INextSignalRepository, NextSignalRepository>()
     .AddScoped<IOperationNotificationRepository, OperationNotificationRepository>()
     .AddScoped<IProtectionRepository, ProtectionRepository>()
-    .AddScoped<IRouteRepository, RouteRepository>() 
-    .AddScoped<IRouteLeverDestinationRepository, RouteLeverDestinationRepository>() 
+    .AddScoped<IRouteRepository, RouteRepository>()
+    .AddScoped<IRouteLeverDestinationRepository, RouteLeverDestinationRepository>()
     .AddScoped<IRouteLockTrackCircuitRepository, RouteLockTrackCircuitRepository>()
     .AddScoped<ISignalRepository, SignalRepository>()
     .AddScoped<ISignalRouteRepository, SignalRouteRepository>()
@@ -276,9 +281,16 @@ builder.Services
     .AddScoped<RendoService>()
     .AddScoped<SignalService>()
     .AddScoped<StationService>()
-    .AddScoped<SwitchingMachineService>() 
+    .AddScoped<SwitchingMachineService>()
     .AddScoped<TrackCircuitService>()
-    .AddSingleton<DiscordService>()
+    .AddSingleton(provider =>
+    {
+        var discordService = new DiscordService(
+            builder.Configuration,
+            provider.GetRequiredService<IDiscordRepository>(),
+            enableAuthorization);
+        return discordService;
+    })
     .AddSingleton<DiscordRepository>()
     .AddSingleton<IDiscordRepository>(provider => provider.GetRequiredService<DiscordRepository>())
     .AddSingleton<IAuthorizationHandler, DiscordRoleHandler>();
