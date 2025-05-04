@@ -157,6 +157,56 @@ CREATE TABLE route_include
 );
 CREATE INDEX route_include_source_lever_id_index ON route_include (source_lever_id);
 
+-- TTC列番窓
+-- 種類
+CREATE TYPE ttc_window_type AS ENUM ('home_track', 'up', 'down');
+
+CREATE TABLE ttc_window
+(
+    name            VARCHAR(100) PRIMARY KEY,                     -- 名前
+    station_id      VARCHAR(10) REFERENCES station (id) NOT NULL, -- 所属する停車場
+    ttc_window_type ttc_window_type                     NOT NULL  -- 列番窓の種類
+);
+
+CREATE TABLE ttc_window_display_station(
+    id              BIGSERIAL PRIMARY KEY,
+    station_id      VARCHAR(10) REFERENCES station (id) NOT NULL,       -- 表示する駅のID
+    ttc_window_name VARCHAR(100) REFERENCES ttc_window (name) NOT NULL, -- 列番窓の名前
+    -- Todo:使用用途確認、所属駅も含めたほうが話が簡単か?
+    UNIQUE (ttc_window_name, station_id)
+);
+
+CREATE TABLE ttc_window_track_circuit
+(
+    id              BIGSERIAL PRIMARY KEY,
+    ttc_window_name VARCHAR(100) REFERENCES ttc_window (name) NOT NULL, -- 列番窓の名前
+    track_circuit_id BIGINT REFERENCES track_circuit (ID) NOT NULL,     -- 対応する軌道回路のID
+    -- Todo: 関係性確認、どのレベルでユニークとしてもよいか？(おそらくtrack_circuit_idでユニーク)
+    UNIQUE (ttc_window_name, track_circuit_id)
+);
+
+-- リンク設定
+CREATE TABLE ttc_window_link(
+    id                     BIGSERIAL PRIMARY KEY,
+    source_ttc_window_name VARCHAR(100) REFERENCES ttc_window (name) NOT NULL, -- リンク元の列番窓の名前
+    target_ttc_window_name VARCHAR(100) REFERENCES ttc_window (name) NOT NULL, -- リンク先の列番窓の名前
+    -- Todo: 上下線
+    is_empty_sending BOOLEAN NOT NULL, -- 空送りかどうか
+    track_circuit_condition BIGINT REFERENCES track_circuit (id) -- 移行条件の軌道回路ID
+);
+
+-- 移行条件進路リスト
+CREATE table ttc_window_link_route_condition(
+    id                     BIGSERIAL PRIMARY KEY,
+    ttc_window_link_id     BIGINT REFERENCES ttc_window_link (id) NOT NULL, -- リンクのID
+    route_id               BIGINT REFERENCES route (id) NOT NULL,           -- 進路のID
+    -- (Todo: 関係性確認、どのレベルでユニーク？おそらくrouteでユニーク？)
+    UNIQUE (ttc_window_link_id, route_id)
+);
+
+-- Todo: おそらくリンクグラフがいると思ったけど駅ごとに処理すりゃいいかな・・・
+-- Todo: TTC関係で持たせないといけない状態は？単純に列車番号のみ？
+
 -- 転てつ機
 CREATE TABLE switching_machine
 (
