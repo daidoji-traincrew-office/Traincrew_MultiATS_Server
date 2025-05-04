@@ -150,6 +150,19 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasPrincipalKey<DirectionSelfControlLever>(dsc => dsc.Id);
 
         modelBuilder.Entity<DirectionSelfControlLever>();
+
+        modelBuilder.Entity<TtcWindowLinkRouteCondition>()
+            .HasOne<TtcWindowLink>()
+            .WithMany()
+            .HasForeignKey(t => t.TtcWindowLinkId)
+            .HasPrincipalKey(t => t.Id);
+
+        modelBuilder.Entity<TtcWindowLinkRouteCondition>()
+            .HasOne<Route>()
+            .WithMany()
+            .HasForeignKey(t => t.RouteId)
+            .HasPrincipalKey(r => r.Id);
+
         // Convert all column names to snake_case 
         foreach (var entity in modelBuilder.Model.GetEntityTypes())
         {

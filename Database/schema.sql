@@ -163,9 +163,9 @@ CREATE TYPE ttc_window_type AS ENUM ('home_track', 'up', 'down');
 
 CREATE TABLE ttc_window
 (
-    name            VARCHAR(100) PRIMARY KEY,                     -- 名前
-    station_id      VARCHAR(10) REFERENCES station (id) NOT NULL, -- 所属する停車場
-    ttc_window_type ttc_window_type                     NOT NULL  -- 列番窓の種類
+    name       VARCHAR(100) PRIMARY KEY,                     -- 名前
+    station_id VARCHAR(10) REFERENCES station (id) NOT NULL, -- 所属する停車場
+    type       ttc_window_type                     NOT NULL  -- 列番窓の種類
 );
 
 CREATE TABLE ttc_window_display_station
