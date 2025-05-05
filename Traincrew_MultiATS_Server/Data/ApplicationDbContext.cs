@@ -157,7 +157,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<DirectionSelfControlLever>();
 
         modelBuilder.Entity<TtcWindowLinkRouteCondition>()
-            .HasOne<TtcWindowLink>()
+            .HasOne(t => t.TtcWindowLink)
             .WithMany()
             .HasForeignKey(t => t.TtcWindowLinkId)
             .HasPrincipalKey(t => t.Id);
