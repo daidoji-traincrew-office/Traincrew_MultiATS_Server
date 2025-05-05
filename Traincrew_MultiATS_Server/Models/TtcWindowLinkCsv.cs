@@ -1,6 +1,5 @@
 using CsvHelper;
 using CsvHelper.Configuration;
-using Traincrew_MultiATS_Server.Models.Enums;
 
 namespace Traincrew_MultiATS_Server.Models;
 

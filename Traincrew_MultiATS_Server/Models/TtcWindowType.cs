@@ -1,4 +1,4 @@
-namespace Traincrew_MultiATS_Server.Models.Enums;
+namespace Traincrew_MultiATS_Server.Models;
 
 public enum TtcWindowType
 {
