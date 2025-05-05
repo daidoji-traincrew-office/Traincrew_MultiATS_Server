@@ -6,11 +6,11 @@ namespace Traincrew_MultiATS_Server.Models;
 public class TtcWindowLinkRouteCondition
 {
     [Column("id")]
-    public long Id { get; set; }
+    public long Id { get; init; }
 
     [Column("ttc_window_link_id")]
-    public ulong TtcWindowLinkId { get; set; }
+    public ulong TtcWindowLinkId { get; init; }
 
     [Column("route_id")]
-    public ulong RouteId { get; set; }
+    public ulong RouteId { get; init; }
 }

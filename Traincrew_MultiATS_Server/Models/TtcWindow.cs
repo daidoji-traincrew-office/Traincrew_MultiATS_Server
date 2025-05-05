@@ -7,11 +7,11 @@ namespace Traincrew_MultiATS_Server.Models;
 public class TtcWindow
 {
     [Column("name")]
-    public string Name { get; set; }
+    public string Name { get; init; }
 
     [Column("station_id")]
-    public string StationId { get; set; }
+    public string StationId { get; init; }
 
     [Column("type")]
-    public TtcWindowType Type { get; set; }
+    public TtcWindowType Type { get; init; }
 }
