@@ -19,8 +19,20 @@ public sealed class TtcWindowCsvMap : ClassMap<TtcWindowCsv>
         Map(m => m.Name).Index(0);
         Map(m => m.StationId).Index(1);
         Map(m => m.DisplayStations).Convert(GetDisplayStations);
-        Map(m => m.Type).Convert(row => Enum.Parse<TtcWindowType>(row.Row.GetField(6), true));
+        Map(m => m.Type).Convert(GetType);
         Map(m => m.TrackCircuits).Convert(GetTrackCircuits);
+    }
+    
+    private static TtcWindowType GetType(ConvertFromStringArgs row)
+    {
+        var value = row.Row.GetField(6);
+        return value switch
+        {
+            "上り" => TtcWindowType.Up,
+            "下り" => TtcWindowType.Down,
+            "番線" => TtcWindowType.HomeTrack,
+            _ => throw new InvalidOperationException($"Invalid TtcWindowType value: {value}")
+        };
     }
     
     private static List<string> GetDisplayStations(ConvertFromStringArgs row)

@@ -19,10 +19,22 @@ public sealed class TtcWindowLinkCsvMap : ClassMap<TtcWindowLinkCsv>
     {
         Map(m => m.Source).Index(0);
         Map(m => m.Target).Index(1);
-        Map(m => m.Type).Convert(row => Enum.Parse<TtcWindowLinkType>(row.Row.GetField(2), true));
+        Map(m => m.Type).Convert(GetType);
         Map(m => m.IsEmptySending).Convert(row => row.Row.GetField(3) == "O");
         Map(m => m.TrackCircuitCondition).Convert(getTrackCircuitCondition);
         Map(m => m.RouteConditions).Convert(GetRouteConditions);
+    }
+    
+    private static TtcWindowLinkType GetType(ConvertFromStringArgs row)
+    {
+        var value = row.Row.GetField(2);
+        return value switch
+        {
+            "上り" => TtcWindowLinkType.Up,
+            "下り" => TtcWindowLinkType.Down,
+            "入換" => TtcWindowLinkType.Switching,
+            _ => throw new InvalidOperationException($"Invalid TtcWindowLinkType value: {value}")
+        };
     }
     
     private static List<string> GetRouteConditions(ConvertFromStringArgs row)
