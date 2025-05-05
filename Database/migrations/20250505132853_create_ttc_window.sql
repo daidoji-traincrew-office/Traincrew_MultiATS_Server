@@ -3,7 +3,7 @@ CREATE TYPE "ttc_window_type" AS ENUM ('home_track', 'up', 'down');
 -- Create enum type "ttc_window_link_type"
 CREATE TYPE "ttc_window_link_type" AS ENUM ('up', 'down', 'switching');
 -- Create "ttc_window" table
-CREATE TABLE "ttc_window" ("name" character varying(100) NOT NULL, "station_id" character varying(10) NOT NULL, "ttc_window_type" "ttc_window_type" NOT NULL, PRIMARY KEY ("name"), CONSTRAINT "ttc_window_station_id_fkey" FOREIGN KEY ("station_id") REFERENCES "station" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION);
+CREATE TABLE "ttc_window" ("name" character varying(100) NOT NULL, "station_id" character varying(10) NOT NULL, "type" "ttc_window_type" NOT NULL, PRIMARY KEY ("name"), CONSTRAINT "ttc_window_station_id_fkey" FOREIGN KEY ("station_id") REFERENCES "station" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION);
 -- Create "ttc_window_display_station" table
 CREATE TABLE "ttc_window_display_station" ("id" bigserial NOT NULL, "ttc_window_name" character varying(100) NOT NULL, "station_id" character varying(10) NOT NULL, PRIMARY KEY ("id"), CONSTRAINT "ttc_window_display_station_ttc_window_name_station_id_key" UNIQUE ("ttc_window_name", "station_id"), CONSTRAINT "ttc_window_display_station_station_id_fkey" FOREIGN KEY ("station_id") REFERENCES "station" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION, CONSTRAINT "ttc_window_display_station_ttc_window_name_fkey" FOREIGN KEY ("ttc_window_name") REFERENCES "ttc_window" ("name") ON UPDATE NO ACTION ON DELETE NO ACTION);
 -- Create "ttc_window_link" table
