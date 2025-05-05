@@ -10,6 +10,8 @@ public class TtcWindowLinkRouteCondition
 
     [Column("ttc_window_link_id")]
     public ulong TtcWindowLinkId { get; init; }
+    
+    public TtcWindowLink TtcWindowLink { get; init; }
 
     [Column("route_id")]
     public ulong RouteId { get; init; }

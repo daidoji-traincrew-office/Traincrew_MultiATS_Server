@@ -365,7 +365,7 @@ public class InitDbHostedService(
                 continue;
             }
 
-            context.TtcWindowLinks.Add(new()
+            var ttcWindowLink = new TtcWindowLink
             {
                 SourceTtcWindowName = record.Source,
                 TargetTtcWindowName = record.Target,
@@ -374,7 +374,8 @@ public class InitDbHostedService(
                 TrackCircuitCondition = record.TrackCircuitCondition != null
                     ? trackCircuitIdByName[record.TrackCircuitCondition]
                     : null
-            });
+            };
+            context.TtcWindowLinks.Add(ttcWindowLink);
 
             foreach (var routeCondition in record.RouteConditions)
             {
@@ -383,10 +384,10 @@ public class InitDbHostedService(
                     continue;
                 }
 
-                // Todo: 紐づけ
                 context.TtcWindowLinkRoutes.Add(new()
                 {
-                    RouteId = routeId
+                    RouteId = routeId,
+                    TtcWindowLink = ttcWindowLink
                 });
             }
         }
