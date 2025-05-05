@@ -112,6 +112,7 @@ public class InitDbHostedService(
         {
             await initializer.InitializeLocks();
         }
+
         changedEntriesCopy = context.ChangeTracker.Entries()
             .Where(e => e.State is EntityState.Unchanged)
             .ToList();
@@ -271,9 +272,13 @@ public class InitDbHostedService(
 
         var config = new CsvConfiguration(CultureInfo.InvariantCulture)
         {
-            HasHeaderRecord = true,
+            HasHeaderRecord = false,
         };
         using var reader = new StreamReader(file.FullName);
+        // ヘッダー行と最初の行を読み飛ばす
+        await reader.ReadLineAsync(cancellationToken);
+        await reader.ReadLineAsync(cancellationToken);
+
         using var csv = new CsvReader(reader, config);
         csv.Context.RegisterClassMap<TtcWindowCsvMap>();
         var records = await csv
@@ -284,7 +289,7 @@ public class InitDbHostedService(
             .Select(w => w.Name)
             .AsAsyncEnumerable()
             .ToHashSetAsync(cancellationToken);
-        var trackCircuitByName = await context.TrackCircuits
+        var trackCircuitIdByName = await context.TrackCircuits
             .ToDictionaryAsync(tc => tc.Name, tc => tc.Id, cancellationToken);
 
         foreach (var record in records)
@@ -315,7 +320,7 @@ public class InitDbHostedService(
                 context.TtcWindowTrackCircuits.Add(new()
                 {
                     TtcWindowName = record.Name,
-                    TrackCircuitId = trackCircuitByName[trackCircuit]
+                    TrackCircuitId = trackCircuitIdByName[trackCircuit]
                 });
             }
         }
@@ -333,9 +338,12 @@ public class InitDbHostedService(
 
         var config = new CsvConfiguration(CultureInfo.InvariantCulture)
         {
-            HasHeaderRecord = true,
+            HasHeaderRecord = false,
         };
         using var reader = new StreamReader(file.FullName);
+        // ヘッダー行を読み飛ばす
+        await reader.ReadLineAsync(cancellationToken);
+
         using var csv = new CsvReader(reader, config);
         csv.Context.RegisterClassMap<TtcWindowLinkCsvMap>();
         var records = await csv
@@ -345,6 +353,10 @@ public class InitDbHostedService(
             .Select(l => new { Source = l.SourceTtcWindowName, Target = l.TargetTtcWindowName })
             .AsAsyncEnumerable()
             .ToHashSetAsync(cancellationToken);
+        var trackCircuitIdByName = await context.TrackCircuits
+            .ToDictionaryAsync(tc => tc.Name, tc => tc.Id, cancellationToken);
+        var routeIdByName = await context.Routes
+            .ToDictionaryAsync(r => r.Name, r => r.Id, cancellationToken);
 
         foreach (var record in records)
         {
@@ -357,18 +369,25 @@ public class InitDbHostedService(
             {
                 SourceTtcWindowName = record.Source,
                 TargetTtcWindowName = record.Target,
-                Type = record.Direction,
+                Type = record.Type,
                 IsEmptySending = record.IsEmptySending,
-                TrackCircuitCondition = record.TrackCircuitCondition != "なし" ? ulong.Parse(record.TrackCircuitCondition) : null,
+                TrackCircuitCondition = record.TrackCircuitCondition != null
+                    ? trackCircuitIdByName[record.TrackCircuitCondition]
+                    : null
             });
 
-            foreach (var routeCondition in record.RouteConditions.Where(rc => !string.IsNullOrWhiteSpace(rc)))
+            foreach (var routeCondition in record.RouteConditions)
             {
-                // context.TtcWindowLinkRouteConditions.Add(new TtcWindowLinkRouteCondition
-                // {
-                    // TtcWindowLinkId = record.Source.GetHashCode() ^ record.Target.GetHashCode(), // Example ID generation
-                    // RouteName = routeCondition
-                // });
+                if (!routeIdByName.TryGetValue(routeCondition, out var routeId))
+                {
+                    continue;
+                }
+
+                // Todo: 紐づけ
+                context.TtcWindowLinkRoutes.Add(new()
+                {
+                    RouteId = routeId
+                });
             }
         }
 
@@ -429,6 +448,7 @@ internal partial class DbInitializer(
                 IsPassengerStation = station.IsPassengerStation
             });
         }
+
         await context.SaveChangesAsync(cancellationToken);
     }
 
@@ -532,6 +552,7 @@ internal partial class DbInitializer(
             {
                 trackCircuits.TryGetValue(signalData.TrackCircuitName, out trackCircuitId);
             }
+
             if (signalData.Name.StartsWith("上り閉塞") || signalData.Name.StartsWith("下り閉塞"))
             {
                 var trackCircuitName = $"{signalData.Name.Replace("閉塞", "")}T";
@@ -548,23 +569,24 @@ internal partial class DbInitializer(
             ulong? directionRouteRightId = null;
             if (signalData.DirectionRouteLeft != null)
             {
-                if(!directionRoutes.TryGetValue(signalData.DirectionRouteLeft, out var directionRouteId))
+                if (!directionRoutes.TryGetValue(signalData.DirectionRouteLeft, out var directionRouteId))
                 {
                     throw new InvalidOperationException($"方向進路が見つかりません: {signalData.DirectionRouteLeft}");
                 }
 
                 directionRouteLeftId = directionRouteId;
             }
+
             if (signalData.DirectionRouteRight != null)
             {
-                if(!directionRoutes.TryGetValue(signalData.DirectionRouteRight, out var directionRouteId))
+                if (!directionRoutes.TryGetValue(signalData.DirectionRouteRight, out var directionRouteId))
                 {
                     throw new InvalidOperationException($"方向進路が見つかりません: {signalData.DirectionRouteRight}");
                 }
 
                 directionRouteRightId = directionRouteId;
             }
-            
+
             LR? direction = signalData.Direction != null
                 ? signalData.Direction == "L" ? LR.Left : signalData.Direction == "R" ? LR.Right : null
                 : null;
@@ -836,7 +858,8 @@ internal partial class DbInitializer(
             }
             // 方向てこ
             else if ((throwOutControl.TargetRouteName.EndsWith('L') || throwOutControl.TargetRouteName.EndsWith('R'))
-                    && directionRouteByName.TryGetValue(throwOutControl.TargetRouteName[..^1] + 'F', out var directionRoute))
+                     && directionRouteByName.TryGetValue(throwOutControl.TargetRouteName[..^1] + 'F',
+                         out var directionRoute))
             {
                 target = directionRoute;
                 targetLr = throwOutControl.TargetRouteName.EndsWith('L') ? LR.Left : LR.Right;
@@ -846,6 +869,7 @@ internal partial class DbInitializer(
                 {
                     throw new InvalidOperationException($"開放てこが見つかりません: {throwOutControl.LeverConditionName[..^1]}");
                 }
+
                 directionSelfControlLeverId = directionSelfControlLever.Id;
                 directionRoute.DirectionSelfControlLeverId = directionSelfControlLeverId;
                 context.DirectionRoutes.Update(directionRoute);
@@ -905,15 +929,15 @@ public partial class DbRendoTableInitializer
     private const string NameNot = "not";
 
     private static readonly Dictionary<string, List<string>> StationIdMap = new()
-    {               
+    {
         // 赤山町: 西赤山、三郷
-        { "TH58", ["TH59", "TH57"] },   
+        { "TH58", ["TH59", "TH57"] },
         // 西赤山: 赤山町
-        { "TH59", ["TH58"] },             
+        { "TH59", ["TH58"] },
         // 日野森: 高見沢
-        { "TH61", ["TH62"] },     
+        { "TH61", ["TH62"] },
         // 高見沢: 水越、日野森
-        { "TH62", ["TH63", "TH61"] },                    
+        { "TH62", ["TH63", "TH61"] },
         // 水越: 藤江、高見沢
         { "TH63", ["TH64", "TH62"] },
         // 藤江: 大道寺、水越
@@ -1282,7 +1306,7 @@ public partial class DbRendoTableInitializer
             };
             var match = RegexLeverParse().Match(rendoTableCsv.Start);
             var leverName = CalcLeverName(match.Groups[1].Value + match.Groups[3].Value, stationId);
-            var direction = match.Groups[2].Value == "L" ? LR.Left: LR.Right;
+            var direction = match.Groups[2].Value == "L" ? LR.Left : LR.Right;
             var buttonName = CalcButtonName(rendoTableCsv.End, stationId);
             if (!leverDictionary.TryGetValue(leverName, out var lever))
             {
@@ -1298,6 +1322,7 @@ public partial class DbRendoTableInitializer
             {
                 routes.Add((route, lever.Id, direction, null));
             }
+
             context.Routes.Add(route);
         }
 
@@ -1391,6 +1416,7 @@ public partial class DbRendoTableInitializer
             {
                 return null;
             }
+
             var key = CalcDirectionLeverName(item.Name[..^1], item.StationId);
             return otherObjects.GetValueOrDefault(key);
         });
@@ -1673,6 +1699,7 @@ public partial class DbRendoTableInitializer
             {
                 isLr = item.Name.EndsWith('L') ? LR.Left : LR.Right;
             }
+
             context.LockConditionObjects.Add(new()
             {
                 Lock = lockObject,
@@ -1711,6 +1738,7 @@ public partial class DbRendoTableInitializer
             {
                 isLr = item.Name.EndsWith('L') ? LR.Left : LR.Right;
             }
+
             context.LockConditionObjects.Add(new()
             {
                 Lock = lockObject,
@@ -1743,6 +1771,7 @@ public partial class DbRendoTableInitializer
         {
             return;
         }
+
         // 接近鎖錠のパース時はlockItemsが1つの想定
         var lockItem = lockItems[0];
         await RegisterFinalTrackCircuitIdInner(lockItem, route, searchTargetObjects);
@@ -1766,6 +1795,7 @@ public partial class DbRendoTableInitializer
                 }
             }
         }
+
         targetObjects = await searchTargetObjects(lockItem);
         var reversedTargetObjects = targetObjects.ToList();
         reversedTargetObjects.Reverse();
@@ -1781,6 +1811,7 @@ public partial class DbRendoTableInitializer
             context.Update(route);
             return true;
         }
+
         // 進路の最終閉塞軌道回路が見つからなかった
         return false;
     }
@@ -1793,9 +1824,10 @@ public partial class DbRendoTableInitializer
         if (lockItems.Count == 0)
         {
             logger.Log(LogLevel.Warning,
-                    "被片鎖錠てこも、鎖錠てこも見つかりません。処理をスキップします。{}", route.Name);
+                "被片鎖錠てこも、鎖錠てこも見つかりません。処理をスキップします。{}", route.Name);
             return;
         }
+
         if (lockItems.Count == 2)
         {
             logger.Log(LogLevel.Warning,
@@ -1813,6 +1845,7 @@ public partial class DbRendoTableInitializer
                     "三郷駅です。処理をスキップします。{}", lockItem.Name);
                 return;
             }
+
             throw new InvalidOperationException($"対象の方向進路が見つかりません: {lockItem.StationId} {lockItem.Name}");
         }
 
@@ -1916,7 +1949,8 @@ public partial class DbRendoTableInitializer
                 var count = token.Length;
                 var targetStationId = StationIdMap[this.stationId][count - 1];
                 enumerator.MoveNext();
-                var child = ParseToken(ref enumerator, targetStationId, isRouteLock, isReverse, isTotalControl, isLocked);
+                var child = ParseToken(ref enumerator, targetStationId, isRouteLock, isReverse, isTotalControl,
+                    isLocked);
                 if (enumerator.Current.Length != count || enumerator.Current.Any(c => c != ']'))
                 {
                     throw new InvalidOperationException("]が閉じられていません");

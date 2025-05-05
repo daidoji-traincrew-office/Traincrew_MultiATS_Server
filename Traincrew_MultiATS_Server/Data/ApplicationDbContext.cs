@@ -37,6 +37,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<TtcWindowLink> TtcWindowLinks { get; set; }
     public DbSet<TtcWindowDisplayStation> TtcWindowDisplayStations { get; set; }
     public DbSet<TtcWindowTrackCircuit> TtcWindowTrackCircuits { get; set; }
+    public DbSet<TtcWindowLinkRouteCondition> TtcWindowLinkRoutes { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
