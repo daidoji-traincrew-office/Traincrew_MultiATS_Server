@@ -33,6 +33,10 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<OperationNotificationState> OperationNotificationStates { get; set; }
     public DbSet<DirectionRoute> DirectionRoutes { get; set; }
     public DbSet<DirectionSelfControlLever> DirectionSelfControlLevers { get; set; }
+    public DbSet<TtcWindow> TtcWindows { get; set; }
+    public DbSet<TtcWindowLink> TtcWindowLinks { get; set; }
+    public DbSet<TtcWindowDisplayStation> TtcWindowDisplayStations { get; set; }
+    public DbSet<TtcWindowTrackCircuit> TtcWindowTrackCircuits { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

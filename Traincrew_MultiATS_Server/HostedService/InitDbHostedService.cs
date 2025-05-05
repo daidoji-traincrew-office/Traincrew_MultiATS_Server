@@ -33,6 +33,8 @@ public class InitDbHostedService(
         await InitRendoTable(context, datetimeRepository, cancellationToken);
         await InitOperationNotificationDisplay(context, datetimeRepository, cancellationToken);
         await InitRouteCsv(context, cancellationToken);
+        await InitTtcWindows(context, cancellationToken);
+        await InitTtcWindowLinks(context, cancellationToken);
 
         if (dbInitializer != null)
         {
@@ -253,6 +255,120 @@ public class InitDbHostedService(
                     RouteId = routeId,
                     TrackCircuitId = trackCircuitId
                 });
+            }
+        }
+
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task InitTtcWindows(ApplicationDbContext context, CancellationToken cancellationToken)
+    {
+        var file = new FileInfo("./Data/TTC列番窓.csv");
+        if (!file.Exists)
+        {
+            return;
+        }
+
+        var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+        {
+            HasHeaderRecord = true,
+        };
+        using var reader = new StreamReader(file.FullName);
+        using var csv = new CsvReader(reader, config);
+        csv.Context.RegisterClassMap<TtcWindowCsvMap>();
+        var records = await csv
+            .GetRecordsAsync<TtcWindowCsv>(cancellationToken)
+            .ToListAsync(cancellationToken);
+
+        var existingWindows = await context.TtcWindows
+            .Select(w => w.Name)
+            .AsAsyncEnumerable()
+            .ToHashSetAsync(cancellationToken);
+        var trackCircuitByName = await context.TrackCircuits
+            .ToDictionaryAsync(tc => tc.Name, tc => tc.Id, cancellationToken);
+
+        foreach (var record in records)
+        {
+            if (existingWindows.Contains(record.Name))
+            {
+                continue;
+            }
+
+            context.TtcWindows.Add(new()
+            {
+                Name = record.Name,
+                StationId = record.StationId,
+                Type = record.Type
+            });
+
+            foreach (var displayStation in record.DisplayStations)
+            {
+                context.TtcWindowDisplayStations.Add(new()
+                {
+                    TtcWindowName = record.Name,
+                    StationId = displayStation
+                });
+            }
+
+            foreach (var trackCircuit in record.TrackCircuits)
+            {
+                context.TtcWindowTrackCircuits.Add(new()
+                {
+                    TtcWindowName = record.Name,
+                    TrackCircuitId = trackCircuitByName[trackCircuit]
+                });
+            }
+        }
+
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task InitTtcWindowLinks(ApplicationDbContext context, CancellationToken cancellationToken)
+    {
+        var file = new FileInfo("./Data/TTC列番窓リンク設定.csv");
+        if (!file.Exists)
+        {
+            return;
+        }
+
+        var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+        {
+            HasHeaderRecord = true,
+        };
+        using var reader = new StreamReader(file.FullName);
+        using var csv = new CsvReader(reader, config);
+        csv.Context.RegisterClassMap<TtcWindowLinkCsvMap>();
+        var records = await csv
+            .GetRecordsAsync<TtcWindowLinkCsv>(cancellationToken).ToListAsync(cancellationToken);
+
+        var existingLinks = await context.TtcWindowLinks
+            .Select(l => new { Source = l.SourceTtcWindowName, Target = l.TargetTtcWindowName })
+            .AsAsyncEnumerable()
+            .ToHashSetAsync(cancellationToken);
+
+        foreach (var record in records)
+        {
+            if (existingLinks.Contains(new { record.Source, record.Target }))
+            {
+                continue;
+            }
+
+            context.TtcWindowLinks.Add(new()
+            {
+                SourceTtcWindowName = record.Source,
+                TargetTtcWindowName = record.Target,
+                Type = record.Direction,
+                IsEmptySending = record.IsEmptySending,
+                TrackCircuitCondition = record.TrackCircuitCondition != "なし" ? ulong.Parse(record.TrackCircuitCondition) : null,
+            });
+
+            foreach (var routeCondition in record.RouteConditions.Where(rc => !string.IsNullOrWhiteSpace(rc)))
+            {
+                // context.TtcWindowLinkRouteConditions.Add(new TtcWindowLinkRouteCondition
+                // {
+                    // TtcWindowLinkId = record.Source.GetHashCode() ^ record.Target.GetHashCode(), // Example ID generation
+                    // RouteName = routeCondition
+                // });
             }
         }
 
