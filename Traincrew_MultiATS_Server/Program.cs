@@ -80,6 +80,8 @@ dataSourceBuilder.MapEnum<RouteType>();
 dataSourceBuilder.MapEnum<RaiseDrop>();
 dataSourceBuilder.MapEnum<OperationNotificationType>();
 dataSourceBuilder.MapEnum<LR>();
+dataSourceBuilder.MapEnum<TtcWindowType>();
+dataSourceBuilder.MapEnum<TtcWindowLinkType>();
 var dataSource = dataSourceBuilder.Build();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
