@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Traincrew_MultiATS_Server.Models.Enums;
 
@@ -6,8 +7,10 @@ namespace Traincrew_MultiATS_Server.Models;
 [Table("ttc_window_link")]
 public class TtcWindowLink
 {
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    [Key]
     [Column("id")]
-    public long Id { get; init; }
+    public ulong Id { get; init; }
 
     [Column("source_ttc_window_name")]
     public string SourceTtcWindowName { get; init; }
