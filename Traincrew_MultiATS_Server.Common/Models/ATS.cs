@@ -1,4 +1,4 @@
-namespace Traincrew_MultiATS_Server.Models;
+namespace Traincrew_MultiATS_Server.Common.Models;
 
 public class OperationNotificationData
 {
@@ -106,5 +106,5 @@ public class DataFromServer
     public OperationNotificationData? OperationNotificationData { get; set; } = null;
     public List<SignalData> NextSignalData { get; set; } = [];
     public List<SignalData> DoubleNextSignalData { get; set; } = [];
-    public List<Route> RouteData { get; set; } = [];
+    // public List<Route> RouteData { get; set; } = [];
 }

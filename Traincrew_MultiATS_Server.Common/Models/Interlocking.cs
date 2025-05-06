@@ -1,4 +1,4 @@
-namespace Traincrew_MultiATS_Server.Models
+namespace Traincrew_MultiATS_Server.Common.Models
 {
     /// <summary>
     /// 受信用データクラス
@@ -33,7 +33,7 @@ namespace Traincrew_MultiATS_Server.Models
         /// <summary>
         /// 着点ボタン情報リスト
         /// </summary>
-        public List<DestinationButtonState> PhysicalButtons { get; set; }
+        public List<DestinationButtonData> PhysicalButtons { get; set; }
 
         /// <summary>
         /// 方向てこ情報リスト

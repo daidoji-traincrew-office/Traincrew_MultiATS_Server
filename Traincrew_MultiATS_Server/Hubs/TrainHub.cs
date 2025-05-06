@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using OpenIddict.Validation.AspNetCore;
+using Traincrew_MultiATS_Server.Common.Contract;
+using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Services;
 
@@ -16,7 +18,7 @@ public class TrainHub(
     SignalService signalService,
     OperationNotificationService operationNotificationService,
     ProtectionService protectionService,
-    RendoService rendoService) : Hub
+    RendoService rendoService) : Hub<ITrainClientContract>, ITrainHubContract
 {
     public async Task<DataFromServer> SendData_ATS(DataToServer clientData)
     {

@@ -1,6 +1,4 @@
-using NpgsqlTypes;
-
-namespace Traincrew_MultiATS_Server.Models;
+namespace Traincrew_MultiATS_Server.Common.Models;
 // ReSharper disable once InconsistentNaming
 public enum LCR
 {
