@@ -129,6 +129,7 @@ public class TtcStationControlService(
             //空送り対応リンクの場合は、後窓に埋まってなければ移動
             if (ttcWindowLink.IsEmptySending)
             {
+                //行先の窓に列番が入っていない場合は、移動する
                 if (targetTtcWindow.TtcWindowState.TrainNumber == string.Empty)
                 {
                     targetTtcWindow.TtcWindowState.TrainNumber = sourceTtcWindow.TtcWindowState.TrainNumber;
@@ -137,6 +138,12 @@ public class TtcStationControlService(
                     await generalRepository.Save(targetTtcWindow.TtcWindowState);
                     //再起呼出してその次に行かないか確認する
                     await TrainTrackingProcess(targetTtcWindow.Name, ttcWindowLinks, ttcWindows, ttcWindowLinkRouteConditions, trackCircuits, routes);
+                }
+                //行先の窓と前窓の列番が同じ場合は、前窓から削除する
+                else if (targetTtcWindow.TtcWindowState.TrainNumber == sourceTtcWindow.TtcWindowState.TrainNumber)
+                {
+                    sourceTtcWindow.TtcWindowState.TrainNumber = string.Empty;
+                    await generalRepository.Save(sourceTtcWindow.TtcWindowState);
                 }
                 continue;
             }
