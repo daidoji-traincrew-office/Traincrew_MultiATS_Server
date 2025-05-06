@@ -11,7 +11,6 @@ public class RouteService(IRouteRepository routeRepository)
 {
     private static RouteData ToRouteData(Route route)
     {
-        // Todo: 後でこいつはRouteSerivceとして分離する
         return new()
         {
             TcName = route.TcName,
