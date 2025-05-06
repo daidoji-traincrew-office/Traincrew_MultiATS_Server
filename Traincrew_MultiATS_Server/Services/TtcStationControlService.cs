@@ -81,7 +81,7 @@ public class TtcStationControlService(
             );
         }
     }
-    public async Task TrainTrackingProcess(
+    private async Task TrainTrackingProcess(
         string SourceTtcWindowName,
         List<TtcWindowLink> ttcWindowLinks,
         List<TtcWindow> ttcWindows,
