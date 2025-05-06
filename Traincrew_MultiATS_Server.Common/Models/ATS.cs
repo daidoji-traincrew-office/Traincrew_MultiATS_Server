@@ -105,6 +105,7 @@ public class RouteData
     public string? Indicator { get; init; }
     public int? ApproachLockTime { get; init; }
     public ulong? ApproachLockFinalTrackCircuitId { get; init; }
+    //Todo: Stateを設定する
 }
 
 public class DataFromServer
