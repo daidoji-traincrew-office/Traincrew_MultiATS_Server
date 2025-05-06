@@ -306,6 +306,9 @@ public class InitDbHostedService(
                 StationId = record.StationId,
                 Type = record.Type,
                 TtcWindowState = new()
+                {
+                    TrainNumber = ""
+                }
             });
 
             foreach (var displayStation in record.DisplayStations)

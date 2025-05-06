@@ -541,5 +541,5 @@ CREATE TABLE operation_notification_state
 CREATE TABLE ttc_window_state
 (
     name         VARCHAR(100) REFERENCES ttc_window (name) NOT NULL, -- 列番窓の名前
-    train_number VARCHAR(100)                                        -- 列車番号
+    train_number VARCHAR(100)                              NOT NULL  -- 列車番号
 );

@@ -20,5 +20,5 @@ public class TtcWindowState
     /// 列車番号
     /// </summary>
     [Column("train_number")]
-    public string? TrainNumber { get; set; }
+    public string TrainNumber { get; set; }
 }
