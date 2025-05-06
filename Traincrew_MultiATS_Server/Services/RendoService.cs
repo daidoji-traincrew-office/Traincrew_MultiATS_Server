@@ -1468,14 +1468,13 @@ public class RendoService(
     private static RouteData ToRouteData(Route route)
     {
         // Todo: 後でこいつはRouteSerivceとして分離する
-        return new RouteData
+        return new()
         {
             TcName = route.TcName,
-            RouteType = route.RouteType.ToString(),
+            RouteType = route.RouteType,
             RootId = route.RootId,
             Indicator = route.Indicator,
             ApproachLockTime = route.ApproachLockTime,
-            ApproachLockFinalTrackCircuitId = route.ApproachLockFinalTrackCircuitId
         };
     }
 

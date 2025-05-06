@@ -28,7 +28,6 @@ public class SignalData
 {
     public string Name { get; init; }
     public Phase phase { get; init; } = Phase.None;
-
 }
 
 public class SignalTypeData
@@ -99,13 +98,56 @@ public class DataToServer
 
 public class RouteData
 {
-    public string TcName { get; init; }
-    public string RouteType { get; init; }
-    public ulong? RootId { get; init; }
-    public string? Indicator { get; init; }
-    public int? ApproachLockTime { get; init; }
-    public ulong? ApproachLockFinalTrackCircuitId { get; init; }
-    //Todo: Stateを設定する
+    public string TcName { get; set; }
+    public RouteType RouteType { get; set; }
+    public ulong? RootId { get; set; }
+    public RouteData? Root { get; set; }
+    public string? Indicator { get; set; }
+    public int? ApproachLockTime { get; set; }
+    public RouteStateData? RouteState { get; set; }
+}
+
+public class RouteStateData
+{
+    /// <summary>
+    /// てこ反応リレー
+    /// </summary>
+    public RaiseDrop IsLeverRelayRaised { get; set; }
+
+    /// <summary>
+    /// 進路照査リレー
+    /// </summary>
+    public RaiseDrop IsRouteRelayRaised { get; set; }
+
+    /// <summary>
+    /// 信号制御リレー
+    /// </summary>
+    public RaiseDrop IsSignalControlRaised { get; set; }
+
+    /// <summary>
+    /// 接近鎖錠リレー(MR)
+    /// </summary>
+    public RaiseDrop IsApproachLockMRRaised { get; set; }
+
+    /// <summary>
+    /// 接近鎖錠リレー(MS)
+    /// </summary>
+    public RaiseDrop IsApproachLockMSRaised { get; set; }
+
+    /// <summary>
+    /// 進路鎖錠リレー(実在しない)
+    /// </summary>
+    public RaiseDrop IsRouteLockRaised { get; set; }
+
+    /// <summary>
+    /// 総括反応リレー
+    /// </summary>
+    public RaiseDrop IsThrowOutXRRelayRaised { get; set; }
+
+    /// <summary>
+    /// 総括反応中継リレー
+    /// </summary>
+    public RaiseDrop IsThrowOutYSRelayRaised { get; set; }
 }
 
 public class DataFromServer
