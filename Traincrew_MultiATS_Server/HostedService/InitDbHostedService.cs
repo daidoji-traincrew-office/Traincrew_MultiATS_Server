@@ -384,7 +384,7 @@ public class InitDbHostedService(
                     continue;
                 }
 
-                context.TtcWindowLinkRoutes.Add(new()
+                context.TtcWindowLinkRouteConditions.Add(new()
                 {
                     RouteId = routeId,
                     TtcWindowLink = ttcWindowLink

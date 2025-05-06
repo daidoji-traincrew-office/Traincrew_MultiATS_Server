@@ -1,4 +1,5 @@
-﻿using Traincrew_MultiATS_Server.Repositories.General;
+﻿using Traincrew_MultiATS_Server.Models;
+using Traincrew_MultiATS_Server.Repositories.General;
 using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
 using Traincrew_MultiATS_Server.Repositories.Route;
 using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
@@ -31,16 +32,30 @@ public class TtcStationControlService(
         //進路情報から進路IDを取得
         var routeIds = ttcWindowLinkRouteConditions.Select(obj => obj.RouteId).ToList();
 
-        //軌道回路IDと進路IDに対応するオブジェクトを取得
-        var trackCircuits = await trackCircuitRepository.GetTrackCircuitsById(trackCircuitIds);
-        var routes = await routeRepository.GetByIdsWithState(routeIds);
+        //軌道回路IDと進路IDに対応するオブジェクトを取得し、IDをキーとする辞書を作成
+        var trackCircuits = (await trackCircuitRepository.GetTrackCircuitsById(trackCircuitIds))
+            .ToDictionary(obj => obj.Id);
+        var routes = (await routeRepository.GetByIdsWithState(routeIds)).ToDictionary(obj => obj.Id);
 
         foreach (var ttcWindowLink in ttcWindowLinks)
         {
             //窓リンクに対応する前窓と後窓を取得
-            var frontTtcWindow = ttcWindows.FirstOrDefault(obj => obj.Name == ttcWindowLink.SourceTtcWindowName);
-            var backTtcWindow = ttcWindows.FirstOrDefault(obj => obj.Name == ttcWindowLink.TargetTtcWindowName);
+            var sourceTtcWindow = ttcWindows.FirstOrDefault(obj => obj.Name == ttcWindowLink.SourceTtcWindowName);
+            var targetTtcWindow = ttcWindows.FirstOrDefault(obj => obj.Name == ttcWindowLink.TargetTtcWindowName);
 
+            //
+            if (ttcWindowLink.IsEmptySending)
+            {
+                targetTtcWindow.
+                continue;
+            }
+
+            //窓リンクに対応する軌道回路オブジェクトを取得
+            if (ttcWindowLink.TrackCircuitCondition == null)
+            {
+                continue;
+            }
+            var trackCircuit = trackCircuits.GetValueOrDefault(ttcWindowLink.TrackCircuitCondition.Value);
         }
     }
 }
