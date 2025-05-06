@@ -168,6 +168,12 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasForeignKey(t => t.RouteId)
             .HasPrincipalKey(r => r.Id);
 
+        modelBuilder.Entity<TtcWindow>()
+            .HasOne(tw => tw.TtcWindowState)
+            .WithOne()
+            .HasForeignKey<TtcWindowState>(tws => tws.Name)
+            .HasPrincipalKey<TtcWindow>(tw => tw.Name);
+
         // Convert all column names to snake_case 
         foreach (var entity in modelBuilder.Model.GetEntityTypes())
         {

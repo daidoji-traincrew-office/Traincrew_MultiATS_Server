@@ -536,3 +536,10 @@ CREATE TABLE operation_notification_state
     content      TEXT                        NOT NULL,                                      -- 表示データ
     operated_at  TIMESTAMP                   NOT NULL                                       -- 操作時刻
 );
+
+-- TTC状態
+CREATE TABLE ttc_window_state
+(
+    name         VARCHAR(100) REFERENCES ttc_window (name) NOT NULL, -- 列番窓の名前
+    train_number VARCHAR(100)                                        -- 列車番号
+);

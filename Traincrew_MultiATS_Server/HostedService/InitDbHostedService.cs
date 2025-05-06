@@ -303,7 +303,8 @@ public class InitDbHostedService(
             {
                 Name = record.Name,
                 StationId = record.StationId,
-                Type = record.Type
+                Type = record.Type,
+                TtcWindowState = new()
             });
 
             foreach (var displayStation in record.DisplayStations)
