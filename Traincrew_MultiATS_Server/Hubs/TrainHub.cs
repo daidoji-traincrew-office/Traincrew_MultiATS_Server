@@ -78,7 +78,7 @@ public class TrainHub(
             Name = pair.Key,
             phase = pair.Value
         }).ToList();
-        // serverData.RouteData = await rendoService.GetActiveRoutes();
+        serverData.RouteData = await rendoService.GetActiveRoutes();
         return serverData;
     }
 }

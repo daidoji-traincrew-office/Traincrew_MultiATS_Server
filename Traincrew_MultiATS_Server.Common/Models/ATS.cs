@@ -97,6 +97,16 @@ public class DataToServer
     public float Speed { get; init; }
 }
 
+public class RouteData
+{
+    public string TcName { get; init; }
+    public string RouteType { get; init; }
+    public ulong? RootId { get; init; }
+    public string? Indicator { get; init; }
+    public int? ApproachLockTime { get; init; }
+    public ulong? ApproachLockFinalTrackCircuitId { get; init; }
+}
+
 public class DataFromServer
 {
     //進路表示の表示はTC本体実装待ち　未決定
@@ -106,5 +116,5 @@ public class DataFromServer
     public OperationNotificationData? OperationNotificationData { get; set; } = null;
     public List<SignalData> NextSignalData { get; set; } = [];
     public List<SignalData> DoubleNextSignalData { get; set; } = [];
-    // public List<Route> RouteData { get; set; } = [];
+    public List<RouteData> RouteData { get; set; } = new();
 }

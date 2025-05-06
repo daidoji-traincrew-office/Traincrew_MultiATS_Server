@@ -1,4 +1,3 @@
-using Discord;
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
@@ -19,6 +18,7 @@ using Traincrew_MultiATS_Server.Repositories.SwitchingMachineRoute;
 using Traincrew_MultiATS_Server.Repositories.ThrowOutControl;
 using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
 using Route = Traincrew_MultiATS_Server.Models.Route;
+using RouteData = Traincrew_MultiATS_Server.Common.Models.RouteData;
 
 namespace Traincrew_MultiATS_Server.Services;
 
@@ -1465,10 +1465,24 @@ public class RendoService(
         return lockConditions.OfType<LockConditionObject>().Select(lc => lc.ObjectId).ToList();
     }
 
-    public async Task<List<Route>> GetActiveRoutes()
+    private static RouteData ToRouteData(Route route)
+    {
+        // Todo: 後でこいつはRouteSerivceとして分離する
+        return new RouteData
+        {
+            TcName = route.TcName,
+            RouteType = route.RouteType.ToString(),
+            RootId = route.RootId,
+            Indicator = route.Indicator,
+            ApproachLockTime = route.ApproachLockTime,
+            ApproachLockFinalTrackCircuitId = route.ApproachLockFinalTrackCircuitId
+        };
+    }
+
+    public async Task<List<RouteData>> GetActiveRoutes()
     {
         var routeIds = await routeRepository.GetIdsWhereLeverRelayIsRaised();
         var routes = await routeRepository.GetByIdsWithState(routeIds);
-        return routes;
+        return routes.Select(ToRouteData).ToList();
     }
 }
