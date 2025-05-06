@@ -280,6 +280,7 @@ builder.Services
     .AddScoped<OperationNotificationService>()
     .AddScoped<ProtectionService>()
     .AddScoped<RendoService>()
+    .AddScoped<RouteService>()
     .AddScoped<SignalService>()
     .AddScoped<StationService>()
     .AddScoped<SwitchingMachineService>()
