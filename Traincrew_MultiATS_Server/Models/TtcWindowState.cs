@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Traincrew_MultiATS_Server.Models;
@@ -10,7 +11,8 @@ public class TtcWindowState
 {
     /// <summary>
     /// 列番窓の名前
-    /// </summary>
+    /// </summary>      
+    [Key]
     [Column("name")]
     public string Name { get; init; }
 
