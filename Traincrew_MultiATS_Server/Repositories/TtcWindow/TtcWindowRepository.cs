@@ -6,15 +6,17 @@ namespace Traincrew_MultiATS_Server.Repositories.TtcWindow;
 
 public class TtcWindowRepository(ApplicationDbContext context) : ITtcWindowRepository
 {
-    public async Task<List<Models.TtcWindow>> GetAllTtcWindow()
+    public async Task<List<Models.TtcWindow>> GetAllTtcWindowWithState()
     {
         return await context.TtcWindows
+            .Include(t => t.TtcWindowState)
             .ToListAsync();
     }
-    public async Task<List<Models.TtcWindow>> GetTtcWindowByName(List<string> ttcWindowNames)
+    public async Task<List<Models.TtcWindow>> GetTtcWindowWithStateByName(List<string> ttcWindowNames)
     {
         return await context.TtcWindows
-            .Where(obj => ttcWindowNames.Contains(obj.Name))
+            .Include(t => t.TtcWindowState)
+            .Where(t => ttcWindowNames.Contains(t.Name))
             .ToListAsync();
     }
     public async Task<List<Models.TtcWindowTrackCircuit>> GetWindowTrackCircuits()
