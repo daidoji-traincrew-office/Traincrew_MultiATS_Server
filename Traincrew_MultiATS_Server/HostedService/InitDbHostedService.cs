@@ -45,6 +45,7 @@ public class InitDbHostedService(
             new SwitchingMachineScheduler(serviceScopeFactory),
             new RendoScheduler(serviceScopeFactory),
             new OperationNotificationScheduler(serviceScopeFactory),
+            new TtcStationControlScheduler(serviceScopeFactory)
         ]);
     }
 
