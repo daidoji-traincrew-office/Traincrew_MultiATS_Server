@@ -70,8 +70,8 @@ public class TtcStationControlService(
                     var shortCircuitTrackCircuits = trackCircuitsList
                         .Where(obj => obj.TrackCircuitState.TrainNumber == trainNumber)
                         .ToList();
-                    //trackCircuitsListとshortCircuitTrackCircuitsの軌道回路の名前が一致する場合のみ、列番を設定する
-                    if (trackCircuitsList == shortCircuitTrackCircuits)
+                    //trackCircuitsListとshortCircuitTrackCircuitsの軌道回路の数が一致する場合のみ、列番を設定する
+                    if (shortCircuitTrackCircuits.Count > trackCircuitsList.Count)
                     {
                         ttcWindow.TtcWindowState.TrainNumber = trainNumber;
                         await generalRepository.Save(ttcWindow.TtcWindowState);
