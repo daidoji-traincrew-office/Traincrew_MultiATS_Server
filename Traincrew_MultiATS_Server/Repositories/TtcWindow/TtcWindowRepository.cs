@@ -30,4 +30,32 @@ public class TtcWindowRepository(ApplicationDbContext context) : ITtcWindowRepos
             .Where(obj => ttcWindowName.Contains(obj.TtcWindowName))
             .ToListAsync();
     }
+    public async Task<List<Models.TtcWindow>> GetTtcWindowsByStationIdsWithState(List<string> stationIds)
+    {
+        //所属駅の他に表示駅も含めるため以下のようにする
+        //①TtcWindow.StationIdがstationIdsに含まれるTtcWindowを取得
+        //②TtcWindowDisplayStation.StationIdがstationIdsに含まれるTtcWindowを取得
+
+        var ttcWindows = await context.TtcWindows
+            .Include(t => t.TtcWindowState)
+            .Where(t => stationIds.Contains(t.StationId))
+            .ToListAsync();
+        var ttcWindowNames = await context.TtcWindowDisplayStations
+            .Where(t => stationIds.Contains(t.StationId))
+            .ToListAsync();
+        var ttcWindowNamesList = ttcWindowNames.Select(t => t.TtcWindowName).ToList();
+
+        var ttcWindows2 = await context.TtcWindows
+            .Include(t => t.TtcWindowState)
+            .Where(t => ttcWindowNamesList.Contains(t.Name))
+            .ToListAsync();
+        //TtcWindowとttcWindows2の結合
+        ttcWindows.AddRange(ttcWindows2);
+        //重複を排除
+        var distinctTtcWindows = ttcWindows
+            .GroupBy(t => t.Name)
+            .Select(g => g.First())
+            .ToList();
+        return distinctTtcWindows;
+    }
 }

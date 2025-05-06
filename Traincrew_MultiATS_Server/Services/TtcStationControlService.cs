@@ -147,4 +147,9 @@ public class TtcStationControlService(
             }
         }
     }
+
+    public async Task<List<TtcWindow>> GetTtcWindowsByStationIdsWithState(List<string> stationIds)
+    {
+        return await ttcWindowRepository.GetTtcWindowsByStationIdsWithState(stationIds);
+    }
 }

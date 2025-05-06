@@ -6,5 +6,6 @@
         Task<List<Models.TtcWindow>> GetTtcWindowWithStateByName(List<string> name);
         Task<List<Models.TtcWindowTrackCircuit>> GetWindowTrackCircuits();
         Task<List<Models.TtcWindowTrackCircuit>> ttcWindowTrackCircuitsById(List<string> ttcWindowName);
+        Task<List<Models.TtcWindow>> GetTtcWindowsByStationIdsWithState(List<string> stationIds);
     }
 }

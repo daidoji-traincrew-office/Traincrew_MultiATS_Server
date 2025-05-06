@@ -16,7 +16,8 @@ public class InterlockingHub(
     TrackCircuitService trackCircuitService,
     SignalService signalService,
     StationService stationService,
-    InterlockingService interlockingService) : Hub
+    InterlockingService interlockingService,
+    TtcStationControlService ttcStationControlService) : Hub
 {
     public async Task<DataToInterlocking> SendData_Interlocking(List<string> activeStationsList)
     {
@@ -28,6 +29,9 @@ public class InterlockingHub(
         // それら全部の信号の現示計算
         var signalIndications = await signalService.CalcSignalIndication(signalNames);
         var lamps = await interlockingService.GetLamps(activeStationsList);
+
+        var TtcWindows = await ttcStationControlService.GetTtcWindowsByStationIdsWithState(activeStationsList);
+
 
         var response = new DataToInterlocking
         {
@@ -63,7 +67,9 @@ public class InterlockingHub(
                 .ToList(),
 
             // Todo: 列番表示の実装から
-            Retsubans = new List<InterlockingRetsubanData>(),
+            Retsubans = TtcWindows
+                .Select(InterlockingService.ToRetsubanData)
+                .ToList(),
 
             // 各ランプの状態 
             Lamps = lamps,
