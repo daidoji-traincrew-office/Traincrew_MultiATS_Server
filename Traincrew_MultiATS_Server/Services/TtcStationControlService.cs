@@ -71,7 +71,7 @@ public class TtcStationControlService(
                         .Where(obj => obj.TrackCircuitState.TrainNumber == trainNumber)
                         .ToList();
                     //trackCircuitsListとshortCircuitTrackCircuitsの軌道回路の数が一致する場合のみ、列番を設定する
-                    if (shortCircuitTrackCircuits.Count > trackCircuitsList.Count)
+                    if (shortCircuitTrackCircuits.Count == trackCircuitsList.Count)
                     {
                         ttcWindow.TtcWindowState.TrainNumber = trainNumber;
                         await generalRepository.Save(ttcWindow.TtcWindowState);
