@@ -166,7 +166,7 @@ public class TtcStationControlService(
                 var trainNumber = trackCircuit.TrackCircuitState.TrainNumber;
                 var TtcWindowLinkRouteConditions = ttcWindowLinkRouteConditions.FirstOrDefault(obj => obj.TtcWindowLinkId == ttcWindowLink.Id);
                 var routeState = routes.GetValueOrDefault(TtcWindowLinkRouteConditions.RouteId)?.RouteState;
-                if (routeState.IsLeverRelayRaised == RaiseDrop.Raise && targetTtcWindow.TtcWindowState.TrainNumber != trainNumber)
+                if (routeState.IsRouteLockRaised == RaiseDrop.Drop && targetTtcWindow.TtcWindowState.TrainNumber != trainNumber)
                 {
                     //本当なら増結解結関連で処理をしないといけない
                     //現在はあとから入ってきたほうで強制上書きする                 
