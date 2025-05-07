@@ -1,5 +1,13 @@
 -- 全リセット用SQL
 -- 実行注意！！！環境確認良いか？
+
+delete from ttc_window_link_route_condition;
+delete from ttc_window_link;
+delete from ttc_window_display_station;
+delete from ttc_window_state;
+delete from ttc_window_track_circuit;
+delete from ttc_window;
+
 delete from switching_machine_route;
 delete from lock_condition_object;
 delete from lock_condition;
