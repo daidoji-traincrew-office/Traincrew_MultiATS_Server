@@ -159,7 +159,7 @@ CREATE INDEX route_include_source_lever_id_index ON route_include (source_lever_
 
 -- TTC列番窓
 -- 種類
-CREATE TYPE ttc_window_type AS ENUM ('home_track', 'up', 'down');
+CREATE TYPE ttc_window_type AS ENUM ('home_track', 'up', 'down', 'switching');
 
 CREATE TABLE ttc_window
 (

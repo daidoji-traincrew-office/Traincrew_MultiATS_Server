@@ -4,5 +4,6 @@ public enum TtcWindowType
 {
     HomeTrack,
     Up,
-    Down
+    Down,
+    Switching
 }
