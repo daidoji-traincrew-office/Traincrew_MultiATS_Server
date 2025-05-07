@@ -31,6 +31,7 @@ public sealed class TtcWindowCsvMap : ClassMap<TtcWindowCsv>
             "上り" => TtcWindowType.Up,
             "下り" => TtcWindowType.Down,
             "番線" => TtcWindowType.HomeTrack,
+            "入換" => TtcWindowType.Switching,
             _ => throw new InvalidOperationException($"Invalid TtcWindowType value: {value}")
         };
     }
