@@ -166,18 +166,21 @@ public class TtcStationControlService(
                 var trainNumber = trackCircuit.TrackCircuitState.TrainNumber;
                 var TtcWindowLinkRouteConditions = ttcWindowLinkRouteConditions.FirstOrDefault(obj => obj.TtcWindowLinkId == ttcWindowLink.Id);
                 var routeState = routes.GetValueOrDefault(TtcWindowLinkRouteConditions.RouteId)?.RouteState;
-                if (routeState.IsRouteLockRaised == RaiseDrop.Drop && targetTtcWindow.TtcWindowState.TrainNumber != trainNumber)
+                if (routeState.IsRouteLockRaised == RaiseDrop.Drop )
                 {
                     //本当なら増結解結関連で処理をしないといけない
-                    //現在はあとから入ってきたほうで強制上書きする                 
-                    targetTtcWindow.TtcWindowState.TrainNumber = sourceTtcWindow.TtcWindowState.TrainNumber;
+                    //現在はあとから入ってきたほうで強制上書きする              
+                    if (targetTtcWindow.TtcWindowState.TrainNumber != trainNumber)
+                    {
+                        targetTtcWindow.TtcWindowState.TrainNumber = sourceTtcWindow.TtcWindowState.TrainNumber;
+                    }
                     sourceTtcWindow.TtcWindowState.TrainNumber = string.Empty;
                     await generalRepository.Save(sourceTtcWindow.TtcWindowState);
                     await generalRepository.Save(targetTtcWindow.TtcWindowState);
                     //再起呼出してその次に行かないか確認する
                     await TrainTrackingProcess(targetTtcWindow.Name, ttcWindowLinks, ttcWindows, ttcWindowLinkRouteConditions, trackCircuits, routes);
                 }
-                continue;
+                    continue;
             }
         }
     }
