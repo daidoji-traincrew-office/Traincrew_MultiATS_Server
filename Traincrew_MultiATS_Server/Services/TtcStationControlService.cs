@@ -54,31 +54,34 @@ public class TtcStationControlService(
 
         foreach (var ttcWindow in ttcWindows)
         {
-            //窓と窓に対応する軌道回路ID辞書から軌道回路IDを取得
-            if (ttcWindowTrackCircuitIdsDic.TryGetValue(ttcWindow.Name, out var trackCircuitIdsList))
+            if (ttcWindow.Type == TtcWindowType.HomeTrack || (ttcWindow.Type == TtcWindowType.Switching && ttcWindow.TtcWindowState.TrainNumber != null))
             {
-                //軌道回路IDに対応するオブジェクトを取得
-                var trackCircuitsList = trackCircuitIdsList
-                    .Select(id => trackCircuits.GetValueOrDefault(id))
-                    .Where(obj => obj != null)
-                    .ToList();
-                //軌道回路IDに対応するオブジェクトが存在する場合、列番を取得
-                if (trackCircuitsList.Count > 0)
+                //窓と窓に対応する軌道回路ID辞書から軌道回路IDを取得
+                if (ttcWindowTrackCircuitIdsDic.TryGetValue(ttcWindow.Name, out var trackCircuitIdsList))
                 {
-                    if (trackCircuitsList.Any(t => t.TrackCircuitState.IsShortCircuit))
+                    //軌道回路IDに対応するオブジェクトを取得
+                    var trackCircuitsList = trackCircuitIdsList
+                        .Select(id => trackCircuits.GetValueOrDefault(id))
+                        .Where(obj => obj != null)
+                        .ToList();
+                    //軌道回路IDに対応するオブジェクトが存在する場合、列番を取得
+                    if (trackCircuitsList.Count > 0)
                     {
-                        var trainNumber = trackCircuitsList.First().TrackCircuitState.TrainNumber;
-                        //その列番が短絡している軌道回路をtrackCircuitsから全部取得
-                        var shortCircuitTrackCircuits = trackCircuits.ToList()
-                            .Where(obj => obj.Value.TrackCircuitState.TrainNumber == trainNumber)
-                            .Select(obj => obj.Value)
-                            .ToList();
-
-                        //trackCircuitsListとshortCircuitTrackCircuitsの軌道回路の数が一致する場合のみ、列番を設定する
-                        if (shortCircuitTrackCircuits.Count == trackCircuitsList.Count)
+                        if (trackCircuitsList.Any(t => t.TrackCircuitState.IsShortCircuit))
                         {
-                            ttcWindow.TtcWindowState.TrainNumber = trainNumber;
-                            await generalRepository.Save(ttcWindow.TtcWindowState);
+                            var trainNumber = trackCircuitsList.First().TrackCircuitState.TrainNumber;
+                            //その列番が短絡している軌道回路をtrackCircuitsから全部取得
+                            var shortCircuitTrackCircuits = trackCircuits.ToList()
+                                .Where(obj => obj.Value.TrackCircuitState.TrainNumber == trainNumber)
+                                .Select(obj => obj.Value)
+                                .ToList();
+
+                            //trackCircuitsListとshortCircuitTrackCircuitsの軌道回路の数が一致する場合のみ、列番を設定する
+                            if (shortCircuitTrackCircuits.Count == trackCircuitsList.Count)
+                            {
+                                ttcWindow.TtcWindowState.TrainNumber = trainNumber;
+                                await generalRepository.Save(ttcWindow.TtcWindowState);
+                            }
                         }
                     }
                 }
