@@ -177,7 +177,7 @@ public class TtcStationControlService(
             var TtcWindowLinkRouteConditions =
                 ttcWindowLinkRouteConditions.FirstOrDefault(obj => obj.TtcWindowLinkId == ttcWindowLink.Id);
             var routeState = routes.GetValueOrDefault(TtcWindowLinkRouteConditions.RouteId)?.RouteState;
-            if (!(routeState.IsRouteLockRaised == RaiseDrop.Drop))
+            if (!(routeState.IsRouteLockRaised == RaiseDrop.Drop || routeState.IsLeverRelayRaised == RaiseDrop.Raise))
             {
                 continue;
             }
