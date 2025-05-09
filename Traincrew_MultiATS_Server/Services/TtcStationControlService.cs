@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Routing;
-using Traincrew_MultiATS_Server.Models;
+﻿using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.General;
 using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
 using Traincrew_MultiATS_Server.Repositories.Route;
@@ -17,7 +16,7 @@ public class TtcStationControlService(
     ITrackCircuitRepository trackCircuitRepository,
     IRouteRepository routeRepository,
     IGeneralRepository generalRepository
-    )
+)
 {
     public async Task TrainTracking()
     {
@@ -54,7 +53,8 @@ public class TtcStationControlService(
 
         foreach (var ttcWindow in ttcWindows)
         {
-            if (ttcWindow.Type == TtcWindowType.HomeTrack || (ttcWindow.Type == TtcWindowType.Switching && ttcWindow.TtcWindowState.TrainNumber != null))
+            if (ttcWindow.Type == TtcWindowType.HomeTrack || (ttcWindow.Type == TtcWindowType.Switching &&
+                                                              ttcWindow.TtcWindowState.TrainNumber != null))
             {
                 //窓と窓に対応する軌道回路ID辞書から軌道回路IDを取得
                 if (ttcWindowTrackCircuitIdsDic.TryGetValue(ttcWindow.Name, out var trackCircuitIdsList))
@@ -86,6 +86,7 @@ public class TtcStationControlService(
                     }
                 }
             }
+
             //その窓からの移行処理を考える
             await TrainTrackingProcess(
                 ttcWindow.Name,
@@ -97,6 +98,7 @@ public class TtcStationControlService(
             );
         }
     }
+
     private async Task TrainTrackingProcess(
         string SourceTtcWindowName,
         List<TtcWindowLink> ttcWindowLinks,
@@ -104,7 +106,7 @@ public class TtcStationControlService(
         List<TtcWindowLinkRouteCondition> ttcWindowLinkRouteConditions,
         Dictionary<ulong, TrackCircuit> trackCircuits,
         Dictionary<ulong, Route> routes
-        )
+    )
     {
         //対象窓名に対応する窓リンクを全て取得
         var targetTtcWindowLinks = ttcWindowLinks
@@ -116,6 +118,7 @@ public class TtcStationControlService(
             {
                 continue;
             }
+
             //窓リンクに対応する前窓と後窓を取得
             var sourceTtcWindow = ttcWindows.FirstOrDefault(obj => obj.Name == ttcWindowLink.SourceTtcWindowName);
             var targetTtcWindow = ttcWindows.FirstOrDefault(obj => obj.Name == ttcWindowLink.TargetTtcWindowName);
@@ -124,11 +127,13 @@ public class TtcStationControlService(
             {
                 continue;
             }
+
             //前窓の列番が空の場合はスキップ
             if (sourceTtcWindow.TtcWindowState.TrainNumber == string.Empty)
             {
                 continue;
             }
+
             //空送り対応リンクの場合は、後窓に埋まってなければ移動
             if (ttcWindowLink.IsEmptySending)
             {
@@ -140,7 +145,8 @@ public class TtcStationControlService(
                     await generalRepository.Save(sourceTtcWindow.TtcWindowState);
                     await generalRepository.Save(targetTtcWindow.TtcWindowState);
                     //再起呼出してその次に行かないか確認する
-                    await TrainTrackingProcess(targetTtcWindow.Name, ttcWindowLinks, ttcWindows, ttcWindowLinkRouteConditions, trackCircuits, routes);
+                    await TrainTrackingProcess(targetTtcWindow.Name, ttcWindowLinks, ttcWindows,
+                        ttcWindowLinkRouteConditions, trackCircuits, routes);
                 }
                 //行先の窓と前窓の列番が同じ場合は、前窓から削除する
                 else if (targetTtcWindow.TtcWindowState.TrainNumber == sourceTtcWindow.TtcWindowState.TrainNumber)
@@ -148,6 +154,7 @@ public class TtcStationControlService(
                     sourceTtcWindow.TtcWindowState.TrainNumber = string.Empty;
                     await generalRepository.Save(sourceTtcWindow.TtcWindowState);
                 }
+
                 continue;
             }
 
@@ -161,27 +168,33 @@ public class TtcStationControlService(
             var trackCircuit = trackCircuits.GetValueOrDefault(ttcWindowLink.TrackCircuitCondition.Value);
 
 
-            if (trackCircuit.TrackCircuitState.IsShortCircuit)
+            if (!trackCircuit.TrackCircuitState.IsShortCircuit)
             {
-                var trainNumber = trackCircuit.TrackCircuitState.TrainNumber;
-                var TtcWindowLinkRouteConditions = ttcWindowLinkRouteConditions.FirstOrDefault(obj => obj.TtcWindowLinkId == ttcWindowLink.Id);
-                var routeState = routes.GetValueOrDefault(TtcWindowLinkRouteConditions.RouteId)?.RouteState;
-                if (routeState.IsRouteLockRaised == RaiseDrop.Drop )
-                {
-                    //本当なら増結解結関連で処理をしないといけない
-                    //現在はあとから入ってきたほうで強制上書きする              
-                    if (targetTtcWindow.TtcWindowState.TrainNumber != trainNumber)
-                    {
-                        targetTtcWindow.TtcWindowState.TrainNumber = sourceTtcWindow.TtcWindowState.TrainNumber;
-                    }
-                    sourceTtcWindow.TtcWindowState.TrainNumber = string.Empty;
-                    await generalRepository.Save(sourceTtcWindow.TtcWindowState);
-                    await generalRepository.Save(targetTtcWindow.TtcWindowState);
-                    //再起呼出してその次に行かないか確認する
-                    await TrainTrackingProcess(targetTtcWindow.Name, ttcWindowLinks, ttcWindows, ttcWindowLinkRouteConditions, trackCircuits, routes);
-                }
-                    continue;
+                continue;
             }
+
+            var trainNumber = trackCircuit.TrackCircuitState.TrainNumber;
+            var TtcWindowLinkRouteConditions =
+                ttcWindowLinkRouteConditions.FirstOrDefault(obj => obj.TtcWindowLinkId == ttcWindowLink.Id);
+            var routeState = routes.GetValueOrDefault(TtcWindowLinkRouteConditions.RouteId)?.RouteState;
+            if (!(routeState.IsRouteLockRaised == RaiseDrop.Drop))
+            {
+                continue;
+            }
+            //本当なら増結解結関連で処理をしないといけない
+            //現在はあとから入ってきたほうで強制上書きする              
+            if (targetTtcWindow.TtcWindowState.TrainNumber != trainNumber)
+            {
+                targetTtcWindow.TtcWindowState.TrainNumber = sourceTtcWindow.TtcWindowState.TrainNumber;
+            }
+
+            sourceTtcWindow.TtcWindowState.TrainNumber = string.Empty;
+            await generalRepository.Save(sourceTtcWindow.TtcWindowState);
+            await generalRepository.Save(targetTtcWindow.TtcWindowState);
+            //再起呼出してその次に行かないか確認する
+            await TrainTrackingProcess(targetTtcWindow.Name, ttcWindowLinks, ttcWindows,
+                ttcWindowLinkRouteConditions, trackCircuits, routes);
+
         }
     }
 
