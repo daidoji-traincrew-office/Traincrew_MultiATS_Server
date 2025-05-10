@@ -119,9 +119,14 @@ public class TtcStationControlService(
         List<TtcWindow> ttcWindows,
         List<TtcWindowLinkRouteCondition> ttcWindowLinkRouteConditions,
         Dictionary<ulong, TrackCircuit> trackCircuits,
-        Dictionary<ulong, Route> routes
+        Dictionary<ulong, Route> routes,
+        int recallCounter = 0
         )
     {
+        if (recallCounter > 15)
+        {
+           // return;
+        }
         try
         {
             //対象窓名に対応する窓リンクを全て取得
@@ -158,7 +163,7 @@ public class TtcStationControlService(
                         await generalRepository.Save(sourceTtcWindow.TtcWindowState);
                         await generalRepository.Save(targetTtcWindow.TtcWindowState);
                         //再起呼出してその次に行かないか確認する
-                        await TrainTrackingProcess(targetTtcWindow.Name, ttcWindowLinks, ttcWindows, ttcWindowLinkRouteConditions, trackCircuits, routes);
+                        await TrainTrackingProcess(targetTtcWindow.Name, ttcWindowLinks, ttcWindows, ttcWindowLinkRouteConditions, trackCircuits, routes, recallCounter++);
                     }
                     //行先の窓と前窓の列番が同じ場合は、前窓から削除する
                     else if (targetTtcWindow.TtcWindowState.TrainNumber == sourceTtcWindow.TtcWindowState.TrainNumber)
@@ -195,8 +200,8 @@ public class TtcStationControlService(
                         sourceTtcWindow.TtcWindowState.TrainNumber = string.Empty;
                         await generalRepository.Save(sourceTtcWindow.TtcWindowState);
                         await generalRepository.Save(targetTtcWindow.TtcWindowState);
-                        //再起呼出してその次に行かないか確認する
-                        await TrainTrackingProcess(targetTtcWindow.Name, ttcWindowLinks, ttcWindows, ttcWindowLinkRouteConditions, trackCircuits, routes);
+                        //再起呼出してその次に行かないか確認する                                                                                                
+                        await TrainTrackingProcess(targetTtcWindow.Name, ttcWindowLinks, ttcWindows, ttcWindowLinkRouteConditions, trackCircuits, routes, recallCounter++);
                     }
                     continue;
                 }
