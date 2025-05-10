@@ -347,7 +347,7 @@ if (enableAuthorization)
         };
 
         Enumerable.Range(0, 10)
-            .Select(i => new Uri($"http://localhost:{49152 + i}/callback"))
+            .Select(i => new Uri($"http://localhost:{49152 + i}/"))
             .ToList()
             .ForEach(uri => applicationDescriptor.RedirectUris.Add(uri));
 
