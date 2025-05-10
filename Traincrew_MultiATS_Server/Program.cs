@@ -317,6 +317,7 @@ else
     app.UseForwardedHeaders();
     app.UseHsts();
 }
+
 app.UseRouting();
 app.UseCors();
 app.UseAuthentication();
@@ -331,19 +332,11 @@ if (enableAuthorization)
 
     if (await manager.FindByClientIdAsync("MultiATS_Client") == null)
     {
-        await manager.CreateAsync(new()
+        var applicationDescriptor = new OpenIddictApplicationDescriptor
         {
             ApplicationType = ApplicationTypes.Native,
             ClientId = "MultiATS_Client",
             ClientType = ClientTypes.Public,
-            RedirectUris =
-            {
-                new("http://localhost:49152/"),
-                new("http://localhost:49153/"),
-                new("http://localhost:49154/"),
-                new("http://localhost:49155/"),
-                new("http://localhost:49156/")
-            },
             Permissions =
             {
                 Permissions.Endpoints.Authorization,
@@ -351,7 +344,14 @@ if (enableAuthorization)
                 Permissions.GrantTypes.AuthorizationCode,
                 Permissions.ResponseTypes.Code
             }
-        });
+        };
+
+        Enumerable.Range(0, 10)
+            .Select(i => new Uri($"http://localhost:{49152 + i}/callback"))
+            .ToList()
+            .ForEach(uri => applicationDescriptor.RedirectUris.Add(uri));
+
+        await manager.CreateAsync(applicationDescriptor);
     }
 }
 
