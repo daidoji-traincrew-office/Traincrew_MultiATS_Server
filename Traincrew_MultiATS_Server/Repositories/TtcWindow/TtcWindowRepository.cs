@@ -58,4 +58,11 @@ public class TtcWindowRepository(ApplicationDbContext context) : ITtcWindowRepos
             .ToList();
         return distinctTtcWindows;
     }
+    public async Task<List<Models.TtcWindow>> GetTtcWindowsByTrainNumber(string trainNumber)
+    {
+        return await context.TtcWindows
+            .Include(t => t.TtcWindowState)
+            .Where(t => t.TtcWindowState.TrainNumber == trainNumber)
+            .ToListAsync();
+    }
 }

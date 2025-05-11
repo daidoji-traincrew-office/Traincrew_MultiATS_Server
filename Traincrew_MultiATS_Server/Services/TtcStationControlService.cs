@@ -135,6 +135,14 @@ public class TtcStationControlService(
                 continue;
             }
 
+            //行先の窓と前窓の列番が同じ場合は、前窓から削除する
+            if (targetTtcWindow.TtcWindowState.TrainNumber == sourceTtcWindow.TtcWindowState.TrainNumber)
+            {
+                sourceTtcWindow.TtcWindowState.TrainNumber = string.Empty;
+                await generalRepository.Save(sourceTtcWindow.TtcWindowState);
+                continue;
+            }
+
             //空送り対応リンクの場合は、後窓に埋まってなければ移動
             if (ttcWindowLink.IsEmptySending)
             {
@@ -149,13 +157,6 @@ public class TtcStationControlService(
                     await TrainTrackingProcess(targetTtcWindow.Name, ttcWindowLinks, ttcWindows,
                         ttcWindowLinkRouteConditions, trackCircuits, routes, recallCounter++);
                 }
-                //行先の窓と前窓の列番が同じ場合は、前窓から削除する
-                else if (targetTtcWindow.TtcWindowState.TrainNumber == sourceTtcWindow.TtcWindowState.TrainNumber)
-                {
-                    sourceTtcWindow.TtcWindowState.TrainNumber = string.Empty;
-                    await generalRepository.Save(sourceTtcWindow.TtcWindowState);
-                }
-
                 continue;
             }
 
@@ -202,5 +203,22 @@ public class TtcStationControlService(
     public async Task<List<TtcWindow>> GetTtcWindowsByStationIdsWithState(List<string> stationIds)
     {
         return await ttcWindowRepository.GetTtcWindowsByStationIdsWithState(stationIds);
+    }
+
+    public async Task ClearTtcWindowByTrainNumber(string DiaName)
+    {
+        //指定された列番が入っている窓を全て取得
+        var ttcWindows = await ttcWindowRepository.GetTtcWindowsByTrainNumber(DiaName);
+        //列番が入っている窓がない場合はスキップ
+        if (ttcWindows.Count == 0)
+        {
+            return;
+        }
+        //窓から列番を削除
+        foreach (var ttcWindow in ttcWindows)
+        {
+            ttcWindow.TtcWindowState.TrainNumber = string.Empty;
+            await generalRepository.Save(ttcWindow.TtcWindowState);
+        }
     }
 }
