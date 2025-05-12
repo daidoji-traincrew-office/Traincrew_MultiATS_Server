@@ -37,14 +37,17 @@ public class WebApplicationFixture : WebApplicationFactory<Program>
     /// </summary>
     /// <param name="receiver">クライアント側のコントラクトを実装したインスタンス</param>
     /// <returns>HubConnectionとITIDHubContract</returns>
-    public (HubConnection, ITIDHubContract) CreateTIDHub(ITIDClientContract receiver)
+    public (HubConnection, ITIDHubContract) CreateTIDHub(ITIDClientContract? receiver = null)
     {
         var connection = new HubConnectionBuilder()
             .WithUrl(Server.BaseAddress + TIDHubPath)
             .Build();
 
         var hubContract = connection.CreateHubProxy<ITIDHubContract>();
-        connection.Register(receiver);
+        if (receiver != null)
+        {
+            connection.Register(receiver);
+        }
 
         return (connection, hubContract);
     }
@@ -54,14 +57,17 @@ public class WebApplicationFixture : WebApplicationFactory<Program>
     /// </summary>
     /// <param name="receiver">クライアント側のコントラクトを実装したインスタンス</param>
     /// <returns>HubConnectionとIInterlockingHubContract</returns>
-    public (HubConnection, IInterlockingHubContract) CreateInterlockingHub(IInterlockingClientContract receiver)
+    public (HubConnection, IInterlockingHubContract) CreateInterlockingHub(IInterlockingClientContract? receiver = null)
     {
         var connection = new HubConnectionBuilder()
             .WithUrl(Server.BaseAddress + InterlockingHubPath)
             .Build();
 
         var hubContract = connection.CreateHubProxy<IInterlockingHubContract>();
-        connection.Register(receiver);
+        if (receiver != null)
+        {
+            connection.Register(receiver);
+        }
 
         return (connection, hubContract);
     }
@@ -71,14 +77,17 @@ public class WebApplicationFixture : WebApplicationFactory<Program>
     /// </summary>
     /// <param name="receiver">クライアント側のコントラクトを実装したインスタンス</param>
     /// <returns>HubConnectionとICommanderTableHubContract</returns>
-    public (HubConnection, ICommanderTableHubContract) CreateCommanderTableHub(ICommanderTableClientContract receiver)
+    public (HubConnection, ICommanderTableHubContract) CreateCommanderTableHub(ICommanderTableClientContract? receiver = null)
     {
         var connection = new HubConnectionBuilder()
             .WithUrl(Server.BaseAddress + CommanderTableHubPath)
             .Build();
 
         var hubContract = connection.CreateHubProxy<ICommanderTableHubContract>();
-        connection.Register(receiver);
+        if (receiver != null)
+        {
+            connection.Register(receiver);
+        }
 
         return (connection, hubContract);
     }
