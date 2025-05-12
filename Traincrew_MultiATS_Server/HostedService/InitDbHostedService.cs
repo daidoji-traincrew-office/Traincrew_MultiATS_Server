@@ -37,7 +37,7 @@ public class InitDbHostedService(
             await initializer.InitializeObjects();
         }
 
-        DetachAllEntities(context);
+        DetachUnchangedEntities(context);
         await InitOperationNotificationDisplay(context, datetimeRepository, cancellationToken);
         await InitRouteCsv(context, cancellationToken);
 
@@ -46,7 +46,7 @@ public class InitDbHostedService(
             await dbInitializer.InitializePost();
         }
 
-        DetachAllEntities(context);
+        DetachUnchangedEntities(context);
         foreach (var initializer in rendoTableInitializers)
         {
             await initializer.InitializeLocks();
@@ -252,7 +252,11 @@ public class InitDbHostedService(
         await context.SaveChangesAsync(cancellationToken);
     }
 
-    private void DetachAllEntities(ApplicationDbContext context)
+    /// <summary>
+    /// UnchangedなEntityをすべてDetachする。
+    /// </summary>
+    /// <param name="context">DbContext</param>
+    private static void DetachUnchangedEntities(ApplicationDbContext context)
     {
         var changedEntriesCopy = context.ChangeTracker.Entries()
             .Where(e => e.State is EntityState.Unchanged)
