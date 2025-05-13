@@ -7,10 +7,10 @@ namespace Traincrew_MultiATS_Server.IT.Fixture;
 
 public class WebApplicationFixture : WebApplicationFactory<Program>
 {
-    private const string TrainHubPath = "/hub/train";
-    private const string TIDHubPath = "/hub/TID";
-    private const string InterlockingHubPath = "/hub/interlocking";
-    private const string CommanderTableHubPath = "/hub/commander_table";
+    private const string TrainHubPath = "hub/train";
+    private const string TIDHubPath = "hub/TID";
+    private const string InterlockingHubPath = "hub/interlocking";
+    private const string CommanderTableHubPath = "hub/commander_table";
 
     /// <summary>
     /// ITrainHubContractとITrainClientContract用のHubConnectionを生成し、両方を返します。
@@ -20,7 +20,8 @@ public class WebApplicationFixture : WebApplicationFactory<Program>
     public (HubConnection, ITrainHubContract) CreateTrainHub(ITrainClientContract? receiver = null)
     {
         var connection = new HubConnectionBuilder()
-            .WithUrl(Server.BaseAddress + TrainHubPath)
+            .WithUrl(Server.BaseAddress + TrainHubPath,
+                o => { o.HttpMessageHandlerFactory = _ => Server.CreateHandler(); })
             .Build();
 
         var hubContract = connection.CreateHubProxy<ITrainHubContract>();
@@ -40,7 +41,8 @@ public class WebApplicationFixture : WebApplicationFactory<Program>
     public (HubConnection, ITIDHubContract) CreateTIDHub(ITIDClientContract? receiver = null)
     {
         var connection = new HubConnectionBuilder()
-            .WithUrl(Server.BaseAddress + TIDHubPath)
+            .WithUrl(Server.BaseAddress + TIDHubPath,
+                o => { o.HttpMessageHandlerFactory = _ => Server.CreateHandler(); })
             .Build();
 
         var hubContract = connection.CreateHubProxy<ITIDHubContract>();
@@ -60,7 +62,8 @@ public class WebApplicationFixture : WebApplicationFactory<Program>
     public (HubConnection, IInterlockingHubContract) CreateInterlockingHub(IInterlockingClientContract? receiver = null)
     {
         var connection = new HubConnectionBuilder()
-            .WithUrl(Server.BaseAddress + InterlockingHubPath)
+            .WithUrl(Server.BaseAddress + InterlockingHubPath,
+                o => { o.HttpMessageHandlerFactory = _ => Server.CreateHandler(); })
             .Build();
 
         var hubContract = connection.CreateHubProxy<IInterlockingHubContract>();
@@ -77,10 +80,12 @@ public class WebApplicationFixture : WebApplicationFactory<Program>
     /// </summary>
     /// <param name="receiver">クライアント側のコントラクトを実装したインスタンス</param>
     /// <returns>HubConnectionとICommanderTableHubContract</returns>
-    public (HubConnection, ICommanderTableHubContract) CreateCommanderTableHub(ICommanderTableClientContract? receiver = null)
+    public (HubConnection, ICommanderTableHubContract) CreateCommanderTableHub(
+        ICommanderTableClientContract? receiver = null)
     {
         var connection = new HubConnectionBuilder()
-            .WithUrl(Server.BaseAddress + CommanderTableHubPath)
+            .WithUrl(Server.BaseAddress + CommanderTableHubPath,
+                o => { o.HttpMessageHandlerFactory = _ => Server.CreateHandler(); })
             .Build();
 
         var hubContract = connection.CreateHubProxy<ICommanderTableHubContract>();
