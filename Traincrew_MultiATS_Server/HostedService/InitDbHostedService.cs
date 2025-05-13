@@ -31,13 +31,26 @@ public class InitDbHostedService(
             await dbInitializer.Initialize();
         }
 
-        await InitRendoTable(context, datetimeRepository, cancellationToken);
+        var rendoTableInitializers =
+            await CreateDbRendoTableInitializer(context, datetimeRepository, cancellationToken);
+        foreach (var initializer in rendoTableInitializers)
+        {
+            await initializer.InitializeObjects();
+        }
+
+        DetachUnchangedEntities(context);
         await InitOperationNotificationDisplay(context, datetimeRepository, cancellationToken);
         await InitRouteCsv(context, cancellationToken);
 
         if (dbInitializer != null)
         {
             await dbInitializer.InitializePost();
+        }
+
+        DetachUnchangedEntities(context);
+        foreach (var initializer in rendoTableInitializers)
+        {
+            await initializer.InitializeLocks();
         }
 
         _schedulers.AddRange([
@@ -59,7 +72,7 @@ public class InitDbHostedService(
             : null;
     }
 
-    private async Task InitRendoTable(
+    private async Task<List<DbRendoTableInitializer>> CreateDbRendoTableInitializer(
         ApplicationDbContext context,
         IDateTimeRepository dateTimeRepository,
         CancellationToken cancellationToken)
@@ -67,7 +80,7 @@ public class InitDbHostedService(
         var rendoTableDir = new DirectoryInfo("./Data/RendoTable");
         if (!rendoTableDir.Exists)
         {
-            return;
+            return [];
         }
 
         var logger = loggerFactory.CreateLogger<DbRendoTableInitializer>();
@@ -95,29 +108,9 @@ public class InitDbHostedService(
             var initializer =
                 new DbRendoTableInitializer(stationId, records, context, dateTimeRepository, logger, cancellationToken);
             initializers.Add(initializer);
-            await initializer.InitializeObjects();
         }
 
-        var changedEntriesCopy = context.ChangeTracker.Entries()
-            .Where(e => e.State is EntityState.Unchanged)
-            .ToList();
-
-        foreach (var entry in changedEntriesCopy)
-        {
-            entry.State = EntityState.Detached;
-        }
-
-        foreach (var initializer in initializers)
-        {
-            await initializer.InitializeLocks();
-        }
-        changedEntriesCopy = context.ChangeTracker.Entries()
-            .Where(e => e.State is EntityState.Unchanged)
-            .ToList();
-        foreach (var entry in changedEntriesCopy)
-        {
-            entry.State = EntityState.Detached;
-        }
+        return initializers;
     }
 
     private async Task InitOperationNotificationDisplay(
@@ -260,6 +253,22 @@ public class InitDbHostedService(
         await context.SaveChangesAsync(cancellationToken);
     }
 
+    /// <summary>
+    /// UnchangedなEntityをすべてDetachする。
+    /// </summary>
+    /// <param name="context">DbContext</param>
+    private static void DetachUnchangedEntities(ApplicationDbContext context)
+    {
+        var changedEntriesCopy = context.ChangeTracker.Entries()
+            .Where(e => e.State is EntityState.Unchanged)
+            .ToList();
+
+        foreach (var entry in changedEntriesCopy)
+        {
+            entry.State = EntityState.Detached;
+        }
+    }
+
     public async Task StopAsync(CancellationToken cancellationToken)
     {
         await Task.WhenAll(_schedulers.Select(s => s.Stop()));
@@ -314,6 +323,7 @@ internal partial class DbInitializer(
                 IsPassengerStation = station.IsPassengerStation
             });
         }
+
         await context.SaveChangesAsync(cancellationToken);
     }
 
@@ -417,6 +427,7 @@ internal partial class DbInitializer(
             {
                 trackCircuits.TryGetValue(signalData.TrackCircuitName, out trackCircuitId);
             }
+
             if (signalData.Name.StartsWith("上り閉塞") || signalData.Name.StartsWith("下り閉塞"))
             {
                 var trackCircuitName = $"{signalData.Name.Replace("閉塞", "")}T";
@@ -433,23 +444,24 @@ internal partial class DbInitializer(
             ulong? directionRouteRightId = null;
             if (signalData.DirectionRouteLeft != null)
             {
-                if(!directionRoutes.TryGetValue(signalData.DirectionRouteLeft, out var directionRouteId))
+                if (!directionRoutes.TryGetValue(signalData.DirectionRouteLeft, out var directionRouteId))
                 {
                     throw new InvalidOperationException($"方向進路が見つかりません: {signalData.DirectionRouteLeft}");
                 }
 
                 directionRouteLeftId = directionRouteId;
             }
+
             if (signalData.DirectionRouteRight != null)
             {
-                if(!directionRoutes.TryGetValue(signalData.DirectionRouteRight, out var directionRouteId))
+                if (!directionRoutes.TryGetValue(signalData.DirectionRouteRight, out var directionRouteId))
                 {
                     throw new InvalidOperationException($"方向進路が見つかりません: {signalData.DirectionRouteRight}");
                 }
 
                 directionRouteRightId = directionRouteId;
             }
-            
+
             LR? direction = signalData.Direction != null
                 ? signalData.Direction == "L" ? LR.Left : signalData.Direction == "R" ? LR.Right : null
                 : null;
@@ -721,7 +733,8 @@ internal partial class DbInitializer(
             }
             // 方向てこ
             else if ((throwOutControl.TargetRouteName.EndsWith('L') || throwOutControl.TargetRouteName.EndsWith('R'))
-                    && directionRouteByName.TryGetValue(throwOutControl.TargetRouteName[..^1] + 'F', out var directionRoute))
+                     && directionRouteByName.TryGetValue(throwOutControl.TargetRouteName[..^1] + 'F',
+                         out var directionRoute))
             {
                 target = directionRoute;
                 targetLr = throwOutControl.TargetRouteName.EndsWith('L') ? LR.Left : LR.Right;
@@ -731,6 +744,7 @@ internal partial class DbInitializer(
                 {
                     throw new InvalidOperationException($"開放てこが見つかりません: {throwOutControl.LeverConditionName[..^1]}");
                 }
+
                 directionSelfControlLeverId = directionSelfControlLever.Id;
                 directionRoute.DirectionSelfControlLeverId = directionSelfControlLeverId;
                 context.DirectionRoutes.Update(directionRoute);
@@ -790,15 +804,15 @@ public partial class DbRendoTableInitializer
     private const string NameNot = "not";
 
     private static readonly Dictionary<string, List<string>> StationIdMap = new()
-    {               
+    {
         // 赤山町: 西赤山、三郷
-        { "TH58", ["TH59", "TH57"] },   
+        { "TH58", ["TH59", "TH57"] },
         // 西赤山: 赤山町
-        { "TH59", ["TH58"] },             
+        { "TH59", ["TH58"] },
         // 日野森: 高見沢
-        { "TH61", ["TH62"] },     
+        { "TH61", ["TH62"] },
         // 高見沢: 水越、日野森
-        { "TH62", ["TH63", "TH61"] },                    
+        { "TH62", ["TH63", "TH61"] },
         // 水越: 藤江、高見沢
         { "TH63", ["TH64", "TH62"] },
         // 藤江: 大道寺、水越
@@ -825,6 +839,10 @@ public partial class DbRendoTableInitializer
     // てこ名を抽出するための正規表現
     [GeneratedRegex(@"(\d+)(R|L)(Z?)")]
     private static partial Regex RegexLeverParse();
+
+    // てこ名を抽出するための正規表現(Full Version)
+    [GeneratedRegex(@"^(\d+)(R|L)(Z?)$")]
+    private static partial Regex RegexLeverParseFullMatch();
 
     // 軌道回路名を抽出するための正規表現
     [GeneratedRegex(@"[A-Z\dｲﾛ]+T")]
@@ -1167,7 +1185,7 @@ public partial class DbRendoTableInitializer
             };
             var match = RegexLeverParse().Match(rendoTableCsv.Start);
             var leverName = CalcLeverName(match.Groups[1].Value + match.Groups[3].Value, stationId);
-            var direction = match.Groups[2].Value == "L" ? LR.Left: LR.Right;
+            var direction = match.Groups[2].Value == "L" ? LR.Left : LR.Right;
             var buttonName = CalcButtonName(rendoTableCsv.End, stationId);
             if (!leverDictionary.TryGetValue(leverName, out var lever))
             {
@@ -1183,6 +1201,7 @@ public partial class DbRendoTableInitializer
             {
                 routes.Add((route, lever.Id, direction, null));
             }
+
             context.Routes.Add(route);
         }
 
@@ -1213,6 +1232,12 @@ public partial class DbRendoTableInitializer
                 .Select(l => l.ObjectId)
                 .ToListAsync(cancellationToken))
             .ToHashSet();
+        var throwOutControl = await context.ThrowOutControls
+            .ToListAsync(cancellationToken);
+        var leverNamesById = await context.Levers
+            .ToDictionaryAsync(l => l.Id, l => l.Name, cancellationToken);
+        var routeLeverDestinationButtons = await context.RouteLeverDestinationButtons
+            .ToListAsync(cancellationToken);
 
         // 進路のDict
         var routes = interlockingObjects
@@ -1239,18 +1264,25 @@ public partial class DbRendoTableInitializer
             .Where(io => io is not SwitchingMachine)
             .ToDictionary(io => io.Name, io => io);
         // てこ->進路へのDict
-        var leverToRoute = await context.RouteLeverDestinationButtons
-            .Join(
-                context.Levers,
-                rldb => rldb.LeverId,
-                l => l.Id,
-                (rr, l) => new { l.Name, rr.RouteId }
-            )
-            .GroupBy(x => x.Name)
-            .ToDictionaryAsync(
+        var routeIdsByLeverName = routeLeverDestinationButtons
+            .GroupBy(x => x.LeverId)
+            .ToDictionary(
+                g => leverNamesById[g.Key],
+                g => g.Select(x => x.RouteId).ToList()
+            );
+        var routeIdsByButtonName = routeLeverDestinationButtons
+            .Where(x => x.DestinationButtonName != null)
+            .GroupBy(x => x.DestinationButtonName!)
+            .ToDictionary(
                 g => g.Key,
-                g => g.Select(x => x.RouteId).ToList(),
-                cancellationToken
+                g => g.Select(x => x.RouteId).ToList()
+            );
+        // 統括制御のDict
+        var throwOutControlBySourceId = throwOutControl
+            .GroupBy(toc => toc.SourceId)
+            .ToDictionary(
+                g => g.Key,
+                g => g.ToList()
             );
         var searchSwitchingMachine = new Func<LockItem, Task<List<InterlockingObject>>>(item =>
         {
@@ -1276,6 +1308,7 @@ public partial class DbRendoTableInitializer
             {
                 return null;
             }
+
             var key = CalcDirectionLeverName(item.Name[..^1], item.StationId);
             return otherObjects.GetValueOrDefault(key);
         });
@@ -1297,15 +1330,50 @@ public partial class DbRendoTableInitializer
             }
 
 
-            // 進路(複数)の場合
-            var match = RegexLeverParse().Match(item.Name);
-            if (match.Success)
+            // てこ名指定の場合はこちら=>そのてこを始点としたすべての進路を取得
+            var leverFullMatch = RegexLeverParseFullMatch().Match(item.Name);
+            if (leverFullMatch.Success)
             {
-                var leverName = CalcLeverName(match.Groups[1].Value + match.Groups[3].Value, item.StationId);
-                var routeIds = leverToRoute.GetValueOrDefault(leverName);
+                var leverName = CalcLeverName(
+                    leverFullMatch.Groups[1].Value + leverFullMatch.Groups[3].Value, item.StationId);
+                var routeIds = routeIdsByLeverName.GetValueOrDefault(leverName);
                 if (routeIds != null)
                 {
                     return routeIds.Select(InterlockingObject (r) => routesById[r]).ToList();
+                }
+            }
+
+            // 統括進路はこちら
+            var leverMatch = RegexLeverParse().Match(item.Name);
+            if (leverMatch.Success)
+            {
+                // てこ
+                var leverName = CalcLeverName(
+                    leverMatch.Groups[1].Value + leverMatch.Groups[3].Value, item.StationId);
+                // 着点ボタン
+                var buttonName = CalcButtonName(
+                    item.Name[(leverMatch.Index + leverMatch.Length)..],
+                    item.StationId);
+
+                // 統括制御から、該当する進路を導き出す
+                // てこに該当する進路すべて
+                var startRouteIds = routeIdsByLeverName.GetValueOrDefault(leverName, []);
+                // 該当する統括制御を選ぶ(てこに該当する進路=>統括制御=>着点てこに該当する進路)
+                var targetThrowOutControls = startRouteIds
+                    .SelectMany(r => throwOutControlBySourceId.GetValueOrDefault(r, []))
+                    .Where(toc => routeIdsByButtonName[buttonName].Contains(toc.TargetId))
+                    .ToList();
+                var targetThrowOutControl = targetThrowOutControls.FirstOrDefault();
+                if (targetThrowOutControls.Count >= 2)
+                {
+                    throw new InvalidOperationException($"統括制御が2つ以上見つかりました: {item.Name}");
+                }
+
+                if (targetThrowOutControl != null)
+                {
+                    var startRoute = routesById[targetThrowOutControl.SourceId];
+                    var endRoute = routesById[targetThrowOutControl.TargetId];
+                    return [startRoute, endRoute];
                 }
             }
 
@@ -1539,7 +1607,7 @@ public partial class DbRendoTableInitializer
         var targetObjects = await searchTargetObjects(item);
         if (targetObjects.Count == 0)
         {
-            if (item.Name.EndsWith('Z'))
+            if (item.Name.Contains('Z'))
             {
                 logger.Log(LogLevel.Warning,
                     "誘導進路の進路名が見つかりません。処理をスキップします: {} {}", item.StationId, item.Name);
@@ -1558,6 +1626,7 @@ public partial class DbRendoTableInitializer
             {
                 isLr = item.Name.EndsWith('L') ? LR.Left : LR.Right;
             }
+
             context.LockConditionObjects.Add(new()
             {
                 Lock = lockObject,
@@ -1596,6 +1665,7 @@ public partial class DbRendoTableInitializer
             {
                 isLr = item.Name.EndsWith('L') ? LR.Left : LR.Right;
             }
+
             context.LockConditionObjects.Add(new()
             {
                 Lock = lockObject,
@@ -1628,6 +1698,7 @@ public partial class DbRendoTableInitializer
         {
             return;
         }
+
         // 接近鎖錠のパース時はlockItemsが1つの想定
         var lockItem = lockItems[0];
         await RegisterFinalTrackCircuitIdInner(lockItem, route, searchTargetObjects);
@@ -1651,6 +1722,7 @@ public partial class DbRendoTableInitializer
                 }
             }
         }
+
         targetObjects = await searchTargetObjects(lockItem);
         var reversedTargetObjects = targetObjects.ToList();
         reversedTargetObjects.Reverse();
@@ -1666,6 +1738,7 @@ public partial class DbRendoTableInitializer
             context.Update(route);
             return true;
         }
+
         // 進路の最終閉塞軌道回路が見つからなかった
         return false;
     }
@@ -1678,9 +1751,10 @@ public partial class DbRendoTableInitializer
         if (lockItems.Count == 0)
         {
             logger.Log(LogLevel.Warning,
-                    "被片鎖錠てこも、鎖錠てこも見つかりません。処理をスキップします。{}", route.Name);
+                "被片鎖錠てこも、鎖錠てこも見つかりません。処理をスキップします。{}", route.Name);
             return;
         }
+
         if (lockItems.Count == 2)
         {
             logger.Log(LogLevel.Warning,
@@ -1698,6 +1772,7 @@ public partial class DbRendoTableInitializer
                     "三郷駅です。処理をスキップします。{}", lockItem.Name);
                 return;
             }
+
             throw new InvalidOperationException($"対象の方向進路が見つかりません: {lockItem.StationId} {lockItem.Name}");
         }
 
@@ -1801,7 +1876,8 @@ public partial class DbRendoTableInitializer
                 var count = token.Length;
                 var targetStationId = StationIdMap[this.stationId][count - 1];
                 enumerator.MoveNext();
-                var child = ParseToken(ref enumerator, targetStationId, isRouteLock, isReverse, isTotalControl, isLocked);
+                var child = ParseToken(ref enumerator, targetStationId, isRouteLock, isReverse, isTotalControl,
+                    isLocked);
                 if (enumerator.Current.Length != count || enumerator.Current.Any(c => c != ']'))
                 {
                     throw new InvalidOperationException("]が閉じられていません");
