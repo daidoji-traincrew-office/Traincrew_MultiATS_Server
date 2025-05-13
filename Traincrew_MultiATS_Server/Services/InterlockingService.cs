@@ -1,3 +1,4 @@
+using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.DestinationButton;
@@ -100,7 +101,7 @@ public class InterlockingService(
     /// <param name="buttonData"></param>
     /// <returns></returns>     
     /// <exception cref="ArgumentException"></exception>
-    public async Task SetDestinationButtonState(DestinationButtonState buttonData)
+    public async Task SetDestinationButtonState(DestinationButtonData buttonData)
     {
         var buttonObject = await destinationButtonRepository.GetButtonByName(buttonData.Name);
         if (buttonObject == null)
@@ -170,6 +171,16 @@ public class InterlockingService(
         {
             Name = direction.Name,
             State = state
+        };
+    }
+
+    public static DestinationButtonData ToDestinationButtonData(DestinationButtonState buttonState)
+    {
+        return new DestinationButtonData
+        {
+            Name = buttonState.Name,
+            IsRaised = buttonState.IsRaised,
+            OperatedAt = buttonState.OperatedAt
         };
     }
 

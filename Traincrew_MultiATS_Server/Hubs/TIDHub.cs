@@ -1,7 +1,8 @@
-using Discord;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using OpenIddict.Validation.AspNetCore;
+using Traincrew_MultiATS_Server.Common.Contract;
+using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Services;
 
@@ -13,7 +14,7 @@ namespace Traincrew_MultiATS_Server.Hubs;
 )]
 public class TIDHub(TrackCircuitService trackCircuitService,
     SwitchingMachineService switchingMachineService,
-    InterlockingService interlockingService) : Hub
+    InterlockingService interlockingService) : Hub<ITIDClientContract>, ITIDHubContract
 {
     public async Task<ConstantDataToTID> SendData_TID()
     {
@@ -21,6 +22,7 @@ public class TIDHub(TrackCircuitService trackCircuitService,
         var switchingMachineDataList = (await switchingMachineService.GetAllSwitchingMachines())
             .Select(SwitchingMachineService.ToSwitchData)
             .ToList();
+        // Todo: 方向進路は方向進路用に別メソッド用意
         var allInterlockingObjects = await interlockingService.GetInterlockingObjects();
         var directionDatas = allInterlockingObjects
                 .OfType<DirectionRoute>()

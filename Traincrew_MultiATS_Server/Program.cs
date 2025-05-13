@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using OpenIddict.Abstractions;
 using Traincrew_MultiATS_Server.Authentication;
+using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.HostedService;
 using Traincrew_MultiATS_Server.Hubs;
@@ -285,6 +286,7 @@ builder.Services
     .AddScoped<OperationNotificationService>()
     .AddScoped<ProtectionService>()
     .AddScoped<RendoService>()
+    .AddScoped<RouteService>()
     .AddScoped<SignalService>()
     .AddScoped<StationService>()
     .AddScoped<SwitchingMachineService>()
@@ -324,6 +326,7 @@ else
     app.UseForwardedHeaders();
     app.UseHsts();
 }
+
 app.UseRouting();
 app.UseCors();
 app.UseAuthentication();
@@ -338,19 +341,11 @@ if (enableAuthorization)
 
     if (await manager.FindByClientIdAsync("MultiATS_Client") == null)
     {
-        await manager.CreateAsync(new()
+        var applicationDescriptor = new OpenIddictApplicationDescriptor
         {
             ApplicationType = ApplicationTypes.Native,
             ClientId = "MultiATS_Client",
             ClientType = ClientTypes.Public,
-            RedirectUris =
-            {
-                new("http://localhost:49152/"),
-                new("http://localhost:49153/"),
-                new("http://localhost:49154/"),
-                new("http://localhost:49155/"),
-                new("http://localhost:49156/")
-            },
             Permissions =
             {
                 Permissions.Endpoints.Authorization,
@@ -358,7 +353,14 @@ if (enableAuthorization)
                 Permissions.GrantTypes.AuthorizationCode,
                 Permissions.ResponseTypes.Code
             }
-        });
+        };
+
+        Enumerable.Range(0, 10)
+            .Select(i => new Uri($"http://localhost:{49152 + i}/"))
+            .ToList()
+            .ForEach(uri => applicationDescriptor.RedirectUris.Add(uri));
+
+        await manager.CreateAsync(applicationDescriptor);
     }
 }
 

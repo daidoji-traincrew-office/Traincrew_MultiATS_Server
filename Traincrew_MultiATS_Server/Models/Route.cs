@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using Traincrew_MultiATS_Server.Common.Models;
 
 namespace Traincrew_MultiATS_Server.Models;
 

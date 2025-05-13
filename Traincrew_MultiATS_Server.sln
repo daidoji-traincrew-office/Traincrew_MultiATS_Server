@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Traincrew_MultiATS_Server",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Traincrew_MultiATS_Server.UT", "Traincrew_MultiATS_Server.UT\Traincrew_MultiATS_Server.UT.csproj", "{1389B207-2E96-4619-8946-E78B0DB1E9CE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Traincrew_MultiATS_Server.Common", "Traincrew_MultiATS_Server.Common\Traincrew_MultiATS_Server.Common.csproj", "{C99CDCDB-A389-4DE8-B9E1-A394AD0B9979}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{1389B207-2E96-4619-8946-E78B0DB1E9CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1389B207-2E96-4619-8946-E78B0DB1E9CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1389B207-2E96-4619-8946-E78B0DB1E9CE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C99CDCDB-A389-4DE8-B9E1-A394AD0B9979}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C99CDCDB-A389-4DE8-B9E1-A394AD0B9979}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C99CDCDB-A389-4DE8-B9E1-A394AD0B9979}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C99CDCDB-A389-4DE8-B9E1-A394AD0B9979}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
