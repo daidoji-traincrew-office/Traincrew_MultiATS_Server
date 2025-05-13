@@ -19,4 +19,7 @@
         <PackageReference Include="OpenIddict.EntityFrameworkCore" Version="5.8.0"/>
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2"/>
     </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\Traincrew_MultiATS_Server.Common\Traincrew_MultiATS_Server.Common.csproj" />
+    </ItemGroup>
 </Project>

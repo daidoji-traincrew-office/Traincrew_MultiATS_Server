@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using OpenIddict.Abstractions;
 using Traincrew_MultiATS_Server.Authentication;
+using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.HostedService;
 using Traincrew_MultiATS_Server.Hubs;
@@ -279,6 +280,7 @@ builder.Services
     .AddScoped<OperationNotificationService>()
     .AddScoped<ProtectionService>()
     .AddScoped<RendoService>()
+    .AddScoped<RouteService>()
     .AddScoped<SignalService>()
     .AddScoped<StationService>()
     .AddScoped<SwitchingMachineService>()

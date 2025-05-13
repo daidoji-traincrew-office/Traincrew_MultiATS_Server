@@ -1,4 +1,4 @@
-namespace Traincrew_MultiATS_Server.Models;
+namespace Traincrew_MultiATS_Server.Common.Models;
 
 public class OperationNotificationData
 {
@@ -28,7 +28,6 @@ public class SignalData
 {
     public string Name { get; init; }
     public Phase phase { get; init; } = Phase.None;
-
 }
 
 public class SignalTypeData
@@ -97,6 +96,60 @@ public class DataToServer
     public float Speed { get; init; }
 }
 
+public class RouteData
+{
+    public string TcName { get; set; }
+    public RouteType RouteType { get; set; }
+    public ulong? RootId { get; set; }
+    public RouteData? Root { get; set; }
+    public string? Indicator { get; set; }
+    public int? ApproachLockTime { get; set; }
+    public RouteStateData? RouteState { get; set; }
+}
+
+public class RouteStateData
+{
+    /// <summary>
+    /// てこ反応リレー
+    /// </summary>
+    public RaiseDrop IsLeverRelayRaised { get; set; }
+
+    /// <summary>
+    /// 進路照査リレー
+    /// </summary>
+    public RaiseDrop IsRouteRelayRaised { get; set; }
+
+    /// <summary>
+    /// 信号制御リレー
+    /// </summary>
+    public RaiseDrop IsSignalControlRaised { get; set; }
+
+    /// <summary>
+    /// 接近鎖錠リレー(MR)
+    /// </summary>
+    public RaiseDrop IsApproachLockMRRaised { get; set; }
+
+    /// <summary>
+    /// 接近鎖錠リレー(MS)
+    /// </summary>
+    public RaiseDrop IsApproachLockMSRaised { get; set; }
+
+    /// <summary>
+    /// 進路鎖錠リレー(実在しない)
+    /// </summary>
+    public RaiseDrop IsRouteLockRaised { get; set; }
+
+    /// <summary>
+    /// 総括反応リレー
+    /// </summary>
+    public RaiseDrop IsThrowOutXRRelayRaised { get; set; }
+
+    /// <summary>
+    /// 総括反応中継リレー
+    /// </summary>
+    public RaiseDrop IsThrowOutYSRelayRaised { get; set; }
+}
+
 public class DataFromServer
 {
     //進路表示の表示はTC本体実装待ち　未決定
@@ -106,5 +159,5 @@ public class DataFromServer
     public OperationNotificationData? OperationNotificationData { get; set; } = null;
     public List<SignalData> NextSignalData { get; set; } = [];
     public List<SignalData> DoubleNextSignalData { get; set; } = [];
-    public List<Route> RouteData { get; set; } = [];
+    public List<RouteData> RouteData { get; set; } = new();
 }

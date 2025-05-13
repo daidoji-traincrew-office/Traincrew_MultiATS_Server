@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using OpenIddict.Validation.AspNetCore;
-using Traincrew_MultiATS_Server.Models;
+using Traincrew_MultiATS_Server.Common.Contract;
+using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Services;
 
 namespace Traincrew_MultiATS_Server.Hubs;
@@ -14,7 +15,7 @@ namespace Traincrew_MultiATS_Server.Hubs;
 public class CommanderTableHub(
     TrackCircuitService trackCircuitService,
     OperationNotificationService operationNotificationService
-) : Hub
+) : Hub<ICommanderTableClientContract>, ICommanderTableHubContract
 {
     public async Task<DataToCommanderTable> SendData_CommanderTable()
     {
