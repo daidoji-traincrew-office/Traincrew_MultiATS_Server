@@ -3,7 +3,8 @@ using Traincrew_MultiATS_Server.IT.Fixture;
 
 namespace Traincrew_MultiATS_Server.IT.Hubs;
 
-public class InterlockingHubTest(WebApplicationFixture factory) : IClassFixture<WebApplicationFixture>
+[Collection("WebApplication")]
+public class InterlockingHubTest(WebApplicationFixture factory)
 {
     [Fact]
     public async Task SendData_Interlocking_ReturnsValidDataForStation_TH76()

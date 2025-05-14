@@ -11,7 +11,7 @@ public class WebApplicationFixture
     private const string TIDHubPath = "/hub/TID";
     private const string InterlockingHubPath = "/hub/interlocking";
     private const string CommanderTableHubPath = "/hub/commander_table";
-    
+
     private WebApplicationFactory<Program> factory = new();
 
     /// <summary>
@@ -22,7 +22,7 @@ public class WebApplicationFixture
     public (HubConnection, ITrainHubContract) CreateTrainHub(ITrainClientContract? receiver = null)
     {
         var connection = new HubConnectionBuilder()
-            .WithUrl(new Uri(factory.Server.BaseAddress ,TrainHubPath),
+            .WithUrl(new Uri(factory.Server.BaseAddress, TrainHubPath),
                 o => { o.HttpMessageHandlerFactory = _ => factory.Server.CreateHandler(); })
             .Build();
 

@@ -3,7 +3,8 @@ using Traincrew_MultiATS_Server.IT.Fixture;
 namespace Traincrew_MultiATS_Server.IT.Logic;
 
 // ReSharper disable once InconsistentNaming
-public class LogicTest_TH71(WebApplicationFixture factory) : IClassFixture<WebApplicationFixture>
+[Collection("WebApplication")]
+public class LogicTest_TH71(WebApplicationFixture factory)
 {
     [Fact]
     public async Task Get_Endpoint_ReturnsSuccess()
