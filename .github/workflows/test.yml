@@ -1,0 +1,33 @@
+name: Integration Tests
+
+on:
+  push:
+    branches:
+      - feature/add_integration_test
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build solution
+        run: dotnet build --no-restore --configuration Release
+
+      - name: Start Database
+        working-directory: ./Database
+        run: docker compose up -d
+
+      - name: Run Integration Tests
+        working-directory: ./Traincrew_MultiATS_Server.IT
+        run: dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage" --results-directory ./TestResults
