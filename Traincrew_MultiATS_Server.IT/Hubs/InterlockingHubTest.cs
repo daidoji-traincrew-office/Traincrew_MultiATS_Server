@@ -67,38 +67,35 @@ public class InterlockingHubTest(WebApplicationFixture factory)
             Path.Combine(AppContext.BaseDirectory, "Hubs", "InterlockingHubTestData"),
             "*.tsv"
         );
-
-        foreach (var tsvFile in tsvFiles)
+        
+        var (connection, contract) = factory.CreateInterlockingHub();
+        await using (connection)
         {
-            var stationId = Path.GetFileName(tsvFile).Split('_')[0];
-
-            var activeStationsList = new List<string> { stationId };
-
-            using var reader = new StreamReader(tsvFile, Encoding.GetEncoding("Shift-jis"));
-            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+            await connection.StartAsync(TestContext.Current.CancellationToken);
+            foreach (var tsvFile in tsvFiles)
             {
-                Delimiter = "\t",
-                HasHeaderRecord = true
-            };
-            using var csv = new CsvReader(reader, config);
-            var expectedData = csv.GetRecords<dynamic>()
-                .Select(row => new InterlockingData
+                var stationId = Path.GetFileName(tsvFile).Split('_')[0];
+
+                var activeStationsList = new List<string> { stationId };
+
+                using var reader = new StreamReader(tsvFile, Encoding.GetEncoding("Shift-jis"));
+                var config = new CsvConfiguration(CultureInfo.InvariantCulture)
                 {
-                    ServerType = MapServerType(row.ServerType),
-                    ServerName = row.ServerName,
-                    PointNameA = row.PointNameA,
-                    PointNameB = row.PointNameB,
-                    DirectionName = row.DirectionName,
-                    UniqueName = row.UniqueName
-                })
-                .ToList();
-
-            var (connection, contract) = factory.CreateInterlockingHub();
-
-            await using (connection)
-            {
-                await connection.StartAsync(TestContext.Current.CancellationToken);
-
+                    Delimiter = "\t",
+                    HasHeaderRecord = true
+                };
+                using var csv = new CsvReader(reader, config);
+                var expectedData = csv.GetRecords<dynamic>()
+                    .Select(row => new InterlockingData
+                    {
+                        ServerType = MapServerType(row.ServerType),
+                        ServerName = row.ServerName,
+                        PointNameA = row.PointNameA,
+                        PointNameB = row.PointNameB,
+                        DirectionName = row.DirectionName,
+                        UniqueName = row.UniqueName
+                    })
+                    .ToList();
                 // Act
                 var result = await contract.SendData_Interlocking(activeStationsList);
 
