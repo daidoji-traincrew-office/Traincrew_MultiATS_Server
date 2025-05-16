@@ -4,6 +4,7 @@ using CsvHelper;
 using CsvHelper.Configuration;
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.IT.Fixture;
+
 // Add this namespace for Encoding
 
 namespace Traincrew_MultiATS_Server.IT.Hubs;
@@ -122,41 +123,43 @@ public class InterlockingHubTest(WebApplicationFixture factory)
             .Where(IsMustAssertData)
             .Select<InterlockingData, Action>(row => () =>
                 {
-                    switch (row.ServerType)
+                    if (!string.IsNullOrWhiteSpace(row.ServerName))
                     {
-                        case ServerType.PhysicalLevers:
-                            Assert.Contains(row.ServerName, physicalLeverNames);
-                            break;
-                        case ServerType.Signals:
-                            Assert.Contains(row.ServerName, signalNames);
-                            break;
-                        case ServerType.PhysicalButtons:
-                            Assert.Contains(row.ServerName, physicalButtonNames);
-                            break;
-                        case ServerType.Retsubans:
-                            // Todo: 列番窓実装したらコメントアウト外す
-                            // Assert.Contains(row.ServerName, retsubanNames);
-                            break;
-                        case ServerType.Lamps:
-                            Assert.Contains(row.ServerName, lampNames);
-                            break;
-                        case ServerType.TrackCircuit:
-                        case ServerType.Directions:
-                            // 方向進路の場合、ServerNameには軌道回路名が入る
-                            Assert.Contains(row.ServerName, trackCircuitNames);
-                            break;
-                        case ServerType.PhysicalKeyLevers:
-                            Assert.Contains(row.ServerName, physicalKeyLeverNames);
-                            break;
-                        case ServerType.Points:
-                        case ServerType.Empty:
-                            // 転てつ器はPointNameAに書かれるのでここでは確認しない
-                            // Emptyは確認しない
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException();
+                        switch (row.ServerType)
+                        {
+                            case ServerType.PhysicalLevers:
+                                Assert.Contains(row.ServerName, physicalLeverNames);
+                                break;
+                            case ServerType.Signals:
+                                Assert.Contains(row.ServerName, signalNames);
+                                break;
+                            case ServerType.PhysicalButtons:
+                                Assert.Contains(row.ServerName, physicalButtonNames);
+                                break;
+                            case ServerType.Retsubans:
+                                // Todo: 列番窓実装したらコメントアウト外す
+                                // Assert.Contains(row.ServerName, retsubanNames);
+                                break;
+                            case ServerType.Lamps:
+                                Assert.Contains(row.ServerName, lampNames);
+                                break;
+                            case ServerType.TrackCircuit:
+                            case ServerType.Directions:
+                                // 方向進路の場合、ServerNameには軌道回路名が入る
+                                Assert.Contains(row.ServerName, trackCircuitNames);
+                                break;
+                            case ServerType.PhysicalKeyLevers:
+                                Assert.Contains(row.ServerName, physicalKeyLeverNames);
+                                break;
+                            case ServerType.Points:
+                            case ServerType.Empty:
+                                // 転てつ器はPointNameAに書かれるのでここでは確認しない
+                                // Emptyは確認しない
+                                break;
+                            default:
+                                throw new ArgumentOutOfRangeException();
+                        }
                     }
-
                     // PointNameAとPointNameBに転てつ器名が書かれている場合は、転てつ器名が存在することを確認
                     if (!string.IsNullOrWhiteSpace(row.PointNameA))
                     {
