@@ -5,8 +5,6 @@ using CsvHelper.Configuration;
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.IT.Fixture;
 
-// Add this namespace for Encoding
-
 namespace Traincrew_MultiATS_Server.IT.Hubs;
 
 [Collection("WebApplication")]
