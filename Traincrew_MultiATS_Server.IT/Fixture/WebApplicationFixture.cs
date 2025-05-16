@@ -1,3 +1,4 @@
+using System.Text;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.SignalR.Client;
 using Traincrew_MultiATS_Server.Common.Contract;
@@ -13,6 +14,12 @@ public class WebApplicationFixture
     private const string CommanderTableHubPath = "/hub/commander_table";
 
     private WebApplicationFactory<Program> factory = new();
+
+    public WebApplicationFixture()
+    {
+        // Shift-JISを使用するために、CodePagesEncodingProviderを登録
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+    }
 
     /// <summary>
     /// ITrainHubContractとITrainClientContract用のHubConnectionを生成し、両方を返します。
