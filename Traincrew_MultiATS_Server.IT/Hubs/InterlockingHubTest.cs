@@ -103,6 +103,7 @@ public class InterlockingHubTest(WebApplicationFixture factory)
                 var result = await contract.SendData_Interlocking(activeStationsList);
 
                 // Assert
+                // Todo: ホントは各PropertyがNullでなく、各要素の値が設定されていることを確認するべき
                 AssertValidDataFromTsv(result, expectedData);
             }
         }
@@ -110,7 +111,6 @@ public class InterlockingHubTest(WebApplicationFixture factory)
 
     private static void AssertValidDataFromTsv(DataToInterlocking data, List<InterlockingData> expectedData)
     {
-        Assert.NotNull(data);
         var physicalLeverNames = data.PhysicalLevers.Select(l => l.Name).ToHashSet();
         var signalNames = data.Signals.Select(s => s.Name).ToHashSet();
         var physicalButtonNames = data.PhysicalButtons.Select(b => b.Name).ToHashSet();
@@ -136,9 +136,6 @@ public class InterlockingHubTest(WebApplicationFixture factory)
                         case ServerType.PhysicalButtons:
                             Assert.Contains(row.ServerName, physicalButtonNames);
                             break;
-                        case ServerType.Directions:
-                            Assert.Contains(row.ServerName, directionNames);
-                            break;
                         case ServerType.Retsubans:
                             // Todo: 列番窓実装したらコメントアウト外す
                             // Assert.Contains(row.ServerName, retsubanNames);
@@ -147,6 +144,8 @@ public class InterlockingHubTest(WebApplicationFixture factory)
                             Assert.Contains(row.ServerName, lampNames);
                             break;
                         case ServerType.TrackCircuit:
+                        case ServerType.Directions:
+                            // 方向進路の場合、ServerNameには軌道回路名が入る
                             Assert.Contains(row.ServerName, trackCircuitNames);
                             break;
                         case ServerType.PhysicalKeyLevers:
