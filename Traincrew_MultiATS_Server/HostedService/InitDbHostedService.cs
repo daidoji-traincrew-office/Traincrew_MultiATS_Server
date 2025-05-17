@@ -791,19 +791,33 @@ internal partial class DbInitializer(
         var routeIds = routes.Select(r => r.Id).ToList();
         var switchingMachine = await context.SwitchingMachines.ToListAsync();
         var switchingMachineIds = switchingMachine.Select(sm => sm.Id).ToHashSet();
+        var trackCircuitIds = await context.TrackCircuits
+            .Select(tc => tc.Id)
+            .AsAsyncEnumerable()
+            .ToHashSetAsync();
         var directLockConditionsByRouteIds = await lockConditionRepository
             .GetConditionsByObjectIdsAndType(routeIds, LockType.Lock);
+        // 進路の進路鎖錠欄
         var routeLockConditionsByRouteIds = await lockConditionRepository
             .GetConditionsByObjectIdsAndType(routeIds, LockType.Route);
+        // 転てつ器のてっさ鎖錠欄
+        var detectorLockConditionsBySwitchingMachineIds = await lockConditionRepository
+            .GetConditionsByObjectIdsAndType(switchingMachineIds.ToList(), LockType.Detector);
         foreach (var route in routes)
         {
-            var directLockConditions = directLockConditionsByRouteIds[route.Id];
-            // 転てつ器が条件先のものを取得する
-            var targetLockCondition = directLockConditions
+            var directLockConditions = directLockConditionsByRouteIds.GetValueOrDefault(route.Id, []);
+            var routeLockConditions = routeLockConditionsByRouteIds.GetValueOrDefault(route.Id, []);
+            // 直接鎖錠のうち、転てつ器が条件先のものを取得する
+            var targetLockConditions = directLockConditions
                 .OfType<LockConditionObject>()
                 .Where(lco => switchingMachineIds.Contains(lco.ObjectId))
                 .ToList();
-            foreach (var lockCondition in targetLockCondition)
+            // 進路鎖錠欄の対象ObjectId
+            var targetRouteLockConditionObjectIds = routeLockConditions
+                .OfType<LockConditionObject>()
+                .Select(lco => lco.ObjectId)
+                .ToHashSet();
+            foreach (var lockCondition in targetLockConditions)
             {
                 // 対象転てつ器を取得
                 var switchingMachineId = lockCondition.ObjectId;
@@ -812,12 +826,21 @@ internal partial class DbInitializer(
                 {
                     continue;
                 }
+                var detectorLockConditions = detectorLockConditionsBySwitchingMachineIds
+                    .GetValueOrDefault(switchingMachineId, [])
+                    .OfType<LockConditionObject>()
+                    .Where(lco => trackCircuitIds.Contains(lco.ObjectId))
+                    .ToList();
+                // てっ鎖鎖錠欄に含まれている軌道回路のうち、どれか１つでも
+                // 進路鎖錠欄に含まれていれば、True
 
                 context.SwitchingMachineRoutes.Add(new()
                 {
                     RouteId = route.Id,
                     SwitchingMachineId = switchingMachineId,
-                    IsReverse = lockCondition.IsReverse
+                    IsReverse = lockCondition.IsReverse,
+                    OnRouteLock = detectorLockConditions
+                        .Any(lco => targetRouteLockConditionObjectIds.Contains(lco.ObjectId)),
                 });
             }
         }
