@@ -432,7 +432,7 @@ internal partial class DbInitializer(
             ulong? directionRouteRightId = null;
             if (signalData.DirectionRouteLeft != null)
             {
-                if(!directionRoutes.TryGetValue(signalData.DirectionRouteLeft, out var directionRouteId))
+                if (!directionRoutes.TryGetValue(signalData.DirectionRouteLeft, out var directionRouteId))
                 {
                     throw new InvalidOperationException($"方向進路が見つかりません: {signalData.DirectionRouteLeft}");
                 }
@@ -441,14 +441,14 @@ internal partial class DbInitializer(
             }
             if (signalData.DirectionRouteRight != null)
             {
-                if(!directionRoutes.TryGetValue(signalData.DirectionRouteRight, out var directionRouteId))
+                if (!directionRoutes.TryGetValue(signalData.DirectionRouteRight, out var directionRouteId))
                 {
                     throw new InvalidOperationException($"方向進路が見つかりません: {signalData.DirectionRouteRight}");
                 }
 
                 directionRouteRightId = directionRouteId;
             }
-            
+
             LR? direction = signalData.Direction != null
                 ? signalData.Direction == "L" ? LR.Left : signalData.Direction == "R" ? LR.Right : null
                 : null;
@@ -776,6 +776,13 @@ internal partial class DbInitializer(
         }
 
         await context.SaveChangesAsync();
+    }
+
+    private async Task InitializeSwitchingMachineRoutes()
+    {
+        var routesByName = await context.Routes
+            .ToDictionaryAsync(r => r.Name, cancellationToken);
+
     }
 }
 
@@ -1166,7 +1173,7 @@ public partial class DbRendoTableInitializer
             };
             var match = RegexLeverParse().Match(rendoTableCsv.Start);
             var leverName = CalcLeverName(match.Groups[1].Value + match.Groups[3].Value, stationId);
-            var direction = match.Groups[2].Value == "L" ? LR.Left: LR.Right;
+            var direction = match.Groups[2].Value == "L" ? LR.Left : LR.Right;
             var buttonName = CalcButtonName(rendoTableCsv.End, stationId);
             if (!leverDictionary.TryGetValue(leverName, out var lever))
             {
@@ -1567,15 +1574,6 @@ public partial class DbRendoTableInitializer
                 IsLR = isLr,
                 Type = LockConditionType.Object
             });
-            if (routeIdForSwitchingMachineRoute != null && targetObjects[0] is SwitchingMachine switchingMachine)
-            {
-                context.SwitchingMachineRoutes.Add(new()
-                {
-                    IsReverse = item.IsReverse,
-                    RouteId = routeIdForSwitchingMachineRoute.Value,
-                    SwitchingMachineId = switchingMachine.Id,
-                });
-            }
 
             return;
         }
@@ -1609,13 +1607,6 @@ public partial class DbRendoTableInitializer
             {
                 continue;
             }
-
-            context.SwitchingMachineRoutes.Add(new()
-            {
-                IsReverse = item.IsReverse,
-                RouteId = routeIdForSwitchingMachineRoute.Value,
-                SwitchingMachineId = switchingMachine.Id,
-            });
         }
     }
 
