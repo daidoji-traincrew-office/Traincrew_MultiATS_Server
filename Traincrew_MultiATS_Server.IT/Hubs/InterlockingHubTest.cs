@@ -32,7 +32,6 @@ public class InterlockingHubTest(WebApplicationFixture factory)
         public required string ServerName { get; set; } = "";
         public string? PointNameA { get; set; }
         public string? PointNameB { get; set; }
-        
         public string UniqueName { get; set; } = "";
         public string? DirectionName { get; set; }
         // Add other properties as needed
@@ -66,7 +65,7 @@ public class InterlockingHubTest(WebApplicationFixture factory)
             Path.Combine(AppContext.BaseDirectory, "Hubs", "InterlockingHubTestData"),
             "*.tsv"
         );
-        
+
         var (connection, contract) = factory.CreateInterlockingHub();
         await using (connection)
         {
@@ -158,6 +157,7 @@ public class InterlockingHubTest(WebApplicationFixture factory)
                                 throw new ArgumentOutOfRangeException();
                         }
                     }
+
                     // PointNameAとPointNameBに転てつ器名が書かれている場合は、転てつ器名が存在することを確認
                     if (!string.IsNullOrWhiteSpace(row.PointNameA))
                     {
@@ -190,10 +190,11 @@ public class InterlockingHubTest(WebApplicationFixture factory)
         // 以下は実装してないので無視
         // CTC切換てこ
         // 転てつ不良表示灯
-        if(data.UniqueName.StartsWith("駅扱切換") || data.UniqueName.StartsWith("転てつ不良"))
+        if (data.UniqueName.StartsWith("駅扱切換") || data.UniqueName.StartsWith("転てつ不良"))
         {
             return false;
         }
+
         return true;
     }
 }
