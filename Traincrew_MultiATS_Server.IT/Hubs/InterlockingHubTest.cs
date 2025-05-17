@@ -213,23 +213,4 @@ public class InterlockingHubTest(WebApplicationFixture factory)
             && !data.UniqueName.StartsWith("転てつ不良")
             && !data.ServerName.StartsWith("赤山町上り場内2R");
     }
-
-    private static List<InterlockingData> ParseTsvFile(string[] tsvFiles)
-    {
-        var interlockingDataList = new List<InterlockingData>();
-
-        foreach (var tsvFile in tsvFiles)
-        {
-            using var reader = new StreamReader(tsvFile, Encoding.GetEncoding("Shift-jis"));
-            using var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)
-            {
-                Delimiter = "\t",
-                HasHeaderRecord = true
-            });
-
-            interlockingDataList.AddRange(csv.GetRecords<InterlockingData>());
-        }
-
-        return interlockingDataList;
-    }
 }
