@@ -36,9 +36,9 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Content Include="Hubs\InterlockingHubTestData\**">
+        <None Include="Hubs\InterlockingHubTestData\**">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </Content>
-      </ItemGroup>
+        </None>
+    </ItemGroup>
 
 </Project>
