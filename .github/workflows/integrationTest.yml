@@ -1,9 +1,9 @@
 name: Integration Tests
 
 on:
-  push:
-    branches:
-      - feature/add_integration_test
+  push: {}
+  pull_request: {}
+  workflow_dispatch: {}
 
 jobs:
   test:
@@ -12,6 +12,15 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4.2.2
+        with:
+          fetch-depth: 0
+      
+      - name: Merge PR branch into base branch
+        if: github.event_name == 'pull_request'
+        run: |
+          git fetch origin ${{ github.event.pull_request.base.ref }}
+          git checkout ${{ github.event.pull_request.base.ref }}
+          git merge --no-ff ${{ github.event.pull_request.head.ref }}
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4.3.1
