@@ -814,7 +814,9 @@ internal partial class DbInitializer(
             .ToHashSetAsync();
         var routeIds = await context.Routes.Select(r => r.Id).ToListAsync();
         var switchingMachineIds = await context.SwitchingMachines
-            .Select(sm => sm.Id).AsAsyncEnumerable().ToHashSetAsync();
+            .Select(sm => sm.Id)
+            .AsAsyncEnumerable()
+            .ToHashSetAsync();
         var trackCircuitIds = await context.TrackCircuits
             .Select(tc => tc.Id)
             .AsAsyncEnumerable()
