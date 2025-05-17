@@ -36,7 +36,6 @@ public class InterlockingService(
         var trackCircuits = await trackCircuitService.GetAllTrackCircuitDataList();
         var switchingMachine = await switchingMachineRepository.GetSwitchingMachinesWithState();
         var lever = await leverRepository.GetAllWithState();
-        var lamps = await GetLamps(stationIds);
         var directionSelfControlLevers = await directionSelfControlLeverRepository.GetAllWithState();
         var directionRoutes = await directionRouteRepository.GetAllWithState();
         var destinationButtons = await destinationButtonRepository.GetAllWithState();
@@ -45,6 +44,8 @@ public class InterlockingService(
         var signalNames = await signalService.GetSignalNamesByStationIds(stationIds);
         // それら全部の信号の現示計算
         var signalIndications = await signalService.CalcSignalIndication(signalNames);
+        // 各ランプの状態を取得
+        var lamps = await GetLamps(stationIds);
 
         var response = new DataToInterlocking
         {
