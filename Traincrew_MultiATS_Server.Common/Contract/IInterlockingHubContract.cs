@@ -12,5 +12,5 @@ public interface IInterlockingHubContract
 
 public interface IInterlockingClientContract
 {
-    // クライアント側のメソッド定義は不要
+    Task ReceiveData(DataToInterlocking data);
 }

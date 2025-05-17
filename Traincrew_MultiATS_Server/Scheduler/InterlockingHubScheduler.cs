@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.SignalR;
+using Traincrew_MultiATS_Server.Common.Contract;
 using Traincrew_MultiATS_Server.Hubs;
 using Traincrew_MultiATS_Server.Services;
 
@@ -9,11 +10,9 @@ public class InterlockingHubScheduler(IServiceScopeFactory serviceScopeFactory) 
     protected override int Interval => 100;
     protected override async Task ExecuteTaskAsync(IServiceScope scope)
     {
-        var hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<InterlockingHub>>();
+        var hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<InterlockingHub, IInterlockingClientContract>>();
         var interlockingService = scope.ServiceProvider.GetRequiredService<InterlockingService>();
-        var clients = hubContext.Clients.All;
         var data = await interlockingService.SendData_Interlocking();
-        // Todo: Contractの定義
-        await clients.SendAsync("ReceiveData", data);
+        await hubContext.Clients.All.ReceiveData(data);
     }
 }
