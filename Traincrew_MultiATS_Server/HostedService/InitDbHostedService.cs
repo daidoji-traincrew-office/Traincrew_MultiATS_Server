@@ -57,6 +57,7 @@ public class InitDbHostedService(
         
         if (dbInitializer != null)
         {
+            DetachUnchangedEntities(context);
             await dbInitializer.InitializeAfterCreateLockCondition();
         }
 
@@ -811,10 +812,9 @@ internal partial class DbInitializer(
             .Select(smr => new { smr.RouteId, smr.SwitchingMachineId })
             .AsAsyncEnumerable()
             .ToHashSetAsync();
-        var routes = await context.Routes.ToListAsync();
-        var routeIds = routes.Select(r => r.Id).ToList();
-        var switchingMachine = await context.SwitchingMachines.ToListAsync();
-        var switchingMachineIds = switchingMachine.Select(sm => sm.Id).ToHashSet();
+        var routeIds = await context.Routes.Select(r => r.Id).ToListAsync();
+        var switchingMachineIds = await context.SwitchingMachines
+            .Select(sm => sm.Id).AsAsyncEnumerable().ToHashSetAsync();
         var trackCircuitIds = await context.TrackCircuits
             .Select(tc => tc.Id)
             .AsAsyncEnumerable()
@@ -827,10 +827,10 @@ internal partial class DbInitializer(
         // 転てつ器のてっさ鎖錠欄
         var detectorLockConditionsBySwitchingMachineIds = await lockConditionRepository
             .GetConditionsByObjectIdsAndType(switchingMachineIds.ToList(), LockType.Detector);
-        foreach (var route in routes)
+        foreach (var routeId in routeIds)
         {
-            var directLockConditions = directLockConditionsByRouteIds.GetValueOrDefault(route.Id, []);
-            var routeLockConditions = routeLockConditionsByRouteIds.GetValueOrDefault(route.Id, []);
+            var directLockConditions = directLockConditionsByRouteIds.GetValueOrDefault(routeId, []);
+            var routeLockConditions = routeLockConditionsByRouteIds.GetValueOrDefault(routeId, []);
             // 直接鎖錠のうち、転てつ器が条件先のものを取得する
             var targetLockConditions = directLockConditions
                 .OfType<LockConditionObject>()
@@ -846,7 +846,7 @@ internal partial class DbInitializer(
                 // 対象転てつ器を取得
                 var switchingMachineId = lockCondition.ObjectId;
                 // 既に登録済みの場合、スキップ
-                if (switchingMachinesRoutes.Contains(new { RouteId = route.Id, SwitchingMachineId = switchingMachineId }))
+                if (switchingMachinesRoutes.Contains(new { RouteId = routeId, SwitchingMachineId = switchingMachineId }))
                 {
                     continue;
                 }
@@ -860,7 +860,7 @@ internal partial class DbInitializer(
 
                 context.SwitchingMachineRoutes.Add(new()
                 {
-                    RouteId = route.Id,
+                    RouteId = routeId,
                     SwitchingMachineId = switchingMachineId,
                     IsReverse = lockCondition.IsReverse,
                     OnRouteLock = detectorLockConditions
@@ -868,6 +868,7 @@ internal partial class DbInitializer(
                 });
             }
         }
+        await context.SaveChangesAsync();
     }
 }
 
