@@ -46,13 +46,18 @@ public class InitDbHostedService(
 
         if (dbInitializer != null)
         {
-            await dbInitializer.InitializePost();
+            await dbInitializer.InitializeAfterCreateRoute();
         }
 
         DetachUnchangedEntities(context);
         foreach (var initializer in rendoTableInitializers)
         {
             await initializer.InitializeLocks();
+        }
+        
+        if (dbInitializer != null)
+        {
+            await dbInitializer.InitializeAfterCreateLockCondition();
         }
 
         _schedulers.AddRange([
@@ -295,13 +300,17 @@ internal partial class DbInitializer(
         await InitSignalType();
     }
 
-    internal async Task InitializePost()
+    internal async Task InitializeAfterCreateRoute()
     {
         await InitSignal();
         await InitNextSignal();
         await InitTrackCircuitSignal();
         await InitializeSignalRoute();
         await InitializeThrowOutControl();
+    }
+    
+    internal async Task InitializeAfterCreateLockCondition()
+    {
         await InitializeSwitchingMachineRoutes();
         await SetStationIdToInterlockingObject();
     }
