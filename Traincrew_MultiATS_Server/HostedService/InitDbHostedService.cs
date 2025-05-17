@@ -418,8 +418,9 @@ internal partial class DbInitializer(
         var signalNames = (await context.Signals
             .Select(s => s.Name)
             .ToListAsync(cancellationToken)).ToHashSet();
-        // 駅マスタを取得
+        // 駅マスタから停車場を取得
         var stations = await context.Stations
+            .Where(station => station.IsStation)
             .ToListAsync(cancellationToken);
         // DirectionRoutesを事前に取得してDictionaryに格納
         var directionRoutes = await context.DirectionRoutes
