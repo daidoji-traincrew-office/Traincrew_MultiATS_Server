@@ -85,7 +85,7 @@ public class InterlockingHubTest(WebApplicationFixture factory)
             })
             .Returns(Task.CompletedTask);
 
-        var (connection, contract) = factory.CreateInterlockingHub(mockClientContract.Object);
+        var (connection, _) = factory.CreateInterlockingHub(mockClientContract.Object);
 
         DataToInterlocking data;
         await using (connection)
