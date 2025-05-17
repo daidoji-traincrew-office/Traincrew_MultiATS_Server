@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
+using Traincrew_MultiATS_Server.Repositories.LockCondition;
 using Traincrew_MultiATS_Server.Scheduler;
 using Route = Traincrew_MultiATS_Server.Models.Route;
 
@@ -24,7 +25,8 @@ public class InitDbHostedService(
         using var scope = serviceScopeFactory.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         var datetimeRepository = scope.ServiceProvider.GetRequiredService<IDateTimeRepository>();
-        var dbInitializer = await CreateDBInitializer(context, datetimeRepository, cancellationToken);
+        var lockConditionRepository = scope.ServiceProvider.GetRequiredService<ILockConditionRepository>();
+        var dbInitializer = await CreateDBInitializer(context, lockConditionRepository, cancellationToken);
         if (dbInitializer != null)
         {
             await dbInitializer.Initialize();
@@ -47,14 +49,14 @@ public class InitDbHostedService(
     }
 
     private async Task<DbInitializer?> CreateDBInitializer(ApplicationDbContext context,
-        IDateTimeRepository dateTimeRepository,
+        ILockConditionRepository lockConditionRepository,
         CancellationToken cancellationToken)
     {
         var jsonstring = await File.ReadAllTextAsync("./Data/DBBase.json", cancellationToken);
         var DBBase = JsonSerializer.Deserialize<DBBasejson>(jsonstring);
         var logger = loggerFactory.CreateLogger<DbInitializer>();
         return DBBase != null
-            ? new DbInitializer(DBBase, context, dateTimeRepository, logger, cancellationToken)
+            ? new DbInitializer(DBBase, context, lockConditionRepository, logger, cancellationToken)
             : null;
     }
 
@@ -268,7 +270,7 @@ public class InitDbHostedService(
 internal partial class DbInitializer(
     DBBasejson DBBase,
     ApplicationDbContext context,
-    IDateTimeRepository dateTimeRepository,
+    ILockConditionRepository lockConditionRepository,
     ILogger<DbInitializer> logger,
     CancellationToken cancellationToken)
 {
@@ -290,6 +292,7 @@ internal partial class DbInitializer(
         await InitTrackCircuitSignal();
         await InitializeSignalRoute();
         await InitializeThrowOutControl();
+        await InitializeSwitchingMachineRoutes();
         await SetStationIdToInterlockingObject();
     }
 
@@ -780,9 +783,44 @@ internal partial class DbInitializer(
 
     private async Task InitializeSwitchingMachineRoutes()
     {
-        var routesByName = await context.Routes
-            .ToDictionaryAsync(r => r.Name, cancellationToken);
+        var switchingMachinesRoutes = await context.SwitchingMachineRoutes
+            .Select(smr => new { smr.RouteId, smr.SwitchingMachineId })
+            .AsAsyncEnumerable()
+            .ToHashSetAsync();
+        var routes = await context.Routes.ToListAsync();
+        var routeIds = routes.Select(r => r.Id).ToList();
+        var switchingMachine = await context.SwitchingMachines.ToListAsync();
+        var switchingMachineIds = switchingMachine.Select(sm => sm.Id).ToHashSet();
+        var directLockConditionsByRouteIds = await lockConditionRepository
+            .GetConditionsByObjectIdsAndType(routeIds, LockType.Lock);
+        var routeLockConditionsByRouteIds = await lockConditionRepository
+            .GetConditionsByObjectIdsAndType(routeIds, LockType.Route);
+        foreach (var route in routes)
+        {
+            var directLockConditions = directLockConditionsByRouteIds[route.Id];
+            // 転てつ器が条件先のものを取得する
+            var targetLockCondition = directLockConditions
+                .OfType<LockConditionObject>()
+                .Where(lco => switchingMachineIds.Contains(lco.ObjectId))
+                .ToList();
+            foreach (var lockCondition in targetLockCondition)
+            {
+                // 対象転てつ器を取得
+                var switchingMachineId = lockCondition.ObjectId;
+                // 既に登録済みの場合、スキップ
+                if (switchingMachinesRoutes.Contains(new { RouteId = route.Id, SwitchingMachineId = switchingMachineId }))
+                {
+                    continue;
+                }
 
+                context.SwitchingMachineRoutes.Add(new()
+                {
+                    RouteId = route.Id,
+                    SwitchingMachineId = switchingMachineId,
+                    IsReverse = lockCondition.IsReverse
+                });
+            }
+        }
     }
 }
 
