@@ -190,11 +190,6 @@ public class InterlockingHubTest(WebApplicationFixture factory)
         // 以下は実装してないので無視
         // CTC切換てこ
         // 転てつ不良表示灯
-        if (data.UniqueName.StartsWith("駅扱切換") || data.UniqueName.StartsWith("転てつ不良"))
-        {
-            return false;
-        }
-
-        return true;
+        return !data.UniqueName.StartsWith("駅扱切換") && !data.UniqueName.StartsWith("転てつ不良");
     }
 }
