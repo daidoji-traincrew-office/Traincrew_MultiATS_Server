@@ -1,4 +1,4 @@
-name: Integration Tests
+name: Unit Tests
 
 on:
   push:
@@ -11,10 +11,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4.2.2
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4.3.1
         with:
           dotnet-version: 8.0.x
 
@@ -24,10 +24,6 @@ jobs:
       - name: Build solution
         run: dotnet build --no-restore --configuration Release
 
-      - name: Start Database
-        working-directory: ./Database
-        run: docker compose up -d
-
-      - name: Run Integration Tests
-        working-directory: ./Traincrew_MultiATS_Server.IT
+      - name: Run Unit Tests
+        working-directory: ./Traincrew_MultiATS_Server.UT
         run: dotnet test --no-build --configuration Release
