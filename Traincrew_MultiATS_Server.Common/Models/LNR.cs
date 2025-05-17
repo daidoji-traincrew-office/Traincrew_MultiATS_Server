@@ -1,4 +1,4 @@
-namespace Traincrew_MultiATS_Server.Models;
+namespace Traincrew_MultiATS_Server.Common.Models;
 
 // Todo: DBに反映
 public enum LNR

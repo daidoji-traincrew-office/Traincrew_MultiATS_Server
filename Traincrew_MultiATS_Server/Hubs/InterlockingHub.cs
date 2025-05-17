@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using OpenIddict.Validation.AspNetCore;
+using Traincrew_MultiATS_Server.Common.Contract;
+using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Services;
 using static OpenIddict.Abstractions.OpenIddictConstants;
@@ -16,10 +18,11 @@ public class InterlockingHub(
     TrackCircuitService trackCircuitService,
     SignalService signalService,
     StationService stationService,
-    InterlockingService interlockingService) : Hub
+    InterlockingService interlockingService) : Hub<IInterlockingClientContract>, IInterlockingHubContract
 {
     public async Task<DataToInterlocking> SendData_Interlocking(List<string> activeStationsList)
     {
+        // Todo: クライアントごとに取得処理をするのではなく、サーバーで定時で取得処理をして、必要なクライアントに配る形式にする
         // Todo: めんどいし、Interlocking全取得してOfTypeと変換作って動くようにする    
         var allInterlockingObjects = await interlockingService.GetInterlockingObjects();
         var destinationButtons = await interlockingService.GetDestinationButtonsByStationIds(activeStationsList);
@@ -54,7 +57,7 @@ public class InterlockingHub(
                 .ToList(),
 
             PhysicalButtons = destinationButtons
-                .Select(button => button.DestinationButtonState)
+                .Select(button => InterlockingService.ToDestinationButtonData(button.DestinationButtonState))
                 .ToList(),
 
             Directions = allInterlockingObjects
@@ -88,7 +91,7 @@ public class InterlockingHub(
         return await interlockingService.SetPhysicalKeyLeverData(keyLeverData, memberId);
     }
 
-    public async Task SetDestinationButtonState(DestinationButtonState buttonData)
+    public async Task SetDestinationButtonState(DestinationButtonData buttonData)
     {
         await interlockingService.SetDestinationButtonState(buttonData);
     }

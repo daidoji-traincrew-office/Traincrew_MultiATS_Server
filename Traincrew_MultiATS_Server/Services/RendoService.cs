@@ -1,4 +1,4 @@
-using Discord;
+using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.DestinationButton;
@@ -1478,12 +1478,5 @@ public class RendoService(
         List<LockCondition> lockConditions)
     {
         return lockConditions.OfType<LockConditionObject>().Select(lc => lc.ObjectId).ToList();
-    }
-
-    public async Task<List<Route>> GetActiveRoutes()
-    {
-        var routeIds = await routeRepository.GetIdsWhereLeverRelayIsRaised();
-        var routes = await routeRepository.GetByIdsWithState(routeIds);
-        return routes;
     }
 }
