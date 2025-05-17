@@ -284,9 +284,11 @@ public class RendoService(
                         &&
                         r.RouteState.IsThrowOutXRRelayRaised == RaiseDrop.Raise
                         &&
-                        targetSourceThrowOutRoutes[r.Id].Any(sr =>
-                            sr.RouteState.IsLeverRelayRaised == RaiseDrop.Drop
-                        )
+                        targetSourceThrowOutRoutes.Count == 0 ?
+                            true :
+                            targetSourceThrowOutRoutes[r.Id].Any(sr =>
+                                sr.RouteState.IsLeverRelayRaised == RaiseDrop.Drop
+                            )
                     )
                 )
                 ? RaiseDrop.Raise
