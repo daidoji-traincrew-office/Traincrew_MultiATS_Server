@@ -11,4 +11,15 @@ public class DirectionRouteRepository(ApplicationDbContext context) : IDirection
             .Select(dl => dl.Id)
             .ToListAsync();
     }
+
+    /// <summary>
+    /// すべての DirectionRoute を取得する。
+    /// </summary>
+    /// <returns>DirectionRoute のリスト。</returns>
+    public async Task<List<Models.DirectionRoute>> GetAllWithState()
+    {
+        return await context.DirectionRoutes
+            .Include(route => route.DirectionRouteState)
+            .ToListAsync();
+    }
 }

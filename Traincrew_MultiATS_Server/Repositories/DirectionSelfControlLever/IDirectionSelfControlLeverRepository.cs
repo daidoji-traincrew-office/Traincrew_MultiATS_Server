@@ -14,4 +14,10 @@ public interface IDirectionSelfControlLeverRepository
     /// </summary>
     /// <returns>開放てこのIDのリスト。</returns>
     Task<List<ulong>> GetAllIds();
+
+    /// <summary>
+    /// すべての DirectionSelfControlLever を取得する。
+    /// </summary>
+    /// <returns>DirectionSelfControlLever のリスト。</returns>
+    Task<List<Models.DirectionSelfControlLever>> GetAllWithState();
 }
