@@ -9,17 +9,14 @@ public class TIDService(
 {
     public async Task<ConstantDataToTID> CreateTidDataAsync()
     {
-        var trackCircuitDataList = await trackCircuitService.GetAllTrackCircuitDataList();
-        var switchingMachineDataList = (await switchingMachineService.GetAllSwitchingMachines())
-            .Select(SwitchingMachineService.ToSwitchData)
-            .ToList();
-
+        var trackCircuitDatas = await trackCircuitService.GetAllTrackCircuitDataList();
+        var switchingMachineDatas = await switchingMachineService.GetAllSwitchData();
         var directionDatas = await directionRouteService.GetAllDirectionData();
 
-        return new ConstantDataToTID
+        return new()
         {
-            TrackCircuitDatas = trackCircuitDataList,
-            SwitchDatas = switchingMachineDataList,
+            TrackCircuitDatas = trackCircuitDatas,
+            SwitchDatas = switchingMachineDatas,
             DirectionDatas = directionDatas
         };
     }
