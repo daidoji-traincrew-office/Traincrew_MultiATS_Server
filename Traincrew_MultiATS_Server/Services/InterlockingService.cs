@@ -136,29 +136,34 @@ public class InterlockingService(
     /// <param name="keyLeverData"></param>
     /// <param name="memberId">DiscordのメンバーID</param>
     /// <returns></returns>
-    internal async Task<bool> SetPhysicalKeyLeverData(InterlockingKeyLeverData keyLeverData, ulong? memberId)
+    internal async Task<InterlockingKeyLeverData> SetPhysicalKeyLeverData(InterlockingKeyLeverData keyLeverData, ulong? memberId)
     {
         // 駅扱の判定を先に入れる
         var directionkeyLever =
             await directionSelfControlLeverRepository.GetDirectionSelfControlLeverByNameWithState(keyLeverData.Name);
-        if (directionkeyLever == null || directionkeyLever.DirectionSelfControlLeverState == null)
+        if (directionkeyLever?.DirectionSelfControlLeverState == null)
         {
             throw new ArgumentException("Invalid key lever name");
         }
 
         // 鍵を刺せるか確認
         var role = await discordService.GetRoleByMemberId(memberId);
-        // 鍵を刺せないなら処理終了
-        if (!role.IsAdministrator)
+        // 鍵を刺せるなら、鍵を処理する
+        // Todo: これ鍵刺さってるならadminじゃなくても回してよいのでは？
+        if (role.IsAdministrator)
         {
-            return false;
+            // 鍵てこを処理する
+            directionkeyLever.DirectionSelfControlLeverState.IsInsertedKey = keyLeverData.IsKeyInserted;
+            directionkeyLever.DirectionSelfControlLeverState.IsReversed =
+                keyLeverData.State == LNR.Right ? NR.Reversed : NR.Normal;
+            await generalRepository.Save(directionkeyLever);
         }
-        // 鍵てこを処理する
-        directionkeyLever.DirectionSelfControlLeverState.IsInsertedKey = keyLeverData.IsKeyInserted;
-        directionkeyLever.DirectionSelfControlLeverState.IsReversed =
-            keyLeverData.State == LNR.Right ? NR.Reversed : NR.Normal;
-        await generalRepository.Save(directionkeyLever);
-        return true;
+        return new()
+        {
+            Name = directionkeyLever.Name,
+            State = directionkeyLever.DirectionSelfControlLeverState.IsReversed == NR.Reversed ? LNR.Right : LNR.Normal,
+            IsKeyInserted = directionkeyLever.DirectionSelfControlLeverState.IsInsertedKey
+        };
     }
 
     /// <summary>

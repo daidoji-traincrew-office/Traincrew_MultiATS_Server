@@ -26,7 +26,7 @@ public class InterlockingHub(
         return await interlockingService.SetPhysicalLeverData(leverData);
     }
 
-    public async Task<bool> SetPhysicalKeyLeverData(InterlockingKeyLeverData keyLeverData)
+    public async Task<InterlockingKeyLeverData> SetPhysicalKeyLeverData(InterlockingKeyLeverData keyLeverData)
     {
         // MemberIDを取得
         var memberIdString = Context.User?.FindFirst(Claims.Subject)?.Value;

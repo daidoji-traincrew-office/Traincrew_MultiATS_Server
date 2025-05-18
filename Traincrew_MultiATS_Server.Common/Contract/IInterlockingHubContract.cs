@@ -6,7 +6,7 @@ public interface IInterlockingHubContract
 {
     Task<DataToInterlocking> SendData_Interlocking(List<string> activeStationsList);
     Task<InterlockingLeverData> SetPhysicalLeverData(InterlockingLeverData leverData);
-    Task<bool> SetPhysicalKeyLeverData(InterlockingKeyLeverData keyLeverData);
+    Task<InterlockingKeyLeverData> SetPhysicalKeyLeverData(InterlockingKeyLeverData keyLeverData);
     Task<DestinationButtonData> SetDestinationButtonState(DestinationButtonData buttonData);
 }
 
