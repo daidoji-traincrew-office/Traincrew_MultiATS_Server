@@ -113,7 +113,7 @@ public class InterlockingService(
     /// <param name="leverData"></param>
     /// <returns></returns>
     /// <exception cref="ArgumentException"></exception>
-    public async Task SetPhysicalLeverData(InterlockingLeverData leverData)
+    public async Task<InterlockingLeverData> SetPhysicalLeverData(InterlockingLeverData leverData)
     {
         var lever = await leverRepository.GetLeverByNameWithState(leverData.Name);
         if (lever == null)
@@ -123,6 +123,11 @@ public class InterlockingService(
 
         lever.LeverState.IsReversed = leverData.State;
         await generalRepository.Save(lever);
+        return new()
+        {
+            Name = lever.Name,
+            State = lever.LeverState.IsReversed
+        };
     }
 
     /// <summary>
@@ -162,7 +167,7 @@ public class InterlockingService(
     /// <param name="buttonData"></param>
     /// <returns></returns>     
     /// <exception cref="ArgumentException"></exception>
-    public async Task SetDestinationButtonState(DestinationButtonData buttonData)
+    public async Task<DestinationButtonData> SetDestinationButtonState(DestinationButtonData buttonData)
     {
         var buttonObject = await destinationButtonRepository.GetButtonByName(buttonData.Name);
         if (buttonObject == null)
@@ -173,6 +178,12 @@ public class InterlockingService(
         buttonObject.DestinationButtonState.OperatedAt = dateTimeRepository.GetNow();
         buttonObject.DestinationButtonState.IsRaised = buttonData.IsRaised;
         await generalRepository.Save(buttonObject.DestinationButtonState);
+        return new()
+        {
+            Name = buttonObject.DestinationButtonState.Name,
+            IsRaised = buttonObject.DestinationButtonState.IsRaised,
+            OperatedAt = buttonObject.DestinationButtonState.OperatedAt
+        };
     }
 
 

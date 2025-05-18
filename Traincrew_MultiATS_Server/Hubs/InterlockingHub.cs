@@ -21,9 +21,9 @@ public class InterlockingHub(
         return await interlockingService.SendData_Interlocking();
     }
 
-    public async Task SetPhysicalLeverData(InterlockingLeverData leverData)
+    public async Task<InterlockingLeverData> SetPhysicalLeverData(InterlockingLeverData leverData)
     {
-        await interlockingService.SetPhysicalLeverData(leverData);
+        return await interlockingService.SetPhysicalLeverData(leverData);
     }
 
     public async Task<bool> SetPhysicalKeyLeverData(InterlockingKeyLeverData keyLeverData)
@@ -34,8 +34,8 @@ public class InterlockingHub(
         return await interlockingService.SetPhysicalKeyLeverData(keyLeverData, memberId);
     }
 
-    public async Task SetDestinationButtonState(DestinationButtonData buttonData)
+    public async Task<DestinationButtonData> SetDestinationButtonState(DestinationButtonData buttonData)
     {
-        await interlockingService.SetDestinationButtonState(buttonData);
+        return await interlockingService.SetDestinationButtonState(buttonData);
     }
 }
