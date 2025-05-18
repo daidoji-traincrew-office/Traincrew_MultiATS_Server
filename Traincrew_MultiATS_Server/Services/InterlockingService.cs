@@ -2,7 +2,6 @@ using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.DestinationButton;
-using Traincrew_MultiATS_Server.Repositories.DirectionRoute;
 using Traincrew_MultiATS_Server.Repositories.DirectionSelfControlLever;
 using Traincrew_MultiATS_Server.Repositories.General;
 using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
@@ -24,10 +23,10 @@ public class InterlockingService(
     IGeneralRepository generalRepository,
     IStationRepository stationRepository,
     ILeverRepository leverRepository,
-    IDirectionRouteRepository directionRouteRepository,
     IDirectionSelfControlLeverRepository directionSelfControlLeverRepository,
     TrackCircuitService trackCircuitService,
     ISwitchingMachineRepository switchingMachineRepository,
+    DirectionRouteService directionRouteService,
     SignalService signalService,
     IMutexRepository mutexRepository)
 {
@@ -41,7 +40,7 @@ public class InterlockingService(
         var switchingMachine = await switchingMachineRepository.GetSwitchingMachinesWithState();
         var lever = await leverRepository.GetAllWithState();
         var directionSelfControlLevers = await directionSelfControlLeverRepository.GetAllWithState();
-        var directionRoutes = await directionRouteRepository.GetAllWithState();
+        var directions = await directionRouteService.GetAllDirectionDataAsync();
         var destinationButtons = await destinationButtonRepository.GetAllWithState();
 
         // List<string> clientData.ActiveStationsListの駅IDから、指定された駅にある信号機名称をList<string>で返すやつ
@@ -73,9 +72,7 @@ public class InterlockingService(
                 .Select(button => ToDestinationButtonData(button.DestinationButtonState))
                 .ToList(),
 
-            Directions = directionRoutes
-                .Select(ToDirectionData)
-                .ToList(),
+            Directions = directions,
 
             // Todo: 列番表示の実装から
             Retsubans = new List<InterlockingRetsubanData>(),
@@ -252,30 +249,6 @@ public class InterlockingService(
     public async Task<List<DestinationButton>> GetDestinationButtonsByStationIds(List<string> stationNames)
     {
         return await destinationButtonRepository.GetButtonsByStationIds(stationNames);
-    }
-
-    public static DirectionData ToDirectionData(DirectionRoute direction)
-    {
-        if (direction.DirectionRouteState == null)
-        {
-            throw new ArgumentException("Invalid direction state");
-        }
-
-        var state = LCR.Center;
-        if (direction.DirectionRouteState.isLr == LR.Left)
-        {
-            state = LCR.Left;
-        }
-        else if (direction.DirectionRouteState.isLr == LR.Right)
-        {
-            state = LCR.Right;
-        }
-
-        return new()
-        {
-            Name = direction.Name,
-            State = state
-        };
     }
 
     public static DestinationButtonData ToDestinationButtonData(DestinationButtonState buttonState)

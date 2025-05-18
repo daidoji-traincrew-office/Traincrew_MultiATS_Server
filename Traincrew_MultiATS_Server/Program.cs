@@ -286,6 +286,7 @@ builder.Services
     .AddScoped<StationService>()
     .AddScoped<SwitchingMachineService>()
     .AddScoped<TrackCircuitService>()
+    .AddScoped<TIDService>()
     .AddSingleton(provider =>
     {
         var discordService = new DiscordService(

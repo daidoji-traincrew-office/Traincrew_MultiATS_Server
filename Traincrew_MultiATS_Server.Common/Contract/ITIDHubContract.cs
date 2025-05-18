@@ -9,5 +9,5 @@ public interface ITIDHubContract
 
 public interface ITIDClientContract
 {
-    // クライアント側のメソッド定義は不要
+    Task ReceiveData(ConstantDataToTID data);
 }
