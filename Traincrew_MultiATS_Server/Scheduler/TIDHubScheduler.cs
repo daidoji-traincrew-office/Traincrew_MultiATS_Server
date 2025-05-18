@@ -14,7 +14,7 @@ public class TIDHubScheduler(IServiceScopeFactory serviceScopeFactory) : Schedul
         var hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<TIDHub, ITIDClientContract>>();
         var tidService = scope.ServiceProvider.GetRequiredService<TIDService>();
 
-        var data = await tidService.CreateTidDataAsync();
+        var data = await tidService.CreateTidData();
 
         await hubContext.Clients.All.ReceiveData(data);
     }

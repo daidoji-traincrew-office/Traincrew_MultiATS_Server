@@ -15,6 +15,6 @@ public class TIDHub(TIDService tidService) : Hub<ITIDClientContract>, ITIDHubCon
 {
     public async Task<ConstantDataToTID> SendData_TID()
     {
-	    return await tidService.CreateTidDataAsync();
+	    return await tidService.CreateTidData();
     }
 }
