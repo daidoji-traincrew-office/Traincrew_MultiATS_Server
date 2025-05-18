@@ -14,7 +14,7 @@ public class TIDService(
             .Select(SwitchingMachineService.ToSwitchData)
             .ToList();
 
-        var directionDatas = await directionRouteService.GetAllDirectionDataAsync();
+        var directionDatas = await directionRouteService.GetAllDirectionData();
 
         return new ConstantDataToTID
         {

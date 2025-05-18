@@ -39,7 +39,7 @@ public class DirectionRouteService(IDirectionRouteRepository directionRouteRepos
     /// 全てのDirectionRouteを取得し、DirectionDataに変換して返す
     /// </summary>
     /// <returns>DirectionDataのリスト</returns>
-    public async Task<List<DirectionData>> GetAllDirectionDataAsync()
+    public async Task<List<DirectionData>> GetAllDirectionData()
     {
         var directionRoutes = await directionRouteRepository.GetAllWithState();
         return directionRoutes.Select(ToDirectionData).ToList();

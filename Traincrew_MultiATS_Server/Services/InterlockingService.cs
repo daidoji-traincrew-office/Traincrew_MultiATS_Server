@@ -40,7 +40,7 @@ public class InterlockingService(
         var switchingMachine = await switchingMachineRepository.GetSwitchingMachinesWithState();
         var lever = await leverRepository.GetAllWithState();
         var directionSelfControlLevers = await directionSelfControlLeverRepository.GetAllWithState();
-        var directions = await directionRouteService.GetAllDirectionDataAsync();
+        var directions = await directionRouteService.GetAllDirectionData();
         var destinationButtons = await destinationButtonRepository.GetAllWithState();
 
         // List<string> clientData.ActiveStationsListの駅IDから、指定された駅にある信号機名称をList<string>で返すやつ
