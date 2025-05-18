@@ -277,6 +277,7 @@ builder.Services
     .AddScoped<ISwitchingMachineRouteRepository, SwitchingMachineRouteRepository>()
     .AddScoped<IThrowOutControlRepository, ThrowOutControlRepository>()
     .AddScoped<ITrackCircuitRepository, TrackCircuitRepository>()
+    .AddScoped<DirectionRouteService>()
     .AddScoped<InterlockingService>()
     .AddScoped<OperationNotificationService>()
     .AddScoped<ProtectionService>()
