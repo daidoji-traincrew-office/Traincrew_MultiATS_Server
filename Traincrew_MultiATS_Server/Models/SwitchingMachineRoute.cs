@@ -11,4 +11,5 @@ public class SwitchingMachineRoute
     public ulong SwitchingMachineId { get; set; }
     public ulong RouteId { get; set; }
     public NR IsReverse { get; set; }
+    public bool OnRouteLock { get; set; }
 }

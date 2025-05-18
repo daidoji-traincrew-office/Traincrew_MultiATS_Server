@@ -105,6 +105,18 @@ public class RendoService(
                 .Select(toc => interlockingObjects[toc.TargetId])
                 .OfType<Route>()
                 .ToList();
+            // targetThrowOutRoutes の TargetId をキーとする辞書を生成
+            var targetSourceThrowOutRoutes = targetThrowOutRoutes
+                .ToDictionary(
+                    toc => toc.Id, // TargetId をキーに
+                    toc => sourceThrowOutControls.GetValueOrDefault(toc.Id, []) // SourceId のリストを取得
+                        .Select(toc => interlockingObjects[toc.SourceId])
+                        .Distinct()
+                        .OfType<Route>()
+                        .Where(r => r.Id != route.Id)
+                        .ToList()
+                );
+
             // 対象てこ
             var lever = (interlockingObjects[routeLeverDestinationButton.LeverId] as Lever)!;
             // 対象ボタン
@@ -271,10 +283,14 @@ public class RendoService(
                         r.RouteState.IsLeverRelayRaised == RaiseDrop.Raise
                         &&
                         r.RouteState.IsThrowOutXRRelayRaised == RaiseDrop.Raise
+                        &&
+                        targetSourceThrowOutRoutes[r.Id].All(sr =>
+                            sr.RouteState.IsLeverRelayRaised == RaiseDrop.Drop
+                        )
                     )
                 )
-                    ? RaiseDrop.Raise
-                    : RaiseDrop.Drop;
+                ? RaiseDrop.Raise
+                : RaiseDrop.Drop;
             if (routeState.IsLeverRelayRaised != isLeverRelayRaised)
             {
                 isChanged = true;
