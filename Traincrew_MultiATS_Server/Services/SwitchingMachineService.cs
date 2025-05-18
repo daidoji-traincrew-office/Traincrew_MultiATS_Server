@@ -82,7 +82,6 @@ public class SwitchingMachineService(
 
             var requestNormal = leverState == LCR.Left;
             var requestReverse = leverState == LCR.Right;
-            var routeLocked = false;
 
             // 対応する転てつ器の要求進路一覧を取得
             // Todo: 全部データをちゃんと入れたら、デフォルト値を使わないようにする
@@ -113,12 +112,6 @@ public class SwitchingMachineService(
                             break;
                     }
                 }
-            }
-
-            if (routeLocked)
-            {
-                // 転換中に進路鎖錠を受けると転換処理が通らないが、そんなことはないので無視。
-                continue;
             }
 
             if (requestNormal == requestReverse)
