@@ -94,9 +94,9 @@ public class SwitchingMachineService(
                 var route = routes[switchingMachineRoute.RouteId];
 
                 // 進路鎖錠欄に直接てっさ鎖錠軌道回路がない場合(=過走防護関係の転てつ器の場合)、進路鎖錠を受けていたら強制終了
-                if (!switchingMachineRoute.OnRouteLock)
+                if (!switchingMachineRoute.OnRouteLock && route.RouteState.IsRouteLockRaised == RaiseDrop.Drop)
                 {
-                    if (route.RouteState.IsRouteLockRaised == RaiseDrop.Drop) break;
+                    break;
                 }
                 // 進路鎖錠欄に直接てっさ鎖錠軌道回路がある場合、IsDetectorLockedですでに弾かれている
 
