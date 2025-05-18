@@ -8,7 +8,6 @@ using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
 using Traincrew_MultiATS_Server.Repositories.Lever;
 using Traincrew_MultiATS_Server.Repositories.Mutex;
 using Traincrew_MultiATS_Server.Repositories.Station;
-using Traincrew_MultiATS_Server.Repositories.SwitchingMachine;
 
 namespace Traincrew_MultiATS_Server.Services;
 
@@ -25,7 +24,7 @@ public class InterlockingService(
     ILeverRepository leverRepository,
     IDirectionSelfControlLeverRepository directionSelfControlLeverRepository,
     TrackCircuitService trackCircuitService,
-    ISwitchingMachineRepository switchingMachineRepository,
+    SwitchingMachineService switchingMachineService,
     DirectionRouteService directionRouteService,
     SignalService signalService,
     IMutexRepository mutexRepository)
@@ -37,7 +36,7 @@ public class InterlockingService(
         var stations = await stationRepository.GetWhereIsStation();
         var stationIds = stations.Select(station => station.Id).ToList();
         var trackCircuits = await trackCircuitService.GetAllTrackCircuitDataList();
-        var switchingMachine = await switchingMachineRepository.GetSwitchingMachinesWithState();
+        var switchingDatas = await switchingMachineService.GetAllSwitchData();
         var lever = await leverRepository.GetAllWithState();
         var directionSelfControlLevers = await directionSelfControlLeverRepository.GetAllWithState();
         var directions = await directionRouteService.GetAllDirectionData();
@@ -54,9 +53,7 @@ public class InterlockingService(
         {
             TrackCircuits = trackCircuits,
 
-            Points = switchingMachine
-                .Select(SwitchingMachineService.ToSwitchData)
-                .ToList(),
+            Points = switchingDatas,
 
             // Todo: 方向てこのほうのリストを連結する
             PhysicalLevers = lever
@@ -177,6 +174,7 @@ public class InterlockingService(
             directionkeyLever.DirectionSelfControlLeverState.IsReversed = isReversed;
             await generalRepository.Save(directionkeyLever);
         }
+
         return new()
         {
             Name = directionkeyLever.Name,
