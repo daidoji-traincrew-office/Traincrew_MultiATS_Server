@@ -82,7 +82,6 @@ public class SwitchingMachineService(
 
             var requestNormal = leverState == LCR.Left;
             var requestReverse = leverState == LCR.Right;
-            var routeLocked = false;
 
             // 対応する転てつ器の要求進路一覧を取得
             // Todo: 全部データをちゃんと入れたら、デフォルト値を使わないようにする
@@ -93,9 +92,12 @@ public class SwitchingMachineService(
                 // 対応する進路のRouteState.IsLeverRelayRaisedを取得
                 var route = routes[switchingMachineRoute.RouteId];
 
-                // 進路鎖錠を受けていたら強制終了
-                routeLocked = route.RouteState.IsRouteLockRaised == RaiseDrop.Drop;
-                if (routeLocked) break;
+                // 進路鎖錠欄に直接てっさ鎖錠軌道回路がない場合(=過走防護関係の転てつ器の場合)、進路鎖錠を受けていたら強制終了
+                if (!switchingMachineRoute.OnRouteLock && route.RouteState.IsRouteLockRaised == RaiseDrop.Drop)
+                {
+                    break;
+                }
+                // 進路鎖錠欄に直接てっさ鎖錠軌道回路がある場合、IsDetectorLockedですでに弾かれている
 
                 var isLeverRelayRaised = route.RouteState.IsLeverRelayRaised == RaiseDrop.Raise;
                 if (isLeverRelayRaised)
@@ -110,12 +112,6 @@ public class SwitchingMachineService(
                             break;
                     }
                 }
-            }
-
-            if (routeLocked)
-            {
-                // 転換中に進路鎖錠を受けると転換処理が通らないが、そんなことはないので無視。
-                continue;
             }
 
             if (requestNormal == requestReverse)

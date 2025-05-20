@@ -1,0 +1,45 @@
+name: Unit Tests
+
+on:
+  push: { }
+  pull_request: { }
+  workflow_dispatch: { }
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.2.2
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        if: github.event_name == 'pull_request'
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+
+      - name: Merge PR branch into base branch
+        if: github.event_name == 'pull_request'
+        run: |
+          git fetch origin "refs/heads/${{ github.event.pull_request.base.ref }}:refs/remotes/origin/${{ github.event.pull_request.base.ref }}"
+          git fetch origin "refs/heads/${{ github.event.pull_request.head.ref }}:refs/remotes/origin/${{ github.event.pull_request.head.ref }}"
+          git checkout ${{ github.event.pull_request.base.ref }}
+          git merge --no-ff "origin/${{ github.event.pull_request.head.ref }}"
+  
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4.3.1
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build solution
+        run: dotnet build --no-restore --configuration Release
+
+      - name: Run Unit Tests
+        working-directory: ./Traincrew_MultiATS_Server.UT
+        run: dotnet test --no-build --configuration Release

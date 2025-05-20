@@ -28,7 +28,15 @@ public abstract class Scheduler
             {
                 logger.LogError(ex, "An error occurred while executing the task.");
             }
-            await timer;
+
+            try
+            {
+                await timer;
+            }
+            catch (TaskCanceledException)
+            {
+                break;
+            }
         }
     }
 

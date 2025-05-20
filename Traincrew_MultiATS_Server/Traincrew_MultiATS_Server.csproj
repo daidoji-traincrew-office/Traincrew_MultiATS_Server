@@ -22,4 +22,9 @@
     <ItemGroup>
       <ProjectReference Include="..\Traincrew_MultiATS_Server.Common\Traincrew_MultiATS_Server.Common.csproj" />
     </ItemGroup>
+    <ItemGroup>
+      <Content Include="Data\**\*.csv">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
 </Project>
