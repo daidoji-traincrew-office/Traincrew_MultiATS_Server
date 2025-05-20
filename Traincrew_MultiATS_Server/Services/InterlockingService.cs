@@ -146,23 +146,38 @@ public class InterlockingService(
             throw new ArgumentException("Invalid key lever name");
         }
 
+        // 更新後の値定義
+        var isInsertedKey = directionkeyLever.DirectionSelfControlLeverState.IsInsertedKey;
+        var isReversed = directionkeyLever.DirectionSelfControlLeverState.IsReversed;
+        
         // 鍵を刺せるか確認
         var role = await discordService.GetRoleByMemberId(memberId);
         // 鍵を刺せるなら、鍵を処理する
-        // Todo: これ鍵刺さってるならadminじゃなくても回してよいのでは？
         if (role.IsAdministrator)
         {
-            // 鍵てこを処理する
-            directionkeyLever.DirectionSelfControlLeverState.IsInsertedKey = keyLeverData.IsKeyInserted;
-            directionkeyLever.DirectionSelfControlLeverState.IsReversed =
-                keyLeverData.State == LNR.Right ? NR.Reversed : NR.Normal;
+            isInsertedKey = keyLeverData.IsKeyInserted;
+        }
+        
+        // 鍵が刺さっている場合、回す処理をする
+        if (isInsertedKey)
+        {
+            isReversed = keyLeverData.State == LNR.Right ? NR.Reversed : NR.Normal;
+        }
+        
+        // 変化があれば、更新する
+        // ReSharper disable once InvertIf
+        if (isInsertedKey != directionkeyLever.DirectionSelfControlLeverState.IsInsertedKey ||
+            isReversed != directionkeyLever.DirectionSelfControlLeverState.IsReversed)
+        {
+            directionkeyLever.DirectionSelfControlLeverState.IsInsertedKey = isInsertedKey;
+            directionkeyLever.DirectionSelfControlLeverState.IsReversed = isReversed;
             await generalRepository.Save(directionkeyLever);
         }
         return new()
         {
             Name = directionkeyLever.Name,
-            State = directionkeyLever.DirectionSelfControlLeverState.IsReversed == NR.Reversed ? LNR.Right : LNR.Normal,
-            IsKeyInserted = directionkeyLever.DirectionSelfControlLeverState.IsInsertedKey
+            State = isReversed == NR.Reversed ? LNR.Right : LNR.Normal,
+            IsKeyInserted = isInsertedKey 
         };
     }
 
