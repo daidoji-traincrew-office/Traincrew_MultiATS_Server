@@ -202,15 +202,14 @@ public class TtcStationControlService(
             if (targetTtcWindow.TtcWindowState.TrainNumber != trainNumber)
             {
                 targetTtcWindow.TtcWindowState.TrainNumber = sourceTtcWindow.TtcWindowState.TrainNumber;
+                sourceTtcWindow.TtcWindowState.TrainNumber = string.Empty;
             }
 
-            sourceTtcWindow.TtcWindowState.TrainNumber = string.Empty;
             await generalRepository.Save(sourceTtcWindow.TtcWindowState);
             await generalRepository.Save(targetTtcWindow.TtcWindowState);
             //再起呼出してその次に行かないか確認する
             await TrainTrackingProcess(targetTtcWindow.Name, ttcWindowLinks, ttcWindows,
                 ttcWindowLinkRouteConditions, trackCircuits, routes, recallCounter++);
-
         }
     }
 
