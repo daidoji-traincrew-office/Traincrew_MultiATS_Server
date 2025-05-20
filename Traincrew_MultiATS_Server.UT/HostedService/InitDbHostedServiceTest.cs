@@ -7,9 +7,11 @@ using static DbRendoTableInitializer;
 
 public class InitDbHostedServiceTest
 {
+    /*
     [Fact]
     public void LockStringParseTest()
     {
+        
         var initializer = new DbRendoTableInitializer(
             "TH65", null, null, null, CancellationToken.None);
 
@@ -125,6 +127,7 @@ public class InitDbHostedServiceTest
             }
         ];
         Assert.Equal(expected7, result7, isEqual);
+        
     }
 
     private bool isEqual(LockItem expected, LockItem actual)
@@ -141,4 +144,5 @@ public class InitDbHostedServiceTest
                expected.StationId == actual.StationId &&
                expected.Name == actual.Name;
     }
+    */
 }

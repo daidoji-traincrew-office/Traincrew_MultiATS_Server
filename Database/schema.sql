@@ -379,6 +379,7 @@ CREATE TABLE switching_machine_route
     switching_machine_id BIGINT REFERENCES switching_machine (id) NOT NULL, -- 転てつ機のID
     route_id             BIGINT REFERENCES route (id)             NOT NULL, -- 進路のID
     is_reverse           nr                                       NOT NULL, -- 定反
+    on_route_lock        BOOLEAN DEFAULT false                    NOT NULL,
     UNIQUE (switching_machine_id, route_id)
 );
 CREATE INDEX switching_machine_route_switching_machine_id_index ON switching_machine_route (switching_machine_id);
