@@ -177,19 +177,26 @@ public class TtcStationControlService(
             }
 
             var trainNumber = trackCircuit.TrackCircuitState.TrainNumber;
-            var TtcWindowLinkRouteConditions =
-                ttcWindowLinkRouteConditions.FirstOrDefault(obj => obj.TtcWindowLinkId == ttcWindowLink.Id);
-            if (TtcWindowLinkRouteConditions == null)
+            // 変更後（複数件取得し、Anyで条件確認）
+            var targetTtcWindowLinkRouteConditions =
+                ttcWindowLinkRouteConditions.Where(obj => obj.TtcWindowLinkId == ttcWindowLink.Id).ToList();
+            if (targetTtcWindowLinkRouteConditions.Count == 0)
             {
                 //窓リンク設定が何らか事故って進路と紐づいていない
                 continue;
             }
 
-            var routeState = routes.GetValueOrDefault(TtcWindowLinkRouteConditions.RouteId)?.RouteState;
-            if (!(routeState.IsRouteLockRaised == RaiseDrop.Drop || routeState.IsLeverRelayRaised == RaiseDrop.Raise))
+            // いずれかの進路が条件を満たしていればOK
+            if (!targetTtcWindowLinkRouteConditions.Any(cond =>
+            {
+                var routeState = routes.GetValueOrDefault(cond.RouteId)?.RouteState;
+                return routeState != null &&
+                       (routeState.IsRouteLockRaised == RaiseDrop.Drop || routeState.IsLeverRelayRaised == RaiseDrop.Raise);
+            }))
             {
                 continue;
             }
+
             //本当なら増結解結関連で処理をしないといけない
             //現在はあとから入ってきたほうで強制上書きする              
             if (targetTtcWindow.TtcWindowState.TrainNumber != trainNumber)
