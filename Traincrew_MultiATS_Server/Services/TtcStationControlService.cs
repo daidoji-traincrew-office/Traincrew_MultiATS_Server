@@ -179,6 +179,12 @@ public class TtcStationControlService(
             var trainNumber = trackCircuit.TrackCircuitState.TrainNumber;
             var TtcWindowLinkRouteConditions =
                 ttcWindowLinkRouteConditions.FirstOrDefault(obj => obj.TtcWindowLinkId == ttcWindowLink.Id);
+            if (TtcWindowLinkRouteConditions == null)
+            {
+                //窓リンク設定が何らか事故って進路と紐づいていない
+                continue;
+            }
+
             var routeState = routes.GetValueOrDefault(TtcWindowLinkRouteConditions.RouteId)?.RouteState;
             if (!(routeState.IsRouteLockRaised == RaiseDrop.Drop || routeState.IsLeverRelayRaised == RaiseDrop.Raise))
             {
