@@ -134,8 +134,7 @@ public class InterlockingHubTest(WebApplicationFixture factory)
                                 Assert.Contains(row.ServerName, physicalButtonNames);
                                 break;
                             case ServerType.Retsubans:
-                                // Todo: 列番窓実装したらコメントアウト外す
-                                // Assert.Contains(row.ServerName, retsubanNames);
+                                Assert.Contains(row.ServerName, retsubanNames);
                                 break;
                             case ServerType.Lamps:
                                 Assert.Contains(row.ServerName, lampNames);
