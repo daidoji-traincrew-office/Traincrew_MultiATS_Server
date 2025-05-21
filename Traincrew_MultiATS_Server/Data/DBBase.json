@@ -6518,23 +6518,49 @@
             "TrackCircuitName": null
         },
         {
-            "Name": "赤山町上り場内2R",
+            "Name": "赤山町上り場内2RA",
             "phase": 1,
-            "TypeName": "4灯YG式",
+            "TypeName": "3灯式",
             "NextSignalNames": [
-                "赤山町上り出発6R",
-                "赤山町上り出発7R",
-                "赤山町上り出発8R"
+                "赤山町上り出発6R"
             ],
             "RouteNames": [
-                "TH58_2RA",
-                "TH58_2RB",
-                "TH58_2RC"
+                "TH58_2RA"
             ],
             "DirectionRouteLeft": null,
             "DirectionRouteRight": null,
             "Direction": null,
             "TrackCircuitName": null
+        },
+        {
+            "Name": "赤山町上り場内2RB",
+            "phase": 1,
+            "TypeName": "5灯式",
+            "NextSignalNames": [
+                "赤山町上り出発7R"
+            ],
+            "RouteNames": [
+                "TH58_2RB"
+            ],
+            "DirectionRouteLeft": null,
+            "DirectionRouteRight": null,
+            "Direction": "",
+            "TrackCircuitName": ""
+        },
+        {
+            "Name": "赤山町上り場内2RC",
+            "phase": 1,
+            "TypeName": "4灯YY式",
+            "NextSignalNames": [
+                "赤山町上り出発8R"
+            ],
+            "RouteNames": [
+                "TH58_2RC"
+            ],
+            "DirectionRouteLeft": null,
+            "DirectionRouteRight": null,
+            "Direction": "",
+            "TrackCircuitName": ""
         },
         {
             "Name": "赤山町下り出発3L",
