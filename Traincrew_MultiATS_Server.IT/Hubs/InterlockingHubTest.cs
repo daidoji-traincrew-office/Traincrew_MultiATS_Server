@@ -190,8 +190,11 @@ public class InterlockingHubTest(WebApplicationFixture factory)
         // 以下は実装してないので無視
         // CTC切換てこ
         // 転てつ不良表示灯
+        
+        // 赤山町上り場内は一旦TSV更新待ち
         return
             !data.UniqueName.StartsWith("駅扱切換")
-            && !data.UniqueName.StartsWith("転てつ不良");
+            && !data.UniqueName.StartsWith("転てつ不良")
+            && !data.ServerName.StartsWith("赤山町上り場内2R");
     }
 }
