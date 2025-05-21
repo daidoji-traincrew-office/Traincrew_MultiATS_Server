@@ -418,8 +418,9 @@ internal partial class DbInitializer(
         var signalNames = (await context.Signals
             .Select(s => s.Name)
             .ToListAsync(cancellationToken)).ToHashSet();
-        // 駅マスタを取得
+        // 駅マスタから停車場を取得
         var stations = await context.Stations
+            .Where(station => station.IsStation)
             .ToListAsync(cancellationToken);
         // DirectionRoutesを事前に取得してDictionaryに格納
         var directionRoutes = await context.DirectionRoutes
@@ -897,9 +898,9 @@ public partial class DbRendoTableInitializer
         { "TH63", ["TH64", "TH62"] },
         // 藤江: 大道寺、水越
         { "TH64", ["TH65", "TH63"] },
-        // 大道寺: 江ノ原検車区、藤江
+        // 大道寺: 江ノ原信号場、藤江
         { "TH65", ["TH66S", "TH64"] },
-        // 江ノ原検車区: 大道寺
+        // 江ノ原信号場: 大道寺
         { "TH66S", ["TH65"] },
         // 新野崎: 
         { "TH67", [] },
