@@ -15,12 +15,18 @@ public class TrackCircuitRepository(ApplicationDbContext context) : ITrackCircui
     }
     public async Task<List<Models.TrackCircuit>> GetTrackCircuitByName(List<string> trackCircuitNames)
     {
-       return await context.TrackCircuits
-           .Where(obj => trackCircuitNames.Contains(obj.Name))
-           .Include(obj => obj.TrackCircuitState)
-           .ToListAsync(); 
+        return await context.TrackCircuits
+            .Where(obj => trackCircuitNames.Contains(obj.Name))
+            .Include(obj => obj.TrackCircuitState)
+            .ToListAsync();
     }
-
+    public async Task<List<Models.TrackCircuit>> GetTrackCircuitsById(List<ulong> Ids)
+    {
+        return await context.TrackCircuits
+            .Where(obj => Ids.Contains(obj.Id))
+            .Include(obj => obj.TrackCircuitState)
+            .ToListAsync();
+    }
     public async Task<List<Models.TrackCircuit>> GetTrackCircuitListByTrainNumber(string trainNumber)
     {
         List<Models.TrackCircuit> trackcircuitlist_db = await context.TrackCircuits

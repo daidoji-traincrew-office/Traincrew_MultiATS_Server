@@ -183,4 +183,13 @@ public class InterlockingService(
             OperatedAt = buttonState.OperatedAt
         };
     }
+
+    public static InterlockingRetsubanData ToRetsubanData(TtcWindow ttcWindow)
+    {
+        return new()
+        {
+            Name = ttcWindow.Name,
+            Retsuban = ttcWindow.TtcWindowState.TrainNumber == null ? "" : ttcWindow.TtcWindowState.TrainNumber,
+        };
+    }
 }

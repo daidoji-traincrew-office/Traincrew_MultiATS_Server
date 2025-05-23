@@ -33,6 +33,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<OperationNotificationState> OperationNotificationStates { get; set; }
     public DbSet<DirectionRoute> DirectionRoutes { get; set; }
     public DbSet<DirectionSelfControlLever> DirectionSelfControlLevers { get; set; }
+    public DbSet<TtcWindow> TtcWindows { get; set; }
+    public DbSet<TtcWindowLink> TtcWindowLinks { get; set; }
+    public DbSet<TtcWindowDisplayStation> TtcWindowDisplayStations { get; set; }
+    public DbSet<TtcWindowTrackCircuit> TtcWindowTrackCircuits { get; set; }
+    public DbSet<TtcWindowLinkRouteCondition> TtcWindowLinkRouteConditions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -142,7 +147,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .WithOne()
             .HasForeignKey<DirectionRoute>(dl => dl.LeverId)
             .HasPrincipalKey<Lever>(l => l.Id);
-        
+
         modelBuilder.Entity<DirectionSelfControlLever>()
             .HasOne(dsc => dsc.DirectionSelfControlLeverState)
             .WithOne()
@@ -150,6 +155,25 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasPrincipalKey<DirectionSelfControlLever>(dsc => dsc.Id);
 
         modelBuilder.Entity<DirectionSelfControlLever>();
+
+        modelBuilder.Entity<TtcWindowLinkRouteCondition>()
+            .HasOne(t => t.TtcWindowLink)
+            .WithMany()
+            .HasForeignKey(t => t.TtcWindowLinkId)
+            .HasPrincipalKey(t => t.Id);
+
+        modelBuilder.Entity<TtcWindowLinkRouteCondition>()
+            .HasOne<Route>()
+            .WithMany()
+            .HasForeignKey(t => t.RouteId)
+            .HasPrincipalKey(r => r.Id);
+
+        modelBuilder.Entity<TtcWindow>()
+            .HasOne(tw => tw.TtcWindowState)
+            .WithOne()
+            .HasForeignKey<TtcWindowState>(tws => tws.Name)
+            .HasPrincipalKey<TtcWindow>(tw => tw.Name);
+
         // Convert all column names to snake_case 
         foreach (var entity in modelBuilder.Model.GetEntityTypes())
         {
