@@ -7,6 +7,7 @@ using Traincrew_MultiATS_Server.Repositories.DirectionSelfControlLever;
 using Traincrew_MultiATS_Server.Repositories.General;
 using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
 using Traincrew_MultiATS_Server.Repositories.Lever;
+using Traincrew_MultiATS_Server.Repositories.Mutex;
 using Traincrew_MultiATS_Server.Repositories.Station;
 using Traincrew_MultiATS_Server.Repositories.SwitchingMachine;
 
@@ -27,10 +28,13 @@ public class InterlockingService(
     IDirectionSelfControlLeverRepository directionSelfControlLeverRepository,
     TrackCircuitService trackCircuitService,
     ISwitchingMachineRepository switchingMachineRepository,
-    SignalService signalService)
+    SignalService signalService,
+    IMutexRepository mutexRepository)
 {
+
     public async Task<DataToInterlocking> SendData_Interlocking()
     {
+        await using var mutex = await mutexRepository.AcquireAsync(nameof(InterlockingService));
         var stations = await stationRepository.GetWhereIsStation();
         var stationIds = stations.Select(station => station.Id).ToList();
         var trackCircuits = await trackCircuitService.GetAllTrackCircuitDataList();
@@ -83,6 +87,7 @@ public class InterlockingService(
                 .Select(pair => SignalService.ToSignalData(pair.Key, pair.Value))
                 .ToList()
         };
+
         return response;
     }
 
@@ -115,6 +120,7 @@ public class InterlockingService(
     /// <exception cref="ArgumentException"></exception>
     public async Task<InterlockingLeverData> SetPhysicalLeverData(InterlockingLeverData leverData)
     {
+        await using var mutex = await mutexRepository.AcquireAsync(nameof(InterlockingService));
         var lever = await leverRepository.GetLeverByNameWithState(leverData.Name);
         if (lever == null)
         {
@@ -138,6 +144,7 @@ public class InterlockingService(
     /// <returns></returns>
     internal async Task<InterlockingKeyLeverData> SetPhysicalKeyLeverData(InterlockingKeyLeverData keyLeverData, ulong? memberId)
     {
+        await using var mutex = await mutexRepository.AcquireAsync(nameof(InterlockingService));
         // 駅扱の判定を先に入れる
         var directionkeyLever =
             await directionSelfControlLeverRepository.GetDirectionSelfControlLeverByNameWithState(keyLeverData.Name);
@@ -189,6 +196,7 @@ public class InterlockingService(
     /// <exception cref="ArgumentException"></exception>
     public async Task<DestinationButtonData> SetDestinationButtonState(DestinationButtonData buttonData)
     {
+        await using var mutex = await mutexRepository.AcquireAsync(nameof(InterlockingService));
         var buttonObject = await destinationButtonRepository.GetButtonByName(buttonData.Name);
         if (buttonObject == null)
         {
