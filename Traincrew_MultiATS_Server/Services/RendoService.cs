@@ -70,7 +70,8 @@ public class RendoService(
                 g => g.Key,
                 g => g.Select(rdb => (interlockingObjects[rdb.RouteId] as Route)!).ToList());
         // Buttonを全取得
-        var buttons = await destinationButtonRepository.GetAllButtons();
+        var buttons = (await destinationButtonRepository.GetAllWithState())
+            .ToDictionary(b => b.Name);
         // 直接鎖錠条件を取得
         var lockConditions = await lockConditionRepository.GetConditionsByType(LockType.Lock);
         // 信号制御条件を取得

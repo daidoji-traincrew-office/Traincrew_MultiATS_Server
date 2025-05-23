@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.SignalR;
 using OpenIddict.Validation.AspNetCore;
 using Traincrew_MultiATS_Server.Common.Contract;
 using Traincrew_MultiATS_Server.Common.Models;
-using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Services;
 
 namespace Traincrew_MultiATS_Server.Hubs;
@@ -12,27 +11,10 @@ namespace Traincrew_MultiATS_Server.Hubs;
 	AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme,
 	Policy = "TIDPolicy"
 )]
-public class TIDHub(TrackCircuitService trackCircuitService,
-    SwitchingMachineService switchingMachineService,
-    InterlockingService interlockingService) : Hub<ITIDClientContract>, ITIDHubContract
+public class TIDHub(TIDService tidService) : Hub<ITIDClientContract>, ITIDHubContract
 {
     public async Task<ConstantDataToTID> SendData_TID()
     {
-        var trackCircuitDataList = await trackCircuitService.GetAllTrackCircuitDataList();
-        var switchingMachineDataList = (await switchingMachineService.GetAllSwitchingMachines())
-            .Select(SwitchingMachineService.ToSwitchData)
-            .ToList();
-        // Todo: 方向進路は方向進路用に別メソッド用意
-        var allInterlockingObjects = await interlockingService.GetInterlockingObjects();
-        var directionDatas = allInterlockingObjects
-                .OfType<DirectionRoute>()
-                .Select(InterlockingService.ToDirectionData)
-                .ToList();
-        return new()
-        {
-            TrackCircuitDatas = trackCircuitDataList,
-            SwitchDatas = switchingMachineDataList,
-            DirectionDatas = directionDatas
-        };
+	    return await tidService.CreateTidData();
     }
 }

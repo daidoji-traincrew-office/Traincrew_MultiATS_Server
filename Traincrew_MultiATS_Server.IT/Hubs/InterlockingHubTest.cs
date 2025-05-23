@@ -2,6 +2,8 @@ using System.Globalization;
 using System.Text;
 using CsvHelper;
 using CsvHelper.Configuration;
+using Moq;
+using Traincrew_MultiATS_Server.Common.Contract;
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.IT.Fixture;
 
@@ -33,6 +35,7 @@ public class InterlockingHubTest(WebApplicationFixture factory)
         public string? PointNameA { get; set; }
         public string? PointNameB { get; set; }
         public string UniqueName { get; set; } = "";
+
         public string? DirectionName { get; set; }
         // Add other properties as needed
     }
@@ -58,7 +61,7 @@ public class InterlockingHubTest(WebApplicationFixture factory)
     }
 
     [Fact]
-    public async Task SendData_Interlocking_ValidatesDataFromTSVFiles()
+    public async Task ReceiveData_Interlocking_ValidatesReceivedData()
     {
         // Arrange
         var tsvFiles = Directory.GetFiles(
@@ -66,41 +69,54 @@ public class InterlockingHubTest(WebApplicationFixture factory)
             "*.tsv"
         );
 
-        var (connection, contract) = factory.CreateInterlockingHub();
+        var tcs = new TaskCompletionSource<DataToInterlocking>();
+
+        var mockClientContract = new Mock<IInterlockingClientContract>();
+        mockClientContract
+            .Setup(client => client.ReceiveData(It.IsAny<DataToInterlocking>()))
+            .Callback<DataToInterlocking>(data =>
+            {
+                if (tcs.Task.IsCompleted)
+                {
+                    return;
+                }
+
+                tcs.SetResult(data);
+            })
+            .Returns(Task.CompletedTask);
+
+        var (connection, _) = factory.CreateInterlockingHub(mockClientContract.Object);
+
+        DataToInterlocking data;
         await using (connection)
         {
             await connection.StartAsync(TestContext.Current.CancellationToken);
-            foreach (var tsvFile in tsvFiles)
+            // Act
+            data = await tcs.Task;
+        }
+
+        foreach (var tsvFile in tsvFiles)
+        {
+            using var reader = new StreamReader(tsvFile, Encoding.GetEncoding("Shift-jis"));
+            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
             {
-                var stationId = Path.GetFileName(tsvFile).Split('_')[0];
-
-                var activeStationsList = new List<string> { stationId };
-
-                using var reader = new StreamReader(tsvFile, Encoding.GetEncoding("Shift-jis"));
-                var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+                Delimiter = "\t",
+                HasHeaderRecord = true
+            };
+            using var csv = new CsvReader(reader, config);
+            var expectedData = csv.GetRecords<dynamic>()
+                .Select(row => new InterlockingData
                 {
-                    Delimiter = "\t",
-                    HasHeaderRecord = true
-                };
-                using var csv = new CsvReader(reader, config);
-                var expectedData = csv.GetRecords<dynamic>()
-                    .Select(row => new InterlockingData
-                    {
-                        ServerType = MapServerType(row.ServerType),
-                        ServerName = row.ServerName,
-                        PointNameA = row.PointNameA,
-                        PointNameB = row.PointNameB,
-                        DirectionName = row.DirectionName,
-                        UniqueName = row.UniqueName
-                    })
-                    .ToList();
-                // Act
-                var result = await contract.SendData_Interlocking(activeStationsList);
-
-                // Assert
-                // Todo: ホントは各PropertyがNullでなく、各要素の値が設定されていることを確認するべき
-                AssertValidDataFromTsv(result, expectedData);
-            }
+                    ServerType = MapServerType(row.ServerType),
+                    ServerName = row.ServerName,
+                    PointNameA = row.PointNameA,
+                    PointNameB = row.PointNameB,
+                    DirectionName = row.DirectionName,
+                    UniqueName = row.UniqueName
+                })
+                .ToList();
+            // Assert
+            AssertValidDataFromTsv(data, expectedData);
         }
     }
 
@@ -189,7 +205,7 @@ public class InterlockingHubTest(WebApplicationFixture factory)
         // 以下は実装してないので無視
         // CTC切換てこ
         // 転てつ不良表示灯
-        
+
         // 赤山町上り場内は一旦TSV更新待ち
         return
             !data.UniqueName.StartsWith("駅扱切換")

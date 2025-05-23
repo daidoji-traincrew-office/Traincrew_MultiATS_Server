@@ -18,4 +18,11 @@ public class LeverRepository(ApplicationDbContext context) : ILeverRepository
             .Select(lever => lever.Id)
             .ToListAsync();
     }
+
+    public async Task<List<Models.Lever>> GetAllWithState()
+    {
+        return await context.Levers
+            .Include(lever => lever.LeverState)
+            .ToListAsync();
+    }
 }
