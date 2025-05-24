@@ -7,4 +7,10 @@ public interface IDirectionRouteRepository
     /// </summary>
     /// <returns>方向てこのIDのリスト。</returns>
     Task<List<ulong>> GetAllIds();
+
+    /// <summary>
+    /// すべての DirectionRoute を取得する。
+    /// </summary>
+    /// <returns>DirectionRoute のリスト。</returns>
+    Task<List<Models.DirectionRoute>> GetAllWithState();
 }

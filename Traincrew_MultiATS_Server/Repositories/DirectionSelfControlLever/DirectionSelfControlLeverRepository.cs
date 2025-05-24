@@ -27,4 +27,15 @@ public class DirectionSelfControlLeverRepository(ApplicationDbContext context) :
             .Select(l => l.Id)
             .ToListAsync();
     }
+
+    /// <summary>
+    /// すべての DirectionSelfControlLever を取得する。
+    /// </summary>
+    /// <returns>DirectionSelfControlLever のリスト。</returns>
+    public async Task<List<Models.DirectionSelfControlLever>> GetAllWithState()
+    {
+        return await context.DirectionSelfControlLevers
+            .Include(lever => lever.DirectionSelfControlLeverState)
+            .ToListAsync();
+    }
 }

@@ -24,6 +24,7 @@ using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
 using Traincrew_MultiATS_Server.Repositories.Lever;
 using Traincrew_MultiATS_Server.Repositories.Lock;
 using Traincrew_MultiATS_Server.Repositories.LockCondition;
+using Traincrew_MultiATS_Server.Repositories.Mutex;
 using Traincrew_MultiATS_Server.Repositories.NextSignal;
 using Traincrew_MultiATS_Server.Repositories.OperationNotification;
 using Traincrew_MultiATS_Server.Repositories.Protection;
@@ -295,6 +296,7 @@ builder.Services
     })
     .AddSingleton<DiscordRepository>()
     .AddSingleton<IDiscordRepository>(provider => provider.GetRequiredService<DiscordRepository>())
+    .AddSingleton<IMutexRepository, MutexRepository>()
     .AddSingleton<IAuthorizationHandler, DiscordRoleHandler>();
 // HostedServiceまわり
 builder.Services

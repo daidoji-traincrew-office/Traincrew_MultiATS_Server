@@ -5,11 +5,11 @@ namespace Traincrew_MultiATS_Server.Repositories.DestinationButton;
 
 public class DestinationButtonRepository(ApplicationDbContext context) : IDestinationButtonRepository
 {
-    public async Task<Dictionary<string, Models.DestinationButton>> GetAllButtons()
+    public async Task<List<Models.DestinationButton>> GetAllWithState()
     {
         return await context.DestinationButtons
             .Include(b => b.DestinationButtonState)
-            .ToDictionaryAsync(button => button.Name);
+            .ToListAsync();
     }
 
     public async Task<Models.DestinationButton?> GetButtonByName(string name)

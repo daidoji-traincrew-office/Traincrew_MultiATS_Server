@@ -6,6 +6,13 @@ namespace Traincrew_MultiATS_Server.Repositories.Station;
 
 public class StationRepository(DbContextOptions<ApplicationDbContext> options, ApplicationDbContext context) : IStationRepository
 {
+    public async Task<List<Models.Station>> GetWhereIsStation()
+    {
+        return await context.Stations
+            .Where(s => s.IsStation)
+            .ToListAsync();
+    }
+
     public Task<Models.Station?> GetStationById(string id)
     {
         return context.Stations.FirstOrDefaultAsync(s => s.Id == id);
