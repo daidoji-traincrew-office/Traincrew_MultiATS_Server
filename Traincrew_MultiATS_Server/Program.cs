@@ -277,6 +277,7 @@ builder.Services
     .AddScoped<ISwitchingMachineRouteRepository, SwitchingMachineRouteRepository>()
     .AddScoped<IThrowOutControlRepository, ThrowOutControlRepository>()
     .AddScoped<ITrackCircuitRepository, TrackCircuitRepository>()
+    .AddScoped<DirectionRouteService>()
     .AddScoped<InterlockingService>()
     .AddScoped<OperationNotificationService>()
     .AddScoped<ProtectionService>()
@@ -286,6 +287,7 @@ builder.Services
     .AddScoped<StationService>()
     .AddScoped<SwitchingMachineService>()
     .AddScoped<TrackCircuitService>()
+    .AddScoped<TIDService>()
     .AddSingleton(provider =>
     {
         var discordService = new DiscordService(
