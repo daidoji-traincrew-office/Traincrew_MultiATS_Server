@@ -27,8 +27,8 @@ public class SwitchingMachineService(
     public async Task SwitchingMachineControl()
     {
         // Todo: クラスのstaticにしたほうが良いかも
-        var switchMoveTime = TimeSpan.FromSeconds(1);
-        var switchReturnTime = TimeSpan.FromMilliseconds(50);
+        var switchMoveTime = TimeSpan.FromSeconds(5);
+        var switchReturnTime = TimeSpan.FromMilliseconds(500);
         // InterlockingObjectを全取得
         // Todo: 全取得しなくても良いようにする
         var interlockingObjects = await interlockingObjectRepository.GetAllWithState();
