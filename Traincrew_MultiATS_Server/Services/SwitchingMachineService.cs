@@ -27,8 +27,8 @@ public class SwitchingMachineService(
     public async Task SwitchingMachineControl()
     {
         // Todo: クラスのstaticにしたほうが良いかも
-        var switchMoveTime = TimeSpan.FromSeconds(5);
-        var switchReturnTime = TimeSpan.FromMilliseconds(500);
+        var switchMoveTime = TimeSpan.FromSeconds(1);
+        var switchReturnTime = TimeSpan.FromMilliseconds(50);
         // InterlockingObjectを全取得
         // Todo: 全取得しなくても良いようにする
         var interlockingObjects = await interlockingObjectRepository.GetAllWithState();
@@ -82,6 +82,7 @@ public class SwitchingMachineService(
 
             var requestNormal = leverState == LCR.Left;
             var requestReverse = leverState == LCR.Right;
+            var isRoutelock = false;
 
             // 対応する転てつ器の要求進路一覧を取得
             // Todo: 全部データをちゃんと入れたら、デフォルト値を使わないようにする
@@ -95,6 +96,7 @@ public class SwitchingMachineService(
                 // 進路鎖錠欄に直接てっさ鎖錠軌道回路がない場合(=過走防護関係の転てつ器の場合)、進路鎖錠を受けていたら強制終了
                 if (!switchingMachineRoute.OnRouteLock && route.RouteState.IsRouteLockRaised == RaiseDrop.Drop)
                 {
+                    isRoutelock = true;
                     break;
                 }
                 // 進路鎖錠欄に直接てっさ鎖錠軌道回路がある場合、IsDetectorLockedですでに弾かれている
@@ -112,6 +114,11 @@ public class SwitchingMachineService(
                             break;
                     }
                 }
+            }
+            if (isRoutelock)
+            {
+                //鎖錠中
+                continue;
             }
 
             if (requestNormal == requestReverse)
