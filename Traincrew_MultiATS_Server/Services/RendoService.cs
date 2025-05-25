@@ -164,13 +164,22 @@ public class RendoService(
             // Refactor: それぞれの条件をメソッド化した方が良い
             if (hasSourceThrowOutRoute)
             {
+                //総括する各進路の根本レバーを取得
+                var sourceLevers = sourceThrowOutRoutes
+                    .Select(r => routeLevers[r.Id])
+                    .ToList();
+
+                // 総括する各進路の自分に関係しない進路をすべて取得
+                var sourceOtherRoutes = sourceLevers
+                    .SelectMany(lever => routesByLevers[lever.Id])
+                    .Where(r => !sourceThrowOutRoutes.Any(s => s.Id == r.Id))
+                    .ToList();
+
                 var isThrowOutXRRelayRaised =
-                    !IsLocked(lockCondition, interlockingObjects)
+                    sourceOtherRoutes.All(r => r.RouteState.IsLeverRelayRaised == RaiseDrop.Drop)
                     &&
-                    sourceThrowOutRoutes
-                        //各進路の根本レバーの状態を取得し、いずれかが倒れているか
-                        .Select(r => routeLevers[r.Id])
-                        .Any(l => l.LeverState.IsReversed != LCR.Center)
+                    //総括する各進路の根本レバーのずれかが倒れているか
+                    sourceLevers.Any(l => l.LeverState.IsReversed != LCR.Center)
                     &&
                     (
                         (
@@ -224,7 +233,7 @@ public class RendoService(
                     lockRouteStates.All(rs => rs.IsRouteLockRaised == RaiseDrop.Raise)
                     &&
                     (
-                        sourceThrowOutRoutes.All(r =>
+                        sourceThrowOutRoutes.Any(r =>
                             r.RouteState.IsRouteLockRaised == RaiseDrop.Drop
                             &&
                             r.RouteState.IsSignalControlRaised == RaiseDrop.Drop
