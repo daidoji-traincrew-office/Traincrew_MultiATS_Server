@@ -279,8 +279,7 @@ public class InitDbHostedService(
             HasHeaderRecord = false,
         };
         using var reader = new StreamReader(file.FullName);
-        // ヘッダー行と最初の行を読み飛ばす
-        await reader.ReadLineAsync(cancellationToken);
+        // ヘッダー行を読み飛ばす
         await reader.ReadLineAsync(cancellationToken);
 
         using var csv = new CsvReader(reader, config);
