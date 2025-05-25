@@ -2212,7 +2212,7 @@
             "On": false,
             "NextSignalNamesUp": [
                 "江ノ原信号場上り出発2R",
-                "江ノ原入換13R"
+                "江ノ原信号場入換13R"
             ],
             "NextSignalNamesDown": [
                 "江ノ原信号場内入換"
@@ -2225,7 +2225,7 @@
             "On": false,
             "NextSignalNamesUp": [
                 "江ノ原信号場上り出発2R",
-                "江ノ原入換13R"
+                "江ノ原信号場入換13R"
             ],
             "NextSignalNamesDown": [],
             "ProtectionZone": 6
