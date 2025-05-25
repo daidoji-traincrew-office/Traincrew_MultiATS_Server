@@ -9226,11 +9226,6 @@
             "SourceRouteName": "TH58_8R",
             "TargetRouteName": "TH58_10L",
             "LeverConditionName": "TH58_99N"
-        },
-        {
-            "SourceRouteName": "TH57_12L",
-            "TargetRouteName": "TH58_1R",
-            "LeverConditionName": "TH58_99N"
         }
     ]
 }
