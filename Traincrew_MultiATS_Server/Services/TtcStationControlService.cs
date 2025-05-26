@@ -55,7 +55,7 @@ public class TtcStationControlService(
         foreach (var ttcWindow in ttcWindows)
         {
             if (ttcWindow.Type == TtcWindowType.HomeTrack || (ttcWindow.Type == TtcWindowType.Switching &&
-                                                              ttcWindow.TtcWindowState.TrainNumber != null))
+                                                              ttcWindow.TtcWindowState.TrainNumber != ""))
             {
                 //窓と窓に対応する軌道回路ID辞書から軌道回路IDを取得
                 if (ttcWindowTrackCircuitIdsDic.TryGetValue(ttcWindow.Name, out var trackCircuitIdsList))
