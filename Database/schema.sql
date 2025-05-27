@@ -475,8 +475,10 @@ CREATE TYPE operation_notification_type AS ENUM (
     'shuppatsu',
     'shuppatsu_jikoku',
     'torikeshi',
+    'other',
+    'class',
     'tenmatsusho'
-    );
+);
 CREATE TABLE operation_notification_state
 (
     display_name VARCHAR(100) REFERENCES operation_notification_display (name) PRIMARY KEY, -- 告知機の名前
