@@ -11,5 +11,6 @@ public enum OperationNotificationType
     ShuppatsuJikoku,
     Torikeshi,
     Other,
+    Class,
     Tenmatsusho
 }
