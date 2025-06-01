@@ -1,1 +1,28 @@
-﻿FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+﻿# Learn about building .NET container images:
+# https://github.com/dotnet/dotnet-docker/blob/main/samples/README.md
+
+# Todo: 一旦全部コメントアウト、あとでPJ作ったら復活させる
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+ARG TARGETARCH
+WORKDIR /source
+
+# Copy project file and restore as distinct layers
+RUN mkdir -p /source/Traincrew_MultiATS_Server.Common
+COPY --link Traincrew_MultiATS_Server.Common/*.csproj Traincrew_MultiATS_Server.Common/
+RUN mkdir -p /source/Traincrew_MultiATS_Server.Passenger
+COPY --link Traincrew_MultiATS_Server.Passenger/*.csproj Traincrew_MultiATS_Server.Passenger/
+RUN cd ./Traincrew_MultiATS_Server.Passenger && dotnet restore -a $TARGETARCH 
+
+# Copy source code and publish app
+COPY --link Traincrew_MultiATS_Server.Common/* Traincrew_MultiATS_Server.Common/
+COPY --link Traincrew_MultiATS_Server.Passenger/* Traincrew_MultiATS_Server.Passenger/
+RUN cd ./Traincrew_MultiATS_Server.Passenger && dotnet publish -a $TARGETARCH --no-restore -o /app
+
+
+# Runtime stage
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
+EXPOSE 8080
+WORKDIR /app
+COPY --link --from=build /app .
+WORKDIR /opt
+ENTRYPOINT ["/app/Traincrew_MultiATS_Server.Passenger"]
