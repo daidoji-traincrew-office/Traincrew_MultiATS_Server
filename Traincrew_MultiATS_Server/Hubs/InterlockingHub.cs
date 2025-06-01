@@ -13,9 +13,7 @@ namespace Traincrew_MultiATS_Server.Hubs;
     AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme,
     Policy = "InterlockingPolicy"
 )]
-public class InterlockingHub(
-    InterlockingService interlockingService,
-    TtcStationControlService ttcStationControlService) : Hub<IInterlockingClientContract>, IInterlockingHubContract
+public class InterlockingHub(InterlockingService interlockingService) : Hub<IInterlockingClientContract>, IInterlockingHubContract
 {
     public async Task<DataToInterlocking> SendData_Interlocking(List<string> activeStationsList)
     {
