@@ -181,7 +181,6 @@ CREATE TABLE ttc_window_track_circuit
     id               BIGSERIAL PRIMARY KEY,
     ttc_window_name  VARCHAR(100) REFERENCES ttc_window (name) NOT NULL, -- 列番窓の名前
     track_circuit_id BIGINT REFERENCES track_circuit (ID)      NOT NULL, -- 対応する軌道回路のID
-    -- Todo: 関係性確認、どのレベルでユニークとしてもよいか？(おそらくtrack_circuit_idでユニーク)
     UNIQUE (ttc_window_name, track_circuit_id)
 );
 
@@ -203,12 +202,9 @@ CREATE table ttc_window_link_route_condition
     id                 BIGSERIAL PRIMARY KEY,
     ttc_window_link_id BIGINT REFERENCES ttc_window_link (id) NOT NULL, -- リンクのID
     route_id           BIGINT REFERENCES route (id)           NOT NULL, -- 進路のID
-    -- (Todo: 関係性確認、どのレベルでユニーク？おそらくrouteでユニーク？)
     UNIQUE (ttc_window_link_id, route_id)
 );
 
--- Todo: おそらくリンクグラフがいると思ったけど駅ごとに処理すりゃいいかな・・・
--- Todo: TTC関係で持たせないといけない状態は？単純に列車番号のみ？
 
 -- 転てつ機
 CREATE TABLE switching_machine
