@@ -38,6 +38,8 @@ using Traincrew_MultiATS_Server.Repositories.SwitchingMachine;
 using Traincrew_MultiATS_Server.Repositories.SwitchingMachineRoute;
 using Traincrew_MultiATS_Server.Repositories.ThrowOutControl;
 using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
+using Traincrew_MultiATS_Server.Repositories.TtcWindow;
+using Traincrew_MultiATS_Server.Repositories.TtcWindowLink;
 using Traincrew_MultiATS_Server.Services;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
@@ -82,6 +84,8 @@ dataSourceBuilder.MapEnum<RouteType>();
 dataSourceBuilder.MapEnum<RaiseDrop>();
 dataSourceBuilder.MapEnum<OperationNotificationType>();
 dataSourceBuilder.MapEnum<LR>();
+dataSourceBuilder.MapEnum<TtcWindowType>();
+dataSourceBuilder.MapEnum<TtcWindowLinkType>();
 var dataSource = dataSourceBuilder.Build();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
@@ -277,6 +281,8 @@ builder.Services
     .AddScoped<ISwitchingMachineRouteRepository, SwitchingMachineRouteRepository>()
     .AddScoped<IThrowOutControlRepository, ThrowOutControlRepository>()
     .AddScoped<ITrackCircuitRepository, TrackCircuitRepository>()
+    .AddScoped<ITtcWindowRepository, TtcWindowRepository>()
+    .AddScoped<ITtcWindowLinkRepository, TtcWindowLinkRepository>()
     .AddScoped<DirectionRouteService>()
     .AddScoped<InterlockingService>()
     .AddScoped<OperationNotificationService>()
@@ -288,6 +294,7 @@ builder.Services
     .AddScoped<SwitchingMachineService>()
     .AddScoped<TrackCircuitService>()
     .AddScoped<TIDService>()
+    .AddScoped<TtcStationControlService>()
     .AddSingleton(provider =>
     {
         var discordService = new DiscordService(

@@ -24,6 +24,7 @@ public class InterlockingService(
     ILeverRepository leverRepository,
     IDirectionSelfControlLeverRepository directionSelfControlLeverRepository,
     TrackCircuitService trackCircuitService,
+    TtcStationControlService ttcStationControlService,
     SwitchingMachineService switchingMachineService,
     DirectionRouteService directionRouteService,
     SignalService signalService,
@@ -48,6 +49,8 @@ public class InterlockingService(
         var signalIndications = await signalService.CalcSignalIndication(signalNames);
         // 各ランプの状態を取得
         var lamps = await GetLamps(stationIds);
+        // 列番窓を取得
+        var ttcWindows = await ttcStationControlService.GetTtcWindowsByStationIdsWithState(stationIds);
 
         var response = new DataToInterlocking
         {
@@ -71,8 +74,9 @@ public class InterlockingService(
 
             Directions = directions,
 
-            // Todo: 列番表示の実装から
-            Retsubans = new List<InterlockingRetsubanData>(),
+            Retsubans = ttcWindows
+                .Select(ToRetsubanData)
+                .ToList(),
 
             // 各ランプの状態 
             Lamps = lamps,
@@ -256,6 +260,15 @@ public class InterlockingService(
             Name = buttonState.Name,
             IsRaised = buttonState.IsRaised,
             OperatedAt = buttonState.OperatedAt
+        };
+    }
+
+    public static InterlockingRetsubanData ToRetsubanData(TtcWindow ttcWindow)
+    {
+        return new()
+        {
+            Name = ttcWindow.Name,
+            Retsuban = ttcWindow.TtcWindowState.TrainNumber == null ? "" : ttcWindow.TtcWindowState.TrainNumber,
         };
     }
 }

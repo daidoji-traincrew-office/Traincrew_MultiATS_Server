@@ -14,7 +14,8 @@ namespace Traincrew_MultiATS_Server.Hubs;
 )]
 public class CommanderTableHub(
     TrackCircuitService trackCircuitService,
-    OperationNotificationService operationNotificationService
+    OperationNotificationService operationNotificationService,
+    TtcStationControlService ttcStationControlService
 ) : Hub<ICommanderTableClientContract>, ICommanderTableHubContract
 {
     public async Task<DataToCommanderTable> SendData_CommanderTable()
@@ -23,28 +24,29 @@ public class CommanderTableHub(
         {
             TroubleDataList = [],
             OperationNotificationDataList = await operationNotificationService.GetOperationNotificationData(),
-            TrackCircuitDataList = await trackCircuitService.GetAllTrackCircuitDataList() 
+            TrackCircuitDataList = await trackCircuitService.GetAllTrackCircuitDataList()
         };
     }
 
     public async Task SendTroubleData(TroubleData troubleData)
     {
-        
+
     }
-    
+
     public async Task SendOperationNotificationData(OperationNotificationData operationNotificationData)
     {
         await operationNotificationService.SetOperationNotificationData(operationNotificationData);
     }
-    
+
     public async Task SendTrackCircuitData(TrackCircuitData trackCircuitData)
     {
         // 受け取ったtrackCircuitDataの値を設定する
-        await trackCircuitService.SetTrackCircuitData(trackCircuitData); 
+        await trackCircuitService.SetTrackCircuitData(trackCircuitData);
     }
-    
+
     public async Task DeleteTrain(string trainName)
     {
         await trackCircuitService.ClearTrackCircuitByTrainNumber(trainName);
+        await ttcStationControlService.ClearTtcWindowByTrainNumber(trainName);
     }
 }

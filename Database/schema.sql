@@ -157,6 +157,55 @@ CREATE TABLE route_include
 );
 CREATE INDEX route_include_source_lever_id_index ON route_include (source_lever_id);
 
+-- TTC列番窓
+-- 種類
+CREATE TYPE ttc_window_type AS ENUM ('home_track', 'up', 'down', 'switching');
+
+CREATE TABLE ttc_window
+(
+    name       VARCHAR(100) PRIMARY KEY,                     -- 名前
+    station_id VARCHAR(10) REFERENCES station (id) NOT NULL, -- 所属する停車場
+    type       ttc_window_type                     NOT NULL  -- 列番窓の種類
+);
+
+CREATE TABLE ttc_window_display_station
+(
+    id              BIGSERIAL PRIMARY KEY,
+    ttc_window_name VARCHAR(100) REFERENCES ttc_window (name) NOT NULL, -- 列番窓の名前
+    station_id      VARCHAR(10) REFERENCES station (id)       NOT NULL, -- 表示する駅のID
+    UNIQUE (ttc_window_name, station_id)
+);
+
+CREATE TABLE ttc_window_track_circuit
+(
+    id               BIGSERIAL PRIMARY KEY,
+    ttc_window_name  VARCHAR(100) REFERENCES ttc_window (name) NOT NULL, -- 列番窓の名前
+    track_circuit_id BIGINT REFERENCES track_circuit (ID)      NOT NULL, -- 対応する軌道回路のID
+    UNIQUE (ttc_window_name, track_circuit_id)
+);
+
+-- リンク設定
+CREATE TYPE ttc_window_link_type AS ENUM ('up', 'down', 'switching');
+CREATE TABLE ttc_window_link
+(
+    id                      BIGSERIAL PRIMARY KEY,
+    source_ttc_window_name  VARCHAR(100) REFERENCES ttc_window (name) NOT NULL, -- リンク元の列番窓の名前
+    target_ttc_window_name  VARCHAR(100) REFERENCES ttc_window (name) NOT NULL, -- リンク先の列番窓の名前
+    type                    ttc_window_link_type                      NOT NULL, -- リンクの種類
+    is_empty_sending        BOOLEAN                                   NOT NULL, -- 空送りかどうか
+    track_circuit_condition BIGINT REFERENCES track_circuit (id)                -- 移行条件の軌道回路ID
+);
+
+-- 移行条件進路リスト
+CREATE table ttc_window_link_route_condition
+(
+    id                 BIGSERIAL PRIMARY KEY,
+    ttc_window_link_id BIGINT REFERENCES ttc_window_link (id) NOT NULL, -- リンクのID
+    route_id           BIGINT REFERENCES route (id)           NOT NULL, -- 進路のID
+    UNIQUE (ttc_window_link_id, route_id)
+);
+
+
 -- 転てつ機
 CREATE TABLE switching_machine
 (
@@ -485,4 +534,11 @@ CREATE TABLE operation_notification_state
     type         operation_notification_type NOT NULL,                                      -- 告知種類 
     content      TEXT                        NOT NULL,                                      -- 表示データ
     operated_at  TIMESTAMP                   NOT NULL                                       -- 操作時刻
+);
+
+-- TTC状態
+CREATE TABLE ttc_window_state
+(
+    name         VARCHAR(100) REFERENCES ttc_window (name) NOT NULL, -- 列番窓の名前
+    train_number VARCHAR(100)                              NOT NULL  -- 列車番号
 );
