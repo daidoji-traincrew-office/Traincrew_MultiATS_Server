@@ -16,5 +16,5 @@ public class TtcWindow
     [Column("type")]
     public TtcWindowType Type { get; init; }
 
-    public TtcWindowState? TtcWindowState;
+    public TtcWindowState? TtcWindowState { get; set; }
 }
