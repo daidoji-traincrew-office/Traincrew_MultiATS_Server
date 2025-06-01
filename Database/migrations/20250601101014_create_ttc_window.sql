@@ -1,5 +1,5 @@
 -- Create enum type "ttc_window_type"
-CREATE TYPE "ttc_window_type" AS ENUM ('home_track', 'up', 'down');
+CREATE TYPE "ttc_window_type" AS ENUM ('home_track', 'up', 'down', 'switching');
 -- Create enum type "ttc_window_link_type"
 CREATE TYPE "ttc_window_link_type" AS ENUM ('up', 'down', 'switching');
 -- Create "ttc_window" table
