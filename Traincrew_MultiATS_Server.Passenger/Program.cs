@@ -8,7 +8,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
 
-// Todo: CORS設定, Rate Limit設定
+// Todo: CORS設定, Rate Limit設定, CSP設定
 // Todo: (優先度低)キャッシュ制御, Response Compression
 
 // DI
