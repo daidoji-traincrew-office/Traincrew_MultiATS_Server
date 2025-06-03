@@ -57,7 +57,7 @@ jobs:
         with:
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: ${{ steps.calc_image_name.outputs.TAG }}
+          tags: ${{ steps.calc_image_name.outputs.Tag }}
           file: ${{ steps.calc_image_name.outputs.Dockerfile }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
