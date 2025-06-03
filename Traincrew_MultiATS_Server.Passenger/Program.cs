@@ -1,3 +1,5 @@
+using Traincrew_MultiATS_Server.Passenger.Service;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -5,6 +7,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
+
+// DI
+builder.Services.AddScoped<PassengerService>();
 
 var app = builder.Build();
 app.MapControllers();
