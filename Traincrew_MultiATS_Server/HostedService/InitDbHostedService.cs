@@ -69,7 +69,8 @@ public class InitDbHostedService(
             new OperationNotificationScheduler(serviceScopeFactory),
             new TtcStationControlScheduler(serviceScopeFactory),
             new InterlockingHubScheduler(serviceScopeFactory),
-            new TIDHubScheduler(serviceScopeFactory)
+            new TIDHubScheduler(serviceScopeFactory),
+            new DestinationButtonScheduler(serviceScopeFactory)
         ]);
     }
 

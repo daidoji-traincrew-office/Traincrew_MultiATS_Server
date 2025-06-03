@@ -213,6 +213,24 @@ public class InterlockingService(
         };
     }
 
+    public async Task ResetRaisedButtonsAsync()
+    {
+        const double resetInterval = 1.0; // 1秒圧下が続いたらリセット
+        await using var mutex = await mutexRepository.AcquireAsync(nameof(InterlockingService));
+        var now = dateTimeRepository.GetNow();
+        var raisedButtons = await destinationButtonRepository.GetRaisedButtonsAsync();
+
+        foreach (var button in raisedButtons)
+        {
+            if ((now - button.DestinationButtonState.OperatedAt).TotalSeconds < resetInterval)
+            {
+                continue;
+            }
+            button.DestinationButtonState.IsRaised = RaiseDrop.Drop;
+            button.DestinationButtonState.OperatedAt = now;
+            await generalRepository.Save(button.DestinationButtonState);
+        }
+    }
 
     public async Task<List<InterlockingObject>> GetInterlockingObjects()
     {
