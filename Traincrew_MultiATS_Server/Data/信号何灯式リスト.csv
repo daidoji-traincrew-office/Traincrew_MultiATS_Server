@@ -4,7 +4,8 @@
 3灯式,Y,Y,G,G,G
 4灯YY式,YY,Y,G,G,G
 4灯YY式G無,YY,Y,Y,Y,Y
-4灯YG式,Y,Y,YG,G,G
+4灯YG式,Y,YG,YG,G,G
+4灯YG式（距離不足）,Y,Y,YG,G,G
 5灯式,YY,Y,YG,G,G
 中継（灯列）,R,YY,Y,YG,G
 中継（色灯2灯式）,R,YY,Y,YG,G
