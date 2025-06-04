@@ -244,6 +244,12 @@ public class Program
                 // AuthorizationCodeFlowとRefreshTokenFlowを有効にする
                 options.AllowAuthorizationCodeFlow()
                     .AllowRefreshTokenFlow();
+               
+                // トークンの有効期限を設定する
+                options
+                    .SetAccessTokenLifetime(TimeSpan.FromHours(6))
+                    .SetIdentityTokenLifetime(TimeSpan.FromHours(6))
+                    .SetRefreshTokenLifetime(TimeSpan.FromDays(7));
 
                 // 証明書制御
                 if (isDevelopment)
