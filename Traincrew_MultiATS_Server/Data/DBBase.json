@@ -4595,7 +4595,7 @@
         {
             "Name": "大道寺上り場内1R",
             "phase": 1,
-            "TypeName": "4灯YG式",
+            "TypeName": "4灯YG式（距離不足）",
             "NextSignalNames": [
                 "大道寺上り場内2R",
                 "大道寺上り場内3R",
@@ -8108,7 +8108,7 @@
         {
             "Name": "下り閉塞9",
             "phase": 1,
-            "TypeName": "5灯式",
+            "TypeName": "4灯YG式（距離不足）",
             "NextSignalNames": [
                 "下り閉塞7"
             ],
@@ -8822,6 +8822,14 @@
         },
         {
             "Name": "4灯YG式",
+            "RIndication": "Y",
+            "YYIndication": "YG",
+            "YIndication": "YG",
+            "YGIndication": "G",
+            "GIndication": "G"
+        },
+        {
+            "Name": "4灯YG式（距離不足）",
             "RIndication": "Y",
             "YYIndication": "Y",
             "YIndication": "YG",
