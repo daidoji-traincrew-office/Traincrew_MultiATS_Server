@@ -28,11 +28,15 @@ public class DestinationButtonRepository(ApplicationDbContext context) : IDestin
             .ToListAsync();
     }
 
-    public async Task<List<Models.DestinationButton>> GetRaisedButtonsAsync()
+    public async Task UpdateRaisedButtonsAsync(DateTime now)
     {
-        return await context.DestinationButtons
+        await context.DestinationButtons
             .Include(b => b.DestinationButtonState)
-            .Where(b => b.DestinationButtonState.IsRaised == RaiseDrop.Raise)
-            .ToListAsync();
+            .Where(b => b.DestinationButtonState.IsRaised == RaiseDrop.Raise &&
+                        (now - b.DestinationButtonState.OperatedAt).TotalSeconds > 1)
+            .ExecuteUpdateAsync(b => 
+                b.SetProperty(d => d.DestinationButtonState.IsRaised, RaiseDrop.Drop)
+                 .SetProperty(d => d.DestinationButtonState.OperatedAt, now));
+
     }
 }
