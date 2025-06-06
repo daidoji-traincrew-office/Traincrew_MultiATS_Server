@@ -274,7 +274,7 @@ public class InterlockingService(
         return new()
         {
             Name = ttcWindow.Name,
-            Retsuban = ttcWindow.TtcWindowState.TrainNumber == null ? "" : ttcWindow.TtcWindowState.TrainNumber,
+            Retsuban = ttcWindow.TtcWindowState?.TrainNumber ?? "",
         };
     }
 }
