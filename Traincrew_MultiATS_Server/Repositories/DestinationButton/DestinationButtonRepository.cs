@@ -32,7 +32,7 @@ public class DestinationButtonRepository(ApplicationDbContext context) : IDestin
     {
         await context.DestinationButtonStates
             .Where(dbs => dbs.IsRaised == RaiseDrop.Raise &&
-                        (now - dbs.OperatedAt).TotalSeconds > 1)
+                        (now - dbs.OperatedAt).TotalSeconds > Constants.Constants.DestinationButtonAutoDropDelay) 
             .ExecuteUpdateAsync(b => 
                 b.SetProperty(dbs => dbs.IsRaised, RaiseDrop.Drop)
                  .SetProperty(dbs => dbs.OperatedAt, now));
