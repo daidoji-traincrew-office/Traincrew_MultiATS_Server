@@ -30,13 +30,12 @@ public class DestinationButtonRepository(ApplicationDbContext context) : IDestin
 
     public async Task UpdateRaisedButtonsAsync(DateTime now)
     {
-        await context.DestinationButtons
-            .Include(b => b.DestinationButtonState)
-            .Where(b => b.DestinationButtonState.IsRaised == RaiseDrop.Raise &&
-                        (now - b.DestinationButtonState.OperatedAt).TotalSeconds > 1)
+        await context.DestinationButtonStates
+            .Where(dbs => dbs.IsRaised == RaiseDrop.Raise &&
+                        (now - dbs.OperatedAt).TotalSeconds > 1)
             .ExecuteUpdateAsync(b => 
-                b.SetProperty(d => d.DestinationButtonState.IsRaised, RaiseDrop.Drop)
-                 .SetProperty(d => d.DestinationButtonState.OperatedAt, now));
+                b.SetProperty(dbs => dbs.IsRaised, RaiseDrop.Drop)
+                 .SetProperty(dbs => dbs.OperatedAt, now));
 
     }
 }
