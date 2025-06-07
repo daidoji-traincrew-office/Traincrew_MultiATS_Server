@@ -1,3 +1,8 @@
+using Microsoft.EntityFrameworkCore;
+using Npgsql;
+using Traincrew_MultiATS_Server.Common.Models;
+using Traincrew_MultiATS_Server.Data;
+using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Passenger.Service;
 using Traincrew_MultiATS_Server.Repositories.General;
 using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
@@ -25,6 +30,9 @@ public class Program
     {
         // Controller
         builder.Services.AddControllers();
+        
+        // Database
+        ConfigureDatabaseService(builder);
 
         // Swagger
         if (isDevelopment)
@@ -59,5 +67,30 @@ public class Program
 
         await Task.CompletedTask;
     }
+    
+    private static void ConfigureDatabaseService(WebApplicationBuilder builder)
+    {
+        // DBの設定
+        var dataSourceBuilder = new NpgsqlDataSourceBuilder(builder.Configuration.GetConnectionString("DefaultConnection"));
+        // Todo: MapEnumは共通のライブラリに移行したい
+        dataSourceBuilder.MapEnum<LockType>();
+        dataSourceBuilder.MapEnum<NR>();
+        dataSourceBuilder.MapEnum<NRC>();
+        dataSourceBuilder.MapEnum<LCR>();
+        dataSourceBuilder.MapEnum<ObjectType>();
+        dataSourceBuilder.MapEnum<SignalIndication>();
+        dataSourceBuilder.MapEnum<LockConditionType>();
+        dataSourceBuilder.MapEnum<LeverType>();
+        dataSourceBuilder.MapEnum<RouteType>();
+        dataSourceBuilder.MapEnum<RaiseDrop>();
+        dataSourceBuilder.MapEnum<OperationNotificationType>();
+        dataSourceBuilder.MapEnum<LR>();
+        dataSourceBuilder.MapEnum<TtcWindowType>();
+        dataSourceBuilder.MapEnum<TtcWindowLinkType>();
+        var dataSource = dataSourceBuilder.Build();
+        builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        {
+            options.UseNpgsql(dataSource);
+        });
+    }
 }
-
