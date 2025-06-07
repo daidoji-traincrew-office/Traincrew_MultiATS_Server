@@ -9,12 +9,15 @@ RUN mkdir -p /source/Traincrew_MultiATS_Server.Common
 COPY --link Traincrew_MultiATS_Server.Common/*.csproj Traincrew_MultiATS_Server.Common/
 RUN mkdir -p /source/Traincrew_MultiATS_Server
 COPY --link Traincrew_MultiATS_Server/*.csproj Traincrew_MultiATS_Server/
-RUN cd ./Traincrew_MultiATS_Server && dotnet restore -a $TARGETARCH 
+RUN mkdir -p /source/Traincrew_MultiATS_Server.Crew
+COPY --link Traincrew_MultiATS_Server.Crew/*.csproj Traincrew_MultiATS_Server.Crew/
+RUN cd ./Traincrew_MultiATS_Server.Crew && dotnet restore -a $TARGETARCH 
 
 # Copy source code and publish app
 COPY --link Traincrew_MultiATS_Server.Common/* Traincrew_MultiATS_Server.Common/
 COPY --link Traincrew_MultiATS_Server/* Traincrew_MultiATS_Server/
-RUN cd ./Traincrew_MultiATS_Server && dotnet publish -a $TARGETARCH --no-restore -o /app
+COPY --link Traincrew_MultiATS_Server.Crew/* Traincrew_MultiATS_Server.Crew/
+RUN cd ./Traincrew_MultiATS_Server.Crew && dotnet publish -a $TARGETARCH --no-restore -o /app
 
 
 # Runtime stage

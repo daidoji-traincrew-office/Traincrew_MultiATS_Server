@@ -18,9 +18,8 @@ RUN cd ./Traincrew_MultiATS_Server.Passenger && dotnet restore -a $TARGETARCH
 COPY --link Traincrew_MultiATS_Server.Common/ Traincrew_MultiATS_Server.Common/
 COPY --link Traincrew_MultiATS_Server/ Traincrew_MultiATS_Server/
 COPY --link Traincrew_MultiATS_Server.Passenger/ Traincrew_MultiATS_Server.Passenger/
-RUN rm ./Traincrew_MultiATS_Server/appsettings.json ./Traincrew_MultiATS_Server/appsettings.Development.json
-RUN cd ./Traincrew_MultiATS_Server.Passenger && dotnet publish -a $TARGETARCH --no-restore -o /app
-
+# Publish app with specific project file
+RUN dotnet publish Traincrew_MultiATS_Server.Passenger/Traincrew_MultiATS_Server.Passenger.csproj -a $TARGETARCH --no-restore -o /app
 
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:8.0

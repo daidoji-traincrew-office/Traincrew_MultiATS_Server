@@ -29,11 +29,11 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Traincrew_MultiATS_Server\Traincrew_MultiATS_Server.csproj" />
+        <ProjectReference Include="..\Traincrew_MultiATS_Server.Passenger\Traincrew_MultiATS_Server.Passenger.csproj" />
     </ItemGroup>
     
     <ItemGroup>
-        <ProjectReference Include="..\Traincrew_MultiATS_Server.Passenger\Traincrew_MultiATS_Server.Passenger.csproj" />
+        <ProjectReference Include="..\Traincrew_MultiATS_Server.Crew\Traincrew_MultiATS_Server.Crew.csproj" />
     </ItemGroup>
 
     <ItemGroup>
