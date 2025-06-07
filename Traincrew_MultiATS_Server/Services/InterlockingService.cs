@@ -213,6 +213,12 @@ public class InterlockingService(
         };
     }
 
+    public async Task ResetRaisedButtonsAsync()
+    {
+        await using var mutex = await mutexRepository.AcquireAsync(nameof(InterlockingService));
+        var now = dateTimeRepository.GetNow();
+        await destinationButtonRepository.UpdateRaisedButtonsAsync(now);
+    }
 
     public async Task<List<InterlockingObject>> GetInterlockingObjects()
     {
@@ -268,7 +274,7 @@ public class InterlockingService(
         return new()
         {
             Name = ttcWindow.Name,
-            Retsuban = ttcWindow.TtcWindowState.TrainNumber == null ? "" : ttcWindow.TtcWindowState.TrainNumber,
+            Retsuban = ttcWindow.TtcWindowState?.TrainNumber ?? "",
         };
     }
 }
