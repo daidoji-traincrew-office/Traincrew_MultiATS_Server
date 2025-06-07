@@ -16,14 +16,6 @@ Dockerを入れる
 
 https://docs.docker.com/engine/install/
 
-### 諸々の環境変数設定
-discordのClientId, ClientSecret を設定する。
-値は他の開発者に聞いてください
-```
-dotnet user-secrets set Discord:ClientId 値は聞いてね 
-dotnet user-secrets set Discord:ClientSecret 値は聞いてね 
-```
-
 ### Postgres
 DockerでPostgresを立ち上げる
 ```
@@ -46,18 +38,5 @@ atlas migrate apply --env local
 ```
 atlas migrate diff --env local add_column_to_table
 ```
-## デプロイ
-
-### 最初だけ
-- 環境変数
-  - Database
-  - discordClientId
-  - discordClientSecret
-  - discordGuildIdなどなど
-    - できればDocker上でappsettings.jsonに置いときたい
-- RedirectUriを設定する
-- 本番用の証明書作成
-
-### 毎回やること
 
 ## フォルダ構成について
