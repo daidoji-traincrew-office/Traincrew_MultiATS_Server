@@ -43,320 +43,374 @@ using Traincrew_MultiATS_Server.Repositories.TtcWindowLink;
 using Traincrew_MultiATS_Server.Services;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
-var builder = WebApplication.CreateBuilder(args);
-var enableAuthorization =
-    !builder.Environment.IsDevelopment() || builder.Configuration.GetValue<bool>("EnableAuthorization");
-// Logging
-builder.Services.AddHttpLogging(options => { options.LoggingFields = HttpLoggingFields.RequestPropertiesAndHeaders; });
-// Proxied headers
-if (!builder.Environment.IsDevelopment())
+namespace Traincrew_MultiATS_Server;
+
+public class Program
 {
-    builder.Services.Configure<ForwardedHeadersOptions>(options =>
+    public static async Task Main(string[] args)
     {
-        options.ForwardedHeaders =
-            ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
-        var proxyIp = builder.Configuration["ProxyIP"];
-        if (IPAddress.TryParse(proxyIp, out var ip))
+        var builder = WebApplication.CreateBuilder(args);
+        var isDevelopment = builder.Environment.IsDevelopment();
+        var enableAuthorization = !isDevelopment || builder.Configuration.GetValue<bool>("EnableAuthorization");
+
+        ConfigureServices(builder, isDevelopment, enableAuthorization);
+
+        var app = builder.Build();
+
+        await Configure(app, isDevelopment, enableAuthorization);
+
+        await app.RunAsync();
+    }
+
+    private static void ConfigureServices(WebApplicationBuilder builder, bool isDevelopment, bool enableAuthorization)
+    {
+        ConfigureLoggingService(builder);
+        if (!isDevelopment)
         {
-            options.KnownProxies.Add(ip);
+            ConfigureProxiedHeadersService(builder);
         }
-    });
-}
-
-// Add services to the container.
-builder.Services.AddControllers();
-
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-// DB
-var dataSourceBuilder = new NpgsqlDataSourceBuilder(builder.Configuration.GetConnectionString("DefaultConnection"));
-dataSourceBuilder.MapEnum<LockType>();
-dataSourceBuilder.MapEnum<NR>();
-dataSourceBuilder.MapEnum<NRC>();
-dataSourceBuilder.MapEnum<LCR>();
-dataSourceBuilder.MapEnum<ObjectType>();
-dataSourceBuilder.MapEnum<SignalIndication>();
-dataSourceBuilder.MapEnum<LockConditionType>();
-dataSourceBuilder.MapEnum<LeverType>();
-dataSourceBuilder.MapEnum<RouteType>();
-dataSourceBuilder.MapEnum<RaiseDrop>();
-dataSourceBuilder.MapEnum<OperationNotificationType>();
-dataSourceBuilder.MapEnum<LR>();
-dataSourceBuilder.MapEnum<TtcWindowType>();
-dataSourceBuilder.MapEnum<TtcWindowLinkType>();
-var dataSource = dataSourceBuilder.Build();
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-{
-    options.UseNpgsql(dataSource);
-    // Todo: セッションであることを考えると、Redisを使ったほうが良いかも
-    options.UseOpenIddict();
-});
-// SignalR
-builder.Services.AddSignalR();
-
-// 認可周り
-// Cookie認可の設定
-builder.Services
-    .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options => { options.ExpireTimeSpan = TimeSpan.FromMinutes(10); });
-// OpenIddictの設定
-var openIddictBuilder = builder.Services.AddOpenIddict()
-    // Register the OpenIddict core components.
-    .AddCore(options =>
-    {
-        options.UseEntityFrameworkCore()
-            .UseDbContext<ApplicationDbContext>();
-    })
-    // Register the OpenIddict server components.
-    .AddServer(options =>
-    {
-        // Authorizationとtokenエンドポイントを有効にする
-        options.SetAuthorizationEndpointUris("auth/authorize")
-            .SetTokenEndpointUris("token");
-
-        // AuthorizationCodeFlowとRefreshTokenFlowを有効にする
-        options.AllowAuthorizationCodeFlow()
-            .AllowRefreshTokenFlow();
-
-        // Register the signing and encryption credentials
-        if (builder.Environment.IsDevelopment())
+        ConfigureControllersService(builder);
+        if (isDevelopment)
         {
-            options.AddDevelopmentEncryptionCertificate()
-                .AddDevelopmentSigningCertificate();
+            ConfigureSwaggerService(builder);
+        }
+        ConfigureDatabaseService(builder);
+        ConfigureSignalRService(builder);
+        ConfigureAuthenticationService(builder);
+        var openiddictBuilder = ConfigureOpeniddictService(builder, isDevelopment);
+        if (enableAuthorization)
+        {
+            ConfigureOpeniddictClientService(builder, openiddictBuilder, isDevelopment);
+        }
+        ConfigureAuthorizationService(builder);
+        ConfigureDependencyInjectionService(builder, enableAuthorization);
+        ConfigureHostedServices(builder);
+        if (enableAuthorization)
+        {
+            ConfigureAuthorizationHostedServices(builder);
+        }
+    }
+
+    private static async Task Configure(WebApplication app, bool isDevelopment, bool enableAuthorization)
+    {
+        ConfigureHttpLogging(app);
+        if (isDevelopment)
+        {
+            ConfigureSwagger(app);
         }
         else
         {
-            // Generate a certificate at startup and register it.
-            const string encryptionCertificatePath = "cert/server-encryption-certificate.pfx";
-            const string signingCertificatePath = "cert/server-signing-certificate.pfx";
-            EnsureCertificateExists(
-                encryptionCertificatePath,
-                "CN=Fabrikam Server Encryption Certificate",
-                X509KeyUsageFlags.KeyEncipherment);
-            EnsureCertificateExists(
-                signingCertificatePath,
-                "CN=Fabrikam Server Signing Certificate",
-                X509KeyUsageFlags.DigitalSignature);
-            options.AddEncryptionCertificate(
-                new X509Certificate2(encryptionCertificatePath, string.Empty));
-            options.AddSigningCertificate(
-                new X509Certificate2(signingCertificatePath, string.Empty));
+            ConfigureForwardedHeaders(app);
         }
+        ConfigureRouting(app);
+        ConfigureCors(app);
+        ConfigureAuthentication(app);
+        ConfigureAuthorization(app);
 
-        // Register the ASP.NET Core host and configure the ASP.NET Core-specific options.
-        //
-        // Note: unlike other samples, this sample doesn't use token endpoint pass-through
-        // to handle token requests in a custom MVC action. As such, the token requests
-        // will be automatically handled by OpenIddict, that will reuse the identity
-        // resolved from the authorization code to produce access and identity tokens.
-        //
-        options.UseAspNetCore()
-            .EnableAuthorizationEndpointPassthrough();
-    })
-    // Register the OpenIddict validation components.
-    .AddValidation(options =>
-    {
-        // Import the configuration from the local OpenIddict server instance.
-        options.UseLocalServer();
-
-        // Register the ASP.NET Core host.
-        options.UseAspNetCore();
-    });
-
-// 認証を有効にする場合の設定
-if (enableAuthorization)
-{
-    // OpenIddictのクライアント設定を有効にする
-    openIddictBuilder
-        .AddClient(options =>
+        var endpointBuilders = ConfigureEndpoints(app);
+        if (!enableAuthorization)
         {
-            // Enable the client credentials flow. 
-            options.AllowAuthorizationCodeFlow();
+            endpointBuilders.ForEach(builder => builder.AllowAnonymous());
+        }
+        else
+        {
+            // OpenIddictアプリケーション登録
+            await RegisterOpeniddictApplicationAsync(app);
+        }
+    }
 
-            // Register the signing and encryption credentials used to protect
-            // sensitive data like the state tokens produced by OpenIddict.
-            if (builder.Environment.IsDevelopment())
+    private static void ConfigureLoggingService(WebApplicationBuilder builder)
+    {
+        // Logging
+        builder.Services.AddHttpLogging(options => { options.LoggingFields = HttpLoggingFields.RequestPropertiesAndHeaders; });
+    }
+
+    private static void ConfigureHttpLogging(WebApplication app)
+    {
+        app.UseHttpLogging();
+    }
+
+    private static void ConfigureProxiedHeadersService(WebApplicationBuilder builder)
+    {
+        // Proxied headers
+        builder.Services.Configure<ForwardedHeadersOptions>(options =>
+        {
+            options.ForwardedHeaders = 
+                ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
+            var proxyIp = builder.Configuration["ProxyIP"];
+            if (IPAddress.TryParse(proxyIp, out var ip))
             {
-                options.AddDevelopmentEncryptionCertificate()
-                    .AddDevelopmentSigningCertificate();
+                options.KnownProxies.Add(ip);
             }
-            else
+        });
+
+    }
+
+    private static void ConfigureForwardedHeaders(WebApplication app)
+    {
+        app.UseForwardedHeaders();
+        app.UseHsts();
+    }
+
+    private static void ConfigureControllersService(WebApplicationBuilder builder)
+    {
+        // Add services to the container.
+        builder.Services.AddControllers();
+    }
+
+    private static void ConfigureRouting(WebApplication app)
+    {
+        app.UseRouting();
+    }
+
+    private static void ConfigureCors(WebApplication app)
+    {
+        app.UseCors();
+    }
+
+    private static void ConfigureSwaggerService(WebApplicationBuilder builder)
+    {
+        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen();
+    }
+
+    private static void ConfigureSwagger(WebApplication app)
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
+
+    private static void ConfigureDatabaseService(WebApplicationBuilder builder)
+    {
+        // DB
+        var dataSourceBuilder = new NpgsqlDataSourceBuilder(builder.Configuration.GetConnectionString("DefaultConnection"));
+        dataSourceBuilder.MapEnum<LockType>();
+        dataSourceBuilder.MapEnum<NR>();
+        dataSourceBuilder.MapEnum<NRC>();
+        dataSourceBuilder.MapEnum<LCR>();
+        dataSourceBuilder.MapEnum<ObjectType>();
+        dataSourceBuilder.MapEnum<SignalIndication>();
+        dataSourceBuilder.MapEnum<LockConditionType>();
+        dataSourceBuilder.MapEnum<LeverType>();
+        dataSourceBuilder.MapEnum<RouteType>();
+        dataSourceBuilder.MapEnum<RaiseDrop>();
+        dataSourceBuilder.MapEnum<OperationNotificationType>();
+        dataSourceBuilder.MapEnum<LR>();
+        dataSourceBuilder.MapEnum<TtcWindowType>();
+        dataSourceBuilder.MapEnum<TtcWindowLinkType>();
+        var dataSource = dataSourceBuilder.Build();
+        builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        {
+            options.UseNpgsql(dataSource);
+            // Todo: セッションであることを考えると、Redisを使ったほうが良いかも
+            options.UseOpenIddict();
+        });
+    }
+
+    private static void ConfigureSignalRService(WebApplicationBuilder builder)
+    {
+        // SignalR
+        builder.Services.AddSignalR();
+    }
+
+    private static List<IEndpointConventionBuilder> ConfigureEndpoints(WebApplication app)
+    {
+        return
+        [
+            app.MapControllers(),
+            app.MapHub<TrainHub>("/hub/train"),
+            app.MapHub<TIDHub>("/hub/TID"),
+            app.MapHub<InterlockingHub>("/hub/interlocking"),
+            app.MapHub<CommanderTableHub>("/hub/commander_table"),
+        ];
+    }
+
+    private static void ConfigureAuthenticationService(WebApplicationBuilder builder)
+    {
+        // 認可周り
+        // Cookie認可の設定
+        builder.Services
+            .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+            .AddCookie(options => { options.ExpireTimeSpan = TimeSpan.FromMinutes(10); });
+    }
+    
+    private static OpenIddictBuilder ConfigureOpeniddictService(WebApplicationBuilder builder, bool isDevelopment)
+    {
+        // OpenIddictの設定
+        return builder.Services.AddOpenIddict()
+            .AddCore(options =>
             {
-                // Generate a certificate at startup and register it.
-                const string encryptionCertificatePath = "cert/client-encryption-certificate.pfx";
-                const string signingCertificatePath = "cert/client-signing-certificate.pfx";
-                EnsureCertificateExists(
-                    encryptionCertificatePath,
-                    "CN=Fabrikam Client Encryption Certificate",
-                    X509KeyUsageFlags.KeyEncipherment);
-                EnsureCertificateExists(
-                    signingCertificatePath,
-                    "CN=Fabrikam Client Signing Certificate",
-                    X509KeyUsageFlags.DigitalSignature);
+                options.UseEntityFrameworkCore()
+                    .UseDbContext<ApplicationDbContext>();
+            })
+            .AddServer(options =>
+            {
+                // Authorizationとtokenエンドポイントを有効にする
+                options.SetAuthorizationEndpointUris("auth/authorize")
+                    .SetTokenEndpointUris("token");
 
-                options.AddEncryptionCertificate(
-                    new X509Certificate2(encryptionCertificatePath, string.Empty));
-                options.AddSigningCertificate(
-                    new X509Certificate2(signingCertificatePath, string.Empty));
-            }
+                // AuthorizationCodeFlowとRefreshTokenFlowを有効にする
+                options.AllowAuthorizationCodeFlow()
+                    .AllowRefreshTokenFlow();
 
-            // Register the ASP.NET Core host and configure the ASP.NET Core-specific options.
-            options.UseAspNetCore()
-                .EnableRedirectionEndpointPassthrough();
-
-            // Register the System.Net.Http integration and use the identity of the current
-            // assembly as a more specific user agent, which can be useful when dealing with
-            // providers that use the user agent as a way to throttle requests (e.g Reddit).
-            options.UseSystemNetHttp()
-                .SetProductInformation(typeof(Program).Assembly);
-
-            // Register the Web providers integrations.
-            options.UseWebProviders()
-                .AddDiscord(discord =>
+                // 証明書制御
+                if (isDevelopment)
                 {
-                    discord.AddScopes("identify", "guilds", "guilds.members.read");
-                    discord
-                        .SetClientId(builder.Configuration["Discord:ClientId"] ?? "")
-                        .SetClientSecret(builder.Configuration["Discord:ClientSecret"] ?? "")
-                        .SetRedirectUri("auth/callback");
+                    options.AddDevelopmentEncryptionCertificate()
+                        .AddDevelopmentSigningCertificate();
+                }
+                else
+                {
+                    // Generate a certificate at startup and register it.
+                    const string encryptionCertificatePath = "cert/server-encryption-certificate.pfx";
+                    const string signingCertificatePath = "cert/server-signing-certificate.pfx";
+                    EnsureCertificateExists(
+                        encryptionCertificatePath,
+                        "CN=Fabrikam Server Encryption Certificate",
+                        X509KeyUsageFlags.KeyEncipherment);
+                    EnsureCertificateExists(
+                        signingCertificatePath,
+                        "CN=Fabrikam Server Signing Certificate",
+                        X509KeyUsageFlags.DigitalSignature);
+                    options.AddEncryptionCertificate(
+                        new X509Certificate2(encryptionCertificatePath, string.Empty));
+                    options.AddSigningCertificate(
+                        new X509Certificate2(signingCertificatePath, string.Empty));
+                }
+
+                options.UseAspNetCore()
+                    .EnableAuthorizationEndpointPassthrough();
+            })
+            .AddValidation(options =>
+            {
+                options.UseLocalServer();
+                options.UseAspNetCore();
+            });
+    }
+
+    private static void ConfigureOpeniddictClientService(
+        WebApplicationBuilder builder, OpenIddictBuilder openiddictBuilder, bool isDevelopment)
+    {
+        // クライアント設定
+        openiddictBuilder
+            .AddClient(options =>
+            {
+                // AllowAuthorizationCodeFlow
+                options.AllowAuthorizationCodeFlow();
+
+                // 証明書制御
+                if (isDevelopment)
+                {
+                    options.AddDevelopmentEncryptionCertificate()
+                        .AddDevelopmentSigningCertificate();
+                }
+                else
+                {
+                    const string encryptionCertificatePath = "cert/client-encryption-certificate.pfx";
+                    const string signingCertificatePath = "cert/client-signing-certificate.pfx";
+                    EnsureCertificateExists(
+                        encryptionCertificatePath,
+                        "CN=Fabrikam Client Encryption Certificate",
+                        X509KeyUsageFlags.KeyEncipherment);
+                    EnsureCertificateExists(
+                        signingCertificatePath,
+                        "CN=Fabrikam Client Signing Certificate",
+                        X509KeyUsageFlags.DigitalSignature);
+
+                    options.AddEncryptionCertificate(
+                        new X509Certificate2(encryptionCertificatePath, string.Empty));
+                    options.AddSigningCertificate(
+                        new X509Certificate2(signingCertificatePath, string.Empty));
+                }
+
+                // ASP.NET Core統合
+                options.UseAspNetCore()
+                    .EnableRedirectionEndpointPassthrough();
+
+                // System.Net.Http統合とUserAgent
+                options.UseSystemNetHttp()
+                    .SetProductInformation(typeof(Program).Assembly);
+
+                // Discord Web Provider
+                options.UseWebProviders()
+                    .AddDiscord(discord =>
+                    {
+                        discord.AddScopes("identify", "guilds", "guilds.members.read");
+                        discord
+                            .SetClientId(builder.Configuration["Discord:ClientId"] ?? "")
+                            .SetClientSecret(builder.Configuration["Discord:ClientSecret"] ?? "")
+                            .SetRedirectUri("auth/callback");
+                    });
+            });
+    }
+
+    private static void ConfigureAuthentication(WebApplication app)
+    {
+        app.UseAuthentication();
+    }
+
+    private static void ConfigureAuthorizationService(WebApplicationBuilder builder)
+    {
+        builder.Services.AddAuthorization();
+        builder.Services.AddAuthorizationBuilder()
+            .AddPolicy("TrainPolicy", policy =>
+            {
+                policy.Requirements.Add(new DiscordRoleRequirement
+                {
+                    Condition = role => role.IsDriver || role.IsConductor
                 });
-        });
-}
+            })
+            .AddPolicy("TIDPolicy", policy =>
+            {
+                policy.Requirements.Add(new DiscordRoleRequirement
+                {
+                    Condition = role => role.IsCommander || role.IsDriverManager
+                });
+            })
+            .AddPolicy("InterlockingPolicy", policy =>
+            {
+                policy.Requirements.Add(new DiscordRoleRequirement
+                {
+                    Condition = role => role.IsSignalman
+                });
+            })
+            .AddPolicy("CommanderTablePolicy", policy =>
+            {
+                policy.Requirements.Add(new DiscordRoleRequirement
+                {
+                    Condition = role => role.IsCommander
+                });
+            });
+    }
 
-builder.Services.AddAuthorization();
-builder.Services.AddAuthorizationBuilder()
-    .AddPolicy("TrainPolicy", policy =>
+    private static void ConfigureAuthorization(WebApplication app)
     {
-        policy.Requirements.Add(new DiscordRoleRequirement
+        app.UseAuthorization();
+    }
+
+    private static async Task RegisterOpeniddictApplicationAsync(WebApplication app)
+    {
+        await using var scope = app.Services.CreateAsyncScope();
+        var manager = scope.ServiceProvider.GetRequiredService<IOpenIddictApplicationManager>();
+
+        if (await manager.FindByClientIdAsync("MultiATS_Client") != null)
         {
-            Condition = role => role.IsDriver || role.IsConductor
-        });
-    })
-    .AddPolicy("TIDPolicy", policy =>
-    {
-        policy.Requirements.Add(new DiscordRoleRequirement
-        {
-            Condition = role => role.IsCommander || role.IsDriverManager
-        });
-    })
-    .AddPolicy("InterlockingPolicy", policy =>
-    {
-        policy.Requirements.Add(new DiscordRoleRequirement
-        {
-            Condition = role => role.IsSignalman
-        });
-    })
-    .AddPolicy("CommanderTablePolicy", policy =>
-    {
-        policy.Requirements.Add(new DiscordRoleRequirement
-        {
-            Condition = role => role.IsCommander
-        });
-    });
-
-
-// DI周り
-builder.Services
-    .AddScoped<IDateTimeRepository, DateTimeRepository>()
-    .AddScoped<IDestinationButtonRepository, DestinationButtonRepository>()
-    .AddScoped<IDirectionRouteRepository, DirectionRouteRepository>()
-    .AddScoped<IDirectionSelfControlLeverRepository, DirectionSelfControlLeverRepository>()
-    .AddScoped<IGeneralRepository, GeneralRepository>()
-    .AddScoped<IInterlockingObjectRepository, InterlockingObjectRepository>()
-    .AddScoped<ILockRepository, LockRepository>()
-    .AddScoped<ILockConditionRepository, LockConditionRepository>()
-    .AddScoped<ILeverRepository, LeverRepository>()
-    .AddScoped<INextSignalRepository, NextSignalRepository>()
-    .AddScoped<IOperationNotificationRepository, OperationNotificationRepository>()
-    .AddScoped<IProtectionRepository, ProtectionRepository>()
-    .AddScoped<IRouteRepository, RouteRepository>()
-    .AddScoped<IRouteLeverDestinationRepository, RouteLeverDestinationRepository>()
-    .AddScoped<IRouteLockTrackCircuitRepository, RouteLockTrackCircuitRepository>()
-    .AddScoped<ISignalRepository, SignalRepository>()
-    .AddScoped<ISignalRouteRepository, SignalRouteRepository>()
-    .AddScoped<IStationRepository, StationRepository>()
-    .AddScoped<ISwitchingMachineRepository, SwitchingMachineRepository>()
-    .AddScoped<ISwitchingMachineRouteRepository, SwitchingMachineRouteRepository>()
-    .AddScoped<IThrowOutControlRepository, ThrowOutControlRepository>()
-    .AddScoped<ITrackCircuitRepository, TrackCircuitRepository>()
-    .AddScoped<ITtcWindowRepository, TtcWindowRepository>()
-    .AddScoped<ITtcWindowLinkRepository, TtcWindowLinkRepository>()
-    .AddScoped<DirectionRouteService>()
-    .AddScoped<InterlockingService>()
-    .AddScoped<OperationNotificationService>()
-    .AddScoped<ProtectionService>()
-    .AddScoped<RendoService>()
-    .AddScoped<RouteService>()
-    .AddScoped<SignalService>()
-    .AddScoped<StationService>()
-    .AddScoped<SwitchingMachineService>()
-    .AddScoped<TrackCircuitService>()
-    .AddScoped<TIDService>()
-    .AddScoped<TtcStationControlService>()
-    .AddSingleton(provider =>
-    {
-        var discordService = new DiscordService(
-            builder.Configuration,
-            provider.GetRequiredService<IDiscordRepository>(),
-            enableAuthorization);
-        return discordService;
-    })
-    .AddSingleton<DiscordRepository>()
-    .AddSingleton<IDiscordRepository>(provider => provider.GetRequiredService<DiscordRepository>())
-    .AddSingleton<IMutexRepository, MutexRepository>()
-    .AddSingleton<IAuthorizationHandler, DiscordRoleHandler>();
-// HostedServiceまわり
-builder.Services
-    .AddHostedService<InitDbHostedService>();
-if (enableAuthorization)
-{
-    // 認可を使う場合はDiscord BOTの起動をする
-    builder.Services.AddHostedService<DiscordBotHostedService>();
-}
-
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-app.UseHttpLogging();
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-else
-{
-    app.UseForwardedHeaders();
-    app.UseHsts();
-}
-
-app.UseRouting();
-app.UseCors();
-app.UseAuthentication();
-app.UseAuthorization();
-
-// Create a new application registration matching the values configured in MultiATS_Client.
-// Note: in a real world application, this step should be part of a setup script.
-if (enableAuthorization)
-{
-    await using var scope = app.Services.CreateAsyncScope();
-    var manager = scope.ServiceProvider.GetRequiredService<IOpenIddictApplicationManager>();
-
-    if (await manager.FindByClientIdAsync("MultiATS_Client") == null)
-    {
+            // 既に登録されている場合は何もしない
+            return;
+        }
         var applicationDescriptor = new OpenIddictApplicationDescriptor
         {
             ApplicationType = ApplicationTypes.Native,
             ClientId = "MultiATS_Client",
             ClientType = ClientTypes.Public,
             Permissions =
-            {
-                Permissions.Endpoints.Authorization,
-                Permissions.Endpoints.Token,
-                Permissions.GrantTypes.AuthorizationCode,
-                Permissions.ResponseTypes.Code
-            }
+                {
+                    Permissions.Endpoints.Authorization,
+                    Permissions.Endpoints.Token,
+                    Permissions.GrantTypes.AuthorizationCode,
+                    Permissions.ResponseTypes.Code
+                }
         };
 
         Enumerable.Range(0, 10)
@@ -366,40 +420,85 @@ if (enableAuthorization)
 
         await manager.CreateAsync(applicationDescriptor);
     }
-}
 
-List<IEndpointConventionBuilder> conventionBuilders =
-[
-    app.MapControllers(),
-    app.MapHub<TrainHub>("/hub/train"),
-    app.MapHub<TIDHub>("/hub/TID"),
-    app.MapHub<InterlockingHub>("/hub/interlocking"),
-    app.MapHub<CommanderTableHub>("/hub/commander_table"),
-];
-if (!enableAuthorization)
-{
-    conventionBuilders.ForEach(conventionBuilder => conventionBuilder.AllowAnonymous());
-}
-
-app.Run();
-return;
-
-static void EnsureCertificateExists(string certificatePath, string subjectName, X509KeyUsageFlags keyUsageFlags)
-{
-    if (File.Exists(certificatePath))
+    private static void ConfigureDependencyInjectionService(WebApplicationBuilder builder, bool enableAuthorization)
     {
-        return;
+        builder.Services
+            .AddScoped<IDateTimeRepository, DateTimeRepository>()
+            .AddScoped<IDestinationButtonRepository, DestinationButtonRepository>()
+            .AddScoped<IDirectionRouteRepository, DirectionRouteRepository>()
+            .AddScoped<IDirectionSelfControlLeverRepository, DirectionSelfControlLeverRepository>()
+            .AddScoped<IGeneralRepository, GeneralRepository>()
+            .AddScoped<IInterlockingObjectRepository, InterlockingObjectRepository>()
+            .AddScoped<ILockRepository, LockRepository>()
+            .AddScoped<ILockConditionRepository, LockConditionRepository>()
+            .AddScoped<ILeverRepository, LeverRepository>()
+            .AddScoped<INextSignalRepository, NextSignalRepository>()
+            .AddScoped<IOperationNotificationRepository, OperationNotificationRepository>()
+            .AddScoped<IProtectionRepository, ProtectionRepository>()
+            .AddScoped<IRouteRepository, RouteRepository>()
+            .AddScoped<IRouteLeverDestinationRepository, RouteLeverDestinationRepository>()
+            .AddScoped<IRouteLockTrackCircuitRepository, RouteLockTrackCircuitRepository>()
+            .AddScoped<ISignalRepository, SignalRepository>()
+            .AddScoped<ISignalRouteRepository, SignalRouteRepository>()
+            .AddScoped<IStationRepository, StationRepository>()
+            .AddScoped<ISwitchingMachineRepository, SwitchingMachineRepository>()
+            .AddScoped<ISwitchingMachineRouteRepository, SwitchingMachineRouteRepository>()
+            .AddScoped<IThrowOutControlRepository, ThrowOutControlRepository>()
+            .AddScoped<ITrackCircuitRepository, TrackCircuitRepository>()
+            .AddScoped<ITtcWindowRepository, TtcWindowRepository>()
+            .AddScoped<ITtcWindowLinkRepository, TtcWindowLinkRepository>()
+            .AddScoped<DirectionRouteService>()
+            .AddScoped<InterlockingService>()
+            .AddScoped<OperationNotificationService>()
+            .AddScoped<ProtectionService>()
+            .AddScoped<RendoService>()
+            .AddScoped<RouteService>()
+            .AddScoped<SignalService>()
+            .AddScoped<StationService>()
+            .AddScoped<SwitchingMachineService>()
+            .AddScoped<TrackCircuitService>()
+            .AddScoped<TIDService>()
+            .AddScoped<TtcStationControlService>()
+            .AddSingleton(provider =>
+            {
+                var discordService = new DiscordService(
+                    builder.Configuration,
+                    provider.GetRequiredService<IDiscordRepository>(),
+                    enableAuthorization);
+                return discordService;
+            })
+            .AddSingleton<DiscordRepository>()
+            .AddSingleton<IDiscordRepository>(provider => provider.GetRequiredService<DiscordRepository>())
+            .AddSingleton<IMutexRepository, MutexRepository>()
+            .AddSingleton<IAuthorizationHandler, DiscordRoleHandler>();
     }
 
-    using var algorithm = RSA.Create(2048);
+    private static void ConfigureHostedServices(WebApplicationBuilder builder)
+    {
+        builder.Services.AddHostedService<InitDbHostedService>();
+    }
 
-    var subject = new X500DistinguishedName(subjectName);
-    var request = new CertificateRequest(subject, algorithm, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
-    request.CertificateExtensions.Add(new X509KeyUsageExtension(keyUsageFlags, true));
+    private static void ConfigureAuthorizationHostedServices(WebApplicationBuilder builder)
+    {
+        builder.Services.AddHostedService<DiscordBotHostedService>();
+    }
 
-    var certificate = request.CreateSelfSigned(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddYears(2));
+    private static void EnsureCertificateExists(string certificatePath, string subjectName, X509KeyUsageFlags keyUsageFlags)
+    {
+        if (File.Exists(certificatePath))
+        {
+            return;
+        }
 
-    File.WriteAllBytes(certificatePath, certificate.Export(X509ContentType.Pfx, string.Empty));
+        using var algorithm = RSA.Create(2048);
+
+        var subject = new X500DistinguishedName(subjectName);
+        var request = new CertificateRequest(subject, algorithm, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+        request.CertificateExtensions.Add(new X509KeyUsageExtension(keyUsageFlags, true));
+
+        var certificate = request.CreateSelfSigned(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddYears(2));
+
+        File.WriteAllBytes(certificatePath, certificate.Export(X509ContentType.Pfx, string.Empty));
+    }
 }
-
-public partial class Program;
