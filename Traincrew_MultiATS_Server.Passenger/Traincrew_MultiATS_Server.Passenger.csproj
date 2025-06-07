@@ -15,5 +15,9 @@
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
     </ItemGroup>
+    
+    <ItemGroup>
+        <ProjectReference Include="..\Traincrew_MultiATS_Server\Traincrew_MultiATS_Server.csproj" />
+    </ItemGroup>
 
 </Project>
