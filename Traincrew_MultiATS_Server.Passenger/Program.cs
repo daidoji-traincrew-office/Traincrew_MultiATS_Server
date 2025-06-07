@@ -1,4 +1,7 @@
 using Traincrew_MultiATS_Server.Passenger.Service;
+using Traincrew_MultiATS_Server.Repositories.General;
+using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
+using Traincrew_MultiATS_Server.Services;
 
 namespace Traincrew_MultiATS_Server.Passenger;
 
@@ -34,7 +37,11 @@ public class Program
         // Todo: (優先度低)キャッシュ制御, Response Compression
 
         // DI
-        builder.Services.AddScoped<PassengerService>();
+        builder.Services
+            .AddScoped<IGeneralRepository, GeneralRepository>()
+            .AddScoped<ITrackCircuitRepository, TrackCircuitRepository>()
+            .AddScoped<TrackCircuitService>()
+            .AddScoped<PassengerService>();
     }
 
     private static async Task Configure(WebApplication app, bool isDevelopment)
