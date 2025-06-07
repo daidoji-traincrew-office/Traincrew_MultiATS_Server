@@ -1,4 +1,4 @@
-﻿# Learn about building .NET container images:
+# Learn about building .NET container images:
 # https://github.com/dotnet/dotnet-docker/blob/main/samples/README.md
 
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 AS build
@@ -15,9 +15,10 @@ COPY --link Traincrew_MultiATS_Server.Passenger/*.csproj Traincrew_MultiATS_Serv
 RUN cd ./Traincrew_MultiATS_Server.Passenger && dotnet restore -a $TARGETARCH 
 
 # Copy source code and publish app
-COPY --link Traincrew_MultiATS_Server.Common/* Traincrew_MultiATS_Server.Common/
-COPY --link Traincrew_MultiATS_Server/* Traincrew_MultiATS_Server/
-COPY --link Traincrew_MultiATS_Server.Passenger/* Traincrew_MultiATS_Server.Passenger/
+COPY --link Traincrew_MultiATS_Server.Common/ Traincrew_MultiATS_Server.Common/
+COPY --link Traincrew_MultiATS_Server/ Traincrew_MultiATS_Server/
+COPY --link Traincrew_MultiATS_Server.Passenger/ Traincrew_MultiATS_Server.Passenger/
+RUN rm -f ./Traincrew_MultiATS_Server/appsettings.json ./Traincrew_MultiATS_Server/appsettings.Development.json
 RUN cd ./Traincrew_MultiATS_Server.Passenger && dotnet publish -a $TARGETARCH --no-restore -o /app
 
 
