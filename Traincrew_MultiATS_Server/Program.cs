@@ -282,7 +282,7 @@ public class Program
 
                 // ASP.NET Coreホストを登録して、ASP.NET Core固有のオプションを設定する
                 //
-                // 他のサンプルと違って、このサンプルはtokenエンドポイントのパススルーを使わない
+                // このサーバーではtokenエンドポイントのパススルーを使わない
                 // カスタムMVCアクションでtokenリクエストを処理しないので、
                 // tokenリクエストはOpenIddictが自動的に処理して、authorization codeから
                 // アクセストークンとIDトークンを発行する
