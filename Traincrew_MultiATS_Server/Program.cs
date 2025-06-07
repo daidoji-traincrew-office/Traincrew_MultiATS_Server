@@ -121,7 +121,7 @@ public class Program
 
     private static void ConfigureLoggingService(WebApplicationBuilder builder)
     {
-        // Logging
+        // ログの設定
         builder.Services.AddHttpLogging(options => { options.LoggingFields = HttpLoggingFields.RequestPropertiesAndHeaders; });
     }
 
@@ -132,7 +132,7 @@ public class Program
 
     private static void ConfigureProxiedHeadersService(WebApplicationBuilder builder)
     {
-        // Proxied headers
+        // Proxy Headerの設定
         builder.Services.Configure<ForwardedHeadersOptions>(options =>
         {
             options.ForwardedHeaders = 
@@ -154,7 +154,7 @@ public class Program
 
     private static void ConfigureControllersService(WebApplicationBuilder builder)
     {
-        // Add services to the container.
+        // ControllerをServiceに追加
         builder.Services.AddControllers();
     }
 
@@ -170,7 +170,7 @@ public class Program
 
     private static void ConfigureSwaggerService(WebApplicationBuilder builder)
     {
-        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+        // Swagger/OpenAPIの設定方法は https://aka.ms/aspnetcore/swashbuckle を参照
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
     }
@@ -183,7 +183,7 @@ public class Program
 
     private static void ConfigureDatabaseService(WebApplicationBuilder builder)
     {
-        // DB
+        // DBの設定
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(builder.Configuration.GetConnectionString("DefaultConnection"));
         dataSourceBuilder.MapEnum<LockType>();
         dataSourceBuilder.MapEnum<NR>();
@@ -210,12 +210,13 @@ public class Program
 
     private static void ConfigureSignalRService(WebApplicationBuilder builder)
     {
-        // SignalR
+        // SignalRの設定
         builder.Services.AddSignalR();
     }
 
     private static List<IEndpointConventionBuilder> ConfigureEndpoints(WebApplication app)
     {
+        // エンドポイントの設定
         return
         [
             app.MapControllers(),
@@ -262,7 +263,7 @@ public class Program
                 }
                 else
                 {
-                    // Generate a certificate at startup and register it.
+                    // 起動時に証明書を生成して登録する
                     const string encryptionCertificatePath = "cert/server-encryption-certificate.pfx";
                     const string signingCertificatePath = "cert/server-signing-certificate.pfx";
                     EnsureCertificateExists(
@@ -279,12 +280,21 @@ public class Program
                         new X509Certificate2(signingCertificatePath, string.Empty));
                 }
 
+                // ASP.NET Coreホストを登録して、ASP.NET Core固有のオプションを設定する
+                //
+                // 他のサンプルと違って、このサンプルはtokenエンドポイントのパススルーを使わない
+                // カスタムMVCアクションでtokenリクエストを処理しないので、
+                // tokenリクエストはOpenIddictが自動的に処理して、authorization codeから
+                // アクセストークンとIDトークンを発行する
+                //
                 options.UseAspNetCore()
                     .EnableAuthorizationEndpointPassthrough();
             })
             .AddValidation(options =>
             {
+                // ローカルのOpenIddictサーバーインスタンスから設定をインポートする
                 options.UseLocalServer();
+                // ASP.NET Coreホストを登録する
                 options.UseAspNetCore();
             });
     }
@@ -296,7 +306,7 @@ public class Program
         openiddictBuilder
             .AddClient(options =>
             {
-                // AllowAuthorizationCodeFlow
+                // AuthorizationCodeFlowを有効にする
                 options.AllowAuthorizationCodeFlow();
 
                 // 証明書制御
@@ -307,6 +317,7 @@ public class Program
                 }
                 else
                 {
+                    // 起動時に証明書を生成して登録する
                     const string encryptionCertificatePath = "cert/client-encryption-certificate.pfx";
                     const string signingCertificatePath = "cert/client-signing-certificate.pfx";
                     EnsureCertificateExists(
@@ -324,7 +335,7 @@ public class Program
                         new X509Certificate2(signingCertificatePath, string.Empty));
                 }
 
-                // ASP.NET Core統合
+                // ASP.NET Coreホストを登録してリダイレクトエンドポイントのパススルーを有効にする
                 options.UseAspNetCore()
                     .EnableRedirectionEndpointPassthrough();
 
@@ -413,6 +424,7 @@ public class Program
                 }
         };
 
+        // ローカルで複数ポートで動かす場合のリダイレクトURIを全部登録する
         Enumerable.Range(0, 10)
             .Select(i => new Uri($"http://localhost:{49152 + i}/"))
             .ToList()
@@ -423,6 +435,7 @@ public class Program
 
     private static void ConfigureDependencyInjectionService(WebApplicationBuilder builder, bool enableAuthorization)
     {
+        // DI周り
         builder.Services
             .AddScoped<IDateTimeRepository, DateTimeRepository>()
             .AddScoped<IDestinationButtonRepository, DestinationButtonRepository>()
@@ -476,11 +489,13 @@ public class Program
 
     private static void ConfigureHostedServices(WebApplicationBuilder builder)
     {
+        // HostedServiceまわり
         builder.Services.AddHostedService<InitDbHostedService>();
     }
 
     private static void ConfigureAuthorizationHostedServices(WebApplicationBuilder builder)
     {
+        // 認可を使う場合はDiscord BOTの起動をする
         builder.Services.AddHostedService<DiscordBotHostedService>();
     }
 
