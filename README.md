@@ -40,3 +40,18 @@ atlas migrate diff --env local add_column_to_table
 ```
 
 ## フォルダ構成について
+
+- `Database` フォルダ
+  - PostgresのDocker Composeファイルとスキーマ定義、マイグレーションファイルが入ってる
+- `Traincrew_MultiATS_Server` フォルダ
+  - ATS、信号盤、TID、司令卓用のサーバー。
+- `Traincrew_MultiATS_Server.Passenger` フォルダ
+  - お客様用アプリ向けのサーバー。
+- `Traincrew_MultiATS_Server.Common` フォルダ
+  - サーバーとクライアント間で共通使用するスキーマ定義を入れる
+- `Traincrew_MultiATS_Server.Core` フォルダ
+  - ATS用サーバーとお客様アプリ用サーバーで共通で使うコードを入れる
+- `Traincrew_MultiATS_Server.UT` フォルダ
+  - ユニットテスト用のコードを入れる
+- `Traincrew_MultiATS_Server.IT` フォルダ
+  - 統合テスト用のコードを入れる
