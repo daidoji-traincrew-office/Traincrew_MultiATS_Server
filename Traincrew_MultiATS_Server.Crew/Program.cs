@@ -9,11 +9,9 @@ using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using OpenIddict.Abstractions;
 using Traincrew_MultiATS_Server.Authentication;
-using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.HostedService;
 using Traincrew_MultiATS_Server.Hubs;
-using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.DestinationButton;
 using Traincrew_MultiATS_Server.Repositories.DirectionRoute;
@@ -185,20 +183,8 @@ public class Program
     {
         // DBの設定
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(builder.Configuration.GetConnectionString("DefaultConnection"));
-        dataSourceBuilder.MapEnum<LockType>();
-        dataSourceBuilder.MapEnum<NR>();
-        dataSourceBuilder.MapEnum<NRC>();
-        dataSourceBuilder.MapEnum<LCR>();
-        dataSourceBuilder.MapEnum<ObjectType>();
-        dataSourceBuilder.MapEnum<SignalIndication>();
-        dataSourceBuilder.MapEnum<LockConditionType>();
-        dataSourceBuilder.MapEnum<LeverType>();
-        dataSourceBuilder.MapEnum<RouteType>();
-        dataSourceBuilder.MapEnum<RaiseDrop>();
-        dataSourceBuilder.MapEnum<OperationNotificationType>();
-        dataSourceBuilder.MapEnum<LR>();
-        dataSourceBuilder.MapEnum<TtcWindowType>();
-        dataSourceBuilder.MapEnum<TtcWindowLinkType>();
+        // Enumのマッピング
+        EnumTypeMapper.MapEnumForNpgsql(dataSourceBuilder);
         var dataSource = dataSourceBuilder.Build();
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
         {
