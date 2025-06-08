@@ -2,6 +2,7 @@ using System.Text;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.SignalR.Client;
 using Traincrew_MultiATS_Server.Common.Contract;
+using Traincrew_MultiATS_Server.Crew;
 using TypedSignalR.Client;
 
 namespace Traincrew_MultiATS_Server.IT.Fixture;

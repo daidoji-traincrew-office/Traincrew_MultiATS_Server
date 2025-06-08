@@ -16,14 +16,6 @@ Dockerを入れる
 
 https://docs.docker.com/engine/install/
 
-### 諸々の環境変数設定
-discordのClientId, ClientSecret を設定する。
-値は他の開発者に聞いてください
-```
-dotnet user-secrets set Discord:ClientId 値は聞いてね 
-dotnet user-secrets set Discord:ClientSecret 値は聞いてね 
-```
-
 ### Postgres
 DockerでPostgresを立ち上げる
 ```
@@ -46,18 +38,20 @@ atlas migrate apply --env local
 ```
 atlas migrate diff --env local add_column_to_table
 ```
-## デプロイ
-
-### 最初だけ
-- 環境変数
-  - Database
-  - discordClientId
-  - discordClientSecret
-  - discordGuildIdなどなど
-    - できればDocker上でappsettings.jsonに置いときたい
-- RedirectUriを設定する
-- 本番用の証明書作成
-
-### 毎回やること
 
 ## フォルダ構成について
+
+- `Database` フォルダ
+  - PostgresのDocker Composeファイルとスキーマ定義、マイグレーションファイルが入ってる
+- `Traincrew_MultiATS_Server` フォルダ
+  - ATS、信号盤、TID、司令卓用のサーバー。
+- `Traincrew_MultiATS_Server.Passenger` フォルダ
+  - お客様用アプリ向けのサーバー。
+- `Traincrew_MultiATS_Server.Common` フォルダ
+  - サーバーとクライアント間で共通使用するスキーマ定義を入れる
+- `Traincrew_MultiATS_Server.Core` フォルダ
+  - ATS用サーバーとお客様アプリ用サーバーで共通で使うコードを入れる
+- `Traincrew_MultiATS_Server.UT` フォルダ
+  - ユニットテスト用のコードを入れる
+- `Traincrew_MultiATS_Server.IT` フォルダ
+  - 統合テスト用のコードを入れる

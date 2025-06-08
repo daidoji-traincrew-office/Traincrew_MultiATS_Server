@@ -76,27 +76,27 @@ def read_csv(file_path, data_class, *args):
 def main():
     db = DBBasejson()
     db.stationList = read_csv(
-        '../Traincrew_MultiATS_Server/Data/駅・停車場.csv',
+        '../Traincrew_MultiATS_Server.Crew/Data/駅・停車場.csv',
         StationData, 0, 1, 2, 3
     )
     db.trackCircuitList = read_csv(
-        '../Traincrew_MultiATS_Server/Data/軌道回路に対する計算するべき信号機リスト.csv',
+        '../Traincrew_MultiATS_Server.Crew/Data/軌道回路に対する計算するべき信号機リスト.csv',
         TrackCircuitData, 0, [1, 2, 3, 4, 5], [7, 8, 9, 10, 11], 13
     )
     db.signalDataList = [e for e in read_csv(
-        '../Traincrew_MultiATS_Server/Data/信号リスト.csv',
+        '../Traincrew_MultiATS_Server.Crew/Data/信号リスト.csv',
         SignalData, 0, 1, [2, 3, 4, 5, 6], [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18], 20, 21, 22, 23
     ) if e.Name != 'なし']
     db.signalTypeList = read_csv(
-        '../Traincrew_MultiATS_Server/Data/信号何灯式リスト.csv',
+        '../Traincrew_MultiATS_Server.Crew/Data/信号何灯式リスト.csv',
         SignalTypeData, 0, 1, 2, 3, 4, 5
     )
     db.throwOutControlList = read_csv(
-        '../Traincrew_MultiATS_Server/Data/総括制御ペア一覧.csv',
+        '../Traincrew_MultiATS_Server.Crew/Data/総括制御ペア一覧.csv',
         ThrowOutControlData, 0, 1, 2
     )
 
-    with open('../Traincrew_MultiATS_Server/Data/DBBase.json', 'w', encoding='utf-8') as jsonfile:
+    with open('../Traincrew_MultiATS_Server.Crew/Data/DBBase.json', 'w', encoding='utf-8') as jsonfile:
         json.dump(db.__dict__, jsonfile, ensure_ascii=False, indent=4, default=lambda o: o.__dict__)
 
 if __name__ == "__main__":
