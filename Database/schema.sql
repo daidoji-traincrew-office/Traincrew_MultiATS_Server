@@ -550,7 +550,7 @@ CREATE TABLE train_state
     from_station_id VARCHAR(10) NOT NULL REFERENCES station (id), -- 出発駅ID
     to_station_id   VARCHAR(10) NOT NULL REFERENCES station (id), -- 到着駅ID
     delay           INT         NOT NULL DEFAULT 0,               -- 遅延時間(秒)
-    is_driving      BOOLEAN     NOT NULL DEFAULT true             -- 乗務中かどうか
+    driver_id       BIGINT                                        -- 運転士ID(列車の運転士)
 );
 
 -- 列車車両情報
