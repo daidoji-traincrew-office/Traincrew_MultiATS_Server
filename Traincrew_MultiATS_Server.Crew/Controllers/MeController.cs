@@ -4,7 +4,7 @@ using OpenIddict.Validation.AspNetCore;
 using Traincrew_MultiATS_Server.Services;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
-namespace Traincrew_MultiATS_Server.Controllers;
+namespace Traincrew_MultiATS_Server.Crew.Controllers;
 
 [ApiController]
 public class MeController(DiscordService discordService) : ControllerBase

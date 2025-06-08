@@ -13,7 +13,7 @@ using Traincrew_MultiATS_Server.Services;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 using static OpenIddict.Client.WebIntegration.OpenIddictClientWebIntegrationConstants;
 
-namespace Traincrew_MultiATS_Server.Controllers;
+namespace Traincrew_MultiATS_Server.Crew.Controllers;
 
 [Route("auth")]
 public class AuthenticationController(ILogger<AuthenticationController> logger, DiscordService discordService)
