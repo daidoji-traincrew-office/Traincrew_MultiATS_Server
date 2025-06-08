@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Traincrew_MultiATS_Server.Models;
@@ -6,9 +5,10 @@ namespace Traincrew_MultiATS_Server.Models;
 [Table("train_car_state")]
 public class TrainCarState
 {
-    [Key, Column("train_number", Order = 0)]
+    [Column("train_number")]
     public string TrainNumber { get; set; }
-    [Key, Column("index", Order = 1)]
+
+    [Column("index")]
     public int Index { get; set; }
 
     [Column("car_model")]

@@ -177,6 +177,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasForeignKey<TtcWindowState>(tws => tws.Name)
             .HasPrincipalKey<TtcWindow>(tw => tw.Name);
 
+        modelBuilder.Entity<TrainCarState>()
+            .HasKey(t => new { t.TrainNumber, t.Index });
+
         // Convert all column names to snake_case 
         foreach (var entity in modelBuilder.Model.GetEntityTypes())
         {
