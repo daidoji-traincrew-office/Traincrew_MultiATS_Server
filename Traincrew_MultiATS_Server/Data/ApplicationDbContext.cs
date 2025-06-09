@@ -39,6 +39,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<TtcWindowDisplayStation> TtcWindowDisplayStations { get; set; }
     public DbSet<TtcWindowTrackCircuit> TtcWindowTrackCircuits { get; set; }
     public DbSet<TtcWindowLinkRouteCondition> TtcWindowLinkRouteConditions { get; set; }
+    public DbSet<TrainState> TrainStates { get; set; }
+    public DbSet<TrainCarState> TrainCarStates { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -174,6 +176,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .WithOne()
             .HasForeignKey<TtcWindowState>(tws => tws.Name)
             .HasPrincipalKey<TtcWindow>(tw => tw.Name);
+
+        modelBuilder.Entity<TrainCarState>()
+            .HasKey(t => new { t.TrainNumber, t.Index });
 
         // Convert all column names to snake_case 
         foreach (var entity in modelBuilder.Model.GetEntityTypes())

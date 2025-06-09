@@ -399,7 +399,7 @@ CREATE TABLE station_timer_state
     is_teu_relay_raised raise_drop  NOT NULL DEFAULT 'drop',
     is_ten_relay_raised raise_drop  NOT NULL DEFAULT 'drop',
     is_ter_relay_raised raise_drop  NOT NULL DEFAULT 'raise',
-    teu_relay_raised_at TIMESTAMP   NULL     DEFAULT NULL,
+    teu_relay_raised_at TIMESTAMP NULL     DEFAULT NULL,
     UNIQUE (station_id, seconds)
 );
 
@@ -541,4 +541,30 @@ CREATE TABLE ttc_window_state
 (
     name         VARCHAR(100) REFERENCES ttc_window (name) NOT NULL, -- 列番窓の名前
     train_number VARCHAR(100)                              NOT NULL  -- 列車番号
+);
+
+-- 列車状態
+CREATE TABLE train_state
+(
+    train_number    VARCHAR(100) PRIMARY KEY,                     -- 列車番号
+    from_station_id VARCHAR(10) NOT NULL REFERENCES station (id), -- 出発駅ID
+    to_station_id   VARCHAR(10) NOT NULL REFERENCES station (id), -- 到着駅ID
+    delay           INT         NOT NULL DEFAULT 0,               -- 遅延時間(秒)
+    driver_id       BIGINT                                        -- 運転士ID(列車の運転士)
+);
+
+-- 列車車両情報
+CREATE TABLE train_car_state
+(
+    train_number      VARCHAR(100) REFERENCES train_state (train_number) NOT NULL,               -- 列車状態のID
+    index             INT                                                NOT NULL,               -- インデックス
+    car_model         VARCHAR(100)                                       NOT NULL,               -- 車両形式
+    has_pantograph    BOOLEAN                                            NOT NULL DEFAULT false, -- パンタグラフの有無
+    has_driver_cab    BOOLEAN                                            NOT NULL DEFAULT false, -- 運転台の有無
+    has_conductor_cab BOOLEAN                                            NOT NULL DEFAULT false, -- 車掌室の有無
+    has_motor         BOOLEAN                                            NOT NULL DEFAULT false, -- 電動機ありなし
+    door_close        BOOLEAN                                            NOT NULL DEFAULT true,  -- 扉閉め状態
+    bc_press          BOOLEAN                                            NOT NULL DEFAULT false, -- ブレーキ圧力
+    ampare            INT                                                NOT NULL DEFAULT 0,     -- 電流値
+    PRIMARY KEY (train_number, index)
 );
