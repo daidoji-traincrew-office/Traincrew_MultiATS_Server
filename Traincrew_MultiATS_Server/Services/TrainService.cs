@@ -13,27 +13,27 @@ public class TrainService(
 {
     public async Task<ServerToATSData> CreateAtsData(long? clientDriverId, AtsToServerData clientData)
     {
-        // ‹O“¹‰ñ˜Hî•ñ‚ÌXV
+        // è»Œé“å›è·¯æƒ…å ±ã®æ›´æ–°
         List<TrackCircuit> oldTrackCircuitList =
             await trackCircuitService.GetTrackCircuitsByTrainNumber(clientData.DiaName);
         List<TrackCircuitData> oldTrackCircuitDataList =
             oldTrackCircuitList.Select(TrackCircuitService.ToTrackCircuitData).ToList();
         /// <summary>
-        /// V‹K“o˜^‹O“¹‰ñ˜H
+        /// æ–°è¦ç™»éŒ²è»Œé“å›è·¯
         /// </summary>
         List<TrackCircuitData> incrementalTrackCircuitDataList =
             clientData.OnTrackList.Except(oldTrackCircuitDataList).ToList();
         /// <summary>
-        /// İüI—¹‹O“¹‰ñ˜H    
+        /// åœ¨ç·šçµ‚äº†è»Œé“å›è·¯    
         /// </summary>
         List<TrackCircuitData> decrementalTrackCircuitDataList =
             oldTrackCircuitDataList.Except(clientData.OnTrackList).ToList();
 
-        // ‹O“¹‰ñ˜H‚ğæ“¾‚µ‚æ‚¤‚Æ‚·‚é
+        // è»Œé“å›è·¯ã‚’å–å¾—ã—ã‚ˆã†ã¨ã™ã‚‹
         var trackCircuitList = await trackCircuitService.GetTrackCircuitsByNames(
             clientData.OnTrackList.Select(tcd => tcd.Name).ToList());
-        // Todo: •¶š‰»‚¯‚Ö‚Ì‘Î‰‚ª‚Å‚«‚½‚çˆÈ‰º‚Ìˆ—‚Í‚¢‚ç‚È‚¢
-        // æ“¾‚Å‚«‚È‚¢‹O“¹‰ñ˜H‚ª‚ ‚éê‡Aˆê’U‘O‰ñ‚Ìƒf[ƒ^‚ğg‚¤
+        // Todo: æ–‡å­—åŒ–ã‘ã¸ã®å¯¾å¿œãŒã§ããŸã‚‰ä»¥ä¸‹ã®å‡¦ç†ã¯ã„ã‚‰ãªã„
+        // å–å¾—ã§ããªã„è»Œé“å›è·¯ãŒã‚ã‚‹å ´åˆã€ä¸€æ—¦å‰å›ã®ãƒ‡ãƒ¼ã‚¿ã‚’ä½¿ã†
         if (trackCircuitList.Count != clientData.OnTrackList.Count)
         {
             trackCircuitList = oldTrackCircuitList;
@@ -42,19 +42,19 @@ public class TrainService(
 
 
         var ClientTrainNumber = clientData.DiaName;
-        // —ñÔ“o˜^î•ñæ“¾
+        // åˆ—è»Šç™»éŒ²æƒ…å ±å–å¾—
         var TrainStates = new List<TrainState>();
-        // ‰^”Ô‚ª“¯‚¶—ñÔ‚Ìî•ñ‚ğæ“¾‚·‚é
+        // é‹ç•ªãŒåŒã˜åˆ—è»Šã®æƒ…å ±ã‚’å–å¾—ã™ã‚‹
         var TrainState = TrainStates.FirstOrDefault(ts => IsTrainNumberEqual(ts.TrainNumber, ClientTrainNumber));
 
         ServerToATSData serverData = new ServerToATSData();
 
 
-        // ™î•ñ‚ÍŠ„‚Æí‚É‘—‚é‚½‚ß‹¤’Ê‚Å‰‰Z‚·‚é   
+        // â˜†æƒ…å ±ã¯å‰²ã¨å¸¸ã«é€ã‚‹ãŸã‚å…±é€šã§æ¼”ç®—ã™ã‚‹   
 
-        // İü‚µ‚Ä‚¢‚é‹O“¹‰ñ˜Hã‚Å–hŒì–³ü‚ª”­•ñ‚³‚ê‚Ä‚¢‚é‚©Šm”F
+        // åœ¨ç·šã—ã¦ã„ã‚‹è»Œé“å›è·¯ä¸Šã§é˜²è­·ç„¡ç·šãŒç™ºå ±ã•ã‚Œã¦ã„ã‚‹ã‹ç¢ºèª
         serverData.BougoState = await protectionService.IsProtectionEnabledForTrackCircuits(trackCircuitList);
-        // –hŒì–³ü‚ğ”­•ñ‚µ‚Ä‚¢‚éê‡‚ÌDBXV
+        // é˜²è­·ç„¡ç·šã‚’ç™ºå ±ã—ã¦ã„ã‚‹å ´åˆã®DBæ›´æ–°
         if (clientData.BougoState)
         {
             await protectionService.EnableProtectionByTrackCircuits(clientData.DiaName, trackCircuitList);
@@ -64,19 +64,19 @@ public class TrainService(
             await protectionService.DisableProtection(clientData.DiaName);
         }
 
-        // ‰^“]’mŠí‚Ì•\¦
+        // é‹è»¢å‘ŠçŸ¥å™¨ã®è¡¨ç¤º
         serverData.OperationNotificationData = await operationNotificationService
             .GetOperationNotificationDataByTrackCircuitIds(trackCircuitList.Select(tc => tc.Id).ToList());
 
-        // M†Œ»¦‚ÌŒvZ
-        // ã‚è‚©‰º‚è‚©”»’f(‹ô”‚È‚çã‚èAŠï”‚È‚ç‰º‚è)
+        // ä¿¡å·ç¾ç¤ºã®è¨ˆç®—
+        // ä¸Šã‚Šã‹ä¸‹ã‚Šã‹åˆ¤æ–­(å¶æ•°ãªã‚‰ä¸Šã‚Šã€å¥‡æ•°ãªã‚‰ä¸‹ã‚Š)
         var lastDiaNumber = clientData.DiaName.Last(char.IsDigit) - '0';
         var isUp = lastDiaNumber % 2 == 0;
-        // ŠY“–‹O“¹‰ñ˜H‚ÌM†‹@‚ğ‘Sæ“¾
+        // è©²å½“è»Œé“å›è·¯ã®ä¿¡å·æ©Ÿã‚’å…¨å–å¾—
         var signalNames = await signalService
             .GetSignalNamesByTrackCircuits(trackCircuitList, isUp);
-        // Œ»¦ŒvZ
-        // Todo: 1‚Âæ‚ÌM†‹@‚Ü‚Å‚ÍÅ’áŒÀŒvZ‚·‚é
+        // ç¾ç¤ºè¨ˆç®—
+        // Todo: 1ã¤å…ˆã®ä¿¡å·æ©Ÿã¾ã§ã¯æœ€ä½é™è¨ˆç®—ã™ã‚‹
         var signalIndications = await signalService.CalcSignalIndication(signalNames);
         serverData.NextSignalData = signalIndications.Select(pair => new SignalData
         {
@@ -85,68 +85,68 @@ public class TrainService(
         }).ToList();
         serverData.RouteData = await routeService.GetActiveRoutes();
 
-        // 1.“¯ˆê—ñ”Ô/“¯ˆê‰^”Ô‚ª–¢“o˜^
+        // 1.åŒä¸€åˆ—ç•ª/åŒä¸€é‹ç•ªãŒæœªç™»éŒ²
         if (TrainState == null)
         {
-            //1-1.İü‚³‚¹‚é‹O“¹‰ñ˜H‚ÉŠù‚É•Ê‰^“]m‚Ì—ñ”Ô‚ª1‚Â‚Å‚àİü‚µ‚Ä‚¢‚éê‡A‘’…‚Æ‚µ‚Ä“o˜^ˆ—‚µ‚È‚¢B
+            //1-1.åœ¨ç·šã•ã›ã‚‹è»Œé“å›è·¯ã«æ—¢ã«åˆ¥é‹è»¢å£«ã®åˆ—ç•ªãŒ1ã¤ã§ã‚‚åœ¨ç·šã—ã¦ã„ã‚‹å ´åˆã€æ—©ç€ã¨ã—ã¦ç™»éŒ²å‡¦ç†ã—ãªã„ã€‚
 
-            //1-2.9999—ñ”Ô‚Ìê‡‚Í—ñÔî•ñ‚ğ“o˜^‚µ‚È‚¢B
+            //1-2.9999åˆ—ç•ªã®å ´åˆã¯åˆ—è»Šæƒ…å ±ã‚’ç™»éŒ²ã—ãªã„ã€‚
 
             if (clientData.DiaName == "9999")
             {
-                // 9999—ñ”Ô‚Í—ñÔî•ñ‚ğ“o˜^‚µ‚È‚¢‚ªAİü‚Í‘‚«‚ŞB     
+                // 9999åˆ—ç•ªã¯åˆ—è»Šæƒ…å ±ã‚’ç™»éŒ²ã—ãªã„ãŒã€åœ¨ç·šã¯æ›¸ãè¾¼ã‚€ã€‚     
                 await trackCircuitService.SetTrackCircuitDataList(incrementalTrackCircuitDataList, clientData.DiaName);
                 return serverData;
             }
-            //1.Š®‘SV‹K“o˜^
-            //‘—M‚³‚ê‚½î•ñ‚ÉŠî‚Ã‚¢‚ÄV‹K‚Éî•ñ‚ğ‘‚«‚ŞB
+            //1.å®Œå…¨æ–°è¦ç™»éŒ²
+            //é€ä¿¡ã•ã‚ŒãŸæƒ…å ±ã«åŸºã¥ã„ã¦æ–°è¦ã«æƒ…å ±ã‚’æ›¸ãè¾¼ã‚€ã€‚
 
         }
         else
         {
-            // “¯ˆê‰^”Ô—ñÔ‚ª“o˜^Ï
+            // åŒä¸€é‹ç•ªåˆ—è»ŠãŒç™»éŒ²æ¸ˆ
             var TrainStateDriverId = TrainState.DriverId;
-            // 2.‰^—p’†/•Ê‰^“]m
+            // 2.é‹ç”¨ä¸­/åˆ¥é‹è»¢å£«
             if (TrainStateDriverId != null && TrainStateDriverId != clientDriverId)
             {
-                // 2.Œğ‘ã‘O‰“š
-                // ‘—M‚µ‚Ä‚«‚½ƒNƒ‰ƒCƒAƒ“ƒg‚É‘Î‚µŒğ‘ã‘O‰“š‚ğs‚¢A‘—M‚³‚ê‚½î•ñ‚Íİüî•ñŠÜ‚ß‚Ä‚·‚×‚Ä”jŠü‚·‚éB  
+                // 2.äº¤ä»£å‰å¿œç­”
+                // é€ä¿¡ã—ã¦ããŸã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆã«å¯¾ã—äº¤ä»£å‰å¿œç­”ã‚’è¡Œã„ã€é€ä¿¡ã•ã‚ŒãŸæƒ…å ±ã¯åœ¨ç·šæƒ…å ±å«ã‚ã¦ã™ã¹ã¦ç ´æ£„ã™ã‚‹ã€‚  
                 serverData.IsOnPreviousTrain = true;
 
-                // –hŒì–³ü‚Ìî•ñ‚ÍA‰^—p’†—ñÔ‚Ìİü‹O“¹‰ñ˜H‚ÆƒNƒ‰ƒCƒAƒ“ƒg‚Ìİü‹O“¹‰ñ˜H‚ªŠ®‘Sˆê’v‚µ‚Ä‚¢‚é‚Æ‚«‚Ì‚İ‘—M‚·‚éB
-                // ¨Šù‚Éî•ñ‚ª“o˜^‚³‚ê‚Ä‚¢‚é‚½‚ßAã‹L‚Ì‹t‚Ì‚Æ‚«false‚Åã‘‚«‚·‚éB
+                // é˜²è­·ç„¡ç·šã®æƒ…å ±ã¯ã€é‹ç”¨ä¸­åˆ—è»Šã®åœ¨ç·šè»Œé“å›è·¯ã¨ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆã®åœ¨ç·šè»Œé“å›è·¯ãŒå®Œå…¨ä¸€è‡´ã—ã¦ã„ã‚‹ã¨ãã®ã¿é€ä¿¡ã™ã‚‹ã€‚
+                // â†’æ—¢ã«æƒ…å ±ãŒç™»éŒ²ã•ã‚Œã¦ã„ã‚‹ãŸã‚ã€ä¸Šè¨˜ã®é€†ã®ã¨ãfalseã§ä¸Šæ›¸ãã™ã‚‹ã€‚
 
 
                 return serverData;
             }
-            // ‚±‚Ì’n“_‚Åİüî•ñ‚ğ“o˜^‚µ‚Ä‚æ‚¢
+            // ã“ã®åœ°ç‚¹ã§åœ¨ç·šæƒ…å ±ã‚’ç™»éŒ²ã—ã¦ã‚ˆã„
 
-            // 3.‰^—pI—¹
+            // 3.é‹ç”¨çµ‚äº†
             if (TrainStateDriverId == null)
             {
-                // 3.î•ñ•ÏX
-                // ŒŸõ‚Å”­Œ©‚³‚ê‚½î•ñ‚É‚Â‚¢‚ÄA‘—M‚³‚ê‚½î•ñ‚ÉŠî‚Ã‚¢‚Äî•ñ‚ğ•ÏX‚·‚éB
+                // 3.æƒ…å ±å¤‰æ›´
+                // æ¤œç´¢ã§ç™ºè¦‹ã•ã‚ŒãŸæƒ…å ±ã«ã¤ã„ã¦ã€é€ä¿¡ã•ã‚ŒãŸæƒ…å ±ã«åŸºã¥ã„ã¦æƒ…å ±ã‚’å¤‰æ›´ã™ã‚‹ã€‚
 
 
             }
-            // 4.“¯ˆê—ñ”Ô‚ª“o˜^Ï/‰^—p’†/“¯ˆê‰^“]m
+            // 4.åŒä¸€åˆ—ç•ªãŒç™»éŒ²æ¸ˆ/é‹ç”¨ä¸­/åŒä¸€é‹è»¢å£«
             else if (TrainState.TrainNumber == ClientTrainNumber && TrainStateDriverId == clientDriverId)
             {
-                // 4.î•ñ•ÏX‚È‚µ
-                // —ñÔî•ñ‚É‚Â‚¢‚Ä‚Í•ÏX‚µ‚È‚¢
+                // 4.æƒ…å ±å¤‰æ›´ãªã—
+                // åˆ—è»Šæƒ…å ±ã«ã¤ã„ã¦ã¯å¤‰æ›´ã—ãªã„
             }
             else
             {
-                // ‚±‚±‚É‚Í—ˆ‚È‚¢
-                // ˆÙí‰“š‚È‚Ç‚ğ•Ô‚·‚×‚«
+                // ã“ã“ã«ã¯æ¥ãªã„
+                // ç•°å¸¸å¿œç­”ãªã©ã‚’è¿”ã™ã¹ã
             }
         }
 
-        // İü‹O“¹‰ñ˜H‚ÌXV
+        // åœ¨ç·šè»Œé“å›è·¯ã®æ›´æ–°
         await trackCircuitService.SetTrackCircuitDataList(incrementalTrackCircuitDataList, clientData.DiaName);
         await trackCircuitService.ClearTrackCircuitDataList(decrementalTrackCircuitDataList);
 
-        // Ô—¼î•ñ‚Ì“o˜^
+        // è»Šä¸¡æƒ…å ±ã®ç™»éŒ²
 
 
 
@@ -156,7 +156,7 @@ public class TrainService(
     }
 
     /// <summary>
-    /// ‰^”Ô‚ª“¯‚¶‚©‚Ç‚¤‚©‚ğ”»’è‚·‚é
+    /// é‹ç•ªãŒåŒã˜ã‹ã©ã†ã‹ã‚’åˆ¤å®šã™ã‚‹
     /// </summary>
     /// <param name="diaName1"></param>
     /// <param name="diaName2"></param>
@@ -169,7 +169,7 @@ public class TrainService(
     }
 
     /// <summary>
-    /// ‰^”Ô‚ğ‹‚ß‚é
+    /// é‹ç•ªã‚’æ±‚ã‚ã‚‹
     /// </summary>
     /// <param name="diaName"></param>
     /// <returns></returns>
@@ -179,12 +179,12 @@ public class TrainService(
         {
             return 400;
         }
-        var isTrain = int.TryParse(Regex.Replace(diaName, @"[^0-9]", ""), out var numBody);  // —ñ”Ô–{‘Ìi”š•”•ªj
+        var isTrain = int.TryParse(Regex.Replace(diaName, @"[^0-9]", ""), out var numBody);  // åˆ—ç•ªæœ¬ä½“ï¼ˆæ•°å­—éƒ¨åˆ†ï¼‰
         if (isTrain)
         {
             return numBody / 3000 * 100 + numBody % 100;
         }
-        // DiaName‚ÌÅŒã‚Ì”š‚ğæ“¾
+        // DiaNameã®æœ€å¾Œã®æ•°å­—ã‚’å–å¾—
         return 0;
     }
 }
