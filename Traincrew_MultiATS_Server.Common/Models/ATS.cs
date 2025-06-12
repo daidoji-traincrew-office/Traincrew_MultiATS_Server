@@ -82,18 +82,19 @@ public class TrackCircuitData : IEquatable<TrackCircuitData>
     }
 }
 
-public class DataToServer
+public class AtsToServerData
 {
-    public int BNotch { get; init; }
     public bool BougoState { get; init; }
     public List<CarState> CarStates { get; init; }
     public string DiaName { get; init; }
     public List<TrackCircuitData> OnTrackList { get; init; }
 
-    public int PNotch { get; init; }
+    public float Speed { get; init; }
+    public float Acceleration { get; init; }
 
     //将来用
-    public float Speed { get; init; }
+    public int PNotch { get; init; }
+    public int BNotch { get; init; }
 }
 
 public class RouteData
@@ -150,14 +151,42 @@ public class RouteStateData
     public RaiseDrop IsThrowOutYSRelayRaised { get; set; }
 }
 
-public class DataFromServer
+public class ServerToATSData
 {
-    //進路表示の表示はTC本体実装待ち　未決定
-    public bool BougoState { get; set; } = false;
-    public List<EmergencyLightData> EmergencyLightDatas { get; set; } = [];
-    public Dictionary<string, OperationNotificationData> KokuchiDatas { get; set; } = new();
-    public OperationNotificationData? OperationNotificationData { get; set; } = null;
+    /// <summary>
+    /// 次信号の状態
+    /// </summary>
     public List<SignalData> NextSignalData { get; set; } = [];
+    /// <summary>
+    /// 次々信号の状態
+    /// </summary>
     public List<SignalData> DoubleNextSignalData { get; set; } = [];
+    /// <summary>
+    /// 防護無線の状態
+    /// </summary>
+    public bool BougoState { get; set; } = false;
+    /// <summary>
+    /// 特発状態
+    /// </summary>
+    public List<EmergencyLightData> EmergencyLightDatas { get; set; } = [];
+    /// <summary>
+    /// 運転告知器の状態
+    /// </summary>
+    public OperationNotificationData? OperationNotificationData { get; set; } = null;
+    /// <summary>
+    /// 進路情報
+    /// </summary>
     public List<RouteData> RouteData { get; set; } = new();
+    /// <summary>
+    /// 踏みつぶし状態
+    /// </summary>
+    public bool IsOnPreviousTrain { get; set; } = false;
+    /// <summary>
+    /// 同一運番状態
+    /// </summary>
+    public bool IsTherePreviousTrain { get; set; } = false;
+    /// <summary>
+    /// 編成構成不一致
+    /// </summary>
+    public bool IsCarMismatch;
 }
