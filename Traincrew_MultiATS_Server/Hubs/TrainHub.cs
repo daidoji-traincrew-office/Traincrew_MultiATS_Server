@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.SignalR;
 using OpenIddict.Validation.AspNetCore;
 using Traincrew_MultiATS_Server.Common.Contract;
 using Traincrew_MultiATS_Server.Common.Models;
-using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Services;
+using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace Traincrew_MultiATS_Server.Hubs;
 
@@ -18,6 +18,9 @@ public class TrainHub(
 {
     public async Task<ServerToATSData> SendData_ATS(AtsToServerData clientData)
     {
-        return await trainService.CreateAtsData(clientData);
+        // MemberIDを取得
+        var memberIdString = Context.User?.FindFirst(Claims.Subject)?.Value;
+        long? memberId = memberIdString != null ? long.Parse(memberIdString) : null;
+        return await trainService.CreateAtsData(memberId, clientData);
     }
 }
