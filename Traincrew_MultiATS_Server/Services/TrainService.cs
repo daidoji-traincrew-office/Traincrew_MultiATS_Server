@@ -18,14 +18,10 @@ public class TrainService(
             await trackCircuitService.GetTrackCircuitsByTrainNumber(clientData.DiaName);
         List<TrackCircuitData> oldTrackCircuitDataList =
             oldTrackCircuitList.Select(TrackCircuitService.ToTrackCircuitData).ToList();
-        /// <summary>
-        /// 新規登録軌道回路
-        /// </summary>
+        // 新規登録軌道回路
         List<TrackCircuitData> incrementalTrackCircuitDataList =
             clientData.OnTrackList.Except(oldTrackCircuitDataList).ToList();
-        /// <summary>
-        /// 在線終了軌道回路    
-        /// </summary>
+        // 在線終了軌道回路    
         List<TrackCircuitData> decrementalTrackCircuitDataList =
             oldTrackCircuitDataList.Except(clientData.OnTrackList).ToList();
 
@@ -45,15 +41,16 @@ public class TrainService(
         // 列車登録情報取得
         var TrainStates = new List<TrainState>();
         // 運番が同じ列車の情報を取得する
-        var TrainState = TrainStates.FirstOrDefault(ts => IsTrainNumberEqual(ts.TrainNumber, ClientTrainNumber));
-
-        ServerToATSData serverData = new ServerToATSData();
-
+        var TrainState = TrainStates.FirstOrDefault(ts => IsDiaNumberEqual(ts.TrainNumber, ClientTrainNumber));
 
         // ☆情報は割と常に送るため共通で演算する   
+        var serverData = new ServerToATSData
+        {
+            // 在線している軌道回路上で防護無線が発報されているか確認
+            BougoState = await protectionService.IsProtectionEnabledForTrackCircuits(trackCircuitList)
+        };
 
-        // 在線している軌道回路上で防護無線が発報されているか確認
-        serverData.BougoState = await protectionService.IsProtectionEnabledForTrackCircuits(trackCircuitList);
+
         // 防護無線を発報している場合のDB更新
         if (clientData.BougoState)
         {
@@ -89,6 +86,7 @@ public class TrainService(
         if (TrainState == null)
         {
             //1-1.在線させる軌道回路に既に別運転士の列番が1つでも在線している場合、早着として登録処理しない。
+            // Todo: 軌道回路に対する列車の取得
 
             //1-2.9999列番の場合は列車情報を登録しない。
 
@@ -100,6 +98,7 @@ public class TrainService(
             }
             //1.完全新規登録
             //送信された情報に基づいて新規に情報を書き込む。
+            // Todo: 新規書き込み
 
         }
         else
@@ -147,6 +146,7 @@ public class TrainService(
         await trackCircuitService.ClearTrackCircuitDataList(decrementalTrackCircuitDataList);
 
         // 車両情報の登録
+        // Todo: 作る
 
 
 
@@ -158,28 +158,28 @@ public class TrainService(
     /// <summary>
     /// 運番が同じかどうかを判定する
     /// </summary>
-    /// <param name="diaName1"></param>
-    /// <param name="diaName2"></param>
+    /// <param name="trainNumber1">列番1</param>
+    /// <param name="trainNumber2">列番2</param>
     /// <returns></returns>
-    private bool IsTrainNumberEqual(string diaName1, string diaName2)
+    private bool IsDiaNumberEqual(string trainNumber1, string trainNumber2)
     {
-        var trainNumber1 = GetTrainNumberFromDiaName(diaName1);
-        var trainNumber2 = GetTrainNumberFromDiaName(diaName2);
-        return trainNumber1 == trainNumber2;
+        var diaNumber1 = GetDiaNumberFromTrainNumber(trainNumber1);
+        var diaNumber2 = GetDiaNumberFromTrainNumber(trainNumber2);
+        return diaNumber1 == diaNumber2;
     }
 
     /// <summary>
-    /// 運番を求める
+    /// 列車番号から運番を求める
     /// </summary>
-    /// <param name="diaName"></param>
+    /// <param name="trainNumber">列車番号</param>
     /// <returns></returns>
-    private int GetTrainNumberFromDiaName(string diaName)
+    private int GetDiaNumberFromTrainNumber(string trainNumber)
     {
-        if (diaName == "9999")
+        if (trainNumber == "9999")
         {
             return 400;
         }
-        var isTrain = int.TryParse(Regex.Replace(diaName, @"[^0-9]", ""), out var numBody);  // 列番本体（数字部分）
+        var isTrain = int.TryParse(Regex.Replace(trainNumber, @"[^0-9]", ""), out var numBody);  // 列番本体（数字部分）
         if (isTrain)
         {
             return numBody / 3000 * 100 + numBody % 100;
