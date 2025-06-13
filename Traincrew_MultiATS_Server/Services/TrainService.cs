@@ -4,13 +4,16 @@ using Traincrew_MultiATS_Server.Models;
 
 namespace Traincrew_MultiATS_Server.Services;
 
-public class TrainService(
+public partial class TrainService(
     TrackCircuitService trackCircuitService,
     SignalService signalService,
     OperationNotificationService operationNotificationService,
     ProtectionService protectionService,
     RouteService routeService)
 {
+    [GeneratedRegex(@"\d+")]
+    private static partial Regex RegexIsDigits();
+    
     public async Task<ServerToATSData> CreateAtsData(long? clientDriverId, AtsToServerData clientData)
     {
         // 軌道回路情報の更新
@@ -161,7 +164,7 @@ public class TrainService(
     /// <param name="trainNumber1">列番1</param>
     /// <param name="trainNumber2">列番2</param>
     /// <returns></returns>
-    private bool IsDiaNumberEqual(string trainNumber1, string trainNumber2)
+    private static bool IsDiaNumberEqual(string trainNumber1, string trainNumber2)
     {
         var diaNumber1 = GetDiaNumberFromTrainNumber(trainNumber1);
         var diaNumber2 = GetDiaNumberFromTrainNumber(trainNumber2);
@@ -173,13 +176,16 @@ public class TrainService(
     /// </summary>
     /// <param name="trainNumber">列車番号</param>
     /// <returns></returns>
-    private int GetDiaNumberFromTrainNumber(string trainNumber)
+    private static int GetDiaNumberFromTrainNumber(string trainNumber)
     {
         if (trainNumber == "9999")
         {
             return 400;
         }
-        var isTrain = int.TryParse(Regex.Replace(trainNumber, @"[^0-9]", ""), out var numBody);  // 列番本体（数字部分）
+        // 列番本体（数字部分）
+        var isTrain = int.TryParse(
+            RegexIsDigits().Match(trainNumber).Value,
+            out var numBody);  
         if (isTrain)
         {
             return numBody / 3000 * 100 + numBody % 100;
