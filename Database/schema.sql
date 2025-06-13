@@ -547,6 +547,7 @@ CREATE TABLE ttc_window_state
 CREATE TABLE train_state
 (
     train_number    VARCHAR(100) PRIMARY KEY,                     -- 列車番号
+    dia_number      VARCHAR(100),                                 -- ダイヤ番号
     from_station_id VARCHAR(10) NOT NULL REFERENCES station (id), -- 出発駅ID
     to_station_id   VARCHAR(10) NOT NULL REFERENCES station (id), -- 到着駅ID
     delay           INT         NOT NULL DEFAULT 0,               -- 遅延時間(秒)

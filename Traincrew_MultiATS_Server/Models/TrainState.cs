@@ -10,6 +10,9 @@ public class TrainState
     [Column("train_number")]
     public string TrainNumber { get; set; }
 
+    [Column("dia_number")]
+    public string DiaNumber { get; set; }
+
     [Column("from_station_id")]
     public string FromStationId { get; set; }
 

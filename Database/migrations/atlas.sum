@@ -1,4 +1,4 @@
-h1:jHD3EsngJl/CRKcK2Y1ApQXMva9B2um1agvrg6eNF1k=
+h1:HKFN8yXP50VjLvEqf5ixcMaGhYgfxMhS2MlCP55XLmk=
 20241105144637_create_openiddict.sql h1:e3YP3bvDT2pkUc506P3fgKJoLzdNnzBgjkBNMKvEKoI=
 20241221070718_create_interlocking_tables.sql h1:bHtt4Hbmv5aMY0jvfDoG7eeY6IpChCnNrvSCAn9cdcU=
 20241221081310_switching_machine_reversed.sql h1:e7qP5i8sHtWVXpkbnbo3n/6smp6Z/lqQxwa4Yp+EQ1w=
@@ -54,3 +54,4 @@ h1:jHD3EsngJl/CRKcK2Y1ApQXMva9B2um1agvrg6eNF1k=
 20250601101015_add_ttc_window_state.sql h1:AVNPYLcf1krLy9kGI+1Hqh5xmftFu0j2GJL3NCxVQqU=
 20250601101016_set_ttc_window_state_train_number_not_null.sql h1:SQc88Wob+nzAc4e0V9oFnEuMFy2pDDPJmM1LxLWGM6U=
 20250608084352_add_train_state.sql h1:YvIuxUH0+ityW54aFhqdFHVDdYw01V04fsMX9UBrdWI=
+20250613161021_add_dia_number.sql h1:MneYhuALffGmR6a5BY0rdEmk6lunuaWwuBSI1r4m8H8=
