@@ -546,26 +546,27 @@ CREATE TABLE ttc_window_state
 -- 列車状態
 CREATE TABLE train_state
 (
-    train_number    VARCHAR(100) PRIMARY KEY,                     -- 列車番号
-    dia_number      VARCHAR(100),                                 -- ダイヤ番号
-    from_station_id VARCHAR(10) NOT NULL REFERENCES station (id), -- 出発駅ID
-    to_station_id   VARCHAR(10) NOT NULL REFERENCES station (id), -- 到着駅ID
-    delay           INT         NOT NULL DEFAULT 0,               -- 遅延時間(秒)
-    driver_id       BIGINT                                        -- 運転士ID(列車の運転士)
+    id              BIGSERIAL PRIMARY KEY,                         -- 列車状態のID
+    train_number    VARCHAR(100) NOT NULL UNIQUE,                  -- 列車番号
+    dia_number      INT          NOT NULL,                         -- ダイヤ番号
+    from_station_id VARCHAR(10)  NOT NULL REFERENCES station (id), -- 出発駅ID
+    to_station_id   VARCHAR(10)  NOT NULL REFERENCES station (id), -- 到着駅ID
+    delay           INT          NOT NULL DEFAULT 0,               -- 遅延時間(秒)
+    driver_id       BIGINT UNIQUE                                  -- 運転士ID(列車の運転士)
 );
 
 -- 列車車両情報
 CREATE TABLE train_car_state
 (
-    train_number      VARCHAR(100) REFERENCES train_state (train_number) NOT NULL,               -- 列車状態のID
-    index             INT                                                NOT NULL,               -- インデックス
-    car_model         VARCHAR(100)                                       NOT NULL,               -- 車両形式
-    has_pantograph    BOOLEAN                                            NOT NULL DEFAULT false, -- パンタグラフの有無
-    has_driver_cab    BOOLEAN                                            NOT NULL DEFAULT false, -- 運転台の有無
-    has_conductor_cab BOOLEAN                                            NOT NULL DEFAULT false, -- 車掌室の有無
-    has_motor         BOOLEAN                                            NOT NULL DEFAULT false, -- 電動機ありなし
-    door_close        BOOLEAN                                            NOT NULL DEFAULT true,  -- 扉閉め状態
-    bc_press          BOOLEAN                                            NOT NULL DEFAULT false, -- ブレーキ圧力
-    ampare            INT                                                NOT NULL DEFAULT 0,     -- 電流値
-    PRIMARY KEY (train_number, index)
+    train_state_id    BIGINT REFERENCES train_state (id) NOT NULL,               -- 列車状態のID
+    index             INT                                NOT NULL,               -- インデックス
+    car_model         VARCHAR(100)                       NOT NULL,               -- 車両形式
+    has_pantograph    BOOLEAN                            NOT NULL DEFAULT false, -- パンタグラフの有無
+    has_driver_cab    BOOLEAN                            NOT NULL DEFAULT false, -- 運転台の有無
+    has_conductor_cab BOOLEAN                            NOT NULL DEFAULT false, -- 車掌室の有無
+    has_motor         BOOLEAN                            NOT NULL DEFAULT false, -- 電動機ありなし
+    door_close        BOOLEAN                            NOT NULL DEFAULT true,  -- 扉閉め状態
+    bc_press          BOOLEAN                            NOT NULL DEFAULT false, -- ブレーキ圧力
+    ampare            INT                                NOT NULL DEFAULT 0,     -- 電流値
+    PRIMARY KEY (train_state_id, index)
 );
