@@ -192,8 +192,7 @@ public partial class TrainService(
     /// </summary>
     private async Task UpdateTrainState(TrainState trainState)
     {
-        // 保存処理（ITrainRepositoryにUpdateTrainメソッドが必要）
-        // await trainRepository.UpdateTrain(trainState);
+        await trainRepository.Update(trainState);
     }
 
     /// <summary>

@@ -26,11 +26,13 @@ public class TrainRepository(ApplicationDbContext context) : ITrainRepository
 
     public async Task Create(TrainState trainState)
     {
-        throw new NotImplementedException();
+        context.TrainStates.Add(trainState);
+        await context.SaveChangesAsync();
     }
 
     public async Task Update(TrainState trainState)
     {
-        throw new NotImplementedException();
+        context.TrainStates.Update(trainState);
+        await context.SaveChangesAsync();
     }
 }
