@@ -93,7 +93,7 @@ public partial class TrainService(
         {
             //1-1.在線させる軌道回路に既に別運転士の列番が1つでも在線している場合、早着として登録処理しない。
             var otherTrainStates = await GetTrainStatesByTrackCircuits(trackCircuitList);
-            if(otherTrainStates.Any(otherTrainState => otherTrainState.DriverId != clientDriverId))
+            if(otherTrainStates.Any(otherTrainState => otherTrainState.DriverId != null && otherTrainState.DriverId != clientDriverId))
             {
                 // 早着として登録しない
                 // 早着の列車情報は登録しない
@@ -181,8 +181,8 @@ public partial class TrainService(
             Delay = 0,                    // 必要に応じて設定
             DriverId = driverId
         };
-        // 保存処理(ITrainRepositoryにCreateTrainメソッドが必要)
-        // await trainRepository.CreateTrain(trainState);
+        // 保存処理
+        await trainRepository.Create(trainState);
     }
     
     /// <summary>
