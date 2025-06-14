@@ -1,12 +1,16 @@
+using Microsoft.EntityFrameworkCore;
+using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.Models;
 
 namespace Traincrew_MultiATS_Server.Repositories.Train;
 
-public class TrainRepository : ITrainRepository
+public class TrainRepository(ApplicationDbContext context) : ITrainRepository
 {
-    public async Task<TrainState?> GetByNumber(string trainNumber)
+    public async Task<List<TrainState>> GetByTrainNumbers(ICollection<string> trainNumbers)
     {
-        throw new NotImplementedException();
+        return await context.TrainStates
+            .Where(ts => trainNumbers.Contains(ts.TrainNumber))
+            .ToListAsync();
     }
 
     public async Task DeleteByTrainNumber(string trainNumber)

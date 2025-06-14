@@ -7,9 +7,9 @@ public interface ITrainRepository
     /// <summary>
     /// 列車番号から列車を取得する
     /// </summary>
-    /// <param name="trainNumber">列車番号</param>
+    /// <param name="trainNumbers">列車番号のリスト</param>
     /// <returns>列車の状態</returns>
-    Task<TrainState?> GetByNumber(string trainNumber);
+    Task<List<TrainState>> GetByTrainNumbers(ICollection<string> trainNumbers);
      
     /// <summary>
     /// 列車番号を指定して列車を削除する。
