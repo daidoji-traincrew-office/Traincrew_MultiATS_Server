@@ -9,7 +9,7 @@ public class TrainCarRepository : ITrainCarRepository
         throw new NotImplementedException();
     }
 
-    public async Task UpdateAll(string trainNumber, List<TrainCarState> carStates)
+    public async Task UpdateAll(long trainStateId, List<TrainCarState> carStates)
     {
         // 差分を取って、追加・更新・削除を行う
         throw new NotImplementedException();

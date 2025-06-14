@@ -5,18 +5,25 @@ namespace Traincrew_MultiATS_Server.Repositories.Train;
 public interface ITrainRepository
 {
     /// <summary>
+    /// ダイヤ番号から列車を取得する
+    /// </summary>
+    /// <param name="diaNumber">ダイヤ番号</param>
+    /// <returns>列車の状態</returns>
+    Task<TrainState?> GetByDiaNumber(int diaNumber);
+
+    /// <summary>
     /// 列車番号から列車を取得する
     /// </summary>
     /// <param name="trainNumbers">列車番号のリスト</param>
     /// <returns>列車の状態</returns>
     Task<List<TrainState>> GetByTrainNumbers(ICollection<string> trainNumbers);
-     
+
     /// <summary>
     /// 列車番号を指定して列車を削除する。
     /// </summary>
     /// <param name="trainNumber">列車番号</param>
     Task DeleteByTrainNumber(string trainNumber);
-    
+
     /// <summary>
     /// 列車情報を新規登録する
     /// </summary>
