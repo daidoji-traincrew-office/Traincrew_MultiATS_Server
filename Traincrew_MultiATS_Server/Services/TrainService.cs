@@ -22,16 +22,12 @@ public partial class TrainService(
     public async Task<ServerToATSData> CreateAtsData(ulong clientDriverId, AtsToServerData clientData)
     {
         // 軌道回路情報の更新
-        List<TrackCircuit> oldTrackCircuitList =
-            await trackCircuitService.GetTrackCircuitsByTrainNumber(clientData.DiaName);
-        List<TrackCircuitData> oldTrackCircuitDataList =
-            oldTrackCircuitList.Select(TrackCircuitService.ToTrackCircuitData).ToList();
+        var oldTrackCircuitList = await trackCircuitService.GetTrackCircuitsByTrainNumber(clientData.DiaName);
+        var oldTrackCircuitDataList = oldTrackCircuitList.Select(TrackCircuitService.ToTrackCircuitData).ToList();
         // 新規登録軌道回路
-        List<TrackCircuitData> incrementalTrackCircuitDataList =
-            clientData.OnTrackList.Except(oldTrackCircuitDataList).ToList();
+        var incrementalTrackCircuitDataList = clientData.OnTrackList.Except(oldTrackCircuitDataList).ToList();
         // 在線終了軌道回路    
-        List<TrackCircuitData> decrementalTrackCircuitDataList =
-            oldTrackCircuitDataList.Except(clientData.OnTrackList).ToList();
+        var decrementalTrackCircuitDataList = oldTrackCircuitDataList.Except(clientData.OnTrackList).ToList();
 
         // 軌道回路を取得しようとする
         var trackCircuitList = await trackCircuitService.GetTrackCircuitsByNames(
