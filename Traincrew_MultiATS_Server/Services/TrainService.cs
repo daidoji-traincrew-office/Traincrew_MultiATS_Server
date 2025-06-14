@@ -180,9 +180,9 @@ public partial class TrainService(
         {
             TrainNumber = clientData.DiaName,
             DiaNumber = GetDiaNumberFromTrainNumber(clientData.DiaName),
-            FromStationId = string.Empty, // 必要に応じて設定
-            ToStationId = string.Empty,   // 必要に応じて設定
-            Delay = 0,                    // 必要に応じて設定
+            FromStationId = "TH76", // Todo: 仮で館浜を入れている
+            ToStationId = "TH76",   // Todo: 仮で館浜を入れている
+            Delay = 0,              // 必要に応じて設定
             DriverId = driverId
         };
         // 保存処理
