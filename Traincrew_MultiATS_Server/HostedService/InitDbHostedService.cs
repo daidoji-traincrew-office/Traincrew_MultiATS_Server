@@ -412,7 +412,9 @@ public class InitDbHostedService(
     {
         var file = new FileInfo("./Data/種別.csv");
         if (!file.Exists)
+        {
             return;
+        }
 
         var config = new CsvConfiguration(CultureInfo.InvariantCulture)
         {
@@ -448,7 +450,9 @@ public class InitDbHostedService(
     {
         var file = new FileInfo("./Data/列車.csv");
         if (!file.Exists)
+        {
             return;
+        }
 
         var config = new CsvConfiguration(CultureInfo.InvariantCulture)
         {
