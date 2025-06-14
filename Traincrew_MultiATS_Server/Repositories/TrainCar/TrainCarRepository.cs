@@ -1,8 +1,10 @@
+using Microsoft.EntityFrameworkCore;
+using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.Models;
 
 namespace Traincrew_MultiATS_Server.Repositories.TrainCar;
 
-public class TrainCarRepository : ITrainCarRepository
+public class TrainCarRepository(ApplicationDbContext context) : ITrainCarRepository
 {
     public async Task<List<TrainCarState>> GetByTrainNumber(string trainNumber)
     {
@@ -17,6 +19,12 @@ public class TrainCarRepository : ITrainCarRepository
 
     public async Task DeleteByTrainNumber(string trainNumber)
     {
-        throw new NotImplementedException();
+        await context.TrainCarStates
+            .Join(context.TrainStates,
+                car => car.TrainStateId,
+                train => train.Id,
+                (car, train) => new { car, train })
+            .Where(x => x.train.TrainNumber == trainNumber)
+            .ExecuteDeleteAsync();
     }
 }

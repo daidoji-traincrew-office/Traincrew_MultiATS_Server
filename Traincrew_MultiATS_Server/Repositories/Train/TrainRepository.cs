@@ -21,7 +21,9 @@ public class TrainRepository(ApplicationDbContext context) : ITrainRepository
 
     public async Task DeleteByTrainNumber(string trainNumber)
     {
-        throw new NotImplementedException();
+        await context.TrainStates
+            .Where(ts => ts.TrainNumber == trainNumber)
+            .ExecuteDeleteAsync();
     }
 
     public async Task Create(TrainState trainState)

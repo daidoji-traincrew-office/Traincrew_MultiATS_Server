@@ -222,7 +222,8 @@ public partial class TrainService(
     /// </summary>
     private async Task DeleteTrainState(string trainNumber)
     {
-        // Todo: 列車情報の削除処理(ITrainRepositoryにDeleteTrainメソッドが必要)
+        await trainCarRepository.DeleteByTrainNumber(trainNumber);
+        await trainRepository.DeleteByTrainNumber(trainNumber);
     }
 
 
