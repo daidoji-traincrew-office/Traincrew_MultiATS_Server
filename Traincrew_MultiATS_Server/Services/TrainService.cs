@@ -176,12 +176,13 @@ public partial class TrainService(
     // TrainState新規書き込み
     private async Task<TrainState> CreateTrainState(AtsToServerData clientData, ulong driverId)
     {
+        var trainDiagram = new TrainDiagram(); 
         var trainState = new TrainState
         {
             TrainNumber = clientData.DiaName,
             DiaNumber = GetDiaNumberFromTrainNumber(clientData.DiaName),
-            FromStationId = "TH76", // Todo: 仮で館浜を入れている
-            ToStationId = "TH76",   // Todo: 仮で館浜を入れている
+            FromStationId = trainDiagram.FromStationId,
+            ToStationId = trainDiagram.ToStationId,
             Delay = 0,              // 必要に応じて設定
             DriverId = driverId
         };
