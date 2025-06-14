@@ -548,7 +548,7 @@ CREATE TABLE train_state
 (
     id              BIGSERIAL PRIMARY KEY,                         -- 列車状態のID
     train_number    VARCHAR(100) NOT NULL UNIQUE,                  -- 列車番号
-    dia_number      INT          NOT NULL,                         -- ダイヤ番号
+    dia_number      INT          NOT NULL UNIQUE,                  -- 運行番号
     from_station_id VARCHAR(10)  NOT NULL REFERENCES station (id), -- 出発駅ID
     to_station_id   VARCHAR(10)  NOT NULL REFERENCES station (id), -- 到着駅ID
     delay           INT          NOT NULL DEFAULT 0,               -- 遅延時間(秒)
