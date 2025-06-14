@@ -1,0 +1,4 @@
+-- Create "train_type" table
+CREATE TABLE "train_type" ("id" bigint NOT NULL, "name" character varying(100) NOT NULL, PRIMARY KEY ("id"), CONSTRAINT "train_type_name_key" UNIQUE ("name"));
+-- Create "train_diagram" table
+CREATE TABLE "train_diagram" ("train_number" character varying(100) NOT NULL, "type_id" bigint NOT NULL, "from_station_id" character varying(10) NOT NULL, "to_station_id" character varying(10) NOT NULL, "dia_id" integer NOT NULL, PRIMARY KEY ("train_number"), CONSTRAINT "train_diagram_from_station_id_fkey" FOREIGN KEY ("from_station_id") REFERENCES "station" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION, CONSTRAINT "train_diagram_to_station_id_fkey" FOREIGN KEY ("to_station_id") REFERENCES "station" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION, CONSTRAINT "train_diagram_type_id_fkey" FOREIGN KEY ("type_id") REFERENCES "train_type" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION);
