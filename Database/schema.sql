@@ -566,7 +566,7 @@ CREATE TABLE train_car_state
     has_conductor_cab BOOLEAN                            NOT NULL DEFAULT false, -- 車掌室の有無
     has_motor         BOOLEAN                            NOT NULL DEFAULT false, -- 電動機ありなし
     door_close        BOOLEAN                            NOT NULL DEFAULT true,  -- 扉閉め状態
-    bc_press          BOOLEAN                            NOT NULL DEFAULT false, -- ブレーキ圧力
-    ampare            INT                                NOT NULL DEFAULT 0,     -- 電流値
+    bc_press          DOUBLE PRECISION                   NOT NULL DEFAULT 0,     -- ブレーキ圧力
+    ampare            DOUBLE PRECISION                   NOT NULL DEFAULT 0,     -- 電流値
     PRIMARY KEY (train_state_id, index)
 );

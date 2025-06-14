@@ -32,8 +32,8 @@ public class TrainCarState
     public bool DoorClose { get; set; }
 
     [Column("bc_press")]
-    public bool BcPress { get; set; }
+    public double BcPress { get; set; }
 
     [Column("ampare")]
-    public int Ampare { get; set; }
+    public double Ampare { get; set; }
 }
