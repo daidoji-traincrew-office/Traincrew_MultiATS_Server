@@ -3,6 +3,7 @@ using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.Train;
 using Traincrew_MultiATS_Server.Repositories.TrainCar;
+using Traincrew_MultiATS_Server.Repositories.TrainDiagram;
 
 namespace Traincrew_MultiATS_Server.Services;
 
@@ -13,7 +14,8 @@ public partial class TrainService(
     ProtectionService protectionService,
     RouteService routeService,
     ITrainRepository trainRepository,
-    ITrainCarRepository trainCarRepository
+    ITrainCarRepository trainCarRepository,
+    ITrainDiagramRepository trainDiagramRepository
 )
 {
     [GeneratedRegex(@"\d+")]
@@ -176,13 +178,14 @@ public partial class TrainService(
     // TrainState新規書き込み
     private async Task<TrainState> CreateTrainState(AtsToServerData clientData, ulong driverId)
     {
-        var trainDiagram = new TrainDiagram(); 
+        var trainDiagram = await trainDiagramRepository.GetByTrainNumber(clientData.DiaName);
+        
         var trainState = new TrainState
         {
             TrainNumber = clientData.DiaName,
             DiaNumber = GetDiaNumberFromTrainNumber(clientData.DiaName),
-            FromStationId = trainDiagram.FromStationId,
-            ToStationId = trainDiagram.ToStationId,
+            FromStationId = trainDiagram?.FromStationId ?? "TH00",
+            ToStationId = trainDiagram?.ToStationId ?? "TH00",
             Delay = 0,              // 必要に応じて設定
             DriverId = driverId
         };
