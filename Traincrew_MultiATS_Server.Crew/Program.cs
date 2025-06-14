@@ -461,6 +461,7 @@ public class Program
             .AddScoped<StationService>()
             .AddScoped<SwitchingMachineService>()
             .AddScoped<TrackCircuitService>()
+            .AddScoped<TrainService>()
             .AddScoped<TIDService>()
             .AddScoped<TtcStationControlService>()
             .AddSingleton<EnableAuthorizationStore>(_ => new(enableAuthorization))
