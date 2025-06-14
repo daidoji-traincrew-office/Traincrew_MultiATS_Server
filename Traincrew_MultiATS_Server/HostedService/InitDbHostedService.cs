@@ -33,6 +33,8 @@ public class InitDbHostedService(
             await dbInitializer.Initialize();
         }
 
+        await InitTrainTypes(context, cancellationToken);
+        await InitTrainDiagrams(context, cancellationToken);
         var rendoTableInitializers =
             await CreateDbRendoTableInitializer(context, datetimeRepository, cancellationToken);
         foreach (var initializer in rendoTableInitializers)
