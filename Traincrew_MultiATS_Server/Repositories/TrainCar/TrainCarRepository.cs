@@ -11,6 +11,7 @@ public class TrainCarRepository : ITrainCarRepository
 
     public async Task UpdateAll(string trainNumber, List<TrainCarState> carStates)
     {
+        // 差分を取って、追加・更新・削除を行う
         throw new NotImplementedException();
     }
 
