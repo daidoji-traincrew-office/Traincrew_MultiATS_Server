@@ -106,9 +106,9 @@ public partial class TrainService(
         else
         {
             // 同一運番列車が登録済
-            var TrainStateDriverId = trainState.DriverId;
+            var trainStateDriverId = trainState.DriverId;
             // 2.運用中/別運転士
-            if (TrainStateDriverId != null && TrainStateDriverId != clientDriverId)
+            if (trainStateDriverId != null && trainStateDriverId != clientDriverId)
             {
                 // 2.交代前応答
                 // 送信してきたクライアントに対し交代前応答を行い、送信された情報は在線情報含めてすべて破棄する。  
@@ -123,15 +123,17 @@ public partial class TrainService(
             // この地点で在線情報を登録してよい
 
             // 3.運用終了
-            if (TrainStateDriverId == null)
+            if (trainStateDriverId == null)
             {
                 // 3.情報変更
                 // 検索で発見された情報について、送信された情報に基づいて情報を変更する。
-
-
+                trainState.TrainNumber = clientData.DiaName;
+                trainState.DiaNumber = GetDiaNumberFromTrainNumber(clientData.DiaName);
+                trainState.DriverId = clientDriverId;
+                await UpdateTrainState(trainState);
             }
             // 4.同一列番が登録済/運用中/同一運転士
-            else if (trainState.TrainNumber == clientTrainNumber && TrainStateDriverId == clientDriverId)
+            else if (trainState.TrainNumber == clientTrainNumber && trainStateDriverId == clientDriverId)
             {
                 // 4.情報変更なし
                 // 列車情報については変更しない
@@ -140,6 +142,7 @@ public partial class TrainService(
             {
                 // ここには来ない
                 // 異常応答などを返すべき
+                throw new InvalidOperationException("Unreachable code: TrainState mismatch.");
             }
         }
 
@@ -186,7 +189,7 @@ public partial class TrainService(
         await trainRepository.Create(trainState);
         return trainState;
     }
-    
+
     /// <summary>
     /// TrainState更新
     /// </summary>
