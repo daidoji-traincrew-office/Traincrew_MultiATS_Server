@@ -90,7 +90,7 @@ public partial class TrainService(
             var otherTrainStates = await GetTrainStatesByTrackCircuits(trackCircuitList);
             if(otherTrainStates.Any(otherTrainState => otherTrainState.DriverId != null && otherTrainState.DriverId != clientDriverId))
             {
-                // 早着として登録しない
+                // QA: 早着の場合クライアントに対してレスポンス返さなくても良い？
                 // 早着の列車情報は登録しない
                 return serverData;
             }
