@@ -459,14 +459,8 @@ public class Program
             .AddScoped<TrackCircuitService>()
             .AddScoped<TIDService>()
             .AddScoped<TtcStationControlService>()
-            .AddSingleton(provider =>
-            {
-                var discordService = new DiscordService(
-                    builder.Configuration,
-                    provider.GetRequiredService<IDiscordRepository>(),
-                    enableAuthorization);
-                return discordService;
-            })
+            .AddSingleton<EnableAuthorizationStore>(_ => new(enableAuthorization))
+            .AddSingleton<DiscordService>()
             .AddSingleton<DiscordRepository>()
             .AddSingleton<IDiscordRepository>(provider => provider.GetRequiredService<DiscordRepository>())
             .AddSingleton<IMutexRepository, MutexRepository>()

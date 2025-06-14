@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using OpenIddict.Validation.AspNetCore;
+using Traincrew_MultiATS_Server.Authentication;
 using Traincrew_MultiATS_Server.Common.Contract;
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Services;
@@ -14,13 +15,25 @@ namespace Traincrew_MultiATS_Server.Hubs;
     Policy = "TrainPolicy"
 )]
 public class TrainHub(
-    TrainService trainService) : Hub<ITrainClientContract>, ITrainHubContract
+    TrainService trainService,
+    EnableAuthorizationStore enableAuthorizationStore
+) : Hub<ITrainClientContract>, ITrainHubContract
 {
     public async Task<ServerToATSData> SendData_ATS(AtsToServerData clientData)
     {
+        var enableAuthorization = enableAuthorizationStore.EnableAuthorization;
         // MemberIDを取得
         var memberIdString = Context.User?.FindFirst(Claims.Subject)?.Value;
-        long? memberId = memberIdString != null ? long.Parse(memberIdString) : null;
+        if (!ulong.TryParse(memberIdString, out var memberId))
+        {
+            if (enableAuthorization)
+            {
+                // Authorizationが有効な場合は、MemberIDの取得に失敗したらエラー
+                throw new InvalidOperationException("Failed to retrieve MemberID.");
+            }
+            // Authorizationが無効な場合は、memberIdを0に設定(ローカル開発用)
+            memberId = 0;
+        }
         return await trainService.CreateAtsData(memberId, clientData);
     }
 }

@@ -30,5 +30,5 @@ public class TrainState
     public int Delay { get; set; }
 
     [Column("driver_id")]
-    public long? DriverId { get; set; }
+    public ulong? DriverId { get; set; }
 }

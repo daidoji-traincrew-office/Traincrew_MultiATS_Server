@@ -1,4 +1,5 @@
 using Discord.Rest;
+using Traincrew_MultiATS_Server.Authentication;
 using Traincrew_MultiATS_Server.Exception.DiscordAuthenticationException;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.Discord;
@@ -8,7 +9,7 @@ namespace Traincrew_MultiATS_Server.Services;
 public class DiscordService(
     IConfiguration configuration,
     IDiscordRepository discordRepository,
-    bool enableAuthorization)
+    EnableAuthorizationStore enableAuthorizationStore)
 {
     public async Task<RestGuildUser> DiscordAuthentication(string token)
     {
@@ -29,7 +30,7 @@ public class DiscordService(
         if (memberId == null)
         {
             // 認証が有効になっており、memberIdがnullの場合はエラーを返す
-            if (enableAuthorization)
+            if (enableAuthorizationStore.EnableAuthorization)
             {
                 throw new InvalidOperationException("Authorization is enabled, But memberId is null.");
             }

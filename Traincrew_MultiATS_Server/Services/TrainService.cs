@@ -18,8 +18,8 @@ public partial class TrainService(
 {
     [GeneratedRegex(@"\d+")]
     private static partial Regex RegexIsDigits();
-
-    public async Task<ServerToATSData> CreateAtsData(long? clientDriverId, AtsToServerData clientData)
+    
+    public async Task<ServerToATSData> CreateAtsData(ulong clientDriverId, AtsToServerData clientData)
     {
         // 軌道回路情報の更新
         List<TrackCircuit> oldTrackCircuitList =
@@ -93,6 +93,12 @@ public partial class TrainService(
         {
             //1-1.在線させる軌道回路に既に別運転士の列番が1つでも在線している場合、早着として登録処理しない。
             var otherTrainStates = await GetTrainStatesByTrackCircuits(trackCircuitList);
+            if(otherTrainStates.Any(otherTrainState => otherTrainState.DriverId != clientDriverId))
+            {
+                // 早着として登録しない
+                // 早着の列車情報は登録しない
+                return serverData;
+            }
             //1-2.9999列番の場合は列車情報を登録しない。
             if (clientData.DiaName == "9999")
             {
@@ -158,14 +164,13 @@ public partial class TrainService(
         var trainNumbers = trackCircuits
             .Select(tc => tc.TrackCircuitState.TrainNumber)
             .Where(trainNumber => !string.IsNullOrEmpty(trainNumber))
-            .Distinct()
-            .ToList();
+            .ToHashSet();
         // 列車番号から列車情報を取得
-        return [];
+        return await trainRepository.GetByTrainNumbers(trainNumbers);
     }
 
     // TrainState新規書き込み
-    private async Task CreateTrainState(AtsToServerData clientData, long? driverId)
+    private async Task CreateTrainState(AtsToServerData clientData, ulong driverId)
     {
         var trainState = new TrainState
         {
