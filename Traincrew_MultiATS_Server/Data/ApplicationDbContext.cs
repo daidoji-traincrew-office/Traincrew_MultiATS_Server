@@ -41,6 +41,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<TtcWindowLinkRouteCondition> TtcWindowLinkRouteConditions { get; set; }
     public DbSet<TrainState> TrainStates { get; set; }
     public DbSet<TrainCarState> TrainCarStates { get; set; }
+    public DbSet<TrainType> TrainTypes { get; set; }
+    public DbSet<TrainDiagram> TrainDiagrams { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

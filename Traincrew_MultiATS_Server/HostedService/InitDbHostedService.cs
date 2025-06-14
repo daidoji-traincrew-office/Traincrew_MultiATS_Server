@@ -404,6 +404,81 @@ public class InitDbHostedService(
     }
 
     /// <summary>
+    /// 列車種別(train_type)をCSVから初期化
+    /// </summary>
+    private async Task InitTrainTypes(ApplicationDbContext context, CancellationToken cancellationToken)
+    {
+        var file = new FileInfo("./Data/種別.csv");
+        if (!file.Exists)
+            return;
+
+        var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+        {
+            HasHeaderRecord = true,
+        };
+        using var reader = new StreamReader(file.FullName);
+        using var csv = new CsvReader(reader, config);
+        csv.Context.RegisterClassMap<TrainTypeCsvMap>();
+        var records = csv.GetRecords<TrainTypeCsv>().ToList();
+
+        var existingIds = await context.TrainTypes.Select(t => t.Id).ToListAsync(cancellationToken);
+
+        foreach (var record in records)
+        {
+            if (existingIds.Contains(record.Id))
+            {
+                continue;
+            }
+
+            context.TrainTypes.Add(new()
+            {
+                Id = record.Id,
+                Name = record.Name
+            });
+        }
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
+    /// <summary>
+    /// 列車ダイヤ(train_diagram)をCSVから初期化
+    /// </summary>
+    private async Task InitTrainDiagrams(ApplicationDbContext context, CancellationToken cancellationToken)
+    {
+        var file = new FileInfo("./Data/列車.csv");
+        if (!file.Exists)
+            return;
+
+        var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+        {
+            HasHeaderRecord = true,
+        };
+        using var reader = new StreamReader(file.FullName);
+        using var csv = new CsvReader(reader, config);
+        csv.Context.RegisterClassMap<TrainDiagramCsvMap>();
+        var records = csv.GetRecords<TrainDiagramCsv>().ToList();
+
+        var existingNumbers = await context.TrainDiagrams.Select(t => t.TrainNumber).ToListAsync(cancellationToken);
+
+        foreach (var record in records)
+        {
+            if (existingNumbers.Contains(record.TrainNumber))
+            {
+                continue;
+            }
+
+            context.TrainDiagrams.Add(new()
+            {
+                TrainNumber = record.TrainNumber,
+                TypeId = record.TypeId,
+                FromStationId = record.FromStationId,
+                ToStationId = record.ToStationId,
+                DiaId = record.DiaId
+            });
+        }
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
+    /// <summary>
     /// UnchangedなEntityをすべてDetachする。
     /// </summary>
     /// <param name="context">DbContext</param>
