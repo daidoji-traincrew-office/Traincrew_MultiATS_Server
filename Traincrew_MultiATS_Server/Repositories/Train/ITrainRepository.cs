@@ -9,13 +9,23 @@ public interface ITrainRepository
     /// </summary>
     /// <param name="trainNumber">列車番号</param>
     /// <returns>列車の状態</returns>
-    Task<TrainState?> GetTrainByNumber(string trainNumber);
-    
-    
- 
+    Task<TrainState?> GetByNumber(string trainNumber);
+     
     /// <summary>
     /// 列車番号を指定して列車を削除する。
     /// </summary>
     /// <param name="trainNumber">列車番号</param>
-    Task DeleteTrain(string trainNumber);
+    Task DeleteByTrainNumber(string trainNumber);
+    
+    /// <summary>
+    /// 列車情報を新規登録する
+    /// </summary>
+    /// <param name="trainState">列車状態</param>
+    Task Create(TrainState trainState);
+
+    /// <summary>
+    /// 列車情報を更新する
+    /// </summary>
+    /// <param name="trainState">列車状態</param>
+    Task Update(TrainState trainState);
 }

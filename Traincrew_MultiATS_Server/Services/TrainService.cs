@@ -1,6 +1,8 @@
 using System.Text.RegularExpressions;
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Models;
+using Traincrew_MultiATS_Server.Repositories.Train;
+using Traincrew_MultiATS_Server.Repositories.TrainCar;
 
 namespace Traincrew_MultiATS_Server.Services;
 
@@ -9,11 +11,14 @@ public partial class TrainService(
     SignalService signalService,
     OperationNotificationService operationNotificationService,
     ProtectionService protectionService,
-    RouteService routeService)
+    RouteService routeService,
+    ITrainRepository trainRepository,
+    ITrainCarRepository trainCarRepository
+)
 {
     [GeneratedRegex(@"\d+")]
     private static partial Regex RegexIsDigits();
-    
+
     public async Task<ServerToATSData> CreateAtsData(long? clientDriverId, AtsToServerData clientData)
     {
         // 軌道回路情報の更新
@@ -37,8 +42,6 @@ public partial class TrainService(
         {
             trackCircuitList = oldTrackCircuitList;
         }
-
-
 
         var ClientTrainNumber = clientData.DiaName;
         // 列車登録情報取得
@@ -89,20 +92,15 @@ public partial class TrainService(
         if (TrainState == null)
         {
             //1-1.在線させる軌道回路に既に別運転士の列番が1つでも在線している場合、早着として登録処理しない。
-            // Todo: 軌道回路に対する列車の取得
-
+            var otherTrainStates = await GetTrainStatesByTrackCircuits(trackCircuitList);
             //1-2.9999列番の場合は列車情報を登録しない。
-
             if (clientData.DiaName == "9999")
             {
-                // 9999列番は列車情報を登録しないが、在線は書き込む。     
                 await trackCircuitService.SetTrackCircuitDataList(incrementalTrackCircuitDataList, clientData.DiaName);
                 return serverData;
             }
             //1.完全新規登録
-            //送信された情報に基づいて新規に情報を書き込む。
-            // Todo: 新規書き込み
-
+            await CreateTrainState(clientData, clientDriverId);
         }
         else
         {
@@ -149,14 +147,65 @@ public partial class TrainService(
         await trackCircuitService.ClearTrackCircuitDataList(decrementalTrackCircuitDataList);
 
         // 車両情報の登録
-        // Todo: 作る
-
-
-
-
-
+        await UpdateTrainCarStates(clientData.DiaName, clientData.CarStates);
         return serverData;
     }
+
+    // 軌道回路に対する列車の取得
+    private async Task<List<TrainState>> GetTrainStatesByTrackCircuits(List<TrackCircuit> trackCircuits)
+    {
+        // 軌道回路の列車番号を取得し、重複を排除
+        var trainNumbers = trackCircuits
+            .Select(tc => tc.TrackCircuitState.TrainNumber)
+            .Where(trainNumber => !string.IsNullOrEmpty(trainNumber))
+            .Distinct()
+            .ToList();
+        // 列車番号から列車情報を取得
+        return [];
+    }
+
+    // TrainState新規書き込み
+    private async Task CreateTrainState(AtsToServerData clientData, long? driverId)
+    {
+        var trainState = new TrainState
+        {
+            TrainNumber = clientData.DiaName,
+            DiaNumber = GetDiaNumberFromTrainNumber(clientData.DiaName),
+            FromStationId = string.Empty, // 必要に応じて設定
+            ToStationId = string.Empty,   // 必要に応じて設定
+            Delay = 0,                    // 必要に応じて設定
+            DriverId = driverId
+        };
+        // 保存処理(ITrainRepositoryにCreateTrainメソッドが必要)
+        // await trainRepository.CreateTrain(trainState);
+    }
+    
+    /// <summary>
+    /// TrainState更新
+    /// </summary>
+    private async Task UpdateTrainState(TrainState trainState)
+    {
+        // 保存処理（ITrainRepositoryにUpdateTrainメソッドが必要）
+        // await trainRepository.UpdateTrain(trainState);
+    }
+
+    /// <summary>
+    /// TrainCarState更新
+    /// </summary> 
+    private async Task UpdateTrainCarStates(string trainNumber, List<CarState> carStates)
+    {
+        // 保存処理(ITrainCarStateRepository等があればそちらで実装)
+        // 差分を取って、追加・更新・削除を行う
+    }
+   
+    /// <summary>
+    /// TrainState並びにTrainCarStateの削除
+    /// </summary>
+    private async Task DeleteTrainState(string trainNumber)
+    {
+        // Todo: 列車情報の削除処理(ITrainRepositoryにDeleteTrainメソッドが必要)
+    }
+
 
     /// <summary>
     /// 運番が同じかどうかを判定する
