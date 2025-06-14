@@ -194,8 +194,18 @@ public partial class TrainService(
     /// </summary> 
     private async Task UpdateTrainCarStates(string trainNumber, List<CarState> carStates)
     {
-        // 保存処理(ITrainCarStateRepository等があればそちらで実装)
-        // 差分を取って、追加・更新・削除を行う
+        var trainCarStates = carStates.Select(cs => new TrainCarState
+        {
+            CarModel = cs.CarModel,
+            HasPantograph = cs.HasPantograph,
+            HasDriverCab = cs.HasDriverCab,
+            HasConductorCab = cs.HasConductorCab,
+            HasMotor = cs.HasMotor,
+            DoorClose = cs.DoorClose,
+            BcPress = cs.BC_Press,
+            Ampare = cs.Ampare,
+        }).ToList();
+        await trainCarRepository.UpdateAll(trainNumber, trainCarStates);
     }
    
     /// <summary>
