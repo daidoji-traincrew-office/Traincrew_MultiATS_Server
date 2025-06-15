@@ -47,6 +47,16 @@ public class Program
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
         }
+        
+        // CORS設定
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("AllowGETOnly",
+                builder => builder
+                    .AllowAnyOrigin()
+                    .WithMethods("GET")
+                    .AllowAnyHeader());
+        });
 
         // Todo: CORS設定, Rate Limit設定, CSP設定
         // Todo: (優先度低)キャッシュ制御, Response Compression
@@ -86,6 +96,9 @@ public class Program
         app.UseHttpsRedirection();
 
         app.MapControllers();
+        
+        // CORSの設定
+        app.UseCors("AllowGETOnly");
 
         await Task.CompletedTask;
     }
