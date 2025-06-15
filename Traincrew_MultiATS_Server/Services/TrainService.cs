@@ -1,6 +1,7 @@
 using System.Text.RegularExpressions;
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Models;
+using Traincrew_MultiATS_Server.Repositories.NextSignal;
 using Traincrew_MultiATS_Server.Repositories.Train;
 using Traincrew_MultiATS_Server.Repositories.TrainCar;
 using Traincrew_MultiATS_Server.Repositories.TrainDiagram;
@@ -15,7 +16,8 @@ public partial class TrainService(
     RouteService routeService,
     ITrainRepository trainRepository,
     ITrainCarRepository trainCarRepository,
-    ITrainDiagramRepository trainDiagramRepository
+    ITrainDiagramRepository trainDiagramRepository,
+    INextSignalRepository nextSignalRepository
 )
 {
     [GeneratedRegex(@"\d+")]
@@ -73,11 +75,18 @@ public partial class TrainService(
         var lastDiaNumber = clientData.DiaName.Last(char.IsDigit) - '0';
         var isUp = lastDiaNumber % 2 == 0;
         // 該当軌道回路の信号機を全取得
-        var signalNames = await signalService
+        var closeSignalName = await signalService
             .GetSignalNamesByTrackCircuits(trackCircuitList, isUp);
+        // 各信号機の１つ先の信号機も取得
+        var nextSignalName = await nextSignalRepository
+            .GetByNamesAndDepth(closeSignalName, 1);
+        // 取得した信号機を結合
+        var signalName = closeSignalName
+            .Concat(nextSignalName.Select(x => x.TargetSignalName))
+            .Distinct()
+            .ToList();
         // 現示計算
-        // Todo: 1つ先の信号機までは最低限計算する
-        var signalIndications = await signalService.CalcSignalIndication(signalNames);
+        var signalIndications = await signalService.CalcSignalIndication(signalName);
         serverData.NextSignalData = signalIndications.Select(pair => new SignalData
         {
             Name = pair.Key,

@@ -12,4 +12,11 @@ public class NextSignalRepository(ApplicationDbContext context): INextSignalRepo
             .OrderByDescending(s => s.Depth)
             .ToListAsync();
     }
+
+    public async Task<List<Models.NextSignal>> GetByNamesAndDepth(List<string> signalNames, int depth)
+    {
+        return await context.NextSignals
+            .Where(s => signalNames.Contains(s.SignalName) && s.Depth == depth)
+            .ToListAsync();
+    }
 }

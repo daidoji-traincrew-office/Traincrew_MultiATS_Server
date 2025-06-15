@@ -660,12 +660,13 @@ internal partial class DbInitializer(
 
             // 軌道回路初期化
             ulong trackCircuitId = 0;
+            // 明示的に指定された軌道回路名がある場合はそれを使用
             if (signalData.TrackCircuitName != null)
             {
                 trackCircuits.TryGetValue(signalData.TrackCircuitName, out trackCircuitId);
             }
-
-            if (signalData.Name.StartsWith("上り閉塞") || signalData.Name.StartsWith("下り閉塞"))
+            // それ以外で閉塞信号機の場合、閉塞信号機の軌道回路を使う
+            else if (signalData.Name.StartsWith("上り閉塞") || signalData.Name.StartsWith("下り閉塞"))
             {
                 var trackCircuitName = $"{signalData.Name.Replace("閉塞", "")}T";
                 trackCircuits.TryGetValue(trackCircuitName, out trackCircuitId);
