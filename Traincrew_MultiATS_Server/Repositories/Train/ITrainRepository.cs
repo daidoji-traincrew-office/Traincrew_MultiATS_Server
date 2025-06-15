@@ -19,6 +19,12 @@ public interface ITrainRepository
     Task<List<TrainState>> GetByTrainNumbers(ICollection<string> trainNumbers);
 
     /// <summary>
+    /// すべての列車情報を取得する
+    /// </summary>
+    /// <returns>全列車状態リスト</returns>
+    Task<List<TrainState>> GetAll();
+
+    /// <summary>
     /// 列車番号を指定して列車を削除する。
     /// </summary>
     /// <param name="trainNumber">列車番号</param>

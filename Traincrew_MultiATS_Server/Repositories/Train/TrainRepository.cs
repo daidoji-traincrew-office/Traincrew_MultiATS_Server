@@ -37,4 +37,9 @@ public class TrainRepository(ApplicationDbContext context) : ITrainRepository
         context.TrainStates.Update(trainState);
         await context.SaveChangesAsync();
     }
+
+    public async Task<List<TrainState>> GetAll()
+    {
+        return await context.TrainStates.ToListAsync();
+    }
 }

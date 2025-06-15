@@ -23,4 +23,10 @@ public interface ITrainCarRepository
     /// </summary>
     /// <param name="trainNumber">列車番号</param>
     Task DeleteByTrainNumber(string trainNumber);
+
+    /// <summary>
+    /// すべての車両情報を取得する
+    /// </summary>
+    /// <returns>全車両状態リスト</returns>
+    Task<List<TrainCarState>> GetAll();
 }

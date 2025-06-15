@@ -22,7 +22,7 @@ public partial class TrainService(
 {
     [GeneratedRegex(@"\d+")]
     private static partial Regex RegexIsDigits();
-    
+
     public async Task<ServerToATSData> CreateAtsData(ulong clientDriverId, AtsToServerData clientData)
     {
         // 軌道回路情報の更新
@@ -99,18 +99,21 @@ public partial class TrainService(
         {
             //1-1.在線させる軌道回路に既に別運転士の列番が1つでも在線している場合、早着として登録処理しない。
             var otherTrainStates = await GetTrainStatesByTrackCircuits(trackCircuitList);
-            if(otherTrainStates.Any(otherTrainState => otherTrainState.DriverId != null && otherTrainState.DriverId != clientDriverId))
+            if (otherTrainStates.Any(otherTrainState =>
+                    otherTrainState.DriverId != null && otherTrainState.DriverId != clientDriverId))
             {
                 // QA: 早着の場合クライアントに対してレスポンス返さなくても良い？
                 // 早着の列車情報は登録しない
                 return serverData;
             }
+
             //1-2.9999列番の場合は列車情報を登録しない。
             if (clientData.DiaName == "9999")
             {
                 await trackCircuitService.SetTrackCircuitDataList(incrementalTrackCircuitDataList, clientData.DiaName);
                 return serverData;
             }
+
             //1.完全新規登録
             trainState = await CreateTrainState(clientData, clientDriverId);
         }
@@ -165,7 +168,41 @@ public partial class TrainService(
         await UpdateTrainCarStates(trainState.Id, clientData.CarStates);
         return serverData;
     }
-    
+
+    public async Task<Dictionary<string, TrainInfo>> GetTrainInfoByTrainNumber()
+    {
+        // 列車情報を取得
+        var trainStates = await trainRepository.GetAll();
+        // 車両情報を取得
+        var trainCarStates = await trainCarRepository.GetAll();
+        // 車両情報を列車状態IDでグループ化
+        var trainCarStatesByTrainStateId = trainCarStates
+            .GroupBy(carState => carState.TrainStateId)
+            .ToDictionary(group => group.Key, group => group.ToList());
+        // 列車のダイアグラムを取得
+        var trainDiagrams = await trainDiagramRepository.GetByTrainNumbers(
+            trainStates
+                .Select(carState => carState.TrainNumber)
+                .ToHashSet());
+        // 列車番号ごとのダイアグラム
+        var trainDiagramsByTrainNumber = trainDiagrams.ToDictionary(td => td.TrainNumber, td => td);
+
+        // 列車情報と車両情報を結合
+        return trainStates
+            .ToDictionary(
+                trainState => trainState.TrainNumber,
+                trainState =>
+                {
+                    var carStates = trainCarStatesByTrainStateId
+                        .GetValueOrDefault(trainState.Id, [])
+                        .Select(ToCarState)
+                        .ToList();
+                    var trainDiagram = trainDiagramsByTrainNumber.GetValueOrDefault(trainState.TrainNumber);
+                    return ToTrainInfo(trainState, carStates, trainDiagram);
+                });
+    }
+
+
     private async Task<TrainState?> GetTrainStatesByDiaNumber(int diaNumber)
     {
         // 列車情報を取得
@@ -188,14 +225,14 @@ public partial class TrainService(
     private async Task<TrainState> CreateTrainState(AtsToServerData clientData, ulong driverId)
     {
         var trainDiagram = await trainDiagramRepository.GetByTrainNumber(clientData.DiaName);
-        
+
         var trainState = new TrainState
         {
             TrainNumber = clientData.DiaName,
             DiaNumber = GetDiaNumberFromTrainNumber(clientData.DiaName),
             FromStationId = trainDiagram?.FromStationId ?? "TH00",
             ToStationId = trainDiagram?.ToStationId ?? "TH00",
-            Delay = 0,              // 必要に応じて設定
+            Delay = 0, // 必要に応じて設定
             DriverId = driverId
         };
         // 保存処理
@@ -229,7 +266,7 @@ public partial class TrainService(
         }).ToList();
         await trainCarRepository.UpdateAll(trainStateId, trainCarStates);
     }
-   
+
     /// <summary>
     /// TrainState並びにTrainCarStateの削除
     /// </summary>
@@ -264,15 +301,45 @@ public partial class TrainService(
         {
             return 400;
         }
+
         // 列番本体（数字部分）
         var isTrain = int.TryParse(
             RegexIsDigits().Match(trainNumber).Value,
-            out var numBody);  
+            out var numBody);
         if (isTrain)
         {
             return numBody / 3000 * 100 + numBody % 100;
         }
+
         // DiaNameの最後の数字を取得
         return 0;
+    }
+
+    private static TrainInfo ToTrainInfo(TrainState trainState, List<CarState> carStates, TrainDiagram? trainDiagram)
+    {
+        return new()
+        {
+            Name = trainState.TrainNumber,
+            CarStates = carStates,
+            TrainClass = trainState.DiaNumber,
+            FromStation = trainDiagram?.FromStationId ?? "TH00",
+            DestinationStation = trainDiagram?.ToStationId ?? "TH00",
+            Delay = trainState.Delay
+        };
+    }
+
+    private static CarState ToCarState(TrainCarState trainCarState)
+    {
+        return new()
+        {
+            CarModel = trainCarState.CarModel,
+            HasPantograph = trainCarState.HasPantograph,
+            HasDriverCab = trainCarState.HasDriverCab,
+            HasConductorCab = trainCarState.HasConductorCab,
+            HasMotor = trainCarState.HasMotor,
+            DoorClose = trainCarState.DoorClose,
+            BC_Press = (float)trainCarState.BcPress,
+            Ampare = (float)trainCarState.Ampare
+        };
     }
 }

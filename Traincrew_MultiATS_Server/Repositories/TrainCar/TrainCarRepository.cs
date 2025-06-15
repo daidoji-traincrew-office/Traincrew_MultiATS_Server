@@ -8,7 +8,15 @@ public class TrainCarRepository(ApplicationDbContext context) : ITrainCarReposit
 {
     public async Task<List<TrainCarState>> GetByTrainNumber(string trainNumber)
     {
-        throw new NotImplementedException();
+        return await context.TrainCarStates
+            .Join(context.TrainStates,
+                car => car.TrainStateId,
+                train => train.Id,
+                (car, train) => new { car, train })
+            .Where(x => x.train.TrainNumber == trainNumber)
+            .OrderBy(x => x.car.Index)
+            .Select(x => x.car)
+            .ToListAsync();
     }
 
     public async Task UpdateAll(long trainStateId, List<TrainCarState> carStates)
@@ -60,5 +68,10 @@ public class TrainCarRepository(ApplicationDbContext context) : ITrainCarReposit
                 (car, train) => new { car, train })
             .Where(x => x.train.TrainNumber == trainNumber)
             .ExecuteDeleteAsync();
+    }
+
+    public async Task<List<TrainCarState>> GetAll()
+    {
+        return await context.TrainCarStates.ToListAsync();
     }
 }

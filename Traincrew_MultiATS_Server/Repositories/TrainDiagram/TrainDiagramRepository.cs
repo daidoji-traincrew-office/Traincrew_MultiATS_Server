@@ -10,4 +10,11 @@ public class TrainDiagramRepository(ApplicationDbContext context) : ITrainDiagra
         return await context.TrainDiagrams
             .FirstOrDefaultAsync(td => td.TrainNumber == trainNumber);
     }
+
+    public async Task<List<Models.TrainDiagram>> GetByTrainNumbers(ICollection<string> trainNumbers)
+    {
+        return await context.TrainDiagrams
+            .Where(td => trainNumbers.Contains(td.TrainNumber))
+            .ToListAsync();
+    }
 }
