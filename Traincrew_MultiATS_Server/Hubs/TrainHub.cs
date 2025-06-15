@@ -4,6 +4,7 @@ using OpenIddict.Validation.AspNetCore;
 using Traincrew_MultiATS_Server.Common.Contract;
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Models;
+using Traincrew_MultiATS_Server.Repositories.NextSignal;
 using Traincrew_MultiATS_Server.Services;
 
 namespace Traincrew_MultiATS_Server.Hubs;
@@ -18,7 +19,7 @@ public class TrainHub(
     SignalService signalService,
     OperationNotificationService operationNotificationService,
     ProtectionService protectionService,
-    RendoService rendoService,
+    INextSignalRepository nextSignalRepository,
     RouteService routeService) : Hub<ITrainClientContract>, ITrainHubContract
 {
     public async Task<DataFromServer> SendData_ATS(DataToServer clientData)
@@ -69,11 +70,18 @@ public class TrainHub(
         var lastDiaNumber = clientData.DiaName.Last(char.IsDigit) - '0';
         var isUp = lastDiaNumber % 2 == 0;
         // 該当軌道回路の信号機を全取得
-        var signalNames = await signalService
+        var closeSignalName = await signalService
             .GetSignalNamesByTrackCircuits(trackCircuitList, isUp);
+        // 各信号機の１つ先の信号機も取得
+        var nextSignalName = await nextSignalRepository
+            .GetByNamesAndDepth(closeSignalName, 1);
+        // 取得した信号機を結合
+        var signalName = closeSignalName
+            .Concat(nextSignalName.Select(x => x.TargetSignalName))
+            .Distinct()
+            .ToList();
         // 現示計算
-        // Todo: 1つ先の信号機までは最低限計算する
-        var signalIndications = await signalService.CalcSignalIndication(signalNames);
+        var signalIndications = await signalService.CalcSignalIndication(signalName);
         serverData.NextSignalData = signalIndications.Select(pair => new SignalData
         {
             Name = pair.Key,
