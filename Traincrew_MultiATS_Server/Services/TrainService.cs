@@ -323,7 +323,7 @@ public partial class TrainService(
         {
             Name = trainState.TrainNumber,
             CarStates = carStates,
-            TrainClass = trainState.DiaNumber,
+            TrainClass = (int)(trainDiagram?.TrainType.Id ?? 0),
             FromStation = trainDiagram?.FromStationId ?? "TH00",
             DestinationStation = trainDiagram?.ToStationId ?? "TH00",
             Delay = trainState.Delay
