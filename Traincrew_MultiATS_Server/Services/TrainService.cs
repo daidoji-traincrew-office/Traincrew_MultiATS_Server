@@ -308,7 +308,9 @@ public partial class TrainService(
             out var numBody);
         if (isTrain)
         {
-            return numBody / 3000 * 100 + numBody % 100;
+            // 偶数に切り捨ててから計算
+            var evenNumBody = numBody % 2 == 0 ? numBody : numBody - 1;
+            return evenNumBody / 3000 * 100 + evenNumBody % 100;
         }
 
         // DiaNameの最後の数字を取得
