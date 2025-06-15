@@ -270,7 +270,7 @@ public partial class TrainService(
     /// <summary>
     /// TrainState並びにTrainCarStateの削除
     /// </summary>
-    private async Task DeleteTrainState(string trainNumber)
+    public async Task DeleteTrainState(string trainNumber)
     {
         await trainCarRepository.DeleteByTrainNumber(trainNumber);
         await trainRepository.DeleteByTrainNumber(trainNumber);
