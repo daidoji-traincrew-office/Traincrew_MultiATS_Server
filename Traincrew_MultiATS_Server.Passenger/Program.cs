@@ -54,7 +54,7 @@ public class Program
             options.AddPolicy("AllowGETOnly",
                 builder => builder
                     .AllowAnyOrigin()
-                    .WithMethods("GET")
+                    .WithMethods("GET", "OPTIONS")
                     .AllowAnyHeader());
         });
 
