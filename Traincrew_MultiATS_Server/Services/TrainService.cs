@@ -173,10 +173,11 @@ public partial class TrainService(
     {
         var clientDiaNumber = GetDiaNumberFromTrainNumber(TrainNumber);
         var trainState = await GetTrainStatesByDiaNumber(clientDiaNumber);
-        if (clientDriverId == trainState.DriverId)
+        if (clientDriverId != trainState.DriverId)
         {
-            trainState.DriverId = null;
+            return;
         }
+        trainState.DriverId = null;
         await UpdateTrainState(trainState);
     }
 
