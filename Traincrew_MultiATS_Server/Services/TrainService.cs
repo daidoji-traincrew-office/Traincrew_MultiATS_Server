@@ -318,15 +318,15 @@ public partial class TrainService(
         var isTrain = int.TryParse(
             RegexIsDigits().Match(trainNumber).Value,
             out var numBody);
-        if (isTrain)
+        if (!isTrain)
         {
-            // 偶数に切り捨ててから計算
-            var evenNumBody = numBody % 2 == 0 ? numBody : numBody - 1;
-            return evenNumBody / 3000 * 100 + evenNumBody % 100;
+            // 列番が数字でない場合は運番を0とする
+            return 0;
         }
 
-        // DiaNameの最後の数字を取得
-        return 0;
+        // 偶数に切り捨ててから計算
+        var evenNumBody = numBody % 2 == 0 ? numBody : numBody - 1;
+        return evenNumBody / 3000 * 100 + evenNumBody % 100;
     }
 
     private static TrainInfo ToTrainInfo(TrainState trainState, List<CarState> carStates, TrainDiagram? trainDiagram)
