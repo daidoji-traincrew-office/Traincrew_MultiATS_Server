@@ -475,7 +475,7 @@ public class InitDbHostedService(
             context.TrainDiagrams.Add(new()
             {
                 TrainNumber = record.TrainNumber,
-                TypeId = record.TypeId,
+                TrainTypeId = record.TypeId,
                 FromStationId = record.FromStationId,
                 ToStationId = record.ToStationId,
                 DiaId = record.DiaId

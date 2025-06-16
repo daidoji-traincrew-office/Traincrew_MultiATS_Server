@@ -11,10 +11,10 @@ public class TrainDiagram
     public string TrainNumber { get; set; }
 
     [Required]
-    [Column("type_id")]
-    public long TypeId { get; set; }
+    [Column("train_type_id")]
+    public long TrainTypeId { get; set; }
 
-    [ForeignKey(nameof(TypeId))]
+    [ForeignKey(nameof(TrainTypeId))]
     public TrainType? TrainType { get; set; }
 
     [Required]

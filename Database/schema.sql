@@ -400,7 +400,7 @@ CREATE TABLE train_type
 CREATE TABLE train_diagram
 (
     train_number    VARCHAR(100) PRIMARY KEY,                        -- 列車番号
-    type_id         BIGINT      NOT NULL REFERENCES train_type (id), -- 列車種別ID
+    train_type_id   BIGINT      NOT NULL REFERENCES train_type (id), -- 列車種別ID
     from_station_id VARCHAR(10) NOT NULL REFERENCES station (id),    -- 出発駅ID
     to_station_id   VARCHAR(10) NOT NULL REFERENCES station (id),    -- 到着駅ID
     dia_id          INT         NOT NULL                             -- ダイヤID
