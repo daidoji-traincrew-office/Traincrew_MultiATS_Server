@@ -36,8 +36,9 @@ public class Program
     private static void ConfigureServices(WebApplicationBuilder builder, bool isDevelopment)
     {
         // Controller
-        builder.Services.AddControllers();
-        
+        builder.Services.AddControllers()
+            .AddJsonOptions(options => { options.JsonSerializerOptions.PropertyNamingPolicy = null; });
+
         // Database
         ConfigureDatabaseService(builder);
 
@@ -47,7 +48,7 @@ public class Program
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
         }
-        
+
         // CORS設定
         builder.Services.AddCors(options =>
         {
@@ -96,22 +97,20 @@ public class Program
         app.UseHttpsRedirection();
 
         app.MapControllers();
-        
+
         // CORSの設定
         app.UseCors("AllowGETOnly");
 
         await Task.CompletedTask;
     }
-    
+
     private static void ConfigureDatabaseService(WebApplicationBuilder builder)
     {
         // DBの設定
-        var dataSourceBuilder = new NpgsqlDataSourceBuilder(builder.Configuration.GetConnectionString("DefaultConnection"));
-        EnumTypeMapper.MapEnumForNpgsql(dataSourceBuilder); 
+        var dataSourceBuilder =
+            new NpgsqlDataSourceBuilder(builder.Configuration.GetConnectionString("DefaultConnection"));
+        EnumTypeMapper.MapEnumForNpgsql(dataSourceBuilder);
         var dataSource = dataSourceBuilder.Build();
-        builder.Services.AddDbContext<ApplicationDbContext>(options =>
-        {
-            options.UseNpgsql(dataSource);
-        });
+        builder.Services.AddDbContext<ApplicationDbContext>(options => { options.UseNpgsql(dataSource); });
     }
 }
