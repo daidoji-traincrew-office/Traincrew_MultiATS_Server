@@ -160,6 +160,13 @@ public partial class TrainService(
                 // 4.情報変更なし
                 // 列車情報については変更しない
             }
+            // 5.運用中/同一運転士
+            else if (trainStateDriverId == clientDriverId)
+            {
+                // 5.列番だけ書き換える
+                trainState.TrainNumber = clientData.DiaName;
+                await UpdateTrainState(trainState);
+            }
             else
             {
                 // ここには来ない
