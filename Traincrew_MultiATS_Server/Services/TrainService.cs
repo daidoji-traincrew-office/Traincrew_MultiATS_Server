@@ -273,6 +273,11 @@ public partial class TrainService(
     /// </summary>
     private async Task UpdateTrainState(TrainState trainState)
     {
+        var trainDiagram = await trainDiagramRepository.GetByTrainNumber(trainState.TrainNumber);
+        // 列車のダイアグラム情報を更新
+        trainState.FromStationId = trainDiagram?.FromStationId ?? "TH00";
+        trainState.ToStationId = trainDiagram?.ToStationId ?? "TH00";
+        // 列車情報を更新
         await trainRepository.Update(trainState);
     }
 
