@@ -19,6 +19,13 @@ public class TrainRepository(ApplicationDbContext context) : ITrainRepository
             .ToListAsync();
     }
 
+    public async Task<List<TrainState>> GetByDriverId(ulong driverId)
+    {
+        return await context.TrainStates
+            .Where(ts => driverId == ts.DriverId)
+            .ToListAsync();
+    }
+
     public async Task DeleteByTrainNumber(string trainNumber)
     {
         await context.TrainStates

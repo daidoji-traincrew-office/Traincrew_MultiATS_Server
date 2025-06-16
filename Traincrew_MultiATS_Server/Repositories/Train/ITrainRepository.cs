@@ -19,6 +19,13 @@ public interface ITrainRepository
     Task<List<TrainState>> GetByTrainNumbers(ICollection<string> trainNumbers);
 
     /// <summary>
+    /// 運転士IDから列車を取得する
+    /// </summary>
+    /// <param name="driverId">運転士ID</param>
+    /// <returns></returns>
+    Task<List<TrainState>> GetByDriverId(ulong driverId);
+
+    /// <summary>
     /// すべての列車情報を取得する
     /// </summary>
     /// <returns>全列車状態リスト</returns>
