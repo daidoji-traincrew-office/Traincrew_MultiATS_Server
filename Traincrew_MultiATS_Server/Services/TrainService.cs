@@ -114,6 +114,14 @@ public partial class TrainService(
                 return serverData;
             }
 
+            //1-3.同一運転士の別列車が居る場合、削除
+            var driverOtherTrains = await trainRepository.GetByDriverId(clientDriverId);
+
+            foreach (var otherTrain in driverOtherTrains)
+            {
+                await DeleteTrainState(otherTrain.TrainNumber);
+            }
+
             //1.完全新規登録
             trainState = await CreateTrainState(clientData, clientDriverId);
         }
