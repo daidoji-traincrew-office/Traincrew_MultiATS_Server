@@ -39,7 +39,7 @@ public class TrainHub(
 
     public async Task DriverGetsOff(string trainNumber)
     {
-        await trainService.DeleteTrainState(trainNumber);
+        await trainService.DriverGetsOff(trainNumber);
         return;
     }
 }

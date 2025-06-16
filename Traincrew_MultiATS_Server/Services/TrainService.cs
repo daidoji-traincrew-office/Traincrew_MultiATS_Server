@@ -169,6 +169,15 @@ public partial class TrainService(
         return serverData;
     }
 
+    public async Task DriverGetsOff(string TrainNumber)
+    {
+        var clientDiaNumber = GetDiaNumberFromTrainNumber(TrainNumber);
+        var trainState = await GetTrainStatesByDiaNumber(clientDiaNumber);
+        trainState.DriverId = null;
+        await UpdateTrainState(trainState);
+    }
+
+
     public async Task<Dictionary<string, TrainInfo>> GetTrainInfoByTrainNumber()
     {
         // 列車情報を取得
