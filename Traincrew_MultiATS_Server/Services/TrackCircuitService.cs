@@ -72,6 +72,13 @@ public class TrackCircuitService(
         await trackCircuitRepository.ClearTrackCircuitListByTrainNumber(trainNumber);
     }
 
+    public async Task<List<TrackCircuitData>> GetShortCircuitedTrackCircuitDataList()
+    {
+        return (await trackCircuitRepository.GetWhereShortCircuited())
+            .Select(ToTrackCircuitData)
+            .ToList();
+    }
+
     internal static TrackCircuitData ToTrackCircuitData(TrackCircuit trackCircuit)
     {
         return new()

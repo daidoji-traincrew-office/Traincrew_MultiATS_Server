@@ -79,4 +79,12 @@ public class TrackCircuitRepository(ApplicationDbContext context) : ITrackCircui
                     .SetProperty(obj => obj.TrainNumber, "")
             );
     }
+
+    public async Task<List<Models.TrackCircuit>> GetWhereShortCircuited()
+    {
+        return await context.TrackCircuits
+            .Include(tc => tc.TrackCircuitState)
+            .Where(tc => tc.TrackCircuitState.IsShortCircuit)
+            .ToListAsync();
+    }
 }
