@@ -42,14 +42,14 @@ public class SignalTypeData
 
 public class CarState
 {
-    public float Ampare;
-    public float BC_Press;
-    public string CarModel;
-    public bool DoorClose;
-    public bool HasConductorCab = false;
-    public bool HasDriverCab = false;
-    public bool HasMotor = false;
-    public bool HasPantograph = false;
+    public float Ampare { get; init; }
+    public float BC_Press { get; init; }
+    public string CarModel { get; init; }
+    public bool DoorClose { get; init; }
+    public bool HasConductorCab { get; init; }
+    public bool HasDriverCab { get; init; }
+    public bool HasMotor { get; init; }
+    public bool HasPantograph { get; init; }
 }
 
 public class TrackCircuitData : IEquatable<TrackCircuitData>
