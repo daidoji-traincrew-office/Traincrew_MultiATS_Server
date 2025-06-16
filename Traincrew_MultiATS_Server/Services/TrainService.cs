@@ -169,14 +169,16 @@ public partial class TrainService(
         return serverData;
     }
 
-    public async Task DriverGetsOff(string TrainNumber)
+    public async Task DriverGetsOff(ulong clientDriverId, string TrainNumber)
     {
         var clientDiaNumber = GetDiaNumberFromTrainNumber(TrainNumber);
         var trainState = await GetTrainStatesByDiaNumber(clientDiaNumber);
-        trainState.DriverId = null;
+        if (clientDriverId == trainState.DriverId)
+        {
+            trainState.DriverId = null;
+        }
         await UpdateTrainState(trainState);
     }
-
 
     public async Task<Dictionary<string, TrainInfo>> GetTrainInfoByTrainNumber()
     {

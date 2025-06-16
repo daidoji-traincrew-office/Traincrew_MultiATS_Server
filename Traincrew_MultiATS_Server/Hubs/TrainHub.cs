@@ -39,7 +39,20 @@ public class TrainHub(
 
     public async Task DriverGetsOff(string trainNumber)
     {
-        await trainService.DriverGetsOff(trainNumber);
+        var enableAuthorization = enableAuthorizationStore.EnableAuthorization;
+        // MemberIDを取得
+        var memberIdString = Context.User?.FindFirst(Claims.Subject)?.Value;
+        if (!ulong.TryParse(memberIdString, out var memberId))
+        {
+            if (enableAuthorization)
+            {
+                // Authorizationが有効な場合は、MemberIDの取得に失敗したらエラー
+                throw new InvalidOperationException("Failed to retrieve MemberID.");
+            }
+            // Authorizationが無効な場合は、memberIdを0に設定(ローカル開発用)
+            memberId = 0;
+        }
+        await trainService.DriverGetsOff(memberId, trainNumber);
         return;
     }
 }
