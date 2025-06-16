@@ -102,8 +102,8 @@ public partial class TrainService(
             if (otherTrainStates.Any(otherTrainState =>
                     otherTrainState.DriverId != null && otherTrainState.DriverId != clientDriverId))
             {
-                // QA: 早着の場合クライアントに対してレスポンス返さなくても良い？
                 // 早着の列車情報は登録しない
+                serverData.IsOnPreviousTrain = true;
                 return serverData;
             }
 
@@ -134,7 +134,7 @@ public partial class TrainService(
             {
                 // 2.交代前応答
                 // 送信してきたクライアントに対し交代前応答を行い、送信された情報は在線情報含めてすべて破棄する。  
-                serverData.IsOnPreviousTrain = true;
+                serverData.IsTherePreviousTrain = true;
 
                 // 防護無線の情報は、運用中列車の在線軌道回路とクライアントの在線軌道回路が完全一致しているときのみ送信する。
                 // →既に情報が登録されているため、上記の逆のときfalseで上書きする。
