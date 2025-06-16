@@ -67,6 +67,7 @@ public class TrainCarRepository(ApplicationDbContext context) : ITrainCarReposit
                 train => train.Id,
                 (car, train) => new { car, train })
             .Where(x => x.train.TrainNumber == trainNumber)
+            .Select(x => x.car)
             .ExecuteDeleteAsync();
     }
 
