@@ -21,26 +21,20 @@ public class TrainHub(
 {
     public async Task<ServerToATSData> SendData_ATS(AtsToServerData clientData)
     {
-        var enableAuthorization = enableAuthorizationStore.EnableAuthorization;
-        // MemberIDを取得
-        var memberIdString = Context.User?.FindFirst(Claims.Subject)?.Value;
-        if (!ulong.TryParse(memberIdString, out var memberId))
-        {
-            if (enableAuthorization)
-            {
-                // Authorizationが有効な場合は、MemberIDの取得に失敗したらエラー
-                throw new InvalidOperationException("Failed to retrieve MemberID.");
-            }
-            // Authorizationが無効な場合は、memberIdを0に設定(ローカル開発用)
-            memberId = 0;
-        }
+        var memberId = GetMemberId();
         return await trainService.CreateAtsData(memberId, clientData);
     }
 
     public async Task DriverGetsOff(string trainNumber)
     {
+        var memberId = GetMemberId();
+        await trainService.DriverGetsOff(memberId, trainNumber);
+        return;
+    }
+    
+    private ulong GetMemberId()
+    {
         var enableAuthorization = enableAuthorizationStore.EnableAuthorization;
-        // MemberIDを取得
         var memberIdString = Context.User?.FindFirst(Claims.Subject)?.Value;
         if (!ulong.TryParse(memberIdString, out var memberId))
         {
@@ -49,10 +43,10 @@ public class TrainHub(
                 // Authorizationが有効な場合は、MemberIDの取得に失敗したらエラー
                 throw new InvalidOperationException("Failed to retrieve MemberID.");
             }
+
             // Authorizationが無効な場合は、memberIdを0に設定(ローカル開発用)
             memberId = 0;
         }
-        await trainService.DriverGetsOff(memberId, trainNumber);
-        return;
+        return memberId;
     }
 }
