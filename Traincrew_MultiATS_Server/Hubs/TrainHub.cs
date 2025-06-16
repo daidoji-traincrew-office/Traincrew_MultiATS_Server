@@ -36,4 +36,10 @@ public class TrainHub(
         }
         return await trainService.CreateAtsData(memberId, clientData);
     }
+
+    public async void DriverGetsOff(string trainNumber)
+    {
+        await trainService.DeleteTrainState(trainNumber);
+        return;
+    }
 }
