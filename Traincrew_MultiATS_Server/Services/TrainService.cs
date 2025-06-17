@@ -1,7 +1,6 @@
 using System.Text.RegularExpressions;
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Models;
-using Traincrew_MultiATS_Server.Repositories.NextSignal;
 using Traincrew_MultiATS_Server.Repositories.Train;
 using Traincrew_MultiATS_Server.Repositories.TrainCar;
 using Traincrew_MultiATS_Server.Repositories.TrainDiagram;
@@ -16,8 +15,7 @@ public partial class TrainService(
     RouteService routeService,
     ITrainRepository trainRepository,
     ITrainCarRepository trainCarRepository,
-    ITrainDiagramRepository trainDiagramRepository,
-    INextSignalRepository nextSignalRepository
+    ITrainDiagramRepository trainDiagramRepository
 )
 {
     [GeneratedRegex(@"\d+")]
