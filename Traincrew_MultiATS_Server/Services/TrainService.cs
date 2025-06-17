@@ -5,6 +5,7 @@ using Traincrew_MultiATS_Server.Repositories.NextSignal;
 using Traincrew_MultiATS_Server.Repositories.Train;
 using Traincrew_MultiATS_Server.Repositories.TrainCar;
 using Traincrew_MultiATS_Server.Repositories.TrainDiagram;
+using RouteData = Traincrew_MultiATS_Server.Common.Models.RouteData;
 
 namespace Traincrew_MultiATS_Server.Services;
 
@@ -54,44 +55,16 @@ public partial class TrainService(
             // 在線している軌道回路上で防護無線が発報されているか確認
             BougoState = await protectionService.IsProtectionEnabledForTrackCircuits(trackCircuitList)
         };
-
-
         // 防護無線を発報している場合のDB更新
-        if (clientData.BougoState)
-        {
-            await protectionService.EnableProtectionByTrackCircuits(clientData.DiaName, trackCircuitList);
-        }
-        else
-        {
-            await protectionService.DisableProtection(clientData.DiaName);
-        }
+        await protectionService.UpdateBougoState(clientTrainNumber, trackCircuitList, clientData.BougoState);
 
         // 運転告知器の表示
         serverData.OperationNotificationData = await operationNotificationService
             .GetOperationNotificationDataByTrackCircuitIds(trackCircuitList.Select(tc => tc.Id).ToList());
 
         // 信号現示の計算
-        // 上りか下りか判断(偶数なら上り、奇数なら下り)
-        var lastDiaNumber = clientData.DiaName.Last(char.IsDigit) - '0';
-        var isUp = lastDiaNumber % 2 == 0;
-        // 該当軌道回路の信号機を全取得
-        var closeSignalName = await signalService
-            .GetSignalNamesByTrackCircuits(trackCircuitList, isUp);
-        // 各信号機の１つ先の信号機も取得
-        var nextSignalName = await nextSignalRepository
-            .GetByNamesAndDepth(closeSignalName, 1);
-        // 取得した信号機を結合
-        var signalName = closeSignalName
-            .Concat(nextSignalName.Select(x => x.TargetSignalName))
-            .Distinct()
-            .ToList();
-        // 現示計算
-        var signalIndications = await signalService.CalcSignalIndication(signalName);
-        serverData.NextSignalData = signalIndications.Select(pair => new SignalData
-        {
-            Name = pair.Key,
-            phase = pair.Value
-        }).ToList();
+        serverData.NextSignalData = await GetSignalIndicationData(trackCircuitList, clientTrainNumber);
+        // 開通進路の情報
         serverData.RouteData = await routeService.GetActiveRoutes();
 
         // 1.同一列番/同一運番が未登録
@@ -377,4 +350,29 @@ public partial class TrainService(
             Ampare = (float)trainCarState.Ampare
         };
     }
+
+    // 4. 信号現示データ取得
+    private async Task<List<SignalData>> GetSignalIndicationData(List<TrackCircuit> trackCircuits, string trainNumber)
+    {
+        // 上りか下りか判断(偶数なら上り、奇数なら下り)
+        var lastDiaNumber = trainNumber.Last(char.IsDigit) - '0';
+        var isUp = lastDiaNumber % 2 == 0;
+        // 該当軌道回路の信号機を全取得
+        var closeSignalName = await signalService.GetSignalNamesByTrackCircuits(trackCircuits, isUp);
+        // 各信号機の１つ先の信号機も取得
+        var nextSignalName = await nextSignalRepository.GetByNamesAndDepth(closeSignalName, 1);
+        // 取得した信号機を結合
+        var signalName = closeSignalName
+            .Concat(nextSignalName.Select(x => x.TargetSignalName))
+            .Distinct()
+            .ToList();
+        // 現示計算
+        var signalIndications = await signalService.CalcSignalIndication(signalName);
+        return signalIndications.Select(pair => new SignalData
+        {
+            Name = pair.Key,
+            phase = pair.Value
+        }).ToList();
+    }
+
 }
