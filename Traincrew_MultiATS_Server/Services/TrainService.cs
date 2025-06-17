@@ -5,7 +5,6 @@ using Traincrew_MultiATS_Server.Repositories.NextSignal;
 using Traincrew_MultiATS_Server.Repositories.Train;
 using Traincrew_MultiATS_Server.Repositories.TrainCar;
 using Traincrew_MultiATS_Server.Repositories.TrainDiagram;
-using RouteData = Traincrew_MultiATS_Server.Common.Models.RouteData;
 
 namespace Traincrew_MultiATS_Server.Services;
 
@@ -63,7 +62,8 @@ public partial class TrainService(
             .GetOperationNotificationDataByTrackCircuitIds(trackCircuitList.Select(tc => tc.Id).ToList());
 
         // 信号現示の計算
-        serverData.NextSignalData = await GetSignalIndicationData(trackCircuitList, clientTrainNumber);
+        var isUp = IsTrainUpOrDown(clientTrainNumber);
+        serverData.NextSignalData = await signalService.GetSignalIndicationDataByTrackCircuits(trackCircuitList, isUp);
         // 開通進路の情報
         serverData.RouteData = await routeService.GetActiveRoutes();
 
@@ -351,28 +351,10 @@ public partial class TrainService(
         };
     }
 
-    // 4. 信号現示データ取得
-    private async Task<List<SignalData>> GetSignalIndicationData(List<TrackCircuit> trackCircuits, string trainNumber)
+    private static bool IsTrainUpOrDown(string trainNumber)
     {
         // 上りか下りか判断(偶数なら上り、奇数なら下り)
         var lastDiaNumber = trainNumber.Last(char.IsDigit) - '0';
-        var isUp = lastDiaNumber % 2 == 0;
-        // 該当軌道回路の信号機を全取得
-        var closeSignalName = await signalService.GetSignalNamesByTrackCircuits(trackCircuits, isUp);
-        // 各信号機の１つ先の信号機も取得
-        var nextSignalName = await nextSignalRepository.GetByNamesAndDepth(closeSignalName, 1);
-        // 取得した信号機を結合
-        var signalName = closeSignalName
-            .Concat(nextSignalName.Select(x => x.TargetSignalName))
-            .Distinct()
-            .ToList();
-        // 現示計算
-        var signalIndications = await signalService.CalcSignalIndication(signalName);
-        return signalIndications.Select(pair => new SignalData
-        {
-            Name = pair.Key,
-            phase = pair.Value
-        }).ToList();
+        return lastDiaNumber % 2 == 0;    
     }
-
 }
