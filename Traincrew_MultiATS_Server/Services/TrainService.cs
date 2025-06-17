@@ -60,12 +60,12 @@ public partial class TrainService(
         serverData.NextSignalData = await signalService.GetSignalIndicationDataByTrackCircuits(trackCircuitList, isUp);
         // 開通進路の情報
         serverData.RouteData = await routeService.GetActiveRoutes();
-        
-        
+
+
         // 運番が同じ列車の情報を取得する
         var trainState = await RegisterOrUpdateTrainState(
             clientDriverId, clientData, trackCircuitList, incrementalTrackCircuitDataList, serverData);
-        
+
         if (trainState == null)
         {
             // 列車情報の更新が不要な場合は、ここで終了
@@ -93,7 +93,7 @@ public partial class TrainService(
         trainState.DriverId = null;
         await UpdateTrainState(trainState);
     }
-    
+
     /// <summary>
     /// 列車情報の新規登録または更新を行う。
     /// </summary>
@@ -166,29 +166,28 @@ public partial class TrainService(
             existingTrainState.DiaNumber = clientDiaNumber;
             existingTrainState.DriverId = clientDriverId;
             await UpdateTrainState(existingTrainState);
-            return existingTrainState;
         }
         // 4.同一列番が登録済/運用中/同一運転士
-
-        if (existingTrainState.TrainNumber == clientTrainNumber && trainStateDriverId == clientDriverId)
+        else if (existingTrainState.TrainNumber == clientTrainNumber && trainStateDriverId == clientDriverId)
         {
             // 4.情報変更なし
             // 列車情報については変更しない
-            return existingTrainState;
         }
         // 5.運用中/同一運転士
-
-        if (trainStateDriverId == clientDriverId)
+        else if (trainStateDriverId == clientDriverId)
         {
             // 5.列番だけ書き換える
             existingTrainState.TrainNumber = clientTrainNumber;
             await UpdateTrainState(existingTrainState);
-            return existingTrainState;
+        }
+        // ここには来ない
+        else
+        {
+            // 異常応答を返す
+            throw new InvalidOperationException("Unreachable code: TrainState mismatch.");
         }
 
-        // ここには来ない
-        // 異常応答などを返すべき
-        throw new InvalidOperationException("Unreachable code: TrainState mismatch.");
+        return existingTrainState;
     }
 
     public async Task<Dictionary<string, TrainInfo>> GetTrainInfoByTrainNumber()
@@ -362,6 +361,6 @@ public partial class TrainService(
     {
         // 上りか下りか判断(偶数なら上り、奇数なら下り)
         var lastDiaNumber = trainNumber.Last(char.IsDigit) - '0';
-        return lastDiaNumber % 2 == 0;    
+        return lastDiaNumber % 2 == 0;
     }
 }
