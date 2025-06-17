@@ -23,8 +23,9 @@ public partial class TrainService(
 
     public async Task<ServerToATSData> CreateAtsData(ulong clientDriverId, AtsToServerData clientData)
     {
+        var clientTrainNumber = clientData.DiaName;
         // 軌道回路情報の更新
-        var oldTrackCircuitList = await trackCircuitService.GetTrackCircuitsByTrainNumber(clientData.DiaName);
+        var oldTrackCircuitList = await trackCircuitService.GetTrackCircuitsByTrainNumber(clientTrainNumber);
         var oldTrackCircuitDataList = oldTrackCircuitList.Select(TrackCircuitService.ToTrackCircuitData).ToList();
         // 新規登録軌道回路
         var incrementalTrackCircuitDataList = clientData.OnTrackList.Except(oldTrackCircuitDataList).ToList();
@@ -40,11 +41,6 @@ public partial class TrainService(
         {
             trackCircuitList = oldTrackCircuitList;
         }
-
-        var clientTrainNumber = clientData.DiaName;
-        var clientDiaNumber = GetDiaNumberFromTrainNumber(clientTrainNumber);
-        // 運番が同じ列車の情報を取得する
-        var trainState = await GetTrainStatesByDiaNumber(clientDiaNumber);
 
         // ☆情報は割と常に送るため共通で演算する   
         var serverData = new ServerToATSData
@@ -64,7 +60,11 @@ public partial class TrainService(
         serverData.NextSignalData = await signalService.GetSignalIndicationDataByTrackCircuits(trackCircuitList, isUp);
         // 開通進路の情報
         serverData.RouteData = await routeService.GetActiveRoutes();
-
+        
+        
+        // 運番が同じ列車の情報を取得する
+        var clientDiaNumber = GetDiaNumberFromTrainNumber(clientTrainNumber);
+        var trainState = await GetTrainStatesByDiaNumber(clientDiaNumber);
         // 1.同一列番/同一運番が未登録
         if (trainState == null)
         {
@@ -81,7 +81,7 @@ public partial class TrainService(
             //1-2.9999列番の場合は列車情報を登録しない。
             if (clientData.DiaName == "9999")
             {
-                await trackCircuitService.SetTrackCircuitDataList(incrementalTrackCircuitDataList, clientData.DiaName);
+                await trackCircuitService.SetTrackCircuitDataList(incrementalTrackCircuitDataList, clientTrainNumber);
                 return serverData;
             }
 
@@ -120,8 +120,8 @@ public partial class TrainService(
             {
                 // 3.情報変更
                 // 検索で発見された情報について、送信された情報に基づいて情報を変更する。
-                trainState.TrainNumber = clientData.DiaName;
-                trainState.DiaNumber = GetDiaNumberFromTrainNumber(clientData.DiaName);
+                trainState.TrainNumber = clientTrainNumber;
+                trainState.DiaNumber = clientDiaNumber;
                 trainState.DriverId = clientDriverId;
                 await UpdateTrainState(trainState);
             }
@@ -135,7 +135,7 @@ public partial class TrainService(
             else if (trainStateDriverId == clientDriverId)
             {
                 // 5.列番だけ書き換える
-                trainState.TrainNumber = clientData.DiaName;
+                trainState.TrainNumber = clientTrainNumber;
                 await UpdateTrainState(trainState);
             }
             else
@@ -147,7 +147,7 @@ public partial class TrainService(
         }
 
         // 在線軌道回路の更新
-        await trackCircuitService.SetTrackCircuitDataList(incrementalTrackCircuitDataList, clientData.DiaName);
+        await trackCircuitService.SetTrackCircuitDataList(incrementalTrackCircuitDataList, clientTrainNumber);
         await trackCircuitService.ClearTrackCircuitDataList(decrementalTrackCircuitDataList);
 
         // 車両情報の登録
