@@ -63,87 +63,13 @@ public partial class TrainService(
         
         
         // 運番が同じ列車の情報を取得する
-        var clientDiaNumber = GetDiaNumberFromTrainNumber(clientTrainNumber);
-        var trainState = await GetTrainStatesByDiaNumber(clientDiaNumber);
-        // 1.同一列番/同一運番が未登録
+        var trainState = await RegisterOrUpdateTrainState(
+            clientDriverId, clientData, trackCircuitList, incrementalTrackCircuitDataList, serverData);
+        
         if (trainState == null)
         {
-            //1-1.在線させる軌道回路に既に別運転士の列番が1つでも在線している場合、早着として登録処理しない。
-            var otherTrainStates = await GetTrainStatesByTrackCircuits(trackCircuitList);
-            if (otherTrainStates.Any(otherTrainState =>
-                    otherTrainState.DriverId != null && otherTrainState.DriverId != clientDriverId))
-            {
-                // 早着の列車情報は登録しない
-                serverData.IsOnPreviousTrain = true;
-                return serverData;
-            }
-
-            //1-2.9999列番の場合は列車情報を登録しない。
-            if (clientData.DiaName == "9999")
-            {
-                await trackCircuitService.SetTrackCircuitDataList(incrementalTrackCircuitDataList, clientTrainNumber);
-                return serverData;
-            }
-
-            //1-3.同一運転士の別列車が居る場合、削除
-            var driverOtherTrains = await trainRepository.GetByDriverId(clientDriverId);
-
-            foreach (var otherTrain in driverOtherTrains)
-            {
-                await DeleteTrainState(otherTrain.TrainNumber);
-            }
-
-            //1.完全新規登録
-            trainState = await CreateTrainState(clientData, clientDriverId);
-        }
-        else
-        {
-            // 同一運番列車が登録済
-            var trainStateDriverId = trainState.DriverId;
-            // 2.運用中/別運転士
-            if (trainStateDriverId != null && trainStateDriverId != clientDriverId)
-            {
-                // 2.交代前応答
-                // 送信してきたクライアントに対し交代前応答を行い、送信された情報は在線情報含めてすべて破棄する。  
-                serverData.IsTherePreviousTrain = true;
-
-                // 防護無線の情報は、運用中列車の在線軌道回路とクライアントの在線軌道回路が完全一致しているときのみ送信する。
-                // →既に情報が登録されているため、上記の逆のときfalseで上書きする。
-
-
-                return serverData;
-            }
-            // この地点で在線情報を登録してよい
-
-            // 3.運用終了
-            if (trainStateDriverId == null)
-            {
-                // 3.情報変更
-                // 検索で発見された情報について、送信された情報に基づいて情報を変更する。
-                trainState.TrainNumber = clientTrainNumber;
-                trainState.DiaNumber = clientDiaNumber;
-                trainState.DriverId = clientDriverId;
-                await UpdateTrainState(trainState);
-            }
-            // 4.同一列番が登録済/運用中/同一運転士
-            else if (trainState.TrainNumber == clientTrainNumber && trainStateDriverId == clientDriverId)
-            {
-                // 4.情報変更なし
-                // 列車情報については変更しない
-            }
-            // 5.運用中/同一運転士
-            else if (trainStateDriverId == clientDriverId)
-            {
-                // 5.列番だけ書き換える
-                trainState.TrainNumber = clientTrainNumber;
-                await UpdateTrainState(trainState);
-            }
-            else
-            {
-                // ここには来ない
-                // 異常応答などを返すべき
-                throw new InvalidOperationException("Unreachable code: TrainState mismatch.");
-            }
+            // 列車情報の更新が不要な場合は、ここで終了
+            return serverData;
         }
 
         // 在線軌道回路の更新
@@ -166,6 +92,103 @@ public partial class TrainService(
 
         trainState.DriverId = null;
         await UpdateTrainState(trainState);
+    }
+    
+    /// <summary>
+    /// 列車情報の新規登録または更新を行う。
+    /// </summary>
+    /// <param name="clientDriverId">運転士ID</param>
+    /// <param name="clientData">クライアントからのデータ</param>
+    /// <param name="trackCircuits">在線軌道回路リスト</param>
+    /// <param name="incrementalTrackCircuitDataList">新規登録する軌道回路データリスト</param>
+    /// <param name="serverData">サーバーからクライアントへのデータ</param>
+    /// <returns>列車状態。登録しない場合はnull。</returns>
+    private async Task<TrainState?> RegisterOrUpdateTrainState(
+        ulong clientDriverId,
+        AtsToServerData clientData,
+        List<TrackCircuit> trackCircuits,
+        List<TrackCircuitData> incrementalTrackCircuitDataList,
+        ServerToATSData serverData)
+    {
+        var clientTrainNumber = clientData.DiaName;
+        var clientDiaNumber = GetDiaNumberFromTrainNumber(clientTrainNumber);
+        var existingTrainState = await GetTrainStatesByDiaNumber(clientDiaNumber);
+
+        // 1.同一列番/同一運番が未登録
+        if (existingTrainState == null)
+        {
+            //1-1.在線させる軌道回路に既に別運転士の列番が1つでも在線している場合、早着として登録処理しない。
+            var otherTrainStates = await GetTrainStatesByTrackCircuits(trackCircuits);
+            if (otherTrainStates.Any(otherTrainState =>
+                    otherTrainState.DriverId != null && otherTrainState.DriverId != clientDriverId))
+            {
+                // 早着の列車情報は登録しない
+                serverData.IsOnPreviousTrain = true;
+                return null;
+            }
+
+            //1-2.9999列番の場合は列車情報を登録しない。
+            if (clientData.DiaName == "9999")
+            {
+                await trackCircuitService.SetTrackCircuitDataList(incrementalTrackCircuitDataList, clientTrainNumber);
+                return null;
+            }
+
+            //1-3.同一運転士の別列車が居る場合、削除
+            var driverOtherTrains = await trainRepository.GetByDriverId(clientDriverId);
+            foreach (var otherTrain in driverOtherTrains)
+            {
+                await DeleteTrainState(otherTrain.TrainNumber);
+            }
+
+            //1.完全新規登録
+            return await CreateTrainState(clientData, clientDriverId);
+        }
+
+        // 同一運番列車が登録済
+        var trainStateDriverId = existingTrainState.DriverId;
+        // 2.運用中/別運転士
+        if (trainStateDriverId != null && trainStateDriverId != clientDriverId)
+        {
+            // 2.交代前応答
+            // 送信してきたクライアントに対し交代前応答を行い、送信された情報は在線情報含めてすべて破棄する。  
+            serverData.IsTherePreviousTrain = true;
+            return null;
+        }
+        // この地点で在線情報を登録してよい
+
+        // 3.運用終了
+        if (trainStateDriverId == null)
+        {
+            // 3.情報変更
+            // 検索で発見された情報について、送信された情報に基づいて情報を変更する。
+            existingTrainState.TrainNumber = clientTrainNumber;
+            existingTrainState.DiaNumber = clientDiaNumber;
+            existingTrainState.DriverId = clientDriverId;
+            await UpdateTrainState(existingTrainState);
+            return existingTrainState;
+        }
+        // 4.同一列番が登録済/運用中/同一運転士
+
+        if (existingTrainState.TrainNumber == clientTrainNumber && trainStateDriverId == clientDriverId)
+        {
+            // 4.情報変更なし
+            // 列車情報については変更しない
+            return existingTrainState;
+        }
+        // 5.運用中/同一運転士
+
+        if (trainStateDriverId == clientDriverId)
+        {
+            // 5.列番だけ書き換える
+            existingTrainState.TrainNumber = clientTrainNumber;
+            await UpdateTrainState(existingTrainState);
+            return existingTrainState;
+        }
+
+        // ここには来ない
+        // 異常応答などを返すべき
+        throw new InvalidOperationException("Unreachable code: TrainState mismatch.");
     }
 
     public async Task<Dictionary<string, TrainInfo>> GetTrainInfoByTrainNumber()
