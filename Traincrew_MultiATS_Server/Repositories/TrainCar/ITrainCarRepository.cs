@@ -28,5 +28,5 @@ public interface ITrainCarRepository
     /// すべての車両情報を取得する
     /// </summary>
     /// <returns>全車両状態リスト</returns>
-    Task<List<TrainCarState>> GetAll();
+    Task<List<TrainCarState>> GetAllOrderByTrainStateIdAndIndex();
 }

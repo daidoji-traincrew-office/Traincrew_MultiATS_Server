@@ -195,7 +195,7 @@ public partial class TrainService(
         // 列車情報を取得
         var trainStates = await trainRepository.GetAll();
         // 車両情報を取得
-        var trainCarStates = await trainCarRepository.GetAll();
+        var trainCarStates = await trainCarRepository.GetAllOrderByTrainStateIdAndIndex();
         // 車両情報を列車状態IDでグループ化
         var trainCarStatesByTrainStateId = trainCarStates
             .GroupBy(carState => carState.TrainStateId)

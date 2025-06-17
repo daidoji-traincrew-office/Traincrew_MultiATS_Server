@@ -71,8 +71,11 @@ public class TrainCarRepository(ApplicationDbContext context) : ITrainCarReposit
             .ExecuteDeleteAsync();
     }
 
-    public async Task<List<TrainCarState>> GetAll()
+    public async Task<List<TrainCarState>> GetAllOrderByTrainStateIdAndIndex()
     {
-        return await context.TrainCarStates.ToListAsync();
+        return await context.TrainCarStates
+            .OrderBy(car => car.TrainStateId)
+            .ThenBy(car => car.Index)
+            .ToListAsync();
     }
 }
