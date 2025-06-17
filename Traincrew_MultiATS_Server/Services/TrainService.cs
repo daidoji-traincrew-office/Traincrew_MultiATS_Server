@@ -282,20 +282,6 @@ public partial class TrainService(
         await trainRepository.DeleteByTrainNumber(trainNumber);
     }
 
-
-    /// <summary>
-    /// 運番が同じかどうかを判定する
-    /// </summary>
-    /// <param name="trainNumber1">列番1</param>
-    /// <param name="trainNumber2">列番2</param>
-    /// <returns></returns>
-    private static bool IsDiaNumberEqual(string trainNumber1, string trainNumber2)
-    {
-        var diaNumber1 = GetDiaNumberFromTrainNumber(trainNumber1);
-        var diaNumber2 = GetDiaNumberFromTrainNumber(trainNumber2);
-        return diaNumber1 == diaNumber2;
-    }
-
     /// <summary>
     /// 列車番号から運番を求める
     /// </summary>
