@@ -587,3 +587,23 @@ CREATE TABLE train_car_state
     ampare            DOUBLE PRECISION                   NOT NULL DEFAULT 0,     -- 電流値
     PRIMARY KEY (train_state_id, index)
 );
+
+-- 運行情報等の種類
+CREATE TYPE operation_information_type AS ENUM (
+    'advertisement',    -- 広告
+    'normal',           -- 平常運転
+    'delay',            -- 遅延
+    'suspended'         -- 運転見合わせ
+);
+
+-- 運行情報等
+CREATE TABLE operation_information_state
+(
+    id         BIGSERIAL PRIMARY KEY,
+    type       operation_information_type NOT NULL, -- 情報の種類
+    content    TEXT                       NOT NULL, -- 情報本文
+    start_time TIMESTAMP                  NOT NULL, -- 表示開始時刻
+    end_time   TIMESTAMP                  NOT NULL  -- 表示終了時刻
+);
+CREATE INDEX operation_information_state_start_time_index ON operation_information_state (start_time);
+CREATE INDEX operation_information_state_end_time_index ON operation_information_state (end_time);
