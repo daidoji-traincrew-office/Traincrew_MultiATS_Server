@@ -43,6 +43,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<TrainCarState> TrainCarStates { get; set; }
     public DbSet<TrainType> TrainTypes { get; set; }
     public DbSet<TrainDiagram> TrainDiagrams { get; set; }
+    public DbSet<OperationInformationState> OperationInformationStates { get; set; } // 追加
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

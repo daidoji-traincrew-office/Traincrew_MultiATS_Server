@@ -16,7 +16,8 @@ public class CommanderTableHub(
     TrackCircuitService trackCircuitService,
     OperationNotificationService operationNotificationService,
     TtcStationControlService ttcStationControlService,
-    TrainService trainService
+    TrainService trainService,
+    OperationInformationService operationInformationService 
 ) : Hub<ICommanderTableClientContract>, ICommanderTableHubContract
 {
     public async Task<DataToCommanderTable> SendData_CommanderTable()
@@ -50,5 +51,15 @@ public class CommanderTableHub(
         await trainService.DeleteTrainState(trainName);
         await trackCircuitService.ClearTrackCircuitByTrainNumber(trainName);
         await ttcStationControlService.ClearTtcWindowByTrainNumber(trainName);
+    }
+
+    public async Task AddOperationInformation(OperationInformationData operationInformationData)
+    {
+        await operationInformationService.AddOperationInformation(operationInformationData);
+    }
+    
+    public async Task UpdateOperationInformation(OperationInformationData operationInformationData)
+    {
+        await operationInformationService.UpdateOperationInformation(operationInformationData);
     }
 }

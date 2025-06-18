@@ -9,6 +9,8 @@ public interface ICommanderTableHubContract
     Task SendOperationNotificationData(OperationNotificationData operationNotificationData);
     Task SendTrackCircuitData(TrackCircuitData trackCircuitData);
     Task DeleteTrain(string trainName);
+    Task AddOperationInformation(OperationInformationData operationInformationData);
+    Task UpdateOperationInformation(OperationInformationData operationInformationData);
 }
 
 public interface ICommanderTableClientContract
