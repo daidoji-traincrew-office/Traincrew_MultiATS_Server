@@ -11,6 +11,8 @@ public interface ICommanderTableHubContract
     Task DeleteTrain(string trainName);
     Task AddOperationInformation(OperationInformationData operationInformationData);
     Task UpdateOperationInformation(OperationInformationData operationInformationData);
+    Task<List<OperationInformationData>> GetAllOperationInformations();
+    Task DeleteOperationInformation(long id);
 }
 
 public interface ICommanderTableClientContract

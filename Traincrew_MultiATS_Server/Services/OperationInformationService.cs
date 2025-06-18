@@ -1,7 +1,7 @@
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Models;
-using Traincrew_MultiATS_Server.Repositories;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
+using Traincrew_MultiATS_Server.Repositories.OperationInformation;
 
 namespace Traincrew_MultiATS_Server.Services;
 
@@ -20,7 +20,7 @@ public class OperationInformationService(
             EndTime = data.EndTime,
         };
 
-        await operationInformationRepository.AddOperationInformation(operationInformationState);
+        await operationInformationRepository.Add(operationInformationState);
     }
     
     public async Task UpdateOperationInformation(OperationInformationData data)
@@ -33,14 +33,25 @@ public class OperationInformationService(
             StartTime = data.StartTime,
             EndTime = data.EndTime,
         };
-        await operationInformationRepository.UpdateOperationInformation(operationInformationState);
+        await operationInformationRepository.Update(operationInformationState);
     }
 
     public async Task<List<OperationInformationData>> GetOperationInformations()
     {
         var now = dateTimeRepository.GetNow();
-        var states = await operationInformationRepository.GetOperationInformationsByNow(now);
+        var states = await operationInformationRepository.GetByNow(now);
         return states.Select(ToOperationInformationData).ToList();
+    }
+
+    public async Task<List<OperationInformationData>> GetAllOperationInformations()
+    {
+        var states = await operationInformationRepository.GetAll();
+        return states.Select(ToOperationInformationData).ToList();
+    }
+
+    public async Task DeleteOperationInformation(long id)
+    {
+        await operationInformationRepository.DeleteById(id);
     }
 
     private static OperationInformationData ToOperationInformationData(OperationInformationState x)

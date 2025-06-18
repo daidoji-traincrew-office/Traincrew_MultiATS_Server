@@ -4,6 +4,7 @@ using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.General;
 using Traincrew_MultiATS_Server.Repositories.NextSignal;
+using Traincrew_MultiATS_Server.Repositories.OperationInformation;
 using Traincrew_MultiATS_Server.Repositories.OperationNotification;
 using Traincrew_MultiATS_Server.Repositories.Protection;
 using Traincrew_MultiATS_Server.Repositories.Route;
@@ -72,6 +73,7 @@ public class Program
             .AddScoped<INextSignalRepository, NextSignalRepository>()
             .AddScoped<ISignalRepository, SignalRepository>()
             .AddScoped<IOperationNotificationRepository, OperationNotificationRepository>()
+            .AddScoped<IOperationInformationRepository, OperationInformationRepository>()
             .AddScoped<IProtectionRepository, ProtectionRepository>()
             .AddScoped<IRouteRepository, RouteRepository>()
             .AddScoped<ISignalRouteRepository, SignalRouteRepository>()
@@ -79,6 +81,7 @@ public class Program
             .AddScoped<TrackCircuitService>()
             .AddScoped<SignalService>()
             .AddScoped<OperationNotificationService>()
+            .AddScoped<OperationInformationService>()
             .AddScoped<ProtectionService>()
             .AddScoped<RouteService>()
             .AddScoped<TrainService>()

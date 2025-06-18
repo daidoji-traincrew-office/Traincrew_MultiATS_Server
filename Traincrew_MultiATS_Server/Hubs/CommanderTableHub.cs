@@ -62,4 +62,14 @@ public class CommanderTableHub(
     {
         await operationInformationService.UpdateOperationInformation(operationInformationData);
     }
+
+    public async Task<List<OperationInformationData>> GetAllOperationInformations()
+    {
+        return await operationInformationService.GetAllOperationInformations();
+    }
+
+    public async Task DeleteOperationInformation(long id)
+    {
+        await operationInformationService.DeleteOperationInformation(id);
+    }
 }
