@@ -2,7 +2,7 @@
 
 Traincrew運転会用のマルチATSサーバー。
 
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Kesigomon/Traincrew_MultiATS_Server)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/daidoji-traincrew-office/Traincrew_MultiATS_Server)
 
 ## 開発者向け初期セットアップ
 
