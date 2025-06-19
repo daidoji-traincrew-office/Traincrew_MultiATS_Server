@@ -22,5 +22,6 @@ public static class EnumTypeMapper
         typeMapper.MapEnum<LR>();
         typeMapper.MapEnum<TtcWindowType>();
         typeMapper.MapEnum<TtcWindowLinkType>();
+        typeMapper.MapEnum<OperationInformationType>();
     }
 }
