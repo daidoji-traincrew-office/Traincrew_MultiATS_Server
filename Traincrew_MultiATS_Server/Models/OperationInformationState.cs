@@ -20,11 +20,11 @@ public class OperationInformationState
     [Required]
     public string Content { get; set; } = string.Empty;
 
-    [Column("start_time")]
+    [Column("start_time", TypeName = "timestamp without time zone")]
     [Required]
     public DateTime StartTime { get; set; }
 
-    [Column("end_time")]
+    [Column("end_time", TypeName = "timestamp without time zone")]
     [Required]
     public DateTime EndTime { get; set; }
 }
