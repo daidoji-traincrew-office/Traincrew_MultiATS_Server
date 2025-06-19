@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Traincrew_MultiATS_Server.Models;
@@ -5,14 +6,15 @@ namespace Traincrew_MultiATS_Server.Models;
 [Table("train_car_state")]
 public class TrainCarState
 {
-    [Column("train_number")]
-    public string TrainNumber { get; set; }
+    [Column("train_state_id")]
+    public long TrainStateId { get; set; }
 
     [Column("index")]
     public int Index { get; set; }
 
     [Column("car_model")]
-    public string CarModel { get; set; }
+    [Required]
+    public required string CarModel { get; set; }
 
     [Column("has_pantograph")]
     public bool HasPantograph { get; set; }
@@ -30,8 +32,8 @@ public class TrainCarState
     public bool DoorClose { get; set; }
 
     [Column("bc_press")]
-    public bool BcPress { get; set; }
+    public double BcPress { get; set; }
 
     [Column("ampare")]
-    public int Ampare { get; set; }
+    public double Ampare { get; set; }
 }

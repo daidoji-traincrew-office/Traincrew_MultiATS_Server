@@ -33,6 +33,8 @@ public class InitDbHostedService(
             await dbInitializer.Initialize();
         }
 
+        await InitTrainTypes(context, cancellationToken);
+        await InitTrainDiagrams(context, cancellationToken);
         var rendoTableInitializers =
             await CreateDbRendoTableInitializer(context, datetimeRepository, cancellationToken);
         foreach (var initializer in rendoTableInitializers)
@@ -404,6 +406,85 @@ public class InitDbHostedService(
     }
 
     /// <summary>
+    /// 列車種別(train_type)をCSVから初期化
+    /// </summary>
+    private async Task InitTrainTypes(ApplicationDbContext context, CancellationToken cancellationToken)
+    {
+        var file = new FileInfo("./Data/種別.csv");
+        if (!file.Exists)
+        {
+            return;
+        }
+
+        var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+        {
+            HasHeaderRecord = true,
+        };
+        using var reader = new StreamReader(file.FullName);
+        using var csv = new CsvReader(reader, config);
+        csv.Context.RegisterClassMap<TrainTypeCsvMap>();
+        var records = csv.GetRecords<TrainTypeCsv>().ToList();
+
+        var existingIds = await context.TrainTypes.Select(t => t.Id).ToListAsync(cancellationToken);
+
+        foreach (var record in records)
+        {
+            if (existingIds.Contains(record.Id))
+            {
+                continue;
+            }
+
+            context.TrainTypes.Add(new()
+            {
+                Id = record.Id,
+                Name = record.Name
+            });
+        }
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
+    /// <summary>
+    /// 列車ダイヤ(train_diagram)をCSVから初期化
+    /// </summary>
+    private async Task InitTrainDiagrams(ApplicationDbContext context, CancellationToken cancellationToken)
+    {
+        var file = new FileInfo("./Data/列車.csv");
+        if (!file.Exists)
+        {
+            return;
+        }
+
+        var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+        {
+            HasHeaderRecord = true,
+        };
+        using var reader = new StreamReader(file.FullName);
+        using var csv = new CsvReader(reader, config);
+        csv.Context.RegisterClassMap<TrainDiagramCsvMap>();
+        var records = csv.GetRecords<TrainDiagramCsv>().ToList();
+
+        var existingNumbers = await context.TrainDiagrams.Select(t => t.TrainNumber).ToListAsync(cancellationToken);
+
+        foreach (var record in records)
+        {
+            if (existingNumbers.Contains(record.TrainNumber))
+            {
+                continue;
+            }
+
+            context.TrainDiagrams.Add(new()
+            {
+                TrainNumber = record.TrainNumber,
+                TrainTypeId = record.TypeId,
+                FromStationId = record.FromStationId,
+                ToStationId = record.ToStationId,
+                DiaId = record.DiaId
+            });
+        }
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
+    /// <summary>
     /// UnchangedなEntityをすべてDetachする。
     /// </summary>
     /// <param name="context">DbContext</param>
@@ -579,12 +660,13 @@ internal partial class DbInitializer(
 
             // 軌道回路初期化
             ulong trackCircuitId = 0;
+            // 明示的に指定された軌道回路名がある場合はそれを使用
             if (signalData.TrackCircuitName != null)
             {
                 trackCircuits.TryGetValue(signalData.TrackCircuitName, out trackCircuitId);
             }
-
-            if (signalData.Name.StartsWith("上り閉塞") || signalData.Name.StartsWith("下り閉塞"))
+            // それ以外で閉塞信号機の場合、閉塞信号機の軌道回路を使う
+            else if (signalData.Name.StartsWith("上り閉塞") || signalData.Name.StartsWith("下り閉塞"))
             {
                 var trackCircuitName = $"{signalData.Name.Replace("閉塞", "")}T";
                 trackCircuits.TryGetValue(trackCircuitName, out trackCircuitId);

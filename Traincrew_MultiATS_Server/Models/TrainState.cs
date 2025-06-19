@@ -7,18 +7,28 @@ namespace Traincrew_MultiATS_Server.Models;
 public class TrainState
 {
     [Key]
+    [Column("id")]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public long Id { get; set; }
+
     [Column("train_number")]
-    public string TrainNumber { get; set; }
+    [Required]
+    public required string TrainNumber { get; set; }
+
+    [Column("dia_number")]
+    public int DiaNumber { get; set; }
 
     [Column("from_station_id")]
-    public string FromStationId { get; set; }
+    [Required]
+    public required string FromStationId { get; set; }
 
     [Column("to_station_id")]
-    public string ToStationId { get; set; }
+    [Required]
+    public required string ToStationId { get; set; }
 
     [Column("delay")]
     public int Delay { get; set; }
 
     [Column("driver_id")]
-    public long? DriverId { get; set; }
+    public ulong? DriverId { get; set; }
 }

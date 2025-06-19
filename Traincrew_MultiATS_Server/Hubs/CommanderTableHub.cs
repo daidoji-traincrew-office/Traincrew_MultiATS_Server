@@ -15,7 +15,8 @@ namespace Traincrew_MultiATS_Server.Hubs;
 public class CommanderTableHub(
     TrackCircuitService trackCircuitService,
     OperationNotificationService operationNotificationService,
-    TtcStationControlService ttcStationControlService
+    TtcStationControlService ttcStationControlService,
+    TrainService trainService
 ) : Hub<ICommanderTableClientContract>, ICommanderTableHubContract
 {
     public async Task<DataToCommanderTable> SendData_CommanderTable()
@@ -46,6 +47,7 @@ public class CommanderTableHub(
 
     public async Task DeleteTrain(string trainName)
     {
+        await trainService.DeleteTrainState(trainName);
         await trackCircuitService.ClearTrackCircuitByTrainNumber(trainName);
         await ttcStationControlService.ClearTtcWindowByTrainNumber(trainName);
     }

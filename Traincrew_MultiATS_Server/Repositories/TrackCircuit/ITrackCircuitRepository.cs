@@ -9,4 +9,5 @@ public interface ITrackCircuitRepository
     Task SetTrackCircuitList(List<Models.TrackCircuit> trackCircuitList, string trainNumber);
     Task ClearTrackCircuitList(List<Models.TrackCircuit> trackCircuitList);
     Task ClearTrackCircuitListByTrainNumber(string trainNumber);
+    Task<List<Models.TrackCircuit>> GetWhereShortCircuited();
 }

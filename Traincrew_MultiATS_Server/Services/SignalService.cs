@@ -12,6 +12,28 @@ public class SignalService(
     ISignalRouteRepository signalRouteRepository,
     INextSignalRepository nextSignalRepository)
 {
+    public async Task<List<SignalData>> GetSignalIndicationDataByTrackCircuits(List<TrackCircuit> trackCircuits, bool isUp)
+    {
+        
+        // 該当軌道回路の信号機を全取得
+        var closeSignalName = await GetSignalNamesByTrackCircuits(trackCircuits, isUp);
+        // 各信号機の１つ先の信号機も取得
+        var nextSignalName = await nextSignalRepository.GetByNamesAndDepth(closeSignalName, 1);
+        // 取得した信号機を結合
+        var signalName = closeSignalName
+            .Concat(nextSignalName.Select(x => x.TargetSignalName))
+            .Distinct()
+            .ToList();
+        // 現示計算
+        var signalIndications = await CalcSignalIndication(signalName);
+        return signalIndications
+            .Select(pair => ToSignalData(
+                pair.Key,
+                pair.Value)
+            )
+            .ToList();
+    }
+
     public async Task<Dictionary<string, Phase>> CalcSignalIndication(List<string> signalNames)
     {
         // まず、先の信号機名を取得

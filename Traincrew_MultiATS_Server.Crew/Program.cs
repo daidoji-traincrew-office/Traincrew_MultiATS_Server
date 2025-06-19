@@ -36,6 +36,9 @@ using Traincrew_MultiATS_Server.Repositories.SwitchingMachine;
 using Traincrew_MultiATS_Server.Repositories.SwitchingMachineRoute;
 using Traincrew_MultiATS_Server.Repositories.ThrowOutControl;
 using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
+using Traincrew_MultiATS_Server.Repositories.Train;
+using Traincrew_MultiATS_Server.Repositories.TrainCar;
+using Traincrew_MultiATS_Server.Repositories.TrainDiagram;
 using Traincrew_MultiATS_Server.Repositories.TtcWindow;
 using Traincrew_MultiATS_Server.Repositories.TtcWindowLink;
 using Traincrew_MultiATS_Server.Services;
@@ -445,6 +448,9 @@ public class Program
             .AddScoped<ISwitchingMachineRouteRepository, SwitchingMachineRouteRepository>()
             .AddScoped<IThrowOutControlRepository, ThrowOutControlRepository>()
             .AddScoped<ITrackCircuitRepository, TrackCircuitRepository>()
+            .AddScoped<ITrainRepository, TrainRepository>()
+            .AddScoped<ITrainCarRepository, TrainCarRepository>()
+            .AddScoped<ITrainDiagramRepository, TrainDiagramRepository>()
             .AddScoped<ITtcWindowRepository, TtcWindowRepository>()
             .AddScoped<ITtcWindowLinkRepository, TtcWindowLinkRepository>()
             .AddScoped<DirectionRouteService>()
@@ -457,16 +463,11 @@ public class Program
             .AddScoped<StationService>()
             .AddScoped<SwitchingMachineService>()
             .AddScoped<TrackCircuitService>()
+            .AddScoped<TrainService>()
             .AddScoped<TIDService>()
             .AddScoped<TtcStationControlService>()
-            .AddSingleton(provider =>
-            {
-                var discordService = new DiscordService(
-                    builder.Configuration,
-                    provider.GetRequiredService<IDiscordRepository>(),
-                    enableAuthorization);
-                return discordService;
-            })
+            .AddSingleton<EnableAuthorizationStore>(_ => new(enableAuthorization))
+            .AddSingleton<DiscordService>()
             .AddSingleton<DiscordRepository>()
             .AddSingleton<IDiscordRepository>(provider => provider.GetRequiredService<DiscordRepository>())
             .AddSingleton<IMutexRepository, MutexRepository>()

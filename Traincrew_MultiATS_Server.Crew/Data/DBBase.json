@@ -203,6 +203,276 @@
             "Name": "大路",
             "IsStation": true,
             "IsPassengerStation": true
+        },
+        {
+            "Id": "TH44",
+            "Name": "",
+            "IsStation": true,
+            "IsPassengerStation": true
+        },
+        {
+            "Id": "TH43",
+            "Name": "広小路",
+            "IsStation": true,
+            "IsPassengerStation": true
+        },
+        {
+            "Id": "TH42",
+            "Name": "田村",
+            "IsStation": true,
+            "IsPassengerStation": true
+        },
+        {
+            "Id": "TH41",
+            "Name": "二ツ山",
+            "IsStation": true,
+            "IsPassengerStation": true
+        },
+        {
+            "Id": "TH40",
+            "Name": "小沼",
+            "IsStation": true,
+            "IsPassengerStation": true
+        },
+        {
+            "Id": "TH39",
+            "Name": "六日市町",
+            "IsStation": true,
+            "IsPassengerStation": true
+        },
+        {
+            "Id": "TH38",
+            "Name": "朝日ヶ丘",
+            "IsStation": true,
+            "IsPassengerStation": true
+        },
+        {
+            "Id": "TH37",
+            "Name": "大野宮",
+            "IsStation": true,
+            "IsPassengerStation": true
+        },
+        {
+            "Id": "TH36",
+            "Name": "沢井",
+            "IsStation": true,
+            "IsPassengerStation": true
+        },
+        {
+            "Id": "TH35",
+            "Name": "箕田",
+            "IsStation": true,
+            "IsPassengerStation": true
+        },
+        {
+            "Id": "TH34",
+            "Name": "江西",
+            "IsStation": true,
+            "IsPassengerStation": true
+        },
+        {
+            "Id": "TH33",
+            "Name": "大和田町",
+            "IsStation": true,
+            "IsPassengerStation": true
+        },
+        {
+            "Id": "TH32",
+            "Name": "木之本",
+            "IsStation": true,
+            "IsPassengerStation": true
+        },
+        {
+            "Id": "TH31",
+            "Name": "新長野公園",
+            "IsStation": true,
+            "IsPassengerStation": true
+        },
+        {
+            "Id": "TH30",
+            "Name": "長野本町",
+            "IsStation": true,
+            "IsPassengerStation": true
+        },
+        {
+            "Id": "TH29",
+            "Name": "高砂町",
+            "IsStation": true,
+            "IsPassengerStation": true
+        },
+        {
+            "Id": "TH28",
+            "Name": "東福",
+            "IsStation": true,
+            "IsPassengerStation": true
+        },
+        {
+            "Id": "TH27",
+            "Name": "千里が丘",
+            "IsStation": true,
+            "IsPassengerStation": true
+        },
+        {
+            "Id": "TH26",
+            "Name": "矢木",
+            "IsStation": true,
+            "IsPassengerStation": true
+        },
+        {
+            "Id": "TH25",
+            "Name": "北美",
+            "IsStation": true,
+            "IsPassengerStation": true
+        },
+        {
+            "Id": "TH24",
+            "Name": "緑ヶ丘",
+            "IsStation": true,
+            "IsPassengerStation": true
+        },
+        {
+            "Id": "TH23",
+            "Name": "町沢",
+            "IsStation": true,
+            "IsPassengerStation": true
+        },
+        {
+            "Id": "TH22",
+            "Name": "大原",
+            "IsStation": true,
+            "IsPassengerStation": true
+        },
+        {
+            "Id": "TH21",
+            "Name": "本郷",
+            "IsStation": true,
+            "IsPassengerStation": true
+        },
+        {
+            "Id": "TH20",
+            "Name": "五十川",
+            "IsStation": true,
+            "IsPassengerStation": true
+        },
+        {
+            "Id": "TH19",
+            "Name": "出屋敷前",
+            "IsStation": true,
+            "IsPassengerStation": true
+        },
+        {
+            "Id": "TH18",
+            "Name": "佐川",
+            "IsStation": true,
+            "IsPassengerStation": true
+        },
+        {
+            "Id": "TH17",
+            "Name": "夕陽が丘",
+            "IsStation": true,
+            "IsPassengerStation": true
+        },
+        {
+            "Id": "TH16",
+            "Name": "五日市",
+            "IsStation": true,
+            "IsPassengerStation": true
+        },
+        {
+            "Id": "TH15",
+            "Name": "南五日市",
+            "IsStation": true,
+            "IsPassengerStation": true
+        },
+        {
+            "Id": "TH14",
+            "Name": "高井戸八幡",
+            "IsStation": true,
+            "IsPassengerStation": true
+        },
+        {
+            "Id": "TH13",
+            "Name": "南八幡",
+            "IsStation": true,
+            "IsPassengerStation": true
+        },
+        {
+            "Id": "TH12",
+            "Name": "学院前",
+            "IsStation": true,
+            "IsPassengerStation": true
+        },
+        {
+            "Id": "TH11",
+            "Name": "中道",
+            "IsStation": true,
+            "IsPassengerStation": true
+        },
+        {
+            "Id": "TH10",
+            "Name": "佐野",
+            "IsStation": true,
+            "IsPassengerStation": true
+        },
+        {
+            "Id": "TH09",
+            "Name": "小手川",
+            "IsStation": true,
+            "IsPassengerStation": true
+        },
+        {
+            "Id": "TH08",
+            "Name": "南吉岡",
+            "IsStation": true,
+            "IsPassengerStation": true
+        },
+        {
+            "Id": "TH07",
+            "Name": "宮の前",
+            "IsStation": true,
+            "IsPassengerStation": true
+        },
+        {
+            "Id": "TH06",
+            "Name": "神宮橋",
+            "IsStation": true,
+            "IsPassengerStation": true
+        },
+        {
+            "Id": "TH05",
+            "Name": "宮松町",
+            "IsStation": true,
+            "IsPassengerStation": true
+        },
+        {
+            "Id": "TH04",
+            "Name": "青木町",
+            "IsStation": true,
+            "IsPassengerStation": true
+        },
+        {
+            "Id": "TH03",
+            "Name": "新町",
+            "IsStation": true,
+            "IsPassengerStation": true
+        },
+        {
+            "Id": "TH02",
+            "Name": "三番街",
+            "IsStation": true,
+            "IsPassengerStation": true
+        },
+        {
+            "Id": "TH01",
+            "Name": "大手橋",
+            "IsStation": true,
+            "IsPassengerStation": true
+        },
+        {
+            "Id": "TH00",
+            "Name": "ダミー",
+            "IsStation": false,
+            "IsPassengerStation": false
         }
     ],
     "trackCircuitList": [
@@ -454,7 +724,7 @@
                 "赤山町上り場内2RC"
             ],
             "NextSignalNamesDown": [
-                "下り閉塞277"
+                "下り閉塞267"
             ],
             "ProtectionZone": 11
         },

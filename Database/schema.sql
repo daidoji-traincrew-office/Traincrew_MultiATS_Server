@@ -389,6 +389,23 @@ CREATE TABLE route_lock_track_circuit
     UNIQUE (route_id, track_circuit_id)
 );
 
+-- 列車種別
+CREATE TABLE train_type
+(
+    id   BIGINT PRIMARY KEY,          -- 列車のID
+    name VARCHAR(100) NOT NULL UNIQUE -- 種別名
+);
+
+-- 列車(ダイヤグラム内の1列車)情報
+CREATE TABLE train_diagram
+(
+    train_number    VARCHAR(100) PRIMARY KEY,                        -- 列車番号
+    train_type_id   BIGINT      NOT NULL REFERENCES train_type (id), -- 列車種別ID
+    from_station_id VARCHAR(10) NOT NULL REFERENCES station (id),    -- 出発駅ID
+    to_station_id   VARCHAR(10) NOT NULL REFERENCES station (id),    -- 到着駅ID
+    dia_id          INT         NOT NULL                             -- ダイヤID
+);
+
 -- ここから状態系
 -- 駅時素状態
 CREATE TABLE station_timer_state
@@ -546,25 +563,27 @@ CREATE TABLE ttc_window_state
 -- 列車状態
 CREATE TABLE train_state
 (
-    train_number    VARCHAR(100) PRIMARY KEY,                     -- 列車番号
-    from_station_id VARCHAR(10) NOT NULL REFERENCES station (id), -- 出発駅ID
-    to_station_id   VARCHAR(10) NOT NULL REFERENCES station (id), -- 到着駅ID
-    delay           INT         NOT NULL DEFAULT 0,               -- 遅延時間(秒)
-    driver_id       BIGINT                                        -- 運転士ID(列車の運転士)
+    id              BIGSERIAL PRIMARY KEY,                         -- 列車状態のID
+    train_number    VARCHAR(100) NOT NULL UNIQUE,                  -- 列車番号
+    dia_number      INT          NOT NULL UNIQUE,                  -- 運行番号
+    from_station_id VARCHAR(10)  NOT NULL REFERENCES station (id), -- 出発駅ID
+    to_station_id   VARCHAR(10)  NOT NULL REFERENCES station (id), -- 到着駅ID
+    delay           INT          NOT NULL DEFAULT 0,               -- 遅延時間(秒)
+    driver_id       BIGINT UNIQUE                                  -- 運転士ID(列車の運転士)
 );
 
 -- 列車車両情報
 CREATE TABLE train_car_state
 (
-    train_number      VARCHAR(100) REFERENCES train_state (train_number) NOT NULL,               -- 列車状態のID
-    index             INT                                                NOT NULL,               -- インデックス
-    car_model         VARCHAR(100)                                       NOT NULL,               -- 車両形式
-    has_pantograph    BOOLEAN                                            NOT NULL DEFAULT false, -- パンタグラフの有無
-    has_driver_cab    BOOLEAN                                            NOT NULL DEFAULT false, -- 運転台の有無
-    has_conductor_cab BOOLEAN                                            NOT NULL DEFAULT false, -- 車掌室の有無
-    has_motor         BOOLEAN                                            NOT NULL DEFAULT false, -- 電動機ありなし
-    door_close        BOOLEAN                                            NOT NULL DEFAULT true,  -- 扉閉め状態
-    bc_press          BOOLEAN                                            NOT NULL DEFAULT false, -- ブレーキ圧力
-    ampare            INT                                                NOT NULL DEFAULT 0,     -- 電流値
-    PRIMARY KEY (train_number, index)
+    train_state_id    BIGINT REFERENCES train_state (id) NOT NULL,               -- 列車状態のID
+    index             INT                                NOT NULL,               -- インデックス
+    car_model         VARCHAR(100)                       NOT NULL,               -- 車両形式
+    has_pantograph    BOOLEAN                            NOT NULL DEFAULT false, -- パンタグラフの有無
+    has_driver_cab    BOOLEAN                            NOT NULL DEFAULT false, -- 運転台の有無
+    has_conductor_cab BOOLEAN                            NOT NULL DEFAULT false, -- 車掌室の有無
+    has_motor         BOOLEAN                            NOT NULL DEFAULT false, -- 電動機ありなし
+    door_close        BOOLEAN                            NOT NULL DEFAULT true,  -- 扉閉め状態
+    bc_press          DOUBLE PRECISION                   NOT NULL DEFAULT 0,     -- ブレーキ圧力
+    ampare            DOUBLE PRECISION                   NOT NULL DEFAULT 0,     -- 電流値
+    PRIMARY KEY (train_state_id, index)
 );

@@ -14,14 +14,26 @@ public class ProtectionService(IProtectionRepository protectionRepository)
 		return await protectionRepository.IsProtectionEnabled(minProtectionZone, maxProtectionZone);
 	}
 	
-	public async Task EnableProtectionByTrackCircuits(string trainNumber, List<TrackCircuit> trackCircuits)
+	private async Task EnableProtectionByTrackCircuits(string trainNumber, List<TrackCircuit> trackCircuits)
 	{
 		await protectionRepository.EnableProtection(
 			trainNumber, trackCircuits.Select(tc => tc.ProtectionZone).ToList());
 	}
 
-	public async Task DisableProtection(string trainNumber)
+	private async Task DisableProtection(string trainNumber)
 	{
 		await protectionRepository.DisableProtection(trainNumber);
 	}
+
+    public async Task UpdateBougoState(string trainNumber, List<TrackCircuit> trackCircuits, bool clientBougoState)
+    {
+        if (clientBougoState)
+        {
+            await EnableProtectionByTrackCircuits(trainNumber, trackCircuits);
+        }
+        else
+        {
+            await DisableProtection(trainNumber);
+        }
+    }
 }
