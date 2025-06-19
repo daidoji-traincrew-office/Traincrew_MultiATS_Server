@@ -6,16 +6,21 @@ namespace Traincrew_MultiATS_Server.Repositories.OperationInformation;
 
 public class OperationInformationRepository(ApplicationDbContext context) : IOperationInformationRepository
 {
-    public async Task<List<OperationInformationState>> GetByNow(DateTime now)
+    public async Task<List<OperationInformationState>> GetByNowOrderByTypeAndId(DateTime now)
     {
         return await context.OperationInformationStates 
             .Where(x => x.StartTime <= now && now < x.EndTime)
+            .OrderByDescending(x => x.Type)
+            .ThenBy(x => x.Id)
             .ToListAsync();
     }
 
-    public async Task<List<OperationInformationState>> GetAll()
+    public async Task<List<OperationInformationState>> GetAllOrderByTypeAndId()
     {
-        return await context.OperationInformationStates.ToListAsync();
+        return await context.OperationInformationStates
+            .OrderByDescending(x => x.Type)
+            .ThenBy(x => x.Id)
+            .ToListAsync();
     }
 
     public async Task<OperationInformationState> Add(OperationInformationState state)

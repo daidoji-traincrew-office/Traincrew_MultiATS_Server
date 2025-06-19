@@ -40,14 +40,24 @@ public class OperationInformationService(
 
     public async Task<List<OperationInformationData>> GetOperationInformations()
     {
-        var now = dateTimeRepository.GetNow();
-        var states = await operationInformationRepository.GetByNow(now);
-        return states.Select(ToOperationInformationData).ToList();
+        return await GetOperationInformationsOrderByType();
     }
 
     public async Task<List<OperationInformationData>> GetAllOperationInformations()
     {
-        var states = await operationInformationRepository.GetAll();
+        return await GetAllOperationInformationsOrderByType();
+    }
+
+    public async Task<List<OperationInformationData>> GetOperationInformationsOrderByType()
+    {
+        var now = dateTimeRepository.GetNow();
+        var states = await operationInformationRepository.GetByNowOrderByTypeAndId(now);
+        return states.Select(ToOperationInformationData).ToList();
+    }
+
+    public async Task<List<OperationInformationData>> GetAllOperationInformationsOrderByType()
+    {
+        var states = await operationInformationRepository.GetAllOrderByTypeAndId();
         return states.Select(ToOperationInformationData).ToList();
     }
 
