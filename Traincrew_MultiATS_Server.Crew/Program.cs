@@ -24,6 +24,7 @@ using Traincrew_MultiATS_Server.Repositories.Lock;
 using Traincrew_MultiATS_Server.Repositories.LockCondition;
 using Traincrew_MultiATS_Server.Repositories.Mutex;
 using Traincrew_MultiATS_Server.Repositories.NextSignal;
+using Traincrew_MultiATS_Server.Repositories.OperationInformation;
 using Traincrew_MultiATS_Server.Repositories.OperationNotification;
 using Traincrew_MultiATS_Server.Repositories.Protection;
 using Traincrew_MultiATS_Server.Repositories.Route;
@@ -437,6 +438,7 @@ public class Program
             .AddScoped<ILeverRepository, LeverRepository>()
             .AddScoped<INextSignalRepository, NextSignalRepository>()
             .AddScoped<IOperationNotificationRepository, OperationNotificationRepository>()
+            .AddScoped<IOperationInformationRepository, OperationInformationRepository>()
             .AddScoped<IProtectionRepository, ProtectionRepository>()
             .AddScoped<IRouteRepository, RouteRepository>()
             .AddScoped<IRouteLeverDestinationRepository, RouteLeverDestinationRepository>()
@@ -456,6 +458,7 @@ public class Program
             .AddScoped<DirectionRouteService>()
             .AddScoped<InterlockingService>()
             .AddScoped<OperationNotificationService>()
+            .AddScoped<OperationInformationService>()
             .AddScoped<ProtectionService>()
             .AddScoped<RendoService>()
             .AddScoped<RouteService>()

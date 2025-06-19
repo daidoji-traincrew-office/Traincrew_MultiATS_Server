@@ -15,6 +15,7 @@ public class ServerToPassengerData
 {
     public List<TrackCircuitData> TrackCircuitData { get; init; }
     public Dictionary<string, TrainInfo> TrainInfos { get; init; } = [];
+    public List<OperationInformationData> OperationInformations { get; init; } = [];
 }
 
 /*
