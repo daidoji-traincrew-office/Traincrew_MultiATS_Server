@@ -53,14 +53,14 @@ public class CommanderTableHub(
         await ttcStationControlService.ClearTtcWindowByTrainNumber(trainName);
     }
 
-    public async Task AddOperationInformation(OperationInformationData operationInformationData)
+    public async Task<OperationInformationData> AddOperationInformation(OperationInformationData operationInformationData)
     {
-        await operationInformationService.AddOperationInformation(operationInformationData);
+        return await operationInformationService.AddOperationInformation(operationInformationData);
     }
     
-    public async Task UpdateOperationInformation(OperationInformationData operationInformationData)
+    public async Task<OperationInformationData> UpdateOperationInformation(OperationInformationData operationInformationData)
     {
-        await operationInformationService.UpdateOperationInformation(operationInformationData);
+        return await operationInformationService.UpdateOperationInformation(operationInformationData);
     }
 
     public async Task<List<OperationInformationData>> GetAllOperationInformations()

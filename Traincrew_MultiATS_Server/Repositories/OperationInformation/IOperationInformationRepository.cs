@@ -6,7 +6,7 @@ public interface IOperationInformationRepository
 {
     Task<List<OperationInformationState>> GetByNow(DateTime now);
     Task<List<OperationInformationState>> GetAll();
-    Task Add(OperationInformationState state);
-    Task Update(OperationInformationState state);
+    Task<OperationInformationState> Add(OperationInformationState state);
+    Task<OperationInformationState> Update(OperationInformationState state);
     Task DeleteById(long id);
 }

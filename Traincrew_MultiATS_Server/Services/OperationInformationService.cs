@@ -10,7 +10,7 @@ public class OperationInformationService(
     IDateTimeRepository dateTimeRepository
 )
 {
-    public async Task AddOperationInformation(OperationInformationData data)
+    public async Task<OperationInformationData> AddOperationInformation(OperationInformationData data)
     {
         var operationInformationState = new OperationInformationState
         {
@@ -20,10 +20,11 @@ public class OperationInformationService(
             EndTime = data.EndTime,
         };
 
-        await operationInformationRepository.Add(operationInformationState);
+        var result = await operationInformationRepository.Add(operationInformationState);
+        return ToOperationInformationData(result);
     }
     
-    public async Task UpdateOperationInformation(OperationInformationData data)
+    public async Task<OperationInformationData> UpdateOperationInformation(OperationInformationData data)
     {
         var operationInformationState = new OperationInformationState
         {
@@ -33,7 +34,8 @@ public class OperationInformationService(
             StartTime = data.StartTime,
             EndTime = data.EndTime,
         };
-        await operationInformationRepository.Update(operationInformationState);
+        var result = await operationInformationRepository.Update(operationInformationState);
+        return ToOperationInformationData(result);
     }
 
     public async Task<List<OperationInformationData>> GetOperationInformations()

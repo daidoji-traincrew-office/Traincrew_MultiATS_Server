@@ -18,16 +18,18 @@ public class OperationInformationRepository(ApplicationDbContext context) : IOpe
         return await context.OperationInformationStates.ToListAsync();
     }
 
-    public async Task Add(OperationInformationState state)
+    public async Task<OperationInformationState> Add(OperationInformationState state)
     {
         context.OperationInformationStates.Add(state);
         await context.SaveChangesAsync();
+        return state;
     }
     
-    public async Task Update(OperationInformationState state)
+    public async Task<OperationInformationState> Update(OperationInformationState state)
     {
         context.OperationInformationStates.Update(state);
         await context.SaveChangesAsync();
+        return state;
     }
 
     public async Task DeleteById(long id)
