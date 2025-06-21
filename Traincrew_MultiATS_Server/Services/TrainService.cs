@@ -113,6 +113,13 @@ public partial class TrainService(
         var clientTrainNumber = clientData.DiaName;
         var clientDiaNumber = GetDiaNumberFromTrainNumber(clientTrainNumber);
         var existingTrainState = await GetTrainStatesByDiaNumber(clientDiaNumber);
+        // 同一運転士の別列車が居る場合、削除
+        var driverOtherTrains = await trainRepository.GetByDriverId(clientDriverId);
+        if (driverOtherTrains != null && driverOtherTrains.TrainNumber != clientTrainNumber)
+        {
+            // 別の列車が在線している場合は削除
+            await DeleteTrainState(driverOtherTrains.TrainNumber);
+        }
 
         // 1.同一列番/同一運番が未登録
         if (existingTrainState == null)
@@ -134,12 +141,6 @@ public partial class TrainService(
                 return null;
             }
 
-            //1-3.同一運転士の別列車が居る場合、削除
-            var driverOtherTrains = await trainRepository.GetByDriverId(clientDriverId);
-            foreach (var otherTrain in driverOtherTrains)
-            {
-                await DeleteTrainState(otherTrain.TrainNumber);
-            }
 
             //1.完全新規登録
             return await CreateTrainState(clientData, clientDriverId);
@@ -228,6 +229,12 @@ public partial class TrainService(
     {
         // 列車情報を取得
         return await trainRepository.GetByDiaNumber(diaNumber);
+    }
+
+    private async Task<TrainState?> GetTrainStatesByDriverId(ulong driverId)
+    {
+        // 運転士IDに紐づく列車情報を取得
+        return await trainRepository.GetByDriverId(driverId);
     }
 
     // 軌道回路に対する列車の取得

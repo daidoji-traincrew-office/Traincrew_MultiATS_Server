@@ -23,7 +23,7 @@ public interface ITrainRepository
     /// </summary>
     /// <param name="driverId">運転士ID</param>
     /// <returns></returns>
-    Task<List<TrainState>> GetByDriverId(ulong driverId);
+    Task<TrainState?> GetByDriverId(ulong driverId);
 
     /// <summary>
     /// すべての列車情報を取得する
