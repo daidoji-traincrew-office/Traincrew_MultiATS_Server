@@ -3,6 +3,7 @@ using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.General;
 using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
+using Traincrew_MultiATS_Server.Repositories.Lever;
 using Traincrew_MultiATS_Server.Repositories.LockCondition;
 using Traincrew_MultiATS_Server.Repositories.SwitchingMachine;
 using Traincrew_MultiATS_Server.Repositories.SwitchingMachineRoute;
@@ -16,6 +17,7 @@ public class SwitchingMachineService(
     IInterlockingObjectRepository interlockingObjectRepository,
     ISwitchingMachineRouteRepository switchingMachineRouteRepository,
     ILockConditionRepository lockConditionRepository,
+    ILeverRepository leverRepository,
     IGeneralRepository generalRepository
     )
 {
@@ -26,39 +28,70 @@ public class SwitchingMachineService(
     /// <returns></returns>   
     public async Task SwitchingMachineControl()
     {
+        // こいつは定常で全駅回すので駅ごとに分けるやつの対象外
         // Todo: クラスのstaticにしたほうが良いかも
         var switchMoveTime = TimeSpan.FromSeconds(5);
         var switchReturnTime = TimeSpan.FromMilliseconds(500);
-        // InterlockingObjectを全取得
-        // Todo: 全取得しなくても良いようにする
-        var interlockingObjects = await interlockingObjectRepository.GetAllWithState();
+        // 処理が必要な転てつ器のIDを取得
+        // 1. 転換中の転てつ器
+        var movingSwitchingMachineIds = await switchingMachineRepository.GetIdsWhereMoving();
+        // 2. 転てつ器の単独てこが倒れている転てつ器
+        var leverReversedSwitchingMachineIds = await switchingMachineRepository.GetIdsWhereLeverReversed();
+        // 3. てこリレー回路が上がっている進路に対する転てつ器
+        var leverRelayRaisedSwitchingMachineIds = await switchingMachineRepository.GetIdsWhereLeverRelayRaised();
+        // それら全てのID
+        var switchingMachineIds = movingSwitchingMachineIds
+            .Union(leverReversedSwitchingMachineIds)
+            .Union(leverRelayRaisedSwitchingMachineIds)
+            .ToList();
+        
+        // 転てつ器てこのIDを取得
+        var leverIds = await leverRepository.GetIdsBySwitchingMachineIds(switchingMachineIds); 
+        
+        // 進路のIDを取得
+        var switchingMachineRoutes =
+            await switchingMachineRouteRepository.GetBySwitchingMachineIds(switchingMachineIds);
+        var routeIds = switchingMachineRoutes.Select(route => route.RouteId).ToList();
+
+        // てっさ鎖錠欄の条件を取得
+        var detectorLockConditions = await lockConditionRepository.GetConditionsByObjectIdsAndType(routeIds, LockType.Detector);
+
+        // 関係するObjectのIDを取得
+        var detectorLockObjects = detectorLockConditions.Values
+            .SelectMany(lockConditions => lockConditions.OfType<LockConditionObject>().Select(lc => lc.ObjectId))
+            .Distinct()
+            .ToList();
+
+        // 全IDをUnionしてInterlockingObjectを取得
+        var allObjectIds = switchingMachineIds
+            .Union(leverIds)
+            .Union(routeIds)
+            .Union(detectorLockObjects)
+            .ToList();
+        var interlockingObjects = await interlockingObjectRepository.GetObjectByIdsWithState(allObjectIds);
         var interlockingObjectDic = interlockingObjects.ToDictionary(x => x.Id);
-        // こいつは定常で全駅回すので駅ごとに分けるやつの対象外
-        // 転てつ機を全取得
+        // 転てつ機
         var switchingMachineList = interlockingObjects
             .OfType<SwitchingMachine>()
             .ToList();
-        // 転てつ機てこを全取得
+        // 転てつ機てこ
         var levers = interlockingObjects
             .OfType<Lever>()
-            .Where(x => x is { SwitchingMachineId: not null })
-            .ToDictionary(x => x.SwitchingMachineId);
-        // SwitchingMachineRouteのリストを取得
-        var switchingMachineRouteDict = (await switchingMachineRouteRepository.GetAll())
+            .Where(x => x.SwitchingMachineId != null)
+            .ToDictionary(x => x.SwitchingMachineId.Value);
+        // SwitchingMachineRouteのDict
+        var switchingMachineRouteDict = switchingMachineRoutes 
             .GroupBy(x => x.SwitchingMachineId)
             .ToDictionary(x => x.Key, x => x.ToList());
-
-        // 全進路を取得
+        // 進路のDict
         var routes = interlockingObjects
             .OfType<Route>()
             .ToDictionary(x => x.Id);
-        // 全てっさ鎖錠欄を取得
-        var detectorLockConditions = await lockConditionRepository.GetConditionsByType(LockType.Detector);
 
         foreach (var switchingMachine in switchingMachineList)
         {
             // 対応する転てつ器のてっさ鎖錠欄の条件確認
-            var detectorLockCondition = detectorLockConditions.GetValueOrDefault(switchingMachine.Id, new List<LockCondition>());
+            var detectorLockCondition = detectorLockConditions.GetValueOrDefault(switchingMachine.Id, []);
 
             if (RendoService.IsDetectorLocked(detectorLockCondition, interlockingObjectDic))
             {

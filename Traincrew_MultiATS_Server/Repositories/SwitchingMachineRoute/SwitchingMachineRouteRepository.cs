@@ -9,4 +9,11 @@ public class SwitchingMachineRouteRepository(ApplicationDbContext context) : ISw
     {
         return context.SwitchingMachineRoutes.ToListAsync();
     }
+
+    public async Task<List<Models.SwitchingMachineRoute>> GetBySwitchingMachineIds(List<ulong> switchingMachineIds)
+    {
+        return await context.SwitchingMachineRoutes
+            .Where(route => switchingMachineIds.Contains(route.SwitchingMachineId))
+            .ToListAsync();
+    }
 }
