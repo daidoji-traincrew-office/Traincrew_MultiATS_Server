@@ -89,6 +89,8 @@ public class AtsToServerData
     public string DiaName { get; init; }
     public List<TrackCircuitData> OnTrackList { get; init; }
 
+    public bool IsTherePreviousTrainIgnore { get; set; } = false;
+
     public float Speed { get; init; }
     public float Acceleration { get; init; }
 
