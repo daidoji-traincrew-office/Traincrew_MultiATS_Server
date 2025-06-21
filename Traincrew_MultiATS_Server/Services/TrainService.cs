@@ -120,8 +120,9 @@ public partial class TrainService(
         var clientDiaNumber = GetDiaNumberFromTrainNumber(clientTrainNumber);
         var existingTrainStates = await GetTrainStatesByDiaNumber(clientDiaNumber);
         var existingTrainStateByMe = existingTrainStates.FirstOrDefault(ts => ts.DriverId == clientDriverId);
+        var existingTrainStateByNone = existingTrainStates.FirstOrDefault(ts => ts.DriverId == null);
         var existingTrainStatesByOther = existingTrainStates
-            .Where(ts => ts.DriverId != clientDriverId)
+            .Where(ts => ts.DriverId != null && ts.DriverId != clientDriverId)
             .ToList();
         // 同一運転士の別運番の列車が居る場合、削除
         var driverOtherTrain = await trainRepository.GetByDriverId(clientDriverId);
@@ -158,29 +159,40 @@ public partial class TrainService(
         }
 
         // 同一運番列車が登録済
+
         // 1-1.運転士が自分な列車が未登録
         if (existingTrainStateByMe == null)
         {
-            var trainStateDriverId = existingTrainStateByMe.DriverId;
-            // 2.運用中/別運転士
-            if (existingTrainStatesByOther.Count > 0)
+            // 2.無効フラグが立っていない場合、同一運番の列車が在線している場合
+            //   無効フラグが立っていた場合、同一列番の列車が在線している場合
+            if (
+                (!clientData.IsTherePreviousTrainIgnore && existingTrainStatesByOther.Count > 0)
+                || (clientData.IsTherePreviousTrainIgnore &&
+                    existingTrainStatesByOther.Any(ts => ts.TrainNumber == clientTrainNumber))
+            )
             {
                 // 2.交代前応答
                 // 送信してきたクライアントに対し交代前応答を行い、送信された情報は在線情報含めてすべて破棄する。  
                 serverData.IsTherePreviousTrain = true;
                 return null;
             }
-            // この地点で在線情報を登録してよい
 
-            // 3.運用終了
-            if (trainStateDriverId == null)
+            // 2. 誰も乗っていない列車がいた場合、その列車に乗る
+            if (existingTrainStateByNone != null)
             {
                 // 3.情報変更
                 // 検索で発見された情報について、送信された情報に基づいて情報を変更する。
+                existingTrainStateByMe = existingTrainStateByNone;
                 existingTrainStateByMe.TrainNumber = clientTrainNumber;
                 existingTrainStateByMe.DiaNumber = clientDiaNumber;
                 existingTrainStateByMe.DriverId = clientDriverId;
                 await UpdateTrainState(existingTrainStateByMe);
+            }
+            // 4.新規登録
+            else
+            {
+                // 4.新規登録
+                existingTrainStateByMe = await CreateTrainState(clientData, clientDriverId);
             }
         }
         // 運転士が自分の列車が登録済で、列番を変更した場合
@@ -188,8 +200,9 @@ public partial class TrainService(
         {
             // 5.列番だけ書き換える
             existingTrainStateByMe.TrainNumber = clientTrainNumber;
-            await UpdateTrainState(existingTrainStateByMe);  
+            await UpdateTrainState(existingTrainStateByMe);
         }
+
         return existingTrainStateByMe;
     }
 
