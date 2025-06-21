@@ -85,18 +85,14 @@ public partial class TrainService(
     {
         var clientDiaNumber = GetDiaNumberFromTrainNumber(trainNumber);
         var trainStates = await GetTrainStatesByDiaNumber(clientDiaNumber);
-        if (trainStates == null || trainStates.Count == 0)
-        {
-            return;
-        }
-
         foreach (var trainState in trainStates)
         {
-            if (clientDriverId == trainState.DriverId)
+            if (clientDriverId != trainState.DriverId)
             {
-                trainState.DriverId = null;
-                await UpdateTrainState(trainState);
+                continue;
             }
+            trainState.DriverId = null;
+            await UpdateTrainState(trainState);
         }
     }
 
