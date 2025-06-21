@@ -191,13 +191,7 @@ public partial class TrainService(
                 return await CreateTrainState(clientData, clientDriverId);
             }
             // 3.同一運番の列車が在線している場合
-            if (
-                trackCircuits.Count > 0
-                && trackCircuits.All(tc =>
-                    trackCircuits[0].TrackCircuitState.TrainNumber == tc.TrackCircuitState.TrainNumber))
-            {
-                 
-            }
+              
 
             // ここには入らないはず？？？
             throw new InvalidOperationException(
@@ -331,7 +325,6 @@ public partial class TrainService(
     {
         await trainCarRepository.DeleteByTrainNumber(trainNumber);
         await trainRepository.DeleteByTrainNumber(trainNumber);
-        await trackCircuitService.ClearTrackCircuitByTrainNumber(trainNumber);
     }
 
     /// <summary>
