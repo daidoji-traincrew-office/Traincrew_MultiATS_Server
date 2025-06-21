@@ -49,7 +49,6 @@ public class CommanderTableHub(
     public async Task DeleteTrain(string trainName)
     {
         await trainService.DeleteTrainState(trainName);
-        await trackCircuitService.ClearTrackCircuitByTrainNumber(trainName);
         await ttcStationControlService.ClearTtcWindowByTrainNumber(trainName);
     }
 

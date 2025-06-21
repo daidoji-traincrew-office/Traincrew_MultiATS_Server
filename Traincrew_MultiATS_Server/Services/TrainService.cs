@@ -176,9 +176,20 @@ public partial class TrainService(
                 serverData.IsTherePreviousTrain = true;
                 return null;
             }
+            
+            //2. 在線させる軌道回路に既に別運転士の列番が1つでも在線している場合、早着として登録処理しない。
+            var trainStatesOnTrackCircuits = await GetTrainStatesByTrackCircuits(trackCircuits);
+            if (trainStatesOnTrackCircuits.Any(otherTrainState =>
+                    otherTrainState.DriverId != null && otherTrainState.DriverId != clientDriverId))
+            {
+                // 早着の列車情報は登録しない
+                serverData.IsOnPreviousTrain = true;
+                return null;
+            }
 
-            // 2. 誰も乗っていない列車がいた場合、その列車に乗る
-            if (existingTrainStateByNone != null)
+            // 3 誰も乗っていない列車がいた場合、その列車に乗る
+            if (trainStatesOnTrackCircuits.Count > 0 
+                && trainStatesOnTrackCircuits.All(ts => trainStatesOnTrackCircuits[0].Id == ts.Id))
             {
                 // 3.情報変更
                 // 検索で発見された情報について、送信された情報に基づいて情報を変更する。
@@ -188,11 +199,17 @@ public partial class TrainService(
                 existingTrainStateByMe.DriverId = clientDriverId;
                 await UpdateTrainState(existingTrainStateByMe);
             }
-            // 4.新規登録
-            else
+            // 在線させる軌道回路に列車がいない場合、新規登録とする 
+            else if (trainStatesOnTrackCircuits.Count == 0)
             {
                 // 4.新規登録
                 existingTrainStateByMe = await CreateTrainState(clientData, clientDriverId);
+            }
+            // ここには入らないはず？？？
+            else
+            {
+                throw new InvalidOperationException(
+                    "Unexpected state: 同一運番の列車を登録しますが、軌道回路の状態がおかしいです");
             }
         }
         // 運転士が自分の列車が登録済で、列番を変更した場合
@@ -322,6 +339,7 @@ public partial class TrainService(
     {
         await trainCarRepository.DeleteByTrainNumber(trainNumber);
         await trainRepository.DeleteByTrainNumber(trainNumber);
+        await trackCircuitService.ClearTrackCircuitByTrainNumber(trainNumber);
     }
 
     /// <summary>
