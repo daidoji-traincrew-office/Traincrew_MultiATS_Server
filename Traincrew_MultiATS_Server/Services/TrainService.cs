@@ -114,11 +114,11 @@ public partial class TrainService(
         var clientDiaNumber = GetDiaNumberFromTrainNumber(clientTrainNumber);
         var existingTrainState = await GetTrainStatesByDiaNumber(clientDiaNumber);
         // 同一運転士の別列車が居る場合、削除
-        var driverOtherTrains = await trainRepository.GetByDriverId(clientDriverId);
-        if (driverOtherTrains != null && driverOtherTrains.TrainNumber != clientTrainNumber)
+        var driverOtherTrain = await trainRepository.GetByDriverId(clientDriverId);
+        if (driverOtherTrain != null && driverOtherTrain.DiaNumber != clientDiaNumber)
         {
             // 別の列車が在線している場合は削除
-            await DeleteTrainState(driverOtherTrains.TrainNumber);
+            await DeleteTrainState(driverOtherTrain.TrainNumber);
         }
 
         // 1.同一列番/同一運番が未登録
