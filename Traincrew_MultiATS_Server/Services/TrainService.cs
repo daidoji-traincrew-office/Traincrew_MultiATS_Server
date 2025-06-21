@@ -1,9 +1,11 @@
+using System.Data;
 using System.Text.RegularExpressions;
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.Train;
 using Traincrew_MultiATS_Server.Repositories.TrainCar;
 using Traincrew_MultiATS_Server.Repositories.TrainDiagram;
+using Traincrew_MultiATS_Server.Repositories.Transaction;
 
 namespace Traincrew_MultiATS_Server.Services;
 
@@ -15,7 +17,8 @@ public partial class TrainService(
     RouteService routeService,
     ITrainRepository trainRepository,
     ITrainCarRepository trainCarRepository,
-    ITrainDiagramRepository trainDiagramRepository
+    ITrainDiagramRepository trainDiagramRepository,
+    ITransactionRepository transactionRepository
 )
 {
     [GeneratedRegex(@"\d+")]
@@ -61,7 +64,8 @@ public partial class TrainService(
         // 開通進路の情報
         serverData.RouteData = await routeService.GetActiveRoutes();
 
-
+        // トランザクション開始
+        await using var transaction = await transactionRepository.BeginTransactionAsync(IsolationLevel.RepeatableRead);
         // 運番が同じ列車の情報を取得する
         var trainState = await RegisterOrUpdateTrainState(
             clientDriverId, clientData, trackCircuitList, incrementalTrackCircuitDataList, serverData);
@@ -69,6 +73,7 @@ public partial class TrainService(
         if (trainState == null)
         {
             // 列車情報の更新が不要な場合は、ここで終了
+            await transaction.CommitAsync();
             return serverData;
         }
 
@@ -78,6 +83,7 @@ public partial class TrainService(
 
         // 車両情報の登録
         await UpdateTrainCarStates(trainState.Id, clientData.CarStates);
+        await transaction.CommitAsync();
         return serverData;
     }
 

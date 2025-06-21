@@ -40,6 +40,7 @@ using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
 using Traincrew_MultiATS_Server.Repositories.Train;
 using Traincrew_MultiATS_Server.Repositories.TrainCar;
 using Traincrew_MultiATS_Server.Repositories.TrainDiagram;
+using Traincrew_MultiATS_Server.Repositories.Transaction;
 using Traincrew_MultiATS_Server.Repositories.TtcWindow;
 using Traincrew_MultiATS_Server.Repositories.TtcWindowLink;
 using Traincrew_MultiATS_Server.Services;
@@ -455,6 +456,7 @@ public class Program
             .AddScoped<ITrainDiagramRepository, TrainDiagramRepository>()
             .AddScoped<ITtcWindowRepository, TtcWindowRepository>()
             .AddScoped<ITtcWindowLinkRepository, TtcWindowLinkRepository>()
+            .AddScoped<ITransactionRepository, TransactionRepository>()
             .AddScoped<DirectionRouteService>()
             .AddScoped<InterlockingService>()
             .AddScoped<OperationNotificationService>()
