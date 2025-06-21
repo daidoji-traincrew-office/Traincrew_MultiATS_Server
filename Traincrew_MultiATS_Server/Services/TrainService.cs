@@ -89,6 +89,7 @@ public partial class TrainService(
         {
             return;
         }
+
         foreach (var trainState in trainStates)
         {
             if (clientDriverId == trainState.DriverId)
@@ -157,47 +158,38 @@ public partial class TrainService(
         }
 
         // 同一運番列車が登録済
-        var trainStateDriverId = existingTrainStateByMe.DriverId;
-        // 2.運用中/別運転士
-        if (existingTrainStatesByOther.Count > 0)
+        // 1-1.運転士が自分な列車が未登録
+        if (existingTrainStateByMe == null)
         {
-            // 2.交代前応答
-            // 送信してきたクライアントに対し交代前応答を行い、送信された情報は在線情報含めてすべて破棄する。  
-            serverData.IsTherePreviousTrain = true;
-            return null;
-        }
-        // この地点で在線情報を登録してよい
+            var trainStateDriverId = existingTrainStateByMe.DriverId;
+            // 2.運用中/別運転士
+            if (existingTrainStatesByOther.Count > 0)
+            {
+                // 2.交代前応答
+                // 送信してきたクライアントに対し交代前応答を行い、送信された情報は在線情報含めてすべて破棄する。  
+                serverData.IsTherePreviousTrain = true;
+                return null;
+            }
+            // この地点で在線情報を登録してよい
 
-        // 3.運用終了
-        if (trainStateDriverId == null)
-        {
-            // 3.情報変更
-            // 検索で発見された情報について、送信された情報に基づいて情報を変更する。
-            existingTrainStateByMe.TrainNumber = clientTrainNumber;
-            existingTrainStateByMe.DiaNumber = clientDiaNumber;
-            existingTrainStateByMe.DriverId = clientDriverId;
-            await UpdateTrainState(existingTrainStateByMe);
+            // 3.運用終了
+            if (trainStateDriverId == null)
+            {
+                // 3.情報変更
+                // 検索で発見された情報について、送信された情報に基づいて情報を変更する。
+                existingTrainStateByMe.TrainNumber = clientTrainNumber;
+                existingTrainStateByMe.DiaNumber = clientDiaNumber;
+                existingTrainStateByMe.DriverId = clientDriverId;
+                await UpdateTrainState(existingTrainStateByMe);
+            }
         }
-        // 4.同一列番が登録済/運用中/同一運転士
-        else if (existingTrainStateByMe.TrainNumber == clientTrainNumber && trainStateDriverId == clientDriverId)
-        {
-            // 4.情報変更なし
-            // 列車情報については変更しない
-        }
-        // 5.運用中/同一運転士
-        else if (trainStateDriverId == clientDriverId)
+        // 運転士が自分の列車が登録済で、列番を変更した場合
+        else if (existingTrainStateByMe.TrainNumber != clientTrainNumber)
         {
             // 5.列番だけ書き換える
             existingTrainStateByMe.TrainNumber = clientTrainNumber;
-            await UpdateTrainState(existingTrainStateByMe);
+            await UpdateTrainState(existingTrainStateByMe);  
         }
-        // ここには来ない
-        else
-        {
-            // 異常応答を返す
-            throw new InvalidOperationException("Unreachable code: TrainState mismatch.");
-        }
-
         return existingTrainStateByMe;
     }
 
