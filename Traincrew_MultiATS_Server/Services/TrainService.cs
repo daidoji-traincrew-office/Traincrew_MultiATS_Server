@@ -125,9 +125,11 @@ public partial class TrainService(
         {
             // 別の列車が在線している場合は削除
             await DeleteTrainState(driverOtherTrain.TrainNumber);
+            await trackCircuitService
+                .ClearTrackCircuitByTrainNumber(driverOtherTrain.TrainNumber);
             // 軌道回路情報を再取得しておく(列車が1度消えるので)
             trackCircuits = await trackCircuitService
-                .GetTrackCircuitsByNames(trackCircuits.Select(tcd => tcd.Name).ToList());
+                .GetTrackCircuitsByNames(trackCircuits.Select(tc => tc.Name).ToList());
         }
 
         // 1.同一列番/同一運番が未登録
@@ -190,8 +192,19 @@ public partial class TrainService(
                 // 4.新規登録
                 return await CreateTrainState(clientData, clientDriverId);
             }
-            // 3.同一運番の列車が在線している場合
-              
+            // 該当軌道回路すべてを見た時に1列車しか在線していない場合 
+            if (
+                trainStatesOnTrackCircuits.Count == 1 &&
+                trackCircuits.Select(tc => tc.TrackCircuitState.TrainNumber).Distinct().Count() == 1)
+            {
+                // 更新
+                existingTrainStateByMe = trainStatesOnTrackCircuits.First();
+                // 3.列車情報を更新
+                existingTrainStateByMe.TrainNumber = clientTrainNumber;
+                existingTrainStateByMe.DiaNumber = clientDiaNumber;
+                existingTrainStateByMe.DriverId = clientDriverId;
+                await UpdateTrainState(existingTrainStateByMe);
+            }
 
             // ここには入らないはず？？？
             throw new InvalidOperationException(
