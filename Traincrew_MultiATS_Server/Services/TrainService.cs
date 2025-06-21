@@ -194,6 +194,14 @@ public partial class TrainService(
                 // 4.新規登録
                 return await CreateTrainState(clientData, clientDriverId);
             }
+            // 3.同一運番の列車が在線している場合
+            if (
+                trackCircuits.Count > 0
+                && trackCircuits.All(tc =>
+                    trackCircuits[0].TrackCircuitState.TrainNumber == tc.TrackCircuitState.TrainNumber))
+            {
+                 
+            }
 
             // ここには入らないはず？？？
             throw new InvalidOperationException(
