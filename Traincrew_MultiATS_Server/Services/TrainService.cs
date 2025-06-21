@@ -84,14 +84,19 @@ public partial class TrainService(
     public async Task DriverGetsOff(ulong clientDriverId, string trainNumber)
     {
         var clientDiaNumber = GetDiaNumberFromTrainNumber(trainNumber);
-        var trainState = await GetTrainStatesByDiaNumber(clientDiaNumber);
-        if (trainState == null || clientDriverId != trainState.DriverId)
+        var trainStates = await GetTrainStatesByDiaNumber(clientDiaNumber);
+        if (trainStates == null || trainStates.Count == 0)
         {
             return;
         }
-
-        trainState.DriverId = null;
-        await UpdateTrainState(trainState);
+        foreach (var trainState in trainStates)
+        {
+            if (clientDriverId == trainState.DriverId)
+            {
+                trainState.DriverId = null;
+                await UpdateTrainState(trainState);
+            }
+        }
     }
 
     /// <summary>
@@ -112,17 +117,22 @@ public partial class TrainService(
     {
         var clientTrainNumber = clientData.DiaName;
         var clientDiaNumber = GetDiaNumberFromTrainNumber(clientTrainNumber);
-        var existingTrainState = await GetTrainStatesByDiaNumber(clientDiaNumber);
-        // 同一運転士の別列車が居る場合、削除
+        var existingTrainStates = await GetTrainStatesByDiaNumber(clientDiaNumber);
+        var existingTrainStateByMe = existingTrainStates.FirstOrDefault(ts => ts.DriverId == clientDriverId);
+        var existingTrainStatesByOther = existingTrainStates
+            .Where(ts => ts.DriverId != clientDriverId)
+            .ToList();
+        // 同一運転士の別運番の列車が居る場合、削除
         var driverOtherTrain = await trainRepository.GetByDriverId(clientDriverId);
         if (driverOtherTrain != null && driverOtherTrain.DiaNumber != clientDiaNumber)
         {
             // 別の列車が在線している場合は削除
             await DeleteTrainState(driverOtherTrain.TrainNumber);
+            // existingTrainStatesには同一運番の列車情報が入るので、ここで削除された列車を気にする必要はない
         }
 
         // 1.同一列番/同一運番が未登録
-        if (existingTrainState == null)
+        if (existingTrainStates.Count == 0)
         {
             //1-1.在線させる軌道回路に既に別運転士の列番が1つでも在線している場合、早着として登録処理しない。
             var otherTrainStates = await GetTrainStatesByTrackCircuits(trackCircuits);
@@ -147,9 +157,9 @@ public partial class TrainService(
         }
 
         // 同一運番列車が登録済
-        var trainStateDriverId = existingTrainState.DriverId;
+        var trainStateDriverId = existingTrainStateByMe.DriverId;
         // 2.運用中/別運転士
-        if (trainStateDriverId != null && trainStateDriverId != clientDriverId)
+        if (existingTrainStatesByOther.Count > 0)
         {
             // 2.交代前応答
             // 送信してきたクライアントに対し交代前応答を行い、送信された情報は在線情報含めてすべて破棄する。  
@@ -163,13 +173,13 @@ public partial class TrainService(
         {
             // 3.情報変更
             // 検索で発見された情報について、送信された情報に基づいて情報を変更する。
-            existingTrainState.TrainNumber = clientTrainNumber;
-            existingTrainState.DiaNumber = clientDiaNumber;
-            existingTrainState.DriverId = clientDriverId;
-            await UpdateTrainState(existingTrainState);
+            existingTrainStateByMe.TrainNumber = clientTrainNumber;
+            existingTrainStateByMe.DiaNumber = clientDiaNumber;
+            existingTrainStateByMe.DriverId = clientDriverId;
+            await UpdateTrainState(existingTrainStateByMe);
         }
         // 4.同一列番が登録済/運用中/同一運転士
-        else if (existingTrainState.TrainNumber == clientTrainNumber && trainStateDriverId == clientDriverId)
+        else if (existingTrainStateByMe.TrainNumber == clientTrainNumber && trainStateDriverId == clientDriverId)
         {
             // 4.情報変更なし
             // 列車情報については変更しない
@@ -178,8 +188,8 @@ public partial class TrainService(
         else if (trainStateDriverId == clientDriverId)
         {
             // 5.列番だけ書き換える
-            existingTrainState.TrainNumber = clientTrainNumber;
-            await UpdateTrainState(existingTrainState);
+            existingTrainStateByMe.TrainNumber = clientTrainNumber;
+            await UpdateTrainState(existingTrainStateByMe);
         }
         // ここには来ない
         else
@@ -188,7 +198,7 @@ public partial class TrainService(
             throw new InvalidOperationException("Unreachable code: TrainState mismatch.");
         }
 
-        return existingTrainState;
+        return existingTrainStateByMe;
     }
 
     public async Task<Dictionary<string, TrainInfo>> GetTrainInfoByTrainNumber()
@@ -225,7 +235,7 @@ public partial class TrainService(
     }
 
 
-    private async Task<TrainState?> GetTrainStatesByDiaNumber(int diaNumber)
+    private async Task<List<TrainState>> GetTrainStatesByDiaNumber(int diaNumber)
     {
         // 列車情報を取得
         return await trainRepository.GetByDiaNumber(diaNumber);

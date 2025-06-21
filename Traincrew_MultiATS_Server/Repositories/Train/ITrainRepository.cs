@@ -8,8 +8,8 @@ public interface ITrainRepository
     /// ダイヤ番号から列車を取得する
     /// </summary>
     /// <param name="diaNumber">ダイヤ番号</param>
-    /// <returns>列車の状態</returns>
-    Task<TrainState?> GetByDiaNumber(int diaNumber);
+    /// <returns>列車の状態リスト</returns>
+    Task<List<TrainState>> GetByDiaNumber(int diaNumber);
 
     /// <summary>
     /// 列車番号から列車を取得する
