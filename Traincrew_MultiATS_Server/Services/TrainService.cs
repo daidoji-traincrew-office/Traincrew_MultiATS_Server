@@ -126,7 +126,7 @@ public partial class TrainService(
             .Where(ts => ts.DriverId != null && ts.DriverId != clientDriverId)
             .ToList();
         // 同一運転士の別運番の列車が居る場合、削除
-        var driverOtherTrain = await trainRepository.GetByDriverId(clientDriverId);
+        var driverOtherTrain = await GetTrainStatesByDriverId(clientDriverId);
         if (driverOtherTrain != null && driverOtherTrain.DiaNumber != clientDiaNumber)
         {
             // 別の列車が在線している場合は削除
