@@ -198,23 +198,21 @@ public partial class TrainService(
                 // 4.新規登録
                 return await CreateTrainState(clientData, clientDriverId);
             }
-            // 該当軌道回路すべてを見た時に1列車しか在線していない場合 
-            if (
-                trainStatesOnTrackCircuits.Count == 1 &&
-                trackCircuits.Select(tc => tc.TrackCircuitState.TrainNumber).Distinct().Count() == 1)
+            // 該当軌道回路すべてを見た時に、２列車以上の在線があった場合
+            if (trainStatesOnTrackCircuits.Count != 1 ||
+                trackCircuits.Select(tc => tc.TrackCircuitState.TrainNumber).Distinct().Count() != 1)
             {
-                // 更新
-                existingTrainStateByMe = trainStatesOnTrackCircuits.First();
-                // 3.列車情報を更新
-                existingTrainStateByMe.TrainNumber = clientTrainNumber;
-                existingTrainStateByMe.DiaNumber = clientDiaNumber;
-                existingTrainStateByMe.DriverId = clientDriverId;
-                await UpdateTrainState(existingTrainStateByMe);
+                throw new InvalidOperationException(
+                    "この列車が在線している軌道回路に、複数の列車が在線しています。");
             }
-
-            // ここには入らないはず？？？
-            throw new InvalidOperationException(
-                "Unexpected state: 同一運番の列車を登録しますが、軌道回路の状態がおかしいです");
+                
+            // 更新
+            existingTrainStateByMe = trainStatesOnTrackCircuits.First();
+            // 3.列車情報を更新
+            existingTrainStateByMe.TrainNumber = clientTrainNumber;
+            existingTrainStateByMe.DiaNumber = clientDiaNumber;
+            existingTrainStateByMe.DriverId = clientDriverId;
+            await UpdateTrainState(existingTrainStateByMe);
         }
         // 運転士が自分の列車が登録済で、列番を変更した場合
 
