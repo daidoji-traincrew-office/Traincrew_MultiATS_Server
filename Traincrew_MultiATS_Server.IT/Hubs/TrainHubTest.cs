@@ -56,7 +56,7 @@ public class TrainHubTest(WebApplicationFixture factory)
         }
     }
 
-    [Fact(DisplayName = "運転士のいない列車がいて、引き継ぐ場合", Skip="まずはロジックを直そうか・・・")]
+    [Fact(DisplayName = "運転士のいない列車がいて、引き継ぐ場合")]
     public async Task SendData_ATS_TakeOverTrainWithoutDriver()
     {
         const string trainNumber = "1162";
@@ -64,6 +64,7 @@ public class TrainHubTest(WebApplicationFixture factory)
         // Arrange
         var mockClient = new Mock<ITrainClientContract>();
         var (connection, hub) = factory.CreateTrainHub(mockClient.Object);
+        var (commanderConnection, commanderHub) = factory.CreateCommanderTableHub();
         var db = factory.CreateTrainRepository();
 
         // 事前に運転士のいない列車を登録
@@ -77,6 +78,18 @@ public class TrainHubTest(WebApplicationFixture factory)
             Delay = 0
         };
         await db.Create(trainState);
+        // 軌道回路を埋める
+        await using (commanderConnection) 
+        {
+            await commanderConnection.StartAsync(TestContext.Current.CancellationToken);
+            await commanderHub.SendTrackCircuitData(new () 
+            {
+                Name = "TH76_5LDT",
+                Last = oldTrainNumber,
+                On = true,
+                Lock = false
+            });
+        }
 
         var atsData = new AtsToServerData
         {
