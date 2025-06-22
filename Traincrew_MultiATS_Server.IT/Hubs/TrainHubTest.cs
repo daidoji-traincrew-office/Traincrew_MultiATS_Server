@@ -56,10 +56,11 @@ public class TrainHubTest(WebApplicationFixture factory)
         }
     }
 
-    [Fact(DisplayName = "運転士のいない列車がいて、引き継ぐ場合", Skip = "通らないので一旦スキップ")]
+    [Fact(DisplayName = "運転士のいない列車がいて、引き継ぐ場合", Skip="まずはロジックを直そうか・・・")]
     public async Task SendData_ATS_TakeOverTrainWithoutDriver()
     {
         const string trainNumber = "1162";
+        const string oldTrainNumber = "1163";
         // Arrange
         var mockClient = new Mock<ITrainClientContract>();
         var (connection, hub) = factory.CreateTrainHub(mockClient.Object);
@@ -68,7 +69,7 @@ public class TrainHubTest(WebApplicationFixture factory)
         // 事前に運転士のいない列車を登録
         var trainState = new TrainState
         {
-            TrainNumber = "1163",
+            TrainNumber = oldTrainNumber,
             DiaNumber = 62,
             DriverId = null,
             FromStationId = "TH00",
@@ -110,13 +111,13 @@ public class TrainHubTest(WebApplicationFixture factory)
                 Assert.False(result.IsOnPreviousTrain);
 
                 // DB上でDriverIdがセットされていることを確認
-                var updatedTrain = (await db.GetByTrainNumbers(["2002"])).FirstOrDefault();
+                var updatedTrain = (await db.GetByTrainNumbers([trainNumber])).FirstOrDefault();
                 Assert.NotNull(updatedTrain);
                 Assert.NotNull(updatedTrain.DriverId);
             }
             finally
             {
-                await DeleteTrainsAsync([trainNumber]);
+                await DeleteTrainsAsync([trainNumber, oldTrainNumber]);
             }
         }
     }
@@ -125,7 +126,7 @@ public class TrainHubTest(WebApplicationFixture factory)
     public async Task SendData_ATS_AnotherDriverExists_RespondsWithIsTherePreviousTrain()
     {
         const string trainNumber = "1164";
-        const string otherDriverTrainNumber = "1163";
+        const string otherDriverTrainNumber = "1165";
         // Arrange
         var mockClient = new Mock<ITrainClientContract>();
         var (connection, hub) = factory.CreateTrainHub(mockClient.Object);
@@ -246,7 +247,7 @@ public class TrainHubTest(WebApplicationFixture factory)
         }
     }
 
-    [Fact(DisplayName = "自分が運転している列車がいて、列番を変更する場合", Skip = "通らないので一旦スキップ")]
+    [Fact(DisplayName = "自分が運転している列車がいて、列番を変更する場合")]
     public async Task SendData_ATS_SameDriver_ChangeTrainNumber_UpdatesTrainNumber()
     {
         const string trainNumber = "1268";
