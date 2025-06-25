@@ -323,6 +323,74 @@ public class TrainHubTest(WebApplicationFixture factory)
             }
         }
     }
+    
+    [Fact(DisplayName = "折り返し変更(運行番号変更)を行う場合")]
+    public async Task SendData_ATS_ChangeDiaNumber_UpdatesTrainNumber()
+    {
+        // 70運行->72運行に変更する例
+        const string oldTrainNumber = "1269";
+        const string trainNumber = "1272";
+        // Arrange
+        var mockClient = new Mock<ITrainClientContract>();
+        var (connection, hub) = factory.CreateTrainHub(mockClient.Object);
+        var db = factory.CreateTrainRepository();
+
+        // 事前に自分が運転していた列車を登録
+        var myDriverId = WebApplicationFixture.DriverId;
+        var trainState = new TrainState
+        {
+            TrainNumber = oldTrainNumber,
+            DiaNumber = 70,
+            DriverId = null,
+            FromStationId = "TH00",
+            ToStationId = "TH00",
+            Delay = 0
+        };
+        await db.Create(trainState);
+
+        var atsData = new AtsToServerData
+        {
+            DiaName = trainNumber, // 列番を変更
+            OnTrackList = [new (){Name = "TH76_5LDT"}],
+            CarStates = [new (){
+                Ampare = 0,
+                BC_Press = 0,
+                CarModel = "5320",
+                DoorClose = true,
+                HasConductorCab = true,
+                HasDriverCab = true,
+                HasMotor = true,
+            }],
+            BougoState = false,
+            IsTherePreviousTrainIgnore = false
+        };
+
+        await using (connection)
+        {
+            await connection.StartAsync(TestContext.Current.CancellationToken);
+
+            try
+            {
+                // Act
+                var result = await hub.SendData_ATS(atsData);
+
+                // Assert
+                Assert.NotNull(result);
+                Assert.False(result.IsTherePreviousTrain);
+                Assert.False(result.IsOnPreviousTrain);
+                // DB上でDriverIdが変わらず、列番が変更されていること
+                var updatedTrain = (await db.GetByTrainNumbers([trainNumber])).FirstOrDefault();
+                Assert.NotNull(updatedTrain);
+                Assert.Equal(myDriverId, updatedTrain.DriverId);
+                Assert.Equal(72, updatedTrain.DiaNumber); // 運行番号が変更されていること
+                Assert.Equal(trainNumber, updatedTrain.TrainNumber);
+            }
+            finally
+            {
+                await DeleteTrainsAsync([trainNumber]);
+            }
+        }
+    }
 
     private async Task DeleteTrainsAsync(List<string> trainNumbers)
     {
