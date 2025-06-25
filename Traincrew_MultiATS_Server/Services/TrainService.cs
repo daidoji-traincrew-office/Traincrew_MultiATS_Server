@@ -111,7 +111,7 @@ public partial class TrainService(
     /// <param name="incrementalTrackCircuitDataList">新規登録する軌道回路データリスト</param>
     /// <param name="serverData">サーバーからクライアントへのデータ</param>
     /// <returns>列車状態。登録しない場合はnull。</returns>
-    private async Task<TrainState?> RegisterOrUpdateTrainState(
+    internal async Task<TrainState?> RegisterOrUpdateTrainState(
         ulong clientDriverId,
         AtsToServerData clientData,
         List<TrackCircuit> trackCircuits,
@@ -192,27 +192,50 @@ public partial class TrainService(
                 return null;
             }
 
-            // 在線させる軌道回路に列車がいない場合、新規登録とする 
-            if (trackCircuits.All(tc => !tc.TrackCircuitState.IsShortCircuit))
+            // 該当軌道回路すべてを見た時に、２列車以上の在線があった場合
+            if (trainStatesOnTrackCircuits.Count >= 2 ||
+                trackCircuits.Select(tc => tc.TrackCircuitState.TrainNumber)
+                    .Distinct()
+                    .Count(trainNumber => !string.IsNullOrEmpty(trainNumber)) >= 2)
             {
-                // 4.新規登録
+                // 早着の列車情報は登録しない
+                serverData.IsOnPreviousTrain = true;
+                return null;
+            }
+            
+            // 交代先の列車を探す
+            existingTrainStateByMe = existingTrainStates.FirstOrDefault(
+                ts => ts.TrainNumber == clientTrainNumber && ts.DriverId == null);
+            // 1. 同一列番の列車が存在する場合、その列車に乗る(途中駅からの再開etcを想定)
+            if (existingTrainStateByMe != null)
+            {
+                // 3.列車情報を更新
+                existingTrainStateByMe.TrainNumber = clientTrainNumber;
+                existingTrainStateByMe.DiaNumber = clientDiaNumber;
+                existingTrainStateByMe.DriverId = clientDriverId;
+                await UpdateTrainState(existingTrainStateByMe);
+                return existingTrainStateByMe;
+            }
+            // 2. 同一列番の列車が存在せず、在線軌道回路に他の列車が在線している場合、それに乗り換える
+            existingTrainStateByMe = trainStatesOnTrackCircuits.FirstOrDefault(
+                ts => ts.DriverId == null);
+            if (existingTrainStateByMe != null)
+            {
+                // 3.列車情報を更新
+                existingTrainStateByMe.TrainNumber = clientTrainNumber;
+                existingTrainStateByMe.DiaNumber = clientDiaNumber;
+                existingTrainStateByMe.DriverId = clientDriverId;
+                await UpdateTrainState(existingTrainStateByMe);
+                return existingTrainStateByMe;
+            }
+            // 3. 同一列番の列車が存在せず、在線軌道回路に他の列車が在線していない場合、新規登録
+            if (trackCircuits.All(tc => !tc.TrackCircuitState.IsShortCircuit) &&
+                existingTrainStateByMe == null)
+            { 
                 return await CreateTrainState(clientData, clientDriverId);
             }
-            // 該当軌道回路すべてを見た時に、２列車以上の在線があった場合
-            if (trainStatesOnTrackCircuits.Count != 1 ||
-                trackCircuits.Select(tc => tc.TrackCircuitState.TrainNumber).Distinct().Count() != 1)
-            {
-                throw new InvalidOperationException(
-                    "この列車が在線している軌道回路に、複数の列車が在線しています。");
-            }
-                
-            // 更新
-            existingTrainStateByMe = trainStatesOnTrackCircuits.First();
-            // 3.列車情報を更新
-            existingTrainStateByMe.TrainNumber = clientTrainNumber;
-            existingTrainStateByMe.DiaNumber = clientDiaNumber;
-            existingTrainStateByMe.DriverId = clientDriverId;
-            await UpdateTrainState(existingTrainStateByMe);
+            // ここには来ないはず
+            throw new InvalidOperationException("Unexpected state: No train state found for driver.");
         }
         // 運転士が自分の列車が登録済で、列番を変更した場合
 
