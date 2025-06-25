@@ -273,7 +273,7 @@ public class TrainHubTest(WebApplicationFixture factory)
         var myDriverId = WebApplicationFixture.DriverId;
         var trainState = new TrainState
         {
-            TrainNumber = "1267",
+            TrainNumber = "1269",
             DiaNumber = 68,
             DriverId = myDriverId,
             FromStationId = "TH00",
@@ -328,7 +328,7 @@ public class TrainHubTest(WebApplicationFixture factory)
     public async Task SendData_ATS_ChangeDiaNumber_UpdatesTrainNumber()
     {
         // 70運行->72運行に変更する例
-        const string oldTrainNumber = "1269";
+        const string oldTrainNumber = "1271";
         const string trainNumber = "1272";
         // Arrange
         var mockClient = new Mock<ITrainClientContract>();
