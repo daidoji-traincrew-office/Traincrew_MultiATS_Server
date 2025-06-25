@@ -416,7 +416,8 @@ public class Program
                     Permissions.Endpoints.Authorization,
                     Permissions.Endpoints.Token,
                     Permissions.GrantTypes.AuthorizationCode,
-                    Permissions.ResponseTypes.Code
+                    Permissions.ResponseTypes.Code,
+                    Permissions.GrantTypes.RefreshToken
                 }
         };
 
