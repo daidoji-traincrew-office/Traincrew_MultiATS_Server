@@ -97,6 +97,7 @@ public partial class TrainService(
             {
                 continue;
             }
+
             trainState.DriverId = null;
             await UpdateTrainState(trainState);
         }
@@ -202,11 +203,10 @@ public partial class TrainService(
                 serverData.IsOnPreviousTrain = true;
                 return null;
             }
-            
+
             // 交代先の列車を探す
-            existingTrainStateByMe = existingTrainStates.FirstOrDefault(
-                ts => ts.TrainNumber == clientTrainNumber && ts.DriverId == null);
-            // 1. 同一列番の列車が存在する場合、その列車に乗る(途中駅からの再開etcを想定)
+            // 1. 同一列番の列車が存在せず、在線軌道回路に他の列車が在線している場合、それに乗り換える
+            existingTrainStateByMe = trainStatesOnTrackCircuits.FirstOrDefault(ts => ts.DriverId == null);
             if (existingTrainStateByMe != null)
             {
                 // 3.列車情報を更新
@@ -216,9 +216,10 @@ public partial class TrainService(
                 await UpdateTrainState(existingTrainStateByMe);
                 return existingTrainStateByMe;
             }
-            // 2. 同一列番の列車が存在せず、在線軌道回路に他の列車が在線している場合、それに乗り換える
-            existingTrainStateByMe = trainStatesOnTrackCircuits.FirstOrDefault(
-                ts => ts.DriverId == null);
+
+            existingTrainStateByMe =
+                existingTrainStates.FirstOrDefault(ts => ts.TrainNumber == clientTrainNumber && ts.DriverId == null);
+            // 2. 同一列番の列車が存在する場合、その列車に乗る(途中駅からの再開etcを想定)
             if (existingTrainStateByMe != null)
             {
                 // 3.列車情報を更新
@@ -228,11 +229,13 @@ public partial class TrainService(
                 await UpdateTrainState(existingTrainStateByMe);
                 return existingTrainStateByMe;
             }
+
             // 3. 在線軌道回路に他の列車が在線していない場合、新規登録
             if (trackCircuits.All(tc => !tc.TrackCircuitState.IsShortCircuit))
-            { 
+            {
                 return await CreateTrainState(clientData, clientDriverId);
             }
+
             // ここには来ないはず
             throw new InvalidOperationException("Unexpected state: No train state found for driver.");
         }
