@@ -228,9 +228,8 @@ public partial class TrainService(
                 await UpdateTrainState(existingTrainStateByMe);
                 return existingTrainStateByMe;
             }
-            // 3. 同一列番の列車が存在せず、在線軌道回路に他の列車が在線していない場合、新規登録
-            if (trackCircuits.All(tc => !tc.TrackCircuitState.IsShortCircuit) &&
-                existingTrainStateByMe == null)
+            // 3. 在線軌道回路に他の列車が在線していない場合、新規登録
+            if (trackCircuits.All(tc => !tc.TrackCircuitState.IsShortCircuit))
             { 
                 return await CreateTrainState(clientData, clientDriverId);
             }
