@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Traincrew_MultiATS_Server.Common.Contract;
 using Traincrew_MultiATS_Server.Crew;
+using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
 using Traincrew_MultiATS_Server.Repositories.Train;
 using TypedSignalR.Client;
 
@@ -54,6 +55,15 @@ public class WebApplicationFixture
     {
         var scope = factory.Services.CreateScope();
         return scope.ServiceProvider.GetRequiredService<ITrainRepository>();
+    }
+    
+    /// <summary>
+    /// テスト用にITrackCircuitRepositoryを取得する
+    /// </summary>
+    public ITrackCircuitRepository CreateTrackCircuitRepository()
+    {
+        var scope = factory.Services.CreateScope();
+        return scope.ServiceProvider.GetRequiredService<ITrackCircuitRepository>();
     }
 
     /// <summary>

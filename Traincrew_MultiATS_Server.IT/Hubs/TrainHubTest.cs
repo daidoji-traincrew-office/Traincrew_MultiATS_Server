@@ -48,6 +48,7 @@ public class TrainHubTest(WebApplicationFixture factory)
                 Assert.NotNull(result);
                 Assert.False(result.IsTherePreviousTrain);
                 Assert.False(result.IsOnPreviousTrain);
+                Assert.False(result.IsMaybeWarp);
             }
             finally
             {
@@ -122,6 +123,7 @@ public class TrainHubTest(WebApplicationFixture factory)
                 Assert.NotNull(result);
                 Assert.False(result.IsTherePreviousTrain);
                 Assert.False(result.IsOnPreviousTrain);
+                Assert.False(result.IsMaybeWarp);
 
                 // DB上でDriverIdがセットされていることを確認
                 var updatedTrain = (await db.GetByTrainNumbers([trainNumber])).FirstOrDefault();
@@ -248,6 +250,7 @@ public class TrainHubTest(WebApplicationFixture factory)
                 Assert.NotNull(result);
                 Assert.False(result.IsTherePreviousTrain);
                 Assert.False(result.IsOnPreviousTrain);
+                Assert.False(result.IsMaybeWarp);
                 // DB上でDriverIdが変わらず、列番も変わらないこと
                 var updatedTrain = (await db.GetByTrainNumbers([trainNumber])).FirstOrDefault();
                 Assert.NotNull(updatedTrain);
@@ -312,6 +315,7 @@ public class TrainHubTest(WebApplicationFixture factory)
                 Assert.NotNull(result);
                 Assert.False(result.IsTherePreviousTrain);
                 Assert.False(result.IsOnPreviousTrain);
+                Assert.False(result.IsMaybeWarp);
                 // DB上でDriverIdが変わらず、列番が変更されていること
                 var updatedTrain = (await db.GetByTrainNumbers([trainNumber])).FirstOrDefault();
                 Assert.NotNull(updatedTrain);
@@ -378,12 +382,80 @@ public class TrainHubTest(WebApplicationFixture factory)
                 Assert.NotNull(result);
                 Assert.False(result.IsTherePreviousTrain);
                 Assert.False(result.IsOnPreviousTrain);
+                Assert.False(result.IsMaybeWarp);
                 // DB上でDriverIdが変わらず、列番が変更されていること
                 var updatedTrain = (await db.GetByTrainNumbers([trainNumber])).FirstOrDefault();
                 Assert.NotNull(updatedTrain);
                 Assert.Equal(myDriverId, updatedTrain.DriverId);
                 Assert.Equal(72, updatedTrain.DiaNumber); // 運行番号が変更されていること
                 Assert.Equal(trainNumber, updatedTrain.TrainNumber);
+            }
+            finally
+            {
+                await DeleteTrainsAsync([trainNumber]);
+            }
+        }
+    }
+    
+    [Fact(DisplayName = "運転士がおらず、同一列番の列車がいて、ワープする可能性がある場合")]
+    public async Task SendData_ATS_NoDriver_SameTrainNumber_IsMaybeWarp()
+    {
+        const string trainNumber = "1274";
+        // Arrange
+        var mockClient = new Mock<ITrainClientContract>();
+        var (connection, hub) = factory.CreateTrainHub(mockClient.Object);
+        var db = factory.CreateTrainRepository();
+        var trackCircuitRepository = factory.CreateTrackCircuitRepository();
+
+        // 事前に運転士のいない同一列番の列車を登録
+        var trainState = new TrainState
+        {
+            TrainNumber = trainNumber,
+            DiaNumber = 74,
+            DriverId = null, // 運転士なし
+            FromStationId = "TH00",
+            ToStationId = "TH00",
+            Delay = 0
+        };
+        await db.Create(trainState);
+        // 軌道回路を埋める
+        await trackCircuitRepository.SetTrackCircuitList([new TrackCircuit {Name = "TH76_5LAT"}], trainNumber);
+
+        var atsData = new AtsToServerData
+        {
+            DiaName = trainNumber,
+            OnTrackList = [new (){Name = "TH76_5LDT"}],
+            CarStates = [new (){
+                Ampare = 0,
+                BC_Press = 0,
+                CarModel = "5320",
+                DoorClose = true,
+                HasConductorCab = true,
+                HasDriverCab = true,
+                HasMotor = true,
+            }],
+            BougoState = false,
+            IsTherePreviousTrainIgnore = false
+        };
+
+        await using (connection)
+        {
+            await connection.StartAsync(TestContext.Current.CancellationToken);
+
+            try
+            {
+                // Act
+                var result = await hub.SendData_ATS(atsData);
+
+                // Assert
+                Assert.NotNull(result);
+                Assert.False(result.IsTherePreviousTrain);
+                Assert.False(result.IsOnPreviousTrain);
+                Assert.True(result.IsMaybeWarp);
+                // DB上でDriverIdがnullのままであることを確認
+                var updatedTrain = (await db.GetByTrainNumbers([trainNumber])).FirstOrDefault();
+                Assert.NotNull(updatedTrain);
+                Assert.Null(updatedTrain.DriverId);
             }
             finally
             {
