@@ -68,7 +68,8 @@ public partial class TrainService(
         await using var transaction = await transactionRepository.BeginTransactionAsync(IsolationLevel.RepeatableRead);
         // 運番が同じ列車の情報を取得する
         var trainState = await RegisterOrUpdateTrainState(
-            clientDriverId, clientData, trackCircuitList, incrementalTrackCircuitDataList, serverData);
+            clientDriverId, clientData, oldTrackCircuitList, trackCircuitList, incrementalTrackCircuitDataList,
+            serverData);
 
         if (trainState == null)
         {
@@ -115,6 +116,7 @@ public partial class TrainService(
     internal async Task<TrainState?> RegisterOrUpdateTrainState(
         ulong clientDriverId,
         AtsToServerData clientData,
+        List<TrackCircuit> oldTrackCircuits,
         List<TrackCircuit> trackCircuits,
         List<TrackCircuitData> incrementalTrackCircuitDataList,
         ServerToATSData serverData)
@@ -169,8 +171,8 @@ public partial class TrainService(
         // 1-1.運転士が自分な列車が未登録
         if (existingTrainStateByMe == null)
         {
-            // 2.無効フラグが立っていない場合、同一運番の列車が在線している場合
-            //   無効フラグが立っていた場合、同一列番の列車が在線している場合
+            // 2.無効フラグが立っていない場合、別運転士で同一運番の列車が在線している場合
+            //   無効フラグが立っていた場合、別運転士で同一列番の列車が在線している場合
             if (
                 (!clientData.IsTherePreviousTrainIgnore && existingTrainStatesByOther.Count > 0)
                 || (clientData.IsTherePreviousTrainIgnore &&
@@ -205,7 +207,7 @@ public partial class TrainService(
             }
 
             // 交代先の列車を探す
-            // 1. 同一列番の列車が存在せず、在線軌道回路に他の列車が在線している場合、それに乗り換える
+            // 1. 同一列番の列車が存在せず、在線軌道回路に他の列車が在線している場合、それに乗り換える(メインケース、折返し変更もここ)
             existingTrainStateByMe = trainStatesOnTrackCircuits.FirstOrDefault(ts => ts.DriverId == null);
             if (existingTrainStateByMe != null)
             {
@@ -222,6 +224,19 @@ public partial class TrainService(
             // 2. 同一列番の列車が存在する場合、その列車に乗る(途中駅からの再開etcを想定)
             if (existingTrainStateByMe != null)
             {
+                var oldTrackCircuitNames = oldTrackCircuits.Select(tc => tc.Name).ToHashSet();
+                // ワープのおそれがある場合「ワープ？」を返す
+                if (
+                    !clientData.IsTherePreviousTrainIgnore
+                    && oldTrackCircuits.Count >= 1
+                    && trackCircuits.Count >= 1
+                    && trackCircuits.Any(tc => !oldTrackCircuitNames.Contains(tc.Name))
+                )
+                {
+                    serverData.IsMaybeWarp = true;
+                    return null;
+                }
+
                 // 3.列車情報を更新
                 existingTrainStateByMe.TrainNumber = clientTrainNumber;
                 existingTrainStateByMe.DiaNumber = clientDiaNumber;

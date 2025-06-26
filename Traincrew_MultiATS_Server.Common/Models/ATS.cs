@@ -188,6 +188,10 @@ public class ServerToATSData
     /// </summary>
     public bool IsTherePreviousTrain { get; set; } = false;
     /// <summary>
+    /// ワープの可能性あり状態
+    /// </summary>
+    public bool IsMaybeWarp { get; set; } = false;
+    /// <summary>
     /// 編成構成不一致
     /// </summary>
     public bool IsCarMismatch;
