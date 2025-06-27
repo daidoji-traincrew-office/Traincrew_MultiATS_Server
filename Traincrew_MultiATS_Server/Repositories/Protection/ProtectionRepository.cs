@@ -6,6 +6,13 @@ namespace Traincrew_MultiATS_Server.Repositories.Protection;
 
 public class ProtectionRepository(ApplicationDbContext context) : IProtectionRepository
 {
+    public async Task<List<ProtectionZoneState>> GetProtectionZoneStates(string trainNumber)
+    {
+        return await context.protectionZoneStates
+            .Where(x => x.TrainNumber == trainNumber)
+            .ToListAsync();
+    }
+
     public async Task<bool> IsProtectionEnabled(int minProtectionZone, int maxProtectionZone)
     {
         return await context.protectionZoneStates
@@ -25,7 +32,7 @@ public class ProtectionRepository(ApplicationDbContext context) : IProtectionRep
             .ToListAsync();
         // 既存のProtectionZoneを取得
         var oldZones = oldEntities.Select(x => x.ProtectionZone).ToList();
-        
+
         // 追加、削除するProtectionZoneを取得
         var zonesToAdd = protectionZones.Except(oldZones).ToList();
         var zonesToRemove = oldZones.Except(protectionZones).ToList();
@@ -48,7 +55,7 @@ public class ProtectionRepository(ApplicationDbContext context) : IProtectionRep
                 oldEntities.Where(x => zonesToRemove.Contains(x.ProtectionZone))
             );
         }
-        
+
         // 保存
         await context.SaveChangesAsync();
         await transaction.CommitAsync();
@@ -58,6 +65,13 @@ public class ProtectionRepository(ApplicationDbContext context) : IProtectionRep
     {
         await context.protectionZoneStates
             .Where(x => x.TrainNumber == trainNumber)
+            .ExecuteDeleteAsync();
+    }
+
+    public async Task DeleteById(ulong id)
+    {
+        await context.protectionZoneStates
+            .Where(x => x.id == id)
             .ExecuteDeleteAsync();
     }
 }
