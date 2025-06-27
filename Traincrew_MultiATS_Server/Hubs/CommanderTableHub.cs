@@ -18,6 +18,7 @@ public class CommanderTableHub(
     TtcStationControlService ttcStationControlService,
     TrainService trainService,
     OperationInformationService operationInformationService,
+    ProtectionService protectionService,
     ServerService serverService
 ) : Hub<ICommanderTableClientContract>, ICommanderTableHubContract
 {
@@ -82,5 +83,24 @@ public class CommanderTableHub(
     public async Task SetServerMode(ServerMode mode)
     {
         await serverService.SetServerModeAsync(mode);
+    }
+
+    public async Task AddProtectionZoneState(ProtectionZoneData data)
+    {
+        await protectionService.AddProtectionZoneState(data);
+    }
+
+    public async Task UpdateProtectionZoneState(ProtectionZoneData data)
+    {
+        await protectionService.UpdateProtectionZoneState(data);
+    }
+
+    public async Task DeleteProtectionZoneState(ulong id)
+    {
+        await protectionService.DeleteProtectionZoneState(id);
+    }
+    public async Task<List<ProtectionZoneData>> GetProtectionZoneStates(string trainNumber)
+    {
+        return await protectionService.GetProtectionZoneStates(trainNumber);
     }
 }
