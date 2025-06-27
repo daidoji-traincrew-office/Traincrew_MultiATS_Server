@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Discord.Net;
 using Discord.Rest;
+using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http.Extensions;
@@ -31,7 +32,8 @@ public class AuthenticationController(ILogger<AuthenticationController> logger, 
         //
         // For scenarios where the default authentication handler configured in the ASP.NET Core
         // authentication options shouldn't be used, a specific scheme can be specified here.
-        var principal = (await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme)).Principal;
+        var principal = (await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme))
+            .Principal;
         if (principal is null)
         {
             var properties = new AuthenticationProperties
@@ -44,57 +46,80 @@ public class AuthenticationController(ILogger<AuthenticationController> logger, 
 
         // クッキーの認証情報を削除
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        // OpenIddictのリクエストを取得
+        var request = HttpContext.GetOpenIddictServerRequest();
+        if (request is null)
+        {
+            // OpenIddictのリクエストが取得できない場合はBadRequestを返す
+            return Results.Forbid(
+                authenticationSchemes: new List<string> { OpenIddictServerAspNetCoreDefaults.AuthenticationScheme },
+                properties: new(new Dictionary<string, string?>
+                {
+                    [OpenIddictClientAspNetCoreConstants.Properties.Error] =
+                        Errors.ServerError,
+                    [OpenIddictClientAspNetCoreConstants.Properties.ErrorDescription] =
+                        "OpenIddictのリクエストが見つかりませんでした。これが表示されるとしたらおそらくバグです。たぶん。"
+                }));
+        }
+
         // ユーザーIDを取得
         var userId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (userId is null)
         {
             // ユーザーIDが取得できない場合はUnauthorizedを返す
             return Results.Forbid(
-                authenticationSchemes: new List<string>{OpenIddictServerAspNetCoreDefaults.AuthenticationScheme},
+                authenticationSchemes: new List<string> { OpenIddictServerAspNetCoreDefaults.AuthenticationScheme },
                 properties: new(new Dictionary<string, string?>
                 {
-                    [OpenIddictClientAspNetCoreConstants.Properties.Error] = 
+                    [OpenIddictClientAspNetCoreConstants.Properties.Error] =
                         Errors.ServerError,
-                    [OpenIddictClientAspNetCoreConstants.Properties.ErrorDescription] = 
+                    [OpenIddictClientAspNetCoreConstants.Properties.ErrorDescription] =
                         "ユーザーIDが見つかりませんでした。これが表示されるとしたらおそらくバグです。たぶん。"
                 }));
         }
+
         // ユーザーIDからそのDiscordユーザーが運転会に参加可能か調べる
         var canAuthenticate = await discordService.IsUserCanAuthenticate(ulong.Parse(userId));
         if (!canAuthenticate)
         {
             // 運転会に参加できない場合はAccessDeniedを返す
             return Results.Forbid(
-                authenticationSchemes: new List<string>{OpenIddictServerAspNetCoreDefaults.AuthenticationScheme},
+                authenticationSchemes: new List<string> { OpenIddictServerAspNetCoreDefaults.AuthenticationScheme },
                 properties: new(new Dictionary<string, string?>
                 {
                     [OpenIddictClientAspNetCoreConstants.Properties.Error] =
                         Errors.AccessDenied,
-                    [OpenIddictClientAspNetCoreConstants.Properties.ErrorDescription] = 
+                    [OpenIddictClientAspNetCoreConstants.Properties.ErrorDescription] =
                         "運転会サーバーに所属していないか、入鋏ロールがついていません。司令主任にお問い合わせください。"
                 }));
         }
-        
-        
+
+
         // Create the claims-based identity that will be used by OpenIddict to generate tokens.
         var identity = new ClaimsIdentity(
             authenticationType: TokenValidationParameters.DefaultAuthenticationType,
             nameType: Claims.Name,
             roleType: Claims.Role);
-        
+
         // ローカルクッキーから取得したクレームをOpenIddictのクレームに変換 
         identity.AddClaim(new Claim(Claims.Subject, principal.FindFirst(ClaimTypes.NameIdentifier)!.Value));
         identity.AddClaim(new Claim(Claims.Name, principal.FindFirst(ClaimTypes.Name)!.Value)
             .SetDestinations(Destinations.AccessToken));
         identity.AddClaim(new Claim(Claims.Private.RegistrationId,
-            principal.FindFirst(Claims.Private.RegistrationId)!.Value)
+                principal.FindFirst(Claims.Private.RegistrationId)!.Value)
             .SetDestinations(Destinations.AccessToken));
         identity.AddClaim(new Claim(Claims.Private.ProviderName,
-            principal.FindFirst(Claims.Private.ProviderName)!.Value)
+                principal.FindFirst(Claims.Private.ProviderName)!.Value)
             .SetDestinations(Destinations.AccessToken));
 
+        // OpenIddictのリクエストからスコープを取得し、identityに設定
+        var scopes = request
+            .GetScopes()
+            .Intersect([Scopes.OfflineAccess], StringComparer.OrdinalIgnoreCase);
+        identity.SetScopes(scopes);
+
         // Openiddictにトークンの生成とOAuth2トークンのレスポンスを返すように依頼
-        return Results.SignIn(new ClaimsPrincipal(identity), properties: null,
+        return Results.SignIn(new(identity), properties: null,
             OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
     }
 
@@ -116,6 +141,7 @@ public class AuthenticationController(ILogger<AuthenticationController> logger, 
         {
             return Results.BadRequest();
         }
+
         var token = authenticationToken.Value;
 
         // Memberを取得
