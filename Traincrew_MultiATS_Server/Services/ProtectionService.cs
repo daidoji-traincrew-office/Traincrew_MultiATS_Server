@@ -43,21 +43,17 @@ public class ProtectionService(
     }
     
     // ProtectionZoneStateの取得
-    public async Task<List<ProtectionZoneData>> GetProtectionZoneStates(string trainNumber)
+    public async Task<List<ProtectionZoneData>> GetProtectionZoneStates()
     {
-        var result = new List<ProtectionZoneData>();
-        var entities = await protectionRepository.GetProtectionZoneStates(trainNumber);
-        foreach (var entity in entities)
-        {
-            result.Add(new()
+        var entities = await protectionRepository.GetProtectionZoneStates();
+        return entities
+            .Select(entity => new ProtectionZoneData
             {
                 Id = entity.id,
                 TrainNumber = entity.TrainNumber,
                 ProtectionZone = entity.ProtectionZone
-            });
-        }
-
-        return result;
+            })
+            .ToList();
     }
 
     // ProtectionZoneStateの追加
