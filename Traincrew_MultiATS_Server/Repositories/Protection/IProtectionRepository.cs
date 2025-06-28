@@ -7,6 +7,6 @@ public interface IProtectionRepository
 	Task<bool> IsProtectionEnabled(int minProtectionZone, int maxProtectionZone);
 	Task EnableProtection(string trainNumber, List<int> protectionZones);
 	Task DisableProtection(string trainNumber);
-	Task<List<ProtectionZoneState>> GetProtectionZoneStates(string trainNumber);
+	Task<List<ProtectionZoneState>> GetProtectionZoneStates();
 	Task DeleteById(ulong id);
 }
