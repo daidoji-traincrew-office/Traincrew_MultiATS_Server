@@ -66,8 +66,16 @@ atlas migrate diff --env local add_column_to_table
 ### Visual Studio
 
 ### Rider
+起動プロファイルを以下に設定
+
+- `Traincrew_MultiATS_Server.Crew` (ATS、信号盤、TID、司令卓用サーバー)
+- `Traincrew_MultiATS_Server.Passenger` (お客様用アプリ向けサーバー)
+
+その後、デバッグボタンを押す
 
 
+詳しくはこちらを参照すること。
+https://pleiades.io/help/rider/Debugging_Code.html
 
 ### Terminal
 ```
