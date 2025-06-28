@@ -19,11 +19,33 @@ Dockerを入れる
 https://docs.docker.com/engine/install/
 
 ### Postgres
+#### (Optional) マイグレーションを含めた開発
+Atlasによるマイグレーションを用いた開発を行う場合、compose.ymlを編集し、コンテナ起動時のスキーマ自動適用を無効にする
+
+```yaml
+    volumes:
+      - ./data:/var/lib/postgresql/data
+      # 以下の行をコメントアウトする
+      # - ./schema.sql:/docker-entrypoint-initdb.d/00_schema.sql
+```
+
+#### 起動方法
 DockerでPostgresを立ち上げる
 ```
 cd Database
 docker compose up -d
 ```
+#### DBのデータを消す方法(特に開発中にスキーマを変更した場合)
+※この操作を行うと、DBのデータが全て消えます。注意してください。
+※マイグレーションを使用している場合は、一般にはマイグレーションの適用で十分です。
+
+docker compose down でコンテナを停止し、削除する
+```
+cd Database
+docker compose down -v
+```
+
+`Database/data`以下にDBのデータが保存されているので、そのフォルダを削除すればOK
 
 ### Atlas
 
@@ -39,6 +61,23 @@ atlas migrate apply --env local
 スキーマを変更したらやる マイグレーション名は適宜変更
 ```
 atlas migrate diff --env local add_column_to_table
+```
+## デバッグ(サーバーの起動方法)
+### Visual Studio
+
+### Rider
+
+
+
+### Terminal
+```
+# 乗務員用サーバー
+cd Traincrew_MultiATS_Server.Crew
+dotnet run -lp https
+
+# お客様用サーバー
+cd Traincrew_MultiATS_Server.Passenger
+dotnet run -lp https
 ```
 
 ## フォルダ構成について
