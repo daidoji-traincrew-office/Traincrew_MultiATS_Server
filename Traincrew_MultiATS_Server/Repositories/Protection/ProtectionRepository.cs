@@ -6,10 +6,9 @@ namespace Traincrew_MultiATS_Server.Repositories.Protection;
 
 public class ProtectionRepository(ApplicationDbContext context) : IProtectionRepository
 {
-    public async Task<List<ProtectionZoneState>> GetProtectionZoneStates(string trainNumber)
+    public async Task<List<ProtectionZoneState>> GetProtectionZoneStates()
     {
         return await context.protectionZoneStates
-            .Where(x => x.TrainNumber == trainNumber)
             .ToListAsync();
     }
 
