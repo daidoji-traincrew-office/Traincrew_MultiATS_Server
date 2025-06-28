@@ -88,8 +88,8 @@ public class CommanderTableHub(
     {
         await protectionService.DeleteProtectionZoneState(id);
     }
-    public async Task<List<ProtectionZoneData>> GetProtectionZoneStates(string trainNumber)
+    public async Task<List<ProtectionZoneData>> GetProtectionZoneStates()
     {
-        return await protectionService.GetProtectionZoneStates(trainNumber);
+        return await protectionService.GetProtectionZoneStates();
     }
 }
