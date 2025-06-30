@@ -227,7 +227,7 @@ public partial class TrainService(
                 var oldTrackCircuitNames = oldTrackCircuits.Select(tc => tc.Name).ToHashSet();
                 // ワープのおそれがある場合「ワープ？」を返す
                 if (
-                    !clientData.IsTherePreviousTrainIgnore
+                    !clientData.IsMaybeWarpIgnore
                     && oldTrackCircuits.Count >= 1
                     && trackCircuits.Count >= 1
                     && trackCircuits.Any(tc => !oldTrackCircuitNames.Contains(tc.Name))

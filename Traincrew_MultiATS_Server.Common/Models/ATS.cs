@@ -90,6 +90,7 @@ public class AtsToServerData
     public List<TrackCircuitData> OnTrackList { get; init; }
 
     public bool IsTherePreviousTrainIgnore { get; set; } = false;
+    public bool IsMaybeWarpIgnore { get; set; } = false;
 
     public float Speed { get; init; }
     public float Acceleration { get; init; }
