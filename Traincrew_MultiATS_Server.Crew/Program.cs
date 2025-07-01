@@ -247,9 +247,9 @@ public class Program
                
                 // トークンの有効期限を設定する
                 options
-                    .SetAccessTokenLifetime(TimeSpan.FromMinutes(3))
-                    .SetIdentityTokenLifetime(TimeSpan.FromMinutes(3))
-                    .SetRefreshTokenLifetime(TimeSpan.FromHours(6));
+                    .SetAccessTokenLifetime(TimeSpan.FromHours(6))
+                    .SetIdentityTokenLifetime(TimeSpan.FromHours(6))
+                    .SetRefreshTokenLifetime(TimeSpan.FromDays(7));
 
                 // 証明書制御
                 if (isDevelopment)
