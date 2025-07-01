@@ -121,6 +121,7 @@ public partial class TrainService(
         List<TrackCircuitData> incrementalTrackCircuitDataList,
         ServerToATSData serverData)
     {
+        // Todo: もうすこし機能的凝集レベルでメソッド分解したい
         var clientTrainNumber = clientData.DiaName;
         var clientDiaNumber = GetDiaNumberFromTrainNumber(clientTrainNumber);
         var existingTrainStates = await GetTrainStatesByDiaNumber(clientDiaNumber);
