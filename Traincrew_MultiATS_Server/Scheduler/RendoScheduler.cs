@@ -11,6 +11,7 @@ public class RendoScheduler(IServiceScopeFactory serviceScopeFactory) : Schedule
         await service.LeverToRouteState();
         await service.DirectionRelay();
         await service.RouteLockRelay();
+        await service.RouteRelayWithoutSwitchingMachine();
         await service.RouteRelay();
         await service.SignalControl();
         await service.ApproachLockRelay();

@@ -317,6 +317,47 @@ public class RendoService(
         }
     }
 
+
+    /// <summary>
+    /// <strong>転てつ器無し進路照査リレー回路</strong><br/>
+    /// 現在の状態から、転てつ器以外の進路が確保され、TCに進路指示を出していいか決定する。
+    /// </summary>
+    /// <returns></returns> 
+    public async Task RouteRelayWithoutSwitchingMachine()
+    {
+        // まず、てこ反応リレーが落下しているすべての進路の進路リレーをすべて落下させる
+        await routeRepository.DropRouteRelayWithoutSwitchingMachineWhereLeverRelayIsDropped();
+
+        // そのうえで、てこ反応リレーが扛上している進路のIDを全取得する
+        var routeIds = await routeRepository.GetIdsWhereLeverRelayIsRaised();
+        // てこリレーが扛上している進路の進路鎖錠条件を取得
+        var routeLockConditions = await lockConditionRepository.GetConditionsByObjectIdsAndType(
+            routeIds, LockType.Route);
+
+
+        // 関わる全てのObjectを取得
+        var objectIds = routeIds
+            .Union(routeLockConditions.Values.SelectMany(ExtractObjectIdsFromLockCondtions))
+            .Distinct()
+            .ToList();
+        var interlockingObjects = (await interlockingObjectRepository.GetObjectByIdsWithState(objectIds))
+            .ToDictionary(obj => obj.Id);
+
+        foreach (var routeId in routeIds)
+        {
+            // 対象進路
+            var route = (interlockingObjects[routeId] as Route)!;
+            var routeLockCondition = routeLockConditions.GetValueOrDefault(routeId, []);
+            var result = ProcessRouteRelayWithoutSwitchingMachine(route, routeLockCondition, interlockingObjects);
+            if (route.RouteState.IsRouteRelayWithoutSwitchingMachineRaised == result)
+            {
+                continue;
+            }
+            route.RouteState.IsRouteRelayWithoutSwitchingMachineRaised = result;
+            await generalRepository.Save(route.RouteState);
+        }
+    }
+
     /// <summary>
     /// <strong>進路照査リレー回路</strong><br/>
     /// 現在の状態から、進路が確保されているか決定する。
@@ -324,10 +365,10 @@ public class RendoService(
     /// <returns></returns>   
     public async Task RouteRelay()
     {
-        // まず、てこ反応リレーが落下しているすべての進路の進路リレーをすべて落下させる
-        await routeRepository.DropRouteRelayWhereLeverRelayIsDropped();
+        // まず、転てつ器無し進路照査リレーが落下しているすべての進路の進路リレーをすべて落下させる
+        await routeRepository.DropRouteRelayWhereRouteRelayWithoutSwitchingMachineIsDropped();
 
-        // そのうえで、てこ反応リレーが扛上している進路のIDを全取得する
+        // そのうえで、転てつ器無し進路照査リレーが扛上している進路のIDを全取得する
         var routeIds = await routeRepository.GetIdsWhereLeverRelayIsRaised();
         // 上記進路に対して統括制御「する」進路の統括制御をすべて取得
         var sourceThrowOutControlList = await throwOutControlRepository.GetByTargetIds(routeIds);
@@ -354,23 +395,42 @@ public class RendoService(
         {
             // 対象進路
             var route = (interlockingObjects[routeId] as Route)!;
+            var directLockCondition = directLockConditions.GetValueOrDefault(routeId, []);
+            var signalControlCondition = signalControlConditions.GetValueOrDefault(routeId, []);
+
             // この進路に対して総括制御「する」進路
             var sourceThrowOutRoutes = sourceThrowOutControlDictionary.GetValueOrDefault(route.Id, [])
                 .Select(toc => interlockingObjects[toc.SourceId])
                 .OfType<Route>()
                 .ToList();
-            var directLockCondition = directLockConditions.GetValueOrDefault(routeId, []);
-            var signalControlCondition = signalControlConditions.GetValueOrDefault(routeId, []);
-            var result = ProcessRouteRelay(route, directLockCondition, signalControlCondition, sourceThrowOutRoutes,
-                interlockingObjects);
+
+            var result = ProcessRouteRelay(route, directLockCondition, signalControlCondition, sourceThrowOutRoutes, interlockingObjects);
             if (route.RouteState.IsRouteRelayRaised == result)
             {
                 continue;
             }
-
             route.RouteState.IsRouteRelayRaised = result;
             await generalRepository.Save(route.RouteState);
         }
+    }
+
+    private RaiseDrop ProcessRouteRelayWithoutSwitchingMachine(Route route,
+        List<LockCondition> routeLockCondition,
+        Dictionary<ulong, InterlockingObject> interlockingObjects)
+    {
+        // てこリレーが落下している場合、進路リレーを落下させてcontinue
+        if (route.RouteState.IsLeverRelayRaised == RaiseDrop.Drop)
+        {
+            return RaiseDrop.Drop;
+        }
+
+        // 進路の鎖錠欄の条件を満たしているかを取得
+        if (!IsEnsuredRouteByDirectLockConditions(routeLockCondition, interlockingObjects))
+        {
+            return RaiseDrop.Drop;
+        }
+        // 進路のRouteState.IsRouteRelayWithoutSwitchingMachineRaisedをRaiseにする
+        return RaiseDrop.Raise;
     }
 
     private RaiseDrop ProcessRouteRelay(Route route,
@@ -397,12 +457,12 @@ public class RendoService(
             return RaiseDrop.Drop;
         }
 
-        // 統括制御の条件を満たしているか確認
+        // 総括制御の条件を満たしているか確認
         if (!(
                 (
                     // 自進路YS扛上
                     route.RouteState.IsThrowOutYSRelayRaised == RaiseDrop.Raise
-                    // この進路に対して統括制御「する」進路の進路鎖錠リレーが落下している
+                    // この進路に対して総括制御「する」進路の進路鎖錠リレーが落下している
                     && sourceThrowOutRoutes.Any(r => r.RouteState.IsRouteLockRaised == RaiseDrop.Drop)
                 )
                 // 自進路YS落下

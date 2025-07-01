@@ -7,9 +7,13 @@ public interface IRouteRepository
     /// </summary>
     Task<List<Models.Route>> GetByIdsWithState(List<ulong> ids);
     /// <summary>
-    /// てこ反応リレーが落下しており かつ 進路照査リレーが扛上している進路に対し、進路照査リレーを落下させる
+    /// てこ反応リレーが落下しており かつ 転てつ器無し進路照査リレーが扛上している進路に対し、転てつ器無し進路照査リレーを落下させる
     /// </summary>
-    Task DropRouteRelayWhereLeverRelayIsDropped();
+    Task DropRouteRelayWithoutSwitchingMachineWhereLeverRelayIsDropped();
+    /// <summary>
+    /// 転てつ器無し進路照査リレーが落下しており かつ 進路照査リレーが扛上している進路に対し、進路照査リレーを落下させる
+    /// </summary>
+    Task DropRouteRelayWhereRouteRelayWithoutSwitchingMachineIsDropped();
     /// <summary>
     /// てこ反応リレーが扛上しているすべての進路IDを取得する 
     /// </summary>
