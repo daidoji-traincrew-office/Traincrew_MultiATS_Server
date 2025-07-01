@@ -46,6 +46,15 @@ public class RouteRepository(ApplicationDbContext context) : IRouteRepository
             .ToListAsync();
     }
 
+    public async Task<List<ulong>> GetIdsWhereRouteRelayWithoutSwitchingMachineIsRaised()
+    {
+        return await context.Routes
+            .Include(r => r.RouteState)
+            .Where(r => r.RouteState.IsLeverRelayRaised == RaiseDrop.Raise)
+            .Select(r => r.Id)
+            .ToListAsync();
+    }
+
     public async Task DropSignalRelayWhereRouteRelayIsDropped()
     {
         await context.RouteStates

@@ -20,6 +20,11 @@ public interface IRouteRepository
     /// <returns> てこ反応リレーが扛上している進路のリスト </returns>
     Task<List<ulong>> GetIdsWhereLeverRelayIsRaised();
     /// <summary>
+    /// てこ反応リレーが扛上しているすべての進路IDを取得する 
+    /// </summary>
+    /// <returns> てこ反応リレーが扛上している進路のリスト </returns>
+    Task<List<ulong>> GetIdsWhereRouteRelayWithoutSwitchingMachineIsRaised();
+    /// <summary>
     /// 進路照査リレーが落下しており かつ 信号制御リレーが扛上している進路に対し、信号制御リレーを落下させる
     /// </summary>
     Task DropSignalRelayWhereRouteRelayIsDropped();
