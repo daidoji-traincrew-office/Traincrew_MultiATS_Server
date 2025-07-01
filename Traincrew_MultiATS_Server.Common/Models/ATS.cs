@@ -89,6 +89,9 @@ public class AtsToServerData
     public string DiaName { get; init; }
     public List<TrackCircuitData> OnTrackList { get; init; }
 
+    public bool IsTherePreviousTrainIgnore { get; set; } = false;
+    public bool IsMaybeWarpIgnore { get; set; } = false;
+
     public float Speed { get; init; }
     public float Acceleration { get; init; }
 
@@ -185,6 +188,10 @@ public class ServerToATSData
     /// 同一運番状態
     /// </summary>
     public bool IsTherePreviousTrain { get; set; } = false;
+    /// <summary>
+    /// ワープの可能性あり状態
+    /// </summary>
+    public bool IsMaybeWarp { get; set; } = false;
     /// <summary>
     /// 編成構成不一致
     /// </summary>

@@ -14,6 +14,7 @@ using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
 using Traincrew_MultiATS_Server.Repositories.Train;
 using Traincrew_MultiATS_Server.Repositories.TrainCar;
 using Traincrew_MultiATS_Server.Repositories.TrainDiagram;
+using Traincrew_MultiATS_Server.Repositories.Transaction;
 using Traincrew_MultiATS_Server.Services;
 
 namespace Traincrew_MultiATS_Server.Passenger;
@@ -65,27 +66,30 @@ public class Program
 
         // DI
         builder.Services
+            // Repository (ABC順)
+            .AddScoped<IDateTimeRepository, DateTimeRepository>()
             .AddScoped<IGeneralRepository, GeneralRepository>()
-            .AddScoped<ITrackCircuitRepository, TrackCircuitRepository>()
-            .AddScoped<ITrainRepository, TrainRepository>()
-            .AddScoped<ITrainCarRepository, TrainCarRepository>()
-            .AddScoped<ITrainDiagramRepository, TrainDiagramRepository>()
             .AddScoped<INextSignalRepository, NextSignalRepository>()
-            .AddScoped<ISignalRepository, SignalRepository>()
-            .AddScoped<IOperationNotificationRepository, OperationNotificationRepository>()
             .AddScoped<IOperationInformationRepository, OperationInformationRepository>()
+            .AddScoped<IOperationNotificationRepository, OperationNotificationRepository>()
             .AddScoped<IProtectionRepository, ProtectionRepository>()
             .AddScoped<IRouteRepository, RouteRepository>()
+            .AddScoped<ISignalRepository, SignalRepository>()
             .AddScoped<ISignalRouteRepository, SignalRouteRepository>()
-            .AddScoped<IDateTimeRepository, DateTimeRepository>()
-            .AddScoped<TrackCircuitService>()
-            .AddScoped<SignalService>()
-            .AddScoped<OperationNotificationService>()
+            .AddScoped<ITrackCircuitRepository, TrackCircuitRepository>()
+            .AddScoped<ITrainCarRepository, TrainCarRepository>()
+            .AddScoped<ITrainDiagramRepository, TrainDiagramRepository>()
+            .AddScoped<ITrainRepository, TrainRepository>()
+            .AddScoped<ITransactionRepository, TransactionRepository>()
+            // Service (ABC順)
             .AddScoped<OperationInformationService>()
+            .AddScoped<OperationNotificationService>()
+            .AddScoped<PassengerService>()
             .AddScoped<ProtectionService>()
             .AddScoped<RouteService>()
-            .AddScoped<TrainService>()
-            .AddScoped<PassengerService>();
+            .AddScoped<SignalService>()
+            .AddScoped<TrackCircuitService>()
+            .AddScoped<TrainService>();
     }
 
     private static async Task Configure(WebApplication app, bool isDevelopment)
