@@ -330,6 +330,9 @@ public class RendoService(
 
         // そのうえで、てこ反応リレーが扛上している進路のIDを全取得する
         var routeIds = await routeRepository.GetIdsWhereLeverRelayIsRaised();
+        // てこリレーが扛上している進路の直接鎖錠条件を取得
+        var directLockConditions = await lockConditionRepository.GetConditionsByObjectIdsAndType(
+            routeIds, LockType.Lock);
         // てこリレーが扛上している進路の進路鎖錠条件を取得
         var routeLockConditions = await lockConditionRepository.GetConditionsByObjectIdsAndType(
             routeIds, LockType.Route);
@@ -337,6 +340,7 @@ public class RendoService(
 
         // 関わる全てのObjectを取得
         var objectIds = routeIds
+            .Union(directLockConditions.Values.SelectMany(ExtractObjectIdsFromLockCondtions))
             .Union(routeLockConditions.Values.SelectMany(ExtractObjectIdsFromLockCondtions))
             .Distinct()
             .ToList();
@@ -347,8 +351,9 @@ public class RendoService(
         {
             // 対象進路
             var route = (interlockingObjects[routeId] as Route)!;
+            var directLockCondition = directLockConditions.GetValueOrDefault(routeId, []);
             var routeLockCondition = routeLockConditions.GetValueOrDefault(routeId, []);
-            var result = ProcessRouteRelayWithoutSwitchingMachine(route, routeLockCondition, interlockingObjects);
+            var result = ProcessRouteRelayWithoutSwitchingMachine(route, directLockCondition, routeLockCondition, interlockingObjects);
             if (route.RouteState.IsRouteRelayWithoutSwitchingMachineRaised == result)
             {
                 continue;
@@ -415,6 +420,7 @@ public class RendoService(
     }
 
     private RaiseDrop ProcessRouteRelayWithoutSwitchingMachine(Route route,
+        List<LockCondition> directLockCondition,
         List<LockCondition> routeLockCondition,
         Dictionary<ulong, InterlockingObject> interlockingObjects)
     {
@@ -424,8 +430,14 @@ public class RendoService(
             return RaiseDrop.Drop;
         }
 
-        // 進路の鎖錠欄の条件を満たしているかを取得
+        // 進路の進路鎖錠欄の条件を満たしているかを取得
         if (!IsEnsuredRouteByDirectLockConditions(routeLockCondition, interlockingObjects))
+        {
+            return RaiseDrop.Drop;
+        }
+
+        // 進路の直接鎖錠欄の条件を確保中かを取得
+        if (!IsEnsuringRouteByDirectLockConditions(directLockCondition, interlockingObjects))
         {
             return RaiseDrop.Drop;
         }
@@ -1365,6 +1377,36 @@ public class RendoService(
             SwitchingMachine switchingMachine =>
                 !switchingMachine.SwitchingMachineState.IsSwitching
                 && switchingMachine.SwitchingMachineState.IsReverse == o.IsReverse,
+            // 接近鎖錠と進路鎖錠リレー扛上かどうか
+            Route route => route.RouteState is
+            { IsApproachLockMRRaised: RaiseDrop.Raise, IsRouteLockRaised: RaiseDrop.Raise },
+            // 軌道回路が短絡していないこと
+            TrackCircuit trackCircuit => !trackCircuit.TrackCircuitState.IsShortCircuit,
+            DirectionRoute directionRoute => o.IsLR == LR.Left ? directionRoute.DirectionRouteState.IsLRelayRaised == RaiseDrop.Raise : directionRoute.DirectionRouteState.IsRRelayRaised == RaiseDrop.Raise,
+            _ => false
+        };
+    }
+
+    /// <summary>
+    /// 進路の鎖錠欄から、進路が確保中か確認する
+    /// </summary>
+    private static bool IsEnsuringRouteByDirectLockConditions(
+        List<LockCondition> lockConditions,
+        Dictionary<ulong, InterlockingObject> interlockingObjects)
+    {
+        return EvaluateLockConditions(lockConditions, interlockingObjects,
+            IsEnsuringRouteByDirectLockConditionsPredicate);
+    }
+
+    private static bool IsEnsuringRouteByDirectLockConditionsPredicate(
+        LockConditionObject o, InterlockingObject interlockingObject)
+    {
+        // 鎖錠欄転てつ器条件　転換中でなく、向きがあっている
+        // 鎖錠欄進路条件　
+        return interlockingObject switch
+        {
+            // 転てつ器表示灯がどうか→向きが合っている
+            SwitchingMachine switchingMachine => switchingMachine.SwitchingMachineState.IsReverse == o.IsReverse,
             // 接近鎖錠と進路鎖錠リレー扛上かどうか
             Route route => route.RouteState is
             { IsApproachLockMRRaised: RaiseDrop.Raise, IsRouteLockRaised: RaiseDrop.Raise },
