@@ -1,4 +1,4 @@
-h1:dvYcF4NPC6fvqK1upTz7SEPprQidcD66ky2o/t5Qd2A=
+h1:6VpQJzDFnDQCzcU87o9EID/LpRRRgXikwl5iNcX/QKI=
 20241105144637_create_openiddict.sql h1:e3YP3bvDT2pkUc506P3fgKJoLzdNnzBgjkBNMKvEKoI=
 20241221070718_create_interlocking_tables.sql h1:bHtt4Hbmv5aMY0jvfDoG7eeY6IpChCnNrvSCAn9cdcU=
 20241221081310_switching_machine_reversed.sql h1:e7qP5i8sHtWVXpkbnbo3n/6smp6Z/lqQxwa4Yp+EQ1w=
@@ -59,3 +59,4 @@ h1:dvYcF4NPC6fvqK1upTz7SEPprQidcD66ky2o/t5Qd2A=
 20250614081537_add_train_diagram.sql h1:bTfW7QzoqCyCKTovgavi0IAlxFcXZCojisK/LlSHzzo=
 20250616122121_rename_to_train_type_id.sql h1:4sIg7fEjTc7tVbuHt+qZTwgBm4ctgnoUbyGM/hmaTac=
 20250618023029_add_operation_information_state.sql h1:fuQLQO+ojh2CTw+fyIGlbfxYSXwcQ5Z/DzqAyKQGD+U=
+20250701153045_add_is_route_relay_without_switching_machine_raised.sql h1:h4EYqbvpN+ENXs2o81n36QPKfWyChAc+J3hoWefTcUU=
