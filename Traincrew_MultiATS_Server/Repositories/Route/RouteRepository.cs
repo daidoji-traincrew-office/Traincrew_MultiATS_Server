@@ -50,7 +50,7 @@ public class RouteRepository(ApplicationDbContext context) : IRouteRepository
     {
         return await context.Routes
             .Include(r => r.RouteState)
-            .Where(r => r.RouteState.IsLeverRelayRaised == RaiseDrop.Raise)
+            .Where(r => r.RouteState.IsRouteRelayWithoutSwitchingMachineRaised == RaiseDrop.Raise)
             .Select(r => r.Id)
             .ToListAsync();
     }
