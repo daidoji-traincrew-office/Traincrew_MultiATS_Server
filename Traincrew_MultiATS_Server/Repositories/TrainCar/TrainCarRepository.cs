@@ -21,7 +21,8 @@ public class TrainCarRepository(ApplicationDbContext context) : ITrainCarReposit
 
     public async Task UpdateAll(long trainStateId, List<TrainCarState> carStates)
     {
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        var hasTransaction = context.Database.CurrentTransaction != null;
+        await using var transaction = hasTransaction ? null : await context.Database.BeginTransactionAsync();
         var oldCarStates = await context.TrainCarStates
             .Where(car => car.TrainStateId == trainStateId)
             .OrderBy(car => car.Index)
@@ -51,7 +52,10 @@ public class TrainCarRepository(ApplicationDbContext context) : ITrainCarReposit
         }
         
         await context.SaveChangesAsync();
-        await transaction.CommitAsync();
+        if (transaction != null)
+        {
+            await transaction.CommitAsync();
+        }
         // 関係するEntityのトラッキングを解除
         carStates.ForEach(carState =>
         {

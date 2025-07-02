@@ -1,8 +1,11 @@
 using System.Text;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.Extensions.DependencyInjection;
 using Traincrew_MultiATS_Server.Common.Contract;
 using Traincrew_MultiATS_Server.Crew;
+using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
+using Traincrew_MultiATS_Server.Repositories.Train;
 using TypedSignalR.Client;
 
 namespace Traincrew_MultiATS_Server.IT.Fixture;
@@ -22,11 +25,13 @@ public class WebApplicationFixture
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
     }
 
+    public static ulong DriverId => 0UL; // テスト用の固定DriverId
+
     /// <summary>
     /// ITrainHubContractとITrainClientContract用のHubConnectionを生成し、両方を返します。
     /// </summary>
     /// <param name="receiver">クライアント側のコントラクトを実装したインスタンス</param>
-    /// <returns>HubConnectionとITrainHubContract</returns>
+    /// <returns>HubConnection, ITrainHubContract</returns>
     public (HubConnection, ITrainHubContract) CreateTrainHub(ITrainClientContract? receiver = null)
     {
         var connection = new HubConnectionBuilder()
@@ -41,6 +46,24 @@ public class WebApplicationFixture
         }
 
         return (connection, hubContract);
+    }
+
+    /// <summary>
+    /// テスト用にITrainRepositoryを取得する
+    /// </summary>
+    public ITrainRepository CreateTrainRepository()
+    {
+        var scope = factory.Services.CreateScope();
+        return scope.ServiceProvider.GetRequiredService<ITrainRepository>();
+    }
+    
+    /// <summary>
+    /// テスト用にITrackCircuitRepositoryを取得する
+    /// </summary>
+    public ITrackCircuitRepository CreateTrackCircuitRepository()
+    {
+        var scope = factory.Services.CreateScope();
+        return scope.ServiceProvider.GetRequiredService<ITrackCircuitRepository>();
     }
 
     /// <summary>
