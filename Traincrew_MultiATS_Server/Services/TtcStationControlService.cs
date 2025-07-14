@@ -110,6 +110,12 @@ public class TtcStationControlService(
         int recallCounter = 0
         )
     {
+        if (recallCounter > 20)
+        {
+            // Todo: ロガー仕込んでおいたほうが安全な気がする
+            //再帰呼出しが20回を超えた場合は無限ループの可能性があるので終了
+            return;
+        }
         //対象窓名に対応する窓リンクを全て取得
         var targetTtcWindowLinks = ttcWindowLinks
             .Where(obj => obj.SourceTtcWindowName == SourceTtcWindowName)
