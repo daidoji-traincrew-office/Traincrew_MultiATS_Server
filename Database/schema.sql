@@ -581,7 +581,7 @@ CREATE TABLE train_car_state
     index             INT                                NOT NULL,               -- インデックス
     car_model         VARCHAR(100)                       NOT NULL,               -- 車両形式
     has_pantograph    BOOLEAN                            NOT NULL DEFAULT false, -- パンタグラフの有無
-    has_driver_cab    BOOLEAN                            NOT NULL DEFAULT false, -- 운전台の有無
+    has_driver_cab    BOOLEAN                            NOT NULL DEFAULT false, -- 運転台の有無
     has_conductor_cab BOOLEAN                            NOT NULL DEFAULT false, -- 車掌室の有無
     has_motor         BOOLEAN                            NOT NULL DEFAULT false, -- 電動機ありなし
     door_close        BOOLEAN                            NOT NULL DEFAULT true,  -- 扉閉め状態
