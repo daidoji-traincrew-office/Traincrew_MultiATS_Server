@@ -15,11 +15,22 @@ public class RouteRepository(ApplicationDbContext context) : IRouteRepository
             .ToListAsync();
     }
 
-    public async Task DropRouteRelayWhereLeverRelayIsDropped()
+    public async Task DropRouteRelayWithoutSwitchingMachineWhereLeverRelayIsDropped()
     {
         await context.RouteStates
             .Where(
-                routeState => routeState.IsLeverRelayRaised == RaiseDrop.Drop && routeState.IsRouteRelayRaised == RaiseDrop.Raise
+                routeState => routeState.IsLeverRelayRaised == RaiseDrop.Drop && routeState.IsRouteRelayWithoutSwitchingMachineRaised == RaiseDrop.Raise
+            )
+            .ExecuteUpdateAsync(
+                r => r.SetProperty(routeState => routeState.IsRouteRelayWithoutSwitchingMachineRaised, RaiseDrop.Drop)
+            );
+    }
+
+    public async Task DropRouteRelayWhereRouteRelayWithoutSwitchingMachineIsDropped()
+    {
+        await context.RouteStates
+            .Where(
+                routeState => routeState.IsRouteRelayWithoutSwitchingMachineRaised == RaiseDrop.Drop && routeState.IsRouteRelayRaised == RaiseDrop.Raise
             )
             .ExecuteUpdateAsync(
                 r => r.SetProperty(routeState => routeState.IsRouteRelayRaised, RaiseDrop.Drop)
@@ -31,6 +42,15 @@ public class RouteRepository(ApplicationDbContext context) : IRouteRepository
         return await context.Routes
             .Include(r => r.RouteState)
             .Where(r => r.RouteState.IsLeverRelayRaised == RaiseDrop.Raise)
+            .Select(r => r.Id)
+            .ToListAsync();
+    }
+
+    public async Task<List<ulong>> GetIdsWhereRouteRelayWithoutSwitchingMachineIsRaised()
+    {
+        return await context.Routes
+            .Include(r => r.RouteState)
+            .Where(r => r.RouteState.IsRouteRelayWithoutSwitchingMachineRaised == RaiseDrop.Raise)
             .Select(r => r.Id)
             .ToListAsync();
     }

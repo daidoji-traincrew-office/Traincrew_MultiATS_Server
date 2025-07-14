@@ -34,7 +34,7 @@ public class RouteService(IRouteRepository routeRepository)
 
     public async Task<List<RouteData>> GetActiveRoutes()
     {
-        var routeIds = await routeRepository.GetIdsWhereLeverRelayIsRaised();
+        var routeIds = await routeRepository.GetIdsWhereRouteRelayWithoutSwitchingMachineIsRaised();
         var routes = await routeRepository.GetByIdsWithState(routeIds);
         return routes.Select(ToRouteData).ToList();
     }

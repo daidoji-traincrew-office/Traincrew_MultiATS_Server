@@ -486,15 +486,16 @@ CREATE TABLE switching_machine_state
 -- 進路状態
 CREATE TABLE route_state
 (
-    id                           BIGINT PRIMARY KEY REFERENCES route (ID), -- 進路のID
-    is_lever_relay_raised        raise_drop NOT NULL,                      -- てこリレーが上がっているか
-    is_route_relay_raised        raise_drop NOT NULL,                      -- 進路照査リレーが上がっているか
-    is_signal_control_raised     raise_drop NOT NULL,                      -- 信号制御リレーが上がっているか
-    is_approach_lock_mr_raised   raise_drop NOT NULL,                      -- 接近鎖状が上がっているか
-    is_approach_lock_ms_raised   raise_drop NOT NULL,                      -- 接近鎖状が上がっているか
-    is_route_lock_raised         raise_drop NOT NULL,                      -- 進路鎖状が上がっているか
-    is_throw_out_xr_relay_raised raise_drop NOT NULL,                      -- 統括制御リレーが上がっているか
-    is_throw_out_ys_relay_raised raise_drop NOT NULL                       -- 統括制御リレーが上がっているか
+    id                                              BIGINT PRIMARY KEY REFERENCES route (ID), -- 進路のID
+    is_lever_relay_raised                           raise_drop NOT NULL,                      -- てこリレーが上がっているか
+    is_route_relay_raised                           raise_drop NOT NULL,                      -- 進路照査リレーが上がっているか
+    is_route_relay_without_switching_machine_raised raise_drop NOT NULL DEFAULT 'drop',       -- 転てつ機を除いた進路照査リレー
+    is_signal_control_raised                        raise_drop NOT NULL,                      -- 信号制御リレーが上がっているか
+    is_approach_lock_mr_raised                      raise_drop NOT NULL,                      -- 接近鎖状が上がっているか
+    is_approach_lock_ms_raised                      raise_drop NOT NULL,                      -- 接近鎖状が上がっているか
+    is_route_lock_raised                            raise_drop NOT NULL,                      -- 進路鎖状が上がっているか
+    is_throw_out_xr_relay_raised                    raise_drop NOT NULL,                      -- 統括制御リレーが上がっているか
+    is_throw_out_ys_relay_raised                    raise_drop NOT NULL                       -- 統括制御リレーが上がっているか
 );
 
 -- 信号機状態

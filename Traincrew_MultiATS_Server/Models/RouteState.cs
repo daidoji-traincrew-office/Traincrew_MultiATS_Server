@@ -46,5 +46,10 @@ public class RouteState
     /// </summary>
     [Column("is_throw_out_ys_relay_raised")]
     public RaiseDrop IsThrowOutYSRelayRaised { get; set; }
+    /// <summary>
+    /// 転てつ器を除いた進路照査リレー
+    /// </summary>
+    [Column("is_route_relay_without_switching_machine_raised")]
+    public RaiseDrop IsRouteRelayWithoutSwitchingMachineRaised { get; set; }
     // ReSharper restore InconsistentNaming
 }
