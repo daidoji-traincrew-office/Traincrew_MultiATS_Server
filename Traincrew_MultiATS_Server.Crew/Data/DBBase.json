@@ -8024,8 +8024,8 @@
             "phase": 1,
             "TypeName": "3灯式",
             "NextSignalNames": [
-                "高見沢上り出発14R",
-                "高見沢上り出発15R"
+                "高見沢上り場内12R",
+                "高見沢上り場内13R"
             ],
             "RouteNames": [],
             "DirectionRouteLeft": "TH63_16F",
