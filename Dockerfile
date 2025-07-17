@@ -22,12 +22,14 @@ COPY --link Traincrew_MultiATS_Server.Common/* Traincrew_MultiATS_Server.Common/
 COPY --link Traincrew_MultiATS_Server/* Traincrew_MultiATS_Server/
 COPY --link Traincrew_MultiATS_Server.Crew/* Traincrew_MultiATS_Server.Crew/
 
+## PrecompiledModelを生成
 RUN cd Traincrew_MultiATS_Server \
     && dotnet ef dbcontext optimize \
         --configuration Release \
-        --no-restore \
         -o PreCompiled \
         -n Traincrew_MultiATS_Server.Models
+# PrecompiledModelを有効にしてビルドする
+# ここで定義を有効にしてビルドする
 RUN cd Traincrew_MultiATS_Server.Crew \
     && dotnet publish \
         --configuration Release \
