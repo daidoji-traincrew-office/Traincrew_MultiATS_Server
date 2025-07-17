@@ -26,9 +26,8 @@ RUN dotnet ef dbcontext optimize \
     --project ./Traincrew_MultiATS_Server/Traincrew_MultiATS_Server.csproj \
     -o PreCompiled \
     -n Traincrew_MultiATS_Server.Models \
-    && cd ./Traincrew_MultiATS_Server.Crew \
-    && dotnet build -c Release -a $TARGETARCH --no-restore -p:DefineConstants=IS_ENABLED_PRECOMPILED_MODEL \
-    && dotnet publish -a $TARGETARCH --no-restore --nobuild -o /app
+RUN cd ./Traincrew_MultiATS_Server.Crew \
+    && dotnet publish -a $TARGETARCH --no-restore -o /app -p:DefineConstants=IS_ENABLED_PRECOMPILED_MODEL
 
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
