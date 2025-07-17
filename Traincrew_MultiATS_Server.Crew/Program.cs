@@ -45,6 +45,9 @@ using Traincrew_MultiATS_Server.Repositories.TtcWindow;
 using Traincrew_MultiATS_Server.Repositories.TtcWindowLink;
 using Traincrew_MultiATS_Server.Services;
 using static OpenIddict.Abstractions.OpenIddictConstants;
+#if IS_ENABLED_PRECOMPILED_MODEL
+using Traincrew_MultiATS_Server.Models;
+#endif
 
 namespace Traincrew_MultiATS_Server.Crew;
 
@@ -196,6 +199,9 @@ public class Program
             options.UseNpgsql(dataSource);
             // Todo: セッションであることを考えると、Redisを使ったほうが良いかも
             options.UseOpenIddict();
+            #if IS_ENABLED_PRECOMPILED_MODEL
+            options.UseModel(ApplicationDbContextModel.Instance);
+            #endif
         });
     }
 
