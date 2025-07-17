@@ -194,11 +194,15 @@ public class Program
         // Enumのマッピング
         EnumTypeMapper.MapEnumForNpgsql(dataSourceBuilder);
         var dataSource = dataSourceBuilder.Build();
-        builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        builder.Services.AddDbContext<DbContext>(options =>
         {
             options.UseNpgsql(dataSource);
             // Todo: セッションであることを考えると、Redisを使ったほうが良いかも
             options.UseOpenIddict();
+        });
+        builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        {
+            options.UseNpgsql(dataSource);
             #if IS_ENABLED_PRECOMPILED_MODEL
             options.UseModel(ApplicationDbContextModel.Instance);
             #endif
