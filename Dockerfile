@@ -21,13 +21,15 @@ RUN cd ./Traincrew_MultiATS_Server.Crew && dotnet restore -a $TARGETARCH
 COPY --link Traincrew_MultiATS_Server.Common/* Traincrew_MultiATS_Server.Common/
 COPY --link Traincrew_MultiATS_Server/* Traincrew_MultiATS_Server/
 COPY --link Traincrew_MultiATS_Server.Crew/* Traincrew_MultiATS_Server.Crew/
-RUN dotnet ef dbcontext optimize \
-    -v \
+RUN dotnet build -c Release -a $TARGETARCH --no-restore \
+    -p:DefineConstants=IS_ENABLED_PRECOMPILED_MODEL
+RUN dotnet ef dbcontext optimize -v --no-build \
     --project ./Traincrew_MultiATS_Server/Traincrew_MultiATS_Server.csproj \
     -o PreCompiled \
-    -n Traincrew_MultiATS_Server.Models \
-RUN cd ./Traincrew_MultiATS_Server.Crew \
-    && dotnet publish -a $TARGETARCH --no-restore -o /app -p:DefineConstants=IS_ENABLED_PRECOMPILED_MODEL
+    -n Traincrew_MultiATS_Server.Models
+RUN dotnet publish -c Release -a $TARGETARCH --no-restore --no-build \
+    --project:Traincrew_MultiATS_Server.Crew.csproj \
+    -o /app
 
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
