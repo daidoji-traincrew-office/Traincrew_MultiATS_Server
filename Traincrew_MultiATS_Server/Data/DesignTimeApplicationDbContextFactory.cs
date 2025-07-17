@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Npgsql;
 
 namespace Traincrew_MultiATS_Server.Data;
 
@@ -9,18 +10,23 @@ public class DesignTimeApplicationDbContextFactory : IDesignTimeDbContextFactory
 {
     public ApplicationDbContext CreateDbContext(string[] args)
     {
-        // appsettings.json から接続文字列を取得
-        var basePath = Directory.GetCurrentDirectory();
-        var configuration = new ConfigurationBuilder()
-            .SetBasePath(basePath)
-            .AddJsonFile("appsettings.json", optional: true)
-            .AddJsonFile("appsettings.Development.json", optional: true)
-            .Build();
-
-        var connectionString = configuration.GetConnectionString("DefaultConnection");
-        var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
-        optionsBuilder.UseNpgsql(connectionString);
-
-        return new(optionsBuilder.Options);
+        try
+        {
+            var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+            // NpgsqlDataSourceBuilderを使ってNpgsqlのEnumマッピングを行う
+            // connectionStringは適当にでも入れないとBuild()が失敗するので、適当な値を入れる(実際のDB接続は発生しない)
+            var dataSourceBuilder = new NpgsqlDataSourceBuilder("Host=localhost");
+            EnumTypeMapper.MapEnumForNpgsql(dataSourceBuilder);
+            optionsBuilder.UseNpgsql(dataSourceBuilder.Build());
+            // OpenIddictの設定を追加
+            // Todo: 本来はDbCotextを分けるべきだが、PropertyのSnakeCase化が適用されているので、一旦一緒くたに設定してしまう
+            optionsBuilder.UseOpenIddict();
+            return new(optionsBuilder.Options);
+        }
+        catch (System.Exception ex)
+        {
+            Console.WriteLine($"{ex.Message} {ex.StackTrace}");
+            throw;
+        }
     }
 }
