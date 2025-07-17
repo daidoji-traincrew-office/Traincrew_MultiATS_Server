@@ -6,6 +6,7 @@ WORKDIR /source
 
 # Install Entity Framework Core tools
 RUN dotnet tool install --global dotnet-ef 
+ENV PATH="${PATH}:/root/.dotnet/tools"
 
 # Copy project file and restore as distinct layers
 RUN mkdir -p /source/Traincrew_MultiATS_Server.Common
