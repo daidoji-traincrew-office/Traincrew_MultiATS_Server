@@ -25,6 +25,7 @@ COPY --link Traincrew_MultiATS_Server.Crew/* Traincrew_MultiATS_Server.Crew/
 RUN cd Traincrew_MultiATS_Server \
     && dotnet ef dbcontext optimize \
         --configuration Release \
+        --no-restore \
         -o PreCompiled \
         -n Traincrew_MultiATS_Server.Models
 RUN cd Traincrew_MultiATS_Server.Crew \
@@ -32,6 +33,7 @@ RUN cd Traincrew_MultiATS_Server.Crew \
         --configuration Release \
         -a $TARGETARCH \
         --no-restore \
+        -p:DefineConstants=IS_ENABLED_PRECOMPILED_MODEL \
         -o /app
 
 # Runtime stage
