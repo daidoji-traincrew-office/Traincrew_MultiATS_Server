@@ -4,6 +4,9 @@ FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG TARGETARCH
 WORKDIR /source
 
+# Install Entity Framework Core tools
+RUN dotnet tool install --global dotnet-ef 
+
 # Copy project file and restore as distinct layers
 RUN mkdir -p /source/Traincrew_MultiATS_Server.Common
 COPY --link Traincrew_MultiATS_Server.Common/*.csproj Traincrew_MultiATS_Server.Common/
