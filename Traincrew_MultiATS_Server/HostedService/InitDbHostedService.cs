@@ -9,6 +9,7 @@ using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.LockCondition;
+using Traincrew_MultiATS_Server.Scheduler;
 using Traincrew_MultiATS_Server.Services;
 using Route = Traincrew_MultiATS_Server.Models.Route;
 
@@ -20,8 +21,6 @@ public class InitDbHostedService(
     ServerService serverService
 ) : IHostedService
 {
-    private readonly List<Scheduler.Scheduler> _schedulers = [];
-
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         using var scope = serviceScopeFactory.CreateScope();
@@ -514,7 +513,10 @@ public class InitDbHostedService(
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        await Task.WhenAll(_schedulers.Select(s => s.Stop()));
+        var schedulerManager = serviceScopeFactory.CreateScope()
+            .ServiceProvider.GetRequiredService<SchedulerManager>();
+        // Stop all schedulers
+        await schedulerManager.Stop();
     }
 }
 
