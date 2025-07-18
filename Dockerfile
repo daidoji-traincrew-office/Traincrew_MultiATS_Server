@@ -1,6 +1,6 @@
 # Learn about building .NET container images:
 # https://github.com/dotnet/dotnet-docker/blob/main/samples/README.md
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG TARGETARCH
 WORKDIR /source
 
@@ -37,12 +37,15 @@ RUN cd Traincrew_MultiATS_Server.Crew \
         --no-restore \
         -p:DefineConstants=IS_ENABLED_PRECOMPILED_MODEL \
         -p:DebugType=full \
-        -o /app \
+        -o /app 
 
+#Download Stage
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS download_tools
+RUN dotnet tool install dotnet-trace --version 9.0.621003 --tool-path /.dotnet/tools
 
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
-COPY --from=build /.dotnet/tools /.dotnet/tools
+COPY --from=download_tools /.dotnet/tools /.dotnet/tools
 ENV PATH="${PATH}:/.dotnet/tools"
 EXPOSE 8080
 WORKDIR /app
