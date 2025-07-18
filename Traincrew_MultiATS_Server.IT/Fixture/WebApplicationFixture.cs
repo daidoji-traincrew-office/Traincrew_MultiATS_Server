@@ -46,7 +46,7 @@ public class WebApplicationFixture : IAsyncLifetime
         await using (connection)
         {
             await connection.StartAsync();
-            await hub.SetServerState(ServerMode.Private);
+            await hub.SetServerMode(ServerMode.Private).WaitAsync(TimeSpan.FromSeconds(10));
         }
     }
 
