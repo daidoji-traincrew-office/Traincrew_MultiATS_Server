@@ -271,7 +271,7 @@ public class InitDbHostedService(
             return;
         }
 
-        context.ServerStates.Add(new ServerState
+        context.ServerStates.Add(new()
         {
             Mode = ServerMode.Off
         });
