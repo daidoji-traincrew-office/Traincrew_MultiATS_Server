@@ -5,7 +5,7 @@ namespace Traincrew_MultiATS_Server.Scheduler;
 public class SchedulerManager(
     IServiceScopeFactory serviceScopeFactory,
     IMutexRepository mutexRepository
-) : IHostedService
+)
 {
     private bool _isRunning;
     private List<Scheduler> _schedulers = [];
@@ -45,15 +45,5 @@ public class SchedulerManager(
         await Task.WhenAll(_schedulers.Select(s => s.Stop()));
         _schedulers.Clear();
         _isRunning = false;
-    }
-
-    public Task StartAsync(CancellationToken cancellationToken)
-    {
-        return Task.CompletedTask;
-    }
-
-    public async Task StopAsync(CancellationToken cancellationToken)
-    {
-        await Stop();
     }
 }

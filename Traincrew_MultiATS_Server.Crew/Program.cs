@@ -492,6 +492,7 @@ public class Program
             .AddScoped<TtcStationControlService>()
             .AddSingleton<EnableAuthorizationStore>(_ => new(enableAuthorization))
             .AddSingleton<DiscordService>()
+            .AddSingleton<SchedulerManager>()
             .AddSingleton<DiscordRepository>()
             .AddSingleton<IDiscordRepository>(provider => provider.GetRequiredService<DiscordRepository>())
             .AddSingleton<IMutexRepository, MutexRepository>()
@@ -501,9 +502,7 @@ public class Program
     private static void ConfigureHostedServices(WebApplicationBuilder builder)
     {
         // HostedServiceまわり
-        builder.Services
-            .AddHostedService<InitDbHostedService>()
-            .AddHostedService<SchedulerManager>();
+        builder.Services.AddHostedService<InitDbHostedService>();
     }
 
     private static void ConfigureAuthorizationHostedServices(WebApplicationBuilder builder)
