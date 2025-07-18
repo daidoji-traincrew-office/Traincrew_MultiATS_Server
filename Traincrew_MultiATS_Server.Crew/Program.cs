@@ -143,13 +143,6 @@ public class Program
             // OpenIddictアプリケーション登録
             await RegisterOpeniddictApplicationAsync(app);
         }
-
-        // サーバー状態に応じてSchedulerManagerを起動
-        using (var scope = app.Services.CreateScope())
-        {
-            var serverService = scope.ServiceProvider.GetRequiredService<ServerService>();
-            await serverService.UpdateSchedulerAsync();
-        }
     }
 
     private static void ConfigureLoggingService(WebApplicationBuilder builder)
