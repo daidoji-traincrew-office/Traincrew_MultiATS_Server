@@ -10,9 +10,14 @@ public class ServerService(
     SchedulerManager schedulerManager,
     IMutexRepository mutexRepository)
 {
-    public async Task<ServerMode> GetServerStateAsync()
+    public async Task<ServerMode> GetServerModeAsync()
     {
         await using var mutex = await mutexRepository.AcquireAsync(nameof(ServerService));
+        return await GetServerModeAsyncWithoutLock();
+    }
+
+    private async Task<ServerMode> GetServerModeAsyncWithoutLock()
+    {
         var state = await serverRepository.GetServerStateAsync();
         if (state == null)
         {
@@ -36,7 +41,7 @@ public class ServerService(
 
     private async Task UpdateSchedulerAsyncWithoutLock()
     {
-        var mode = await GetServerStateAsync();
+        var mode = await GetServerModeAsyncWithoutLock();
         if (mode == ServerMode.Off)
         {
             await schedulerManager.Stop();
