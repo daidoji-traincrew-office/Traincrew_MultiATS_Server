@@ -494,7 +494,6 @@ public class Program
             .AddSingleton<DiscordService>()
             .AddSingleton<DiscordRepository>()
             .AddSingleton<IDiscordRepository>(provider => provider.GetRequiredService<DiscordRepository>())
-            .AddSingleton<SchedulerManager>()
             .AddSingleton<IMutexRepository, MutexRepository>()
             .AddSingleton<IAuthorizationHandler, DiscordRoleHandler>();
     }
@@ -502,7 +501,9 @@ public class Program
     private static void ConfigureHostedServices(WebApplicationBuilder builder)
     {
         // HostedServiceまわり
-        builder.Services.AddHostedService<InitDbHostedService>();
+        builder.Services
+            .AddHostedService<InitDbHostedService>()
+            .AddHostedService<SchedulerManager>();
     }
 
     private static void ConfigureAuthorizationHostedServices(WebApplicationBuilder builder)
