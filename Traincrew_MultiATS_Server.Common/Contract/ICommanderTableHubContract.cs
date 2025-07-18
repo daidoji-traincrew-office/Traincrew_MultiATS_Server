@@ -13,8 +13,8 @@ public interface ICommanderTableHubContract
     Task<OperationInformationData> UpdateOperationInformation(OperationInformationData operationInformationData);
     Task<List<OperationInformationData>> GetAllOperationInformations();
     Task DeleteOperationInformation(long id);
-    Task<ServerMode> GetServerState();
-    Task SetServerState(ServerMode mode);
+    Task<ServerMode> GetServerMode();
+    Task SetServerMode(ServerMode mode);
 }
 
 public interface ICommanderTableClientContract
