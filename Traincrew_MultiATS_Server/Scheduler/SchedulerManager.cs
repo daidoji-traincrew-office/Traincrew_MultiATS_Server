@@ -5,13 +5,14 @@ namespace Traincrew_MultiATS_Server.Scheduler;
 public class SchedulerManager(
     IServiceScopeFactory serviceScopeFactory,
     IMutexRepository mutexRepository
-)
+) : IHostedService
 {
     private bool _isRunning;
-
-    private void Hoge()
+    private List<Scheduler> _schedulers = [];
+    
+    private void InitSchedulers()
     {
-        List<Scheduler> schedulers =
+        _schedulers =
         [
             new SwitchingMachineScheduler(serviceScopeFactory),
             new RendoScheduler(serviceScopeFactory),
@@ -22,6 +23,7 @@ public class SchedulerManager(
             new DestinationButtonScheduler(serviceScopeFactory)
         ];
     }
+
     public async Task Start()
     {
         await using var mutex = await mutexRepository.AcquireAsync(nameof(SchedulerManager));
@@ -29,21 +31,29 @@ public class SchedulerManager(
         {
             return;
         }
-        // Todo: Schedulerの初期化処理をここに追加
-
+        InitSchedulers();
         _isRunning = true;
     }
 
     public async Task Stop()
     {
-       
         await using var mutex = await mutexRepository.AcquireAsync(nameof(SchedulerManager));
         if (!_isRunning)
         {
             return;
         }
-        // Todo: Schedulerの停止処理をここに追加
-
+        await Task.WhenAll(_schedulers.Select(s => s.Stop()));
+        _schedulers.Clear();
         _isRunning = false;
+    }
+
+    public Task StartAsync(CancellationToken cancellationToken)
+    {
+        return Task.CompletedTask;
+    }
+
+    public async Task StopAsync(CancellationToken cancellationToken)
+    {
+        await Stop();
     }
 }
