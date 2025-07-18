@@ -17,8 +17,7 @@ namespace Traincrew_MultiATS_Server.HostedService;
 
 public class InitDbHostedService(
     IServiceScopeFactory serviceScopeFactory,
-    ILoggerFactory loggerFactory,
-    ServerService serverService
+    ILoggerFactory loggerFactory
 ) : IHostedService
 {
     public async Task StartAsync(CancellationToken cancellationToken)
@@ -27,6 +26,7 @@ public class InitDbHostedService(
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         var datetimeRepository = scope.ServiceProvider.GetRequiredService<IDateTimeRepository>();
         var lockConditionRepository = scope.ServiceProvider.GetRequiredService<ILockConditionRepository>();
+        var serverService = scope.ServiceProvider.GetRequiredService<ServerService>();
         var dbInitializer = await CreateDBInitializer(context, lockConditionRepository, cancellationToken);
         if (dbInitializer != null)
         {
