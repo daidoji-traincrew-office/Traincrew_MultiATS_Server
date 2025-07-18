@@ -6,7 +6,6 @@ WORKDIR /source
 
 # Install Entity Framework Core tools
 RUN dotnet tool install --global dotnet-ef --version 8.0.18
-RUN dotnet tool install dotnet-trace --version 9.0.621003 --tool-path /.dotnet/tools
 ENV PATH="${PATH}:/root/.dotnet/tools"
 
 # Copy project file and restore as distinct layers
@@ -38,11 +37,15 @@ RUN cd Traincrew_MultiATS_Server.Crew \
         --no-restore \
         -p:DefineConstants=IS_ENABLED_PRECOMPILED_MODEL \
         -p:DebugType=full \
-        -o /app
+        -o /app \
+
+
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS download_tools
+RUN dotnet tool install dotnet-trace --version 9.0.621003 --tool-path /.dotnet/tools
 
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
-COPY --from=build /.dotnet/tools /.dotnet/tools
+COPY --from=download_tools /.dotnet/tools /.dotnet/tools
 ENV PATH="${PATH}:/.dotnet/tools"
 EXPOSE 8080
 WORKDIR /app
