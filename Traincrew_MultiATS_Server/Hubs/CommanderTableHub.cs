@@ -76,7 +76,7 @@ public class CommanderTableHub(
 
     public async Task<ServerMode> GetServerState()
     {
-        return await serverService.GetServerStateAsync();
+        return await serverService.GetServerModeAsync();
     }
 
     public async Task SetServerState(ServerMode mode)
