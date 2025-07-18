@@ -26,7 +26,7 @@ public class ServerService(
         return state.Mode;
     }
 
-    public async Task SetServerStateAsync(ServerMode mode)
+    public async Task SetServerModeAsync(ServerMode mode)
     {
         await using var mutex = await mutexRepository.AcquireAsync(nameof(ServerService));
         await serverRepository.SetServerStateAsync(mode);

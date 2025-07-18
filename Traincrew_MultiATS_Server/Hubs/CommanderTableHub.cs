@@ -74,13 +74,13 @@ public class CommanderTableHub(
         await operationInformationService.DeleteOperationInformation(id);
     }
 
-    public async Task<ServerMode> GetServerState()
+    public async Task<ServerMode> GetServerMode()
     {
         return await serverService.GetServerModeAsync();
     }
 
-    public async Task SetServerState(ServerMode mode)
+    public async Task SetServerMode(ServerMode mode)
     {
-        await serverService.SetServerStateAsync(mode);
+        await serverService.SetServerModeAsync(mode);
     }
 }
