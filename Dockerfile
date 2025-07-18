@@ -16,7 +16,7 @@ RUN mkdir -p /source/Traincrew_MultiATS_Server
 COPY --link Traincrew_MultiATS_Server/*.csproj Traincrew_MultiATS_Server/
 RUN mkdir -p /source/Traincrew_MultiATS_Server.Crew
 COPY --link Traincrew_MultiATS_Server.Crew/*.csproj Traincrew_MultiATS_Server.Crew/
-RUN cd ./Traincrew_MultiATS_Server.Crew && dotnet restore
+RUN cd ./Traincrew_MultiATS_Server.Crew && dotnet restore -a $TARGETARCH
 
 # Copy source code and publish app
 COPY --link Traincrew_MultiATS_Server.Common/* Traincrew_MultiATS_Server.Common/
@@ -34,6 +34,7 @@ RUN cd Traincrew_MultiATS_Server \
 RUN cd Traincrew_MultiATS_Server.Crew \
     && dotnet publish \
         --configuration Release \
+        -a $TARGETARCH \
         --no-restore \
         -p:DefineConstants=IS_ENABLED_PRECOMPILED_MODEL \
         -p:DebugType=full \
