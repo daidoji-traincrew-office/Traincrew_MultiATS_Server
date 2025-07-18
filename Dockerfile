@@ -6,7 +6,7 @@ WORKDIR /source
 
 # Install Entity Framework Core tools
 RUN dotnet tool install --global dotnet-ef --version 8.0.18
-RUN dotnet tool install dotnet-trace --version 9.0.621003 --architecture $TARGETARCH --tool-path /.dotnet/tools
+RUN dotnet tool install dotnet-trace --version 9.0.621003 -a $TARGETARCH --tool-path /.dotnet/tools
 ENV PATH="${PATH}:/root/.dotnet/tools"
 
 # Copy project file and restore as distinct layers
