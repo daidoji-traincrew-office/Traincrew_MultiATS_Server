@@ -23,5 +23,6 @@ public static class EnumTypeMapper
         typeMapper.MapEnum<TtcWindowType>();
         typeMapper.MapEnum<TtcWindowLinkType>();
         typeMapper.MapEnum<OperationInformationType>();
+        typeMapper.MapEnum<ServerMode>();
     }
 }
