@@ -17,7 +17,8 @@ public class CommanderTableHub(
     OperationNotificationService operationNotificationService,
     TtcStationControlService ttcStationControlService,
     TrainService trainService,
-    OperationInformationService operationInformationService 
+    OperationInformationService operationInformationService,
+    ServerService serverService
 ) : Hub<ICommanderTableClientContract>, ICommanderTableHubContract
 {
     public async Task<DataToCommanderTable> SendData_CommanderTable()
@@ -71,5 +72,15 @@ public class CommanderTableHub(
     public async Task DeleteOperationInformation(long id)
     {
         await operationInformationService.DeleteOperationInformation(id);
+    }
+
+    public async Task<ServerMode> GetServerState()
+    {
+        return await serverService.GetServerStateAsync();
+    }
+
+    public async Task SetServerState(ServerMode mode)
+    {
+        await serverService.SetServerStateAsync(mode);
     }
 }

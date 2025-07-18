@@ -9,14 +9,15 @@ using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.LockCondition;
-using Traincrew_MultiATS_Server.Scheduler;
+using Traincrew_MultiATS_Server.Services;
 using Route = Traincrew_MultiATS_Server.Models.Route;
 
 namespace Traincrew_MultiATS_Server.HostedService;
 
 public class InitDbHostedService(
     IServiceScopeFactory serviceScopeFactory,
-    ILoggerFactory loggerFactory
+    ILoggerFactory loggerFactory,
+    ServerService serverService
 ) : IHostedService
 {
     private readonly List<Scheduler.Scheduler> _schedulers = [];
@@ -45,6 +46,7 @@ public class InitDbHostedService(
         DetachUnchangedEntities(context);
         await InitOperationNotificationDisplay(context, datetimeRepository, cancellationToken);
         await InitRouteCsv(context, cancellationToken);
+        await InitServerStatus(context, cancellationToken);
         await InitTtcWindows(context, cancellationToken);
         await InitTtcWindowLinks(context, cancellationToken);
 
@@ -64,16 +66,7 @@ public class InitDbHostedService(
             DetachUnchangedEntities(context);
             await dbInitializer.InitializeAfterCreateLockCondition();
         }
-
-        _schedulers.AddRange([
-            new SwitchingMachineScheduler(serviceScopeFactory),
-            new RendoScheduler(serviceScopeFactory),
-            new OperationNotificationScheduler(serviceScopeFactory),
-            new TtcStationControlScheduler(serviceScopeFactory),
-            new InterlockingHubScheduler(serviceScopeFactory),
-            new TIDHubScheduler(serviceScopeFactory),
-            new DestinationButtonScheduler(serviceScopeFactory)
-        ]);
+        await serverService.UpdateSchedulerAsync();
     }
 
     private async Task<DbInitializer?> CreateDBInitializer(ApplicationDbContext context,
@@ -266,6 +259,23 @@ public class InitDbHostedService(
             }
         }
 
+        await context.SaveChangesAsync(cancellationToken);
+    }
+    
+    private async Task InitServerStatus(
+        ApplicationDbContext context,
+        CancellationToken cancellationToken)
+    {
+        var serverState = await context.ServerStates.FirstOrDefaultAsync(cancellationToken);
+        if (serverState != null)
+        {
+            return;
+        }
+
+        context.ServerStates.Add(new ServerState
+        {
+            Mode = ServerMode.Off
+        });
         await context.SaveChangesAsync(cancellationToken);
     }
 
@@ -2194,7 +2204,7 @@ public partial class DbRendoTableInitializer
             }
             else if (token == "(")
             {
-                // 進路鎖錠パース時は進路鎖錠のグループ、それ以外の場合は反位鎖錠
+                // 進路鎖錠パース時は進路鎖錠のグループ、それ以外の場合は反位を渡す 
                 enumerator.MoveNext();
                 var target = ParseToken(
                     ref enumerator,
@@ -2407,3 +2417,4 @@ public partial class DbRendoTableInitializer
         return $"{stationId}_{start}{(end.StartsWith('(') ? "" : end)}";
     }
 }
+
