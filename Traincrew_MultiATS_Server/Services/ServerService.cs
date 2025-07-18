@@ -25,7 +25,7 @@ public class ServerService(
     {
         await using var mutex = await mutexRepository.AcquireAsync(nameof(ServerService));
         await serverRepository.SetServerStateAsync(mode);
-        await UpdateSchedulerAsync();
+        await UpdateSchedulerAsyncWithoutLock();
     }
 
     public async Task UpdateSchedulerAsync()
