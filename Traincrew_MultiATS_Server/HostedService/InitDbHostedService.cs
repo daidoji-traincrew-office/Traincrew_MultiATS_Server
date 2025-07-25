@@ -1697,7 +1697,7 @@ public partial class DbRendoTableInitializer
             var match = RegexClosureTrackCircuitParse().Match(item.Name);
             string trackCircuitName;
             // 閉塞軌道回路
-            if (!match.Success)
+            if (match.Success)
             {
                 var trackCircuitNumber = int.Parse(match.Groups[1].Value);
                 var prefix = trackCircuitNumber % 2 == 0 ? PrefixTrackCircuitUp : PrefixTrackCircuitDown;
