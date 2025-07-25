@@ -58,7 +58,7 @@ public class InitDbHostedService(
         {
             await initializer.InitializeLocks();
         }
-        
+
         if (dbInitializer != null)
         {
             DetachUnchangedEntities(context);
@@ -440,6 +440,7 @@ public class InitDbHostedService(
                 Name = record.Name
             });
         }
+
         await context.SaveChangesAsync(cancellationToken);
     }
 
@@ -481,6 +482,7 @@ public class InitDbHostedService(
                 DiaId = record.DiaId
             });
         }
+
         await context.SaveChangesAsync(cancellationToken);
     }
 
@@ -532,7 +534,7 @@ internal partial class DbInitializer(
         await InitializeSignalRoute();
         await InitializeThrowOutControl();
     }
-    
+
     internal async Task InitializeAfterCreateLockCondition()
     {
         await InitializeSwitchingMachineRoutes();
@@ -1073,10 +1075,12 @@ internal partial class DbInitializer(
                 // 対象転てつ器を取得
                 var switchingMachineId = lockCondition.ObjectId;
                 // 既に登録済みの場合、スキップ
-                if (switchingMachinesRoutes.Contains(new { RouteId = routeId, SwitchingMachineId = switchingMachineId }))
+                if (switchingMachinesRoutes.Contains(new
+                        { RouteId = routeId, SwitchingMachineId = switchingMachineId }))
                 {
                     continue;
                 }
+
                 var detectorLockConditions = detectorLockConditionsBySwitchingMachineIds
                     .GetValueOrDefault(switchingMachineId, [])
                     .OfType<LockConditionObject>()
@@ -1095,6 +1099,7 @@ internal partial class DbInitializer(
                 });
             }
         }
+
         await context.SaveChangesAsync();
     }
 }
@@ -1102,6 +1107,7 @@ internal partial class DbInitializer(
 public partial class DbRendoTableInitializer
 {
     const string NameSwitchingMachine = "転てつ器";
+    private const string NameClosure = "閉そく";
     private const string PrefixTrackCircuitDown = "下り";
     private const string PrefixTrackCircuitUp = "上り";
     private const string NameAnd = "and";
@@ -1132,8 +1138,8 @@ public partial class DbRendoTableInitializer
         { "TH70", ["TH71"] },
         // 津崎: 浜園
         { "TH71", ["TH70"] },
-        // 駒野: 館浜
-        { "TH75", ["TH76"] },
+        // 駒野: 館浜、閉そく
+        { "TH75", ["TH76", NameClosure] },
         // 館浜: 駒野
         { "TH76", ["TH75"] },
     };
@@ -1189,7 +1195,9 @@ public partial class DbRendoTableInitializer
         this.dateTimeRepository = dateTimeRepository;
         this.logger = logger;
         this.cancellationToken = cancellationToken;
-        otherStations = StationIdMap.GetValueOrDefault(stationId) ?? [];
+        otherStations = (StationIdMap.GetValueOrDefault(stationId) ?? [])
+            .Where(s => s != NameClosure)
+            .ToList();
     }
 
     internal async Task InitializeObjects()
@@ -1684,19 +1692,12 @@ public partial class DbRendoTableInitializer
 
             return [];
         });
-        var searchObjectsForApproachLock = new Func<LockItem, Task<List<InterlockingObject>>>(async item =>
+        var searchClosureTrackCircuit = new Func<LockItem, Task<List<InterlockingObject>>>(async item =>
         {
-            var result = await searchOtherObjects(item);
-            if (result.Count > 0)
-            {
-                return result;
-            }
-
-            // 接近鎖錠の場合、閉塞軌道回路も探す
             var match = RegexClosureTrackCircuitParse().Match(item.Name);
             string trackCircuitName;
             // 閉塞軌道回路
-            if (match.Success)
+            if (!match.Success)
             {
                 var trackCircuitNumber = int.Parse(match.Groups[1].Value);
                 var prefix = trackCircuitNumber % 2 == 0 ? PrefixTrackCircuitUp : PrefixTrackCircuitDown;
@@ -1710,12 +1711,28 @@ public partial class DbRendoTableInitializer
 
             var trackCircuit = await context.TrackCircuits
                 .FirstOrDefaultAsync(tc => tc.Name == trackCircuitName, cancellationToken: cancellationToken);
-            if (trackCircuit != null)
+            if (trackCircuit == null)
             {
-                return [trackCircuit];
+                return [];
             }
 
-            return [];
+            return [trackCircuit];
+        });
+        var searchObjectsForApproachLock = new Func<LockItem, Task<List<InterlockingObject>>>(async item =>
+        {
+            if (item.StationId == NameClosure)
+            {
+                return await searchClosureTrackCircuit(item);
+            }
+
+            var result = await searchOtherObjects(item);
+            if (result.Count > 0)
+            {
+                return result;
+            }
+
+            // 接近鎖錠の場合、閉塞軌道回路も探す
+            return await searchClosureTrackCircuit(item); 
         });
 
         int? approachLockTime = null;
