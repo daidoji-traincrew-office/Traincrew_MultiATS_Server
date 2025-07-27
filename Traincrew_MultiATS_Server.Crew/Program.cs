@@ -64,13 +64,12 @@ public class Program
 
         var app = builder.Build();
 
-        await Configure(app, isDevelopment, enableAuthorization, enableOtlp);
+        await Configure(app, isDevelopment, enableAuthorization);
 
         await app.RunAsync();
     }
 
-    private static void ConfigureServices(
-        WebApplicationBuilder builder,
+    private static void ConfigureServices(WebApplicationBuilder builder,
         bool isDevelopment,
         bool enableAuthorization,
         bool enableOtlp)
@@ -112,8 +111,7 @@ public class Program
     private static async Task Configure(
         WebApplication app, 
         bool isDevelopment, 
-        bool enableAuthorization,
-        bool enableOtlp)
+        bool enableAuthorization)
     {
         ConfigureHttpLogging(app);
         if (isDevelopment)
@@ -139,10 +137,6 @@ public class Program
         {
             // OpenIddictアプリケーション登録
             await RegisterOpeniddictApplicationAsync(app);
-        }
-        if (enableOtlp)
-        {
-            ConfigureOpenTelemetry(app);
         }
     }
 
@@ -544,7 +538,7 @@ public class Program
         File.WriteAllBytes(certificatePath, certificate.Export(X509ContentType.Pfx, string.Empty));
     }
 
-    private static OpenTelemetryBuilder ConfigureOpenTelemetryService(WebApplicationBuilder builder)
+    private static void ConfigureOpenTelemetryService(WebApplicationBuilder builder)
     {
         // Setup logging to be exported via OpenTelemetry
         builder.Logging.AddOpenTelemetry(logging =>
@@ -571,12 +565,7 @@ public class Program
             tracing.AddAspNetCoreInstrumentation();
             tracing.AddHttpClientInstrumentation();
         });
-        return otel;
-    }
 
-    private static void ConfigureOpenTelemetry(WebApplication application)
-    {
-        var otel = application.Services.GetRequiredService<OpenTelemetryBuilder>();
         otel.UseOtlpExporter();
     }
 }
