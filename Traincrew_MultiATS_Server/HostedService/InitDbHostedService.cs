@@ -1732,7 +1732,7 @@ public partial class DbRendoTableInitializer
             }
 
             // 接近鎖錠の場合、閉塞軌道回路も探す
-            return await searchClosureTrackCircuit(item); 
+            return await searchClosureTrackCircuit(item);
         });
 
         int? approachLockTime = null;
