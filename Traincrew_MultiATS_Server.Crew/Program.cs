@@ -564,6 +564,7 @@ public class Program
         {
             tracing.AddAspNetCoreInstrumentation();
             tracing.AddHttpClientInstrumentation();
+            tracing.AddEntityFrameworkCoreInstrumentation();
         });
 
         otel.UseOtlpExporter();
