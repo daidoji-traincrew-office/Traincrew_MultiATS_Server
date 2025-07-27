@@ -206,7 +206,7 @@
         },
         {
             "Id": "TH44",
-            "Name": "",
+            "Name": "常盤通",
             "IsStation": true,
             "IsPassengerStation": true
         },
@@ -8143,8 +8143,10 @@
         {
             "Name": "上り閉塞282",
             "phase": 1,
-            "TypeName": "なし",
-            "NextSignalNames": [],
+            "TypeName": "3灯式",
+            "NextSignalNames": [
+                "上り閉塞288"
+            ],
             "RouteNames": [],
             "DirectionRouteLeft": null,
             "DirectionRouteRight": null,
@@ -8154,8 +8156,10 @@
         {
             "Name": "上り閉塞288",
             "phase": 1,
-            "TypeName": "なし",
-            "NextSignalNames": [],
+            "TypeName": "3灯式",
+            "NextSignalNames": [
+                "三郷上り場内12R"
+            ],
             "RouteNames": [],
             "DirectionRouteLeft": null,
             "DirectionRouteRight": null,
