@@ -6,7 +6,7 @@ public class TtcStationControlScheduler(IServiceScopeFactory serviceScopeFactory
 {
     protected override int Interval => 1000;
 
-    protected override async Task ExecuteTaskAsync(IServiceScope scope)
+    protected override async Task ExecuteTaskAsync(IServiceScope scope, System.Diagnostics.Activity? activity)
     {
         var service = scope.ServiceProvider.GetRequiredService<TtcStationControlService>();
         await service.TrainTracking();

@@ -28,7 +28,7 @@ public abstract class Scheduler
             {
                 try
                 {
-                    await ExecuteTaskAsync(scope);
+                    await ExecuteTaskAsync(scope, activity);
                 }
                 catch (System.Exception ex)
                 {
@@ -50,7 +50,7 @@ public abstract class Scheduler
         }
     }
 
-    protected abstract Task ExecuteTaskAsync(IServiceScope scope);
+    protected abstract Task ExecuteTaskAsync(IServiceScope scope, System.Diagnostics.Activity? activity);
     
 
     public async Task Stop()

@@ -8,7 +8,7 @@ namespace Traincrew_MultiATS_Server.Scheduler;
 public class InterlockingHubScheduler(IServiceScopeFactory serviceScopeFactory) : Scheduler(serviceScopeFactory)
 {
     protected override int Interval => 250;
-    protected override async Task ExecuteTaskAsync(IServiceScope scope)
+    protected override async Task ExecuteTaskAsync(IServiceScope scope, System.Diagnostics.Activity? activity)
     {
         var hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<InterlockingHub, IInterlockingClientContract>>();
         var interlockingService = scope.ServiceProvider.GetRequiredService<InterlockingService>();
