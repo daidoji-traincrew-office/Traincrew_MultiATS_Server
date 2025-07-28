@@ -8,21 +8,37 @@ public class RendoScheduler(IServiceScopeFactory serviceScopeFactory) : Schedule
     protected override async Task ExecuteTaskAsync(IServiceScope scope, System.Diagnostics.Activity? activity)
     {
         var service = scope.ServiceProvider.GetRequiredService<RendoService>();
-        await service.LeverToRouteState();
-        activity?.AddEvent(new("RendoScheduler: LeverToRouteState executed"));
-        await service.DirectionRelay();
-        activity?.AddEvent(new("RendoScheduler: DirectionRelay executed"));
-        await service.RouteLockRelay();
-        activity?.AddEvent(new("RendoScheduler: RouteLockRelay executed"));
-        await service.RouteRelayWithoutSwitchingMachine();
-        activity?.AddEvent(new("RendoScheduler: RouteRelayWithoutSwitchingMachine executed"));
-        await service.RouteRelay();
-        activity?.AddEvent(new("RendoScheduler: RouteRelay executed"));
-        await service.SignalControl();
-        activity?.AddEvent(new("RendoScheduler: SignalControl executed"));
-        await service.ApproachLockRelay();
-        activity?.AddEvent(new("RendoScheduler: ApproachLockRelay executed"));
-        await service.TimerRelay();
-        activity?.AddEvent(new("RendoScheduler: TimerRelay executed"));
+        using (activity?.Source.StartActivity($"{GetType()}.LeverToRouteState"))
+        {
+            await service.LeverToRouteState();
+        }
+        using (activity?.Source.StartActivity($"{GetType()}.DirectionRelay"))
+        {
+            await service.DirectionRelay();
+        }
+        using (activity?.Source.StartActivity($"{GetType()}.RouteLockRelay"))
+        {
+            await service.RouteLockRelay();
+        }
+        using (activity?.Source.StartActivity($"{GetType()}.RouteRelayWithoutSwitchingMachine"))
+        {
+            await service.RouteRelayWithoutSwitchingMachine();
+        }
+        using (activity?.Source.StartActivity($"{GetType()}.RouteRelay"))
+        {
+            await service.RouteRelay();
+        }
+        using (activity?.Source.StartActivity($"{GetType()}.SignalControl"))
+        {
+            await service.SignalControl();
+        }
+        using (activity?.Source.StartActivity($"{GetType()}.ApproachLockRelay"))
+        {
+            await service.ApproachLockRelay();
+        }
+        using (activity?.Source.StartActivity($"{GetType()}.TimerRelay"))
+        {
+            await service.TimerRelay();
+        }
     }
 }
