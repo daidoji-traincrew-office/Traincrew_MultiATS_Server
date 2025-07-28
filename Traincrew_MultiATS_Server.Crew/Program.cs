@@ -94,6 +94,7 @@ public class Program
         {
             ConfigureOpeniddictClientService(builder, openiddictBuilder, isDevelopment);
         }
+
         if (enableOtlp)
         {
             ConfigureOpenTelemetryService(builder);
@@ -109,8 +110,8 @@ public class Program
     }
 
     private static async Task Configure(
-        WebApplication app, 
-        bool isDevelopment, 
+        WebApplication app,
+        bool isDevelopment,
         bool enableAuthorization)
     {
         ConfigureHttpLogging(app);
@@ -565,6 +566,8 @@ public class Program
             tracing.AddAspNetCoreInstrumentation();
             tracing.AddHttpClientInstrumentation();
             tracing.AddEntityFrameworkCoreInstrumentation();
+            tracing.AddSource(ActivitySources.Scheduler.Name);
+            tracing.AddSource(ActivitySources.Hubs.Name);
         });
 
         otel.UseOtlpExporter();
