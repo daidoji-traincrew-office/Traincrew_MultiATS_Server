@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using OpenIddict.Validation.AspNetCore;
+using Traincrew_MultiATS_Server.Activity;
 using Traincrew_MultiATS_Server.Authentication;
 using Traincrew_MultiATS_Server.Common.Contract;
 using Traincrew_MultiATS_Server.Common.Models;
@@ -21,6 +22,7 @@ public class TrainHub(
 {
     public async Task<ServerToATSData> SendData_ATS(AtsToServerData clientData)
     {
+        using var activity = ActivitySources.Hubs.StartActivity("TrainHub.SendData_ATS");
         var memberId = GetMemberId();
         return await trainService.CreateAtsData(memberId, clientData);
     }

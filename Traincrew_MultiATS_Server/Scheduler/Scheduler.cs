@@ -1,3 +1,5 @@
+using Traincrew_MultiATS_Server.Activity;
+
 namespace Traincrew_MultiATS_Server.Scheduler;
 
 public abstract class Scheduler
@@ -20,13 +22,21 @@ public abstract class Scheduler
             using var scope = _serviceScopeFactory.CreateScope();
             var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger(GetType());
             var timer = Task.Delay(Interval, cancellationToken);
-            try
+
+            // Activityの開始
+            using (var activity = ActivitySources.Scheduler.StartActivity($"{GetType().Name}.ExecuteTask"))
             {
-                await ExecuteTaskAsync(scope);
-            }
-            catch (System.Exception ex)
-            {
-                logger.LogError(ex, "An error occurred while executing the task.");
+                try
+                {
+                    await ExecuteTaskAsync(scope);
+                }
+                catch (System.Exception ex)
+                {
+                    logger.LogError(ex, "An error occurred while executing the task.");
+                    activity?.SetTag("error", true);
+                    activity?.SetTag("exception.message", ex.Message);
+                    activity?.SetTag("exception.stacktrace", ex.StackTrace);
+                }
             }
 
             try
