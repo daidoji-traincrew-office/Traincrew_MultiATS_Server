@@ -510,7 +510,7 @@ public class Program
     private static void ConfigureHostedServices(WebApplicationBuilder builder)
     {
         // HostedServiceまわり
-        // builder.Services.AddHostedService<InitDbHostedService>();
+        builder.Services.AddHostedService<InitDbHostedService>();
     }
 
     private static void ConfigureAuthorizationHostedServices(WebApplicationBuilder builder)
