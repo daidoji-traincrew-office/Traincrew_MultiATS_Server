@@ -6,7 +6,7 @@ public class SwitchingMachineScheduler(IServiceScopeFactory serviceScopeFactory)
 {
     protected override int Interval => 100;
 
-    protected override async Task ExecuteTaskAsync(IServiceScope scope)
+    protected override async Task ExecuteTaskAsync(IServiceScope scope, System.Diagnostics.Activity? activity)
     {
         var service = scope.ServiceProvider.GetRequiredService<SwitchingMachineService>();
         await service.SwitchingMachineControl();

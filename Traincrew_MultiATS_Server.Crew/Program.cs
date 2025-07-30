@@ -8,6 +8,10 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using OpenIddict.Abstractions;
+using OpenTelemetry;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Trace;
+using Traincrew_MultiATS_Server.Activity;
 using Traincrew_MultiATS_Server.Authentication;
 using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.HostedService;
@@ -55,8 +59,9 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
         var isDevelopment = builder.Environment.IsDevelopment();
         var enableAuthorization = !isDevelopment || builder.Configuration.GetValue<bool>("EnableAuthorization");
+        var enableOtlp = builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"] != null;
 
-        ConfigureServices(builder, isDevelopment, enableAuthorization);
+        ConfigureServices(builder, isDevelopment, enableAuthorization, enableOtlp);
 
         var app = builder.Build();
 
@@ -65,18 +70,23 @@ public class Program
         await app.RunAsync();
     }
 
-    private static void ConfigureServices(WebApplicationBuilder builder, bool isDevelopment, bool enableAuthorization)
+    private static void ConfigureServices(WebApplicationBuilder builder,
+        bool isDevelopment,
+        bool enableAuthorization,
+        bool enableOtlp)
     {
         ConfigureLoggingService(builder);
         if (!isDevelopment)
         {
             ConfigureProxiedHeadersService(builder);
         }
+
         ConfigureControllersService(builder);
         if (isDevelopment)
         {
             ConfigureSwaggerService(builder);
         }
+
         ConfigureDatabaseService(builder);
         ConfigureSignalRService(builder);
         ConfigureAuthenticationService(builder);
@@ -85,6 +95,12 @@ public class Program
         {
             ConfigureOpeniddictClientService(builder, openiddictBuilder, isDevelopment);
         }
+
+        if (enableOtlp)
+        {
+            ConfigureOpenTelemetryService(builder);
+        }
+
         ConfigureAuthorizationService(builder);
         ConfigureDependencyInjectionService(builder, enableAuthorization);
         ConfigureHostedServices(builder);
@@ -94,7 +110,10 @@ public class Program
         }
     }
 
-    private static async Task Configure(WebApplication app, bool isDevelopment, bool enableAuthorization)
+    private static async Task Configure(
+        WebApplication app,
+        bool isDevelopment,
+        bool enableAuthorization)
     {
         ConfigureHttpLogging(app);
         if (isDevelopment)
@@ -105,6 +124,7 @@ public class Program
         {
             ConfigureForwardedHeaders(app);
         }
+
         ConfigureRouting(app);
         ConfigureCors(app);
         ConfigureAuthentication(app);
@@ -125,7 +145,10 @@ public class Program
     private static void ConfigureLoggingService(WebApplicationBuilder builder)
     {
         // ログの設定
-        builder.Services.AddHttpLogging(options => { options.LoggingFields = HttpLoggingFields.RequestPropertiesAndHeaders; });
+        builder.Services.AddHttpLogging(options =>
+        {
+            options.LoggingFields = HttpLoggingFields.RequestPropertiesAndHeaders;
+        });
     }
 
     private static void ConfigureHttpLogging(WebApplication app)
@@ -138,7 +161,7 @@ public class Program
         // Proxy Headerの設定
         builder.Services.Configure<ForwardedHeadersOptions>(options =>
         {
-            options.ForwardedHeaders = 
+            options.ForwardedHeaders =
                 ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
             var proxyIp = builder.Configuration["ProxyIP"];
             if (IPAddress.TryParse(proxyIp, out var ip))
@@ -146,7 +169,6 @@ public class Program
                 options.KnownProxies.Add(ip);
             }
         });
-
     }
 
     private static void ConfigureForwardedHeaders(WebApplication app)
@@ -226,7 +248,7 @@ public class Program
             .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
             .AddCookie(options => { options.ExpireTimeSpan = TimeSpan.FromMinutes(10); });
     }
-    
+
     private static OpenIddictBuilder ConfigureOpeniddictService(WebApplicationBuilder builder, bool isDevelopment)
     {
         // OpenIddictの設定
@@ -245,7 +267,7 @@ public class Program
                 // AuthorizationCodeFlowとRefreshTokenFlowを有効にする
                 options.AllowAuthorizationCodeFlow()
                     .AllowRefreshTokenFlow();
-               
+
                 // トークンの有効期限を設定する
                 options
                     .SetAccessTokenLifetime(TimeSpan.FromHours(6))
@@ -407,19 +429,20 @@ public class Program
             // 既に登録されている場合は何もしない
             return;
         }
+
         var applicationDescriptor = new OpenIddictApplicationDescriptor
         {
             ApplicationType = ApplicationTypes.Native,
             ClientId = "MultiATS_Client",
             ClientType = ClientTypes.Public,
             Permissions =
-                {
-                    Permissions.Endpoints.Authorization,
-                    Permissions.Endpoints.Token,
-                    Permissions.GrantTypes.AuthorizationCode,
-                    Permissions.ResponseTypes.Code,
-                    Permissions.GrantTypes.RefreshToken
-                }
+            {
+                Permissions.Endpoints.Authorization,
+                Permissions.Endpoints.Token,
+                Permissions.GrantTypes.AuthorizationCode,
+                Permissions.ResponseTypes.Code,
+                Permissions.GrantTypes.RefreshToken
+            }
         };
 
         // ローカルで複数ポートで動かす場合のリダイレクトURIを全部登録する
@@ -498,7 +521,8 @@ public class Program
         builder.Services.AddHostedService<DiscordBotHostedService>();
     }
 
-    private static void EnsureCertificateExists(string certificatePath, string subjectName, X509KeyUsageFlags keyUsageFlags)
+    private static void EnsureCertificateExists(string certificatePath, string subjectName,
+        X509KeyUsageFlags keyUsageFlags)
     {
         if (File.Exists(certificatePath))
         {
@@ -514,5 +538,39 @@ public class Program
         var certificate = request.CreateSelfSigned(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddYears(2));
 
         File.WriteAllBytes(certificatePath, certificate.Export(X509ContentType.Pfx, string.Empty));
+    }
+
+    private static void ConfigureOpenTelemetryService(WebApplicationBuilder builder)
+    {
+        // Setup logging to be exported via OpenTelemetry
+        builder.Logging.AddOpenTelemetry(logging =>
+        {
+            logging.IncludeFormattedMessage = true;
+            logging.IncludeScopes = true;
+        });
+
+        var otel = builder.Services.AddOpenTelemetry();
+
+        // Add Metrics for ASP.NET Core and our custom metrics and export via OTLP
+        otel.WithMetrics(metrics =>
+        {
+            // Metrics provider from OpenTelemetry
+            metrics.AddAspNetCoreInstrumentation();
+            // Metrics provides by ASP.NET Core in .NET 8
+            metrics.AddMeter("Microsoft.AspNetCore.Hosting");
+            metrics.AddMeter("Microsoft.AspNetCore.Server.Kestrel");
+        });
+
+        // Add Tracing for ASP.NET Core and our custom ActivitySource and export via OTLP
+        otel.WithTracing(tracing =>
+        {
+            tracing.AddAspNetCoreInstrumentation();
+            tracing.AddHttpClientInstrumentation();
+            tracing.AddEntityFrameworkCoreInstrumentation();
+            tracing.AddSource(ActivitySources.Scheduler.Name);
+            tracing.AddSource(ActivitySources.Hubs.Name);
+        });
+
+        otel.UseOtlpExporter();
     }
 }
