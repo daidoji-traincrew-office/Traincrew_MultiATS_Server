@@ -33,7 +33,7 @@ public abstract class Scheduler
                 catch (System.Exception ex)
                 {
                     logger.LogError(ex, "An error occurred while executing the task.");
-                    activity?.SetTag("error", true);
+                    activity?.SetTag("error", "true");
                     activity?.SetTag("exception.message", ex.Message);
                     activity?.SetTag("exception.stacktrace", ex.StackTrace);
                 }
