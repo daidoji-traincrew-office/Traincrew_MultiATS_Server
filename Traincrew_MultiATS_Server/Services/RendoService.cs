@@ -54,6 +54,12 @@ public class RendoService(
     /// <returns></returns>
     public async Task LeverToRouteState()
     {
+        // 見るべきは
+        // 1. てこ反応リレーが扛上している進路
+        // 2. てこが反位になっており、着点ボタンが押されている進路(ただし、単線は着点ボタンを見なくて良い)
+        // 3. 総括制御関連
+        //    (ここの条件をちゃんとまとめたい。特に、XS, YSはどうなる？
+        //    妥協するならXS, YS全部取ってきて 1.2.で取ってきた進路に関連するものでもいいかも)
         // RouteLeverDestinationButtonを全取得
         var routeLeverDestinationButtonList = await routeLeverDestinationRepository.GetAll();
         // InterlockingObjectを全取得
