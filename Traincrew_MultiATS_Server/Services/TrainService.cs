@@ -300,6 +300,12 @@ public partial class TrainService(
                 });
     }
 
+    public async Task<List<TrainStateData>> GetAllTrainState()
+    {
+        var trainStates = await trainRepository.GetAll();
+        return trainStates.Select(ToTrainStateData).ToList();
+    }
+
 
     private async Task<List<TrainState>> GetTrainStatesByDiaNumber(int diaNumber)
     {
@@ -437,6 +443,20 @@ public partial class TrainService(
             DoorClose = trainCarState.DoorClose,
             BC_Press = (float)trainCarState.BcPress,
             Ampare = (float)trainCarState.Ampare
+        };
+    }
+
+    private static TrainStateData ToTrainStateData(TrainState trainState)
+    {
+        return new()
+        {
+            Id = trainState.Id,
+            TrainNumber = trainState.TrainNumber,
+            DiaNumber = trainState.DiaNumber,
+            FromStationId = trainState.FromStationId,
+            ToStationId = trainState.ToStationId,
+            Delay = trainState.Delay,
+            DriverId = trainState.DriverId
         };
     }
 
