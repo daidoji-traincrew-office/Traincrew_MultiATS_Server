@@ -103,4 +103,9 @@ public class CommanderTableHub(
     {
         return await protectionService.GetProtectionZoneStates();
     }
+
+    public async Task<List<TrainStateData>> GetAllTrainState()
+    {
+        return await trainService.GetAllTrainState();
+    }
 }
