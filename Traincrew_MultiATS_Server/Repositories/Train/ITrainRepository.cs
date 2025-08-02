@@ -32,6 +32,13 @@ public interface ITrainRepository
     Task<List<TrainState>> GetAll();
 
     /// <summary>
+    /// IDから列車情報を取得する
+    /// </summary>
+    /// <param name="id">列車状態ID</param>
+    /// <returns>列車の状態</returns>
+    Task<TrainState?> GetById(long id);
+
+    /// <summary>
     /// 列車番号を指定して列車を削除する。
     /// </summary>
     /// <param name="trainNumber">列車番号</param>

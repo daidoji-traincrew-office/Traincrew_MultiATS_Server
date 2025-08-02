@@ -108,4 +108,9 @@ public class CommanderTableHub(
     {
         return await trainService.GetAllTrainState();
     }
+
+    public async Task<TrainStateData> UpdateTrainStateData(TrainStateData trainStateData)
+    {
+        return await trainService.UpdateTrainStateData(trainStateData);
+    }
 }
