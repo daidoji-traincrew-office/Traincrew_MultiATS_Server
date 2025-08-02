@@ -306,6 +306,30 @@ public partial class TrainService(
         return trainStates.Select(ToTrainStateData).ToList();
     }
 
+    public async Task<TrainStateData> UpdateTrainStateData(TrainStateData trainStateData)
+    {
+        // IDで既存の列車状態を取得
+        var existingTrainState = await trainRepository.GetById(trainStateData.Id);
+        if (existingTrainState == null)
+        {
+            throw new InvalidOperationException($"ID{trainStateData.Id} の列車が見つかりませんでした");
+        }
+
+        // 更新可能なフィールドを設定
+        existingTrainState.TrainNumber = trainStateData.TrainNumber;
+        existingTrainState.DiaNumber = trainStateData.DiaNumber;
+        existingTrainState.Delay = trainStateData.Delay;
+        existingTrainState.DriverId = trainStateData.DriverId;
+        existingTrainState.FromStationId = trainStateData.FromStationId;
+        existingTrainState.ToStationId = trainStateData.ToStationId; 
+
+        // 更新
+        await trainRepository.Update(existingTrainState);
+
+        // 更新された列車状態を返す
+        return ToTrainStateData(existingTrainState);
+    }
+
 
     private async Task<List<TrainState>> GetTrainStatesByDiaNumber(int diaNumber)
     {

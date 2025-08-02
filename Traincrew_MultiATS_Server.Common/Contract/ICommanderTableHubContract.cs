@@ -13,6 +13,8 @@ public interface ICommanderTableHubContract
     Task<OperationInformationData> UpdateOperationInformation(OperationInformationData operationInformationData);
     Task<List<OperationInformationData>> GetAllOperationInformations();
     Task DeleteOperationInformation(long id);
+    Task<List<TrainStateData>> GetAllTrainState();
+    Task<TrainStateData> UpdateTrainStateData(TrainStateData trainStateData);
 }
 
 public interface ICommanderTableClientContract
