@@ -25,6 +25,12 @@ public interface ITrainCarRepository
     Task DeleteByTrainNumber(string trainNumber);
 
     /// <summary>
+    /// 指定された列車IDの車両情報を全て削除する
+    /// </summary>
+    /// <param name="trainId">列車ID</param>
+    Task DeleteByTrainId(long trainId);
+
+    /// <summary>
     /// すべての車両情報を取得する
     /// </summary>
     /// <returns>全車両状態リスト</returns>

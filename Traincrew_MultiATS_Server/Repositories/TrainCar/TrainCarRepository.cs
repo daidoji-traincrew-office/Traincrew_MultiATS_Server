@@ -75,6 +75,13 @@ public class TrainCarRepository(ApplicationDbContext context) : ITrainCarReposit
             .ExecuteDeleteAsync();
     }
 
+    public async Task DeleteByTrainId(long trainId)
+    {
+        await context.TrainCarStates
+            .Where(car => car.TrainStateId == trainId)
+            .ExecuteDeleteAsync();
+    }
+
     public async Task<List<TrainCarState>> GetAllOrderByTrainStateIdAndIndex()
     {
         return await context.TrainCarStates
