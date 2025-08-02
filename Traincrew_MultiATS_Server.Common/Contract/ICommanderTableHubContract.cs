@@ -21,6 +21,7 @@ public interface ICommanderTableHubContract
     Task<List<ProtectionZoneData>> GetProtectionZoneStates();
     Task<List<TrainStateData>> GetAllTrainState();
     Task<TrainStateData> UpdateTrainStateData(TrainStateData trainStateData);
+    Task DeleteTrainState(long id);
 }
 
 public interface ICommanderTableClientContract

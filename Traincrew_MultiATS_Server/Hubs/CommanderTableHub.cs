@@ -113,4 +113,9 @@ public class CommanderTableHub(
     {
         return await trainService.UpdateTrainStateData(trainStateData);
     }
+
+    public async Task DeleteTrainState(long id)
+    {
+        await trainService.DeleteTrainStateById(id);
+    }
 }
