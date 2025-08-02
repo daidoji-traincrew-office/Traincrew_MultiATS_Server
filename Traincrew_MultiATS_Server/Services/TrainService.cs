@@ -267,7 +267,7 @@ public partial class TrainService(
         return existingTrainStateByMe;
     }
 
-    public async Task<Dictionary<string, TrainInfo>> GetTrainInfoByTrainNumber()
+    public async Task<Dictionary<string, TrainInfo>> GetTrainInfoGroupByTrainNumber()
     {
         // 列車情報を取得
         var trainStates = await trainRepository.GetAll();
