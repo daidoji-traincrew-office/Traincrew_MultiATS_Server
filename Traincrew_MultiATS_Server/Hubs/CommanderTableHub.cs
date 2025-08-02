@@ -72,4 +72,9 @@ public class CommanderTableHub(
     {
         await operationInformationService.DeleteOperationInformation(id);
     }
+
+    public async Task<List<TrainStateData>> GetAllTrainState()
+    {
+        return await trainService.GetAllTrainState();
+    }
 }
