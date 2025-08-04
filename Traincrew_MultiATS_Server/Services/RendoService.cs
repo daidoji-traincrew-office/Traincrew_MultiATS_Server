@@ -639,9 +639,12 @@ public class RendoService(
 
 
             // 各進路の進路照査リレーが落下していて、進路鎖錠リレーが扛上している場合true
-            bool PredicateIsFlRelayRaised(ThrowOutControl t) =>
-                (interlockingObjects[t.SourceId] as Route).RouteState.IsRouteRelayRaised == RaiseDrop.Drop
-                && (interlockingObjects[t.SourceId] as Route).RouteState.IsRouteLockRaised == RaiseDrop.Raise;
+            bool PredicateIsFlRelayRaised(ThrowOutControl t)
+            {
+                var route = (interlockingObjects[t.SourceId] as Route);
+                return route.RouteState.IsRouteRelayRaised == RaiseDrop.Drop
+                    && route.RouteState.IsRouteLockRaised == RaiseDrop.Raise;
+            }
 
             // 対応軌道回路の短絡状態によって、FLリレーを扛上
             var isFLRelayRaised = lockTrackCircuits.All(tc => !tc.TrackCircuitState.IsShortCircuit)
