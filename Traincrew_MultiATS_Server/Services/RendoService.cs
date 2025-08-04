@@ -628,13 +628,8 @@ public class RendoService(
                 .Select(lco => interlockingObjects[lco.ObjectId])
                 .OfType<TrackCircuit>();
 
-            // 対応軌道回路の短絡状態によって、FLリレーを扛上
-            var isFLRelayRaised = lockTrackCircuits.All(tc => !tc.TrackCircuitState.IsShortCircuit)
-                ? RaiseDrop.Raise
-                : RaiseDrop.Drop;
 
-            // 総括リレー                                                            
-            // 総括される進路のてこ反応リレーが扛上しているか(方向ごとに確認)
+            // 総括される進路を各方向ごとに取得
             var thisLeftThrowOutControls = targetThrowOutControls[directionRoute.Id]
                 .Where(t => t.TargetLr == LR.Left)
                 .ToList();
@@ -642,6 +637,23 @@ public class RendoService(
                 .Where(t => t.TargetLr == LR.Right)
                 .ToList();
 
+
+            // 各進路の進路照査リレーが落下していて、進路鎖錠リレーが扛上している場合true
+            bool PredicateIsFlRelayRaised(ThrowOutControl t)
+            {
+                var route = (interlockingObjects[t.SourceId] as Route);
+                return route.RouteState.IsRouteRelayRaised == RaiseDrop.Drop
+                    && route.RouteState.IsRouteLockRaised == RaiseDrop.Raise;
+            }
+
+            // 対応軌道回路の短絡状態によって、FLリレーを扛上
+            var isFLRelayRaised = lockTrackCircuits.All(tc => !tc.TrackCircuitState.IsShortCircuit)
+                && thisLeftThrowOutControls.All(PredicateIsFlRelayRaised)
+                && thisRightThrowOutControls.All(PredicateIsFlRelayRaised)
+                ? RaiseDrop.Raise
+                : RaiseDrop.Drop;
+
+            // 総括リレー      
             // thisLeftThrowOutControlsのSourceの進路のてこ反応リレー扛上と、ConditionLeverの状態を確認する
             bool PredicateIsYsRelayRaised(ThrowOutControl t) =>
                 (interlockingObjects[t.SourceId] as Route).RouteState.IsLeverRelayRaised == RaiseDrop.Raise
