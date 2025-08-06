@@ -67,8 +67,8 @@ public class RouteRepository(ApplicationDbContext context) : IRouteRepository
                     || combined.source.Lever.LeverState.IsReversed == LCR.Right && combined.source.Direction == LR.Right
                 )
                 && (
-                    combined.source.DestinationButtonName == null
-                    || combined.source.DestinationButton.DestinationButtonState.IsRaised == RaiseDrop.Raise
+                    combined.target.DestinationButtonName == null
+                    || combined.target.DestinationButton.DestinationButtonState.IsRaised == RaiseDrop.Raise
                 )
             )
             .SelectMany(combined => new[] { combined.toc.SourceId, combined.toc.TargetId }.AsEnumerable())
