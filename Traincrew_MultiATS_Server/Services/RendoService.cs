@@ -64,6 +64,7 @@ public class RendoService(
         //    妥協するならXS, YS全部取ってきて 1.2.で取ってきた進路に関連するものでもいいかも)
 
         // 統括制御テーブルを取得
+        // Todo: ここどうにかして全取得やめたい
         var throwOutControls = await throwOutControlRepository.GetAll();
         // 進路IDをキーにして、統括制御「する」進路をグループ化
         var sourceThrowOutControls = throwOutControls
