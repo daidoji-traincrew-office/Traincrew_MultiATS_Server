@@ -54,15 +54,6 @@ public class RendoService(
     /// <returns></returns>
     public async Task LeverToRouteState()
     {
-        // 見るべきは
-        // 1. てこ反応リレーが扛上している進路(+ XS, YSが扛上している進路)
-        // 2. てこが正規方向に倒れており、着点ボタンが押されている進路(ただし、単線は着点ボタンを見なくて良い)
-        // 3. 総括制御関連
-        //    てこ、着点ボタンで言うなら、統括元進路のてこが倒れており、統括先進路の着点ボタンが押されている進路
-        //    (性能出るSQL書ける気がしねぇ〜)
-        //    (ここの条件をちゃんとまとめたい。特に、XS, YSはどうなる？
-        //    妥協するならXS, YS全部取ってきて 1.2.で取ってきた進路に関連するものでもいいかも)
-
         // 統括制御テーブルを取得
         // Todo: ここどうにかして全取得やめたい
         var throwOutControls = await throwOutControlRepository.GetAll();
