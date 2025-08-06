@@ -162,8 +162,8 @@ public class RendoService(
             // targetThrowOutRoutes の TargetId をキーとする辞書を生成
             var targetSourceThrowOutRoutes = targetThrowOutRoutes
                 .ToDictionary(
-                    toc => toc.Id, // TargetId をキーに
-                    toc => sourceThrowOutControls.GetValueOrDefault(toc.Id, []) // SourceId のリストを取得
+                    targetRoute => targetRoute.Id, // TargetId をキーに
+                    targetRoute => sourceThrowOutControls.GetValueOrDefault(targetRoute.Id, []) // SourceId のリストを取得
                         .Select(toc => routeById[toc.SourceId])
                         .Distinct()
                         .Where(r => r.Id != route.Id)
