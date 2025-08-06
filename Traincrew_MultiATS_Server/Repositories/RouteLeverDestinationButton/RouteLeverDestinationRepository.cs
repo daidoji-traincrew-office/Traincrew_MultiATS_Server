@@ -9,4 +9,11 @@ public class RouteLeverDestinationRepository(ApplicationDbContext dbContext): IR
     {
         return dbContext.RouteLeverDestinationButtons.ToListAsync();
     }
+
+    public Task<List<Models.RouteLeverDestinationButton>> GetByRouteIds(IEnumerable<ulong> routeIds)
+    {
+        return dbContext.RouteLeverDestinationButtons
+            .Where(x => routeIds.Contains(x.RouteId))
+            .ToListAsync();
+    }
 }
