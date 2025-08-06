@@ -661,7 +661,8 @@ public class RendoService(
         // 方向てこの全取得
         var directionLeverIds = await leverRepository.GetAllIds();
         // 直接鎖錠条件を全取得
-        var lockConditionDict = await lockConditionRepository.GetConditionsByType(LockType.Lock);
+        var lockConditionDict =
+            await lockConditionRepository.GetConditionsByObjectIdsAndType(directionRouteIds, LockType.Lock);
         // 開放てこの全ID取得
         var directionSelfControlLeverIds = await directionSelfControlLeverRepository.GetAllIds();
 
