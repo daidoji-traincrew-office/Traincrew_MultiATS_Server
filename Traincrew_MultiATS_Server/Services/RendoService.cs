@@ -63,17 +63,36 @@ public class RendoService(
         //    (ここの条件をちゃんとまとめたい。特に、XS, YSはどうなる？
         //    妥協するならXS, YS全部取ってきて 1.2.で取ってきた進路に関連するものでもいいかも)
 
+        // 統括制御テーブルを取得
+        var throwOutControls = await throwOutControlRepository.GetAll();
+        // 進路IDをキーにして、統括制御「する」進路をグループ化
+        var sourceThrowOutControls = throwOutControls
+            .GroupBy(c => c.TargetId)
+            .ToDictionary(g => g.Key, g => g.ToList());
+        // 進路IDをキーにして、統括制御「される」進路をグループ化
+        var targetThrowOutControls = throwOutControls
+            .GroupBy(c => c.SourceId)
+            .ToDictionary(g => g.Key, g => g.ToList());
 
-        // てこ反応リレーが扛上している進路のIDを全取得
+        // てこ反応リレー/総括制御XR, YSが扛上している進路のIDを全取得
         var routeIdsIsRaised = await routeRepository.GetIdsWhereLeverRelayOrThrowOutIsRaised();
         // てこが倒れており、着点ボタンが押されている進路のIDを全取得
         var routeIdsToOpen = await routeRepository.GetIdsToOpen();
         // 総括制御で開こうとしている進路のIDを全取得
         var routeIdsToOpenWithThrowOutControl = await routeRepository.GetIdsToOpenWithThrowOutControl();
-        // これらの進路IDを全て結合して、重複を除去
         var routeIds = routeIdsIsRaised
             .Union(routeIdsToOpen)
             .Union(routeIdsToOpenWithThrowOutControl)
+            .Distinct()
+            .ToList();
+        // 総括制御元の進路を取得
+        var sourceThrowOutControlRoutes = routeIds
+            .SelectMany(id => sourceThrowOutControls.GetValueOrDefault(id, []))
+            .Select(toc => toc.SourceId)
+            .Distinct()
+            .ToList();
+        routeIds = routeIds
+            .Union(sourceThrowOutControlRoutes)
             .Distinct()
             .ToList();
         var routeById = (await routeRepository.GetByIdsWithState(routeIds))
@@ -113,7 +132,7 @@ public class RendoService(
         var lockConditions = await lockConditionRepository.GetConditionsByType(LockType.Lock);
         // 信号制御条件を取得
         var signalControlConditions = await lockConditionRepository.GetConditionsByType(LockType.SignalControl);
-        
+
         // 追加で必要なInterlockingObjectを取得
         var conditionObjectIds = lockConditions.Values
             .SelectMany(ExtractObjectIdsFromLockCondtions)
@@ -128,18 +147,6 @@ public class RendoService(
             .Union(leverById.Values)
             .ToDictionary(obj => obj.Id);
 
-        // 統括制御テーブルを取得
-        var throwOutControls = await throwOutControlRepository.GetAll();
-        // 進路IDをキーにして、統括制御「する」進路をグループ化
-        var sourceThrowOutControls = throwOutControls
-            .GroupBy(c => c.TargetId)
-            .ToDictionary(g => g.Key, g => g.ToList());
-        // 進路IDをキーにして、統括制御「される」進路をグループ化
-        var targetThrowOutControls = throwOutControls
-            .GroupBy(c => c.SourceId)
-            .ToDictionary(g => g.Key, g => g.ToList());
-
-        // ここまで実行できればほぼほぼOOMしないはず
         foreach (var routeLeverDestinationButton in routeLeverDestinationButtonList)
         {
             // 対象進路 
@@ -147,29 +154,32 @@ public class RendoService(
             var routeState = route.RouteState!;
             // この進路に対して総括制御「する」進路
             var sourceThrowOutRoutes = sourceThrowOutControls.GetValueOrDefault(route.Id, [])
-                .Select(toc => interlockingObjectById[toc.SourceId])
-                .OfType<Route>()
+                .Select(toc => routeById[toc.SourceId])
                 .ToList();
             var hasSourceThrowOutRoute = sourceThrowOutRoutes.Count != 0;
             // この進路に対して総括制御「される」進路
             var targetThrowOutRoutes = targetThrowOutControls.GetValueOrDefault(route.Id, [])
-                .Select(toc => interlockingObjectById[toc.TargetId])
-                .OfType<Route>()
+                .SelectMany(toc =>
+                {
+                    // 進路IDから進路を取得
+                    var targetRoute = routeById.GetValueOrDefault(toc.TargetId);
+                    // 進路が存在する場合は返す
+                    return targetRoute != null ? new[] { targetRoute } : [];
+                })
                 .ToList();
             // targetThrowOutRoutes の TargetId をキーとする辞書を生成
             var targetSourceThrowOutRoutes = targetThrowOutRoutes
                 .ToDictionary(
                     toc => toc.Id, // TargetId をキーに
                     toc => sourceThrowOutControls.GetValueOrDefault(toc.Id, []) // SourceId のリストを取得
-                        .Select(toc => interlockingObjectById[toc.SourceId])
+                        .Select(toc => routeById[toc.SourceId])
                         .Distinct()
-                        .OfType<Route>()
                         .Where(r => r.Id != route.Id)
                         .ToList()
                 );
 
             // 対象てこ
-            var lever = (interlockingObjectById[routeLeverDestinationButton.LeverId] as Lever)!;
+            var lever = leverById[routeLeverDestinationButton.LeverId];
             // 対象ボタン
             DestinationButton button;
             if (routeLeverDestinationButton.DestinationButtonName != null)
