@@ -129,9 +129,9 @@ public class RendoService(
             .ToDictionary(b => b.Name);
 
         // 直接鎖錠条件を取得
-        var lockConditions = await lockConditionRepository.GetConditionsByType(LockType.Lock);
+        var lockConditions = await lockConditionRepository.GetConditionsByObjectIdsAndType(routeIds, LockType.Lock);
         // 信号制御条件を取得
-        var signalControlConditions = await lockConditionRepository.GetConditionsByType(LockType.SignalControl);
+        var signalControlConditions = await lockConditionRepository.GetConditionsByObjectIdsAndType(routeIds, LockType.SignalControl);
 
         // 追加で必要なInterlockingObjectを取得
         var conditionObjectIds = lockConditions.Values
