@@ -80,5 +80,6 @@ public class ProtectionService(
     // ProtectionZoneStateの削除
     public async Task DeleteProtectionZoneState(ulong id)
     {
+        await protectionRepository.DeleteById(id);
     }
 }
