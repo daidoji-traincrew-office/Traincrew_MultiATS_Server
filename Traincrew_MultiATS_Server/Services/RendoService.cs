@@ -1101,12 +1101,7 @@ public class RendoService(
             {
                 //  一斉に軌道回路を鎖錠、進路鎖錠する
                 // 軌道回路Lock
-                routeLockTrackCircuit.ForEach(tc =>
-                {
-                    tc.TrackCircuitState.IsLocked = true;
-                    tc.TrackCircuitState.LockedBy = route.Id;
-                });
-                await generalRepository.SaveAll(routeLockTrackCircuit.Select(tc => tc.TrackCircuitState));
+                await trackCircuitRepository.LockTrackCircuits(routeLockTrackCircuit, route.Id);
                 // IsRouteLockRaisedをDropにする
                 route.RouteState.IsRouteLockRaised = RaiseDrop.Drop;
                 await generalRepository.Save(route.RouteState);
@@ -1151,10 +1146,8 @@ public class RendoService(
                         // 時間条件が存在し、UnlockedAtがnull => now+時間条件をUnlockedAtに設定してBreak
                         if (targetTrackCircuits.Any(tc => tc.TrackCircuitState.UnlockedAt == null))
                         {
-                            targetTrackCircuits.ForEach(tc => tc.TrackCircuitState.UnlockedAt =
-                                dateTimeRepository.GetNow() +
-                                TimeSpan.FromSeconds(timerSeconds.Value));
-                            await generalRepository.SaveAll(targetTrackCircuits.Select(tc => tc.TrackCircuitState));
+                            var unlockedAt = dateTimeRepository.GetNow() + TimeSpan.FromSeconds(timerSeconds.Value);
+                            await trackCircuitRepository.StartUnlockTimer(targetTrackCircuits, unlockedAt);
                             break;
                         }
 
@@ -1167,13 +1160,7 @@ public class RendoService(
                     }
 
                     // 対象軌道回路を解錠、UnlockedAtをnullにする
-                    targetTrackCircuits.ForEach(tc =>
-                    {
-                        tc.TrackCircuitState.IsLocked = false;
-                        tc.TrackCircuitState.LockedBy = null;
-                        tc.TrackCircuitState.UnlockedAt = null;
-                    });
-                    await generalRepository.SaveAll(targetTrackCircuits.Select(tc => tc.TrackCircuitState));
+                    await trackCircuitRepository.UnlockTrackCircuits(targetTrackCircuits);
                 }
 
                 // 進路鎖錠欄に書かれている軌道回路のすべての軌道回路が鎖錠解除された場合、進路鎖錠リレーを扛上させる+進路鎖錠するべき軌道回路のリストを全解除する
@@ -1192,15 +1179,9 @@ public class RendoService(
                 var toUnlockedTrackCircuits = routeLockTrackCircuit
                     .Where(tc => tc.TrackCircuitState.LockedBy == route.Id)
                     .ToList();
-                toUnlockedTrackCircuits.ForEach(tc =>
-                {
-                    tc.TrackCircuitState.IsLocked = false;
-                    tc.TrackCircuitState.LockedBy = null;
-                    tc.TrackCircuitState.UnlockedAt = null;
-                });
                 if (toUnlockedTrackCircuits.Count > 0)
                 {
-                    await generalRepository.SaveAll(toUnlockedTrackCircuits.Select(tc => tc.TrackCircuitState));
+                    await trackCircuitRepository.UnlockTrackCircuits(toUnlockedTrackCircuits);
                 }
                 // 進路鎖錠リレーを扛上させる
                 route.RouteState.IsRouteLockRaised = RaiseDrop.Raise;

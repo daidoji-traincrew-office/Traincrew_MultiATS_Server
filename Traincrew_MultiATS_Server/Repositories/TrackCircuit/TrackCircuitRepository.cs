@@ -73,4 +73,34 @@ public class TrackCircuitRepository(ApplicationDbContext context) : ITrackCircui
             .Where(tc => tc.TrackCircuitState.IsShortCircuit)
             .ToListAsync();
     }
+
+    public async Task LockTrackCircuits(List<Models.TrackCircuit> trackCircuitList, ulong routeId)
+    {
+        await context.TrackCircuits
+            .Where(tc => trackCircuitList.Select(trackCircuit => trackCircuit.Id).Contains(tc.Id))
+            .Select(tc => tc.TrackCircuitState)
+            .ExecuteUpdateAsync(item => item
+                .SetProperty(tcs => tcs.IsLocked, true)
+                .SetProperty(tcs => tcs.LockedBy, routeId));
+    }
+
+    public async Task StartUnlockTimer(List<Models.TrackCircuit> trackCircuitList, DateTime unlockedAt)
+    {
+        await context.TrackCircuits
+            .Where(tc => trackCircuitList.Select(trackCircuit => trackCircuit.Id).Contains(tc.Id))
+            .Select(tc => tc.TrackCircuitState)
+            .ExecuteUpdateAsync(item => item
+                .SetProperty(tcs => tcs.UnlockedAt, unlockedAt));
+    }
+
+    public async Task UnlockTrackCircuits(List<Models.TrackCircuit> trackCircuitList)
+    {
+        await context.TrackCircuits
+            .Where(tc => trackCircuitList.Select(trackCircuit => trackCircuit.Id).Contains(tc.Id))
+            .Select(tc => tc.TrackCircuitState)
+            .ExecuteUpdateAsync(item => item
+                .SetProperty(tcs => tcs.IsLocked, false)
+                .SetProperty(tcs => tcs.LockedBy, (ulong?)null)
+                .SetProperty(tcs => tcs.UnlockedAt, (DateTime?)null));
+    }
 }
