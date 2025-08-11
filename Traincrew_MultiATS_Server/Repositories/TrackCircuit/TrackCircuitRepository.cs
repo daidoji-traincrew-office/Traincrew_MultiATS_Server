@@ -1,18 +1,17 @@
 using Microsoft.EntityFrameworkCore;
 using Traincrew_MultiATS_Server.Data;
-using Traincrew_MultiATS_Server.Models;
 
 namespace Traincrew_MultiATS_Server.Repositories.TrackCircuit;
 
 public class TrackCircuitRepository(ApplicationDbContext context) : ITrackCircuitRepository
 {
-
     public async Task<List<Models.TrackCircuit>> GetAllTrackCircuitList()
     {
         List<Models.TrackCircuit> trackcircuitlist_db = await context.TrackCircuits
             .Include(obj => obj.TrackCircuitState).ToListAsync();
         return trackcircuitlist_db;
     }
+
     public async Task<List<Models.TrackCircuit>> GetTrackCircuitByName(List<string> trackCircuitNames)
     {
         return await context.TrackCircuits
@@ -20,13 +19,15 @@ public class TrackCircuitRepository(ApplicationDbContext context) : ITrackCircui
             .Include(obj => obj.TrackCircuitState)
             .ToListAsync();
     }
+
     public async Task<List<Models.TrackCircuit>> GetTrackCircuitsById(List<ulong> Ids)
     {
         return await context.TrackCircuits
-            .Where(obj => Ids.Contains(obj.Id))
-            .Include(obj => obj.TrackCircuitState)
+            .Where(tc => Ids.Contains(tc.Id))
+            .Include(tc => tc.TrackCircuitState)
             .ToListAsync();
     }
+
     public async Task<List<Models.TrackCircuit>> GetTrackCircuitListByTrainNumber(string trainNumber)
     {
         List<Models.TrackCircuit> trackcircuitlist_db = await context.TrackCircuits
@@ -37,46 +38,31 @@ public class TrackCircuitRepository(ApplicationDbContext context) : ITrackCircui
 
     public async Task SetTrackCircuitList(List<Models.TrackCircuit> trackCircuitList, string trainNumber)
     {
-        // Todo: N+1問題の解消
-        foreach (var trackCircuit in trackCircuitList)
-        {
-            TrackCircuitState item = context.TrackCircuits
-                .Include(item => item.TrackCircuitState)
-                .Where(obj => obj.Name == trackCircuit.Name)
-                .Select(item => item.TrackCircuitState)
-                .FirstOrDefault()!;
-            item.IsShortCircuit = true;
-            item.TrainNumber = trainNumber;
-            context.Update(item);
-        }
-        await context.SaveChangesAsync();
+        await context.TrackCircuits
+            .Where(tc => trackCircuitList.Contains(tc))
+            .Select(tc => tc.TrackCircuitState)
+            .ExecuteUpdateAsync(item => item
+                .SetProperty(tcs => tcs.IsShortCircuit, true)
+                .SetProperty(tcs => tcs.TrainNumber, trainNumber));
     }
 
     public async Task ClearTrackCircuitList(List<Models.TrackCircuit> trackCircuitList)
     {
-        // Todo: N+1問題の解消
-        foreach (var trackCircuit in trackCircuitList)
-        {
-            TrackCircuitState item = context.TrackCircuits
-                .Include(item => item.TrackCircuitState)
-                .Where(obj => obj.Name == trackCircuit.Name)
-                .Select(item => item.TrackCircuitState)
-                .FirstOrDefault()!;
-            item.IsShortCircuit = false;
-            item.TrainNumber = "";
-            context.Update(item);
-        }
-        await context.SaveChangesAsync();
+        await context.TrackCircuits
+            .Where(tc => trackCircuitList.Contains(tc))
+            .Select(tc => tc.TrackCircuitState)
+            .ExecuteUpdateAsync(item => item
+                .SetProperty(tcs => tcs.IsShortCircuit, false)
+                .SetProperty(tcs => tcs.TrainNumber, ""));
     }
 
     public async Task ClearTrackCircuitListByTrainNumber(string trainNumber)
     {
         await context.TrackCircuitStates
-            .Where(obj => obj.TrainNumber == trainNumber)
-            .ExecuteUpdateAsync(
-                item => item
-                    .SetProperty(obj => obj.IsShortCircuit, false)
-                    .SetProperty(obj => obj.TrainNumber, "")
+            .Where(tcs => tcs.TrainNumber == trainNumber)
+            .ExecuteUpdateAsync(item => item
+                .SetProperty(tcs => tcs.IsShortCircuit, false)
+                .SetProperty(tcs => tcs.TrainNumber, "")
             );
     }
 
