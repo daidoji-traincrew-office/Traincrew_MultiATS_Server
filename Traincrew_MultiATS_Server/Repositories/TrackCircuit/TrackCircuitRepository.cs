@@ -74,7 +74,7 @@ public class TrackCircuitRepository(ApplicationDbContext context) : ITrackCircui
             .ToListAsync();
     }
 
-    public async Task LockTrackCircuits(List<Models.TrackCircuit> trackCircuitList, ulong routeId)
+    public async Task LockFromRouteByIds(List<Models.TrackCircuit> trackCircuitList, ulong routeId)
     {
         await context.TrackCircuits
             .Where(tc => trackCircuitList.Select(trackCircuit => trackCircuit.Id).Contains(tc.Id))
@@ -84,7 +84,7 @@ public class TrackCircuitRepository(ApplicationDbContext context) : ITrackCircui
                 .SetProperty(tcs => tcs.LockedBy, routeId));
     }
 
-    public async Task StartUnlockTimer(List<Models.TrackCircuit> trackCircuitList, DateTime unlockedAt)
+    public async Task StartUnlockTimerByIds(List<Models.TrackCircuit> trackCircuitList, DateTime unlockedAt)
     {
         await context.TrackCircuits
             .Where(tc => trackCircuitList.Select(trackCircuit => trackCircuit.Id).Contains(tc.Id))
@@ -93,7 +93,7 @@ public class TrackCircuitRepository(ApplicationDbContext context) : ITrackCircui
                 .SetProperty(tcs => tcs.UnlockedAt, unlockedAt));
     }
 
-    public async Task UnlockTrackCircuits(List<Models.TrackCircuit> trackCircuitList)
+    public async Task UnlockByIds(List<Models.TrackCircuit> trackCircuitList)
     {
         await context.TrackCircuits
             .Where(tc => trackCircuitList.Select(trackCircuit => trackCircuit.Id).Contains(tc.Id))

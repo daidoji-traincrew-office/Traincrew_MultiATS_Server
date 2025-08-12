@@ -10,7 +10,7 @@ public interface ITrackCircuitRepository
     Task ClearTrainNumberByNames(List<string> names);
     Task ClearTrackCircuitListByTrainNumber(string trainNumber);
     Task<List<Models.TrackCircuit>> GetWhereShortCircuited();
-    Task LockTrackCircuits(List<Models.TrackCircuit> trackCircuitList, ulong routeId);
-    Task StartUnlockTimer(List<Models.TrackCircuit> trackCircuitList, DateTime unlockedAt);
-    Task UnlockTrackCircuits(List<Models.TrackCircuit> trackCircuitList);
+    Task LockFromRouteByIds(List<Models.TrackCircuit> trackCircuitList, ulong routeId);
+    Task StartUnlockTimerByIds(List<Models.TrackCircuit> trackCircuitList, DateTime unlockedAt);
+    Task UnlockByIds(List<Models.TrackCircuit> trackCircuitList);
 }
