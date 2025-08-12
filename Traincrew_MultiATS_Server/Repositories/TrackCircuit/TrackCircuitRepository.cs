@@ -36,20 +36,20 @@ public class TrackCircuitRepository(ApplicationDbContext context) : ITrackCircui
         return trackcircuitlist_db;
     }
 
-    public async Task SetTrackCircuitList(List<Models.TrackCircuit> trackCircuitList, string trainNumber)
+    public async Task SetTrainNumberByNames(List<string> names, string trainNumber)
     {
         await context.TrackCircuits
-            .Where(trackCircuit => trackCircuitList.Select(tc => tc.Name).Contains(trackCircuit.Name))
+            .Where(trackCircuit => names.Contains(trackCircuit.Name))
             .Select(tc => tc.TrackCircuitState)
             .ExecuteUpdateAsync(item => item
                 .SetProperty(tcs => tcs.IsShortCircuit, true)
                 .SetProperty(tcs => tcs.TrainNumber, trainNumber));
     }
 
-    public async Task ClearTrackCircuitList(List<Models.TrackCircuit> trackCircuitList)
+    public async Task ClearTrainNumberByNames(List<string> names)
     {
         await context.TrackCircuits
-            .Where(trackCircuit => trackCircuitList.Select(tc => tc.Name).Contains(trackCircuit.Name))
+            .Where(trackCircuit => names.Contains(trackCircuit.Name))
             .Select(tc => tc.TrackCircuitState)
             .ExecuteUpdateAsync(item => item
                 .SetProperty(tcs => tcs.IsShortCircuit, false)
