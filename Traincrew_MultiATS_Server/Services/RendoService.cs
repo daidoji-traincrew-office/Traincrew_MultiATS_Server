@@ -1101,6 +1101,11 @@ public class RendoService(
             {
                 //  一斉に軌道回路を鎖錠、進路鎖錠する
                 // 軌道回路Lock
+                routeLockTrackCircuit.ForEach(tc =>
+                {
+                    tc.TrackCircuitState.IsLocked = true;
+                    tc.TrackCircuitState.LockedBy = route.Id;
+                });
                 await trackCircuitRepository.LockTrackCircuits(routeLockTrackCircuit, route.Id);
                 // IsRouteLockRaisedをDropにする
                 route.RouteState.IsRouteLockRaised = RaiseDrop.Drop;
@@ -1147,6 +1152,7 @@ public class RendoService(
                         if (targetTrackCircuits.Any(tc => tc.TrackCircuitState.UnlockedAt == null))
                         {
                             var unlockedAt = dateTimeRepository.GetNow() + TimeSpan.FromSeconds(timerSeconds.Value);
+                            targetTrackCircuits.ForEach(tc => tc.TrackCircuitState.UnlockedAt = unlockedAt);
                             await trackCircuitRepository.StartUnlockTimer(targetTrackCircuits, unlockedAt);
                             break;
                         }
@@ -1160,6 +1166,12 @@ public class RendoService(
                     }
 
                     // 対象軌道回路を解錠、UnlockedAtをnullにする
+                    targetTrackCircuits.ForEach(tc =>
+                    {
+                        tc.TrackCircuitState.IsLocked = false;
+                        tc.TrackCircuitState.LockedBy = null;
+                        tc.TrackCircuitState.UnlockedAt = null;
+                    });
                     await trackCircuitRepository.UnlockTrackCircuits(targetTrackCircuits);
                 }
 
@@ -1179,6 +1191,12 @@ public class RendoService(
                 var toUnlockedTrackCircuits = routeLockTrackCircuit
                     .Where(tc => tc.TrackCircuitState.LockedBy == route.Id)
                     .ToList();
+                toUnlockedTrackCircuits.ForEach(tc =>
+                {
+                    tc.TrackCircuitState.IsLocked = false;
+                    tc.TrackCircuitState.LockedBy = null;
+                    tc.TrackCircuitState.UnlockedAt = null;
+                });
                 if (toUnlockedTrackCircuits.Count > 0)
                 {
                     await trackCircuitRepository.UnlockTrackCircuits(toUnlockedTrackCircuits);
