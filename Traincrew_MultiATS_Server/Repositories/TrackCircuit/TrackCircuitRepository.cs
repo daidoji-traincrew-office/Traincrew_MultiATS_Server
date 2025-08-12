@@ -39,7 +39,7 @@ public class TrackCircuitRepository(ApplicationDbContext context) : ITrackCircui
     public async Task SetTrackCircuitList(List<Models.TrackCircuit> trackCircuitList, string trainNumber)
     {
         await context.TrackCircuits
-            .Where(tc => trackCircuitList.Contains(tc))
+            .Where(trackCircuit => trackCircuitList.Select(tc => tc.Name).Contains(trackCircuit.Name))
             .Select(tc => tc.TrackCircuitState)
             .ExecuteUpdateAsync(item => item
                 .SetProperty(tcs => tcs.IsShortCircuit, true)
@@ -49,7 +49,7 @@ public class TrackCircuitRepository(ApplicationDbContext context) : ITrackCircui
     public async Task ClearTrackCircuitList(List<Models.TrackCircuit> trackCircuitList)
     {
         await context.TrackCircuits
-            .Where(tc => trackCircuitList.Contains(tc))
+            .Where(trackCircuit => trackCircuitList.Select(tc => tc.Name).Contains(trackCircuit.Name))
             .Select(tc => tc.TrackCircuitState)
             .ExecuteUpdateAsync(item => item
                 .SetProperty(tcs => tcs.IsShortCircuit, false)

@@ -30,7 +30,7 @@ public class TrackCircuitService(
 
     public async Task SetTrackCircuitDataList(List<TrackCircuitData> trackCircuitData, string trainNumber)
     {
-        List<TrackCircuit> trackCircuit = trackCircuitData
+        var trackCircuit = trackCircuitData
             .Select(item => new TrackCircuit
             {
                 Name = item.Name
@@ -57,7 +57,7 @@ public class TrackCircuitService(
 
     public async Task ClearTrackCircuitDataList(List<TrackCircuitData> trackCircuitData)
     {
-        List<TrackCircuit> trackCircuit = trackCircuitData
+        var trackCircuit = trackCircuitData
             .Select(item => new TrackCircuit
             {
                 Name = item.Name
