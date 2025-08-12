@@ -375,12 +375,12 @@ public class RendoService(
 
         // そのうえで、転てつ器無し進路照査リレーが扛上している進路のIDを全取得する
         var routeIds = await routeRepository.GetIdsWhereLeverRelayIsRaised();
-        // 上記進路に対して統括制御「する」進路の統括制御をすべて取得
+        // 上記進路に対して総括制御「する」進路の総括制御をすべて取得
         var sourceThrowOutControlList = await throwOutControlRepository.GetByTargetIds(routeIds);
         var sourceThrowOutControlDictionary = sourceThrowOutControlList
             .GroupBy(c => c.TargetId)
             .ToDictionary(g => g.Key, g => g.ToList());
-        // てこリレーが扛上している進路の直接鎖状条件を取得
+        // てこリレーが扛上している進路の直接鎖錠条件を取得
         var directLockConditions = await lockConditionRepository.GetConditionsByObjectIdsAndType(
             routeIds, LockType.Lock);
         // てこリレーが扛上している進路の信号制御欄を取得
@@ -476,6 +476,7 @@ public class RendoService(
                     route.RouteState.IsThrowOutYSRelayRaised == RaiseDrop.Raise
                     // この進路に対して総括制御「する」進路の進路鎖錠リレーが落下している
                     && sourceThrowOutRoutes.Any(r => r.RouteState.IsRouteLockRaised == RaiseDrop.Drop)
+                    && sourceThrowOutRoutes.Any(r => r.RouteState.IsRouteRelayRaised == RaiseDrop.Raise)
                 )
                 // 自進路YS落下
                 || route.RouteState.IsThrowOutYSRelayRaised == RaiseDrop.Drop)
