@@ -1116,7 +1116,8 @@ public class RendoService(
                         tc.TrackCircuitState.IsLocked = true;
                         tc.TrackCircuitState.LockedBy = route.Id;
                     });
-                    await trackCircuitRepository.LockFromRouteByIds(routeLockTrackCircuit, route.Id);
+                    await trackCircuitRepository.LockByIds(
+                        routeLockTrackCircuit.Select(tc => tc.Id).ToList(), route.Id);
                 }
                 // IsRouteLockRaisedがDropになってないならDropにする
                 if (route.RouteState.IsApproachLockMSRaised == RaiseDrop.Drop)
@@ -1168,7 +1169,8 @@ public class RendoService(
                         {
                             var unlockedAt = dateTimeRepository.GetNow() + TimeSpan.FromSeconds(timerSeconds.Value);
                             targetTrackCircuits.ForEach(tc => tc.TrackCircuitState.UnlockedAt = unlockedAt);
-                            await trackCircuitRepository.StartUnlockTimerByIds(targetTrackCircuits, unlockedAt);
+                            await trackCircuitRepository.StartUnlockTimerByIds(
+                                targetTrackCircuits.Select(tc => tc.Id).ToList(), unlockedAt);
                             break;
                         }
 
@@ -1187,7 +1189,7 @@ public class RendoService(
                         tc.TrackCircuitState.LockedBy = null;
                         tc.TrackCircuitState.UnlockedAt = null;
                     });
-                    await trackCircuitRepository.UnlockByIds(targetTrackCircuits);
+                    await trackCircuitRepository.UnlockByIds(targetTrackCircuits.Select(tc => tc.Id).ToList());
                 }
 
                 // 進路鎖錠欄に書かれている軌道回路のすべての軌道回路が鎖錠解除された場合、進路鎖錠リレーを扛上させる+進路鎖錠するべき軌道回路のリストを全解除する
@@ -1214,7 +1216,7 @@ public class RendoService(
                 });
                 if (toUnlockedTrackCircuits.Count > 0)
                 {
-                    await trackCircuitRepository.UnlockByIds(toUnlockedTrackCircuits);
+                    await trackCircuitRepository.UnlockByIds(toUnlockedTrackCircuits.Select(tc => tc.Id).ToList());
                 }
 
                 // 進路鎖錠リレーを扛上させる
