@@ -1121,7 +1121,7 @@ public class RendoService(
                         routeLockTrackCircuit.Select(tc => tc.Id).ToList(), route.Id);
                 }
                 // IsRouteLockRaisedがDropになってないならDropにする
-                if (route.RouteState.IsApproachLockMSRaised != RaiseDrop.Drop)
+                if (route.RouteState.IsRouteLockRaised != RaiseDrop.Drop)
                 {
                     route.RouteState.IsRouteLockRaised = RaiseDrop.Drop;
                     await generalRepository.Save(route.RouteState);    
