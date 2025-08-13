@@ -13,6 +13,15 @@ public interface ICommanderTableHubContract
     Task<OperationInformationData> UpdateOperationInformation(OperationInformationData operationInformationData);
     Task<List<OperationInformationData>> GetAllOperationInformations();
     Task DeleteOperationInformation(long id);
+    Task<ServerMode> GetServerMode();
+    Task SetServerMode(ServerMode mode);
+    Task AddProtectionZoneState(ProtectionZoneData protectionZoneData);
+    Task UpdateProtectionZoneState(ProtectionZoneData protectionZoneData);
+    Task DeleteProtectionZoneState(ulong id);
+    Task<List<ProtectionZoneData>> GetProtectionZoneStates();
+    Task<List<TrainStateData>> GetAllTrainState();
+    Task<TrainStateData> UpdateTrainStateData(TrainStateData trainStateData);
+    Task DeleteTrainState(long id);
 }
 
 public interface ICommanderTableClientContract

@@ -2,6 +2,7 @@ using System.Data;
 using System.Text.RegularExpressions;
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Models;
+using Traincrew_MultiATS_Server.Repositories.General;
 using Traincrew_MultiATS_Server.Repositories.Train;
 using Traincrew_MultiATS_Server.Repositories.TrainCar;
 using Traincrew_MultiATS_Server.Repositories.TrainDiagram;
@@ -18,7 +19,8 @@ public partial class TrainService(
     ITrainRepository trainRepository,
     ITrainCarRepository trainCarRepository,
     ITrainDiagramRepository trainDiagramRepository,
-    ITransactionRepository transactionRepository
+    ITransactionRepository transactionRepository,
+    IGeneralRepository generalRepository
 )
 {
     [GeneratedRegex(@"\d+")]
@@ -267,7 +269,7 @@ public partial class TrainService(
         return existingTrainStateByMe;
     }
 
-    public async Task<Dictionary<string, TrainInfo>> GetTrainInfoByTrainNumber()
+    public async Task<Dictionary<string, TrainInfo>> GetTrainInfoGroupByTrainNumber()
     {
         // 列車情報を取得
         var trainStates = await trainRepository.GetAll();
@@ -298,6 +300,36 @@ public partial class TrainService(
                     var trainDiagram = trainDiagramsByTrainNumber.GetValueOrDefault(trainState.TrainNumber);
                     return ToTrainInfo(trainState, carStates, trainDiagram);
                 });
+    }
+
+    public async Task<List<TrainStateData>> GetAllTrainState()
+    {
+        var trainStates = await trainRepository.GetAll();
+        return trainStates.Select(ToTrainStateData).ToList();
+    }
+
+    public async Task<TrainStateData> UpdateTrainStateData(TrainStateData trainStateData)
+    {
+        // IDで既存の列車状態を取得
+        var existingTrainState = await trainRepository.GetById(trainStateData.Id);
+        if (existingTrainState == null)
+        {
+            throw new InvalidOperationException($"ID{trainStateData.Id} の列車が見つかりませんでした");
+        }
+
+        // 更新可能なフィールドを設定
+        existingTrainState.TrainNumber = trainStateData.TrainNumber;
+        existingTrainState.DiaNumber = trainStateData.DiaNumber;
+        existingTrainState.Delay = trainStateData.Delay;
+        existingTrainState.DriverId = trainStateData.DriverId;
+        existingTrainState.FromStationId = trainStateData.FromStationId;
+        existingTrainState.ToStationId = trainStateData.ToStationId;
+
+        // 更新
+        await trainRepository.Update(existingTrainState);
+
+        // 更新された列車状態を返す
+        return ToTrainStateData(existingTrainState);
     }
 
 
@@ -386,6 +418,26 @@ public partial class TrainService(
     }
 
     /// <summary>
+    /// 指定されたIDの列車情報を削除する
+    /// </summary>
+    /// <param name="id">列車状態ID</param>
+    public async Task DeleteTrainStateById(long id)
+    {
+        // 列車状態IDで列車情報を取得
+        var trainState = await trainRepository.GetById(id);
+        if (trainState == null)
+        {
+            throw new InvalidOperationException($"ID {id} の列車が見つかりませんでした");
+        }
+
+        // まず車両情報を削除する
+        await trainCarRepository.DeleteByTrainId(id);
+
+        // 列車情報を取得して削除する
+        await generalRepository.Delete(trainState);
+    }
+
+    /// <summary>
     /// 列車番号から運番を求める
     /// </summary>
     /// <param name="trainNumber">列車番号</param>
@@ -437,6 +489,20 @@ public partial class TrainService(
             DoorClose = trainCarState.DoorClose,
             BC_Press = (float)trainCarState.BcPress,
             Ampare = (float)trainCarState.Ampare
+        };
+    }
+
+    private static TrainStateData ToTrainStateData(TrainState trainState)
+    {
+        return new()
+        {
+            Id = trainState.Id,
+            TrainNumber = trainState.TrainNumber,
+            DiaNumber = trainState.DiaNumber,
+            FromStationId = trainState.FromStationId,
+            ToStationId = trainState.ToStationId,
+            Delay = trainState.Delay,
+            DriverId = trainState.DriverId
         };
     }
 

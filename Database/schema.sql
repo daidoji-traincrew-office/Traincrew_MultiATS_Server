@@ -609,3 +609,12 @@ CREATE TABLE operation_information_state
 );
 CREATE INDEX operation_information_state_start_time_index ON operation_information_state (start_time);
 CREATE INDEX operation_information_state_end_time_index ON operation_information_state (end_time);
+
+-- サーバー状態管理用Enum
+CREATE TYPE server_mode AS ENUM ('off', 'private', 'public');
+
+-- サーバー状態テーブル(基本Entityは1つの想定)
+CREATE TABLE server_state (
+    id   SERIAL PRIMARY KEY,
+    mode server_mode NOT NULL
+);

@@ -17,7 +17,9 @@ public class CommanderTableHub(
     OperationNotificationService operationNotificationService,
     TtcStationControlService ttcStationControlService,
     TrainService trainService,
-    OperationInformationService operationInformationService 
+    OperationInformationService operationInformationService,
+    ProtectionService protectionService,
+    ServerService serverService
 ) : Hub<ICommanderTableClientContract>, ICommanderTableHubContract
 {
     public async Task<DataToCommanderTable> SendData_CommanderTable()
@@ -71,5 +73,49 @@ public class CommanderTableHub(
     public async Task DeleteOperationInformation(long id)
     {
         await operationInformationService.DeleteOperationInformation(id);
+    }
+
+    public async Task<ServerMode> GetServerMode()
+    {
+        return await serverService.GetServerModeAsync();
+    }
+
+    public async Task SetServerMode(ServerMode mode)
+    {
+        await serverService.SetServerModeAsync(mode);
+    }
+
+    public async Task AddProtectionZoneState(ProtectionZoneData data)
+    {
+        await protectionService.AddProtectionZoneState(data);
+    }
+
+    public async Task UpdateProtectionZoneState(ProtectionZoneData data)
+    {
+        await protectionService.UpdateProtectionZoneState(data);
+    }
+
+    public async Task DeleteProtectionZoneState(ulong id)
+    {
+        await protectionService.DeleteProtectionZoneState(id);
+    }
+    public async Task<List<ProtectionZoneData>> GetProtectionZoneStates()
+    {
+        return await protectionService.GetProtectionZoneStates();
+    }
+
+    public async Task<List<TrainStateData>> GetAllTrainState()
+    {
+        return await trainService.GetAllTrainState();
+    }
+
+    public async Task<TrainStateData> UpdateTrainStateData(TrainStateData trainStateData)
+    {
+        return await trainService.UpdateTrainStateData(trainStateData);
+    }
+
+    public async Task DeleteTrainState(long id)
+    {
+        await trainService.DeleteTrainStateById(id);
     }
 }
