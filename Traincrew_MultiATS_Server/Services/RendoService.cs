@@ -482,11 +482,6 @@ public class RendoService(
             return RaiseDrop.Drop;
         }
 
-        // 総括制御の条件
-        if (targetThrowOutRoutes.Any(r => r.RouteState.IsRouteLockRaised == RaiseDrop.Raise))
-        {
-            return RaiseDrop.Drop;
-        }
 
         // 被総括制御の条件を満たしているか確認
         if (!(
@@ -495,6 +490,8 @@ public class RendoService(
                     route.RouteState.IsThrowOutYSRelayRaised == RaiseDrop.Raise
                     // この進路に対して総括制御「する」進路の進路鎖錠リレーが落下している
                     && sourceThrowOutRoutes.Any(r => r.RouteState.IsRouteLockRaised == RaiseDrop.Drop)
+                    // この進路に対して総括制御「される」進路の進路照査リレーが扛上している
+                    && targetThrowOutRoutes.Any(r => r.RouteState.IsRouteLockRaised == RaiseDrop.Raise)
                 )
                 // 自進路YS落下
                 || route.RouteState.IsThrowOutYSRelayRaised == RaiseDrop.Drop)
