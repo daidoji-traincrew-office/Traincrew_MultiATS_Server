@@ -6,7 +6,7 @@ public class DestinationButtonScheduler(IServiceScopeFactory serviceScopeFactory
 {
     protected override int Interval => 500;
 
-    protected override async Task ExecuteTaskAsync(IServiceScope scope)
+    protected override async Task ExecuteTaskAsync(IServiceScope scope, System.Diagnostics.Activity? activity)
     {
         var interlockingService = scope.ServiceProvider.GetRequiredService<InterlockingService>();
         await interlockingService.ResetRaisedButtonsAsync();

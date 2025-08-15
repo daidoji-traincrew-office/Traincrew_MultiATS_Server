@@ -9,7 +9,7 @@ public class TIDHubScheduler(IServiceScopeFactory serviceScopeFactory) : Schedul
 {
     protected override int Interval => 333;
 
-    protected override async Task ExecuteTaskAsync(IServiceScope scope)
+    protected override async Task ExecuteTaskAsync(IServiceScope scope, System.Diagnostics.Activity? activity)
     {
         var hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<TIDHub, ITIDClientContract>>();
         var tidService = scope.ServiceProvider.GetRequiredService<TIDService>();
