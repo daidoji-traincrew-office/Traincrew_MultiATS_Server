@@ -417,7 +417,7 @@ public class RendoService(
                 .ToList();
             // この進路に対して総括制御「される」進路
             var targetThrowOutRoutes = targetThrowOutControlDictionary.GetValueOrDefault(route.Id, [])
-                .Select(toc => interlockingObjects[toc.SourceId])
+                .Select(toc => interlockingObjects[toc.TargetId])
                 .OfType<Route>()
                 .ToList();
 
