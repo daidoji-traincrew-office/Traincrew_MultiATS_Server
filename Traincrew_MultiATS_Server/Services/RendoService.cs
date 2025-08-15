@@ -397,6 +397,7 @@ public class RendoService(
         // 関わる全てのObjectを取得
         var objectIds = routeIds
             .Union(sourceThrowOutControlList.Select(c => c.SourceId))
+            .Union(targetThrowOutControlList.Select(c => c.TargetId))
             .Union(directLockConditions.Values.SelectMany(ExtractObjectIdsFromLockCondtions))
             .Union(signalControlConditions.Values.SelectMany(ExtractObjectIdsFromLockCondtions))
             .Distinct()
