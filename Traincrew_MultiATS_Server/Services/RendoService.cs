@@ -384,7 +384,7 @@ public class RendoService(
         // 上記進路に対して総括制御「される」進路の総括制御をすべて取得
         var targetThrowOutControlList = await throwOutControlRepository.GetBySourceIds(routeIds);
         var targetThrowOutControlDictionary = targetThrowOutControlList
-            .GroupBy(c => c.TargetId)
+            .GroupBy(c => c.SourceId)
             .ToDictionary(g => g.Key, g => g.ToList());
 
         // てこリレーが扛上している進路の直接鎖錠条件を取得
@@ -397,6 +397,7 @@ public class RendoService(
         // 関わる全てのObjectを取得
         var objectIds = routeIds
             .Union(sourceThrowOutControlList.Select(c => c.SourceId))
+            .Union(targetThrowOutControlList.Select(c => c.TargetId))
             .Union(directLockConditions.Values.SelectMany(ExtractObjectIdsFromLockCondtions))
             .Union(signalControlConditions.Values.SelectMany(ExtractObjectIdsFromLockCondtions))
             .Distinct()
@@ -417,7 +418,7 @@ public class RendoService(
                 .ToList();
             // この進路に対して総括制御「される」進路
             var targetThrowOutRoutes = targetThrowOutControlDictionary.GetValueOrDefault(route.Id, [])
-                .Select(toc => interlockingObjects[toc.SourceId])
+                .Select(toc => interlockingObjects[toc.TargetId])
                 .OfType<Route>()
                 .ToList();
 
