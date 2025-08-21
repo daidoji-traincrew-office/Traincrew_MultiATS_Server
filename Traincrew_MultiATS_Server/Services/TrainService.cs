@@ -471,8 +471,8 @@ public partial class TrainService(
             Name = trainState.TrainNumber,
             CarStates = carStates,
             TrainClass = (int)(trainDiagram?.TrainTypeId ?? 0),
-            FromStation = trainDiagram?.FromStationId ?? "TH00",
-            DestinationStation = trainDiagram?.ToStationId ?? "TH00",
+            FromStation = trainState.FromStationId, 
+            DestinationStation = trainState.ToStationId, 
             Delay = trainState.Delay
         };
     }
