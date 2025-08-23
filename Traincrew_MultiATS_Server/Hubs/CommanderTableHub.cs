@@ -92,4 +92,19 @@ public class CommanderTableHub(
     {
         return await protectionService.GetProtectionZoneStates();
     }
+
+    public async Task<List<TrainStateData>> GetAllTrainState()
+    {
+        return await trainService.GetAllTrainState();
+    }
+
+    public async Task<TrainStateData> UpdateTrainStateData(TrainStateData trainStateData)
+    {
+        return await trainService.UpdateTrainStateData(trainStateData);
+    }
+
+    public async Task DeleteTrainState(long id)
+    {
+        await trainService.DeleteTrainStateById(id);
+    }
 }

@@ -49,4 +49,10 @@ public class TrainRepository(ApplicationDbContext context) : ITrainRepository
     {
         return await context.TrainStates.ToListAsync();
     }
+
+    public async Task<TrainState?> GetById(long id)
+    {
+        return await context.TrainStates
+            .FirstOrDefaultAsync(ts => ts.Id == id);
+    }
 }
