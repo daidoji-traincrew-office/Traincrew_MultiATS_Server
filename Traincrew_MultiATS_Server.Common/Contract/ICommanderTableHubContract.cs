@@ -26,5 +26,5 @@ public interface ICommanderTableHubContract
 
 public interface ICommanderTableClientContract
 {
-    // クライアント側のメソッド定義は不要
+    Task ReceiveData(DataToCommanderTable data);
 }

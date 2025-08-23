@@ -33,6 +33,9 @@ public class DataToCommanderTable
     public List<TroubleData> TroubleDataList { get; set; }
     public List<OperationNotificationData> OperationNotificationDataList { get; set; }
     public List<TrackCircuitData> TrackCircuitDataList { get; set; }
+    public List<OperationInformationData> OperationInformationDataList { get; set; }
+    public List<ProtectionZoneData> ProtectionZoneDataList { get; set; }
+    public ServerMode ServerMode { get; set; }
 }
 
 public class ProtectionZoneData

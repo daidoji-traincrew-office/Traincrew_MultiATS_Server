@@ -19,17 +19,13 @@ public class CommanderTableHub(
     TrainService trainService,
     OperationInformationService operationInformationService,
     ProtectionService protectionService,
-    ServerService serverService
+    ServerService serverService,
+    CommanderTableService commanderTableService
 ) : Hub<ICommanderTableClientContract>, ICommanderTableHubContract
 {
     public async Task<DataToCommanderTable> SendData_CommanderTable()
     {
-        return new()
-        {
-            TroubleDataList = [],
-            OperationNotificationDataList = await operationNotificationService.GetOperationNotificationData(),
-            TrackCircuitDataList = await trackCircuitService.GetAllTrackCircuitDataList()
-        };
+        return await commanderTableService.SendData_CommanderTable();
     }
 
     public async Task SendTroubleData(TroubleData troubleData)
