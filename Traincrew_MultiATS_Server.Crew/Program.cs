@@ -558,6 +558,7 @@ public class Program
             metrics.AddAspNetCoreInstrumentation();
             // Metrics provides by ASP.NET Core in .NET 8
             metrics.AddMeter("Microsoft.AspNetCore.Hosting");
+            metrics.AddMeter("Microsoft.AspNetCore.Http.Connections");
             metrics.AddMeter("Microsoft.AspNetCore.Server.Kestrel");
         });
 
