@@ -92,7 +92,7 @@ public class InterlockingHubTest(WebApplicationFixture factory)
         {
             await connection.StartAsync(TestContext.Current.CancellationToken);
             // Act
-            data = await tcs.Task;
+            data = await tcs.Task.WaitAsync(TimeSpan.FromSeconds(3), TestContext.Current.CancellationToken);
         }
 
         foreach (var tsvFile in tsvFiles)

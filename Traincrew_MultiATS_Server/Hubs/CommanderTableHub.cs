@@ -18,7 +18,8 @@ public class CommanderTableHub(
     TtcStationControlService ttcStationControlService,
     TrainService trainService,
     OperationInformationService operationInformationService,
-    ProtectionService protectionService
+    ProtectionService protectionService,
+    ServerService serverService
 ) : Hub<ICommanderTableClientContract>, ICommanderTableHubContract
 {
     public async Task<DataToCommanderTable> SendData_CommanderTable()
@@ -106,5 +107,15 @@ public class CommanderTableHub(
     public async Task DeleteTrainState(long id)
     {
         await trainService.DeleteTrainStateById(id);
+    }
+
+    public async Task<ServerMode> GetServerMode()
+    {
+        return await serverService.GetServerModeAsync();
+    }
+
+    public async Task SetServerMode(ServerMode mode)
+    {
+        await serverService.SetServerModeAsync(mode);
     }
 }

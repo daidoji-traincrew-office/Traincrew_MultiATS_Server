@@ -20,6 +20,8 @@ public interface ICommanderTableHubContract
     Task<List<TrainStateData>> GetAllTrainState();
     Task<TrainStateData> UpdateTrainStateData(TrainStateData trainStateData);
     Task DeleteTrainState(long id);
+    Task<ServerMode> GetServerMode();
+    Task SetServerMode(ServerMode mode);
 }
 
 public interface ICommanderTableClientContract
