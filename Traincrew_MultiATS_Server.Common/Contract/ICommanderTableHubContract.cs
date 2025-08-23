@@ -27,4 +27,5 @@ public interface ICommanderTableHubContract
 public interface ICommanderTableClientContract
 {
     Task ReceiveData(DataToCommanderTable data);
+    Task ReceiveServerMode(ServerMode serverMode);
 }
