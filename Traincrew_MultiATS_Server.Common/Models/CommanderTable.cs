@@ -35,6 +35,7 @@ public class DataToCommanderTable
     public List<TrackCircuitData> TrackCircuitDataList { get; set; }
     public List<OperationInformationData> OperationInformationDataList { get; set; }
     public List<ProtectionZoneData> ProtectionZoneDataList { get; set; }
+    public List<TrainStateData> TrainStateDataList { get; set; }
     public ServerMode ServerMode { get; set; }
 }
 
