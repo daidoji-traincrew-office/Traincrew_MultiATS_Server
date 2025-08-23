@@ -7,7 +7,6 @@ public class CommanderTableService(
     OperationNotificationService operationNotificationService,
     OperationInformationService operationInformationService,
     ProtectionService protectionService,
-    ServerService serverService,
     TrainService trainService
 )
 {
@@ -21,7 +20,6 @@ public class CommanderTableService(
             OperationInformationDataList = await operationInformationService.GetAllOperationInformations(),
             ProtectionZoneDataList = await protectionService.GetProtectionZoneStates(),
             TrainStateDataList = await trainService.GetAllTrainState(),
-            ServerMode = await serverService.GetServerModeAsync()
         };
     }
 }
