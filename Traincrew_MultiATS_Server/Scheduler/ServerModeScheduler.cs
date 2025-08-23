@@ -5,7 +5,7 @@ using Traincrew_MultiATS_Server.Services;
 
 namespace Traincrew_MultiATS_Server.Scheduler;
 
-// このSchedulerは常時実行するため、SchedulerManagerでは管理をしない
+// このSchedulerは常時実行する
 public class ServerModeScheduler(IServiceScopeFactory serviceScopeFactory) : Scheduler(serviceScopeFactory)
 {
     protected override int Interval => 250;
