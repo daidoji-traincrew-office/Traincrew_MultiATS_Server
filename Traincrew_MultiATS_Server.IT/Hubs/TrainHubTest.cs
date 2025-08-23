@@ -419,7 +419,7 @@ public class TrainHubTest(WebApplicationFixture factory)
         };
         await db.Create(trainState);
         // 軌道回路を埋める
-        await trackCircuitRepository.SetTrackCircuitList([new TrackCircuit {Name = "TH76_5LAT"}], trainNumber);
+        await trackCircuitRepository.SetTrainNumberByNames(["TH76_5LAT"], trainNumber);
 
         var atsData = new AtsToServerData
         {

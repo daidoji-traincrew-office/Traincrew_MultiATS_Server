@@ -1094,25 +1094,41 @@ public class RendoService(
             // 進路鎖錠するべき軌道回路リスト
             var routeLockTrackCircuit = routeLockTrackCircuits.GetValueOrDefault(route.Id, []);
 
-            // 進路鎖錠取るべきリストの末端回路が鎖錠されていない && 接近鎖錠されている && 進路鎖錠されていない → 一斉に軌道回路を鎖錠、進路鎖錠する
-            if (!(routeLockTrackCircuit.LastOrDefault()?.TrackCircuitState.IsLocked ?? true)
-                && route.RouteState.IsApproachLockMRRaised == RaiseDrop.Drop
-                && route.RouteState.IsRouteLockRaised == RaiseDrop.Raise)
+            // 接近鎖錠されている場合
+            // ReSharper disable once ConvertIfStatementToSwitchStatement
+            if (route.RouteState.IsApproachLockMRRaised == RaiseDrop.Drop)
             {
-                //  一斉に軌道回路を鎖錠、進路鎖錠する
-                // 軌道回路Lock
-                routeLockTrackCircuit.ForEach(tc =>
+                // いずれかの軌道回路を自分以外が鎖錠している場合は早期Continue
+                if (routeLockTrackCircuit.Any(tc =>
+                        tc.TrackCircuitState.IsLocked && tc.TrackCircuitState.LockedBy != routeId))
                 {
-                    tc.TrackCircuitState.IsLocked = true;
-                    tc.TrackCircuitState.LockedBy = route.Id;
-                });
-                await generalRepository.SaveAll(routeLockTrackCircuit.Select(tc => tc.TrackCircuitState));
-                // IsRouteLockRaisedをDropにする
-                route.RouteState.IsRouteLockRaised = RaiseDrop.Drop;
-                await generalRepository.Save(route.RouteState);
+                    continue;
+                }
+
+                // 鎖錠できてない軌道回路がある場合、その軌道回路を鎖錠する
+                var toRouteLockTrackCircuit = routeLockTrackCircuit
+                    .Where(tc => !tc.TrackCircuitState.IsLocked)
+                    .ToList();
+                if (toRouteLockTrackCircuit.Count > 0)
+                {
+                    routeLockTrackCircuit.ForEach(tc =>
+                    {
+                        tc.TrackCircuitState.IsLocked = true;
+                        tc.TrackCircuitState.LockedBy = route.Id;
+                    });
+                    await trackCircuitRepository.LockByIds(
+                        routeLockTrackCircuit.Select(tc => tc.Id).ToList(), route.Id);
+                }
+                // IsRouteLockRaisedがDropになってないならDropにする
+                if (route.RouteState.IsRouteLockRaised != RaiseDrop.Drop)
+                {
+                    route.RouteState.IsRouteLockRaised = RaiseDrop.Drop;
+                    await generalRepository.Save(route.RouteState);    
+                }
             }
 
             // 接近鎖錠が扛上して、かつ進路鎖錠リレーが落下している場合
+            // ReSharper disable once InvertIf
             if (
                 route.RouteState.IsApproachLockMRRaised == RaiseDrop.Raise
                 && route.RouteState.IsRouteLockRaised == RaiseDrop.Drop)
@@ -1151,10 +1167,10 @@ public class RendoService(
                         // 時間条件が存在し、UnlockedAtがnull => now+時間条件をUnlockedAtに設定してBreak
                         if (targetTrackCircuits.Any(tc => tc.TrackCircuitState.UnlockedAt == null))
                         {
-                            targetTrackCircuits.ForEach(tc => tc.TrackCircuitState.UnlockedAt =
-                                dateTimeRepository.GetNow() +
-                                TimeSpan.FromSeconds(timerSeconds.Value));
-                            await generalRepository.SaveAll(targetTrackCircuits.Select(tc => tc.TrackCircuitState));
+                            var unlockedAt = dateTimeRepository.GetNow() + TimeSpan.FromSeconds(timerSeconds.Value);
+                            targetTrackCircuits.ForEach(tc => tc.TrackCircuitState.UnlockedAt = unlockedAt);
+                            await trackCircuitRepository.StartUnlockTimerByIds(
+                                targetTrackCircuits.Select(tc => tc.Id).ToList(), unlockedAt);
                             break;
                         }
 
@@ -1173,17 +1189,17 @@ public class RendoService(
                         tc.TrackCircuitState.LockedBy = null;
                         tc.TrackCircuitState.UnlockedAt = null;
                     });
-                    await generalRepository.SaveAll(targetTrackCircuits.Select(tc => tc.TrackCircuitState));
+                    await trackCircuitRepository.UnlockByIds(targetTrackCircuits.Select(tc => tc.Id).ToList());
                 }
 
                 // 進路鎖錠欄に書かれている軌道回路のすべての軌道回路が鎖錠解除された場合、進路鎖錠リレーを扛上させる+進路鎖錠するべき軌道回路のリストを全解除する
 
                 // 進路鎖錠欄に書かれている軌道回路のいずれかの軌道回路が自分によって鎖状されている場合、スキップ
                 if (routeLocks
-                        .SelectMany(l => l.LockConditions)
-                        .OfType<LockConditionObject>()
-                        .Select(l => interlockingObjects[l.ObjectId])
-                        .Any(io => io is TrackCircuit tc && tc.TrackCircuitState.LockedBy == route.Id))
+                    .SelectMany(l => l.LockConditions)
+                    .OfType<LockConditionObject>()
+                    .Select(l => interlockingObjects[l.ObjectId])
+                    .Any(io => io is TrackCircuit tc && tc.TrackCircuitState.LockedBy == route.Id))
                 {
                     continue;
                 }
@@ -1200,8 +1216,9 @@ public class RendoService(
                 });
                 if (toUnlockedTrackCircuits.Count > 0)
                 {
-                    await generalRepository.SaveAll(toUnlockedTrackCircuits.Select(tc => tc.TrackCircuitState));
+                    await trackCircuitRepository.UnlockByIds(toUnlockedTrackCircuits.Select(tc => tc.Id).ToList());
                 }
+
                 // 進路鎖錠リレーを扛上させる
                 route.RouteState.IsRouteLockRaised = RaiseDrop.Raise;
                 await generalRepository.Save(route.RouteState);

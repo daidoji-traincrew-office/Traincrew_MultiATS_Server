@@ -30,13 +30,8 @@ public class TrackCircuitService(
 
     public async Task SetTrackCircuitDataList(List<TrackCircuitData> trackCircuitData, string trainNumber)
     {
-        List<TrackCircuit> trackCircuit = trackCircuitData
-            .Select(item => new TrackCircuit
-            {
-                Name = item.Name
-            })
-            .ToList();
-        await trackCircuitRepository.SetTrackCircuitList(trackCircuit, trainNumber);
+        var names = trackCircuitData.Select(t => t.Name).ToList(); 
+        await trackCircuitRepository.SetTrainNumberByNames(names, trainNumber);
     }
 
 
@@ -57,14 +52,8 @@ public class TrackCircuitService(
 
     public async Task ClearTrackCircuitDataList(List<TrackCircuitData> trackCircuitData)
     {
-        List<TrackCircuit> trackCircuit = trackCircuitData
-            .Select(item => new TrackCircuit
-            {
-                Name = item.Name
-            })
-            .ToList();
-
-        await trackCircuitRepository.ClearTrackCircuitList(trackCircuit);
+        var names = trackCircuitData.Select(t => t.Name).ToList();
+        await trackCircuitRepository.ClearTrainNumberByNames(names);
     }
     
     public async Task ClearTrackCircuitByTrainNumber(string trainNumber)
