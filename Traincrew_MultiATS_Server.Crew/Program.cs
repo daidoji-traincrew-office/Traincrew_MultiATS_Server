@@ -491,6 +491,7 @@ public class Program
             .AddScoped<ITtcWindowRepository, TtcWindowRepository>()
             .AddScoped<ITtcWindowLinkRepository, TtcWindowLinkRepository>()
             .AddScoped<ITransactionRepository, TransactionRepository>()
+            .AddScoped<CommanderTableService>()
             .AddScoped<DirectionRouteService>()
             .AddScoped<InterlockingService>()
             .AddScoped<OperationNotificationService>()
