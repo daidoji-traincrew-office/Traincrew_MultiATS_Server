@@ -67,7 +67,7 @@ public class InitDbHostedService(
             await dbInitializer.InitializeAfterCreateLockCondition();
         }
 
-        await schedulerManager.StartServerModeScheduler();
+        schedulerManager.StartServerModeScheduler();
         await serverService.UpdateSchedulerAsync();
     }
 

@@ -37,13 +37,9 @@ public class SchedulerManager(
         _isRunning = true;
     }
 
-    public async Task StartServerModeScheduler()
+    public void StartServerModeScheduler()
     {
-        if (_serverModeScheduler != null)
-        {
-            return;
-        }
-        _serverModeScheduler = new(serviceScopeFactory);
+        _serverModeScheduler ??= new(serviceScopeFactory);
     }
 
     public async Task Stop()
