@@ -23,11 +23,6 @@ public class CommanderTableHub(
     CommanderTableService commanderTableService
 ) : Hub<ICommanderTableClientContract>, ICommanderTableHubContract
 {
-    public async Task<DataToCommanderTable> SendData_CommanderTable()
-    {
-        return await commanderTableService.SendData_CommanderTable();
-    }
-
     public async Task SendTroubleData(TroubleData troubleData)
     {
 
@@ -61,11 +56,6 @@ public class CommanderTableHub(
         return await operationInformationService.UpdateOperationInformation(operationInformationData);
     }
 
-    public async Task<List<OperationInformationData>> GetAllOperationInformations()
-    {
-        return await operationInformationService.GetAllOperationInformations();
-    }
-
     public async Task DeleteOperationInformation(long id)
     {
         await operationInformationService.DeleteOperationInformation(id);
@@ -85,16 +75,6 @@ public class CommanderTableHub(
     {
         await protectionService.DeleteProtectionZoneState(id);
     }
-    public async Task<List<ProtectionZoneData>> GetProtectionZoneStates()
-    {
-        return await protectionService.GetProtectionZoneStates();
-    }
-
-    public async Task<List<TrainStateData>> GetAllTrainState()
-    {
-        return await trainService.GetAllTrainState();
-    }
-
     public async Task<TrainStateData> UpdateTrainStateData(TrainStateData trainStateData)
     {
         return await trainService.UpdateTrainStateData(trainStateData);
@@ -103,11 +83,6 @@ public class CommanderTableHub(
     public async Task DeleteTrainState(long id)
     {
         await trainService.DeleteTrainStateById(id);
-    }
-
-    public async Task<ServerMode> GetServerMode()
-    {
-        return await serverService.GetServerModeAsync();
     }
 
     public async Task SetServerMode(ServerMode mode)
