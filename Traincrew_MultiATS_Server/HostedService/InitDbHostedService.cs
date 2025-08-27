@@ -27,6 +27,7 @@ public class InitDbHostedService(
         var datetimeRepository = scope.ServiceProvider.GetRequiredService<IDateTimeRepository>();
         var lockConditionRepository = scope.ServiceProvider.GetRequiredService<ILockConditionRepository>();
         var serverService = scope.ServiceProvider.GetRequiredService<ServerService>();
+        var schedulerManager =  scope.ServiceProvider.GetRequiredService<SchedulerManager>();
         var dbInitializer = await CreateDBInitializer(context, lockConditionRepository, cancellationToken);
         if (dbInitializer != null)
         {
@@ -65,6 +66,8 @@ public class InitDbHostedService(
             DetachUnchangedEntities(context);
             await dbInitializer.InitializeAfterCreateLockCondition();
         }
+
+        schedulerManager.StartServerModeScheduler();
         await serverService.UpdateSchedulerAsync();
     }
 
@@ -517,6 +520,7 @@ public class InitDbHostedService(
             .ServiceProvider.GetRequiredService<SchedulerManager>();
         // Stop all schedulers
         await schedulerManager.Stop();
+        await schedulerManager.StopServerModeScheduler();
     }
 }
 

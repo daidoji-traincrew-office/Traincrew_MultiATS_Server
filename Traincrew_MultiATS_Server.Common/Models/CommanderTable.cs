@@ -36,7 +36,6 @@ public class DataToCommanderTable
     public List<OperationInformationData> OperationInformationDataList { get; set; }
     public List<ProtectionZoneData> ProtectionZoneDataList { get; set; }
     public List<TrainStateData> TrainStateDataList { get; set; }
-    public ServerMode ServerMode { get; set; }
 }
 
 public class ProtectionZoneData

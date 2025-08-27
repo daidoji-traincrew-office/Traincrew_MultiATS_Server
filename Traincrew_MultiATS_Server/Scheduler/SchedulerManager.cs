@@ -9,6 +9,7 @@ public class SchedulerManager(
 {
     private bool _isRunning;
     private List<Scheduler> _schedulers = [];
+    private ServerModeScheduler? _serverModeScheduler;
     
     private void InitSchedulers()
     {
@@ -36,6 +37,11 @@ public class SchedulerManager(
         _isRunning = true;
     }
 
+    public void StartServerModeScheduler()
+    {
+        _serverModeScheduler ??= new(serviceScopeFactory);
+    }
+
     public async Task Stop()
     {
         await using var mutex = await mutexRepository.AcquireAsync(nameof(SchedulerManager));
@@ -46,5 +52,14 @@ public class SchedulerManager(
         await Task.WhenAll(_schedulers.Select(s => s.Stop()));
         _schedulers.Clear();
         _isRunning = false;
+    }
+
+    public async Task StopServerModeScheduler()
+    {
+        if (_serverModeScheduler != null)
+        {
+            await _serverModeScheduler.Stop();
+            _serverModeScheduler = null;
+        }
     }
 }
