@@ -44,6 +44,18 @@ jobs:
         working-directory: ./Database
         run: docker compose up -d
 
+      - name: Wait for Database to be ready
+        run: |
+          echo "Waiting for PostgreSQL to be ready..."
+          for i in {1..30}; do
+            if docker compose exec db pg_isready -U postgres; then
+              echo "PostgreSQL is ready!"
+              break
+            fi
+            echo "Waiting for PostgreSQL... ($i/30)"
+            sleep 2
+          done
+
       - name: Run Integration Tests
         working-directory: ./Traincrew_MultiATS_Server.IT
         run: dotnet test --no-build --configuration Release
