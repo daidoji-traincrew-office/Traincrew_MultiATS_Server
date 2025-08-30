@@ -60,8 +60,8 @@ public class TrainHubTest(WebApplicationFixture factory)
     [Fact(DisplayName = "運転士のいない列車がいて、引き継ぐ場合")]
     public async Task SendData_ATS_TakeOverTrainWithoutDriver()
     {
-        const string trainNumber = "1162";
-        const string oldTrainNumber = "1163";
+        const string trainNumber = "1162C";
+        const string oldTrainNumber = "1163C";
         // Arrange
         var mockClient = new Mock<ITrainClientContract>();
         var (connection, hub) = factory.CreateTrainHub(mockClient.Object);
@@ -85,7 +85,7 @@ public class TrainHubTest(WebApplicationFixture factory)
             await commanderConnection.StartAsync(TestContext.Current.CancellationToken);
             await commanderHub.SendTrackCircuitData(new () 
             {
-                Name = "TH76_5LDT",
+                Name = "TH76_5LCT",
                 Last = oldTrainNumber,
                 On = true,
                 Lock = false
@@ -95,7 +95,7 @@ public class TrainHubTest(WebApplicationFixture factory)
         var atsData = new AtsToServerData
         {
             DiaName = trainNumber,
-            OnTrackList = [new (){Name = "TH76_5LDT"}],
+            OnTrackList = [new (){Name = "TH76_5LCT"}],
             CarStates = [new (){
                 Ampare = 0,
                 BC_Press = 0,
