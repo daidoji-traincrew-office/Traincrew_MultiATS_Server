@@ -18,7 +18,7 @@ public class CommanderTableService(
             OperationNotificationDataList = await operationNotificationService.GetOperationNotificationData(),
             TrackCircuitDataList = await trackCircuitService.GetAllTrackCircuitDataList(),
             OperationInformationDataList = await operationInformationService.GetAllOperationInformations(),
-            ProtectionZoneDataList = await protectionService.GetProtectionZoneStates(),
+            ProtectionRadioDataList = await protectionService.GetProtectionRadioStates(),
             TrainStateDataList = await trainService.GetAllTrainState(),
         };
     }

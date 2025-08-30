@@ -71,12 +71,12 @@ public class CommanderTableHub(
         await operationInformationService.DeleteOperationInformation(id);
     }
 
-    public async Task AddProtectionZoneState(ProtectionZoneData data)
+    public async Task AddProtectionZoneState(ProtectionRadioData data)
     {
         await protectionService.AddProtectionZoneState(data);
     }
 
-    public async Task UpdateProtectionZoneState(ProtectionZoneData data)
+    public async Task UpdateProtectionZoneState(ProtectionRadioData data)
     {
         await protectionService.UpdateProtectionZoneState(data);
     }
@@ -85,9 +85,9 @@ public class CommanderTableHub(
     {
         await protectionService.DeleteProtectionZoneState(id);
     }
-    public async Task<List<ProtectionZoneData>> GetProtectionZoneStates()
+    public async Task<List<ProtectionRadioData>> GetProtectionZoneStates()
     {
-        return await protectionService.GetProtectionZoneStates();
+        return await protectionService.GetProtectionRadioStates();
     }
 
     public async Task<List<TrainStateData>> GetAllTrainState()
