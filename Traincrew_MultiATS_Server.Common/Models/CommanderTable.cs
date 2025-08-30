@@ -34,11 +34,11 @@ public class DataToCommanderTable
     public List<OperationNotificationData> OperationNotificationDataList { get; set; }
     public List<TrackCircuitData> TrackCircuitDataList { get; set; }
     public List<OperationInformationData> OperationInformationDataList { get; set; }
-    public List<ProtectionZoneData> ProtectionZoneDataList { get; set; }
+    public List<ProtectionRadioData> ProtectionRadioDataList { get; set; }
     public List<TrainStateData> TrainStateDataList { get; set; }
 }
 
-public class ProtectionZoneData
+public class ProtectionRadioData
 {
     public ulong Id { get; set; }
     public string TrainNumber { get; set; }
