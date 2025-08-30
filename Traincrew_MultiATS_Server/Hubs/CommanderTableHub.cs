@@ -17,17 +17,15 @@ public class CommanderTableHub(
     OperationNotificationService operationNotificationService,
     TtcStationControlService ttcStationControlService,
     TrainService trainService,
-    OperationInformationService operationInformationService 
+    OperationInformationService operationInformationService,
+    ProtectionService protectionService,
+    ServerService serverService,
+    CommanderTableService commanderTableService
 ) : Hub<ICommanderTableClientContract>, ICommanderTableHubContract
 {
     public async Task<DataToCommanderTable> SendData_CommanderTable()
     {
-        return new()
-        {
-            TroubleDataList = [],
-            OperationNotificationDataList = await operationNotificationService.GetOperationNotificationData(),
-            TrackCircuitDataList = await trackCircuitService.GetAllTrackCircuitDataList()
-        };
+        return await commanderTableService.SendData_CommanderTable();
     }
 
     public async Task SendTroubleData(TroubleData troubleData)
@@ -71,5 +69,49 @@ public class CommanderTableHub(
     public async Task DeleteOperationInformation(long id)
     {
         await operationInformationService.DeleteOperationInformation(id);
+    }
+
+    public async Task AddProtectionZoneState(ProtectionRadioData data)
+    {
+        await protectionService.AddProtectionZoneState(data);
+    }
+
+    public async Task UpdateProtectionZoneState(ProtectionRadioData data)
+    {
+        await protectionService.UpdateProtectionZoneState(data);
+    }
+
+    public async Task DeleteProtectionZoneState(ulong id)
+    {
+        await protectionService.DeleteProtectionZoneState(id);
+    }
+    public async Task<List<ProtectionRadioData>> GetProtectionZoneStates()
+    {
+        return await protectionService.GetProtectionRadioStates();
+    }
+
+    public async Task<List<TrainStateData>> GetAllTrainState()
+    {
+        return await trainService.GetAllTrainState();
+    }
+
+    public async Task<TrainStateData> UpdateTrainStateData(TrainStateData trainStateData)
+    {
+        return await trainService.UpdateTrainStateData(trainStateData);
+    }
+
+    public async Task DeleteTrainState(long id)
+    {
+        await trainService.DeleteTrainStateById(id);
+    }
+
+    public async Task<ServerMode> GetServerMode()
+    {
+        return await serverService.GetServerModeAsync();
+    }
+
+    public async Task SetServerMode(ServerMode mode)
+    {
+        await serverService.SetServerModeAsync(mode);
     }
 }

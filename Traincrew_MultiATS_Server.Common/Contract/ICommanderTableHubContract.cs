@@ -13,9 +13,19 @@ public interface ICommanderTableHubContract
     Task<OperationInformationData> UpdateOperationInformation(OperationInformationData operationInformationData);
     Task<List<OperationInformationData>> GetAllOperationInformations();
     Task DeleteOperationInformation(long id);
+    Task AddProtectionZoneState(ProtectionRadioData protectionRadioData);
+    Task UpdateProtectionZoneState(ProtectionRadioData protectionRadioData);
+    Task DeleteProtectionZoneState(ulong id);
+    Task<List<ProtectionRadioData>> GetProtectionZoneStates();
+    Task<List<TrainStateData>> GetAllTrainState();
+    Task<TrainStateData> UpdateTrainStateData(TrainStateData trainStateData);
+    Task DeleteTrainState(long id);
+    Task<ServerMode> GetServerMode();
+    Task SetServerMode(ServerMode mode);
 }
 
 public interface ICommanderTableClientContract
 {
-    // クライアント側のメソッド定義は不要
+    Task ReceiveData(DataToCommanderTable data);
+    Task ReceiveServerMode(ServerMode serverMode);
 }

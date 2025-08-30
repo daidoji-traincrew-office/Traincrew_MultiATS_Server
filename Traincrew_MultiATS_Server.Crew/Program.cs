@@ -1,3 +1,4 @@
+#define IS_ENABLED_PRECOMPILED_MODEL
 using System.Net;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -34,6 +35,7 @@ using Traincrew_MultiATS_Server.Repositories.Protection;
 using Traincrew_MultiATS_Server.Repositories.Route;
 using Traincrew_MultiATS_Server.Repositories.RouteLeverDestinationButton;
 using Traincrew_MultiATS_Server.Repositories.RouteLockTrackCircuit;
+using Traincrew_MultiATS_Server.Repositories.Server;
 using Traincrew_MultiATS_Server.Repositories.Signal;
 using Traincrew_MultiATS_Server.Repositories.SignalRoute;
 using Traincrew_MultiATS_Server.Repositories.Station;
@@ -47,6 +49,7 @@ using Traincrew_MultiATS_Server.Repositories.TrainDiagram;
 using Traincrew_MultiATS_Server.Repositories.Transaction;
 using Traincrew_MultiATS_Server.Repositories.TtcWindow;
 using Traincrew_MultiATS_Server.Repositories.TtcWindowLink;
+using Traincrew_MultiATS_Server.Scheduler;
 using Traincrew_MultiATS_Server.Services;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
@@ -474,6 +477,7 @@ public class Program
             .AddScoped<IRouteRepository, RouteRepository>()
             .AddScoped<IRouteLeverDestinationRepository, RouteLeverDestinationRepository>()
             .AddScoped<IRouteLockTrackCircuitRepository, RouteLockTrackCircuitRepository>()
+            .AddScoped<IServerRepository, ServerRepository>()
             .AddScoped<ISignalRepository, SignalRepository>()
             .AddScoped<ISignalRouteRepository, SignalRouteRepository>()
             .AddScoped<IStationRepository, StationRepository>()
@@ -487,6 +491,7 @@ public class Program
             .AddScoped<ITtcWindowRepository, TtcWindowRepository>()
             .AddScoped<ITtcWindowLinkRepository, TtcWindowLinkRepository>()
             .AddScoped<ITransactionRepository, TransactionRepository>()
+            .AddScoped<CommanderTableService>()
             .AddScoped<DirectionRouteService>()
             .AddScoped<InterlockingService>()
             .AddScoped<OperationNotificationService>()
@@ -494,6 +499,7 @@ public class Program
             .AddScoped<ProtectionService>()
             .AddScoped<RendoService>()
             .AddScoped<RouteService>()
+            .AddScoped<ServerService>()
             .AddScoped<SignalService>()
             .AddScoped<StationService>()
             .AddScoped<SwitchingMachineService>()
@@ -503,6 +509,7 @@ public class Program
             .AddScoped<TtcStationControlService>()
             .AddSingleton<EnableAuthorizationStore>(_ => new(enableAuthorization))
             .AddSingleton<DiscordService>()
+            .AddSingleton<SchedulerManager>()
             .AddSingleton<DiscordRepository>()
             .AddSingleton<IDiscordRepository>(provider => provider.GetRequiredService<DiscordRepository>())
             .AddSingleton<IMutexRepository, MutexRepository>()

@@ -2,7 +2,9 @@ using System.Text;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
+using Moq;
 using Traincrew_MultiATS_Server.Common.Contract;
+using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Crew;
 using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
 using Traincrew_MultiATS_Server.Repositories.Train;
@@ -10,7 +12,7 @@ using TypedSignalR.Client;
 
 namespace Traincrew_MultiATS_Server.IT.Fixture;
 
-public class WebApplicationFixture
+public class WebApplicationFixture : IAsyncLifetime
 {
     private const string TrainHubPath = "/hub/train";
     private const string TIDHubPath = "/hub/TID";
@@ -23,6 +25,29 @@ public class WebApplicationFixture
     {
         // Shift-JISを使用するために、CodePagesEncodingProviderを登録
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+    }
+
+    public async ValueTask InitializeAsync()
+    {
+        await StartScheduledTask();
+    }
+
+
+    public async ValueTask DisposeAsync()
+    {
+        await factory.DisposeAsync();
+    }
+
+    private async Task StartScheduledTask()
+    {
+        var mockClientContract = new Mock<ICommanderTableClientContract>();
+        var (connection, hub) = CreateCommanderTableHub(mockClientContract.Object);
+
+        await using (connection)
+        {
+            await connection.StartAsync();
+            await hub.SetServerMode(ServerMode.Private).WaitAsync(TimeSpan.FromSeconds(10));
+        }
     }
 
     public static ulong DriverId => 0UL; // テスト用の固定DriverId
@@ -56,7 +81,7 @@ public class WebApplicationFixture
         var scope = factory.Services.CreateScope();
         return scope.ServiceProvider.GetRequiredService<ITrainRepository>();
     }
-    
+
     /// <summary>
     /// テスト用にITrackCircuitRepositoryを取得する
     /// </summary>

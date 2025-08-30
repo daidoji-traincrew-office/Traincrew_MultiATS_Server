@@ -11,7 +11,7 @@ public class PassengerService(
     public async Task<ServerToPassengerData>  GetServerToPassengerData()
     {
         var trackCircuitData = await trackCircuitService.GetShortCircuitedTrackCircuitDataList();
-        var trainInfoByTrainNumber = await trainService.GetTrainInfoByTrainNumber();
+        var trainInfoByTrainNumber = await trainService.GetTrainInfoGroupByTrainNumber();
         var operationInformations = await operationInformationService.GetOperationInformations();
 
         return new()
