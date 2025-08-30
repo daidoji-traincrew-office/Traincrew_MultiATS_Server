@@ -43,11 +43,11 @@ public class ProtectionService(
     }
     
     // ProtectionZoneStateの取得
-    public async Task<List<ProtectionZoneData>> GetProtectionZoneStates()
+    public async Task<List<ProtectionRadioData>> GetProtectionRadioStates()
     {
         var entities = await protectionRepository.GetProtectionZoneStates();
         return entities
-            .Select(entity => new ProtectionZoneData
+            .Select(entity => new ProtectionRadioData
             {
                 Id = entity.id,
                 TrainNumber = entity.TrainNumber,
@@ -57,7 +57,7 @@ public class ProtectionService(
     }
 
     // ProtectionZoneStateの追加
-    public async Task AddProtectionZoneState(ProtectionZoneData data)
+    public async Task AddProtectionZoneState(ProtectionRadioData data)
     {
         await generalRepository.Add(new ProtectionZoneState
         {
@@ -67,7 +67,7 @@ public class ProtectionService(
     }
 
     // ProtectionZoneStateの更新
-    public async Task UpdateProtectionZoneState(ProtectionZoneData data)
+    public async Task UpdateProtectionZoneState(ProtectionRadioData data)
     {
         await generalRepository.Save(new ProtectionZoneState
         {
@@ -80,5 +80,6 @@ public class ProtectionService(
     // ProtectionZoneStateの削除
     public async Task DeleteProtectionZoneState(ulong id)
     {
+        await protectionRepository.DeleteById(id);
     }
 }
