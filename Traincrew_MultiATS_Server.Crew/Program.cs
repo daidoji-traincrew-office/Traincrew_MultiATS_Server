@@ -227,7 +227,10 @@ public class Program
     private static void ConfigureSignalRService(WebApplicationBuilder builder)
     {
         // SignalRの設定
-        builder.Services.AddSignalR();
+        builder.Services.AddSignalR(options =>
+        {
+            options.ClientTimeoutInterval = TimeSpan.FromMinutes(3);
+        });
     }
 
     private static List<IEndpointConventionBuilder> ConfigureEndpoints(WebApplication app)
