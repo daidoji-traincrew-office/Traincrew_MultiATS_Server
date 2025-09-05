@@ -107,7 +107,7 @@ public class InterlockingService(
         {
             var lampName = $"{switchingMachine.StationId}_W-FAILURE";
             var wState = switchingMachine.SwitchingMachineState;
-            wFailure[lampName] = wFailure[lampName] || (wState.IsSwitching && wState.SwitchEndTime + TimeSpan.FromSeconds(10) < now);
+            wFailure[lampName] = wFailure.GetValueOrDefault(lampName, false) || (wState.IsSwitching && wState.SwitchEndTime + TimeSpan.FromSeconds(10) < now);
         }
 
         // 駅の時素状態を取得
