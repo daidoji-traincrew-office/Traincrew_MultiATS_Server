@@ -98,6 +98,17 @@ public class InterlockingService(
         var ctcFailure = stationIds.ToDictionary(
             stationId => $"{stationId}_CTC-FAILURE",
             _ => false);
+
+        // 転てつ不良表示灯
+        var SwitchingMachines = new List<SwitchingMachine>();
+        var wFailure = new Dictionary<string, bool>();
+        foreach (var switchingMachine in SwitchingMachines)
+        {
+            var lampname = $"{switchingMachine.StationId}_W-FAILURE";
+            var wState = switchingMachine.SwitchingMachineState;
+            wFailure[lampname] = wFailure[lampname] || (wState.IsSwitching && wState.SwitchEndTime + TimeSpan.FromSeconds(10) < DateTime.Now);
+        }
+
         // 駅の時素状態を取得
         var stationTimerStates = (await stationRepository.GetTimerStatesByStationIds(stationIds))
             .ToDictionary(
@@ -154,7 +165,7 @@ public class InterlockingService(
         // 更新後の値定義
         var isInsertedKey = directionkeyLever.DirectionSelfControlLeverState.IsInsertedKey;
         var isReversed = directionkeyLever.DirectionSelfControlLeverState.IsReversed;
-        
+
         // 鍵を刺せるか確認
         var role = await discordService.GetRoleByMemberId(memberId);
         // 鍵を刺せるなら、鍵を処理する
@@ -162,13 +173,13 @@ public class InterlockingService(
         {
             isInsertedKey = keyLeverData.IsKeyInserted;
         }
-        
+
         // 鍵が刺さっている場合、回す処理をする
         if (isInsertedKey)
         {
             isReversed = keyLeverData.State == LNR.Right ? NR.Reversed : NR.Normal;
         }
-        
+
         // 変化があれば、更新する
         // ReSharper disable once InvertIf
         if (isInsertedKey != directionkeyLever.DirectionSelfControlLeverState.IsInsertedKey ||
@@ -183,7 +194,7 @@ public class InterlockingService(
         {
             Name = directionkeyLever.Name,
             State = isReversed == NR.Reversed ? LNR.Right : LNR.Normal,
-            IsKeyInserted = isInsertedKey 
+            IsKeyInserted = isInsertedKey
         };
     }
 
