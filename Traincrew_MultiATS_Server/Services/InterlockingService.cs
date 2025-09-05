@@ -49,7 +49,7 @@ public class InterlockingService(
         // それら全部の信号の現示計算
         var signalIndications = await signalService.CalcSignalIndication(signalNames);
         // 各ランプの状態を取得
-        var lamps = await GetLamps(stationIds);
+        var lamps = await GetLamps(stationIds, switchingMachines);
         // 列番窓を取得
         var ttcWindows = await ttcStationControlService.GetTtcWindowsByStationIdsWithState(stationIds);
 
@@ -90,7 +90,7 @@ public class InterlockingService(
         return response;
     }
 
-    public async Task<Dictionary<string, bool>> GetLamps(List<string> stationIds)
+    private async Task<Dictionary<string, bool>> GetLamps(List<string> stationIds, List<SwitchingMachine> switchingMachines)
     {
         // Todo: 一旦仮でFalse
         var pwrFailure = stationIds.ToDictionary(
@@ -101,9 +101,8 @@ public class InterlockingService(
             _ => false);
 
         // 転てつ不良表示灯
-        var SwitchingMachines = new List<SwitchingMachine>();
         var wFailure = new Dictionary<string, bool>();
-        foreach (var switchingMachine in SwitchingMachines)
+        foreach (var switchingMachine in switchingMachines)
         {
             var lampname = $"{switchingMachine.StationId}_W-FAILURE";
             var wState = switchingMachine.SwitchingMachineState;
