@@ -104,9 +104,9 @@ public class InterlockingService(
         var wFailure = new Dictionary<string, bool>();
         foreach (var switchingMachine in switchingMachines)
         {
-            var lampname = $"{switchingMachine.StationId}_W-FAILURE";
+            var lampName = $"{switchingMachine.StationId}_W-FAILURE";
             var wState = switchingMachine.SwitchingMachineState;
-            wFailure[lampname] = wFailure[lampname] || (wState.IsSwitching && wState.SwitchEndTime + TimeSpan.FromSeconds(10) < DateTime.Now);
+            wFailure[lampName] = wFailure[lampName] || (wState.IsSwitching && wState.SwitchEndTime + TimeSpan.FromSeconds(10) < DateTime.Now);
         }
 
         // 駅の時素状態を取得
