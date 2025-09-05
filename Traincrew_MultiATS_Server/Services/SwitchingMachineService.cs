@@ -72,6 +72,9 @@ public class SwitchingMachineService(
             // 転換中の転てつ器が、転換を終了した場合
             if (switchingMachineState.IsSwitching && switchingMachineState.SwitchEndTime < now)
             {
+                // TH67_W36を検知したら強制スキップ
+                if (switchingMachine.Name.Contains("TH67_W36") && switchingMachineState.IsReverse == NR.Reversed) continue;
+
                 // 対応する転てつ器のSwitchingMachineState.IsSwitchingをfalseにする 
                 switchingMachineState.IsSwitching = false;
                 await generalRepository.Save(switchingMachineState);
