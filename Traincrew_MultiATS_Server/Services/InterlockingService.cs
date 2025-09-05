@@ -118,6 +118,7 @@ public class InterlockingService(
         return pwrFailure
             .Concat(ctcFailure)
             .Concat(stationTimerStates)
+            .Concat(wFailure)
             .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
     }
 
