@@ -10,7 +10,8 @@ public class TIDService(
     public async Task<ConstantDataToTID> CreateTidData()
     {
         var trackCircuitDatas = await trackCircuitService.GetAllTrackCircuitDataList();
-        var switchingMachineDatas = await switchingMachineService.GetAllSwitchData();
+        var switchingMachines = await switchingMachineService.GetAllSwitchingMachines();
+        var switchingMachineDatas = switchingMachines.Select(SwitchingMachineService.ToSwitchData).ToList();
         var directionDatas = await directionRouteService.GetAllDirectionData();
 
         return new()

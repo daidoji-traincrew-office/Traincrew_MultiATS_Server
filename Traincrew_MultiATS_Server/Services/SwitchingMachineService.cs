@@ -180,9 +180,8 @@ public class SwitchingMachineService(
         };
     }
 
-    public async Task<List<SwitchData>> GetAllSwitchData()
+    public async Task<List<SwitchingMachine>> GetAllSwitchingMachines()
     {
-        var switchingMachines = await switchingMachineRepository.GetSwitchingMachinesWithState();
-        return switchingMachines.Select(ToSwitchData).ToList();
+        return await switchingMachineRepository.GetSwitchingMachinesWithState();
     }
 }

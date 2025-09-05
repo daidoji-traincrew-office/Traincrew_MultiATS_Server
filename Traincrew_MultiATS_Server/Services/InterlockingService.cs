@@ -37,7 +37,8 @@ public class InterlockingService(
         var stations = await stationRepository.GetWhereIsStation();
         var stationIds = stations.Select(station => station.Id).ToList();
         var trackCircuits = await trackCircuitService.GetAllTrackCircuitDataList();
-        var switchingDatas = await switchingMachineService.GetAllSwitchData();
+        var switchingMachines = await switchingMachineService.GetAllSwitchingMachines();
+        var switchingDatas = switchingMachines.Select(SwitchingMachineService.ToSwitchData).ToList();
         var lever = await leverRepository.GetAllWithState();
         var directionSelfControlLevers = await directionSelfControlLeverRepository.GetAllWithState();
         var directions = await directionRouteService.GetAllDirectionData();
