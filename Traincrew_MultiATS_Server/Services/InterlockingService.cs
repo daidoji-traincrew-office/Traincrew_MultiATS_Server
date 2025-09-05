@@ -101,12 +101,13 @@ public class InterlockingService(
             _ => false);
 
         // 転てつ不良表示灯
+        var now = dateTimeRepository.GetNow();
         var wFailure = new Dictionary<string, bool>();
         foreach (var switchingMachine in switchingMachines)
         {
             var lampName = $"{switchingMachine.StationId}_W-FAILURE";
             var wState = switchingMachine.SwitchingMachineState;
-            wFailure[lampName] = wFailure[lampName] || (wState.IsSwitching && wState.SwitchEndTime + TimeSpan.FromSeconds(10) < DateTime.Now);
+            wFailure[lampName] = wFailure[lampName] || (wState.IsSwitching && wState.SwitchEndTime + TimeSpan.FromSeconds(10) < now);
         }
 
         // 駅の時素状態を取得
