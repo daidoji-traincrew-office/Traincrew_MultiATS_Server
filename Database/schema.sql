@@ -379,6 +379,7 @@ CREATE TABLE switching_machine_route
     UNIQUE (switching_machine_id, route_id)
 );
 CREATE INDEX switching_machine_route_switching_machine_id_index ON switching_machine_route (switching_machine_id);
+CREATE INDEX switching_machine_route_route_id_index ON switching_machine_route (route_id);
 
 -- 進路鎖錠で鎖状するべき軌道回路のリスト
 CREATE TABLE route_lock_track_circuit
