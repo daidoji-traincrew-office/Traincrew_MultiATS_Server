@@ -33,4 +33,12 @@ public class LeverRepository(ApplicationDbContext context) : ILeverRepository
             .Select(lever => lever.Id)
             .ToListAsync();
     }
+    
+    public async Task<List<Models.Lever>> GetByIdsWithState(IEnumerable<ulong> ids)
+    {
+        return await context.Levers
+            .Include(lever => lever.LeverState)
+            .Where(lever => ids.Contains(lever.Id))
+            .ToListAsync();
+    }
 }

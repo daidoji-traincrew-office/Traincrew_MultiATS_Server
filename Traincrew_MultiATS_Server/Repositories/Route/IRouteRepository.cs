@@ -7,6 +7,21 @@ public interface IRouteRepository
     /// </summary>
     Task<List<Models.Route>> GetByIdsWithState(List<ulong> ids);
     /// <summary>
+    /// てこ反応リレーまたは総括制御XRリレー、総括制御YSリレーが扛上している進路のIDを取得する
+    /// </summary>
+    /// <returns>てこ反応リレーまたは総括制御XRリレー、総括制御YSリレーが扛上している進路のIDのリスト</returns>
+    Task<List<ulong>> GetIdsWhereLeverRelayOrThrowOutIsRaised();
+    /// <summary>
+    /// てこと着点ボタンの状態に基づいて、開こうとしている進路のIDを取得する
+    /// </summary>
+    /// <returns>開こうとしている進路のIDのリスト</returns>
+    Task<List<ulong>> GetIdsToOpen();
+    /// <summary>
+    /// てこと着点ボタンの状態に基づいて、総括制御で開こうとしている進路のIDを取得する
+    /// </summary>
+    /// <returns>総括制御で開こうとしている進路のIDのリスト</returns>
+    Task<List<ulong>> GetIdsToOpenWithThrowOutControl();
+    /// <summary>
     /// てこ反応リレーが落下しており かつ 転てつ器無し進路照査リレーが扛上している進路に対し、転てつ器無し進路照査リレーを落下させる
     /// </summary>
     Task DropRouteRelayWithoutSwitchingMachineWhereLeverRelayIsDropped();
