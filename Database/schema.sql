@@ -511,7 +511,8 @@ CREATE TABLE route_state
     is_approach_lock_ms_raised                      raise_drop NOT NULL,                      -- 接近鎖状が上がっているか
     is_route_lock_raised                            raise_drop NOT NULL,                      -- 進路鎖状が上がっているか
     is_throw_out_xr_relay_raised                    raise_drop NOT NULL,                      -- 統括制御リレーが上がっているか
-    is_throw_out_ys_relay_raised                    raise_drop NOT NULL                       -- 統括制御リレーが上がっているか
+    is_throw_out_ys_relay_raised                    raise_drop NOT NULL,                      -- 統括制御リレーが上がっているか
+    is_ctc_relay_raised                             raise_drop NOT NULL DEFAULT 'drop'        -- CTCリレーが上がっているか
 );
 
 -- 信号機状態
