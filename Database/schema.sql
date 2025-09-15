@@ -86,7 +86,7 @@ CREATE TABLE station
     is_passenger_station BOOLEAN      NOT NULL  -- 旅客駅かどうか
 );
 
-CREATE TYPE object_type AS ENUM ('route', 'switching_machine', 'track_circuit', 'lever', 'direction_route', 'direction_self_control_lever');
+CREATE TYPE object_type AS ENUM ('route', 'switching_machine', 'track_circuit', 'lever', 'direction_route', 'direction_self_control_lever', 'route_central_control_lever');
 
 -- object(進路、転てつ機、軌道回路、てこ)を表す
 -- 以上4つのIDの一元管理を行う
@@ -230,6 +230,12 @@ CREATE TYPE lr as ENUM ('left', 'right');
 -- 開放てこ(方向てこ用)
 CREATE TYPE nr AS ENUM ('reversed', 'normal');
 CREATE TABLE direction_self_control_lever
+(
+    id BIGINT PRIMARY KEY REFERENCES interlocking_object (id) -- ID
+);
+
+-- 集中てこ(進路集中てこ用)
+CREATE TABLE route_central_control_lever
 (
     id BIGINT PRIMARY KEY REFERENCES interlocking_object (id) -- ID
 );
@@ -434,6 +440,16 @@ CREATE TABLE direction_self_control_lever_state
     is_inserted_key BOOL NOT NULL DEFAULT 'false',                                   -- 鍵が挿入されているか
     is_reversed     nr   NOT NULL DEFAULT 'normal'                                   -- てこの位置
 );
+
+-- 集中てこ状態
+CREATE TABLE route_central_control_lever_state
+(
+    id              BIGINT PRIMARY KEY REFERENCES route_central_control_lever (ID), -- てこのID
+    is_inserted_key BOOL NOT NULL DEFAULT 'false',                                  -- 鍵が挿入されているか
+    is_reversed     nr   NOT NULL DEFAULT 'normal'                                  -- てこの位置
+);
+
+-- CTCてこ状態
 
 -- 方向てこ状態
 CREATE TABLE direction_route_state
