@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using OpenIddict.Abstractions;
@@ -230,6 +231,7 @@ public class Program
         builder.Services.AddSignalR(options =>
         {
             options.ClientTimeoutInterval = TimeSpan.FromMinutes(3);
+            options.AddFilter<ActivityHubFilter>();
         });
     }
 
