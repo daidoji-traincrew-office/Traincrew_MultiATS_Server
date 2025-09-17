@@ -54,7 +54,8 @@ public class SwitchingMachineService(
         var routeIds = switchingMachineRoutes.Select(route => route.RouteId).ToList();
 
         // てっさ鎖錠欄の条件を取得
-        var detectorLockConditions = await lockConditionRepository.GetConditionsByObjectIdsAndType(routeIds, LockType.Detector);
+        var detectorLockConditions = await lockConditionRepository
+            .GetConditionsByObjectIdsAndType(switchingMachineIds, LockType.Detector);
 
         // 関係するObjectのIDを取得
         var detectorLockObjects = detectorLockConditions.Values
