@@ -20,6 +20,7 @@ public class CommanderTableHub(
     OperationInformationService operationInformationService,
     ProtectionService protectionService,
     ServerService serverService,
+    SchedulerService schedulerService,
     CommanderTableService commanderTableService
 ) : Hub<ICommanderTableClientContract>, ICommanderTableHubContract
 {
@@ -113,5 +114,15 @@ public class CommanderTableHub(
     public async Task SetServerMode(ServerMode mode)
     {
         await serverService.SetServerModeAsync(mode);
+    }
+    
+    public async Task<List<SchedulerInfo>> GetSchedulers()
+    {
+        return await schedulerService.GetSchedulers();
+    }
+
+    public async Task<bool> ToggleScheduler(string schedulerName, bool isEnabled)
+    {
+        return await schedulerService.ToggleScheduler(schedulerName, isEnabled);
     }
 }

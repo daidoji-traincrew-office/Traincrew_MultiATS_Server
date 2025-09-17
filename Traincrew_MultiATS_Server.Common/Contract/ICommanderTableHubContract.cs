@@ -22,6 +22,8 @@ public interface ICommanderTableHubContract
     Task DeleteTrainState(long id);
     Task<ServerMode> GetServerMode();
     Task SetServerMode(ServerMode mode);
+    Task<List<SchedulerInfo>> GetSchedulers();
+    Task<bool> ToggleScheduler(string schedulerName, bool isEnabled);
 }
 
 public interface ICommanderTableClientContract

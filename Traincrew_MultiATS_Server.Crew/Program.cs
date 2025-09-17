@@ -243,7 +243,6 @@ public class Program
             app.MapHub<TIDHub>("/hub/TID"),
             app.MapHub<InterlockingHub>("/hub/interlocking"),
             app.MapHub<CommanderTableHub>("/hub/commander_table"),
-            app.MapHub<SchedulerHub>("/hub/scheduler")
         ];
     }
 
