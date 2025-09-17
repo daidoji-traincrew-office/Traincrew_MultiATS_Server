@@ -8,7 +8,8 @@ using Traincrew_MultiATS_Server.Services;
 namespace Traincrew_MultiATS_Server.Hubs;
 
 [Authorize(
-    AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme
+    AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme,
+    Policy = "CommanderTablePolicy"
 )]
 public class SchedulerHub(SchedulerService schedulerService) : Hub<ISchedulerClientContract>, ISchedulerHubContract
 {

@@ -243,6 +243,7 @@ public class Program
             app.MapHub<TIDHub>("/hub/TID"),
             app.MapHub<InterlockingHub>("/hub/interlocking"),
             app.MapHub<CommanderTableHub>("/hub/commander_table"),
+            app.MapHub<SchedulerHub>("/hub/scheduler")
         ];
     }
 
@@ -502,6 +503,7 @@ public class Program
             .AddScoped<ProtectionService>()
             .AddScoped<RendoService>()
             .AddScoped<RouteService>()
+            .AddScoped<SchedulerService>()
             .AddScoped<ServerService>()
             .AddScoped<SignalService>()
             .AddScoped<StationService>()
