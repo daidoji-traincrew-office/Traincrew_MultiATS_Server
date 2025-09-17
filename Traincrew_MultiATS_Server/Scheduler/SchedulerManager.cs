@@ -66,7 +66,7 @@ public class SchedulerManager(
 
     public List<SchedulerInfo> GetSchedulers()
     {
-        return _schedulers.Select(kvp => new SchedulerInfo
+        return _schedulerStates.Select(kvp => new SchedulerInfo
         {
             Name = kvp.Key,
             IsEnabled = _schedulerStates.GetValueOrDefault(kvp.Key, false),
@@ -78,9 +78,14 @@ public class SchedulerManager(
     {
         await using var mutex = await mutexRepository.AcquireAsync(nameof(SchedulerManager));
         
-        if (!_schedulers.ContainsKey(schedulerName))
+        if (!_schedulerStates.TryGetValue(schedulerName, out var state))
         {
             return false;
+        }
+
+        if (state == isEnabled)
+        {
+            return true;
         }
 
         _schedulerStates[schedulerName] = isEnabled;
