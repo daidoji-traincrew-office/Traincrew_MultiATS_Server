@@ -33,15 +33,11 @@ public class InterlockingService(
 
     public async Task<DataToInterlocking> SendData_Interlocking()
     {
-        await using var mutex = await mutexRepository.AcquireAsync(nameof(InterlockingService));
         var stations = await stationRepository.GetWhereIsStation();
         var stationIds = stations.Select(station => station.Id).ToList();
         var trackCircuits = await trackCircuitService.GetAllTrackCircuitDataList();
         var switchingDatas = await switchingMachineService.GetAllSwitchData();
-        var lever = await leverRepository.GetAllWithState();
-        var directionSelfControlLevers = await directionSelfControlLeverRepository.GetAllWithState();
         var directions = await directionRouteService.GetAllDirectionData();
-        var destinationButtons = await destinationButtonRepository.GetAllWithState();
 
         // List<string> clientData.ActiveStationsListの駅IDから、指定された駅にある信号機名称をList<string>で返すやつ
         var signalNames = await signalService.GetSignalNamesByStationIds(stationIds);
@@ -51,6 +47,12 @@ public class InterlockingService(
         var lamps = await GetLamps(stationIds);
         // 列番窓を取得
         var ttcWindows = await ttcStationControlService.GetTtcWindowsByStationIdsWithState(stationIds);
+
+        // 操作可能なオブジェクトのみロックを取る
+        await using var mutex = await mutexRepository.AcquireAsync(nameof(InterlockingService));
+        var lever = await leverRepository.GetAllWithState();
+        var destinationButtons = await destinationButtonRepository.GetAllWithState();
+        var directionSelfControlLevers = await directionSelfControlLeverRepository.GetAllWithState();
 
         var response = new DataToInterlocking
         {
