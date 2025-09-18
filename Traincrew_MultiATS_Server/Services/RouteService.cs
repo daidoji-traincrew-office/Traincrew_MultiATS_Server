@@ -1,3 +1,5 @@
+using System.Reactive;
+using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Repositories.Route;
 using Route = Traincrew_MultiATS_Server.Models.Route;
 using RouteData = Traincrew_MultiATS_Server.Common.Models.RouteData;
@@ -37,5 +39,17 @@ public class RouteService(IRouteRepository routeRepository)
         var routeIds = await routeRepository.GetIdsWhereRouteRelayWithoutSwitchingMachineIsRaised();
         var routes = await routeRepository.GetByIdsWithState(routeIds);
         return routes.Select(ToRouteData).ToList();
+    }
+
+    public async Task<List<InterlockingLeverData>> GetAllCTCLeverData()
+    {
+        var routeIds = await routeRepository.GetIdsForAll();
+        var routes = await routeRepository.GetByIdsWithState(routeIds);
+        return routes.Select(r => new InterlockingLeverData
+        {
+            Name = r.Name,
+            State = r.RouteState.IsCtcRelayRaised == RaiseDrop.Raise ? LCR.Center : LCR.Right,
+        }).ToList();
+
     }
 }

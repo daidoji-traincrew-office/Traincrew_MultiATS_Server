@@ -7,6 +7,7 @@ using Traincrew_MultiATS_Server.Repositories.General;
 using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
 using Traincrew_MultiATS_Server.Repositories.Lever;
 using Traincrew_MultiATS_Server.Repositories.Mutex;
+using Traincrew_MultiATS_Server.Repositories.Route;
 using Traincrew_MultiATS_Server.Repositories.Station;
 
 namespace Traincrew_MultiATS_Server.Services;
@@ -25,23 +26,22 @@ public class CTCPService(
     IDirectionSelfControlLeverRepository directionSelfControlLeverRepository,
     TrackCircuitService trackCircuitService,
     TtcStationControlService ttcStationControlService,
+    RouteService routeService,
     SwitchingMachineService switchingMachineService,
     DirectionRouteService directionRouteService,
     SignalService signalService,
     IMutexRepository mutexRepository)
 {
 
-    public async Task<DataToInterlocking> SendData_CTCP()
+    public async Task<DataToCTCP> SendData_CTCP()
     {
         await using var mutex = await mutexRepository.AcquireAsync(nameof(InterlockingService));
         var stations = await stationRepository.GetWhereIsStation();
         var stationIds = stations.Select(station => station.Id).ToList();
         var trackCircuits = await trackCircuitService.GetAllTrackCircuitDataList();
-        var switchingDatas = await switchingMachineService.GetAllSwitchData();
-        var lever = await leverRepository.GetAllWithState();
+        var lever = await routeService.GetAllCTCLeverData();
         var directionSelfControlLevers = await directionSelfControlLeverRepository.GetAllWithState();
         var directions = await directionRouteService.GetAllDirectionData();
-        var destinationButtons = await destinationButtonRepository.GetAllWithState();
 
         // List<string> clientData.ActiveStationsListの駅IDから、指定された駅にある信号機名称をList<string>で返すやつ
         var signalNames = await signalService.GetSignalNamesByStationIds(stationIds);
@@ -52,27 +52,18 @@ public class CTCPService(
         // 列番窓を取得
         var ttcWindows = await ttcStationControlService.GetTtcWindowsByStationIdsWithState(stationIds);
 
-        var response = new DataToInterlocking
+        var response = new DataToCTCP
         {
             TrackCircuits = trackCircuits,
 
-            Points = switchingDatas,
-
             // Todo: 方向てこのほうのリストを連結する
-            PhysicalLevers = lever
-                .Select(ToLeverData)
+            CTCLevers = lever
                 .ToList(),
 
             // 駅扱てこの実装と両方渡し
             PhysicalKeyLevers = directionSelfControlLevers
                 .Select(ToKeyLeverData)
                 .ToList(),
-
-            PhysicalButtons = destinationButtons
-                .Select(button => ToDestinationButtonData(button.DestinationButtonState))
-                .ToList(),
-
-            Directions = directions,
 
             Retsubans = ttcWindows
                 .Select(ToRetsubanData)
@@ -127,111 +118,6 @@ public class CTCPService(
 
         lever.LeverState.IsReversed = leverData.State;
         await generalRepository.Save(lever);
-        return new()
-        {
-            Name = lever.Name,
-            State = lever.LeverState.IsReversed
-        };
-    }
-
-    /// <summary>
-    /// 鍵てこの物理状態を設定する
-    /// </summary>
-    /// <param name="keyLeverData"></param>
-    /// <param name="memberId">DiscordのメンバーID</param>
-    /// <returns></returns>
-    internal async Task<InterlockingKeyLeverData> SetPhysicalKeyLeverData(InterlockingKeyLeverData keyLeverData, ulong? memberId)
-    {
-        await using var mutex = await mutexRepository.AcquireAsync(nameof(InterlockingService));
-        // 駅扱の判定を先に入れる
-        var directionkeyLever =
-            await directionSelfControlLeverRepository.GetDirectionSelfControlLeverByNameWithState(keyLeverData.Name);
-        if (directionkeyLever?.DirectionSelfControlLeverState == null)
-        {
-            throw new ArgumentException("Invalid key lever name");
-        }
-
-        // 更新後の値定義
-        var isInsertedKey = directionkeyLever.DirectionSelfControlLeverState.IsInsertedKey;
-        var isReversed = directionkeyLever.DirectionSelfControlLeverState.IsReversed;
-        
-        // 鍵を刺せるか確認
-        var role = await discordService.GetRoleByMemberId(memberId);
-        // 鍵を刺せるなら、鍵を処理する
-        if (role.IsAdministrator)
-        {
-            isInsertedKey = keyLeverData.IsKeyInserted;
-        }
-        
-        // 鍵が刺さっている場合、回す処理をする
-        if (isInsertedKey)
-        {
-            isReversed = keyLeverData.State == LNR.Right ? NR.Reversed : NR.Normal;
-        }
-        
-        // 変化があれば、更新する
-        // ReSharper disable once InvertIf
-        if (isInsertedKey != directionkeyLever.DirectionSelfControlLeverState.IsInsertedKey ||
-            isReversed != directionkeyLever.DirectionSelfControlLeverState.IsReversed)
-        {
-            directionkeyLever.DirectionSelfControlLeverState.IsInsertedKey = isInsertedKey;
-            directionkeyLever.DirectionSelfControlLeverState.IsReversed = isReversed;
-            await generalRepository.Save(directionkeyLever);
-        }
-
-        return new()
-        {
-            Name = directionkeyLever.Name,
-            State = isReversed == NR.Reversed ? LNR.Right : LNR.Normal,
-            IsKeyInserted = isInsertedKey 
-        };
-    }
-
-    /// <summary>
-    /// 着点ボタンの物理状態を設定する
-    /// </summary>
-    /// <param name="buttonData"></param>
-    /// <returns></returns>     
-    /// <exception cref="ArgumentException"></exception>
-    public async Task<DestinationButtonData> SetDestinationButtonState(DestinationButtonData buttonData)
-    {
-        await using var mutex = await mutexRepository.AcquireAsync(nameof(InterlockingService));
-        var buttonObject = await destinationButtonRepository.GetButtonByName(buttonData.Name);
-        if (buttonObject == null)
-        {
-            throw new ArgumentException("Invalid button name");
-        }
-
-        buttonObject.DestinationButtonState.OperatedAt = dateTimeRepository.GetNow();
-        buttonObject.DestinationButtonState.IsRaised = buttonData.IsRaised;
-        await generalRepository.Save(buttonObject.DestinationButtonState);
-        return new()
-        {
-            Name = buttonObject.DestinationButtonState.Name,
-            IsRaised = buttonObject.DestinationButtonState.IsRaised,
-            OperatedAt = buttonObject.DestinationButtonState.OperatedAt
-        };
-    }
-
-    public async Task ResetRaisedButtonsAsync()
-    {
-        await using var mutex = await mutexRepository.AcquireAsync(nameof(InterlockingService));
-        var now = dateTimeRepository.GetNow();
-        await destinationButtonRepository.UpdateRaisedButtonsAsync(now);
-    }
-
-    public async Task<List<InterlockingObject>> GetInterlockingObjects()
-    {
-        return await interlockingObjectRepository.GetAllWithState();
-    }
-
-    public async Task<List<InterlockingObject>> GetObjectsByStationIds(List<string> stationIds)
-    {
-        return await interlockingObjectRepository.GetObjectsByStationIdsWithState(stationIds);
-    }
-
-    public static InterlockingLeverData ToLeverData(Lever lever)
-    {
         return new()
         {
             Name = lever.Name,

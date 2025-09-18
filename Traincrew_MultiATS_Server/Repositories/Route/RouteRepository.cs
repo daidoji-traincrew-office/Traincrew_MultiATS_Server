@@ -98,6 +98,14 @@ public class RouteRepository(ApplicationDbContext context) : IRouteRepository
             .ToListAsync();
     }
 
+    public async Task<List<ulong>> GetIdsForAll()
+    {
+        return await context.Routes
+            .Include(r => r.RouteState)
+            .Select(r => r.Id)
+            .ToListAsync();
+    }
+
     public async Task<List<Models.Route>> GetWhereApproachLockMSRelayIsRaised()
     {
         return await context.Routes
