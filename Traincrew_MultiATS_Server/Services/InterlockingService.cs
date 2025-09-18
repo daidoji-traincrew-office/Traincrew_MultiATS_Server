@@ -7,6 +7,7 @@ using Traincrew_MultiATS_Server.Repositories.General;
 using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
 using Traincrew_MultiATS_Server.Repositories.Lever;
 using Traincrew_MultiATS_Server.Repositories.Mutex;
+using Traincrew_MultiATS_Server.Repositories.RouteCentralControlLever;
 using Traincrew_MultiATS_Server.Repositories.Station;
 
 namespace Traincrew_MultiATS_Server.Services;
@@ -23,6 +24,7 @@ public class InterlockingService(
     IStationRepository stationRepository,
     ILeverRepository leverRepository,
     IDirectionSelfControlLeverRepository directionSelfControlLeverRepository,
+    IRouteCentralControlLeverRepository routeCentralControlLeverRepository,
     TrackCircuitService trackCircuitService,
     TtcStationControlService ttcStationControlService,
     SwitchingMachineService switchingMachineService,
@@ -40,6 +42,7 @@ public class InterlockingService(
         var switchingDatas = await switchingMachineService.GetAllSwitchData();
         var lever = await leverRepository.GetAllWithState();
         var directionSelfControlLevers = await directionSelfControlLeverRepository.GetAllWithState();
+        var routeCentralControlLevers = await routeCentralControlLeverRepository.GetAllWithState();
         var directions = await directionRouteService.GetAllDirectionData();
         var destinationButtons = await destinationButtonRepository.GetAllWithState();
 
@@ -63,9 +66,9 @@ public class InterlockingService(
                 .Select(ToLeverData)
                 .ToList(),
 
-            // 駅扱てこの実装と両方渡し
             PhysicalKeyLevers = directionSelfControlLevers
                 .Select(ToKeyLeverData)
+                .Concat(routeCentralControlLevers.Select(ToKeyLeverDataFromRouteCentral))
                 .ToList(),
 
             PhysicalButtons = destinationButtons
@@ -143,18 +146,32 @@ public class InterlockingService(
     internal async Task<InterlockingKeyLeverData> SetPhysicalKeyLeverData(InterlockingKeyLeverData keyLeverData, ulong? memberId)
     {
         await using var mutex = await mutexRepository.AcquireAsync(nameof(InterlockingService));
-        // 駅扱の判定を先に入れる
+        // 開放てこの判定を先に入れる
         var directionkeyLever =
             await directionSelfControlLeverRepository.GetDirectionSelfControlLeverByNameWithState(keyLeverData.Name);
-        if (directionkeyLever?.DirectionSelfControlLeverState == null)
+        if (directionkeyLever?.DirectionSelfControlLeverState != null)
         {
-            throw new ArgumentException("Invalid key lever name");
+            return await SetDirectionSelfControlKeyLeverData(directionkeyLever, keyLeverData, memberId);
         }
+
+        // CTC切替てこの判定
+        var routeCentralControlLever =
+            await routeCentralControlLeverRepository.GetByNameWithState(keyLeverData.Name);
+        if (routeCentralControlLever?.RouteCentralControlLeverState != null)
+        {
+            return await SetRouteCentralControlKeyLeverData(routeCentralControlLever, keyLeverData, memberId);
+        }
+
+        throw new ArgumentException("Invalid key lever name");
+    }
+
+    private async Task<InterlockingKeyLeverData> SetDirectionSelfControlKeyLeverData(DirectionSelfControlLever directionkeyLever, InterlockingKeyLeverData keyLeverData, ulong? memberId)
+    {
 
         // 更新後の値定義
         var isInsertedKey = directionkeyLever.DirectionSelfControlLeverState.IsInsertedKey;
         var isReversed = directionkeyLever.DirectionSelfControlLeverState.IsReversed;
-        
+
         // 鍵を刺せるか確認
         var role = await discordService.GetRoleByMemberId(memberId);
         // 鍵を刺せるなら、鍵を処理する
@@ -162,13 +179,13 @@ public class InterlockingService(
         {
             isInsertedKey = keyLeverData.IsKeyInserted;
         }
-        
+
         // 鍵が刺さっている場合、回す処理をする
         if (isInsertedKey)
         {
             isReversed = keyLeverData.State == LNR.Right ? NR.Reversed : NR.Normal;
         }
-        
+
         // 変化があれば、更新する
         // ReSharper disable once InvertIf
         if (isInsertedKey != directionkeyLever.DirectionSelfControlLeverState.IsInsertedKey ||
@@ -183,7 +200,45 @@ public class InterlockingService(
         {
             Name = directionkeyLever.Name,
             State = isReversed == NR.Reversed ? LNR.Right : LNR.Normal,
-            IsKeyInserted = isInsertedKey 
+            IsKeyInserted = isInsertedKey
+        };
+    }
+
+    private async Task<InterlockingKeyLeverData> SetRouteCentralControlKeyLeverData(RouteCentralControlLever routeCentralControlLever, InterlockingKeyLeverData keyLeverData, ulong? memberId)
+    {
+        // 更新後の値定義
+        var isInsertedKey = routeCentralControlLever.RouteCentralControlLeverState.IsInsertedKey;
+        var isReversed = routeCentralControlLever.RouteCentralControlLeverState.IsReversed;
+
+        // 鍵を刺せるか確認
+        var role = await discordService.GetRoleByMemberId(memberId);
+        // 鍵を刺せるなら、鍵を処理する
+        if (role.IsAdministrator)
+        {
+            isInsertedKey = keyLeverData.IsKeyInserted;
+        }
+
+        // 鍵が刺さっている場合、回す処理をする
+        if (isInsertedKey)
+        {
+            isReversed = keyLeverData.State == LNR.Right ? NR.Reversed : NR.Normal;
+        }
+
+        // 変化があれば、更新する
+        // ReSharper disable once InvertIf
+        if (isInsertedKey != routeCentralControlLever.RouteCentralControlLeverState.IsInsertedKey ||
+            isReversed != routeCentralControlLever.RouteCentralControlLeverState.IsReversed)
+        {
+            routeCentralControlLever.RouteCentralControlLeverState.IsInsertedKey = isInsertedKey;
+            routeCentralControlLever.RouteCentralControlLeverState.IsReversed = isReversed;
+            await generalRepository.Save(routeCentralControlLever);
+        }
+
+        return new()
+        {
+            Name = routeCentralControlLever.Name,
+            State = isReversed == NR.Reversed ? LNR.Right : LNR.Normal,
+            IsKeyInserted = isInsertedKey
         };
     }
 
@@ -251,6 +306,21 @@ public class InterlockingService(
             Name = lever.Name,
             State = lever.DirectionSelfControlLeverState.IsReversed == NR.Reversed ? LNR.Right : LNR.Normal,
             IsKeyInserted = lever.DirectionSelfControlLeverState.IsInsertedKey
+        };
+    }
+
+    public static InterlockingKeyLeverData ToKeyLeverDataFromRouteCentral(RouteCentralControlLever lever)
+    {
+        if (lever.RouteCentralControlLeverState == null)
+        {
+            throw new ArgumentException("Invalid lever state");
+        }
+
+        return new()
+        {
+            Name = lever.Name,
+            State = lever.RouteCentralControlLeverState.IsReversed == NR.Reversed ? LNR.Right : LNR.Normal,
+            IsKeyInserted = lever.RouteCentralControlLeverState.IsInsertedKey
         };
     }
 
