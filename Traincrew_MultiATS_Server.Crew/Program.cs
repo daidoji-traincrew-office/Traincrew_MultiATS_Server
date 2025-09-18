@@ -33,6 +33,7 @@ using Traincrew_MultiATS_Server.Repositories.OperationInformation;
 using Traincrew_MultiATS_Server.Repositories.OperationNotification;
 using Traincrew_MultiATS_Server.Repositories.Protection;
 using Traincrew_MultiATS_Server.Repositories.Route;
+using Traincrew_MultiATS_Server.Repositories.RouteCentralControlLever;
 using Traincrew_MultiATS_Server.Repositories.RouteLeverDestinationButton;
 using Traincrew_MultiATS_Server.Repositories.RouteLockTrackCircuit;
 using Traincrew_MultiATS_Server.Repositories.Server;
@@ -478,6 +479,7 @@ public class Program
             .AddScoped<IOperationInformationRepository, OperationInformationRepository>()
             .AddScoped<IProtectionRepository, ProtectionRepository>()
             .AddScoped<IRouteRepository, RouteRepository>()
+            .AddScoped<IRouteCentralControlLeverRepository, RouteCentralControlLeverRepository>()
             .AddScoped<IRouteLeverDestinationRepository, RouteLeverDestinationRepository>()
             .AddScoped<IRouteLockTrackCircuitRepository, RouteLockTrackCircuitRepository>()
             .AddScoped<IServerRepository, ServerRepository>()
