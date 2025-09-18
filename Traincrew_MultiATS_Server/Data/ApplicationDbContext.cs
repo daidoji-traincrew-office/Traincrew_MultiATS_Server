@@ -184,6 +184,12 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
         modelBuilder.Entity<TrainCarState>()
             .HasKey(t => new { t.TrainStateId, t.Index });
+        
+        modelBuilder.Entity<RouteCentralControlLever>()
+            .HasOne(rl => rl.RouteCentralControlLeverState)
+            .WithOne()
+            .HasForeignKey<RouteCentralControlLeverState>(rls => rls.Id)
+            .HasPrincipalKey<RouteCentralControlLever>(rl => rl.Id);
 
         // Convert all column names to snake_case 
         foreach (var entity in modelBuilder.Model.GetEntityTypes())
