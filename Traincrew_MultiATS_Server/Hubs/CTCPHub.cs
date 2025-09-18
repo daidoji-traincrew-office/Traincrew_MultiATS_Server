@@ -4,7 +4,6 @@ using OpenIddict.Validation.AspNetCore;
 using Traincrew_MultiATS_Server.Common.Contract;
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Services;
-using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace Traincrew_MultiATS_Server.Hubs;
 
@@ -13,9 +12,9 @@ namespace Traincrew_MultiATS_Server.Hubs;
     AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme,
     Policy = "InterlockingPolicy"
 )]
-public class CTCPHub(CTCPService ctcpService) : Hub<IInterlockingClientContract>, IInterlockingHubContract
+public class CTCPHub(CTCPService ctcpService) : Hub<ICTCPClientContract>, ICTCPHubContract
 {
-    public async Task<DataToInterlocking> SendData_CTCP(List<string> activeStationsList)
+    public async Task<DataToCTCP> SendData_CTCP(List<string> activeStationsList)
     {
         return await ctcpService.SendData_CTCP();
     }
