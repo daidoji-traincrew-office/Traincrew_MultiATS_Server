@@ -1221,6 +1221,7 @@ public partial class DbRendoTableInitializer
         PreprocessCsv();
         await InitLever();
         await InitDirectionSelfControlLever();
+        await InitRouteCentralControlLever();
         await InitDestinationButtons();
         await InitRoutes();
     }
@@ -1388,6 +1389,42 @@ public partial class DbRendoTableInitializer
                 Name = name,
                 Type = ObjectType.DirectionSelfControlLever,
                 DirectionSelfControlLeverState = new()
+                {
+                    IsInsertedKey = false,
+                    IsReversed = NR.Normal
+                }
+            });
+        }
+
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task InitRouteCentralControlLever()
+    {
+        // 該当駅の全てのてこを取得
+        var leverNames = (await context.RouteCentralControlLevers
+            .Where(l => l.Name.StartsWith(stationId))
+            .Select(l => l.Name)
+            .ToListAsync(cancellationToken)).ToHashSet();
+        foreach (var rendoTableCsv in rendoTableCsvs)
+        {
+            if (!rendoTableCsv.Name.Contains("CTC"))
+            {
+                continue;
+            }
+
+            // てこがすでに存在する場合はcontinue
+            var name = CalcLeverName(rendoTableCsv.Start, stationId);
+            if (rendoTableCsv.Start.Length <= 0 || !leverNames.Add(name))
+            {
+                continue;
+            }
+
+            context.RouteCentralControlLevers.Add(new()
+            {
+                Name = name,
+                Type = ObjectType.RouteCentralControlLever,
+                RouteCentralControlLeverState = new()
                 {
                     IsInsertedKey = false,
                     IsReversed = NR.Normal
