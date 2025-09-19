@@ -319,7 +319,7 @@ public class InterlockingService(
         return new()
         {
             Name = lever.Name,
-            State = lever.RouteCentralControlLeverState.IsReversed == NR.Reversed ? LNR.Right : LNR.Normal,
+            State = lever.RouteCentralControlLeverState.IsReversed == NR.Reversed ? LNR.Right : LNR.Left,
             IsKeyInserted = lever.RouteCentralControlLeverState.IsInsertedKey
         };
     }
