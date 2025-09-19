@@ -237,7 +237,7 @@ public class InterlockingService(
         return new()
         {
             Name = routeCentralControlLever.Name,
-            State = isReversed == NR.Reversed ? LNR.Right : LNR.Normal,
+            State = isReversed == NR.Reversed ? LNR.Right : LNR.Left,
             IsKeyInserted = isInsertedKey
         };
     }
