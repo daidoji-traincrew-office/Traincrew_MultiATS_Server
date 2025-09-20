@@ -1,4 +1,4 @@
-h1:u4nelTz3eGnd+kf15EqjwCIFrOAF2r56I5f3rKf8vUc=
+h1:UA2T7bnOYgmnrhALkLx11D76ohCsqSVu2my6spB77sw=
 20241105144637_create_openiddict.sql h1:e3YP3bvDT2pkUc506P3fgKJoLzdNnzBgjkBNMKvEKoI=
 20241221070718_create_interlocking_tables.sql h1:bHtt4Hbmv5aMY0jvfDoG7eeY6IpChCnNrvSCAn9cdcU=
 20241221081310_switching_machine_reversed.sql h1:e7qP5i8sHtWVXpkbnbo3n/6smp6Z/lqQxwa4Yp+EQ1w=
@@ -64,3 +64,4 @@ h1:u4nelTz3eGnd+kf15EqjwCIFrOAF2r56I5f3rKf8vUc=
 20250718064021_add_server_state.sql h1:K395HOgz46fTtwYPSpX3z5QWQ7Ox9pEo/dhgiXDGC90=
 20250915011508_add_route_central_control_lever.sql h1:/3erseGYeFgrXXmcw+j2Os/4cpTBMDbF59EfLUJY5MY=
 20250915012027_add_ctc_relay.sql h1:O0vxqZTvQh0YuG24BbGwJYes5SunstQPXjEtFCc3AUg=
+20250920142303_add_chr_relay_to_route_central_control_lever_state.sql h1:/QysmhDhC3db5u4oNIg5JtZnCYXziLszsuvn+6nG8R8=

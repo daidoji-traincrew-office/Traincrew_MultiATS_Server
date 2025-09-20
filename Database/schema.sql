@@ -422,7 +422,7 @@ CREATE TABLE station_timer_state
     is_teu_relay_raised raise_drop  NOT NULL DEFAULT 'drop',
     is_ten_relay_raised raise_drop  NOT NULL DEFAULT 'drop',
     is_ter_relay_raised raise_drop  NOT NULL DEFAULT 'raise',
-    teu_relay_raised_at TIMESTAMP NULL     DEFAULT NULL,
+    teu_relay_raised_at TIMESTAMP   NULL     DEFAULT NULL,
     UNIQUE (station_id, seconds)
 );
 
@@ -444,9 +444,10 @@ CREATE TABLE direction_self_control_lever_state
 -- 集中てこ状態
 CREATE TABLE route_central_control_lever_state
 (
-    id              BIGINT PRIMARY KEY REFERENCES route_central_control_lever (ID), -- てこのID
-    is_inserted_key BOOL NOT NULL DEFAULT 'false',                                  -- 鍵が挿入されているか
-    is_reversed     nr   NOT NULL DEFAULT 'normal'                                  -- てこの位置
+    id                  BIGINT PRIMARY KEY REFERENCES route_central_control_lever (ID), -- てこのID
+    is_inserted_key     BOOL       NOT NULL DEFAULT 'false',                            -- 鍵が挿入されているか
+    is_reversed         nr         NOT NULL DEFAULT 'normal',                           -- てこの位置
+    is_chr_relay_raised raise_drop NOT NULL DEFAULT 'drop'                              -- chrリレー扛上しているか
 );
 
 -- CTCてこ状態
@@ -562,7 +563,7 @@ CREATE TYPE operation_notification_type AS ENUM (
     'other',
     'class',
     'tenmatsusho'
-);
+    );
 CREATE TABLE operation_notification_state
 (
     display_name VARCHAR(100) REFERENCES operation_notification_display (name) PRIMARY KEY, -- 告知機の名前
@@ -609,11 +610,11 @@ CREATE TABLE train_car_state
 
 -- 運行情報等の種類
 CREATE TYPE operation_information_type AS ENUM (
-    'advertisement',    -- 広告
-    'normal',           -- 平常運転
-    'delay',            -- 遅延
-    'suspended'         -- 運転見合わせ
-);
+    'advertisement', -- 広告
+    'normal', -- 平常運転
+    'delay', -- 遅延
+    'suspended' -- 運転見合わせ
+    );
 
 -- 運行情報等
 CREATE TABLE operation_information_state
@@ -631,7 +632,8 @@ CREATE INDEX operation_information_state_end_time_index ON operation_information
 CREATE TYPE server_mode AS ENUM ('off', 'private', 'public');
 
 -- サーバー状態テーブル(基本Entityは1つの想定)
-CREATE TABLE server_state (
+CREATE TABLE server_state
+(
     id   SERIAL PRIMARY KEY,
     mode server_mode NOT NULL
 );

@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Traincrew_MultiATS_Server.Common.Models;
 
 namespace Traincrew_MultiATS_Server.Models;
 
@@ -21,4 +22,9 @@ public class RouteCentralControlLeverState
     /// てこの位置
     /// </summary>
     public NR IsReversed { get; set; } = NR.Normal;
+
+    /// <summary>
+    /// chrリレー扛上しているか
+    /// </summary>
+    public RaiseDrop IsChrRelayRaised { get; set; } = RaiseDrop.Drop;
 }
