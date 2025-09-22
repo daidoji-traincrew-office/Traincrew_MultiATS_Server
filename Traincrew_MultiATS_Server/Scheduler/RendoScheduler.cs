@@ -8,6 +8,10 @@ public class RendoScheduler(IServiceScopeFactory serviceScopeFactory) : Schedule
     protected override async Task ExecuteTaskAsync(IServiceScope scope, System.Diagnostics.Activity? activity)
     {
         var service = scope.ServiceProvider.GetRequiredService<RendoService>();
+        using (activity?.Source.StartActivity($"{GetType().Name}.CHRRelay"))
+        {
+            await service.CHRRelay();
+        }
         using (activity?.Source.StartActivity($"{GetType().Name}.LeverToRouteState"))
         {
             await service.LeverToRouteState();
