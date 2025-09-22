@@ -240,6 +240,17 @@ CREATE TABLE route_central_control_lever
     id BIGINT PRIMARY KEY REFERENCES interlocking_object (id) -- ID
 );
 
+-- 進路と集中てこの鎖錠条件
+CREATE TABLE lock_condition_by_route_central_control_lever
+(
+    id                              BIGSERIAL PRIMARY KEY,
+    route_id                        BIGINT REFERENCES route (id) NOT NULL,                        -- 進路のID
+    route_central_control_lever_id  BIGINT REFERENCES route_central_control_lever (id) NOT NULL,  -- 集中てこのID
+    UNIQUE (route_id, route_central_control_lever_id)
+);
+CREATE INDEX lock_condition_by_route_central_control_lever_route_id_index ON lock_condition_by_route_central_control_lever (route_id);
+CREATE INDEX lock_condition_by_route_central_control_lever_rcl_id_index ON lock_condition_by_route_central_control_lever (route_central_control_lever_id);
+
 -- 方向進路
 CREATE TABLE direction_route
 (

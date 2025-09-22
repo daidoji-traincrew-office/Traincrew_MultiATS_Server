@@ -46,6 +46,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<OperationInformationState> OperationInformationStates { get; set; }
     public DbSet<ServerState> ServerStates { get; set; }
     public DbSet<RouteCentralControlLever> RouteCentralControlLevers { get; set; }
+    public DbSet<LockConditionByRouteCentralControlLever> LockConditionByRouteCentralControlLevers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -190,6 +191,18 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .WithOne()
             .HasForeignKey<RouteCentralControlLeverState>(rls => rls.Id)
             .HasPrincipalKey<RouteCentralControlLever>(rl => rl.Id);
+
+        modelBuilder.Entity<LockConditionByRouteCentralControlLever>()
+            .HasOne<Route>()
+            .WithMany()
+            .HasForeignKey(lcbrcl => lcbrcl.RouteId)
+            .HasPrincipalKey(r => r.Id);
+
+        modelBuilder.Entity<LockConditionByRouteCentralControlLever>()
+            .HasOne<RouteCentralControlLever>()
+            .WithMany()
+            .HasForeignKey(lcbrcl => lcbrcl.RouteCentralControlLeverId)
+            .HasPrincipalKey(rcl => rcl.Id);
 
         // Convert all column names to snake_case 
         foreach (var entity in modelBuilder.Model.GetEntityTypes())
