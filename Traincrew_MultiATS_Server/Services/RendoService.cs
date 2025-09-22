@@ -87,6 +87,12 @@ public class RendoService(
             .ToDictionary(
                 g => g.Key,
                 g => g.Select(rdb => (interlockingObjects[rdb.RouteId] as Route)!).ToList());
+        var routeCentralControlLeverByName = interlockingObjects.Values
+            .Where(obj => obj is RouteCentralControlLever)
+            .ToDictionary(
+                obj => obj.Name,
+                obj => (obj as RouteCentralControlLever)!
+            );
         // Buttonを全取得
         var buttons = (await destinationButtonRepository.GetAllWithState())
             .ToDictionary(b => b.Name);
@@ -163,7 +169,7 @@ public class RendoService(
                 .ToList();
 
             // Todo: 駅扱いてこ繋ぎ込み
-            var routeCentralControlLever = await routeCentralControlRepository.GetByNameWithState($"{route.StationId}_81");
+            var routeCentralControlLever = routeCentralControlLeverByName[$"{route.StationId}_81"];
             // Todo: CTC制御状態を確認する(CHR相当)
             if (routeCentralControlLever.RouteCentralControlLeverState.IsChrRelayRaised == RaiseDrop.Raise)
             {
