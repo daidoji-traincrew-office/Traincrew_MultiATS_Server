@@ -207,13 +207,13 @@
         {
             "Id": "TH44",
             "Name": "常盤通",
-            "IsStation": true,
+            "IsStation": false,
             "IsPassengerStation": true
         },
         {
             "Id": "TH43",
             "Name": "広小路",
-            "IsStation": true,
+            "IsStation": false,
             "IsPassengerStation": true
         },
         {
@@ -225,7 +225,7 @@
         {
             "Id": "TH41",
             "Name": "二ツ山",
-            "IsStation": true,
+            "IsStation": false,
             "IsPassengerStation": true
         },
         {
@@ -243,7 +243,7 @@
         {
             "Id": "TH38",
             "Name": "朝日ヶ丘",
-            "IsStation": true,
+            "IsStation": false,
             "IsPassengerStation": true
         },
         {
@@ -255,13 +255,13 @@
         {
             "Id": "TH36",
             "Name": "沢井",
-            "IsStation": true,
+            "IsStation": false,
             "IsPassengerStation": true
         },
         {
             "Id": "TH35",
             "Name": "箕田",
-            "IsStation": true,
+            "IsStation": false,
             "IsPassengerStation": true
         },
         {
@@ -273,13 +273,13 @@
         {
             "Id": "TH33",
             "Name": "大和田町",
-            "IsStation": true,
+            "IsStation": false,
             "IsPassengerStation": true
         },
         {
             "Id": "TH32",
             "Name": "木之本",
-            "IsStation": true,
+            "IsStation": false,
             "IsPassengerStation": true
         },
         {
@@ -297,13 +297,13 @@
         {
             "Id": "TH29",
             "Name": "高砂町",
-            "IsStation": true,
+            "IsStation": false,
             "IsPassengerStation": true
         },
         {
             "Id": "TH28",
             "Name": "東福",
-            "IsStation": true,
+            "IsStation": false,
             "IsPassengerStation": true
         },
         {
@@ -315,13 +315,13 @@
         {
             "Id": "TH26",
             "Name": "矢木",
-            "IsStation": true,
+            "IsStation": false,
             "IsPassengerStation": true
         },
         {
             "Id": "TH25",
             "Name": "北美",
-            "IsStation": true,
+            "IsStation": false,
             "IsPassengerStation": true
         },
         {
@@ -333,25 +333,25 @@
         {
             "Id": "TH23",
             "Name": "町沢",
-            "IsStation": true,
+            "IsStation": false,
             "IsPassengerStation": true
         },
         {
             "Id": "TH22",
             "Name": "大原",
-            "IsStation": true,
+            "IsStation": false,
             "IsPassengerStation": true
         },
         {
             "Id": "TH21",
             "Name": "本郷",
-            "IsStation": true,
+            "IsStation": false,
             "IsPassengerStation": true
         },
         {
             "Id": "TH20",
             "Name": "五十川",
-            "IsStation": true,
+            "IsStation": false,
             "IsPassengerStation": true
         },
         {
@@ -363,25 +363,25 @@
         {
             "Id": "TH18",
             "Name": "佐川",
-            "IsStation": true,
+            "IsStation": false,
             "IsPassengerStation": true
         },
         {
             "Id": "TH17",
             "Name": "夕陽が丘",
-            "IsStation": true,
+            "IsStation": false,
             "IsPassengerStation": true
         },
         {
             "Id": "TH16",
             "Name": "五日市",
-            "IsStation": true,
+            "IsStation": false,
             "IsPassengerStation": true
         },
         {
             "Id": "TH15",
             "Name": "南五日市",
-            "IsStation": true,
+            "IsStation": false,
             "IsPassengerStation": true
         },
         {
@@ -393,31 +393,31 @@
         {
             "Id": "TH13",
             "Name": "南八幡",
-            "IsStation": true,
+            "IsStation": false,
             "IsPassengerStation": true
         },
         {
             "Id": "TH12",
             "Name": "学院前",
-            "IsStation": true,
+            "IsStation": false,
             "IsPassengerStation": true
         },
         {
             "Id": "TH11",
             "Name": "中道",
-            "IsStation": true,
+            "IsStation": false,
             "IsPassengerStation": true
         },
         {
             "Id": "TH10",
             "Name": "佐野",
-            "IsStation": true,
+            "IsStation": false,
             "IsPassengerStation": true
         },
         {
             "Id": "TH09",
             "Name": "小手川",
-            "IsStation": true,
+            "IsStation": false,
             "IsPassengerStation": true
         },
         {
@@ -429,7 +429,7 @@
         {
             "Id": "TH07",
             "Name": "宮の前",
-            "IsStation": true,
+            "IsStation": false,
             "IsPassengerStation": true
         },
         {
@@ -441,19 +441,19 @@
         {
             "Id": "TH05",
             "Name": "宮松町",
-            "IsStation": true,
+            "IsStation": false,
             "IsPassengerStation": true
         },
         {
             "Id": "TH04",
             "Name": "青木町",
-            "IsStation": true,
+            "IsStation": false,
             "IsPassengerStation": true
         },
         {
             "Id": "TH03",
             "Name": "新町",
-            "IsStation": true,
+            "IsStation": false,
             "IsPassengerStation": true
         },
         {
