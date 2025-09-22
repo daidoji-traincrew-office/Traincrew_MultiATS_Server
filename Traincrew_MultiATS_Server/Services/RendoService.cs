@@ -27,7 +27,7 @@ namespace Traincrew_MultiATS_Server.Services;
 // Hope: クエリ自体が重すぎて時間計算量的に死ぬってことはないと信じたい
 
 /// <summary>
-///     連動装置
+/// 連動装置
 /// </summary>
 public class RendoService(
     IRouteRepository routeRepository,
@@ -49,6 +49,22 @@ public class RendoService(
     IRouteCentralControlLeverRepository routeCentralControlRepository,
     IGeneralRepository generalRepository)
 {
+    /// <summary>      
+    /// <strong>駅／ＣＴＣ扱い条件</strong><br/>
+    /// </summary>
+    public async Task CHRRelay()
+    {
+        //仮接続
+        var routeCentralControlLevers = await routeCentralControlRepository.GetAllWithState();
+
+        foreach (var routeCentralControlLever in routeCentralControlLevers)
+        {
+            routeCentralControlLever.RouteCentralControlLeverState.IsChrRelayRaised = routeCentralControlLever.RouteCentralControlLeverState.IsReversed == NR.Reversed ? RaiseDrop.Raise : RaiseDrop.Drop;
+            await generalRepository.Save(routeCentralControlLever.RouteCentralControlLeverState);
+        }
+    }
+
+
     /// <summary>
     /// <strong>てこ反応リレー回路</strong><br/>
     /// てこやボタンの状態から、確保するべき進路を決定する。
