@@ -10,6 +10,7 @@ using Traincrew_MultiATS_Server.Repositories.Lever;
 using Traincrew_MultiATS_Server.Repositories.Lock;
 using Traincrew_MultiATS_Server.Repositories.LockCondition;
 using Traincrew_MultiATS_Server.Repositories.Route;
+using Traincrew_MultiATS_Server.Repositories.RouteCentralControlLever;
 using Traincrew_MultiATS_Server.Repositories.RouteLeverDestinationButton;
 using Traincrew_MultiATS_Server.Repositories.RouteLockTrackCircuit;
 using Traincrew_MultiATS_Server.Repositories.Station;
@@ -45,6 +46,7 @@ public class RendoService(
     IDirectionRouteRepository directionRouteRepository,
     IDirectionSelfControlLeverRepository directionSelfControlLeverRepository,
     ILeverRepository leverRepository,
+    IRouteCentralControlLeverRepository routeCentralControlRepository,
     IGeneralRepository generalRepository)
 {
     /// <summary>
@@ -88,6 +90,7 @@ public class RendoService(
         var targetThrowOutControls = throwOutControls
             .GroupBy(c => c.SourceId)
             .ToDictionary(g => g.Key, g => g.ToList());
+
 
         // ここまで実行できればほぼほぼOOMしないはず
         foreach (var routeLeverDestinationButton in routeLeverDestinationButtonList)
@@ -144,17 +147,17 @@ public class RendoService(
                 .ToList();
 
             // Todo: 駅扱いてこ繋ぎ込み
-            var CTCControlState = RaiseDrop.Drop;
+            var routeCentralControlLever = await routeCentralControlRepository.GetByNameWithState($"{route.StationId}_81");
             // Todo: CTC制御状態を確認する(CHR相当)
-            //if (CTCControlState　== RaiseDrop.Raise)
-            //{
-            //    if (isLeverRelayRaised != /*CTCの制御条件*/)
-            //    {
-            //        routeState.IsLeverRelayRaised = /*CTCの制御条件*/;
-            //        await generalRepository.Save(routeState);
-            //    }
-            //    continue;
-            //}
+            if (routeCentralControlLever.RouteCentralControlLeverState.IsChrRelayRaised == RaiseDrop.Raise)
+            {
+                if (routeState.IsLeverRelayRaised != routeState.IsCtcRelayRaised)
+                {
+                    routeState.IsLeverRelayRaised = routeState.IsCtcRelayRaised;
+                    await generalRepository.Save(routeState);
+                }
+                continue;
+            }
 
 
             var isChanged = false;
@@ -1140,7 +1143,7 @@ public class RendoService(
                 if (route.RouteState.IsRouteLockRaised != RaiseDrop.Drop)
                 {
                     route.RouteState.IsRouteLockRaised = RaiseDrop.Drop;
-                    await generalRepository.Save(route.RouteState);    
+                    await generalRepository.Save(route.RouteState);
                 }
             }
 
