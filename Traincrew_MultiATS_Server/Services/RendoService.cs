@@ -1255,6 +1255,13 @@ public class RendoService(
 
         // そのうえで、進路照査リレーが扛上している進路のIDを全取得する
         var routeIds = await routeRepository.GetIdsWhereRouteRelayIsRaised();
+
+        // 上記進路に対して総括制御「される」進路の総括制御をすべて取得
+        var targetThrowOutControlList = await throwOutControlRepository.GetBySourceIds(routeIds);
+        var targetThrowOutControlDictionary = targetThrowOutControlList
+            .GroupBy(c => c.SourceId)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
         // 直接鎖状条件を取得
         var directLockConditions = await lockConditionRepository.GetConditionsByObjectIdsAndType(
             routeIds, LockType.Lock);
@@ -1267,6 +1274,7 @@ public class RendoService(
         // 関わる全てのObjectを取得
         var objectIds = routeIds
             .Union(directLockConditions.Values.SelectMany(ExtractObjectIdsFromLockCondtions))
+            .Union(targetThrowOutControlList.Select(c => c.TargetId))
             .Union(signalControlConditions.Values.SelectMany(ExtractObjectIdsFromLockCondtions))
             .Union(routeLockTrackCircuitList.Select(rltc => rltc.TrackCircuitId))
             .Distinct()
@@ -1293,8 +1301,15 @@ public class RendoService(
             var signalControlCondition = signalControlConditions.GetValueOrDefault(routeId, []);
             // 進路鎖錠するべき軌道回路リスト
             var routeLockTrackCircuit = routeLockTrackCircuitDictionary.GetValueOrDefault(routeId, []);
+
+            // この進路に対して総括制御「される」進路
+            var targetThrowOutRoutes = targetThrowOutControlDictionary.GetValueOrDefault(route.Id, [])
+                .Select(toc => interlockingObjects[toc.TargetId])
+                .OfType<Route>()
+                .ToList();
+
             var result = ProcessSignalControl(route, directLockCondition, signalControlCondition,
-                routeLockTrackCircuit, interlockingObjects);
+                routeLockTrackCircuit, targetThrowOutRoutes, interlockingObjects);
             // 変更があれば、DBに保存する
             if (route.RouteState.IsSignalControlRaised == result)
             {
@@ -1310,6 +1325,7 @@ public class RendoService(
         List<LockCondition> directLockCondition,
         List<LockCondition> signalControlCondition,
         List<TrackCircuit> routeLockTrackCircuit,
+        List<Route> targetThrowOutRoutes,
         Dictionary<ulong, InterlockingObject> interlockingObjects)
     {
         // 進路照査リレーが落下している場合、信号制御リレーを落下させる
@@ -1346,6 +1362,12 @@ public class RendoService(
 
         // 鎖錠確認 進路の鎖錠欄の条件を満たしていない場合早期continue
         if (MustIndicateStopSignalByDirectLockConditions(directLockCondition, interlockingObjects))
+        {
+            return RaiseDrop.Drop;
+        }
+
+        // 総括制御される進路のいずれかが信号制御リレーが落下している場合、信号制御リレーを落下させる
+        if (targetThrowOutRoutes.Any(r => r.RouteState.IsThrowOutXRRelayRaised == RaiseDrop.Raise) && targetThrowOutRoutes.All(r => r.RouteState.IsSignalControlRaised == RaiseDrop.Drop))
         {
             return RaiseDrop.Drop;
         }
