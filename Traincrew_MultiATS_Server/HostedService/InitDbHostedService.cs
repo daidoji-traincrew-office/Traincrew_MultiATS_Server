@@ -1880,7 +1880,7 @@ public partial class DbRendoTableInitializer
                 .SelectMany(lockItem => lockItem.Children)
                 .ToList();
             var targetRoutes = lockItems
-                .Select(lockItem => routesByName.GetValueOrDefault(lockItem.Name))
+                .Select(lockItem => routesByName.GetValueOrDefault(CalcRouteName(lockItem.Name, "", lockItem.StationId)))
                 .OfType<Route>();
             var entities = targetRoutes
                 .Select(r => new LockConditionByRouteCentralControlLever
@@ -1888,7 +1888,7 @@ public partial class DbRendoTableInitializer
                     RouteCentralControlLeverId = routeCentralControlLever.Id,
                     RouteId = r.Id
                 })
-                .Where(condition => locksByRouteCentralControlLevers.Contains(new
+                .Where(condition => !locksByRouteCentralControlLevers.Contains(new
                 {
                     condition.RouteCentralControlLeverId, condition.RouteId
                 }));
