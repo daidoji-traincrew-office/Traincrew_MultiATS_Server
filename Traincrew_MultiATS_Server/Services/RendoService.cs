@@ -182,7 +182,7 @@ public class RendoService(
             }
             else if (routeCentralControlLever.RouteCentralControlLeverState == null)
             {
-                isLeverRelayRaised = RaiseDrop.Raise;
+                isLeverRelayRaised = RaiseDrop.Drop;
                 logger.LogInformation("[{RendoServiceName}.{LeverToRouteStateName}] 駅集中制御てこの状態が見つかりません。StationId={RouteStationId}", nameof(RendoService), nameof(LeverToRouteState), route.StationId);
             }
             else if (routeCentralControlLever.RouteCentralControlLeverState.IsChrRelayRaised == null)
