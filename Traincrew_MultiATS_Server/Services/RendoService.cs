@@ -47,7 +47,8 @@ public class RendoService(
     IDirectionSelfControlLeverRepository directionSelfControlLeverRepository,
     ILeverRepository leverRepository,
     IRouteCentralControlLeverRepository routeCentralControlRepository,
-    IGeneralRepository generalRepository)
+    IGeneralRepository generalRepository,
+    ILogger<RendoService> logger)
 {
     /// <summary>      
     /// <strong>駅／ＣＴＣ扱い条件</strong><br/>
@@ -177,17 +178,17 @@ public class RendoService(
             if (routeCentralControlLever == null)
             {
                 isLeverRelayRaised = RaiseDrop.Drop;
-                Console.WriteLine($"[{nameof(RendoService)}.{nameof(LeverToRouteState)}] 駅集中制御てこが見つかりません。StationId={route.StationId}");
+                logger.LogInformation("[{RendoServiceName}.{LeverToRouteStateName}] 駅集中制御てこが見つかりません。StationId={RouteStationId}", nameof(RendoService), nameof(LeverToRouteState), route.StationId);
             }
             else if (routeCentralControlLever.RouteCentralControlLeverState == null)
             {
                 isLeverRelayRaised = RaiseDrop.Raise;
-                Console.WriteLine($"[{nameof(RendoService)}.{nameof(LeverToRouteState)}] 駅集中制御てこの状態が見つかりません。StationId={route.StationId}");
+                logger.LogInformation("[{RendoServiceName}.{LeverToRouteStateName}] 駅集中制御てこの状態が見つかりません。StationId={RouteStationId}", nameof(RendoService), nameof(LeverToRouteState), route.StationId);
             }
             else if (routeCentralControlLever.RouteCentralControlLeverState.IsChrRelayRaised == null)
             {
                 isLeverRelayRaised = RaiseDrop.Drop;
-                Console.WriteLine($"[{nameof(RendoService)}.{nameof(LeverToRouteState)}] 駅集中制御てこのCHR状態が見つかりません。StationId={route.StationId}");
+                logger.LogInformation("[{RendoServiceName}.{LeverToRouteStateName}] 駅集中制御てこのCHR状態が見つかりません。StationId={RouteStationId}", nameof(RendoService), nameof(LeverToRouteState), route.StationId);
             }
             // Todo: CTC制御状態を確認する(CHR相当)
             else if (routeCentralControlLever.RouteCentralControlLeverState.IsChrRelayRaised == RaiseDrop.Raise)
