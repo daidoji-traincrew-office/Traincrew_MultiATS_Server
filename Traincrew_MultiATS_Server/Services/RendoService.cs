@@ -177,14 +177,17 @@ public class RendoService(
             if (routeCentralControlLever == null)
             {
                 isLeverRelayRaised = RaiseDrop.Drop;
+                Console.WriteLine($"[{nameof(RendoService)}.{nameof(LeverToRouteState)}] 駅集中制御てこが見つかりません。StationId={route.StationId}");
             }
             else if (routeCentralControlLever.RouteCentralControlLeverState == null)
             {
-                isLeverRelayRaised = RaiseDrop.Drop;
+                isLeverRelayRaised = RaiseDrop.Raise;
+                Console.WriteLine($"[{nameof(RendoService)}.{nameof(LeverToRouteState)}] 駅集中制御てこの状態が見つかりません。StationId={route.StationId}");
             }
             else if (routeCentralControlLever.RouteCentralControlLeverState.IsChrRelayRaised == null)
             {
                 isLeverRelayRaised = RaiseDrop.Drop;
+                Console.WriteLine($"[{nameof(RendoService)}.{nameof(LeverToRouteState)}] 駅集中制御てこのCHR状態が見つかりません。StationId={route.StationId}");
             }
             // Todo: CTC制御状態を確認する(CHR相当)
             else if (routeCentralControlLever.RouteCentralControlLeverState.IsChrRelayRaised == RaiseDrop.Raise)
