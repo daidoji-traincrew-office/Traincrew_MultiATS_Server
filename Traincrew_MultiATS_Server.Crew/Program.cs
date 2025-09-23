@@ -27,6 +27,7 @@ using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
 using Traincrew_MultiATS_Server.Repositories.Lever;
 using Traincrew_MultiATS_Server.Repositories.Lock;
 using Traincrew_MultiATS_Server.Repositories.LockCondition;
+using Traincrew_MultiATS_Server.Repositories.LockConditionByRouteCentralControlLever;
 using Traincrew_MultiATS_Server.Repositories.Mutex;
 using Traincrew_MultiATS_Server.Repositories.NextSignal;
 using Traincrew_MultiATS_Server.Repositories.OperationInformation;
@@ -473,6 +474,7 @@ public class Program
             .AddScoped<IInterlockingObjectRepository, InterlockingObjectRepository>()
             .AddScoped<ILockRepository, LockRepository>()
             .AddScoped<ILockConditionRepository, LockConditionRepository>()
+            .AddScoped<ILockConditionByRouteCentralControlLeverRepository, LockConditionByRouteCentralControlLeverRepository>()
             .AddScoped<ILeverRepository, LeverRepository>()
             .AddScoped<INextSignalRepository, NextSignalRepository>()
             .AddScoped<IOperationNotificationRepository, OperationNotificationRepository>()
