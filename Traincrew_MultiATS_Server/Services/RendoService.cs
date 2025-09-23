@@ -178,6 +178,14 @@ public class RendoService(
             {
                 isLeverRelayRaised = RaiseDrop.Drop;
             }
+            else if (routeCentralControlLever.RouteCentralControlLeverState == null)
+            {
+                isLeverRelayRaised = RaiseDrop.Drop;
+            }
+            else if (routeCentralControlLever.RouteCentralControlLeverState.IsChrRelayRaised == null)
+            {
+                isLeverRelayRaised = RaiseDrop.Drop;
+            }
             // Todo: CTC制御状態を確認する(CHR相当)
             else if (routeCentralControlLever.RouteCentralControlLeverState.IsChrRelayRaised == RaiseDrop.Raise)
             {
