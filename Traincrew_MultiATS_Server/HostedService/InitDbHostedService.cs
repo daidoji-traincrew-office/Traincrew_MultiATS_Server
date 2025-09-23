@@ -27,7 +27,7 @@ public class InitDbHostedService(
         var datetimeRepository = scope.ServiceProvider.GetRequiredService<IDateTimeRepository>();
         var lockConditionRepository = scope.ServiceProvider.GetRequiredService<ILockConditionRepository>();
         var serverService = scope.ServiceProvider.GetRequiredService<ServerService>();
-        var schedulerManager =  scope.ServiceProvider.GetRequiredService<SchedulerManager>();
+        var schedulerManager = scope.ServiceProvider.GetRequiredService<SchedulerManager>();
         var dbInitializer = await CreateDBInitializer(context, lockConditionRepository, cancellationToken);
         if (dbInitializer != null)
         {
@@ -263,7 +263,7 @@ public class InitDbHostedService(
 
         await context.SaveChangesAsync(cancellationToken);
     }
-    
+
     private async Task InitServerStatus(
         ApplicationDbContext context,
         CancellationToken cancellationToken)
@@ -1598,6 +1598,14 @@ public partial class DbRendoTableInitializer
                 .Select(l => l.ObjectId)
                 .ToListAsync(cancellationToken))
             .ToHashSet();
+        var locksByRouteCentralControlLevers = (await context.LockConditionByRouteCentralControlLevers
+                .Select(l => new
+                {
+                    l.RouteCentralControlLeverId, l.RouteId
+                })
+                .ToListAsync(cancellationToken)
+            )
+            .ToHashSet();
         var throwOutControl = await context.ThrowOutControls
             .ToListAsync(cancellationToken);
         var leverNamesById = await context.Levers
@@ -1619,8 +1627,12 @@ public partial class DbRendoTableInitializer
             .ToList();
         var directionRoutesByName = directionRoutes
             .ToDictionary(r => r.Name, r => r);
-        var directionRoutesById = directionRoutes
-            .ToDictionary(r => r.Id, r => r);
+        // CTC切替てこのDict
+        var routeCentralControlLevers = interlockingObjects
+            .OfType<RouteCentralControlLever>()
+            .ToList();
+        var routeCentralControlLeversByName = routeCentralControlLevers
+            .ToDictionary(l => l.Name, l => l);
         // 転てつ器のDict
         var switchingMachines = interlockingObjects
             .OfType<SwitchingMachine>()
@@ -1853,7 +1865,37 @@ public partial class DbRendoTableInitializer
                 searchDirectionRoutes, isLr);
         }
 
-        // Todo: CTC進路用の処理
+        // CTC切換てこの処理
+        foreach (var rendoTableCsv in rendoTableCsvs)
+        {
+            var leverName = CalcLeverName(rendoTableCsv.Start, stationId);
+            var routeCentralControlLever = routeCentralControlLeversByName.GetValueOrDefault(leverName);
+            if (routeCentralControlLever == null || rendoTableCsv.End != "R")
+            {
+                // Todo: CTC切換てこでrouteCentralControlLeverがnullならエラーを返す
+                continue;
+            }
+
+            var lockItems = CalcLockItems(rendoTableCsv.LockToSwitchingMachine, false)
+                .SelectMany(lockItem => lockItem.Children)
+                .ToList();
+            var targetRoutes = lockItems
+                .Select(lockItem => routesByName.GetValueOrDefault(lockItem.Name))
+                .OfType<Route>();
+            var entities = targetRoutes
+                .Select(r => new LockConditionByRouteCentralControlLever
+                {
+                    RouteCentralControlLeverId = routeCentralControlLever.Id,
+                    RouteId = r.Id
+                })
+                .Where(condition => locksByRouteCentralControlLevers.Contains(new
+                {
+                    condition.RouteCentralControlLeverId, condition.RouteId
+                }));
+
+            context.LockConditionByRouteCentralControlLevers.AddRange(entities);
+            await context.SaveChangesAsync(cancellationToken);
+        }
 
         // 転てつ器のてっ査鎖錠を処理する
         foreach (var rendoTableCsv in rendoTableCsvs)
@@ -2454,4 +2496,3 @@ public partial class DbRendoTableInitializer
         return $"{stationId}_{start}{(end.StartsWith('(') ? "" : end)}";
     }
 }
-
