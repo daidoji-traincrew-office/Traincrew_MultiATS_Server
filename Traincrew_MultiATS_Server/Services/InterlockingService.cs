@@ -51,7 +51,7 @@ public class InterlockingService(
         // それら全部の信号の現示計算
         var signalIndications = await signalService.CalcSignalIndication(signalNames);
         // 各ランプの状態を取得
-        var lamps = await GetLamps(stationIds);
+        var lamps = await GetLamps(stationIds, directionSelfControlLevers);
         // 列番窓を取得
         var ttcWindows = await ttcStationControlService.GetTtcWindowsByStationIdsWithState(stationIds);
 
@@ -92,7 +92,7 @@ public class InterlockingService(
         return response;
     }
 
-    public async Task<Dictionary<string, bool>> GetLamps(List<string> stationIds)
+    private async Task<Dictionary<string, bool>> GetLamps(List<string> stationIds, List<DirectionSelfControlLever> directionSelfControlLevers)
     {
         // Todo: 一旦仮でFalse
         var pwrFailure = stationIds.ToDictionary(
