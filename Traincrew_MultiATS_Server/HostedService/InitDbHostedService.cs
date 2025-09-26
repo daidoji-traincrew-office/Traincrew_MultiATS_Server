@@ -27,7 +27,7 @@ public class InitDbHostedService(
         var datetimeRepository = scope.ServiceProvider.GetRequiredService<IDateTimeRepository>();
         var lockConditionRepository = scope.ServiceProvider.GetRequiredService<ILockConditionRepository>();
         var serverService = scope.ServiceProvider.GetRequiredService<ServerService>();
-        var schedulerManager =  scope.ServiceProvider.GetRequiredService<SchedulerManager>();
+        var schedulerManager = scope.ServiceProvider.GetRequiredService<SchedulerManager>();
         var dbInitializer = await CreateDBInitializer(context, lockConditionRepository, cancellationToken);
         if (dbInitializer != null)
         {
@@ -263,7 +263,7 @@ public class InitDbHostedService(
 
         await context.SaveChangesAsync(cancellationToken);
     }
-    
+
     private async Task InitServerStatus(
         ApplicationDbContext context,
         CancellationToken cancellationToken)
@@ -993,6 +993,12 @@ internal partial class DbInitializer(
                          out var directionRoute))
             {
                 target = directionRoute;
+                // 既に登録済みの場合、スキップ
+                if (throwOutControlList.Contains(
+                        new { throwOutControl.SourceRouteName, TargetRouteName = target.Name }))
+                {
+                    continue;
+                }
                 targetLr = throwOutControl.TargetRouteName.EndsWith('L') ? LR.Left : LR.Right;
                 // 該当する開放てこを探し、方向てこにも開放てこのリンクを設定する
                 if (!directionSelfControlLeverByName.TryGetValue(throwOutControl.LeverConditionName[..^1],
@@ -1000,6 +1006,7 @@ internal partial class DbInitializer(
                 {
                     throw new InvalidOperationException($"開放てこが見つかりません: {throwOutControl.LeverConditionName[..^1]}");
                 }
+                
 
                 directionSelfControlLeverId = directionSelfControlLever.Id;
                 directionRoute.DirectionSelfControlLeverId = directionSelfControlLeverId;
@@ -2423,4 +2430,3 @@ public partial class DbRendoTableInitializer
         return $"{stationId}_{start}{(end.StartsWith('(') ? "" : end)}";
     }
 }
-
