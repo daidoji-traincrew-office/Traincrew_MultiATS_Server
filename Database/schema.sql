@@ -363,7 +363,8 @@ CREATE TABLE throw_out_control
     target_id          BIGINT REFERENCES interlocking_object (id) NOT NULL, -- 統括先オブジェクトID
     target_lr          lr,                                                  -- 統括先が方向てこの場合、方向てこの向き
     condition_lever_id BIGINT REFERENCES direction_self_control_lever (id), -- てこ条件となる開放てこID
-    condition_nr       nr                                                   -- てこ条件の開放てこの向き
+    condition_nr       nr,                                                  -- てこ条件の開放てこの向き
+    unique (source_id, target_id)
 );
 CREATE INDEX throw_out_control_source_id_index ON throw_out_control (source_id);
 CREATE INDEX throw_out_control_target_id_index ON throw_out_control (target_id);
