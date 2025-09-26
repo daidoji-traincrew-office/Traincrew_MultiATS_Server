@@ -30,14 +30,9 @@ public class RouteRepository(ApplicationDbContext context) : IRouteRepository
     {
         return await context.RouteLeverDestinationButtons
             .Where(rldb =>
-                (
-                    rldb.Lever.LeverState.IsReversed == LCR.Left && rldb.Direction == LR.Left
-                    || rldb.Lever.LeverState.IsReversed == LCR.Right && rldb.Direction == LR.Right
-                )
-                && (
-                    rldb.DestinationButtonName == null
-                    || rldb.DestinationButton.DestinationButtonState.IsRaised == RaiseDrop.Raise
-                )
+                rldb.Lever.LeverState.IsReversed == LCR.Left && rldb.Direction == LR.Left
+                || rldb.Lever.LeverState.IsReversed == LCR.Right && rldb.Direction == LR.Right
+                || rldb.DestinationButton.DestinationButtonState.IsRaised == RaiseDrop.Raise
             )
             .Select(rldb => rldb.RouteId)
             .ToListAsync();

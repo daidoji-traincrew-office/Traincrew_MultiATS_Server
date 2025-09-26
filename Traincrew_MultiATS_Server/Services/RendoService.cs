@@ -68,23 +68,27 @@ public class RendoService(
 
         // てこ反応リレー/総括制御XR, YSが扛上している進路のIDを全取得
         var routeIdsIsRaised = await routeRepository.GetIdsWhereLeverRelayOrThrowOutIsRaised();
-        // てこが倒れており、着点ボタンが押されている進路のIDを全取得
+        // てこが倒れている、または着点ボタンが押されている進路のIDを全取得
         var routeIdsToOpen = await routeRepository.GetIdsToOpen();
-        // 総括制御で開こうとしている進路のIDを全取得
-        var routeIdsToOpenWithThrowOutControl = await routeRepository.GetIdsToOpenWithThrowOutControl();
         var routeIds = routeIdsIsRaised
             .Union(routeIdsToOpen)
-            .Union(routeIdsToOpenWithThrowOutControl)
-            .Distinct()
             .ToList();
+
         // 総括制御元の進路を取得
         var sourceThrowOutControlRoutes = routeIds
             .SelectMany(id => sourceThrowOutControls.GetValueOrDefault(id, []))
             .Select(toc => toc.SourceId)
             .Distinct()
             .ToList();
+        // 総括制御先の進路を取得
+        var targetThrowOutControlRoutes = routeIds
+            .SelectMany(id => targetThrowOutControls.GetValueOrDefault(id, []))
+            .Select(toc => toc.TargetId)
+            .Distinct()
+            .ToList();
         routeIds = routeIds
-            .Union(sourceThrowOutControlRoutes)
+            .Concat(sourceThrowOutControlRoutes)
+            .Concat(targetThrowOutControlRoutes)
             .Distinct()
             .ToList();
         var routeById = (await routeRepository.GetByIdsWithState(routeIds))
