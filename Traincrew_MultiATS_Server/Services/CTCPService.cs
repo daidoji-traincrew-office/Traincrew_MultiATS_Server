@@ -13,7 +13,7 @@ using Traincrew_MultiATS_Server.Repositories.Station;
 namespace Traincrew_MultiATS_Server.Services;
 
 /// <summary>
-/// 連動装置装置卓
+/// CTCP装置卓
 /// </summary>
 public class CTCPService(
     IDateTimeRepository dateTimeRepository,
