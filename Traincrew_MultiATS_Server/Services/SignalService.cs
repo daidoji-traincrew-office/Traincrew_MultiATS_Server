@@ -34,10 +34,12 @@ public class SignalService(
             .ToList();
     }
 
-    public async Task<Dictionary<string, Phase>> CalcSignalIndication(List<string> signalNames)
+    public async Task<Dictionary<string, Phase>> CalcSignalIndication(List<string> signalNames, bool getDetailedIndication = true)
     {
         // まず、先の信号機名を取得
-        var nextSignals = await nextSignalRepository.GetNextSignalByNamesOrderByDepthDesc(signalNames);
+        var nextSignals = getDetailedIndication
+            ? await nextSignalRepository.GetNextSignalByNamesOrderByDepthDesc(signalNames) 
+            : [];
         // その上で、必要な信号と情報をすべて取得する
         var signalList = await signalRepository.GetSignalsByNamesForCalcIndication(
             signalNames.Concat(nextSignals.Select(x => x.TargetSignalName)).ToList());
