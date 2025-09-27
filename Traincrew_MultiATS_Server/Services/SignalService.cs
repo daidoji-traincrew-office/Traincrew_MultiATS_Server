@@ -12,6 +12,12 @@ public class SignalService(
     ISignalRouteRepository signalRouteRepository,
     INextSignalRepository nextSignalRepository)
 {
+    /// <summary>
+    /// 指定した軌道回路から見える信号機の現示データを計算する
+    /// </summary>
+    /// <param name="trackCircuits">対象となる軌道回路のリスト</param>
+    /// <param name="isUp">上り方向かどうか</param>
+    /// <returns>信号機の現示データのリスト</returns>
     public async Task<List<SignalData>> GetSignalIndicationDataByTrackCircuits(List<TrackCircuit> trackCircuits, bool isUp)
     {
         
@@ -34,6 +40,13 @@ public class SignalService(
             .ToList();
     }
 
+    /// <summary>
+    /// 指定した信号機名のリストから各信号機の現示を計算する
+    /// </summary>
+    /// <param name="signalNames">現示を計算する信号機名のリスト</param>
+    /// <param name="getDetailedIndication">具体的な現示まで計算するか(進行・減速・注意・警戒)まで計算するか。
+    ///                                     進行を示す現示であるか？のみに興味がある場合falseを指定すると軽くなる</param>
+    /// <returns>信号機名をキーとし、信号現示を値とする辞書</returns>
     public async Task<Dictionary<string, Phase>> CalcSignalIndication(List<string> signalNames, bool getDetailedIndication = true)
     {
         // まず、先の信号機名を取得
@@ -63,12 +76,27 @@ public class SignalService(
         );
     }
 
-    public async Task<List<string>> GetSignalNamesByTrackCircuits(List<TrackCircuit> trackCircuits, bool isUp)
+    /// <summary>
+    /// 指定した軌道回路から見える信号機名を取得する
+    /// </summary>
+    /// <param name="trackCircuits">対象となる軌道回路のリスト</param>
+    /// <param name="isUp">上り方向かどうか</param>
+    /// <returns>信号機名のリスト</returns>
+    private async Task<List<string>> GetSignalNamesByTrackCircuits(List<TrackCircuit> trackCircuits, bool isUp)
     {
         return await signalRepository.GetSignalNamesByTrackCircuits(
             trackCircuits.Select(tc => tc.Name).ToList(), isUp);
     }
 
+    /// <summary>
+    /// 単一の信号機の現示を計算する（具体的な現示計算時は、再帰的に次の信号機の現示も考慮）
+    /// </summary>
+    /// <param name="signalName">計算対象の信号機名</param>
+    /// <param name="signals">信号機の辞書</param>
+    /// <param name="nextSignalDict">次の信号機の辞書</param>
+    /// <param name="routeDict">ルートの辞書</param>
+    /// <param name="cache">計算結果のキャッシュ</param>
+    /// <returns>計算された信号現示</returns>
     private static SignalIndication CalcSignalIndication(
         string signalName,
         Dictionary<string, Signal> signals,
@@ -120,11 +148,22 @@ public class SignalService(
         return result;
     }
 
+    /// <summary>
+    /// 指定した駅IDに関連する信号機名を取得する
+    /// </summary>
+    /// <param name="stationIds">対象となる駅IDのリスト</param>
+    /// <returns>信号機名のリスト</returns>
     public async Task<List<string>> GetSignalNamesByStationIds(List<string> stationIds)
     {
         return await signalRepository.GetSignalNamesByStationIds(stationIds);
     }
 
+    /// <summary>
+    /// 信号機の種類と次の信号機の現示から、現在の信号機の現示を決定する
+    /// </summary>
+    /// <param name="signalType">信号機の種類</param>
+    /// <param name="nextSignalIndication">次の信号機の現示</param>
+    /// <returns>決定された信号現示</returns>
     private static SignalIndication GetIndication(SignalType signalType, SignalIndication nextSignalIndication)
     {
         return nextSignalIndication switch
@@ -137,6 +176,11 @@ public class SignalService(
         };
     }
 
+    /// <summary>
+    /// SignalIndicationをPhaseに変換する
+    /// </summary>
+    /// <param name="indication">変換元のSignalIndication</param>
+    /// <returns>変換されたPhase</returns>
     private static Phase ToPhase(SignalIndication indication)
     {
         return indication switch
@@ -149,6 +193,12 @@ public class SignalService(
         };
     }
 
+    /// <summary>
+    /// 信号機名と現示からSignalDataオブジェクトを作成する
+    /// </summary>
+    /// <param name="signalName">信号機名</param>
+    /// <param name="phase">信号機の現示</param>
+    /// <returns>作成されたSignalDataオブジェクト</returns>
     public static SignalData ToSignalData(string signalName, Phase phase)
     {
         return new()
