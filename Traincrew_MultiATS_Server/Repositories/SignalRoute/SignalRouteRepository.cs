@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Traincrew_MultiATS_Server.Data;
+using Traincrew_MultiATS_Server.Models;
 
 namespace Traincrew_MultiATS_Server.Repositories.SignalRoute;
 
@@ -11,6 +12,17 @@ public class SignalRouteRepository(ApplicationDbContext context) : ISignalRouteR
             .Where(sr => signalNames.Contains(sr.SignalName))
             .Include(sr => sr.Route)
             .ThenInclude(r => r.RouteState)
+            .Select(sr => new
+            {
+                sr.SignalName,
+                Route = new Models.Route
+                {
+                    RouteState = sr.Route.RouteState == null ? null : new RouteState
+                    {
+                        IsSignalControlRaised = sr.Route.RouteState.IsSignalControlRaised
+                    }
+                }
+            })
             .GroupBy(sr => sr.SignalName)
             .ToDictionaryAsync(
                 g => g.Key,
