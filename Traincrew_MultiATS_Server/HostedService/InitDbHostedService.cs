@@ -49,6 +49,7 @@ public class InitDbHostedService(
         await InitServerStatus(context, cancellationToken);
         await InitTtcWindows(context, cancellationToken);
         await InitTtcWindowLinks(context, cancellationToken);
+        await InitThrowOutControlCsv(context, cancellationToken);
 
         if (dbInitializer != null)
         {
@@ -498,6 +499,115 @@ public class InitDbHostedService(
         await context.SaveChangesAsync(cancellationToken);
     }
 
+    private async Task InitThrowOutControlCsv(ApplicationDbContext context, CancellationToken cancellationToken)
+    {
+        var file = new FileInfo("./Data/総括制御ペア一覧.csv");
+        if (!file.Exists)
+        {
+            return;
+        }
+
+        var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+        {
+            HasHeaderRecord = false,
+        };
+        using var reader = new StreamReader(file.FullName);
+        // ヘッダー行を読み飛ばす
+        await reader.ReadLineAsync(cancellationToken);
+        using var csv = new CsvReader(reader, config);
+        csv.Context.RegisterClassMap<ThrowOutControlCsvMap>();
+        var records = await csv
+            .GetRecordsAsync<ThrowOutControlCsv>(cancellationToken)
+            .ToListAsync(cancellationToken);
+
+        var routesByName = await context.Routes
+            .ToDictionaryAsync(r => r.Name, r => r, cancellationToken);
+        var directionRoutesByName = await context.DirectionRoutes
+            .ToDictionaryAsync(dr => dr.Name, dr => dr, cancellationToken);
+        var directionSelfControlLeversByName = await context.DirectionSelfControlLevers
+            .ToDictionaryAsync(dscl => dscl.Name, dscl => dscl, cancellationToken);
+        var existingThrowOutControls = (await context.ThrowOutControls
+                .Select(toc => new { toc.SourceId, toc.TargetId })
+                .ToListAsync(cancellationToken))
+            .ToHashSet();
+
+        foreach (var record in records)
+        {
+            // 総括制御元の進路を取得
+            if (!routesByName.TryGetValue(record.SourceLever, out var sourceRoute))
+            {
+                continue;
+            }
+
+            InterlockingObject target;
+            LR? targetLr = null;
+            ulong? conditionLeverId = null;
+
+            // 総括種類による分岐処理
+            switch (record.Type)
+            {
+                case ThrowOutControlType.WithLever:
+                case ThrowOutControlType.WithoutLever:
+                    // てこあり/てこナシの場合、総括制御先は通常の進路
+                    if (!routesByName.TryGetValue(record.TargetLever, out var targetRoute))
+                    {
+                        continue;
+                    }
+                    target = targetRoute;
+                    break;
+
+                case ThrowOutControlType.Direction:
+                    // 方向の場合、方向進路を探す
+                    // record.LeverConditionから方向進路名を取得（末尾のNを除いてFに置換）
+                    if (string.IsNullOrEmpty(record.LeverCondition))
+                    {
+                        continue;
+                    }
+
+                    var directionRouteName = record.LeverCondition.TrimEnd('N') + "F";
+                    if (!directionRoutesByName.TryGetValue(directionRouteName, out var directionRoute))
+                    {
+                        continue;
+                    }
+
+                    target = directionRoute;
+                    // 総括制御先のてこ名の末尾から方向を判定
+                    targetLr = record.TargetLever.EndsWith("L") ? LR.Left : LR.Right;
+
+                    // 開放てこを取得
+                    var directionSelfControlLeverName = record.LeverCondition.TrimEnd('N');
+                    if (directionSelfControlLeversByName.TryGetValue(directionSelfControlLeverName,
+                            out var directionSelfControlLever))
+                    {
+                        conditionLeverId = directionSelfControlLever.Id;
+                        directionRoute.DirectionSelfControlLeverId = conditionLeverId;
+                        context.DirectionRoutes.Update(directionRoute);
+                    }
+
+                    break;
+
+                default:
+                    continue;
+            }
+
+            // 既に登録済みの場合はスキップ
+            if (existingThrowOutControls.Contains(new { SourceId = sourceRoute.Id, TargetId = target.Id }))
+            {
+                continue;
+            }
+
+            context.ThrowOutControls.Add(new()
+            {
+                SourceId = sourceRoute.Id,
+                TargetId = target.Id,
+                TargetLr = targetLr,
+                ConditionLeverId = conditionLeverId
+            });
+        }
+
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
     /// <summary>
     /// UnchangedなEntityをすべてDetachする。
     /// </summary>
@@ -548,7 +658,6 @@ internal partial class DbInitializer(
         await InitNextSignal();
         await InitTrackCircuitSignal();
         await InitializeSignalRoute();
-        await InitializeThrowOutControl();
     }
 
     internal async Task InitializeAfterCreateLockCondition()
@@ -948,85 +1057,6 @@ internal partial class DbInitializer(
         }
 
         await context.SaveChangesAsync(cancellationToken);
-    }
-
-    private async Task InitializeThrowOutControl()
-    {
-        var routesByName = await context.Routes
-            .ToDictionaryAsync(r => r.Name, cancellationToken);
-        var directionRouteByName = await context.DirectionRoutes
-            .ToDictionaryAsync(r => r.Name, cancellationToken);
-        var directionSelfControlLeverByName = await context.DirectionSelfControlLevers
-            .ToDictionaryAsync(r => r.Name, cancellationToken);
-        var throwOutControlList = (await context.ThrowOutControls
-                .Include(toc => toc.Source)
-                .Include(toc => toc.Target)
-                .Select(toc => new { SourceRouteName = toc.Source.Name, TargetRouteName = toc.Target.Name })
-                .ToListAsync(cancellationToken))
-            .ToHashSet();
-        foreach (var throwOutControl in DBBase.throwOutControlList)
-        {
-            // 既に登録済みの場合、スキップ
-            if (throwOutControlList.Contains(
-                    new { throwOutControl.SourceRouteName, throwOutControl.TargetRouteName }))
-            {
-                continue;
-            }
-
-            InterlockingObject target;
-            LR? targetLr = null;
-            ulong? directionSelfControlLeverId = null;
-            // 進路名を取得
-            if (!routesByName.TryGetValue(throwOutControl.SourceRouteName, out var sourceRoute))
-            {
-                throw new InvalidOperationException($"進路名が見つかりません: {throwOutControl.SourceRouteName}");
-            }
-
-            // 方向てこ以外
-            if (routesByName.TryGetValue(throwOutControl.TargetRouteName, out var targetRoute))
-            {
-                target = targetRoute;
-            }
-            // 方向てこ
-            else if ((throwOutControl.TargetRouteName.EndsWith('L') || throwOutControl.TargetRouteName.EndsWith('R'))
-                     && directionRouteByName.TryGetValue(throwOutControl.TargetRouteName[..^1] + 'F',
-                         out var directionRoute))
-            {
-                target = directionRoute;
-                targetLr = throwOutControl.TargetRouteName.EndsWith('L') ? LR.Left : LR.Right;
-                // 該当する開放てこを探し、方向てこにも開放てこのリンクを設定する
-                if (!directionSelfControlLeverByName.TryGetValue(throwOutControl.LeverConditionName[..^1],
-                        out var directionSelfControlLever))
-                {
-                    throw new InvalidOperationException($"開放てこが見つかりません: {throwOutControl.LeverConditionName[..^1]}");
-                }
-
-                directionSelfControlLeverId = directionSelfControlLever.Id;
-                directionRoute.DirectionSelfControlLeverId = directionSelfControlLeverId;
-                context.DirectionRoutes.Update(directionRoute);
-            }
-            else
-            {
-                throw new InvalidOperationException($"進路名が見つかりません: {throwOutControl.TargetRouteName}");
-            }
-
-            context.ThrowOutControls.Add(new()
-            {
-                SourceId = sourceRoute.Id,
-                TargetId = target.Id,
-                TargetLr = targetLr,
-                ConditionLeverId = directionSelfControlLeverId
-            });
-        }
-
-        await context.SaveChangesAsync(cancellationToken);
-        var changedEntriesCopy = context.ChangeTracker.Entries()
-            .Where(e => e.State is EntityState.Unchanged)
-            .ToList();
-        foreach (var entry in changedEntriesCopy)
-        {
-            entry.State = EntityState.Detached;
-        }
     }
 
     private async Task SetStationIdToInterlockingObject()
