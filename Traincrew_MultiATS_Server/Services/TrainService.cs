@@ -20,7 +20,8 @@ public partial class TrainService(
     ITrainCarRepository trainCarRepository,
     ITrainDiagramRepository trainDiagramRepository,
     ITransactionRepository transactionRepository,
-    IGeneralRepository generalRepository
+    IGeneralRepository generalRepository,
+    ILogger<TrainService> logger
 )
 {
     [GeneratedRegex(@"\d+")]
@@ -54,6 +55,9 @@ public partial class TrainService(
             BougoState = await protectionService.IsProtectionEnabledForTrackCircuits(trackCircuitList)
         };
         // 防護無線を発報している場合のDB更新
+        logger.LogInformation(
+            "TrainNumber: {TrainNumber} BougoState: {clientDataBougoState} TrackCircuitList: {trackCircuitList}",
+            clientTrainNumber, clientData.BougoState, trackCircuitList.Select(tc => tc.Name));
         await protectionService.UpdateBougoState(clientTrainNumber, trackCircuitList, clientData.BougoState);
 
         // 運転告知器の表示

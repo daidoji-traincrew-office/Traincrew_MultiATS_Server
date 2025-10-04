@@ -4,7 +4,7 @@ using Traincrew_MultiATS_Server.Models;
 
 namespace Traincrew_MultiATS_Server.Repositories.Protection;
 
-public class ProtectionRepository(ApplicationDbContext context) : IProtectionRepository
+public class ProtectionRepository(ApplicationDbContext context, Logger<ProtectionRepository> logger) : IProtectionRepository
 {
     public async Task<List<ProtectionZoneState>> GetProtectionZoneStates()
     {
@@ -35,6 +35,9 @@ public class ProtectionRepository(ApplicationDbContext context) : IProtectionRep
         // 追加、削除するProtectionZoneを取得
         var zonesToAdd = protectionZones.Except(oldZones).ToList();
         var zonesToRemove = oldZones.Except(protectionZones).ToList();
+        logger.LogInformation(
+            "ProtectionZones :{ProtectionZones}, oldZones: {oldZones} , zonesToAdd: {zonesToAdd}, zonesToRemove: {zonesToRemove}",
+            protectionZones, oldZones, zonesToAdd, zonesToRemove);
 
         // 追加するProtectionZoneがあれば追加
         if (zonesToAdd.Count != 0)
