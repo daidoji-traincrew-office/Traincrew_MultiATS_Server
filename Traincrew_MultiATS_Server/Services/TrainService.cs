@@ -30,7 +30,7 @@ public partial class TrainService(
     {
         var clientTrainNumber = clientData.DiaName;
         // 軌道回路情報の更新
-        var oldTrackCircuitList = await trackCircuitService.GetTrackCircuitsByTrainNumber(clientTrainNumber);
+        var oldTrackCircuitList = await trackCircuitService.GetTrackCircuitsByDiaNumber(clientTrainNumber);
         var oldTrackCircuitDataList = oldTrackCircuitList.Select(TrackCircuitService.ToTrackCircuitData).ToList();
         // 新規登録軌道回路
         var incrementalTrackCircuitDataList = clientData.OnTrackList.Except(oldTrackCircuitDataList).ToList();
