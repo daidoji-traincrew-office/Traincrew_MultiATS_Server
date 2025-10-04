@@ -26,7 +26,7 @@ public class SwitchingMachineRepository(ApplicationDbContext context) : ISwitchi
     {
         // 2. 転てつ器の単独てこが倒れている転てつ器
         return await context.SwitchingMachines
-            .Join(context.Levers, l => l.Id, swm => swm.Id, ( swm, l) => new { swm, l })
+            .Join(context.Levers, swm => swm.Id, l => l.SwitchingMachineId, ( swm, l) => new { swm, l })
             .Where(obj => obj.l.LeverState.IsReversed == LCR.Left && obj.swm.SwitchingMachineState.IsReverse != NR.Normal
                 || obj.l.LeverState.IsReversed == LCR.Right && obj.swm.SwitchingMachineState.IsReverse != NR.Reversed)
             .Select(obj => obj.swm.Id)
