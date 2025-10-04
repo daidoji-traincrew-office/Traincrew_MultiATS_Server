@@ -233,7 +233,7 @@ public partial class TrainService(
                 // ワープのおそれがある場合「ワープ？」を返す
                 if (
                     !clientData.IsMaybeWarpIgnore
-                    && oldTrackCircuits.Count >= 1
+                    && oldTrackCircuitNames.Count >= 1
                     && trackCircuits.Count >= 1
                     && trackCircuits.Any(tc => !oldTrackCircuitNames.Contains(tc.Name))
                 )
