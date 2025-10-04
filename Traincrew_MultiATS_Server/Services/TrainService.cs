@@ -29,8 +29,9 @@ public partial class TrainService(
     public async Task<ServerToATSData> CreateAtsData(ulong clientDriverId, AtsToServerData clientData)
     {
         var clientTrainNumber = clientData.DiaName;
+        var clientDiaNumber = GetDiaNumberFromTrainNumber(clientTrainNumber);
         // 軌道回路情報の更新
-        var oldTrackCircuitList = await trackCircuitService.GetTrackCircuitsByDiaNumber(clientTrainNumber);
+        var oldTrackCircuitList = await trackCircuitService.GetTrackCircuitsByDiaNumber(clientDiaNumber);
         var oldTrackCircuitDataList = oldTrackCircuitList.Select(TrackCircuitService.ToTrackCircuitData).ToList();
         // 新規登録軌道回路
         var incrementalTrackCircuitDataList = clientData.OnTrackList.Except(oldTrackCircuitDataList).ToList();
