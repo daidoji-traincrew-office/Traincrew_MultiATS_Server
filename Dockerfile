@@ -26,4 +26,5 @@ EXPOSE 8080
 WORKDIR /app
 COPY --link --from=build /app .
 WORKDIR /opt
+COPY Traincrew_MultiATS_Server.Crew/Data /opt/Data
 ENTRYPOINT ["/app/Traincrew_MultiATS_Server.Crew"]
