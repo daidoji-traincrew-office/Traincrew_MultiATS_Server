@@ -223,8 +223,8 @@ public partial class TrainService(
             }
 
             existingTrainStateByMe =
-                existingTrainStates.FirstOrDefault(ts => ts.TrainNumber == clientTrainNumber && ts.DriverId == null);
-            // 2. 同一列番の列車が存在する場合、その列車に乗る(途中駅からの再開etcを想定)
+                existingTrainStates.FirstOrDefault(ts => ts.DiaNumber == clientDiaNumber && ts.DriverId == null);
+            // 2. 同一運番の列車が存在する場合、その列車に乗る(途中駅からの再開etcを想定)
             if (existingTrainStateByMe != null)
             {
                 var oldTrackCircuitNames = oldTrackCircuits.Select(tc => tc.Name).ToHashSet();
