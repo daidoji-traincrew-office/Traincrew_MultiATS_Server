@@ -227,7 +227,9 @@ public partial class TrainService(
             // 2. 同一運番の列車が存在する場合、その列車に乗る(途中駅からの再開etcを想定)
             if (existingTrainStateByMe != null)
             {
-                var oldTrackCircuitNames = oldTrackCircuits.Select(tc => tc.Name).ToHashSet();
+                // 同一運番の旧列番で在線を取得しなおす
+                var oldTrackCircuitList = await trackCircuitService.GetTrackCircuitsByTrainNumber(existingTrainStateByMe.TrainNumber);
+                var oldTrackCircuitNames = oldTrackCircuitList.Select(tc => tc.Name).ToHashSet();
                 // ワープのおそれがある場合「ワープ？」を返す
                 if (
                     !clientData.IsMaybeWarpIgnore
