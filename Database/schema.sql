@@ -355,9 +355,11 @@ CREATE TABLE lock_condition_object
     is_lr          lr                                                   -- 方向てこの方向
 );
 -- 統括制御テーブル
+CREATE TYPE throw_out_control_type AS ENUM ('with_lever', 'without_lever', 'direction');
 CREATE TABLE throw_out_control
 (
     id                 BIGSERIAL PRIMARY KEY,
+    control_type       throw_out_control_type NOT NULL,                     -- 総括の種類
     source_id          BIGINT REFERENCES interlocking_object (id) NOT NULL, -- 統括元オブジェクトID
     source_lr          lr,                                                  -- 統括元が方向てこの場合、方向てこの向き
     target_id          BIGINT REFERENCES interlocking_object (id) NOT NULL, -- 統括先オブジェクトID
