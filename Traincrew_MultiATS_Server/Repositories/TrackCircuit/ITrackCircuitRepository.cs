@@ -4,7 +4,6 @@ public interface ITrackCircuitRepository
 {
     Task<List<Models.TrackCircuit>> GetAllTrackCircuitList();
     Task<List<Models.TrackCircuit>> GetTrackCircuitListByTrainNumber(string trainNumber);
-    Task<List<Models.TrackCircuit>> GetTrackCircuitListByDiaNumber(int diaNumber);
     Task<List<Models.TrackCircuit>> GetTrackCircuitByName(List<string> trackCircuitNames);
     Task<List<Models.TrackCircuit>> GetTrackCircuitsById(List<ulong> Ids);
     Task SetTrainNumberByNames(List<string> names, string trainNumber);

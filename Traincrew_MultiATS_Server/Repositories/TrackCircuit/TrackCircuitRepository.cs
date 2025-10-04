@@ -36,16 +36,6 @@ public class TrackCircuitRepository(ApplicationDbContext context) : ITrackCircui
         return trackcircuitlist_db;
     }
 
-    public async Task<List<Models.TrackCircuit>> GetTrackCircuitListByDiaNumber(int diaNumber)
-    {
-
-        List<Models.TrackCircuit> trackcircuitlist_db = await context.TrackCircuits
-            .Where(odj => Services.TrainService.GetDiaNumberFromTrainNumber(odj.TrackCircuitState.TrainNumber) == diaNumber)
-            .Include(obj => obj.TrackCircuitState).ToListAsync();
-        return trackcircuitlist_db;
-    }
-
-
     public async Task SetTrainNumberByNames(List<string> names, string trainNumber)
     {
         await context.TrackCircuits

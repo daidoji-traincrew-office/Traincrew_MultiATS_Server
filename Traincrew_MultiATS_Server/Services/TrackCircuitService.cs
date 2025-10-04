@@ -28,11 +28,6 @@ public class TrackCircuitService(
         return await trackCircuitRepository.GetTrackCircuitListByTrainNumber(trainNumber);
     }
 
-    public async Task<List<TrackCircuit>> GetTrackCircuitsByDiaNumber(int diaNumber)
-    {
-        return await trackCircuitRepository.GetTrackCircuitListByDiaNumber(diaNumber);
-    }
-
     public async Task SetTrackCircuitDataList(List<TrackCircuitData> trackCircuitData, string trainNumber)
     {
         var names = trackCircuitData.Select(t => t.Name).ToList();
