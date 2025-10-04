@@ -4,7 +4,7 @@ using Traincrew_MultiATS_Server.Models;
 
 namespace Traincrew_MultiATS_Server.Repositories.Protection;
 
-public class ProtectionRepository(ApplicationDbContext context, Logger<ProtectionRepository> logger) : IProtectionRepository
+public class ProtectionRepository(ApplicationDbContext context, ILogger<ProtectionRepository> logger) : IProtectionRepository
 {
     public async Task<List<ProtectionZoneState>> GetProtectionZoneStates()
     {
