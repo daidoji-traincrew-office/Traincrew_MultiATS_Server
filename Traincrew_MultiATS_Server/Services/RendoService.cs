@@ -1365,12 +1365,13 @@ public class RendoService(
         {
             return RaiseDrop.Drop;
         }
-        
+
         // 総括制御する場合、総括制御先のすべての信号制御リレーが落下している場合、信号制御リレーを落下させる
         // (= すなわち、総括制御の場合は奥の信号が開いてないなら開けない)
         if (
-            targetThrowOutRoutes.Any(r => r.RouteState.IsThrowOutXRRelayRaised == RaiseDrop.Raise) 
-            && targetThrowOutRoutes.All(r => r.RouteState.IsSignalControlRaised == RaiseDrop.Drop))
+            targetThrowOutRoutes.Any(r =>
+                r.RouteState.IsThrowOutXRRelayRaised == RaiseDrop.Raise
+                && r.RouteState.IsSignalControlRaised == RaiseDrop.Drop))
         {
             return RaiseDrop.Drop;
         }
