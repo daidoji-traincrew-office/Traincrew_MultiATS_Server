@@ -70,27 +70,38 @@ public class RendoService(
         var routeIdsIsRaised = await routeRepository.GetIdsWhereLeverRelayOrThrowOutIsRaised();
         // てこが倒れている、または着点ボタンが押されている進路のIDを全取得
         var routeIdsToOpen = await routeRepository.GetIdsToOpen();
-        var routeIds = routeIdsIsRaised
-            .Union(routeIdsToOpen)
-            .ToList();
+        var routeIdSet = routeIdsIsRaised
+            .Concat(routeIdsToOpen)
+            .ToHashSet();
+        var keys = routeIdSet.ToList();
 
-        // 総括制御元の進路を取得
-        var sourceThrowOutControlRoutes = routeIds
-            .SelectMany(id => sourceThrowOutControls.GetValueOrDefault(id, []))
-            .Select(toc => toc.SourceId)
-            .Distinct()
-            .ToList();
-        // 総括制御先の進路を取得
-        var targetThrowOutControlRoutes = routeIds
-            .SelectMany(id => targetThrowOutControls.GetValueOrDefault(id, []))
-            .Select(toc => toc.TargetId)
-            .Distinct()
-            .ToList();
-        routeIds = routeIds
-            .Concat(sourceThrowOutControlRoutes)
-            .Concat(targetThrowOutControlRoutes)
-            .Distinct()
-            .ToList();
+        // 総括元→先→元のように探索するため、ループで繰り返す
+        // Todo: ループせず、関連進路を一発取りしたい
+        for (var i = 0; i < 5; i++)
+        {
+            // 総括制御元の進路を取得
+            var sourceThrowOutControlRoutes = keys
+                .SelectMany(id => sourceThrowOutControls.GetValueOrDefault(id, []))
+                .Select(toc => toc.SourceId);
+            // 総括制御先の進路を取得
+            var targetThrowOutControlRoutes = keys
+                .SelectMany(id => targetThrowOutControls.GetValueOrDefault(id, []))
+                .Select(toc => toc.TargetId);
+            // 総括制御元・先の進路を取得
+            var throwOutControlRoutes = sourceThrowOutControlRoutes
+                .Concat(targetThrowOutControlRoutes)
+                .Except(routeIdSet)
+                .Distinct()
+                .ToList();
+            if (throwOutControlRoutes.Count == 0)
+            {
+                break;
+            }
+            throwOutControlRoutes.ForEach(id => routeIdSet.Add(id));
+            keys = throwOutControlRoutes;
+        }
+
+        var routeIds = routeIdSet.ToList(); 
         var routeById = (await routeRepository.GetByIdsWithState(routeIds))
             .ToDictionary(r => r.Id);
 
@@ -127,7 +138,8 @@ public class RendoService(
         // 直接鎖錠条件を取得
         var lockConditions = await lockConditionRepository.GetConditionsByObjectIdsAndType(routeIds, LockType.Lock);
         // 信号制御条件を取得
-        var signalControlConditions = await lockConditionRepository.GetConditionsByObjectIdsAndType(routeIds, LockType.SignalControl);
+        var signalControlConditions =
+            await lockConditionRepository.GetConditionsByObjectIdsAndType(routeIds, LockType.SignalControl);
 
         // 追加で必要なInterlockingObjectを取得
         var conditionObjectIds = lockConditions.Values
