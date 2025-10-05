@@ -133,8 +133,8 @@ public class RendoService(
         var conditionObjectIds = lockConditions.Values
             .SelectMany(ExtractObjectIdsFromLockCondtions)
             .Union(signalControlConditions.Values.SelectMany(ExtractObjectIdsFromLockCondtions))
-            .Except(routeIds)
-            .Except(leverIds)
+            .Except(routeById.Keys)
+            .Except(leverById.Keys)
             .Distinct()
             .ToList();
         var conditionObjects = await interlockingObjectRepository.GetObjectByIdsWithState(conditionObjectIds);
