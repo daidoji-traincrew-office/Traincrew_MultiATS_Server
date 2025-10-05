@@ -223,15 +223,17 @@ public partial class TrainService(
             }
 
             existingTrainStateByMe =
-                existingTrainStates.FirstOrDefault(ts => ts.TrainNumber == clientTrainNumber && ts.DriverId == null);
-            // 2. 同一列番の列車が存在する場合、その列車に乗る(途中駅からの再開etcを想定)
+                existingTrainStates.FirstOrDefault(ts => ts.DiaNumber == clientDiaNumber && ts.DriverId == null);
+            // 2. 同一運番の列車が存在する場合、その列車に乗る(途中駅からの再開etcを想定)
             if (existingTrainStateByMe != null)
             {
-                var oldTrackCircuitNames = oldTrackCircuits.Select(tc => tc.Name).ToHashSet();
+                // 同一運番の旧列番で在線を取得しなおす
+                var oldTrackCircuitList = await trackCircuitService.GetTrackCircuitsByTrainNumber(existingTrainStateByMe.TrainNumber);
+                var oldTrackCircuitNames = oldTrackCircuitList.Select(tc => tc.Name).ToHashSet();
                 // ワープのおそれがある場合「ワープ？」を返す
                 if (
                     !clientData.IsMaybeWarpIgnore
-                    && oldTrackCircuits.Count >= 1
+                    && oldTrackCircuitNames.Count >= 1
                     && trackCircuits.Count >= 1
                     && trackCircuits.Any(tc => !oldTrackCircuitNames.Contains(tc.Name))
                 )
@@ -442,7 +444,7 @@ public partial class TrainService(
     /// </summary>
     /// <param name="trainNumber">列車番号</param>
     /// <returns></returns>
-    private static int GetDiaNumberFromTrainNumber(string trainNumber)
+    public static int GetDiaNumberFromTrainNumber(string trainNumber)
     {
         if (trainNumber == "9999")
         {
