@@ -37,7 +37,7 @@ public class SwitchingMachineService(
         var movingSwitchingMachineIds = await switchingMachineRepository.GetIdsWhereMoving();
         // 2. 転てつ器の単独てこが倒れている転てつ器
         var leverReversedSwitchingMachineIds = await switchingMachineRepository.GetIdsWhereLeverReversed();
-        // 3. てこリレー回路が上がっている進路に対する転てつ器
+        // 3. てこリレーが上がっている進路に対する転てつ器
         var leverRelayRaisedSwitchingMachineIds = await switchingMachineRepository.GetIdsWhereLeverRelayRaised();
         // それら全てのID
         var switchingMachineIds = movingSwitchingMachineIds
