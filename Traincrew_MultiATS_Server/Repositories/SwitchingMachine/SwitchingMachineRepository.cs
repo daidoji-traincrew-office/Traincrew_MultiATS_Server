@@ -35,12 +35,16 @@ public class SwitchingMachineRepository(ApplicationDbContext context) : ISwitchi
 
     public async Task<List<ulong>> GetIdsWhereLeverRelayRaised()
     {
-        // 3. てこリレー回路が上がっている進路に対する転てつ器
+        // 3. てこリレーが上がっている進路に対する転てつ器
         return await context.Routes
+            // てこリレーが扛上している
             .Where(r => r.RouteState.IsLeverRelayRaised == RaiseDrop.Raise)
+            // 進路に紐づく転てつ器(転換しないといけない転てつ器)を取得
             .Join(context.SwitchingMachineRoutes, r => r.Id, smr => smr.RouteId, (_, smr) => smr)
             .Join(context.SwitchingMachines, smr => smr.SwitchingMachineId, sm => sm.Id, (smr, sm) => new { smr, sm })
+            // 現在の方向が想定方向と違うもの
             .Where(s => s.smr.IsReverse != s.sm.SwitchingMachineState.IsReverse)
+            // それらの転てつ器ID
             .Select(s => s.smr.SwitchingMachineId)
             .ToListAsync();
     }
