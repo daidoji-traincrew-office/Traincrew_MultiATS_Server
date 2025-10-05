@@ -24,15 +24,7 @@ public class TrainHub(
     {
         using var activity = ActivitySources.Hubs.StartActivity("TrainHub.SendData_ATS");
         var memberId = GetMemberId();
-        try
-        {
-
-            return await trainService.CreateAtsData(memberId, clientData);
-        }
-        catch (System.Exception e)
-        {
-            throw new HubException(e.Message + e.StackTrace);
-        }
+        return await trainService.CreateAtsData(memberId, clientData);
     }
 
     public async Task DriverGetsOff(string trainNumber)
