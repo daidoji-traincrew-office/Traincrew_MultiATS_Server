@@ -444,7 +444,7 @@ public partial class TrainService(
     /// </summary>
     /// <param name="trainNumber">列車番号</param>
     /// <returns></returns>
-    public static int GetDiaNumberFromTrainNumber(string trainNumber)
+    private static int GetDiaNumberFromTrainNumber(string trainNumber)
     {
         if (trainNumber == "9999")
         {
