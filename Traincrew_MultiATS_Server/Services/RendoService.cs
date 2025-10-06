@@ -56,7 +56,8 @@ public class RendoService(
     {
         // 統括制御テーブルを取得
         // Todo: ここどうにかして全取得やめたい
-        var throwOutControls = await throwOutControlRepository.GetAll();
+        var throwOutControls = await throwOutControlRepository
+            .GetByControlTypes([ThrowOutControlType.WithLever, ThrowOutControlType.WithoutLever]);
         // 進路IDをキーにして、統括制御「する」進路をグループ化
         var sourceThrowOutControls = throwOutControls
             .GroupBy(c => c.TargetId)
