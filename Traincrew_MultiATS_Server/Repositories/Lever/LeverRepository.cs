@@ -25,4 +25,12 @@ public class LeverRepository(ApplicationDbContext context) : ILeverRepository
             .Include(lever => lever.LeverState)
             .ToListAsync();
     }
+
+    public async Task<List<ulong>> GetIdsBySwitchingMachineIds(List<ulong> ids)
+    {
+        return await context.Levers
+            .Where(lever => lever.SwitchingMachineId != null && ids.Contains(lever.SwitchingMachineId.Value))
+            .Select(lever => lever.Id)
+            .ToListAsync();
+    }
 }
