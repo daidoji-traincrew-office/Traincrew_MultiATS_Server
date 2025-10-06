@@ -97,11 +97,12 @@ public class RendoService(
             {
                 break;
             }
+
             throwOutControlRoutes.ForEach(id => routeIdSet.Add(id));
             keys = throwOutControlRoutes;
         }
 
-        var routeIds = routeIdSet.ToList(); 
+        var routeIds = routeIdSet.ToList();
         var routeById = (await routeRepository.GetByIdsWithState(routeIds))
             .ToDictionary(r => r.Id);
 
@@ -496,7 +497,7 @@ public class RendoService(
                 .ToList();
 
             var result = ProcessRouteRelay(route, directLockCondition, signalControlCondition, sourceThrowOutRoutes,
-               targetThrowOutRoutes, interlockingObjects);
+                targetThrowOutRoutes, interlockingObjects);
             if (route.RouteState.IsRouteRelayRaised == result)
             {
                 continue;
@@ -568,7 +569,8 @@ public class RendoService(
                     // この進路に対して総括制御「する」進路の進路鎖錠リレーが落下している
                     && sourceThrowOutRoutes.Any(r => r.RouteState.IsRouteLockRaised == RaiseDrop.Drop)
                     // この進路に対して総括制御「される」進路の進路照査リレーが扛上している
-                    && (targetThrowOutRoutes.Count == 0 || targetThrowOutRoutes.Any(r => r.RouteState.IsRouteRelayRaised == RaiseDrop.Raise))
+                    && (targetThrowOutRoutes.Count == 0 ||
+                        targetThrowOutRoutes.Any(r => r.RouteState.IsRouteRelayRaised == RaiseDrop.Raise))
                 )
                 // 自進路YS落下
                 || route.RouteState.IsThrowOutYSRelayRaised == RaiseDrop.Drop)
@@ -738,13 +740,13 @@ public class RendoService(
             {
                 var route = (interlockingObjects[t.SourceId] as Route);
                 return route.RouteState.IsRouteRelayRaised == RaiseDrop.Drop
-                    && route.RouteState.IsRouteLockRaised == RaiseDrop.Raise;
+                       && route.RouteState.IsRouteLockRaised == RaiseDrop.Raise;
             }
 
             // 対応軌道回路の短絡状態によって、FLリレーを扛上
             var isFLRelayRaised = lockTrackCircuits.All(tc => !tc.TrackCircuitState.IsShortCircuit)
-                && thisLeftThrowOutControls.All(PredicateIsFlRelayRaised)
-                && thisRightThrowOutControls.All(PredicateIsFlRelayRaised)
+                                  && thisLeftThrowOutControls.All(PredicateIsFlRelayRaised)
+                                  && thisRightThrowOutControls.All(PredicateIsFlRelayRaised)
                 ? RaiseDrop.Raise
                 : RaiseDrop.Drop;
 
@@ -1218,11 +1220,12 @@ public class RendoService(
                     await trackCircuitRepository.LockByIds(
                         routeLockTrackCircuit.Select(tc => tc.Id).ToList(), route.Id);
                 }
+
                 // IsRouteLockRaisedがDropになってないならDropにする
                 if (route.RouteState.IsRouteLockRaised != RaiseDrop.Drop)
                 {
                     route.RouteState.IsRouteLockRaised = RaiseDrop.Drop;
-                    await generalRepository.Save(route.RouteState);    
+                    await generalRepository.Save(route.RouteState);
                 }
             }
 
