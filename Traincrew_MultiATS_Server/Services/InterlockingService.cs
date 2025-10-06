@@ -46,7 +46,7 @@ public class InterlockingService(
         // List<string> clientData.ActiveStationsListの駅IDから、指定された駅にある信号機名称をList<string>で返すやつ
         var signalNames = await signalService.GetSignalNamesByStationIds(stationIds);
         // それら全部の信号の現示計算
-        var signalIndications = await signalService.CalcSignalIndication(signalNames);
+        var signalIndications = await signalService.CalcSignalIndication(signalNames, getDetailedIndication: false);
         // 各ランプの状態を取得
         var lamps = await GetLamps(stationIds);
         // 列番窓を取得
