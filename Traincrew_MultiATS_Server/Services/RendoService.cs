@@ -706,12 +706,10 @@ public class RendoService(
         var routeState = route.RouteState!;
         // 転てつ器が想定方向と逆の方向に転換完了しているか？(=想定方向と逆の扛上接点)
         var switchingMachineIsReversed =
-            // 総括する側に通る転てつ器がない場合、True。逆にする場合は != null として&&にする
-            switchingMachineRoute == null
-            || (
-                !switchingMachine.SwitchingMachineState.IsSwitching
-                && switchingMachine.SwitchingMachineState.IsReverse != switchingMachineRoute.IsReverse
-            );
+            // 総括する側に通る転てつ器がない場合、False
+            switchingMachineRoute != null
+            && !switchingMachine.SwitchingMachineState.IsSwitching
+            && switchingMachine.SwitchingMachineState.IsReverse != switchingMachineRoute.IsReverse;
         return
             (
                 // 軌道回路が鎖錠されている or 転てつ器の想定方向と扛上接点
