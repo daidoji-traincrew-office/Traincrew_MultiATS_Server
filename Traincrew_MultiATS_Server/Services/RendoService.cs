@@ -162,11 +162,15 @@ public class RendoService(
             // 対象進路 
             var route = routeById[routeLeverDestinationButton.RouteId];
             var routeState = route.RouteState!;
-            // この進路に対して総括制御「する」進路
-            var sourceThrowOutRoutes = sourceThrowOutControls.GetValueOrDefault(route.Id, [])
-                .Select(toc => routeById[toc.SourceId])
+            var sourceThrowOutControl = sourceThrowOutControls.GetValueOrDefault(route.Id, []);
+            // この進路に対して「てこあり」な総括制御
+            var sourceThrowOutControlWithLever = sourceThrowOutControl
+                .Where(toc => toc.ControlType == ThrowOutControlType.WithLever)
                 .ToList();
-            var hasSourceThrowOutRoute = sourceThrowOutRoutes.Count != 0;
+            // この進路に対して「てこナシ」な総括制御
+            var sourceThrowOutControlWithoutLever = sourceThrowOutControl
+                .Where(toc => toc.ControlType == ThrowOutControlType.WithoutLever)
+                .ToList();
             // この進路に対して総括制御「される」進路
             var targetThrowOutRoutes = targetThrowOutControls.GetValueOrDefault(route.Id, [])
                 .SelectMany(toc =>
@@ -233,8 +237,12 @@ public class RendoService(
             var leverState = lever.LeverState.IsReversed;
 
             // Refactor: それぞれの条件をメソッド化した方が良い
-            if (hasSourceThrowOutRoute)
+            if (sourceThrowOutControlWithLever.Count > 0)
             {
+                // この進路に対して総括制御「する」進路
+                var sourceThrowOutRoutes = sourceThrowOutControlWithLever
+                    .Select(toc => routeById[toc.SourceId])
+                    .ToList();
                 //総括する各進路の根本レバーを取得
                 var sourceLevers = sourceThrowOutRoutes
                     .Select(r => leverByRouteId[r.Id])
@@ -334,6 +342,43 @@ public class RendoService(
                 routeState.IsThrowOutYSRelayRaised = isThrowOutYSRelayRaised;
             }
 
+            var isXRelayRaised = RaiseDrop.Drop;
+            // てこなし総括がある場合、Xリレーの計算をする
+            if (sourceThrowOutControlWithoutLever.Count > 0)
+            {
+                // この進路に対して総括制御「する」進路
+                var sourceThrowOutRoutes = sourceThrowOutControlWithoutLever
+                    .Select(toc => routeById[toc.SourceId])
+                    .ToList();
+                var approachLockFinalTrackCircuitId = route.ApproachLockFinalTrackCircuitId;
+                var finalApproachTrackState = false;
+                if (approachLockFinalTrackCircuitId != null
+                    && interlockingObjectById.TryGetValue(approachLockFinalTrackCircuitId.Value,
+                        out var finalApproachTrackCircuit))
+                {
+                    var finalTrackCircuit = (finalApproachTrackCircuit as TrackCircuit)!;
+                    // 自進路の接近鎖錠欄に書かれている条件のうち最終の軌道回路条件の状態を取得 鎖錠していない
+                    finalApproachTrackState = !finalTrackCircuit.TrackCircuitState.IsLocked;
+                }
+
+                isXRelayRaised = (
+                    sourceThrowOutRoutes.Any(r => r.RouteState.IsLeverRelayRaised == RaiseDrop.Raise)
+                    && finalApproachTrackState
+                ) || (
+                    !finalApproachTrackState
+                    && routeState.IsThrowOutXRelayRaised == RaiseDrop.Raise
+                )
+                    ? RaiseDrop.Raise
+                    : RaiseDrop.Drop;
+            }
+
+            if (routeState.IsThrowOutXRelayRaised != isXRelayRaised)
+            {
+                isChanged = true;
+            }
+
+            routeState.IsThrowOutXRelayRaised = isXRelayRaised;
+
             var isLeverRelayRaised =
                 !IsLocked(lockCondition, interlockingObjectById)
                 &&
@@ -352,6 +397,8 @@ public class RendoService(
                     )
                     ||
                     routeState.IsThrowOutYSRelayRaised == RaiseDrop.Raise
+                    ||
+                    routeState.IsThrowOutXRelayRaised == RaiseDrop.Raise
                 )
                 &&
                 (
@@ -371,6 +418,8 @@ public class RendoService(
                             sr.RouteState.IsLeverRelayRaised == RaiseDrop.Drop
                         )
                     )
+                    ||
+                    routeState.IsThrowOutXRelayRaised == RaiseDrop.Raise
                 )
                     ? RaiseDrop.Raise
                     : RaiseDrop.Drop;
@@ -685,9 +734,9 @@ public class RendoService(
         // 開放てこの全ID取得
         var directionSelfControlLeverIds = await directionSelfControlLeverRepository.GetAllIds();
 
-        // 総括制御を全取得
-        // Todo: 方向進路関係のものだけ取得するようにする
-        var throwOutControls = await throwOutControlRepository.GetAll();
+        // 方向進路関連の総括制御を全取得
+        var throwOutControls = await throwOutControlRepository
+            .GetByControlTypes([ThrowOutControlType.Direction]);
 
         // 総括されるオブジェクトをキーとして総括制御をグループ化
         var targetThrowOutControls = throwOutControls
