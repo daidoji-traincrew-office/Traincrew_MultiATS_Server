@@ -641,10 +641,11 @@ public class RendoService(
         // てこナシ総括制御を取得する
         var throwOutControlsWithoutLever = await throwOutControlRepository
             .GetByControlTypes([ThrowOutControlType.WithoutLever]);
-        // その中から、Sリレーが落下している進路 または 進路照査リレーが扛上している進路で絞り込む
-        var routeIds = await routeRepository.GetIdsByIdsForSRelay(throwOutControlsWithoutLever
-            .Select(toc => toc.TargetId)
-            .ToList());
+        var targetIds = throwOutControlsWithoutLever.Select(toc => toc.TargetId).ToList();
+        // てこナシ総括がない進路でSリレーが扛上していた場合、落下させておく
+        await routeRepository.DropThrowOutSRelayExceptByIds(targetIds); 
+        // てこナシ総括がある進路の中から、Sリレーが落下している進路 または 進路照査リレーが扛上している進路で絞り込む
+        var routeIds = await routeRepository.GetIdsByIdsForSRelay(targetIds);
         // 対象がないのであれば、処理を止める
         if (routeIds.Count == 0)
         {

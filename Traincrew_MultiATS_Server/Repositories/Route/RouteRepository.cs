@@ -168,4 +168,15 @@ public class RouteRepository(ApplicationDbContext context) : IRouteRepository
             .Select(r => r.Id)
             .ToListAsync();
     }
+
+    public async Task DropThrowOutSRelayExceptByIds(List<ulong> targetIds)
+    {
+        await context.RouteStates
+            .Where(routeState => !targetIds.Contains(routeState.Id) &&
+                                 routeState.IsThrowOutSRelayRaised == RaiseDrop.Raise
+            )
+            .ExecuteUpdateAsync(r =>
+                r.SetProperty(routeState => routeState.IsThrowOutSRelayRaised, RaiseDrop.Drop)
+            );
+    }
 }

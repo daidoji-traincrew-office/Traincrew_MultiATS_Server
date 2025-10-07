@@ -71,5 +71,9 @@ public interface IRouteRepository
     /// <param name="routeIds">チェック対象の進路IDリスト</param>
     /// <returns>Sリレーが落下している又は進路照査リレーが扛上している進路のIDリスト</returns>
     Task<List<ulong>> GetIdsByIdsForSRelay(List<ulong> routeIds);
-
+    /// <summary>
+    /// 指定されたID以外の進路の総括制御Sリレーを落下させる
+    /// </summary>
+    /// <param name="targetIds">総括制御Sリレーを維持する進路のIDリスト</param>
+    Task DropThrowOutSRelayExceptByIds(List<ulong> targetIds);
 }
