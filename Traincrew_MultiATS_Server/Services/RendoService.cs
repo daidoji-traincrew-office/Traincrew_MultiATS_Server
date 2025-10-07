@@ -634,6 +634,94 @@ public class RendoService(
     }
 
     /// <summary>
+    /// てこナシ総括時奥だけ先取り防止回路
+    /// </summary>
+    public async Task SRelay()
+    {
+        // てこナシ総括制御を取得する
+        var throwOutControlsWithoutLever = await throwOutControlRepository
+            .GetByControlTypes([ThrowOutControlType.WithoutLever]);
+        // その中から、Sリレーが落下している進路 または 進路照査リレーが扛上している進路で絞り込む
+        var routeIds = await routeRepository.GetIdsByIdsForSRelay(throwOutControlsWithoutLever
+            .Select(toc => toc.TargetId)
+            .ToList());
+        // 対象がないのであれば、処理を止める
+        if (routeIds.Count == 0)
+        {
+            return;
+        }
+
+        // 該当する総括制御を取得
+        var throwOutControls = throwOutControlsWithoutLever
+            .Where(toc => routeIds.Contains(toc.TargetId))
+            .ToList();
+        // 総括される側の進路を取得
+        var routes = await routeRepository.GetByIdsWithState(routeIds.ToList());
+        // 総括される側進路の最終接近鎖錠軌道回路を取得
+        var finalTrackCircuitByTargetId =
+            await trackCircuitRepository.GetApproachLockFinalTrackCircuitsByRouteIds(routeIds);
+        // 総括する側の最初に通る転てつ器と転換方向を取得し、総括される側進路IDで引けるようにする
+        var targetIdBySourceId = throwOutControls
+            .ToDictionary(toc => toc.SourceId, toc => toc.TargetId);
+        var switchingMachineRouteBySourceId =
+            await switchingMachineRouteRepository.GetFirstByRouteIds(targetIdBySourceId.Keys.ToList());
+        var switchingMachineRouteByTargetId = switchingMachineRouteBySourceId
+            .ToDictionary(kvp => targetIdBySourceId[kvp.Key], kvp => kvp.Value);
+        var switchingMachineIds = switchingMachineRouteBySourceId
+            .Values
+            .Select(smr => smr?.SwitchingMachineId)
+            .OfType<ulong>()
+            .ToList();
+        var switchingMachineById = (
+            await switchingMachineRepository.GetByIdsWithState(switchingMachineIds)
+        ).ToDictionary(sm => sm.Id);
+
+        foreach (var route in routes)
+        {
+            var trackCircuit = finalTrackCircuitByTargetId[route.Id];
+            var switchingMachineRoute = switchingMachineRouteByTargetId.GetValueOrDefault(route.Id);
+            var switchingMachine = switchingMachineRoute == null
+                ? null
+                : switchingMachineById[switchingMachineRoute.SwitchingMachineId];
+            var result = ProcessSRelay(route, trackCircuit, switchingMachineRoute, switchingMachine);
+            if (result == route.RouteState.IsThrowOutSRelayRaised)
+            {
+                continue;
+            }
+
+            route.RouteState.IsThrowOutSRelayRaised = result;
+            await generalRepository.Save(route.RouteState);
+        }
+    }
+
+    private RaiseDrop ProcessSRelay(
+        Route route,
+        TrackCircuit trackCircuit,
+        SwitchingMachineRoute? switchingMachineRoute,
+        SwitchingMachine? switchingMachine
+    )
+    {
+        var trackCircuitState = trackCircuit.TrackCircuitState;
+        var routeState = route.RouteState!;
+        // 転てつ器が想定方向と逆の方向に転換完了しているか？
+        var switchingMachineIsReversed =
+            // 総括する側に通る転てつ器がない場合、True。逆にする場合は != null として&&にする
+            switchingMachineRoute == null
+            || (
+                !switchingMachine.SwitchingMachineState.IsSwitching
+                && switchingMachine.SwitchingMachineState.IsReverse != switchingMachineRoute.IsReverse
+            );
+        return
+            (
+                (!trackCircuitState.IsLocked || switchingMachineIsReversed)
+                && (!trackCircuitState.IsShortCircuit || routeState.IsThrowOutSRelayRaised == RaiseDrop.Raise)
+            )
+            || routeState is { IsRouteRelayRaised: RaiseDrop.Drop, IsThrowOutSRelayRaised: RaiseDrop.Raise }
+                ? RaiseDrop.Raise
+                : RaiseDrop.Drop;
+    }
+
+    /// <summary>
     /// 時素リレー回路
     /// </summary>
     public async Task TimerRelay()
@@ -1475,6 +1563,12 @@ public class RendoService(
 
         // 進路鎖錠リレーが向上している場合、信号制御リレーを落下させる
         if (route.RouteState.IsRouteLockRaised == RaiseDrop.Raise)
+        {
+            return RaiseDrop.Drop;
+        }
+
+        // Sリレーが扛上している場合、信号制御リレーを落下させる
+        if (route.RouteState.IsThrowOutSRelayRaised == RaiseDrop.Raise)
         {
             return RaiseDrop.Drop;
         }

@@ -19,7 +19,7 @@ public class ThrowOutControlRepository(ApplicationDbContext context) : IThrowOut
             .ToListAsync();
     }
 
-    public async Task<List<Models.ThrowOutControl>> GetBySourceIds(List<ulong> sourceIds, List<ThrowOutControlType> controlTypes)
+    public async Task<List<Models.ThrowOutControl>> GetBySourceIdsAndTypes(List<ulong> sourceIds, List<ThrowOutControlType> controlTypes)
     {
         return await context.ThrowOutControls
             .Where(t => sourceIds.Contains(t.SourceId) && controlTypes.Contains(t.ControlType))
@@ -33,7 +33,7 @@ public class ThrowOutControlRepository(ApplicationDbContext context) : IThrowOut
             .ToListAsync();
     }
 
-    public async Task<List<Models.ThrowOutControl>> GetByTargetIds(List<ulong> targetIds, List<ThrowOutControlType> controlTypes)
+    public async Task<List<Models.ThrowOutControl>> GetByTargetIdsAndTypes(List<ulong> targetIds, List<ThrowOutControlType> controlTypes)
     {
         return await context.ThrowOutControls
             .Where(t => targetIds.Contains(t.TargetId) && controlTypes.Contains(t.ControlType))

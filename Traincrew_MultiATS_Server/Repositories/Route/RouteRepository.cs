@@ -158,4 +158,14 @@ public class RouteRepository(ApplicationDbContext context) : IRouteRepository
             .Where(r => r.RouteState.IsApproachLockMSRaised == RaiseDrop.Raise)
             .ToListAsync();
     }
+
+    public async Task<List<ulong>> GetIdsByIdsForSRelay(List<ulong> routeIds)
+    {
+        return await context.Routes
+            .Where(r => routeIds.Contains(r.Id)
+                && (r.RouteState.IsThrowOutSRelayRaised == RaiseDrop.Drop
+                    || r.RouteState.IsRouteRelayRaised == RaiseDrop.Raise))
+            .Select(r => r.Id)
+            .ToListAsync();
+    }
 }

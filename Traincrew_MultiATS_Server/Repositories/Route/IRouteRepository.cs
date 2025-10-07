@@ -65,5 +65,11 @@ public interface IRouteRepository
     /// </summary>
     /// <returns> 接近鎖錠MSリレーが扛上している進路のリスト </returns>
     Task<List<Models.Route>> GetWhereApproachLockMSRelayIsRaised();
+    /// <summary>
+    /// 渡されたrouteIdsの中から、Sリレーが落下している又は進路照査リレーが扛上している進路の進路IDを取得する
+    /// </summary>
+    /// <param name="routeIds">チェック対象の進路IDリスト</param>
+    /// <returns>Sリレーが落下している又は進路照査リレーが扛上している進路のIDリスト</returns>
+    Task<List<ulong>> GetIdsByIdsForSRelay(List<ulong> routeIds);
 
 }

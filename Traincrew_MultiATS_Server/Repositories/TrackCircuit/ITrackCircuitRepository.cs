@@ -13,4 +13,5 @@ public interface ITrackCircuitRepository
     Task LockByIds(List<ulong> ids, ulong routeId);
     Task StartUnlockTimerByIds(List<ulong> ids, DateTime unlockedAt);
     Task UnlockByIds(List<ulong> ids);
+    Task<Dictionary<ulong, Models.TrackCircuit>> GetApproachLockFinalTrackCircuitsByRouteIds(List<ulong> routeIds);
 }
