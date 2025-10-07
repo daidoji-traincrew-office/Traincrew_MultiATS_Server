@@ -49,7 +49,7 @@ public class InitDbHostedService(
         await InitServerStatus(context, cancellationToken);
         await InitTtcWindows(context, cancellationToken);
         await InitTtcWindowLinks(context, cancellationToken);
-        await InitThrowOutControlCsv(context, cancellationToken);
+        await InitThrowOutControls(context, cancellationToken);
 
         if (dbInitializer != null)
         {
@@ -499,7 +499,7 @@ public class InitDbHostedService(
         await context.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task InitThrowOutControlCsv(ApplicationDbContext context, CancellationToken cancellationToken)
+    private async Task InitThrowOutControls(ApplicationDbContext context, CancellationToken cancellationToken)
     {
         var file = new FileInfo("./Data/総括制御ペア一覧.csv");
         if (!file.Exists)
@@ -541,6 +541,7 @@ public class InitDbHostedService(
 
             InterlockingObject target;
             LR? targetLr = null;
+            NR? conditionNr = null;
             ulong? conditionLeverId = null;
 
             // 総括種類による分岐処理
@@ -558,13 +559,13 @@ public class InitDbHostedService(
 
                 case ThrowOutControlType.Direction:
                     // 方向の場合、方向進路を探す
-                    // record.LeverConditionから方向進路名を取得（末尾のNを除いてFに置換）
                     if (string.IsNullOrEmpty(record.LeverCondition))
                     {
                         continue;
                     }
 
-                    var directionRouteName = record.LeverCondition.TrimEnd('N') + "F";
+                    // record.LeverConditionから方向進路名を取得（末尾を除いてFに置換）
+                    var directionRouteName = record.TargetLever[..^1] + "F";
                     if (!directionRoutesByName.TryGetValue(directionRouteName, out var directionRoute))
                     {
                         continue;
@@ -581,6 +582,7 @@ public class InitDbHostedService(
                     {
                         conditionLeverId = directionSelfControlLever.Id;
                         directionRoute.DirectionSelfControlLeverId = conditionLeverId;
+                        conditionNr = NR.Normal;
                         context.DirectionRoutes.Update(directionRoute);
                     }
 
@@ -601,7 +603,9 @@ public class InitDbHostedService(
                 SourceId = sourceRoute.Id,
                 TargetId = target.Id,
                 TargetLr = targetLr,
-                ConditionLeverId = conditionLeverId
+                ConditionLeverId = conditionLeverId,
+                ConditionNr = conditionNr,
+                ControlType = record.Type
             });
         }
 
