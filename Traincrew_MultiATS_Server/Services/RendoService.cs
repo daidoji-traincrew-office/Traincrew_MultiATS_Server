@@ -703,7 +703,7 @@ public class RendoService(
     {
         var trackCircuitState = trackCircuit.TrackCircuitState;
         var routeState = route.RouteState!;
-        // 転てつ器が想定方向と逆の方向に転換完了しているか？
+        // 転てつ器が想定方向と逆の方向に転換完了しているか？(=想定方向と逆の扛上接点)
         var switchingMachineIsReversed =
             // 総括する側に通る転てつ器がない場合、True。逆にする場合は != null として&&にする
             switchingMachineRoute == null
@@ -713,9 +713,12 @@ public class RendoService(
             );
         return
             (
+                // 軌道回路が鎖錠されている or 転てつ器の想定方向と扛上接点
                 (!trackCircuitState.IsLocked || switchingMachineIsReversed)
+                // 軌道回路が短絡されているか or 自己保持
                 && (!trackCircuitState.IsShortCircuit || routeState.IsThrowOutSRelayRaised == RaiseDrop.Raise)
             )
+            // 進路照査の落下接点 and 自己保持
             || routeState is { IsRouteRelayRaised: RaiseDrop.Drop, IsThrowOutSRelayRaised: RaiseDrop.Raise }
                 ? RaiseDrop.Raise
                 : RaiseDrop.Drop;
