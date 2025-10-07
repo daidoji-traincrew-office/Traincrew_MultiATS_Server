@@ -1438,13 +1438,10 @@ public class RendoService(
             var routeLockTrackCircuit = routeLockTrackCircuitDictionary.GetValueOrDefault(routeId, []);
 
             // この進路に対して総括制御「される」進路
-            var targetThrowOutRoutes = targetThrowOutControlDictionary.GetValueOrDefault(route.Id, [])
-                .Select(toc => interlockingObjects[toc.TargetId])
-                .OfType<Route>()
-                .ToList();
+            var targetThrowOutControls = targetThrowOutControlDictionary.GetValueOrDefault(route.Id, []);
 
             var result = ProcessSignalControl(route, directLockCondition, signalControlCondition,
-                routeLockTrackCircuit, targetThrowOutRoutes, interlockingObjects);
+                routeLockTrackCircuit, targetThrowOutControls, interlockingObjects);
             // 変更があれば、DBに保存する
             if (route.RouteState.IsSignalControlRaised == result)
             {
@@ -1460,7 +1457,7 @@ public class RendoService(
         List<LockCondition> directLockCondition,
         List<LockCondition> signalControlCondition,
         List<TrackCircuit> routeLockTrackCircuit,
-        List<Route> targetThrowOutRoutes,
+        List<ThrowOutControl> targetThrowOutControls,
         Dictionary<ulong, InterlockingObject> interlockingObjects)
     {
         // 進路照査リレーが落下している場合、信号制御リレーを落下させる
@@ -1503,10 +1500,27 @@ public class RendoService(
 
         // 総括制御する場合、総括制御先のすべての信号制御リレーが落下している場合、信号制御リレーを落下させる
         // (= すなわち、総括制御の場合は奥の信号が開いてないなら開けない)
-        if (
-            targetThrowOutRoutes.Any(r =>
-                r.RouteState.IsThrowOutXRRelayRaised == RaiseDrop.Raise
-                && r.RouteState.IsSignalControlRaised == RaiseDrop.Drop))
+        if (targetThrowOutControls.Any(toc =>
+            {
+                var targetRoute = interlockingObjects[toc.TargetId] as Route;
+                return toc.ControlType switch
+                {
+                    ThrowOutControlType.WithLever => targetRoute is
+                    {
+                        RouteState:
+                        {
+                            IsSignalControlRaised: RaiseDrop.Drop,
+                            IsThrowOutXRRelayRaised: RaiseDrop.Raise
+                        }
+                    },
+                    ThrowOutControlType.WithoutLever => targetRoute is
+                    {
+                        RouteState.IsSignalControlRaised: RaiseDrop.Drop,
+                    },
+                    ThrowOutControlType.Direction => false,
+                    _ => true
+                };
+            }))
         {
             return RaiseDrop.Drop;
         }
