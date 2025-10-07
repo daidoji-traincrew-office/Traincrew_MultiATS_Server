@@ -1502,7 +1502,7 @@ public class RendoService(
         // (= すなわち、総括制御の場合は奥の信号が開いてないなら開けない)
         if (targetThrowOutControls.Any(toc =>
             {
-                var targetRoute = interlockingObjects[toc.TargetId] as Route;
+                var targetRoute = interlockingObjects.GetValueOrDefault(toc.TargetId) as Route;
                 return toc.ControlType switch
                 {
                     ThrowOutControlType.WithLever => targetRoute is
