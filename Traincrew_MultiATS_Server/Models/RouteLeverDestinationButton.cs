@@ -10,8 +10,7 @@ public class RouteLeverDestinationButton
     public ulong Id { get; set; }
     public ulong RouteId { get; set; }
     public ulong LeverId { get; set; }
-    public Lever Lever { get; set; }
     public LR Direction { get; set; }
     public string? DestinationButtonName { get; set; }
-    public DestinationButton? DestinationButton { get; set; }
+    
 }

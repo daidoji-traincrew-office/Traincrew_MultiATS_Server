@@ -183,18 +183,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
         modelBuilder.Entity<TrainCarState>()
             .HasKey(t => new { t.TrainStateId, t.Index });
-        
-        modelBuilder.Entity<RouteLeverDestinationButton>()
-            .HasOne(rldb => rldb.Lever)
-            .WithMany()
-            .HasForeignKey(rldb => rldb.LeverId)
-            .HasPrincipalKey(l => l.Id);
-        
-        modelBuilder.Entity<RouteLeverDestinationButton>()
-            .HasOne(rldb => rldb.DestinationButton)
-            .WithMany()
-            .HasForeignKey(rldb => rldb.DestinationButtonName)
-            .HasPrincipalKey(db => db.Name);
 
         // Convert all column names to snake_case 
         foreach (var entity in modelBuilder.Model.GetEntityTypes())

@@ -9,6 +9,5 @@ public interface ILeverRepository
     Task<List<ulong>?> GetAllIds();
     
     Task<List<Models.Lever>> GetAllWithState();
-    
-    Task<List<Models.Lever>> GetByIdsWithState(IEnumerable<ulong> ids);
+
 }

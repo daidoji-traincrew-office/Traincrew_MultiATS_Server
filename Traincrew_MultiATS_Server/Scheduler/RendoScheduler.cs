@@ -28,10 +28,6 @@ public class RendoScheduler(IServiceScopeFactory serviceScopeFactory) : Schedule
         {
             await service.RouteRelay();
         }
-        using (activity?.Source.StartActivity($"{GetType().Name}.SRelay"))
-        {
-            await service.SRelay();
-        }
         using (activity?.Source.StartActivity($"{GetType().Name}.SignalControl"))
         {
             await service.SignalControl();

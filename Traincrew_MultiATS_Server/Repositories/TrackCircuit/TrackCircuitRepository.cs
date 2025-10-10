@@ -103,24 +103,4 @@ public class TrackCircuitRepository(ApplicationDbContext context) : ITrackCircui
                 .SetProperty(tcs => tcs.LockedBy, (ulong?)null)
                 .SetProperty(tcs => tcs.UnlockedAt, (DateTime?)null));
     }
-
-
-    public async Task<Dictionary<ulong, Models.TrackCircuit>> GetApproachLockFinalTrackCircuitsByRouteIds(
-        List<ulong> routeIds)
-    {
-        return await context.TrackCircuits
-            .Include(tc => tc.TrackCircuitState)
-            .Join(
-                context.Routes,
-                tc => tc.Id,
-                r => r.ApproachLockFinalTrackCircuitId,
-                (tc, r) => new { r.Id, tc }
-            )
-            .Where(x => routeIds.Contains(x.Id))
-            .GroupBy(x => x.Id)
-            .ToDictionaryAsync(
-                x => x.Key,
-                x => x.Select(y => y.tc).First()
-            );
-    }
 }

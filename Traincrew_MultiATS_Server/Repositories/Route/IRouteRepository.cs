@@ -7,16 +7,6 @@ public interface IRouteRepository
     /// </summary>
     Task<List<Models.Route>> GetByIdsWithState(List<ulong> ids);
     /// <summary>
-    /// てこ反応リレーまたは総括制御XRリレー、総括制御YSリレーが扛上している進路のIDを取得する
-    /// </summary>
-    /// <returns>てこ反応リレーまたは総括制御XRリレー、総括制御YSリレーが扛上している進路のIDのリスト</returns>
-    Task<List<ulong>> GetIdsWhereLeverRelayOrThrowOutIsRaised();
-    /// <summary>
-    /// てこか倒れているか、着点ボタンが圧下している進路のIDを取得する
-    /// </summary>
-    /// <returns>進路のIDのリスト</returns>
-    Task<List<ulong>> GetIdsToOpen();
-    /// <summary>
     /// てこ反応リレーが落下しており かつ 転てつ器無し進路照査リレーが扛上している進路に対し、転てつ器無し進路照査リレーを落下させる
     /// </summary>
     Task DropRouteRelayWithoutSwitchingMachineWhereLeverRelayIsDropped();
@@ -65,15 +55,5 @@ public interface IRouteRepository
     /// </summary>
     /// <returns> 接近鎖錠MSリレーが扛上している進路のリスト </returns>
     Task<List<Models.Route>> GetWhereApproachLockMSRelayIsRaised();
-    /// <summary>
-    /// 渡されたrouteIdsの中から、Sリレーが落下している又は進路照査リレーが扛上している進路の進路IDを取得する
-    /// </summary>
-    /// <param name="routeIds">チェック対象の進路IDリスト</param>
-    /// <returns>Sリレーが落下している又は進路照査リレーが扛上している進路のIDリスト</returns>
-    Task<List<ulong>> GetIdsByIdsForSRelay(List<ulong> routeIds);
-    /// <summary>
-    /// 指定されたID以外の進路の総括制御Sリレーを落下させる
-    /// </summary>
-    /// <param name="targetIds">総括制御Sリレーを維持する進路のIDリスト</param>
-    Task DropThrowOutSRelayExceptByIds(List<ulong> targetIds);
+
 }

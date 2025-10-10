@@ -48,12 +48,4 @@ public class SwitchingMachineRepository(ApplicationDbContext context) : ISwitchi
             .Select(s => s.smr.SwitchingMachineId)
             .ToListAsync();
     }
-
-    public Task<List<Models.SwitchingMachine>> GetByIdsWithState(List<ulong> ids)
-    {
-        return context.SwitchingMachines
-            .Include(sm => sm.SwitchingMachineState)
-            .Where(sm => ids.Contains(sm.Id))
-            .ToListAsync();
-    }
 }

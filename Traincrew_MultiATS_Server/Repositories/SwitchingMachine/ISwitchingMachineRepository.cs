@@ -21,9 +21,4 @@ public interface ISwitchingMachineRepository
     /// てこリレー回路が扛上している進路に対する転てつ器のIDを取得する
     /// </summary>
     Task<List<ulong>> GetIdsWhereLeverRelayRaised();
-
-    /// <summary>
-    /// 指定されたIDの転てつ器とその状態を取得する
-    /// </summary>
-    Task<List<Models.SwitchingMachine>> GetByIdsWithState(List<ulong> ids);
 }
