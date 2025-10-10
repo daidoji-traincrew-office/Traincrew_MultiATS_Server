@@ -15,7 +15,7 @@ using OpenTelemetry.Trace;
 using Traincrew_MultiATS_Server.Activity;
 using Traincrew_MultiATS_Server.Authentication;
 using Traincrew_MultiATS_Server.Data;
-using Traincrew_MultiATS_Server.HostedService;
+using Traincrew_MultiATS_Server.Initializer;
 using Traincrew_MultiATS_Server.Hubs;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.DestinationButton;
