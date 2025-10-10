@@ -17,7 +17,8 @@ namespace Traincrew_MultiATS_Server.HostedService;
 
 public class InitDbHostedService(
     IServiceScopeFactory serviceScopeFactory,
-    ILoggerFactory loggerFactory
+    ILoggerFactory loggerFactory,
+    ILogger<InitDbHostedService> logger
 ) : IHostedService
 {
     public async Task StartAsync(CancellationToken cancellationToken)
@@ -536,6 +537,7 @@ public class InitDbHostedService(
             // 総括制御元の進路を取得
             if (!routesByName.TryGetValue(record.SourceLever, out var sourceRoute))
             {
+                logger.LogWarning("総括制御元が見つかりません。処理をスキップします。: {SourceLever}", record.SourceLever);
                 continue;
             }
 
