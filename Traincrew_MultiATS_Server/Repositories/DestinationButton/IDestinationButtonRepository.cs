@@ -6,6 +6,13 @@ public interface IDestinationButtonRepository
     /// すべての着点ボタンとその状態を取得する
     /// </summary>
     Task<List<Models.DestinationButton>> GetAllWithState();
+    
+    /// <summary>
+    /// 名前を複数指定して着点ボタンを取得する
+    /// </summary>
+    /// <param name="names">着点ボタンの名前のリスト。</param>
+    /// <returns>見つかった着点ボタンのリスト</returns>
+    Task<List<Models.DestinationButton>> GetByNames(IEnumerable<string> names);
 
     /// <summary>
     /// 名前を指定して着点ボタンを取得する
