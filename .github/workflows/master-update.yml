@@ -20,7 +20,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4.2.2
-      
+        with:
+          fetch-depth: 0
+
       - name: Set branch name
         id: branch
         run: |
