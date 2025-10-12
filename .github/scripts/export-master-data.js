@@ -1,4 +1,4 @@
-const { google } = require('googleapis');
+const sheetsApi = require('@googleapis/sheets');
 const fs = require('fs').promises;
 const path = require('path');
 
@@ -163,7 +163,7 @@ async function main() {
   try {
     // 認証クライアントを取得
     const authClient = await getAuthClient();
-    const sheets = google.sheets({ version: 'v4', auth: authClient });
+    const sheets = sheetsApi({ version: 'v4', auth: authClient });
 
     // ディレクトリを作成
     await fs.mkdir(DATA_DIR, { recursive: true });

@@ -37,7 +37,7 @@ jobs:
         uses: google-github-actions/setup-gcloud@v2.2.1
 
       - name: Install dependencies
-        run: npm install googleapis google-auth-library
+        run: npm install @googleapis/sheets google-auth-library
 
       - name: Export spreadsheets to CSV
         run: node .github/scripts/export-master-data.js
