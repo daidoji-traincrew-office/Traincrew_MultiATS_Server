@@ -36,7 +36,6 @@ jobs:
         run: |
           git checkout -b ${{ steps.branch.outputs.name }} || git checkout ${{ steps.branch.outputs.name }}
           git pull --no-rebase origin ${{ steps.branch.outputs.name }} || true
-          
 
       - name: Set up Node.js
         uses: actions/setup-node@v4.4.0
