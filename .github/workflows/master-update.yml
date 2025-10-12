@@ -8,6 +8,7 @@ on:
 
 env:
   DATA_DIR: Traincrew_MultiATS_Server.Crew/Data
+  TZ: Asia/Tokyo
 
 jobs:
   update-master-data:
