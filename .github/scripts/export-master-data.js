@@ -55,11 +55,6 @@ async function getAuthClient() {
     scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly']
   };
 
-  // GOOGLE_APPLICATION_CREDENTIALSが設定されている場合は明示的に指定
-  if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-    authOptions.keyFile = process.env.GOOGLE_APPLICATION_CREDENTIALS;
-  }
-
   const auth = new GoogleAuth(authOptions);
   return await auth.getClient();
 }
@@ -163,7 +158,7 @@ async function main() {
   try {
     // 認証クライアントを取得
     const authClient = await getAuthClient();
-    const sheets = sheetsApi({ version: 'v4', auth: authClient });
+    const sheets = sheetsApi.sheets({ version: 'v4', auth: authClient });
 
     // ディレクトリを作成
     await fs.mkdir(DATA_DIR, { recursive: true });
