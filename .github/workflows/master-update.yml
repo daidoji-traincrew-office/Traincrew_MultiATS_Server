@@ -20,6 +20,23 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4.2.2
+      
+      - name: Set branch name
+        id: branch
+        run: |
+          BRANCH_NAME="master_update/$(date +'%Y%m%d')"
+          echo "name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+      
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Create or pull branch
+        run: |
+          git checkout -b ${{ steps.branch.outputs.name }} || git checkout ${{ steps.branch.outputs.name }}
+          git pull --no-rebase origin ${{ steps.branch.outputs.name }} || true
+          
 
       - name: Set up Node.js
         uses: actions/setup-node@v4.4.0
@@ -45,21 +62,8 @@ jobs:
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ steps.auth.outputs.credentials_file_path }}
 
-      - name: Set branch name
-        id: branch
+      - name: Commit and push 
         run: |
-          BRANCH_NAME="master_update/$(date +'%Y%m%d')"
-          echo "name=$BRANCH_NAME" >> $GITHUB_OUTPUT
-
-      - name: Configure Git
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: Create and push branch
-        run: |
-          git checkout -b ${{ steps.branch.outputs.name }} || git checkout ${{ steps.branch.outputs.name }}
-          git pull --no-rebase origin ${{ steps.branch.outputs.name }} || true
           git add ${{ env.DATA_DIR }}
           if git diff --staged --quiet; then
             echo "No changes to commit"
