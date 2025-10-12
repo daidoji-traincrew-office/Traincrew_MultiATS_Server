@@ -59,6 +59,7 @@ jobs:
       - name: Create and push branch
         run: |
           git checkout -b ${{ steps.branch.outputs.name }} || git checkout ${{ steps.branch.outputs.name }}
+          git pull origin ${{ steps.branch.outputs.name }} || true
           git add ${{ env.DATA_DIR }}
           if git diff --staged --quiet; then
             echo "No changes to commit"
