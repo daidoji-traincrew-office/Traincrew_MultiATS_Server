@@ -49,9 +49,18 @@ const MASTER_RANGES_NO_REMOVE_FIRST_EMPTY = [
  * Google Sheets APIクライアントを初期化
  */
 async function getAuthClient() {
-  const auth = new google.auth.GoogleAuth({
+  const { GoogleAuth } = require('google-auth-library');
+
+  const authOptions = {
     scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly']
-  });
+  };
+
+  // GOOGLE_APPLICATION_CREDENTIALSが設定されている場合は明示的に指定
+  if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+    authOptions.keyFile = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+  }
+
+  const auth = new GoogleAuth(authOptions);
   return await auth.getClient();
 }
 

@@ -27,6 +27,7 @@ jobs:
           node-version: '20'
 
       - name: Authenticate to Google Cloud
+        id: auth
         uses: google-github-actions/auth@v2.1.13
         with:
           project_id: ${{ secrets.GOOGLE_PROJECT_ID }}
@@ -36,7 +37,7 @@ jobs:
         uses: google-github-actions/setup-gcloud@v2.2.1
 
       - name: Install dependencies
-        run: npm install @googleapis/sheets
+        run: npm install @googleapis/sheets google-auth-library
 
       - name: Export spreadsheets to CSV
         run: node .github/scripts/export-master-data.js
