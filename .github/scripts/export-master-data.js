@@ -1,4 +1,4 @@
-const { google } = require('@googleapis/sheets');
+const { google } = require('googleapis');
 const fs = require('fs').promises;
 const path = require('path');
 
