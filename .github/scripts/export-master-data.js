@@ -98,6 +98,8 @@ function convertToCSV(data, removeFirstEmpty, removeEmptyColumn) {
     const columnCount = filteredRows[0]?.length || 0;
     const nonEmptyColumns = [];
     for (let col = 0; col < columnCount; col++) {
+        const column = filteredRows.map(row => row[col]);
+        console.log(column);
         if (!removeEmptyColumn || filteredRows.some(row => row[col] !== '')) {
             nonEmptyColumns.push(col);
         }
