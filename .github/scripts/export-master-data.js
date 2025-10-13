@@ -138,7 +138,7 @@ async function exportOneDataToCSV(
                 continue;
             }
 
-            const sheetName = !addIndexToSheetName && rangeList.length === 1
+            const sheetName = !addIndexToSheetName || rangeList.length === 1
                 ? stationName
                 : `${stationName}${index + 1}`;
 
