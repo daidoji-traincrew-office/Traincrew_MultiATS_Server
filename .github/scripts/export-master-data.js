@@ -33,7 +33,7 @@ const MASTER_RANGES = [
   ['進路', '進路', ['A1:L338']],
   ['信号', '信号リスト', ['A1:X365']],
   ['軌道回路', '軌道回路に対する計算するべき信号機リスト', ['A1:X371']],
-  ['総括制御ペア一覧', '総括制御ペア一覧', ['A1:D68']],
+  ['総括制御ペア一覧', '総括制御ペア一覧', ['A1:D67']],
   ['運転告知器', '運転告知器', ['A1:H63']],
   ['TTC列番窓', 'TTC列番窓', ['A1:I188']],
   ['TTC列番窓リンク設定', 'TTC列番窓リンク設定', ['A1:J415']],
@@ -87,7 +87,7 @@ function convertToCSV(data, removeFirstEmpty, removeEmptyColumn) {
   const columnCount = filteredRows[0]?.length || 0;
   const nonEmptyColumns = [];
   for (let col = 0; col < columnCount; col++) {
-    if (!removeEmptyColumn || filteredRows.some(row => row[col] !== '' && row[col] !== undefined)) {
+    if (!removeEmptyColumn || filteredRows.some(row => row[col] !== '')) {
       nonEmptyColumns.push(col);
     }
   }
