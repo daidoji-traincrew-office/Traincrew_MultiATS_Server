@@ -2,9 +2,6 @@ name: Master Data Update
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - feature/master_update_ci
 
 env:
   DATA_DIR: Traincrew_MultiATS_Server.Crew/Data
