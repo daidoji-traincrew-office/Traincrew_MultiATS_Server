@@ -123,6 +123,7 @@ async function exportOneDataToCSV(
     sheets,
     spreadsheetId,
     ranges,
+    addIndexToSheetName,
     removeFirstEmpty,
     removeEmptyColumn,
     outputDir
@@ -137,7 +138,7 @@ async function exportOneDataToCSV(
                 continue;
             }
 
-            const sheetName = rangeList.length === 1
+            const sheetName = addIndexToSheetName && rangeList.length === 1
                 ? stationName
                 : `${stationName}${index + 1}`;
 
@@ -180,6 +181,7 @@ async function main() {
             sheets,
             RENDO_SPREADSHEET_ID,
             RENDO_RANGES,
+            true,
             false,
             true,
             RENDO_DIR
@@ -190,6 +192,7 @@ async function main() {
             sheets,
             MASTER_SPREADSHEET_ID,
             MASTER_RANGES,
+            false,
             true,
             false,
             DATA_DIR
@@ -200,6 +203,7 @@ async function main() {
             sheets,
             MASTER_SPREADSHEET_ID,
             MASTER_RANGES_NO_REMOVE_FIRST_EMPTY,
+            false,
             false,
             false,
             DATA_DIR
