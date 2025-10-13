@@ -74,6 +74,9 @@ async function getSpreadsheetData(sheets, spreadsheetId, sheetName, range) {
  * データをCSV形式に変換
  */
 function convertToCSV(data, removeFirstEmpty, removeEmptyColumn) {
+  for(const rows of data){
+    console.log(rows.join(","));
+  }
   // 空の行を除外
   const filteredRows = removeFirstEmpty
     ? data.filter(row => row[0] !== '' && row[0] !== 'なし')
