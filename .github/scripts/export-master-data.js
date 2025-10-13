@@ -102,7 +102,7 @@ function convertToCSV(data, removeFirstEmpty, removeEmptyColumn) {
     .map(row =>
       row.map(cell => String(cell).replace(/\n/g, '')).join(',')
     )
-    .join('\r\n');
+    .join('\n');
 }
 
 /**
