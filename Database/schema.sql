@@ -372,9 +372,11 @@ CREATE TABLE lock_condition_object
     is_lr          lr                                                   -- 方向てこの方向
 );
 -- 統括制御テーブル
+CREATE TYPE throw_out_control_type AS ENUM ('with_lever', 'without_lever', 'direction');
 CREATE TABLE throw_out_control
 (
     id                 BIGSERIAL PRIMARY KEY,
+    control_type       throw_out_control_type NOT NULL,                     -- 総括の種類
     source_id          BIGINT REFERENCES interlocking_object (id) NOT NULL, -- 統括元オブジェクトID
     source_lr          lr,                                                  -- 統括元が方向てこの場合、方向てこの向き
     target_id          BIGINT REFERENCES interlocking_object (id) NOT NULL, -- 統括先オブジェクトID
@@ -396,6 +398,7 @@ CREATE TABLE switching_machine_route
     UNIQUE (switching_machine_id, route_id)
 );
 CREATE INDEX switching_machine_route_switching_machine_id_index ON switching_machine_route (switching_machine_id);
+CREATE INDEX switching_machine_route_route_id_index ON switching_machine_route (route_id);
 
 -- 進路鎖錠で鎖状するべき軌道回路のリスト
 CREATE TABLE route_lock_track_circuit
@@ -522,8 +525,10 @@ CREATE TABLE route_state
     is_approach_lock_mr_raised                      raise_drop NOT NULL,                      -- 接近鎖状が上がっているか
     is_approach_lock_ms_raised                      raise_drop NOT NULL,                      -- 接近鎖状が上がっているか
     is_route_lock_raised                            raise_drop NOT NULL,                      -- 進路鎖状が上がっているか
-    is_throw_out_xr_relay_raised                    raise_drop NOT NULL,                      -- 統括制御リレーが上がっているか
-    is_throw_out_ys_relay_raised                    raise_drop NOT NULL,                      -- 統括制御リレーが上がっているか
+    is_throw_out_xr_relay_raised                    raise_drop NOT NULL,                      -- xrリレーが上がっているか
+    is_throw_out_ys_relay_raised                    raise_drop NOT NULL,                      -- ysリレーが上がっているか
+    is_throw_out_x_relay_raised                     raise_drop NOT NULL DEFAULT 'drop',       -- xリレーが上がっているか
+    is_throw_out_s_relay_raised                     raise_drop NOT NULL DEFAULT 'drop'        -- sリレーが上がっているか
     is_ctc_relay_raised                             raise_drop NOT NULL DEFAULT 'drop'        -- CTCリレーが上がっているか
 );
 
@@ -533,24 +538,6 @@ CREATE TABLE signal_state
     signal_name VARCHAR(100) PRIMARY KEY REFERENCES signal (name), -- 信号機の名前
     is_lighted  BOOLEAN NOT NULL                                   -- 点灯状態
 );
-
--- 鎖状状態
--- 進路鎖状の場合、接近鎖状の場合、てっさ鎖状、保留鎖状
--- テッサ鎖状は、軌道回路の短絡状態を見ればよいので含めない
--- 接近鎖状は、鎖状しているオブジェクトのlock_typeをすべて接近鎖状に変更し、end_timeを設定する
--- 進路鎖状は、進路から軌道回路に鎖状をかける(特段追加カラム必要なし)
--- 保留鎖状は、接近鎖状とほぼ同じ
-CREATE TABLE lock_state
-(
-    id               BIGSERIAL PRIMARY KEY,
-    target_object_id BIGINT REFERENCES interlocking_object (ID) NOT NULL, -- 鎖状されるオブジェクトID
-    source_object_id BIGINT REFERENCES interlocking_object (ID) NOT NULL, -- 鎖状する要因のオブジェクトID
-    is_reverse       nr                                         NOT NULL, -- 定反
-    lock_type        lock_type                                  NOT NULL, -- 鎖状の種類
-    end_time         TIMESTAMP                                            -- 接近鎖状が終了する時刻
-);
-
-CREATE INDEX lock_state_target_object_id_index ON lock_state (target_object_id);
 
 -- 防護無線状態
 CREATE TABLE protection_zone_state

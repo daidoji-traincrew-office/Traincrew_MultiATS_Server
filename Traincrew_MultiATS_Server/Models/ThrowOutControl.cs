@@ -46,4 +46,8 @@ public class ThrowOutControl
     /// てこ条件の開放てこの向き
     /// </summary>
     public NR? ConditionNr { get; init; }
+    /// <summary>
+    /// 統括制御タイプ
+    /// </summary>
+    public ThrowOutControlType ControlType { get; init; }
 }
