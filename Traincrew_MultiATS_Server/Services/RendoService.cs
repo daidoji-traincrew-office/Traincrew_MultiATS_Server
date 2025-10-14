@@ -60,7 +60,10 @@ public class RendoService(
 
         foreach (var routeCentralControlLever in routeCentralControlLevers)
         {
-            routeCentralControlLever.RouteCentralControlLeverState.IsChrRelayRaised = routeCentralControlLever.RouteCentralControlLeverState.IsReversed == NR.Reversed ? RaiseDrop.Raise : RaiseDrop.Drop;
+            routeCentralControlLever.RouteCentralControlLeverState.IsChrRelayRaised =
+                routeCentralControlLever.RouteCentralControlLeverState.IsReversed == NR.Reversed
+                    ? RaiseDrop.Raise
+                    : RaiseDrop.Drop;
             await generalRepository.Save(routeCentralControlLever.RouteCentralControlLeverState);
         }
     }
@@ -86,12 +89,8 @@ public class RendoService(
             .GroupBy(c => c.SourceId)
             .ToDictionary(g => g.Key, g => g.ToList());
 
-        var routeCentralControlLeverByName = interlockingObjects.Values
-            .Where(obj => obj is RouteCentralControlLever)
-            .ToDictionary(
-                obj => obj.Name,
-                obj => (obj as RouteCentralControlLever)!
-            );
+        // Todo: 繋ぎ込み
+        Dictionary<string, RouteCentralControlLever> routeCentralControlLeverByName = [];
         // てこ反応リレー/総括制御XR, YSが扛上している進路のIDを全取得
         var routeIdsIsRaised = await routeRepository.GetIdsWhereLeverRelayOrThrowOutIsRaised();
         // てこが倒れている、または着点ボタンが押されている進路のIDを全取得
@@ -139,7 +138,7 @@ public class RendoService(
             .Select(rdb => rdb.LeverId)
             .Distinct()
             .ToList();
-        
+
         var leverById = (await leverRepository.GetByIdsWithState(leverIds))
             .ToDictionary(l => l.Id);
         var leverByRouteId = routeLeverDestinationButtonList
@@ -252,17 +251,23 @@ public class RendoService(
             if (routeCentralControlLever == null)
             {
                 isLeverRelayRaised = RaiseDrop.Drop;
-                logger.LogInformation("[{RendoServiceName}.{LeverToRouteStateName}] 駅集中制御てこが見つかりません。StationId={RouteStationId}", nameof(RendoService), nameof(LeverToRouteState), route.StationId);
+                logger.LogInformation(
+                    "[{RendoServiceName}.{LeverToRouteStateName}] 駅集中制御てこが見つかりません。StationId={RouteStationId}",
+                    nameof(RendoService), nameof(LeverToRouteState), route.StationId);
             }
             else if (routeCentralControlLever.RouteCentralControlLeverState == null)
             {
                 isLeverRelayRaised = RaiseDrop.Drop;
-                logger.LogInformation("[{RendoServiceName}.{LeverToRouteStateName}] 駅集中制御てこの状態が見つかりません。StationId={RouteStationId}", nameof(RendoService), nameof(LeverToRouteState), route.StationId);
+                logger.LogInformation(
+                    "[{RendoServiceName}.{LeverToRouteStateName}] 駅集中制御てこの状態が見つかりません。StationId={RouteStationId}",
+                    nameof(RendoService), nameof(LeverToRouteState), route.StationId);
             }
             else if (routeCentralControlLever.RouteCentralControlLeverState.IsChrRelayRaised == null)
             {
                 isLeverRelayRaised = RaiseDrop.Drop;
-                logger.LogInformation("[{RendoServiceName}.{LeverToRouteStateName}] 駅集中制御てこのCHR状態が見つかりません。StationId={RouteStationId}", nameof(RendoService), nameof(LeverToRouteState), route.StationId);
+                logger.LogInformation(
+                    "[{RendoServiceName}.{LeverToRouteStateName}] 駅集中制御てこのCHR状態が見つかりません。StationId={RouteStationId}",
+                    nameof(RendoService), nameof(LeverToRouteState), route.StationId);
             }
             // Todo: CTC制御状態を確認する(CHR相当)
             else if (routeCentralControlLever.RouteCentralControlLeverState.IsChrRelayRaised == RaiseDrop.Raise)
@@ -276,11 +281,11 @@ public class RendoService(
 
                 // Refactor: それぞれの条件をメソッド化した方が良い
                 if (sourceThrowOutControlWithLever.Count > 0)
-            {
-                // この進路に対して総括制御「する」進路
-                var sourceThrowOutRoutes = sourceThrowOutControlWithLever
-                    .Select(toc => routeById[toc.SourceId])
-                .ToList();
+                {
+                    // この進路に対して総括制御「する」進路
+                    var sourceThrowOutRoutes = sourceThrowOutControlWithLever
+                        .Select(toc => routeById[toc.SourceId])
+                        .ToList();
                     //総括する各進路の根本レバーを取得
                     var sourceLevers = sourceThrowOutRoutes
                         .Select(r => leverByRouteId[r.Id])
@@ -332,12 +337,14 @@ public class RendoService(
                     var approachLockFinalTrackCircuitId = route.ApproachLockFinalTrackCircuitId;
                     var finalApproachTrackState = false;
                     if (approachLockFinalTrackCircuitId != null
-                        && interlockingObjectById.TryGetValue(approachLockFinalTrackCircuitId.Value, out var finalApproachTrackCircuit))
+                        && interlockingObjectById.TryGetValue(approachLockFinalTrackCircuitId.Value,
+                            out var finalApproachTrackCircuit))
                     {
                         var finalTrackCircuit = (finalApproachTrackCircuit as TrackCircuit)!;
                         // 自進路の接近鎖錠欄に書かれている条件のうち最終の軌道回路条件の状態を取得 鎖錠していない
                         finalApproachTrackState = !finalTrackCircuit.TrackCircuitState.IsLocked;
                     }
+
                     // 自進路の信号制御欄に書かれている条件に書かれている軌道回路の状態を取得
                     var signalControlLockTrackCircuitState = signalControlConditions[route.Id]
                         .OfType<LockConditionObject>()
@@ -378,87 +385,89 @@ public class RendoService(
                     routeState.IsThrowOutYSRelayRaised = isThrowOutYSRelayRaised;
                 }
 
-            var isXRelayRaised = RaiseDrop.Drop;
-            // てこなし総括がある場合、Xリレーの計算をする
-            if (sourceThrowOutControlWithoutLever.Count > 0)
-            {
-                // この進路に対して総括制御「する」進路
-                var sourceThrowOutRoutes = sourceThrowOutControlWithoutLever
-                    .Select(toc => routeById[toc.SourceId])
-                    .ToList();
-                var approachLockFinalTrackCircuitId = route.ApproachLockFinalTrackCircuitId;
-                var finalApproachTrackState = false;
-                if (approachLockFinalTrackCircuitId != null
-                    && interlockingObjectById.TryGetValue(approachLockFinalTrackCircuitId.Value,
-                        out var finalApproachTrackCircuit))
+                var isXRelayRaised = RaiseDrop.Drop;
+                // てこなし総括がある場合、Xリレーの計算をする
+                if (sourceThrowOutControlWithoutLever.Count > 0)
                 {
-                    var finalTrackCircuit = (finalApproachTrackCircuit as TrackCircuit)!;
-                    // 自進路の接近鎖錠欄に書かれている条件のうち最終の軌道回路条件の状態を取得 鎖錠していない
-                    finalApproachTrackState = !finalTrackCircuit.TrackCircuitState.IsLocked;
+                    // この進路に対して総括制御「する」進路
+                    var sourceThrowOutRoutes = sourceThrowOutControlWithoutLever
+                        .Select(toc => routeById[toc.SourceId])
+                        .ToList();
+                    var approachLockFinalTrackCircuitId = route.ApproachLockFinalTrackCircuitId;
+                    var finalApproachTrackState = false;
+                    if (approachLockFinalTrackCircuitId != null
+                        && interlockingObjectById.TryGetValue(approachLockFinalTrackCircuitId.Value,
+                            out var finalApproachTrackCircuit))
+                    {
+                        var finalTrackCircuit = (finalApproachTrackCircuit as TrackCircuit)!;
+                        // 自進路の接近鎖錠欄に書かれている条件のうち最終の軌道回路条件の状態を取得 鎖錠していない
+                        finalApproachTrackState = !finalTrackCircuit.TrackCircuitState.IsLocked;
+                    }
+
+                    isXRelayRaised = (
+                        sourceThrowOutRoutes.Any(r => r.RouteState.IsLeverRelayRaised == RaiseDrop.Raise)
+                        && finalApproachTrackState
+                    ) || (
+                        !finalApproachTrackState
+                        && routeState.IsThrowOutXRelayRaised == RaiseDrop.Raise
+                    )
+                        ? RaiseDrop.Raise
+                        : RaiseDrop.Drop;
                 }
 
-                isXRelayRaised = (
-                    sourceThrowOutRoutes.Any(r => r.RouteState.IsLeverRelayRaised == RaiseDrop.Raise)
-                    && finalApproachTrackState
-                ) || (
-                    !finalApproachTrackState
-                    && routeState.IsThrowOutXRelayRaised == RaiseDrop.Raise
-                )
-                    ? RaiseDrop.Raise
-                    : RaiseDrop.Drop;
-            }
+                if (routeState.IsThrowOutXRelayRaised != isXRelayRaised)
+                {
+                    isChanged = true;
+                }
 
-            if (routeState.IsThrowOutXRelayRaised != isXRelayRaised)
-            {
-                isChanged = true;
-            }
+                routeState.IsThrowOutXRelayRaised = isXRelayRaised;
 
-            routeState.IsThrowOutXRelayRaised = isXRelayRaised;
-
-            var isLeverRelayRaised =
-                !IsLocked(lockCondition, interlockingObjectById)
-                &&
-                otherRoutes.All(route => route.RouteState.IsLeverRelayRaised == RaiseDrop.Drop)
-                &&
-                (
+                isLeverRelayRaised =
+                    !IsLocked(lockCondition, interlockingObjectById)
+                    &&
+                    otherRoutes.All(route => route.RouteState.IsLeverRelayRaised == RaiseDrop.Drop)
+                    &&
                     (
-                        routeState is
-                            { IsThrowOutYSRelayRaised: RaiseDrop.Drop, IsThrowOutXRRelayRaised: RaiseDrop.Drop }
-                        &&
                         (
-                            routeLeverDestinationButton.Direction == LR.Left && leverState == LCR.Left
-                            ||
-                            routeLeverDestinationButton.Direction == LR.Right && leverState == LCR.Right
+                            routeState is
+                                { IsThrowOutYSRelayRaised: RaiseDrop.Drop, IsThrowOutXRRelayRaised: RaiseDrop.Drop }
+                            &&
+                            (
+                                routeLeverDestinationButton.Direction == LR.Left && leverState == LCR.Left
+                                ||
+                                routeLeverDestinationButton.Direction == LR.Right && leverState == LCR.Right
+                            )
                         )
+                        ||
+                        routeState.IsThrowOutYSRelayRaised == RaiseDrop.Raise
+                        ||
+                        routeState.IsThrowOutXRelayRaised == RaiseDrop.Raise
                     )
-                    ||
-                    routeState.IsThrowOutYSRelayRaised == RaiseDrop.Raise
-                    ||
-                    routeState.IsThrowOutXRelayRaised == RaiseDrop.Raise
-                )
-                &&
-                (
-                    button.DestinationButtonState.IsRaised == RaiseDrop.Raise
-                    ||
+                    &&
                     (
-                        routeState.IsLeverRelayRaised == RaiseDrop.Raise
-                        && targetThrowOutRoutes.All(r => r.RouteState.IsThrowOutXRRelayRaised == RaiseDrop.Drop)
-                    )
-                    ||
-                    targetThrowOutRoutes.Any(r =>
-                        r.RouteState.IsLeverRelayRaised == RaiseDrop.Raise
-                        &&
-                        r.RouteState.IsThrowOutXRRelayRaised == RaiseDrop.Raise
-                        &&
-                        targetSourceThrowOutRoutes[r.Id].All(sr =>
-                            sr.RouteState.IsLeverRelayRaised == RaiseDrop.Drop
+                        button.DestinationButtonState.IsRaised == RaiseDrop.Raise
+                        ||
+                        (
+                            routeState.IsLeverRelayRaised == RaiseDrop.Raise
+                            && targetThrowOutRoutes.All(r => r.RouteState.IsThrowOutXRRelayRaised == RaiseDrop.Drop)
                         )
+                        ||
+                        targetThrowOutRoutes.Any(r =>
+                            r.RouteState.IsLeverRelayRaised == RaiseDrop.Raise
+                            &&
+                            r.RouteState.IsThrowOutXRRelayRaised == RaiseDrop.Raise
+                            &&
+                            targetSourceThrowOutRoutes[r.Id].All(sr =>
+                                sr.RouteState.IsLeverRelayRaised == RaiseDrop.Drop
+                            )
+                        )
+                        ||
+                        routeState.IsThrowOutXRelayRaised == RaiseDrop.Raise
                     )
-                    ||
-                    routeState.IsThrowOutXRelayRaised == RaiseDrop.Raise
-                )
-                    ? RaiseDrop.Raise
-                    : RaiseDrop.Drop;
+                        ? RaiseDrop.Raise
+                        : RaiseDrop.Drop;
+            }
+
             if (routeState.IsLeverRelayRaised != isLeverRelayRaised)
             {
                 isChanged = true;
@@ -679,7 +688,7 @@ public class RendoService(
             .GetByControlTypes([ThrowOutControlType.WithoutLever]);
         var targetIds = throwOutControlsWithoutLever.Select(toc => toc.TargetId).ToList();
         // てこナシ総括がない進路でSリレーが扛上していた場合、落下させておく
-        await routeRepository.DropThrowOutSRelayExceptByIds(targetIds); 
+        await routeRepository.DropThrowOutSRelayExceptByIds(targetIds);
         // てこナシ総括がある進路の中から、Sリレーが落下している進路 または 進路照査リレーが扛上している進路で絞り込む
         var routeIds = await routeRepository.GetIdsByIdsForSRelay(targetIds);
         // 対象がないのであれば、処理を止める
@@ -1626,12 +1635,6 @@ public class RendoService(
 
         // 鎖錠確認 進路の鎖錠欄の条件を満たしていない場合早期continue
         if (MustIndicateStopSignalByDirectLockConditions(directLockCondition, interlockingObjects))
-        {
-            return RaiseDrop.Drop;
-        }
-
-        // 総括制御される進路のいずれかが信号制御リレーが落下している場合、信号制御リレーを落下させる
-        if (targetThrowOutRoutes.Any(r => r.RouteState.IsThrowOutXRRelayRaised == RaiseDrop.Raise) && targetThrowOutRoutes.All(r => r.RouteState.IsSignalControlRaised == RaiseDrop.Drop))
         {
             return RaiseDrop.Drop;
         }
