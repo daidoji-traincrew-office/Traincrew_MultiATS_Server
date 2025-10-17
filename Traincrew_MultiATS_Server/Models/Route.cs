@@ -13,5 +13,6 @@ public class Route : InterlockingObject
     public string? Indicator { get; set; }
     public int? ApproachLockTime { get; set; }
     public RouteState? RouteState { get; set; }
+    public RouteCentralControlLeverState? RouteCentralControlLeverState { get; set; }
     public ulong? ApproachLockFinalTrackCircuitId { get; set; }
 }

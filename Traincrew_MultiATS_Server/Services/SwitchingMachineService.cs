@@ -114,13 +114,19 @@ public class SwitchingMachineService(
             // 対応する転てつ器のてこ状態を取得
             var leverState = levers[switchingMachine.Id].LeverState.IsReversed;
 
-            var requestNormal = leverState == LCR.Left;
-            var requestReverse = leverState == LCR.Right;
-            var isRoutelock = false;
-
             // 対応する転てつ器の要求進路一覧を取得
             // Todo: 全部データをちゃんと入れたら、デフォルト値を使わないようにする
             var switchingMachineRouteList = switchingMachineRouteDict.GetValueOrDefault(switchingMachine.Id, []);
+
+            // CHCリレー(進路中央制御レバー状態)が向上しているか確認
+            var isChcRelayRaised = switchingMachineRouteList
+                .Any(smr => routes.TryGetValue(smr.RouteId, out var route) &&
+                            route.RouteCentralControlLeverState?.IsChcRelayRaised == RaiseDrop.Raise);
+
+            // CHCリレーが向上していない場合のみ、単独てこの位置を考慮する
+            var requestNormal = !isChcRelayRaised && leverState == LCR.Left;
+            var requestReverse = !isChcRelayRaised && leverState == LCR.Right;
+            var isRoutelock = false;
 
             foreach (var switchingMachineRoute in switchingMachineRouteList)
             {

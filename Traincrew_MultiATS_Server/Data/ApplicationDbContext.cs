@@ -12,6 +12,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Route> Routes { get; set; }
     public DbSet<RouteLockTrackCircuit> RouteLockTrackCircuits { get; set; }
     public DbSet<RouteState> RouteStates { get; set; }
+    public DbSet<RouteCentralControlLeverState> RouteCentralControlLeverStates { get; set; }
     public DbSet<SwitchingMachine> SwitchingMachines { get; set; }
     public DbSet<TrackCircuit> TrackCircuits { get; set; }
     public DbSet<TrackCircuitState> TrackCircuitStates { get; set; }
@@ -60,6 +61,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasOne(r => r.RouteState)
             .WithOne()
             .HasForeignKey<RouteState>(rs => rs.Id);
+
+        modelBuilder.Entity<Route>()
+            .HasOne(r => r.RouteCentralControlLeverState)
+            .WithOne()
+            .HasForeignKey<RouteCentralControlLeverState>(rccls => rccls.Id);
 
         modelBuilder.Entity<Route>()
             .HasOne(r => r.Root)
