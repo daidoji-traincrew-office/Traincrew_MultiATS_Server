@@ -130,16 +130,22 @@ public class SwitchingMachineService(
 
             var requestNormal = false;
             var requestReverse = false;
-            // CHCリレーが落下している場合
-            if (switchingMachineRouteList.All(x =>
+            var isChrRelayRaised = switchingMachineRouteList
+                .Any(x =>
                 {
-                    var centralControlLeverId = routeCentralControlLeverById.GetValueOrDefault(x.RouteId)?.Id;
-                    var centralControlLever = centralControlLeverId != null
-                        ? routeCentralControlLeverById.GetValueOrDefault(centralControlLeverId.Value)
-                        : null;
-                    return centralControlLever == null ||
-                           centralControlLever.RouteCentralControlLeverState.IsChrRelayRaised == RaiseDrop.Drop;
-                }))
+                    if (!routeCentralControlLeverIdByRouteId.TryGetValue(x.RouteId, out var centralControlLeverId))
+                    {
+                        return false;
+                    }
+
+                    var centralControlLever = routeCentralControlLeverById.GetValueOrDefault(centralControlLeverId);
+                    return centralControlLever != null
+                           && centralControlLever.RouteCentralControlLeverState.IsChrRelayRaised == RaiseDrop.Raise;
+                })
+                ? RaiseDrop.Raise
+                : RaiseDrop.Drop;
+            // CHRリレーが落下している場合
+            if (isChrRelayRaised == RaiseDrop.Drop)
             {
                 // 対応する転てつ器のてこ状態を取得
                 var leverState = levers[switchingMachine.Id].LeverState.IsReversed;
@@ -177,6 +183,7 @@ public class SwitchingMachineService(
                     }
                 }
             }
+
             if (isRoutelock)
             {
                 //鎖錠中
