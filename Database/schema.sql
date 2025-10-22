@@ -528,7 +528,7 @@ CREATE TABLE route_state
     is_throw_out_xr_relay_raised                    raise_drop NOT NULL,                      -- xrリレーが上がっているか
     is_throw_out_ys_relay_raised                    raise_drop NOT NULL,                      -- ysリレーが上がっているか
     is_throw_out_x_relay_raised                     raise_drop NOT NULL DEFAULT 'drop',       -- xリレーが上がっているか
-    is_throw_out_s_relay_raised                     raise_drop NOT NULL DEFAULT 'drop'        -- sリレーが上がっているか
+    is_throw_out_s_relay_raised                     raise_drop NOT NULL DEFAULT 'drop',       -- sリレーが上がっているか
     is_ctc_relay_raised                             raise_drop NOT NULL DEFAULT 'drop'        -- CTCリレーが上がっているか
 );
 
