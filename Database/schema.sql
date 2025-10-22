@@ -602,6 +602,7 @@ CREATE TYPE server_mode AS ENUM ('off', 'private', 'public');
 
 -- サーバー状態テーブル(基本Entityは1つの想定)
 CREATE TABLE server_state (
-    id   SERIAL PRIMARY KEY,
-    mode server_mode NOT NULL
+    id          SERIAL PRIMARY KEY,
+    mode        server_mode NOT NULL,
+    time_offset INTEGER NOT NULL DEFAULT 0
 );

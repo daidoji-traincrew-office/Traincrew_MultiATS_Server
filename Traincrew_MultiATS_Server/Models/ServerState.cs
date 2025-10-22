@@ -8,4 +8,5 @@ public class ServerState
 {
     public int Id { get; set; }
     public ServerMode Mode { get; set; }
+    public int TimeOffset { get; set; } = 0;
 }

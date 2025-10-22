@@ -114,4 +114,14 @@ public class CommanderTableHub(
     {
         await serverService.SetServerModeAsync(mode);
     }
+
+    public async Task<int> GetTimeOffset()
+    {
+        return await serverService.GetTimeOffsetAsync();
+    }
+
+    public async Task SetTimeOffset(int timeOffset)
+    {
+        await serverService.SetTimeOffsetAsync(timeOffset);
+    }
 }
