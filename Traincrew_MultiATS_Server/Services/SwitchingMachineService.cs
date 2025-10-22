@@ -5,6 +5,7 @@ using Traincrew_MultiATS_Server.Repositories.General;
 using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
 using Traincrew_MultiATS_Server.Repositories.Lever;
 using Traincrew_MultiATS_Server.Repositories.LockCondition;
+using Traincrew_MultiATS_Server.Repositories.LockConditionByRouteCentralControlLever;
 using Traincrew_MultiATS_Server.Repositories.SwitchingMachine;
 using Traincrew_MultiATS_Server.Repositories.SwitchingMachineRoute;
 using Route = Traincrew_MultiATS_Server.Models.Route;
@@ -18,8 +19,9 @@ public class SwitchingMachineService(
     ISwitchingMachineRouteRepository switchingMachineRouteRepository,
     ILockConditionRepository lockConditionRepository,
     ILeverRepository leverRepository,
+    ILockConditionByRouteCentralControlLeverRepository lockConditionByRouteCentralControlLeverRepository,
     IGeneralRepository generalRepository
-    )
+)
 {
     /// <summary>
     /// <strong>転てつ器制御回路・転てつ器表示リレー回路</strong><br/>
@@ -44,14 +46,20 @@ public class SwitchingMachineService(
             .Union(leverReversedSwitchingMachineIds)
             .Union(leverRelayRaisedSwitchingMachineIds)
             .ToList();
-        
+
         // 転てつ器てこのIDを取得
-        var leverIds = await leverRepository.GetIdsBySwitchingMachineIds(switchingMachineIds); 
-        
+        var leverIds = await leverRepository.GetIdsBySwitchingMachineIds(switchingMachineIds);
+
         // 進路のIDを取得
         var switchingMachineRoutes =
             await switchingMachineRouteRepository.GetBySwitchingMachineIds(switchingMachineIds);
         var routeIds = switchingMachineRoutes.Select(route => route.RouteId).ToList();
+
+        // 集中てこのIDを取得
+        var routeCentralControlLeverIdByRouteId =
+            (await lockConditionByRouteCentralControlLeverRepository.GetByRouteIds(routeIds))
+            .ToDictionary(lc => lc.RouteId, lc => lc.RouteCentralControlLeverId);
+        var routeCentralControlLeverIds = routeCentralControlLeverIdByRouteId.Values.ToList();
 
         // てっさ鎖錠欄の条件を取得
         var detectorLockConditions = await lockConditionRepository
@@ -67,6 +75,7 @@ public class SwitchingMachineService(
         var allObjectIds = switchingMachineIds
             .Union(leverIds)
             .Union(routeIds)
+            .Union(routeCentralControlLeverIds)
             .Union(detectorLockObjects)
             .ToList();
         var interlockingObjects = await interlockingObjectRepository.GetObjectByIdsWithState(allObjectIds);
@@ -81,12 +90,16 @@ public class SwitchingMachineService(
             .Where(x => x.SwitchingMachineId != null)
             .ToDictionary(x => x.SwitchingMachineId.Value);
         // SwitchingMachineRouteのDict
-        var switchingMachineRouteDict = switchingMachineRoutes 
+        var switchingMachineRouteDict = switchingMachineRoutes
             .GroupBy(x => x.SwitchingMachineId)
             .ToDictionary(x => x.Key, x => x.ToList());
         // 進路のDict
         var routes = interlockingObjects
             .OfType<Route>()
+            .ToDictionary(x => x.Id);
+        // 集中てこのDict
+        var routeCentralControlLeverById = interlockingObjects
+            .OfType<RouteCentralControlLever>()
             .ToDictionary(x => x.Id);
 
         foreach (var switchingMachine in switchingMachineList)
@@ -111,16 +124,31 @@ public class SwitchingMachineService(
                 await generalRepository.Save(switchingMachineState);
             }
 
-            // 対応する転てつ器のてこ状態を取得
-            var leverState = levers[switchingMachine.Id].LeverState.IsReversed;
-
-            var requestNormal = leverState == LCR.Left;
-            var requestReverse = leverState == LCR.Right;
-            var isRoutelock = false;
-
             // 対応する転てつ器の要求進路一覧を取得
             // Todo: 全部データをちゃんと入れたら、デフォルト値を使わないようにする
             var switchingMachineRouteList = switchingMachineRouteDict.GetValueOrDefault(switchingMachine.Id, []);
+
+            var requestNormal = false;
+            var requestReverse = false;
+            // CHCリレーが落下している場合
+            if (switchingMachineRouteList.All(x =>
+                {
+                    var centralControlLeverId = routeCentralControlLeverById.GetValueOrDefault(x.RouteId)?.Id;
+                    var centralControlLever = centralControlLeverId != null
+                        ? routeCentralControlLeverById.GetValueOrDefault(centralControlLeverId.Value)
+                        : null;
+                    return centralControlLever == null ||
+                           centralControlLever.RouteCentralControlLeverState.IsChrRelayRaised == RaiseDrop.Drop;
+                }))
+            {
+                // 対応する転てつ器のてこ状態を取得
+                var leverState = levers[switchingMachine.Id].LeverState.IsReversed;
+
+                requestNormal = leverState == LCR.Left;
+                requestReverse = leverState == LCR.Right;
+            }
+
+            var isRoutelock = false;
 
             foreach (var switchingMachineRoute in switchingMachineRouteList)
             {
@@ -183,6 +211,7 @@ public class SwitchingMachineService(
                 // 対応する転てつ器のSwitchingMachineState.IsReverseをNR.Reversedにする    
                 switchingMachineState.IsReverse = NR.Reversed;
             }
+
             DateTime switchEndTime;
             // 転換中の転てつ器が、転換を終了する前に反転した場合
             if (switchingMachineState.IsSwitching && now < switchingMachineState.SwitchEndTime)
