@@ -599,9 +599,11 @@ CREATE INDEX operation_information_state_end_time_index ON operation_information
 
 -- サーバー状態管理用Enum
 CREATE TYPE server_mode AS ENUM ('off', 'private', 'public');
+CREATE TYPE raise_drop_with_force AS ENUM ('force_drop', 'drop', 'raise');
 
 -- サーバー状態テーブル(基本Entityは1つの想定)
 CREATE TABLE server_state (
-    id   SERIAL PRIMARY KEY,
-    mode server_mode NOT NULL
+    id                          SERIAL PRIMARY KEY,
+    mode                        server_mode           NOT NULL,
+    is_all_signal_relay_raised  raise_drop_with_force NOT NULL DEFAULT 'drop'
 );
