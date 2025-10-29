@@ -278,7 +278,8 @@ public class InitDbHostedService(
 
         context.ServerStates.Add(new()
         {
-            Mode = ServerMode.Off
+            Mode = ServerMode.Off,
+            IsAllSignalRelayRaised = RaiseDropWithForce.Drop
         });
         await context.SaveChangesAsync(cancellationToken);
     }
