@@ -23,4 +23,16 @@ public class ServerRepository(ApplicationDbContext context) : IServerRepository
         context.ServerStates.Update(state);
         await context.SaveChangesAsync();
     }
+
+    public async Task SetIsAllSignalRelayRaisedAsync(RaiseDropWithForce raiseDropWithForce)
+    {
+        var state = await context.ServerStates.FirstOrDefaultAsync();
+        if (state == null)
+        {
+            return;
+        }
+        state.IsAllSignalRelayRaised = raiseDropWithForce;
+        context.ServerStates.Update(state);
+        await context.SaveChangesAsync();
+    }
 }

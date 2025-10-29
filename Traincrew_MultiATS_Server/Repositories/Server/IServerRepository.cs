@@ -7,5 +7,6 @@ public interface IServerRepository
 {
     Task<ServerState?> GetServerStateAsync();
     Task SetServerStateAsync(ServerMode mode);
+    Task SetIsAllSignalRelayRaisedAsync(RaiseDropWithForce raiseDropWithForce);
 }
 
