@@ -1,6 +1,7 @@
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.NextSignal;
+using Traincrew_MultiATS_Server.Repositories.Server;
 using Traincrew_MultiATS_Server.Repositories.Signal;
 using Traincrew_MultiATS_Server.Repositories.SignalRoute;
 using Route = Traincrew_MultiATS_Server.Models.Route;
@@ -10,7 +11,8 @@ namespace Traincrew_MultiATS_Server.Services;
 public class SignalService(
     ISignalRepository signalRepository,
     ISignalRouteRepository signalRouteRepository,
-    INextSignalRepository nextSignalRepository)
+    INextSignalRepository nextSignalRepository,
+    IServerRepository serverRepository)
 {
     /// <summary>
     /// 指定した軌道回路から見える信号機の現示データを計算する
@@ -20,7 +22,6 @@ public class SignalService(
     /// <returns>信号機の現示データのリスト</returns>
     public async Task<List<SignalData>> GetSignalIndicationDataByTrackCircuits(List<TrackCircuit> trackCircuits, bool isUp)
     {
-        
         // 該当軌道回路の信号機を全取得
         var closeSignalName = await GetSignalNamesByTrackCircuits(trackCircuits, isUp);
         // 各信号機の１つ先の信号機も取得
@@ -30,6 +31,17 @@ public class SignalService(
             .Concat(nextSignalName.Select(x => x.TargetSignalName))
             .Distinct()
             .ToList();
+
+        // フェイルセーフチェック: isAllSignalRelayRaisedがRaiseでない場合、すべての信号を停止として返す
+        var serverState = await serverRepository.GetServerStateAsync();
+        if (serverState?.IsAllSignalRelayRaised != RaiseDropWithForce.Raise)
+        {
+            // すべての信号を停止現示として返す
+            return signalName 
+                .Select(name => ToSignalData(name, Phase.R))
+                .ToList();
+        }
+
         // 現示計算
         var signalIndications = await CalcSignalIndication(signalName);
         return signalIndications
