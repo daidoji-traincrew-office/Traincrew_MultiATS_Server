@@ -38,4 +38,17 @@ public class RouteCentralControlLeverRepository(ApplicationDbContext context) : 
             .Include(lever => lever.RouteCentralControlLeverState)
             .ToListAsync();
     }
+
+    /// <summary>
+    /// 指定されたIDのリストから進路集中制御てこを取得する。
+    /// </summary>
+    /// <param name="ids">進路集中制御てこのIDのリスト。</param>
+    /// <returns>RouteCentralControlLever のリスト。</returns>
+    public async Task<List<Models.RouteCentralControlLever>> GetByIds(List<ulong> ids)
+    {
+        return await context.RouteCentralControlLevers
+            .Include(lever => lever.RouteCentralControlLeverState)
+            .Where(lever => ids.Contains(lever.Id))
+            .ToListAsync();
+    }
 }

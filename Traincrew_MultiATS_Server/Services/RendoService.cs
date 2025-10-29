@@ -9,6 +9,7 @@ using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
 using Traincrew_MultiATS_Server.Repositories.Lever;
 using Traincrew_MultiATS_Server.Repositories.Lock;
 using Traincrew_MultiATS_Server.Repositories.LockCondition;
+using Traincrew_MultiATS_Server.Repositories.LockConditionByRouteCentralControlLever;
 using Traincrew_MultiATS_Server.Repositories.Route;
 using Traincrew_MultiATS_Server.Repositories.RouteCentralControlLever;
 using Traincrew_MultiATS_Server.Repositories.RouteLeverDestinationButton;
@@ -46,7 +47,8 @@ public class RendoService(
     IDirectionRouteRepository directionRouteRepository,
     IDirectionSelfControlLeverRepository directionSelfControlLeverRepository,
     ILeverRepository leverRepository,
-    IRouteCentralControlLeverRepository routeCentralControlRepository,
+    IRouteCentralControlLeverRepository routeCentralControlLeverRepository,
+    ILockConditionByRouteCentralControlLeverRepository lockConditionByRouteCentralControlLeverRepository,
     IGeneralRepository generalRepository,
     ILogger<RendoService> logger)
 {
@@ -56,7 +58,8 @@ public class RendoService(
     public async Task CHRRelay()
     {
         //仮接続
-        var routeCentralControlLevers = await routeCentralControlRepository.GetAllWithState();
+        var routeCentralControlLevers = await routeCentralControlLeverRepository
+            .GetAllWithState();
 
         foreach (var routeCentralControlLever in routeCentralControlLevers)
         {
@@ -89,8 +92,6 @@ public class RendoService(
             .GroupBy(c => c.SourceId)
             .ToDictionary(g => g.Key, g => g.ToList());
 
-        // Todo: 繋ぎ込み
-        Dictionary<string, RouteCentralControlLever> routeCentralControlLeverByName = [];
         // てこ反応リレー/総括制御XR, YSが扛上している進路のIDを全取得
         var routeIdsIsRaised = await routeRepository.GetIdsWhereLeverRelayOrThrowOutIsRaised();
         // てこが倒れている、または着点ボタンが押されている進路のIDを全取得
@@ -161,6 +162,21 @@ public class RendoService(
         // DestinationButtonを取得
         var buttonsByName = (await destinationButtonRepository.GetByNames(destinationButtonNames))
             .ToDictionary(b => b.Name);
+        
+        // 駅扱いてこのIDを取得
+        var routeCentralControlLeverIdByRouteId =
+            (await lockConditionByRouteCentralControlLeverRepository.GetByRouteIds(routeIds))
+            .ToDictionary(lc => lc.RouteId, lc => lc.RouteCentralControlLeverId);
+        // 駅扱いてこを取得
+        var routeCentralControlLeverByIds =
+            (await routeCentralControlLeverRepository.GetByIds(routeCentralControlLeverIdByRouteId.Values.ToList()))
+            .ToDictionary(rccl => rccl.Id);
+        // 進路ID => 駅扱いてこ で引けるようにしておく
+        var routeCentralControlLeverByRouteIds = routeCentralControlLeverIdByRouteId
+            .ToDictionary(
+                kvp => kvp.Key,
+                kvp => routeCentralControlLeverByIds.GetValueOrDefault(kvp.Value)
+            );
 
         // 直接鎖錠条件を取得
         var lockConditions = await lockConditionRepository.GetConditionsByObjectIdsAndType(routeIds, LockType.Lock);
@@ -246,8 +262,8 @@ public class RendoService(
 
             var isLeverRelayRaised = RaiseDrop.Drop;
 
-            // Todo: 駅扱いてこ繋ぎ込み
-            var routeCentralControlLever = routeCentralControlLeverByName[$"{route.StationId}_81"];
+            // 駅扱いてこ
+            var routeCentralControlLever = routeCentralControlLeverByRouteIds.GetValueOrDefault(route.Id);
             if (routeCentralControlLever == null)
             {
                 isLeverRelayRaised = RaiseDrop.Drop;
