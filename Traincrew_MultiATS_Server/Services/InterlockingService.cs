@@ -51,7 +51,7 @@ public class InterlockingService(
         // それら全部の信号の現示計算
         var signalIndications = await signalService.CalcSignalIndication(signalNames, getDetailedIndication: false);
         // 各ランプの状態を取得
-        var lamps = await GetLamps(stationIds, directionSelfControlLevers);
+        var lamps = await GetLamps(stationIds, directionSelfControlLevers, routeCentralControlLevers);
         // 列番窓を取得
         var ttcWindows = await ttcStationControlService.GetTtcWindowsByStationIdsWithState(stationIds);
 
@@ -92,7 +92,10 @@ public class InterlockingService(
         return response;
     }
 
-    private async Task<Dictionary<string, bool>> GetLamps(List<string> stationIds, List<DirectionSelfControlLever> directionSelfControlLevers)
+    private async Task<Dictionary<string, bool>> GetLamps(
+        List<string> stationIds,
+        List<DirectionSelfControlLever> directionSelfControlLevers,
+        List<RouteCentralControlLever> routeCentralControlLevers)
     {
         // Todo: 一旦仮でFalse
         var pwrFailure = stationIds.ToDictionary(
@@ -101,6 +104,21 @@ public class InterlockingService(
         var ctcFailure = stationIds.ToDictionary(
             stationId => $"{stationId}_CTC-FAILURE",
             _ => false);
+        var chrLamps = routeCentralControlLevers
+            .SelectMany(rccl =>
+            {
+                var stationId = rccl.StationId;
+                return new KeyValuePair<string, bool>[]
+                {
+                    new(
+                        $"{stationId}_CHRNK",
+                        rccl.RouteCentralControlLeverState?.IsChrRelayRaised == RaiseDrop.Drop),
+                    new(
+                        $"{stationId}_CHRRK",
+                        rccl.RouteCentralControlLeverState?.IsChrRelayRaised == RaiseDrop.Raise)
+                };
+            })
+            .ToDictionary();
         // 駅の時素状態を取得
         var stationTimerStates = (await stationRepository.GetTimerStatesByStationIds(stationIds))
             .ToDictionary(
@@ -109,8 +127,9 @@ public class InterlockingService(
 
         return pwrFailure
             .Concat(ctcFailure)
+            .Concat(chrLamps)
             .Concat(stationTimerStates)
-            .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            .ToDictionary();
     }
 
     /// <summary>
