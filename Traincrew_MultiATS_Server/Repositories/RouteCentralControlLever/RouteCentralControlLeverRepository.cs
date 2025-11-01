@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Data;
+using Traincrew_MultiATS_Server.Models;
 
 namespace Traincrew_MultiATS_Server.Repositories.RouteCentralControlLever;
 
@@ -49,6 +51,31 @@ public class RouteCentralControlLeverRepository(ApplicationDbContext context) : 
         return await context.RouteCentralControlLevers
             .Include(lever => lever.RouteCentralControlLeverState)
             .Where(lever => ids.Contains(lever.Id))
+            .ToListAsync();
+    }
+
+    /// <summary>
+    /// IsReversedがNでIsChrRelayRaisedがRaiseの進路集中制御てこStateのIsChrRelayRaisedをDropにする
+    /// </summary>
+    public async Task DropChrRelayWhereIsNormal()
+    {
+        await context.RouteCentralControlLevers
+            .Where(lever => lever.RouteCentralControlLeverState.IsReversed == NR.Normal
+                         && lever.RouteCentralControlLeverState.IsChrRelayRaised == RaiseDrop.Raise)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(lever => lever.RouteCentralControlLeverState.IsChrRelayRaised, RaiseDrop.Drop));
+    }
+
+    /// <summary>
+    /// IsReversedがRでIsChrRelayRaisedがDropの進路集中制御てこを取得する
+    /// </summary>
+    /// <returns>条件に合致するRouteCentralControlLeverのリスト</returns>
+    public async Task<List<Models.RouteCentralControlLever>> GetWhereIsReversedAndChrRelayIsDropped()
+    {
+        return await context.RouteCentralControlLevers
+            .Include(lever => lever.RouteCentralControlLeverState)
+            .Where(lever => lever.RouteCentralControlLeverState.IsReversed == NR.Reversed
+                         && lever.RouteCentralControlLeverState.IsChrRelayRaised == RaiseDrop.Drop)
             .ToListAsync();
     }
 }

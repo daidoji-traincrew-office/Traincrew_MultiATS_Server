@@ -27,4 +27,15 @@ public interface IRouteCentralControlLeverRepository
     /// <param name="ids">進路集中制御てこのIDのリスト。</param>
     /// <returns>RouteCentralControlLever のリスト。</returns>
     Task<List<Models.RouteCentralControlLever>> GetByIds(List<ulong> ids);
+
+    /// <summary>
+    /// 定位でCHRリレーが扛上している駅扱いのCHRリレーを落下させる
+    /// </summary>
+    Task DropChrRelayWhereIsNormal();
+
+    /// <summary>
+    ///　反位でかつ、CHRリレーが落下している駅扱いのてこをすべて取得 
+    /// </summary>
+    /// <returns>条件に合致するRouteCentralControlLeverのリスト</returns>
+    Task<List<Models.RouteCentralControlLever>> GetWhereIsReversedAndChrRelayIsDropped();
 }

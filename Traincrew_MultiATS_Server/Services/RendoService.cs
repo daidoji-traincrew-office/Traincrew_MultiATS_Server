@@ -52,22 +52,54 @@ public class RendoService(
     IGeneralRepository generalRepository,
     ILogger<RendoService> logger)
 {
-    /// <summary>      
+    /// <summary>
     /// <strong>駅／ＣＴＣ扱い条件</strong><br/>
     /// </summary>
     public async Task CHRRelay()
     {
-        //仮接続
-        var routeCentralControlLevers = await routeCentralControlLeverRepository
-            .GetAllWithState();
+        // IsReversedがNでIsChrRelayRaisedがRaiseなものがあったら、IsChrRelayRaisedをDropにする
+        await routeCentralControlLeverRepository.DropChrRelayWhereIsNormal();
 
-        foreach (var routeCentralControlLever in routeCentralControlLevers)
+        // IsReversedがRでIsChrRelayRaisedがDropなもののRouteCentralControlLeverを全取得
+        var targetLevers = await routeCentralControlLeverRepository.GetWhereIsReversedAndChrRelayIsDropped();
+
+        if (targetLevers.Count == 0)
         {
-            routeCentralControlLever.RouteCentralControlLeverState.IsChrRelayRaised =
-                routeCentralControlLever.RouteCentralControlLeverState.IsReversed == NR.Reversed
-                    ? RaiseDrop.Raise
-                    : RaiseDrop.Drop;
-            await generalRepository.Save(routeCentralControlLever.RouteCentralControlLeverState);
+            return;
+        }
+
+        var targetLeverIds = targetLevers.Select(lever => lever.Id).ToList();
+
+        // LockConditionByRouteCentralControlLeverで、RouteCentralControlLeverIdが同じものを全取得
+        var lockConditions = await lockConditionByRouteCentralControlLeverRepository
+            .GetByRouteCentralControlLeverIds(targetLeverIds);
+
+        // RouteIdでRoute全取得
+        var routeIds = lockConditions.Select(lc => lc.RouteId).Distinct().ToList();
+        var routes = await routeRepository.GetByIdsWithState(routeIds);
+        var routeById = routes.ToDictionary(r => r.Id);
+
+        // 駅扱いてこごとにループし、 
+        // 鎖錠欄に記載されている進路のてこ反応リレーがすべて落下している場合のみ、ChrRelayを扛上させる
+        var lockConditionsByLeverId = lockConditions
+            .GroupBy(lc => lc.RouteCentralControlLeverId)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        foreach (var lever in targetLevers)
+        {
+            var relatedLockConditions = lockConditionsByLeverId.GetValueOrDefault(lever.Id, []);
+
+            // 関連する進路のてこ反応リレーがすべて落下しているかチェック
+            var allRelatedRoutesAreDrop = relatedLockConditions
+                .All(lc => routeById.TryGetValue(lc.RouteId, out var route)
+                        && route.RouteState.IsLeverRelayRaised == RaiseDrop.Drop);
+
+            if (!allRelatedRoutesAreDrop)
+            {
+                continue;
+            }
+            lever.RouteCentralControlLeverState.IsChrRelayRaised = RaiseDrop.Raise;
+            await generalRepository.Save(lever.RouteCentralControlLeverState);
         }
     }
 
