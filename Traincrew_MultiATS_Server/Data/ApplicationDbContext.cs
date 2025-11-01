@@ -46,6 +46,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<OperationInformationState> OperationInformationStates { get; set; }
     public DbSet<ServerState> ServerStates { get; set; }
     public DbSet<RouteCentralControlLever> RouteCentralControlLevers { get; set; }
+    public DbSet<RouteCentralControlLeverState>  RouteCentralControlLeverStates { get; set; }
     public DbSet<LockConditionByRouteCentralControlLever> LockConditionByRouteCentralControlLevers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

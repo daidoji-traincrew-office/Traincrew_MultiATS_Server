@@ -59,11 +59,12 @@ public class RouteCentralControlLeverRepository(ApplicationDbContext context) : 
     /// </summary>
     public async Task DropChrRelayWhereIsNormal()
     {
-        await context.RouteCentralControlLevers
-            .Where(lever => lever.RouteCentralControlLeverState.IsReversed == NR.Normal
-                         && lever.RouteCentralControlLeverState.IsChrRelayRaised == RaiseDrop.Raise)
+        await context.RouteCentralControlLeverStates
+            .Where(state => 
+                state.IsReversed == NR.Normal
+                && state.IsChrRelayRaised == RaiseDrop.Raise)
             .ExecuteUpdateAsync(setters => setters
-                .SetProperty(lever => lever.RouteCentralControlLeverState.IsChrRelayRaised, RaiseDrop.Drop));
+                .SetProperty(state => state.IsChrRelayRaised, RaiseDrop.Drop));
     }
 
     /// <summary>
