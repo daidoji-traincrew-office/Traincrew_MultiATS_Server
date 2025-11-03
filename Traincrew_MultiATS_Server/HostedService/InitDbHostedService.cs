@@ -1915,9 +1915,9 @@ public partial class DbRendoTableInitializer
             var lockItems = CalcLockItems(rendoTableCsv.LockToSwitchingMachine, false)
                 .SelectMany(lockItem => lockItem.Children)
                 .ToList();
-            var targetRoutes = lockItems
-                .Select(lockItem => routesByName.GetValueOrDefault(CalcRouteName(lockItem.Name, "", lockItem.StationId)))
-                .OfType<Route>();
+            var targetRoutes = (await Task.WhenAll(lockItems.Select(searchOtherObjects)))
+                .SelectMany(x => x.OfType<Route>())
+                .ToList();
             var entities = targetRoutes
                 .Select(r => new LockConditionByRouteCentralControlLever
                 {
