@@ -296,29 +296,8 @@ public class RendoService(
 
             // 駅扱いてこ
             var routeCentralControlLever = routeCentralControlLeverByRouteIds.GetValueOrDefault(route.Id);
-            if (routeCentralControlLever == null)
-            {
-                isLeverRelayRaised = RaiseDrop.Drop;
-                logger.LogInformation(
-                    "[{RendoServiceName}.{LeverToRouteStateName}] 駅集中制御てこが見つかりません。StationId={RouteStationId}",
-                    nameof(RendoService), nameof(LeverToRouteState), route.StationId);
-            }
-            else if (routeCentralControlLever.RouteCentralControlLeverState == null)
-            {
-                isLeverRelayRaised = RaiseDrop.Drop;
-                logger.LogInformation(
-                    "[{RendoServiceName}.{LeverToRouteStateName}] 駅集中制御てこの状態が見つかりません。StationId={RouteStationId}",
-                    nameof(RendoService), nameof(LeverToRouteState), route.StationId);
-            }
-            else if (routeCentralControlLever.RouteCentralControlLeverState.IsChrRelayRaised == null)
-            {
-                isLeverRelayRaised = RaiseDrop.Drop;
-                logger.LogInformation(
-                    "[{RendoServiceName}.{LeverToRouteStateName}] 駅集中制御てこのCHR状態が見つかりません。StationId={RouteStationId}",
-                    nameof(RendoService), nameof(LeverToRouteState), route.StationId);
-            }
-            // Todo: CTC制御状態を確認する(CHR相当)
-            else if (routeCentralControlLever.RouteCentralControlLeverState.IsChrRelayRaised == RaiseDrop.Raise)
+            // CTC制御状態を確認する(CHR相当)
+            if (routeCentralControlLever?.RouteCentralControlLeverState is {IsChrRelayRaised: RaiseDrop.Raise})
             {
                 isLeverRelayRaised = routeState.IsCtcRelayRaised;
             }
