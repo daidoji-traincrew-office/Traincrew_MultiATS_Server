@@ -155,7 +155,7 @@ public class InterlockingLogicTest(WebApplicationFixture factory) : IAsyncLifeti
         const int maxSeconds = 7;
         foreach (var i in Enumerable.Range(0, maxSeconds + 1))
         {
-            // 7秒待機後に開通した場合は成功
+            // 開通した場合は成功
             if (CheckSignalsOpen(testCase))
             {
                 return true;
