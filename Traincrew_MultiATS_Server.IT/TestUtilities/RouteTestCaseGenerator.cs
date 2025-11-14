@@ -1,7 +1,6 @@
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.IT.InterlockingLogic;
 using Traincrew_MultiATS_Server.Models;
-using Traincrew_MultiATS_Server.Repositories.DestinationButton;
 using Traincrew_MultiATS_Server.Repositories.Lever;
 using Traincrew_MultiATS_Server.Repositories.Route;
 using Traincrew_MultiATS_Server.Repositories.RouteLeverDestinationButton;
@@ -18,8 +17,7 @@ public class RouteTestCaseGenerator(
     IRouteLeverDestinationRepository routeLeverDestinationRepository,
     IRouteRepository routeRepository,
     ISignalRouteRepository signalRouteRepository,
-    ILeverRepository leverRepository,
-    IDestinationButtonRepository destinationButtonRepository)
+    ILeverRepository leverRepository)
 {
     /// <summary>
     /// 指定された駅IDのテストケースを生成する

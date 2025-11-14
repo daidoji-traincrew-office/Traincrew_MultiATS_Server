@@ -4,6 +4,7 @@ using Traincrew_MultiATS_Server.Common.Contract;
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.IT.Fixture;
 using Traincrew_MultiATS_Server.IT.TestUtilities;
+using Traincrew_MultiATS_Server.Repositories.Lever;
 using Traincrew_MultiATS_Server.Repositories.Route;
 using Traincrew_MultiATS_Server.Repositories.RouteLeverDestinationButton;
 using Traincrew_MultiATS_Server.Repositories.SignalRoute;
@@ -79,9 +80,10 @@ public class InterlockingLogicTest(WebApplicationFixture factory) : IAsyncLifeti
 
             var generator = new RouteTestCaseGenerator(
                 fixture.Create<IStationRepository>(),
-                fixture.Create<IRouteLeverDestinationButtonRepository>(),
+                fixture.Create<IRouteLeverDestinationRepository>(),
                 fixture.Create<IRouteRepository>(),
-                fixture.Create<ISignalRouteRepository>());
+                fixture.Create<ISignalRouteRepository>(),
+                fixture.Create<ILeverRepository>());
             var testCases = generator.GenerateTestCasesAsync(stationIds).GetAwaiter().GetResult();
             return new(testCases);
         }
