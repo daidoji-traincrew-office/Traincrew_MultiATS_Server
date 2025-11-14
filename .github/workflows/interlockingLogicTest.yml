@@ -89,7 +89,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-results-${{ matrix.station }}
-          path: "**/*_results.trx"
+          path: "Traincrew_MultiATS_Server.IT/TestResults/**/*_results.trx"
 
       - name: Output Database Logs
         if: always()
