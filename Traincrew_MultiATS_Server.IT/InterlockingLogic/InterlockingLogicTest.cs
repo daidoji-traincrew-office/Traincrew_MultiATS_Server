@@ -9,6 +9,7 @@ using Traincrew_MultiATS_Server.Repositories.Route;
 using Traincrew_MultiATS_Server.Repositories.RouteLeverDestinationButton;
 using Traincrew_MultiATS_Server.Repositories.SignalRoute;
 using Traincrew_MultiATS_Server.Repositories.Station;
+using Traincrew_MultiATS_Server.Repositories.ThrowOutControl;
 
 namespace Traincrew_MultiATS_Server.IT.InterlockingLogic;
 
@@ -83,7 +84,8 @@ public class InterlockingLogicTest(WebApplicationFixture factory) : IAsyncLifeti
                 fixture.Create<IRouteLeverDestinationRepository>(),
                 fixture.Create<IRouteRepository>(),
                 fixture.Create<ISignalRouteRepository>(),
-                fixture.Create<ILeverRepository>());
+                fixture.Create<ILeverRepository>(),
+                fixture.Create<IThrowOutControlRepository>());
             var testCases = generator.GenerateTestCasesAsync(stationIds).GetAwaiter().GetResult();
             return new(testCases);
         }
@@ -148,9 +150,8 @@ public class InterlockingLogicTest(WebApplicationFixture factory) : IAsyncLifeti
 
         // 3. 即時確認: 信号開通確認
         await Task.Delay(TimeSpan.FromMilliseconds(100), TestContext.Current.CancellationToken);
-        var signal = _latestData?.Signals.FirstOrDefault(s => s.Name == testCase.SignalName);
 
-        if (signal != null && signal.phase != Phase.None && signal.phase != Phase.R)
+        if (CheckSignalsOpen(testCase))
         {
             // 即時開通した場合は成功
             return true;
@@ -159,9 +160,36 @@ public class InterlockingLogicTest(WebApplicationFixture factory) : IAsyncLifeti
         // 4. 7秒待機 → 再確認（転てつ器の転換完了を考慮）
         await Task.Delay(TimeSpan.FromSeconds(7), TestContext.Current.CancellationToken);
 
-        signal = _latestData?.Signals.FirstOrDefault(s => s.Name == testCase.SignalName);
-
         // 7秒待機後に開通した場合は成功
-        return signal != null && signal.phase != Phase.None && signal.phase != Phase.R;
+        return CheckSignalsOpen(testCase);
+    }
+
+    /// <summary>
+    /// 信号が開通しているかチェック
+    /// てこなし総括元の場合は、総括先の信号も確認する
+    /// </summary>
+    private bool CheckSignalsOpen(RouteTestCase testCase)
+    {
+        // メイン信号機の開通確認
+        var mainSignal = _latestData?.Signals.FirstOrDefault(s => s.Name == testCase.SignalName);
+        if (mainSignal == null || mainSignal.phase == Phase.None || mainSignal.phase == Phase.R)
+        {
+            return false;
+        }
+
+        // てこなし総括先の信号機も確認（存在する場合）
+        if (testCase.ThrowOutControlTargetSignals != null && testCase.ThrowOutControlTargetSignals.Count > 0)
+        {
+            foreach (var targetSignalName in testCase.ThrowOutControlTargetSignals)
+            {
+                var targetSignal = _latestData?.Signals.FirstOrDefault(s => s.Name == targetSignalName);
+                if (targetSignal == null || targetSignal.phase == Phase.None || targetSignal.phase == Phase.R)
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 }

@@ -48,6 +48,11 @@ public record RouteTestCase
     public required string SignalName { get; init; }
 
     /// <summary>
+    /// てこなし総括先の信号機名リスト（てこなし総括元の場合のみ）
+    /// </summary>
+    public List<string>? ThrowOutControlTargetSignals { get; init; }
+
+    /// <summary>
     /// テストケース名を生成
     /// </summary>
     public string GetTestCaseName()

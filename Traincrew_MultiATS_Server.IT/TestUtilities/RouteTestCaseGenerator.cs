@@ -6,6 +6,7 @@ using Traincrew_MultiATS_Server.Repositories.Route;
 using Traincrew_MultiATS_Server.Repositories.RouteLeverDestinationButton;
 using Traincrew_MultiATS_Server.Repositories.SignalRoute;
 using Traincrew_MultiATS_Server.Repositories.Station;
+using Traincrew_MultiATS_Server.Repositories.ThrowOutControl;
 
 namespace Traincrew_MultiATS_Server.IT.TestUtilities;
 
@@ -17,7 +18,8 @@ public class RouteTestCaseGenerator(
     IRouteLeverDestinationRepository routeLeverDestinationRepository,
     IRouteRepository routeRepository,
     ISignalRouteRepository signalRouteRepository,
-    ILeverRepository leverRepository)
+    ILeverRepository leverRepository,
+    IThrowOutControlRepository throwOutControlRepository)
 {
     /// <summary>
     /// 指定された駅IDのテストケースを生成する
@@ -56,12 +58,39 @@ public class RouteTestCaseGenerator(
 
         // 6. 進路と信号機の関連を取得
         var signalRoutes = await signalRouteRepository.GetByRouteIds(routeIds);
+        var signalRouteByRouteId = signalRoutes
+            .GroupBy(sr => sr.RouteId)
+            .ToDictionary(g => g.Key, g => g.First());
 
-        // 7. テストケース生成
+        // 7. てこなし総括(WithoutLever)の情報を取得
+        var throwOutControls = await throwOutControlRepository
+            .GetByControlTypes([ThrowOutControlType.WithoutLever]);
+
+        // てこなし総括先の進路IDセット（これらはテストから除外する）
+        var throwOutTargetRouteIds = throwOutControls
+            .Select(toc => toc.TargetId)
+            .ToHashSet();
+
+        // てこなし総括元 -> 総括先のマッピング
+        var throwOutSourceToTargets = throwOutControls
+            .GroupBy(toc => toc.SourceId)
+            .ToDictionary(
+                g => g.Key,
+                g => g.Select(toc => toc.TargetId).ToList()
+            );
+
+        // 8. テストケース生成
         var testCases = routeLeverButtons
             .Select(rldb =>
             {
                 var route = routes[rldb.RouteId];
+
+                // てこなし総括先の進路はテストケースから除外
+                if (throwOutTargetRouteIds.Contains(rldb.RouteId))
+                {
+                    return null;
+                }
+
                 var signalRoute = signalRoutes.FirstOrDefault(sr => sr.RouteId == rldb.RouteId);
 
                 // 信号機が関連付けられていない進路はスキップ
@@ -85,6 +114,17 @@ public class RouteTestCaseGenerator(
                     return null;
                 }
 
+                // てこなし総括元の場合、総括先の信号機名を取得
+                List<string>? throwOutTargetSignals = null;
+                if (throwOutSourceToTargets.TryGetValue(rldb.RouteId, out var targetRouteIds))
+                {
+                    throwOutTargetSignals = targetRouteIds
+                        .Select(targetRouteId => signalRouteByRouteId.TryGetValue(targetRouteId, out var sr) ? sr.SignalName : null)
+                        .Where(signalName => signalName != null)
+                        .Cast<string>()
+                        .ToList();
+                }
+
                 return new RouteTestCase
                 {
                     StationId = route.StationId,
@@ -94,7 +134,8 @@ public class RouteTestCaseGenerator(
                     LeverName = lever.Name,
                     LeverDirection = rldb.Direction == LR.Left ? LCR.Left : LCR.Right,
                     DestinationButtonName = rldb.DestinationButtonName,
-                    SignalName = signalRoute.SignalName
+                    SignalName = signalRoute.SignalName,
+                    ThrowOutControlTargetSignals = throwOutTargetSignals
                 };
             })
             .Where(tc => tc != null)
