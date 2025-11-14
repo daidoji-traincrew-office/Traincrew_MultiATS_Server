@@ -1,13 +1,41 @@
-name: Integration Tests
+name: Interlocking Logic Integration Test
 
 on:
-  push: {}
-  pull_request: {}
-  workflow_dispatch: {}
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false  # 駅ごとの失敗で全体を止めない
+      matrix:
+        # 単一駅での並列実行（デフォルト）
+        station:
+          - TH58
+          - TH59
+          - TH61
+          - TH62
+          - TH63
+          - TH64
+          - TH65
+          - TH66S
+          - TH67
+          - TH70
+          - TH71
+          - TH75
+          - TH76
+
+        # Matrix上限に達した場合は、以下のようにグループ化可能
+        # station:
+        #   - TH58,TH59,TH61
+        #   - TH62,TH63,TH64
+        #   - TH65,TH66S,TH67
+        #   - TH70,TH71
+        #   - TH75,TH76
 
     steps:
       - name: Checkout code
@@ -44,12 +72,28 @@ jobs:
         working-directory: ./Database
         run: docker compose up -d
 
-      - name: Run Integration Tests
+      - name: Wait for Database to be ready
+        run: sleep 10
+
+      - name: Run Interlocking Logic Tests for ${{ matrix.station }}
         working-directory: ./Traincrew_MultiATS_Server.IT
-        run: dotnet test --no-build --configuration Release --filter "FullyQualifiedName!~InterlockingLogicTest"
+        run: |
+          dotnet test \
+            --no-build \
+            --configuration Release \
+            --filter "FullyQualifiedName~InterlockingLogicTest" \
+            --logger "trx;LogFileName=${{ matrix.station }}_results.trx"
+        env:
+          TEST_STATION_ID: ${{ matrix.station }}
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.station }}
+          path: "**/*_results.trx"
+
       - name: Output Database Logs
-        # 何故かログを出すとITが通るのでこうしている
         if: always()
         working-directory: ./Database
         run: docker compose logs
-        
