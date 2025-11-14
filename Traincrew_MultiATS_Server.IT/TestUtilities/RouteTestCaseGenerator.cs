@@ -1,6 +1,8 @@
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.IT.InterlockingLogic;
 using Traincrew_MultiATS_Server.Models;
+using Traincrew_MultiATS_Server.Repositories.DestinationButton;
+using Traincrew_MultiATS_Server.Repositories.Lever;
 using Traincrew_MultiATS_Server.Repositories.Route;
 using Traincrew_MultiATS_Server.Repositories.RouteLeverDestinationButton;
 using Traincrew_MultiATS_Server.Repositories.SignalRoute;
@@ -13,9 +15,11 @@ namespace Traincrew_MultiATS_Server.IT.TestUtilities;
 /// </summary>
 public class RouteTestCaseGenerator(
     IStationRepository stationRepository,
-    IRouteLeverDestinationButtonRepository routeLeverDestinationButtonRepository,
+    IRouteLeverDestinationRepository routeLeverDestinationRepository,
     IRouteRepository routeRepository,
-    ISignalRouteRepository signalRouteRepository)
+    ISignalRouteRepository signalRouteRepository,
+    ILeverRepository leverRepository,
+    IDestinationButtonRepository destinationButtonRepository)
 {
     /// <summary>
     /// 指定された駅IDのテストケースを生成する
@@ -37,20 +41,25 @@ public class RouteTestCaseGenerator(
         var stations = stationList.ToDictionary(s => s.Id, s => s.Name);
         var targetStationIds = stations.Keys.ToList();
 
-        // 2. 対象駅の進路とてこ・着点の関連を取得
-        var routeLeverButtons = await routeLeverDestinationButtonRepository.GetByStationIdsWithNavigations(targetStationIds);
-
-        // 3. 進路IDのリストを取得
-        var routeIds = routeLeverButtons.Select(rldb => rldb.RouteId).Distinct().ToList();
-
-        // 4. 進路情報を取得
-        var routeList = await routeRepository.GetByIdsWithState(routeIds);
+        // 2. 対象駅の進路を取得
+        var routeList = await routeRepository.GetByStationIds(targetStationIds);
         var routes = routeList.ToDictionary(r => r.Id);
+        var routeIds = routeList.Select(r => r.Id).ToList();
 
-        // 5. 進路と信号機の関連を取得
+        // 3. 進路のRouteLeverDestinationButtonを取得
+        var routeLeverButtons = await routeLeverDestinationRepository.GetByRouteIds(routeIds);
+
+        // 4. LeverのIDを収集
+        var leverIds = routeLeverButtons.Select(rlb => rlb.LeverId).Distinct().ToList();
+
+        // 5. Leverを取得してDictionaryに変換
+        var levers = (await leverRepository.GetByIdsWithState(leverIds))
+            .ToDictionary(l => l.Id);
+
+        // 6. 進路と信号機の関連を取得
         var signalRoutes = await signalRouteRepository.GetByRouteIds(routeIds);
 
-        // 6. テストケース生成
+        // 7. テストケース生成
         var testCases = routeLeverButtons
             .Select(rldb =>
             {
@@ -73,13 +82,18 @@ public class RouteTestCaseGenerator(
                     return null;
                 }
 
+                if (!levers.TryGetValue(rldb.LeverId, out var lever))
+                {
+                    return null;
+                }
+
                 return new RouteTestCase
                 {
                     StationId = route.StationId,
                     StationName = stationName,
                     RouteId = route.Id,
                     RouteName = route.Name,
-                    LeverName = rldb.Lever.Name,
+                    LeverName = lever.Name,
                     LeverDirection = rldb.Direction == LR.Left ? LCR.Left : LCR.Right,
                     DestinationButtonName = rldb.DestinationButtonName,
                     SignalName = signalRoute.SignalName
