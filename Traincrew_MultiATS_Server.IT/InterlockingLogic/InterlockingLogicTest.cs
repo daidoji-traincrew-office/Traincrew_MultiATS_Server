@@ -148,20 +148,25 @@ public class InterlockingLogicTest(WebApplicationFixture factory) : IAsyncLifeti
             });
         }
 
-        // 3. 即時確認: 信号開通確認
-        await Task.Delay(TimeSpan.FromMilliseconds(100), TestContext.Current.CancellationToken);
+        // 3. 次のデータ更新と、連動装置処理まで待つ
+        await Task.Delay(TimeSpan.FromMilliseconds(500), TestContext.Current.CancellationToken);
 
-        if (CheckSignalsOpen(testCase))
+        // 4. 1秒ポーリングで確認（転てつ器の転換完了を考慮、最大7秒まで）
+        const int maxSeconds = 7;
+        foreach (var i in Enumerable.Range(0, maxSeconds + 1))
         {
-            // 即時開通した場合は成功
-            return true;
+            // 7秒待機後に開通した場合は成功
+            if (CheckSignalsOpen(testCase))
+            {
+                return true;
+            }
+
+            if (i < maxSeconds)
+            {
+                await Task.Delay(TimeSpan.FromSeconds(1), TestContext.Current.CancellationToken);
+            }
         }
-
-        // 4. 7秒待機 → 再確認（転てつ器の転換完了を考慮）
-        await Task.Delay(TimeSpan.FromSeconds(7), TestContext.Current.CancellationToken);
-
-        // 7秒待機後に開通した場合は成功
-        return CheckSignalsOpen(testCase);
+        return false;
     }
 
     /// <summary>
