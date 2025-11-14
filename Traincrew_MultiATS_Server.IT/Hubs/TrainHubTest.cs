@@ -3,6 +3,8 @@ using Traincrew_MultiATS_Server.Common.Contract;
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.IT.Fixture;
 using Traincrew_MultiATS_Server.Models;
+using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
+using Traincrew_MultiATS_Server.Repositories.Train;
 
 namespace Traincrew_MultiATS_Server.IT.Hubs;
 
@@ -66,7 +68,7 @@ public class TrainHubTest(WebApplicationFixture factory)
         var mockClient = new Mock<ITrainClientContract>();
         var (connection, hub) = factory.CreateTrainHub(mockClient.Object);
         var (commanderConnection, commanderHub) = factory.CreateCommanderTableHub();
-        var db = factory.CreateTrainRepository();
+        var db = factory.Create<ITrainRepository>();
 
         // 事前に運転士のいない列車を登録
         var trainState = new TrainState
@@ -145,7 +147,7 @@ public class TrainHubTest(WebApplicationFixture factory)
         // Arrange
         var mockClient = new Mock<ITrainClientContract>();
         var (connection, hub) = factory.CreateTrainHub(mockClient.Object);
-        var db = factory.CreateTrainRepository();
+        var db = factory.Create<ITrainRepository>();
 
         // 事前に他人が運転している列車を登録
         var trainState = new TrainState
@@ -204,7 +206,7 @@ public class TrainHubTest(WebApplicationFixture factory)
         // Arrange
         var mockClient = new Mock<ITrainClientContract>();
         var (connection, hub) = factory.CreateTrainHub(mockClient.Object);
-        var db = factory.CreateTrainRepository();
+        var db = factory.Create<ITrainRepository>();
 
         // 事前に自分が運転している列車を登録
         var myDriverId = WebApplicationFixture.DriverId;
@@ -270,7 +272,7 @@ public class TrainHubTest(WebApplicationFixture factory)
         // Arrange
         var mockClient = new Mock<ITrainClientContract>();
         var (connection, hub) = factory.CreateTrainHub(mockClient.Object);
-        var db = factory.CreateTrainRepository();
+        var db = factory.Create<ITrainRepository>();
 
         // 事前に自分が運転している列車を登録
         var myDriverId = WebApplicationFixture.DriverId;
@@ -337,7 +339,7 @@ public class TrainHubTest(WebApplicationFixture factory)
         // Arrange
         var mockClient = new Mock<ITrainClientContract>();
         var (connection, hub) = factory.CreateTrainHub(mockClient.Object);
-        var db = factory.CreateTrainRepository();
+        var db = factory.Create<ITrainRepository>();
 
         // 事前に自分が運転していた列車を登録
         var myDriverId = WebApplicationFixture.DriverId;
@@ -404,8 +406,8 @@ public class TrainHubTest(WebApplicationFixture factory)
         // Arrange
         var mockClient = new Mock<ITrainClientContract>();
         var (connection, hub) = factory.CreateTrainHub(mockClient.Object);
-        var db = factory.CreateTrainRepository();
-        var trackCircuitRepository = factory.CreateTrackCircuitRepository();
+        var db = factory.Create<ITrainRepository>();
+        var trackCircuitRepository = factory.Create<ITrackCircuitRepository>();
 
         // 事前に運転士のいない同一列番の列車を登録
         var trainState = new TrainState

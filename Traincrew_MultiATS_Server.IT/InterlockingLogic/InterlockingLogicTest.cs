@@ -4,6 +4,10 @@ using Traincrew_MultiATS_Server.Common.Contract;
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.IT.Fixture;
 using Traincrew_MultiATS_Server.IT.TestUtilities;
+using Traincrew_MultiATS_Server.Repositories.Route;
+using Traincrew_MultiATS_Server.Repositories.RouteLeverDestinationButton;
+using Traincrew_MultiATS_Server.Repositories.SignalRoute;
+using Traincrew_MultiATS_Server.Repositories.Station;
 
 namespace Traincrew_MultiATS_Server.IT.InterlockingLogic;
 
@@ -66,15 +70,18 @@ public class InterlockingLogicTest(WebApplicationFixture factory) : IAsyncLifeti
             // 単一駅: TEST_STATION_ID=TH76
             // 複数駅: TEST_STATION_ID=TH58,TH59,TH61 (カンマ区切り)
             // 未指定の場合は全駅のテストケースを生成
-            string[]? stationIds = ["TH76"];
+            string[]? stationIds = null;
             if (!string.IsNullOrEmpty(_targetStationIds))
             {
                 stationIds = _targetStationIds
                     .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
             }
 
-            var context = fixture.CreateDbContext();
-            var generator = new RouteTestCaseGenerator(context);
+            var generator = new RouteTestCaseGenerator(
+                fixture.Create<IStationRepository>(),
+                fixture.Create<IRouteLeverDestinationButtonRepository>(),
+                fixture.Create<IRouteRepository>(),
+                fixture.Create<ISignalRouteRepository>());
             var testCases = generator.GenerateTestCasesAsync(stationIds).GetAwaiter().GetResult();
             return new(testCases);
         }

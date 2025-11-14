@@ -6,8 +6,6 @@ using Moq;
 using Traincrew_MultiATS_Server.Common.Contract;
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Crew;
-using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
-using Traincrew_MultiATS_Server.Repositories.Train;
 using TypedSignalR.Client;
 
 namespace Traincrew_MultiATS_Server.IT.Fixture;
@@ -74,21 +72,12 @@ public class WebApplicationFixture : IAsyncLifetime
     }
 
     /// <summary>
-    /// テスト用にITrainRepositoryを取得する
+    /// テスト用にDIにあるものを取得する
     /// </summary>
-    public ITrainRepository CreateTrainRepository()
+    public T Create<T>() where T : notnull
     {
         var scope = factory.Services.CreateScope();
-        return scope.ServiceProvider.GetRequiredService<ITrainRepository>();
-    }
-
-    /// <summary>
-    /// テスト用にITrackCircuitRepositoryを取得する
-    /// </summary>
-    public ITrackCircuitRepository CreateTrackCircuitRepository()
-    {
-        var scope = factory.Services.CreateScope();
-        return scope.ServiceProvider.GetRequiredService<ITrackCircuitRepository>();
+        return scope.ServiceProvider.GetRequiredService<T>();
     }
 
     /// <summary>

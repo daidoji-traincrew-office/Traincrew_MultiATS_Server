@@ -1,15 +1,21 @@
-using Microsoft.EntityFrameworkCore;
 using Traincrew_MultiATS_Server.Common.Models;
-using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.IT.InterlockingLogic;
 using Traincrew_MultiATS_Server.Models;
+using Traincrew_MultiATS_Server.Repositories.Route;
+using Traincrew_MultiATS_Server.Repositories.RouteLeverDestinationButton;
+using Traincrew_MultiATS_Server.Repositories.SignalRoute;
+using Traincrew_MultiATS_Server.Repositories.Station;
 
 namespace Traincrew_MultiATS_Server.IT.TestUtilities;
 
 /// <summary>
 /// 進路構成テストケースを動的に生成するヘルパークラス
 /// </summary>
-public class RouteTestCaseGenerator(ApplicationDbContext context)
+public class RouteTestCaseGenerator(
+    IStationRepository stationRepository,
+    IRouteLeverDestinationButtonRepository routeLeverDestinationButtonRepository,
+    IRouteRepository routeRepository,
+    ISignalRouteRepository signalRouteRepository)
 {
     /// <summary>
     /// 指定された駅IDのテストケースを生成する
@@ -19,40 +25,30 @@ public class RouteTestCaseGenerator(ApplicationDbContext context)
     public async Task<List<RouteTestCase>> GenerateTestCasesAsync(string[]? stationIds = null)
     {
         // 1. 対象駅の取得
-        IQueryable<Station> stationQuery = context.Stations;
-        if (stationIds is { Length: > 0 })
-        {
-            stationQuery = stationQuery.Where(s => stationIds.Contains(s.Id));
-        }
+        var stationList = stationIds is { Length: > 0 }
+            ? await stationRepository.GetStationByIds(stationIds)
+            : await stationRepository.GetWhereIsStation();
 
-        var stations = await stationQuery.ToDictionaryAsync(s => s.Id, s => s.Name);
-
-        if (stations.Count == 0)
+        if (stationList.Count == 0)
         {
             return [];
         }
 
+        var stations = stationList.ToDictionary(s => s.Id, s => s.Name);
         var targetStationIds = stations.Keys.ToList();
 
         // 2. 対象駅の進路とてこ・着点の関連を取得
-        var routeLeverButtons = await context.RouteLeverDestinationButtons
-            .Include(rldb => rldb.Lever)
-            .Include(rldb => rldb.DestinationButton)
-            .Where(rldb => targetStationIds.Contains(rldb.Lever.StationId!))
-            .ToListAsync();
+        var routeLeverButtons = await routeLeverDestinationButtonRepository.GetByStationIdsWithNavigations(targetStationIds);
 
         // 3. 進路IDのリストを取得
         var routeIds = routeLeverButtons.Select(rldb => rldb.RouteId).Distinct().ToList();
 
         // 4. 進路情報を取得
-        var routes = await context.Routes
-            .Where(r => routeIds.Contains(r.Id))
-            .ToDictionaryAsync(r => r.Id);
+        var routeList = await routeRepository.GetByIdsWithState(routeIds);
+        var routes = routeList.ToDictionary(r => r.Id);
 
         // 5. 進路と信号機の関連を取得
-        var signalRoutes = await context.SignalRoutes
-            .Where(sr => routeIds.Contains(sr.RouteId))
-            .ToListAsync();
+        var signalRoutes = await signalRouteRepository.GetByRouteIds(routeIds);
 
         // 6. テストケース生成
         var testCases = routeLeverButtons
