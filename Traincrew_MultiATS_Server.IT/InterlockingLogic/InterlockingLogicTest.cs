@@ -19,6 +19,9 @@ public class InterlockingLogicTest(WebApplicationFixture factory) : IAsyncLifeti
 {
     private static readonly string? _targetStationIds = Environment.GetEnvironmentVariable("TEST_STATION_ID");
 
+    // テストケースを遅延初期化し、一度だけ生成する
+    private static readonly Lazy<TheoryData<RouteTestCase>> _testCases = new(GenerateTestCases);
+
     private IInterlockingHubContract? _hub;
     private HubConnection? _connection;
     private TaskCompletionSource<DataToInterlocking>? _dataReceived;
@@ -59,13 +62,16 @@ public class InterlockingLogicTest(WebApplicationFixture factory) : IAsyncLifeti
     }
 
     /// <summary>
-    /// テストケース生成
+    /// テストケース取得（Lazyによる遅延初期化）
     /// </summary>
-    public static TheoryData<RouteTestCase> GetTestCases()
+    public static TheoryData<RouteTestCase> GetTestCases() => _testCases.Value;
+
+    /// <summary>
+    /// テストケース生成（Lazyから一度だけ呼ばれる）
+    /// </summary>
+    private static TheoryData<RouteTestCase> GenerateTestCases()
     {
         // WebApplicationFixtureのインスタンスを作成
-        // MemberDataを利用する場合、このメソッドはStaticにしないといけないが
-        // StaticメソッドだとFixtureが使えないので、やむなくここで定義している
         var fixture = new WebApplicationFixture();
         fixture.InitializeAsync().GetAwaiter().GetResult();
 
