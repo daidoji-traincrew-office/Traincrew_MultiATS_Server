@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Traincrew_MultiATS_Server.Common.Contract;
 using Traincrew_MultiATS_Server.Common.Models;
@@ -68,24 +69,28 @@ public class TrainHubTest(WebApplicationFixture factory)
         var mockClient = new Mock<ITrainClientContract>();
         var (connection, hub) = factory.CreateTrainHub(mockClient.Object);
         var (commanderConnection, commanderHub) = factory.CreateCommanderTableHub();
-        var db = factory.Create<ITrainRepository>();
 
         // 事前に運転士のいない列車を登録
-        var trainState = new TrainState
+        await using (var scope = factory.Services.CreateAsyncScope())
         {
-            TrainNumber = oldTrainNumber,
-            DiaNumber = 62,
-            DriverId = null,
-            FromStationId = "TH00",
-            ToStationId = "TH00",
-            Delay = 0
-        };
-        await db.Create(trainState);
+            var db = scope.ServiceProvider.GetRequiredService<ITrainRepository>();
+            var trainState = new TrainState
+            {
+                TrainNumber = oldTrainNumber,
+                DiaNumber = 62,
+                DriverId = null,
+                FromStationId = "TH00",
+                ToStationId = "TH00",
+                Delay = 0
+            };
+            await db.Create(trainState);
+        }
+
         // 軌道回路を埋める
-        await using (commanderConnection) 
+        await using (commanderConnection)
         {
             await commanderConnection.StartAsync(TestContext.Current.CancellationToken);
-            await commanderHub.SendTrackCircuitData(new () 
+            await commanderHub.SendTrackCircuitData(new ()
             {
                 Name = "TH76_5LCT",
                 Last = oldTrainNumber,
@@ -128,9 +133,13 @@ public class TrainHubTest(WebApplicationFixture factory)
                 Assert.False(result.IsMaybeWarp);
 
                 // DB上でDriverIdがセットされていることを確認
-                var updatedTrain = (await db.GetByTrainNumbers([trainNumber])).FirstOrDefault();
-                Assert.NotNull(updatedTrain);
-                Assert.NotNull(updatedTrain.DriverId);
+                await using (var scope = factory.Services.CreateAsyncScope())
+                {
+                    var db = scope.ServiceProvider.GetRequiredService<ITrainRepository>();
+                    var updatedTrain = (await db.GetByTrainNumbers([trainNumber])).FirstOrDefault();
+                    Assert.NotNull(updatedTrain);
+                    Assert.NotNull(updatedTrain.DriverId);
+                }
             }
             finally
             {
@@ -147,19 +156,22 @@ public class TrainHubTest(WebApplicationFixture factory)
         // Arrange
         var mockClient = new Mock<ITrainClientContract>();
         var (connection, hub) = factory.CreateTrainHub(mockClient.Object);
-        var db = factory.Create<ITrainRepository>();
 
         // 事前に他人が運転している列車を登録
-        var trainState = new TrainState
+        await using (var scope = factory.Services.CreateAsyncScope())
         {
-            TrainNumber = otherDriverTrainNumber,
-            DiaNumber = 64,
-            DriverId = 9999UL, // 他人のDriverId
-            FromStationId = "TH00",
-            ToStationId = "TH00",
-            Delay = 0
-        };
-        await db.Create(trainState);
+            var db = scope.ServiceProvider.GetRequiredService<ITrainRepository>();
+            var trainState = new TrainState
+            {
+                TrainNumber = otherDriverTrainNumber,
+                DiaNumber = 64,
+                DriverId = 9999UL, // 他人のDriverId
+                FromStationId = "TH00",
+                ToStationId = "TH00",
+                Delay = 0
+            };
+            await db.Create(trainState);
+        }
 
         var atsData = new AtsToServerData
         {
@@ -206,20 +218,23 @@ public class TrainHubTest(WebApplicationFixture factory)
         // Arrange
         var mockClient = new Mock<ITrainClientContract>();
         var (connection, hub) = factory.CreateTrainHub(mockClient.Object);
-        var db = factory.Create<ITrainRepository>();
 
         // 事前に自分が運転している列車を登録
-        var myDriverId = WebApplicationFixture.DriverId;
-        var trainState = new TrainState
+        await using (var scope = factory.Services.CreateAsyncScope())
         {
-            TrainNumber = trainNumber,
-            DiaNumber = 66,
-            DriverId = myDriverId,
-            FromStationId = "TH00",
-            ToStationId = "TH00",
-            Delay = 0
-        };
-        await db.Create(trainState);
+            var db = scope.ServiceProvider.GetRequiredService<ITrainRepository>();
+            var myDriverId = WebApplicationFixture.DriverId;
+            var trainState = new TrainState
+            {
+                TrainNumber = trainNumber,
+                DiaNumber = 66,
+                DriverId = myDriverId,
+                FromStationId = "TH00",
+                ToStationId = "TH00",
+                Delay = 0
+            };
+            await db.Create(trainState);
+        }
 
         var atsData = new AtsToServerData
         {
@@ -254,9 +269,14 @@ public class TrainHubTest(WebApplicationFixture factory)
                 Assert.False(result.IsOnPreviousTrain);
                 Assert.False(result.IsMaybeWarp);
                 // DB上でDriverIdが変わらず、列番も変わらないこと
-                var updatedTrain = (await db.GetByTrainNumbers([trainNumber])).FirstOrDefault();
-                Assert.NotNull(updatedTrain);
-                Assert.Equal(myDriverId, updatedTrain.DriverId);
+                await using (var scope = factory.Services.CreateAsyncScope())
+                {
+                    var db = scope.ServiceProvider.GetRequiredService<ITrainRepository>();
+                    var myDriverId = WebApplicationFixture.DriverId;
+                    var updatedTrain = (await db.GetByTrainNumbers([trainNumber])).FirstOrDefault();
+                    Assert.NotNull(updatedTrain);
+                    Assert.Equal(myDriverId, updatedTrain.DriverId);
+                }
             }
             finally
             {
@@ -272,20 +292,23 @@ public class TrainHubTest(WebApplicationFixture factory)
         // Arrange
         var mockClient = new Mock<ITrainClientContract>();
         var (connection, hub) = factory.CreateTrainHub(mockClient.Object);
-        var db = factory.Create<ITrainRepository>();
 
         // 事前に自分が運転している列車を登録
-        var myDriverId = WebApplicationFixture.DriverId;
-        var trainState = new TrainState
+        await using (var scope = factory.Services.CreateAsyncScope())
         {
-            TrainNumber = "1269",
-            DiaNumber = 68,
-            DriverId = myDriverId,
-            FromStationId = "TH00",
-            ToStationId = "TH00",
-            Delay = 0
-        };
-        await db.Create(trainState);
+            var db = scope.ServiceProvider.GetRequiredService<ITrainRepository>();
+            var myDriverId = WebApplicationFixture.DriverId;
+            var trainState = new TrainState
+            {
+                TrainNumber = "1269",
+                DiaNumber = 68,
+                DriverId = myDriverId,
+                FromStationId = "TH00",
+                ToStationId = "TH00",
+                Delay = 0
+            };
+            await db.Create(trainState);
+        }
 
         var atsData = new AtsToServerData
         {
@@ -319,9 +342,14 @@ public class TrainHubTest(WebApplicationFixture factory)
                 Assert.False(result.IsOnPreviousTrain);
                 Assert.False(result.IsMaybeWarp);
                 // DB上でDriverIdが変わらず、列番が変更されていること
-                var updatedTrain = (await db.GetByTrainNumbers([trainNumber])).FirstOrDefault();
-                Assert.NotNull(updatedTrain);
-                Assert.Equal(myDriverId, updatedTrain.DriverId);
+                await using (var scope = factory.Services.CreateAsyncScope())
+                {
+                    var db = scope.ServiceProvider.GetRequiredService<ITrainRepository>();
+                    var myDriverId = WebApplicationFixture.DriverId;
+                    var updatedTrain = (await db.GetByTrainNumbers([trainNumber])).FirstOrDefault();
+                    Assert.NotNull(updatedTrain);
+                    Assert.Equal(myDriverId, updatedTrain.DriverId);
+                }
             }
             finally
             {
@@ -329,7 +357,7 @@ public class TrainHubTest(WebApplicationFixture factory)
             }
         }
     }
-    
+
     [Fact(DisplayName = "折り返し変更(運行番号変更)を行う場合")]
     public async Task SendData_ATS_ChangeDiaNumber_UpdatesTrainNumber()
     {
@@ -339,20 +367,23 @@ public class TrainHubTest(WebApplicationFixture factory)
         // Arrange
         var mockClient = new Mock<ITrainClientContract>();
         var (connection, hub) = factory.CreateTrainHub(mockClient.Object);
-        var db = factory.Create<ITrainRepository>();
 
         // 事前に自分が運転していた列車を登録
-        var myDriverId = WebApplicationFixture.DriverId;
-        var trainState = new TrainState
+        await using (var scope = factory.Services.CreateAsyncScope())
         {
-            TrainNumber = oldTrainNumber,
-            DiaNumber = 70,
-            DriverId = null,
-            FromStationId = "TH00",
-            ToStationId = "TH00",
-            Delay = 0
-        };
-        await db.Create(trainState);
+            var db = scope.ServiceProvider.GetRequiredService<ITrainRepository>();
+            var myDriverId = WebApplicationFixture.DriverId;
+            var trainState = new TrainState
+            {
+                TrainNumber = oldTrainNumber,
+                DiaNumber = 70,
+                DriverId = null,
+                FromStationId = "TH00",
+                ToStationId = "TH00",
+                Delay = 0
+            };
+            await db.Create(trainState);
+        }
 
         var atsData = new AtsToServerData
         {
@@ -386,11 +417,16 @@ public class TrainHubTest(WebApplicationFixture factory)
                 Assert.False(result.IsOnPreviousTrain);
                 Assert.False(result.IsMaybeWarp);
                 // DB上でDriverIdが変わらず、列番が変更されていること
-                var updatedTrain = (await db.GetByTrainNumbers([trainNumber])).FirstOrDefault();
-                Assert.NotNull(updatedTrain);
-                Assert.Equal(myDriverId, updatedTrain.DriverId);
-                Assert.Equal(72, updatedTrain.DiaNumber); // 運行番号が変更されていること
-                Assert.Equal(trainNumber, updatedTrain.TrainNumber);
+                await using (var scope = factory.Services.CreateAsyncScope())
+                {
+                    var db = scope.ServiceProvider.GetRequiredService<ITrainRepository>();
+                    var myDriverId = WebApplicationFixture.DriverId;
+                    var updatedTrain = (await db.GetByTrainNumbers([trainNumber])).FirstOrDefault();
+                    Assert.NotNull(updatedTrain);
+                    Assert.Equal(myDriverId, updatedTrain.DriverId);
+                    Assert.Equal(72, updatedTrain.DiaNumber); // 運行番号が変更されていること
+                    Assert.Equal(trainNumber, updatedTrain.TrainNumber);
+                }
             }
             finally
             {
@@ -406,22 +442,29 @@ public class TrainHubTest(WebApplicationFixture factory)
         // Arrange
         var mockClient = new Mock<ITrainClientContract>();
         var (connection, hub) = factory.CreateTrainHub(mockClient.Object);
-        var db = factory.Create<ITrainRepository>();
-        var trackCircuitRepository = factory.Create<ITrackCircuitRepository>();
 
         // 事前に運転士のいない同一列番の列車を登録
-        var trainState = new TrainState
+        await using (var scope = factory.Services.CreateAsyncScope())
         {
-            TrainNumber = trainNumber,
-            DiaNumber = 74,
-            DriverId = null, // 運転士なし
-            FromStationId = "TH00",
-            ToStationId = "TH00",
-            Delay = 0
-        };
-        await db.Create(trainState);
+            var db = scope.ServiceProvider.GetRequiredService<ITrainRepository>();
+            var trainState = new TrainState
+            {
+                TrainNumber = trainNumber,
+                DiaNumber = 74,
+                DriverId = null, // 運転士なし
+                FromStationId = "TH00",
+                ToStationId = "TH00",
+                Delay = 0
+            };
+            await db.Create(trainState);
+        }
+
         // 軌道回路を埋める
-        await trackCircuitRepository.SetTrainNumberByNames(["TH76_5LAT"], trainNumber);
+        await using (var scope = factory.Services.CreateAsyncScope())
+        {
+            var trackCircuitRepository = scope.ServiceProvider.GetRequiredService<ITrackCircuitRepository>();
+            await trackCircuitRepository.SetTrainNumberByNames(["TH76_5LAT"], trainNumber);
+        }
 
         var atsData = new AtsToServerData
         {
@@ -455,9 +498,13 @@ public class TrainHubTest(WebApplicationFixture factory)
                 Assert.False(result.IsOnPreviousTrain);
                 Assert.True(result.IsMaybeWarp);
                 // DB上でDriverIdがnullのままであることを確認
-                var updatedTrain = (await db.GetByTrainNumbers([trainNumber])).FirstOrDefault();
-                Assert.NotNull(updatedTrain);
-                Assert.Null(updatedTrain.DriverId);
+                await using (var scope = factory.Services.CreateAsyncScope())
+                {
+                    var db = scope.ServiceProvider.GetRequiredService<ITrainRepository>();
+                    var updatedTrain = (await db.GetByTrainNumbers([trainNumber])).FirstOrDefault();
+                    Assert.NotNull(updatedTrain);
+                    Assert.Null(updatedTrain.DriverId);
+                }
             }
             finally
             {

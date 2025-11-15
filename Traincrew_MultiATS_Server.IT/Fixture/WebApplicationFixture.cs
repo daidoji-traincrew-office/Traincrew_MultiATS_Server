@@ -77,15 +77,6 @@ public class WebApplicationFixture : IAsyncLifetime
     }
 
     /// <summary>
-    /// テスト用にDIにあるものを取得する
-    /// </summary>
-    public T Create<T>() where T : notnull
-    {
-        var scope = factory.Services.CreateScope();
-        return scope.ServiceProvider.GetRequiredService<T>();
-    }
-
-    /// <summary>
     /// ITIDHubContractとITIDClientContract用のHubConnectionを生成し、両方を返します。
     /// </summary>
     /// <param name="receiver">クライアント側のコントラクトを実装したインスタンス</param>
