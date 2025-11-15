@@ -75,7 +75,7 @@ jobs:
           echo "Waiting for PostgreSQL to be ready..."
           max_attempts=30
           attempt=0
-          until docker compose -f ./Database/docker-compose.yml exec -T postgres pg_isready -U postgres -d traincrew_multiats || [ $attempt -eq $max_attempts ]; do
+          until docker compose exec -T postgres pg_isready -U postgres -d traincrew_multiats || [ $attempt -eq $max_attempts ]; do
             attempt=$((attempt + 1))
             echo "Attempt $attempt/$max_attempts: Database not ready yet..."
             sleep 1
@@ -88,6 +88,7 @@ jobs:
 
           echo "Database is ready!"
           sleep 2
+        working-directory: ./Database
 
       - name: Run Interlocking Logic Tests for ${{ matrix.station }}
         working-directory: ./Traincrew_MultiATS_Server.IT
