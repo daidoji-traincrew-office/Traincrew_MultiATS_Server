@@ -75,7 +75,7 @@ jobs:
           echo "Waiting for PostgreSQL to be ready..."
           max_attempts=30
           attempt=0
-          until docker compose exec -T postgres pg_isready -U postgres -d traincrew_multiats || [ $attempt -eq $max_attempts ]; do
+          until docker compose exec -T db postgres pg_isready -U postgres -d traincrew_multiats || [ $attempt -eq $max_attempts ]; do
             attempt=$((attempt + 1))
             echo "Attempt $attempt/$max_attempts: Database not ready yet..."
             sleep 1
