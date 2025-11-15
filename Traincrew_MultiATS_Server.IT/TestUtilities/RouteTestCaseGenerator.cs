@@ -91,11 +91,10 @@ public class RouteTestCaseGenerator(
                     return null;
                 }
 
-                var signalRoute = signalRoutes.FirstOrDefault(sr => sr.RouteId == rldb.RouteId);
-
-                // 信号機が関連付けられていない進路はスキップ
-                if (signalRoute == null)
+                // 辞書を使用してO(1)でルックアップ (O(N)になるのを避ける)
+                if (!signalRouteByRouteId.TryGetValue(rldb.RouteId, out var signalRoute))
                 {
+                    // 信号機が関連付けられていない進路はスキップ
                     return null;
                 }
 
