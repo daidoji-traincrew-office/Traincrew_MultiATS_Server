@@ -19,6 +19,11 @@ public class WebApplicationFixture : IAsyncLifetime
 
     private WebApplicationFactory<Program> factory = new();
 
+    /// <summary>
+    /// DIコンテナのサービスプロバイダーにアクセスします
+    /// </summary>
+    public IServiceProvider Services => factory.Services;
+
     public WebApplicationFixture()
     {
         // Shift-JISを使用するために、CodePagesEncodingProviderを登録

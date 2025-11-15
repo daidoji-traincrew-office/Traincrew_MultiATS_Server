@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Traincrew_MultiATS_Server.Common.Contract;
 using Traincrew_MultiATS_Server.Common.Models;
@@ -21,7 +22,7 @@ public class InterlockingLogicTest(WebApplicationFixture factory) : IAsyncLifeti
     private IInterlockingHubContract? _hub;
     private HubConnection? _connection;
     private TaskCompletionSource<DataToInterlocking>? _dataReceived;
-    private DataToInterlocking? _latestData;
+    private volatile DataToInterlocking? _latestData;
 
     public async ValueTask InitializeAsync()
     {
@@ -79,13 +80,17 @@ public class InterlockingLogicTest(WebApplicationFixture factory) : IAsyncLifeti
                     .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
             }
 
+            // スコープを明示的に管理してリソースリークを防止
+            using var scope = fixture.Services.CreateScope();
+            var serviceProvider = scope.ServiceProvider;
+
             var generator = new RouteTestCaseGenerator(
-                fixture.Create<IStationRepository>(),
-                fixture.Create<IRouteLeverDestinationRepository>(),
-                fixture.Create<IRouteRepository>(),
-                fixture.Create<ISignalRouteRepository>(),
-                fixture.Create<ILeverRepository>(),
-                fixture.Create<IThrowOutControlRepository>());
+                serviceProvider.GetRequiredService<IStationRepository>(),
+                serviceProvider.GetRequiredService<IRouteLeverDestinationRepository>(),
+                serviceProvider.GetRequiredService<IRouteRepository>(),
+                serviceProvider.GetRequiredService<ISignalRouteRepository>(),
+                serviceProvider.GetRequiredService<ILeverRepository>(),
+                serviceProvider.GetRequiredService<IThrowOutControlRepository>());
             var testCases = generator.GenerateTestCasesAsync(stationIds).GetAwaiter().GetResult();
             return new(testCases);
         }
@@ -166,6 +171,7 @@ public class InterlockingLogicTest(WebApplicationFixture factory) : IAsyncLifeti
                 await Task.Delay(TimeSpan.FromSeconds(1), TestContext.Current.CancellationToken);
             }
         }
+
         return false;
     }
 
@@ -175,23 +181,28 @@ public class InterlockingLogicTest(WebApplicationFixture factory) : IAsyncLifeti
     /// </summary>
     private bool CheckSignalsOpen(RouteTestCase testCase)
     {
+        // ローカル変数にコピーして、途中で変更されないようにする（競合状態を防止）
+        var currentData = _latestData;
+
         // メイン信号機の開通確認
-        var mainSignal = _latestData?.Signals.FirstOrDefault(s => s.Name == testCase.SignalName);
+        var mainSignal = currentData?.Signals.FirstOrDefault(s => s.Name == testCase.SignalName);
         if (mainSignal == null || mainSignal.phase == Phase.None || mainSignal.phase == Phase.R)
         {
             return false;
         }
 
         // てこなし総括先の信号機も確認（存在する場合）
-        if (testCase.ThrowOutControlTargetSignals != null && testCase.ThrowOutControlTargetSignals.Count > 0)
+        if (testCase.ThrowOutControlTargetSignals is not { Count: > 0 })
         {
-            foreach (var targetSignalName in testCase.ThrowOutControlTargetSignals)
+            return true;
+        }
+
+        foreach (var targetSignalName in testCase.ThrowOutControlTargetSignals)
+        {
+            var targetSignal = currentData.Signals.FirstOrDefault(s => s.Name == targetSignalName);
+            if (targetSignal == null || targetSignal.phase == Phase.None || targetSignal.phase == Phase.R)
             {
-                var targetSignal = _latestData?.Signals.FirstOrDefault(s => s.Name == targetSignalName);
-                if (targetSignal == null || targetSignal.phase == Phase.None || targetSignal.phase == Phase.R)
-                {
-                    return false;
-                }
+                return false;
             }
         }
 
