@@ -64,6 +64,8 @@ public class InterlockingLogicTest(WebApplicationFixture factory) : IAsyncLifeti
     public static TheoryData<RouteTestCase> GetTestCases()
     {
         // WebApplicationFixtureのインスタンスを作成
+        // MemberDataを利用する場合、このメソッドはStaticにしないといけないが
+        // StaticメソッドだとFixtureが使えないので、やむなくここで定義している
         var fixture = new WebApplicationFixture();
         fixture.InitializeAsync().GetAwaiter().GetResult();
 
@@ -185,6 +187,7 @@ public class InterlockingLogicTest(WebApplicationFixture factory) : IAsyncLifeti
         var currentData = _latestData;
 
         // メイン信号機の開通確認
+        // currentDataがNullの場合、mainSignalはNullになる
         var mainSignal = currentData?.Signals.FirstOrDefault(s => s.Name == testCase.SignalName);
         if (mainSignal == null || mainSignal.phase == Phase.None || mainSignal.phase == Phase.R)
         {
