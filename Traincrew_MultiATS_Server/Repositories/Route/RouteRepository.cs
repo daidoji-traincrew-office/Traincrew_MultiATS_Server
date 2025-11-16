@@ -15,6 +15,13 @@ public class RouteRepository(ApplicationDbContext context) : IRouteRepository
             .ToListAsync();
     }
 
+    public async Task<List<Models.Route>> GetByStationIds(List<string> stationIds)
+    {
+        return await context.Routes
+            .Where(r => r.StationId != null && stationIds.Contains(r.StationId))
+            .ToListAsync();
+    }
+
     public async Task<List<ulong>> GetIdsWhereLeverRelayOrThrowOutIsRaised()
     {
         return await context.Routes

@@ -4,8 +4,9 @@ using Traincrew_MultiATS_Server.Models;
 
 namespace Traincrew_MultiATS_Server.Repositories.Station;
 
-public class StationRepository(DbContextOptions<ApplicationDbContext> options, ApplicationDbContext context) : IStationRepository
+public class StationRepository(ApplicationDbContext context) : IStationRepository
 {
+
     public async Task<List<Models.Station>> GetWhereIsStation()
     {
         return await context.Stations
@@ -41,11 +42,5 @@ public class StationRepository(DbContextOptions<ApplicationDbContext> options, A
         return await context.StationTimerStates
             .Where(s => stationIds.Contains(s.StationId))
             .ToListAsync();
-    }
-
-    public async Task Save(Models.Station station)
-    {
-        await using var context = new ApplicationDbContext(options);
-        await context.Stations.AddAsync(station);
     }
 }

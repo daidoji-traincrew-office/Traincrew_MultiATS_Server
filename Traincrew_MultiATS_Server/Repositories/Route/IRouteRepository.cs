@@ -7,6 +7,10 @@ public interface IRouteRepository
     /// </summary>
     Task<List<Models.Route>> GetByIdsWithState(List<ulong> ids);
     /// <summary>
+    /// 駅IDから進路を取得する
+    /// </summary>
+    Task<List<Models.Route>> GetByStationIds(List<string> stationIds);
+    /// <summary>
     /// てこ反応リレーまたは総括制御XRリレー、総括制御YSリレーが扛上している進路のIDを取得する
     /// </summary>
     /// <returns>てこ反応リレーまたは総括制御XRリレー、総括制御YSリレーが扛上している進路のIDのリスト</returns>
