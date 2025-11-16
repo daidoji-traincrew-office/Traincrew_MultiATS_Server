@@ -1822,12 +1822,6 @@ public partial class DbRendoTableInitializer
                 LockType.Route, isRouteLock: true);
 
             // 接近鎖錠
-            // Todo: 大道寺13Lの進路は山線用進路なので、一旦スルー(パースするとエラーが出るので)
-            if (stationId == "TH65" && rendoTableCsv.Start == "13L")
-            {
-                continue;
-            }
-
             await RegisterLocks(rendoTableCsv.ApproachLock, route.Id, searchObjectsForApproachLock,
                 LockType.Approach);
             await RegisterFinalTrackCircuitId(
