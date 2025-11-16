@@ -1975,7 +1975,14 @@ public partial class DbRendoTableInitializer
         var targetObjects = await searchTargetObjects(item);
         if (targetObjects.Count == 0)
         {
+            if (item.Name.Contains('Z'))
+            {
+                logger.Log(LogLevel.Warning,
+                    "誘導進路の進路名が見つかりません。処理をスキップします: {} {}", item.StationId, item.Name);
+                return;
+            }
             // Todo: 方向てこ、開放てこに対する処理
+
             throw new InvalidOperationException($"対象のオブジェクトが見つかりません: {item.StationId} {item.Name}");
         }
 
