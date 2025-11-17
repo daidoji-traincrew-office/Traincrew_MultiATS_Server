@@ -15,6 +15,7 @@ public class TIDService(
         var switchingMachineDatas = await switchingMachineService.GetAllSwitchData();
         var directionDatas = await directionRouteService.GetAllDirectionData();
         var trainStateDatas = await trainService.GetAllTrainState();
+        var timeOffset = await serverService.GetTimeOffsetAsync();
 
         return new()
         {
@@ -22,7 +23,7 @@ public class TIDService(
             SwitchDatas = switchingMachineDatas,
             DirectionDatas = directionDatas,
             TrainStateDatas = trainStateDatas,
-            TimeOffset = await serverService.GetTimeOffsetAsync()
+            TimeOffset = timeOffset
         };
     }
 }
