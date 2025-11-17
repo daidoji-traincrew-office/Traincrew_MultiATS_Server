@@ -19,6 +19,7 @@ public class ServerRepository(ApplicationDbContext context) : IServerRepository
         {
             return;
         }
+
         state.Mode = mode;
         context.ServerStates.Update(state);
         await context.SaveChangesAsync();
@@ -26,19 +27,17 @@ public class ServerRepository(ApplicationDbContext context) : IServerRepository
 
     public async Task<int> GetTimeOffset()
     {
-        var state = await context.ServerStates.FirstOrDefaultAsync();
-        return state?.TimeOffset ?? 0;
+        return await context.ServerStates
+            .Select(state => state.TimeOffset)
+            .DefaultIfEmpty(0)
+            .FirstAsync();
     }
 
     public async Task SetTimeOffsetAsync(int timeOffset)
     {
-        var state = await context.ServerStates.FirstOrDefaultAsync();
-        if (state == null)
-        {
-            return;
-        }
-        state.TimeOffset = timeOffset;
-        context.ServerStates.Update(state);
-        await context.SaveChangesAsync();
+        await context.ServerStates
+            .ExecuteUpdateAsync(property => property
+                .SetProperty(serverState => serverState.TimeOffset, timeOffset)
+            );
     }
 }

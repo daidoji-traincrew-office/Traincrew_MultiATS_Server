@@ -54,13 +54,11 @@ public class ServerService(
 
     public async Task<int> GetTimeOffsetAsync()
     {
-        await using var mutex = await mutexRepository.AcquireAsync(nameof(ServerService));
         return await serverRepository.GetTimeOffset();
     }
 
     public async Task SetTimeOffsetAsync(int timeOffset)
     {
-        await using var mutex = await mutexRepository.AcquireAsync(nameof(ServerService));
         await serverRepository.SetTimeOffsetAsync(timeOffset);
     }
 }

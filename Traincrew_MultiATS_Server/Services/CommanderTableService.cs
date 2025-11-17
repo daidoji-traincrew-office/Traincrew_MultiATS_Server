@@ -7,7 +7,8 @@ public class CommanderTableService(
     OperationNotificationService operationNotificationService,
     OperationInformationService operationInformationService,
     ProtectionService protectionService,
-    TrainService trainService
+    TrainService trainService,
+    ServerService serverService
 )
 {
     public async Task<DataToCommanderTable> SendData_CommanderTable()
@@ -20,6 +21,7 @@ public class CommanderTableService(
             OperationInformationDataList = await operationInformationService.GetAllOperationInformations(),
             ProtectionRadioDataList = await protectionService.GetProtectionRadioStates(),
             TrainStateDataList = await trainService.GetAllTrainState(),
+            TimeOffset = await serverService.GetTimeOffsetAsync()
         };
     }
 }
