@@ -20,7 +20,8 @@ public partial class TrainService(
     ITrainCarRepository trainCarRepository,
     ITrainDiagramRepository trainDiagramRepository,
     ITransactionRepository transactionRepository,
-    IGeneralRepository generalRepository
+    IGeneralRepository generalRepository,
+    ServerService serverService
 )
 {
     [GeneratedRegex(@"\d+")]
@@ -104,6 +105,22 @@ public partial class TrainService(
             trainState.DriverId = null;
             await UpdateTrainState(trainState);
         }
+    }
+
+    /// <summary>
+    /// スケジューラーから定期的にATSに送信するデータを生成する。
+    /// </summary>
+    /// <returns>ATS向けデータ</returns>
+    public async Task<ServerToATSDataBySchedule> CreateDataBySchedule()
+    {
+        var timeOffset = await serverService.GetTimeOffsetAsync();
+        var routeData = await routeService.GetActiveRoutes();
+
+        return new()
+        {
+            TimeOffset = timeOffset,
+            RouteData = routeData
+        };
     }
 
     /// <summary>
