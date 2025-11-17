@@ -29,4 +29,11 @@ public class SignalRouteRepository(ApplicationDbContext context) : ISignalRouteR
                 g => g.Select(sr => sr.Route).ToList()
             );
     }
+
+    public async Task<List<Models.SignalRoute>> GetByRouteIds(IEnumerable<ulong> routeIds)
+    {
+        return await context.SignalRoutes
+            .Where(sr => routeIds.Contains(sr.RouteId))
+            .ToListAsync();
+    }
 }

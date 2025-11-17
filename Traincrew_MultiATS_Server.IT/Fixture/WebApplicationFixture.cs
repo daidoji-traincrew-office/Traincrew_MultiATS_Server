@@ -6,8 +6,6 @@ using Moq;
 using Traincrew_MultiATS_Server.Common.Contract;
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Crew;
-using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
-using Traincrew_MultiATS_Server.Repositories.Train;
 using TypedSignalR.Client;
 
 namespace Traincrew_MultiATS_Server.IT.Fixture;
@@ -20,6 +18,11 @@ public class WebApplicationFixture : IAsyncLifetime
     private const string CommanderTableHubPath = "/hub/commander_table";
 
     private WebApplicationFactory<Program> factory = new();
+
+    /// <summary>
+    /// DIコンテナのサービスプロバイダーにアクセスします
+    /// </summary>
+    public IServiceProvider Services => factory.Services;
 
     public WebApplicationFixture()
     {
@@ -71,24 +74,6 @@ public class WebApplicationFixture : IAsyncLifetime
         }
 
         return (connection, hubContract);
-    }
-
-    /// <summary>
-    /// テスト用にITrainRepositoryを取得する
-    /// </summary>
-    public ITrainRepository CreateTrainRepository()
-    {
-        var scope = factory.Services.CreateScope();
-        return scope.ServiceProvider.GetRequiredService<ITrainRepository>();
-    }
-
-    /// <summary>
-    /// テスト用にITrackCircuitRepositoryを取得する
-    /// </summary>
-    public ITrackCircuitRepository CreateTrackCircuitRepository()
-    {
-        var scope = factory.Services.CreateScope();
-        return scope.ServiceProvider.GetRequiredService<ITrackCircuitRepository>();
     }
 
     /// <summary>
