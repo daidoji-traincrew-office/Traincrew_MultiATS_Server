@@ -196,6 +196,10 @@ public class ServerToATSData
     /// 編成構成不一致
     /// </summary>
     public bool IsCarMismatch;
+}
+
+public class ServerToATSDataBySchedule
+{
     /// <summary>
     /// TST時差
     /// </summary>

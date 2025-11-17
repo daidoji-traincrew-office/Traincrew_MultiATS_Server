@@ -10,7 +10,7 @@ public class SchedulerManager(
     private bool _isRunning;
     private List<Scheduler> _schedulers = [];
     private ServerModeScheduler? _serverModeScheduler;
-    
+
     private void InitSchedulers()
     {
         _schedulers =
@@ -22,7 +22,8 @@ public class SchedulerManager(
             new InterlockingHubScheduler(serviceScopeFactory),
             new TIDHubScheduler(serviceScopeFactory),
             new CommanderTableHubScheduler(serviceScopeFactory),
-            new DestinationButtonScheduler(serviceScopeFactory)
+            new DestinationButtonScheduler(serviceScopeFactory),
+            new TrainScheduler(serviceScopeFactory)
         ];
     }
 
@@ -33,6 +34,7 @@ public class SchedulerManager(
         {
             return;
         }
+
         InitSchedulers();
         _isRunning = true;
     }
@@ -49,6 +51,7 @@ public class SchedulerManager(
         {
             return;
         }
+
         await Task.WhenAll(_schedulers.Select(s => s.Stop()));
         _schedulers.Clear();
         _isRunning = false;

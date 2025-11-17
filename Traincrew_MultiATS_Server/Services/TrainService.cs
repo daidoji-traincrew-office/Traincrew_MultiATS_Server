@@ -20,8 +20,7 @@ public partial class TrainService(
     ITrainCarRepository trainCarRepository,
     ITrainDiagramRepository trainDiagramRepository,
     ITransactionRepository transactionRepository,
-    IGeneralRepository generalRepository,
-    ServerService serverService
+    IGeneralRepository generalRepository
 )
 {
     [GeneratedRegex(@"\d+")]
@@ -52,8 +51,7 @@ public partial class TrainService(
         var serverData = new ServerToATSData
         {
             // 在線している軌道回路上で防護無線が発報されているか確認
-            BougoState = await protectionService.IsProtectionEnabledForTrackCircuits(trackCircuitList),
-            TimeOffset = await serverService.GetTimeOffsetAsync()
+            BougoState = await protectionService.IsProtectionEnabledForTrackCircuits(trackCircuitList)
         };
         // 防護無線を発報している場合のDB更新
         await protectionService.UpdateBougoState(clientTrainNumber, trackCircuitList, clientData.BougoState);
@@ -446,7 +444,7 @@ public partial class TrainService(
     /// </summary>
     /// <param name="trainNumber">列車番号</param>
     /// <returns></returns>
-    public static int GetDiaNumberFromTrainNumber(string trainNumber)
+    private static int GetDiaNumberFromTrainNumber(string trainNumber)
     {
         if (trainNumber == "9999")
         {
