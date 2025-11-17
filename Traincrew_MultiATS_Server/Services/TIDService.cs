@@ -6,7 +6,8 @@ public class TIDService(
     TrackCircuitService trackCircuitService,
     SwitchingMachineService switchingMachineService,
     DirectionRouteService directionRouteService,
-    TrainService trainService)
+    TrainService trainService,
+    ServerService serverService)
 {
     public async Task<ConstantDataToTID> CreateTidData()
     {
@@ -20,7 +21,8 @@ public class TIDService(
             TrackCircuitDatas = trackCircuitDatas,
             SwitchDatas = switchingMachineDatas,
             DirectionDatas = directionDatas,
-            TrainStateDatas = trainStateDatas
+            TrainStateDatas = trainStateDatas,
+            TimeOffset = await serverService.GetTimeOffsetAsync()
         };
     }
 }
