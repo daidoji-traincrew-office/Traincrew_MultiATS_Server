@@ -28,7 +28,8 @@ public class InterlockingService(
     SwitchingMachineService switchingMachineService,
     DirectionRouteService directionRouteService,
     SignalService signalService,
-    IMutexRepository mutexRepository)
+    IMutexRepository mutexRepository,
+    ServerService serverService)
 {
 
     public async Task<DataToInterlocking> SendData_Interlocking()
@@ -78,12 +79,14 @@ public class InterlockingService(
                 .Select(ToRetsubanData)
                 .ToList(),
 
-            // 各ランプの状態 
+            // 各ランプの状態
             Lamps = lamps,
 
             Signals = signalIndications
                 .Select(pair => SignalService.ToSignalData(pair.Key, pair.Value))
-                .ToList()
+                .ToList(),
+
+            TimeOffset = await serverService.GetTimeOffsetAsync()
         };
 
         return response;
