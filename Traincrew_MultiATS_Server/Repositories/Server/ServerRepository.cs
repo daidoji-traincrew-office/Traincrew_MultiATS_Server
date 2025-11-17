@@ -28,9 +28,8 @@ public class ServerRepository(ApplicationDbContext context) : IServerRepository
     public async Task<int> GetTimeOffset()
     {
         return await context.ServerStates
-            .Select(state => state.TimeOffset)
-            .DefaultIfEmpty(0)
-            .FirstAsync();
+            .Select(state => (int?)state.TimeOffset)
+            .FirstOrDefaultAsync() ?? 0;
     }
 
     public async Task SetTimeOffsetAsync(int timeOffset)
