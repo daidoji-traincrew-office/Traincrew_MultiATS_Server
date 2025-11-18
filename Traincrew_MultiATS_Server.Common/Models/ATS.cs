@@ -197,3 +197,11 @@ public class ServerToATSData
     /// </summary>
     public bool IsCarMismatch;
 }
+
+public class ServerToATSDataBySchedule
+{
+    /// <summary>
+    /// TST時差
+    /// </summary>
+    public int TimeOffset { get; set; }
+}
