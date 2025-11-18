@@ -19,4 +19,11 @@ public class NextSignalRepository(ApplicationDbContext context): INextSignalRepo
             .Where(s => signalNames.Contains(s.SignalName) && s.Depth == depth)
             .ToListAsync();
     }
+
+    public async Task<List<Models.NextSignal>> GetAllByDepth(int depth)
+    {
+        return await context.NextSignals
+            .Where(s => s.Depth == depth)
+            .ToListAsync();
+    }
 }

@@ -73,4 +73,50 @@ public class SignalRepository(ApplicationDbContext context) : ISignalRepository
             .Select(signal => signal.Name)
             .ToListAsync();
     }
+
+    public async Task<List<Models.Signal>> GetSignalsForCalcIndication()
+    {
+        return await context.Signals
+            .Include(s => s.SignalState)
+            .Include(s => s.Type)
+            .Include(s => s.TrackCircuit)
+            .ThenInclude(t => t!.TrackCircuitState)
+            .Include(s => s.DirectionRouteLeft)
+            .ThenInclude(dr => dr.DirectionRouteState)
+            .Include(s => s.DirectionRouteRight)
+            .ThenInclude(dr => dr.DirectionRouteState)
+            .Select(s => new Models.Signal
+            {
+                Name = s.Name,
+                SignalState = s.SignalState,
+                Direction = s.Direction,
+                DirectionRouteLeftId = s.DirectionRouteLeftId,
+                DirectionRouteRightId = s.DirectionRouteRightId,
+                Type = s.Type,
+                TrackCircuit = s.TrackCircuit == null ? null : new Models.TrackCircuit
+                {
+                    Name = s.TrackCircuit.Name,
+                    TrackCircuitState = new()
+                    {
+                        IsShortCircuit = s.TrackCircuit.TrackCircuitState.IsShortCircuit,
+                        TrainNumber = s.TrackCircuit.TrackCircuitState.TrainNumber,
+                    }
+                },
+                DirectionRouteLeft = s.DirectionRouteLeft == null ? null : new Models.DirectionRoute
+                {
+                    DirectionRouteState = s.DirectionRouteLeft.DirectionRouteState == null ? null : new DirectionRouteState
+                    {
+                        isLr = s.DirectionRouteLeft.DirectionRouteState.isLr
+                    }
+                },
+                DirectionRouteRight = s.DirectionRouteRight == null ? null : new Models.DirectionRoute
+                {
+                    DirectionRouteState = s.DirectionRouteRight.DirectionRouteState == null ? null : new DirectionRouteState
+                    {
+                        isLr = s.DirectionRouteRight.DirectionRouteState.isLr
+                    }
+                }
+            })
+            .ToListAsync();
+    }
 }

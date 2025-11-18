@@ -41,6 +41,47 @@ public class SignalService(
     }
 
     /// <summary>
+    /// 全信号機の現示を計算する
+    /// </summary>
+    /// <returns>信号機名をキーとし、信号現示を値とする辞書</returns>
+    public async Task<Dictionary<string, SignalIndication>> CalcAllSignalIndication()
+    {
+        // 1. 全信号の詳細情報を取得
+        var allSignals = await signalRepository.GetSignalsForCalcIndication();
+        var signals = allSignals.ToDictionary(x => x.Name);
+
+        // 2. depth=1の先の信号情報を全取得
+        var nextSignalsDepth1 = await nextSignalRepository.GetAllByDepth(1);
+
+        // NextSignal情報を辞書化
+        var nextSignalDict = nextSignalsDepth1
+            .GroupBy(x => x.SourceSignalName)
+            .ToDictionary(
+                g => g.Key,
+                g => g.Select(x => x.TargetSignalName).ToList()
+            );
+
+        // 3. SignalRouteを全取得
+        var routes = await signalRouteRepository.GetAllRoutes();
+
+        // 4. 信号名をHashSetに入れて、結果用Dictionaryを定義
+        var remainingSignals = allSignals.Select(x => x.Name).ToHashSet();
+        var result = new Dictionary<string, SignalIndication>();
+
+        // 5-7. HashSetから信号名を取得し、現示を計算。HashSetが空になるまで繰り返し
+        while (remainingSignals.Count > 0)
+        {
+            // HashSetから信号名を一つ取得
+            var signalName = remainingSignals.First();
+
+            // 信号現示を計算（計算過程で先の信号機の現示を計算した場合、HashSetから削除される）
+            CalcSignalIndicationRecursive(signalName, signals, nextSignalDict, routes, result, remainingSignals);
+        }
+
+        return result;
+    }
+
+    /// <summary>
     /// 指定した信号機名のリストから各信号機の現示を計算する
     /// </summary>
     /// <param name="signalNames">現示を計算する信号機名のリスト</param>
@@ -86,6 +127,70 @@ public class SignalService(
     {
         return await signalRepository.GetSignalNamesByTrackCircuits(
             trackCircuits.Select(tc => tc.Name).ToList(), isUp);
+    }
+
+    /// <summary>
+    /// 単一の信号機の現示を計算する（HashSetを使った全体計算用）
+    /// </summary>
+    /// <param name="signalName">計算対象の信号機名</param>
+    /// <param name="signals">信号機の辞書</param>
+    /// <param name="nextSignalDict">次の信号機の辞書</param>
+    /// <param name="routeDict">ルートの辞書</param>
+    /// <param name="cache">計算結果のキャッシュ</param>
+    /// <param name="remainingSignals">計算待ちの信号機名のHashSet</param>
+    /// <returns>計算された信号現示</returns>
+    private static SignalIndication CalcSignalIndicationRecursive(
+        string signalName,
+        Dictionary<string, Signal> signals,
+        Dictionary<string, List<string>> nextSignalDict,
+        Dictionary<string, List<Route>> routeDict,
+        Dictionary<string, SignalIndication> cache,
+        HashSet<string> remainingSignals
+    )
+    {
+        // すでに計算済みの信号機の場合、その結果を返す
+        if (cache.TryGetValue(signalName, out var signalIndication))
+        {
+            return signalIndication;
+        }
+
+        var result = SignalIndication.R;
+        var routes = routeDict.GetValueOrDefault(signalName, []);
+        if (
+            // 信号機が存在している
+            signals.TryGetValue(signalName, out var signal)
+            // 絶対信号機の場合、信号制御リレーが扛上している
+            && (routes.Count == 0 || routes.Any(route => route.RouteState.IsSignalControlRaised == RaiseDrop.Raise))
+            // 許容信号機の場合、対象軌道回路が短絡していない
+            && !(signal.TrackCircuit?.TrackCircuitState.IsShortCircuit ?? false)
+            // 単線区間の場合、方向が正しい
+            && (signal.DirectionRouteLeftId == null ||
+                signal.DirectionRouteLeft.DirectionRouteState.isLr == signal.Direction)
+            && (signal.DirectionRouteRightId == null ||
+                signal.DirectionRouteRight.DirectionRouteState.isLr == signal.Direction)
+        )
+        {
+            // 次の信号機名を取得
+            var nextSignalNames = nextSignalDict.GetValueOrDefault(signalName, []);
+            // 次の信号機の情報を取得
+            var nextSignalIndications = nextSignalNames
+                .Select(x => CalcSignalIndicationRecursive(x, signals, nextSignalDict, routeDict, cache, remainingSignals))
+                .ToList();
+            // 次の信号機の中で最も高い現示を取得
+            var nextSignalIndication = SignalIndication.R;
+            if (nextSignalIndications.Count != 0)
+            {
+                nextSignalIndication = nextSignalIndications.Max();
+            }
+
+            // 信号機の種類によって、信号の現示を計算する
+            result = GetIndication(signal.Type, nextSignalIndication);
+        }
+
+        // 計算結果をキャッシュに追加し、HashSetから削除
+        cache[signalName] = result;
+        remainingSignals.Remove(signalName);
+        return result;
     }
 
     /// <summary>
