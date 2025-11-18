@@ -30,6 +30,15 @@ public partial class TrainService(
     public async Task<ServerToATSData> CreateAtsData(ulong clientDriverId, AtsToServerData clientData)
     {
         var clientTrainNumber = clientData.DiaName;
+        var serverMode = await serverService.GetServerModeAsync();
+        // 定時処理が停止している場合、その旨だけ返す
+        if (serverMode == ServerMode.Off)
+        {
+            return new()
+            {
+                ServerMode = serverMode
+            };
+        }
         // 軌道回路情報の更新
         var oldTrackCircuitList = await trackCircuitService.GetTrackCircuitsByTrainNumber(clientTrainNumber);
         var oldTrackCircuitDataList = oldTrackCircuitList.Select(TrackCircuitService.ToTrackCircuitData).ToList();
@@ -461,7 +470,7 @@ public partial class TrainService(
     /// </summary>
     /// <param name="trainNumber">列車番号</param>
     /// <returns></returns>
-    private static int GetDiaNumberFromTrainNumber(string trainNumber)
+    public static int GetDiaNumberFromTrainNumber(string trainNumber)
     {
         if (trainNumber == "9999")
         {

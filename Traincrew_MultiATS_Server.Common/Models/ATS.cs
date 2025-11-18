@@ -179,7 +179,7 @@ public class ServerToATSData
     /// <summary>
     /// 進路情報
     /// </summary>
-    public List<RouteData> RouteData { get; set; } = new();
+    public List<RouteData> RouteData { get; set; } = [];
     /// <summary>
     /// 踏みつぶし状態
     /// </summary>
@@ -196,6 +196,10 @@ public class ServerToATSData
     /// 編成構成不一致
     /// </summary>
     public bool IsCarMismatch;
+    /// <summary>
+    /// サーバーモード
+    /// </summary>
+    public ServerMode ServerMode { get; set; } = ServerMode.Off;
 }
 
 public class ServerToATSDataBySchedule
