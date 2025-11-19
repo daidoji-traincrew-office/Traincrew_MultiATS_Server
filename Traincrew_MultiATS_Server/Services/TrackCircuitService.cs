@@ -83,7 +83,7 @@ public class TrackCircuitService(
     {
         return new()
         {
-            Last = "溝月レイル",
+            Last = string.IsNullOrEmpty(trackCircuit.TrackCircuitState.TrainNumber) ? "" : "溝月レイル",
             Name = trackCircuit.Name,
             On = trackCircuit.TrackCircuitState.IsShortCircuit,
             Lock = trackCircuit.TrackCircuitState.IsLocked
