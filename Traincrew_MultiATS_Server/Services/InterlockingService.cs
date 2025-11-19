@@ -36,7 +36,7 @@ public class InterlockingService(
         await using var mutex = await mutexRepository.AcquireAsync(nameof(InterlockingService));
         var stations = await stationRepository.GetWhereIsStation();
         var stationIds = stations.Select(station => station.Id).ToList();
-        var trackCircuits = await trackCircuitService.GetAllTrackCircuitDataList();
+        var trackCircuits = await trackCircuitService.GetAllTrackCircuitHiddenDataList();
         var switchingDatas = await switchingMachineService.GetAllSwitchData();
         var lever = await leverRepository.GetAllWithState();
         var directionSelfControlLevers = await directionSelfControlLeverRepository.GetAllWithState();
