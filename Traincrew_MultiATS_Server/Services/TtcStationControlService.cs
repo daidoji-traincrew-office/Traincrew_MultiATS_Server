@@ -221,7 +221,20 @@ public class TtcStationControlService(
 
     public async Task<List<TtcWindow>> GetTtcWindowsByStationIdsWithState(List<string> stationIds)
     {
-        return await ttcWindowRepository.GetTtcWindowsByStationIdsWithState(stationIds);
+        return await GetTtcWindowsDataHidden(await ttcWindowRepository.GetTtcWindowsByStationIdsWithState(stationIds));
+    }
+
+    private async Task<List<TtcWindow>> GetTtcWindowsDataHidden(List<TtcWindow> TtcWindows)
+    {
+        foreach (var ttcWindow in TtcWindows)
+        {
+            if (ttcWindow.TtcWindowState != null && !string.IsNullOrEmpty(ttcWindow.TtcWindowState.TrainNumber))
+            {
+                ttcWindow.TtcWindowState.TrainNumber = "溝月レイル";
+            }
+        }
+
+        return TtcWindows;
     }
 
     public async Task ClearTtcWindowByTrainNumber(string DiaName)
