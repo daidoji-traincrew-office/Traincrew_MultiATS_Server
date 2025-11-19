@@ -269,12 +269,12 @@ public class InterlockingService(
         };
     }
 
-    public static InterlockingRetsubanData ToRetsubanData(TtcWindow ttcWindow)
+    private static InterlockingRetsubanData ToRetsubanData(TtcWindow ttcWindow)
     {
         return new()
         {
             Name = ttcWindow.Name,
-            Retsuban = ttcWindow.TtcWindowState?.TrainNumber ?? "",
+            Retsuban = string.IsNullOrEmpty(ttcWindow.TtcWindowState?.TrainNumber) ? "" : "溝月レイル",
         };
     }
 }
