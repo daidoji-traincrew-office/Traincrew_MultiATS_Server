@@ -16,7 +16,7 @@ public class CommanderTableService(
         {
             TroubleDataList = [],
             OperationNotificationDataList = await operationNotificationService.GetOperationNotificationData(),
-            TrackCircuitDataList = await trackCircuitService.GetAllTrackCircuitHiddenDataList(),
+            TrackCircuitDataList = await trackCircuitService.GetAllTrackCircuitDataList(),
             OperationInformationDataList = await operationInformationService.GetAllOperationInformations(),
             ProtectionRadioDataList = await protectionService.GetProtectionRadioStates(),
             TrainStateDataList = await trainService.GetAllTrainState(),
