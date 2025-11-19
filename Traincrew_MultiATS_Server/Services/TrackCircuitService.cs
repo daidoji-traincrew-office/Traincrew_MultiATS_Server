@@ -13,6 +13,15 @@ public class TrackCircuitService(
     {
         var trackCircuitsDb = await trackCircuitRepository.GetAllTrackCircuitList();
         var trackCircuitDataList = trackCircuitsDb
+            .Select(ToTrackCircuitData)
+            .ToList();
+        return trackCircuitDataList;
+    }
+
+    public async Task<List<TrackCircuitData>> GetAllTrackCircuitHiddenDataList()
+    {
+        var trackCircuitsDb = await trackCircuitRepository.GetAllTrackCircuitList();
+        var trackCircuitDataList = trackCircuitsDb
             .Select(ToTrackCircuitDataHidden)
             .ToList();
         return trackCircuitDataList;
