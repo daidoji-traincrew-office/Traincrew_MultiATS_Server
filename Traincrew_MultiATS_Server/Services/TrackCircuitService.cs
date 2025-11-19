@@ -64,7 +64,7 @@ public class TrackCircuitService(
     public async Task<List<TrackCircuitData>> GetShortCircuitedTrackCircuitDataList()
     {
         return (await trackCircuitRepository.GetWhereShortCircuited())
-            .Select(ToTrackCircuitDataHidden)
+            .Select(ToTrackCircuitData)
             .ToList();
     }
 
