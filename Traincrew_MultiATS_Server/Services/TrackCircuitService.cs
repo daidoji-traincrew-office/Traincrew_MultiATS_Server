@@ -25,7 +25,7 @@ public class TrackCircuitService(
     {
         var trackCircuitsDb = await trackCircuitRepository.GetAllTrackCircuitList();
         var trackCircuitDataList = trackCircuitsDb
-            .Select(ToTrackCircuitData)
+            .Select(ToTrackCircuitDataHidden)
             .ToList();
         return trackCircuitDataList;
     }
@@ -76,7 +76,7 @@ public class TrackCircuitService(
     public async Task<List<TrackCircuitData>> GetShortCircuitedTrackCircuitDataList()
     {
         return (await trackCircuitRepository.GetWhereShortCircuited())
-            .Select(ToTrackCircuitData)
+            .Select(ToTrackCircuitDataHidden)
             .ToList();
     }
 
@@ -85,6 +85,17 @@ public class TrackCircuitService(
         return new()
         {
             Last = trackCircuit.TrackCircuitState.TrainNumber,
+            Name = trackCircuit.Name,
+            On = trackCircuit.TrackCircuitState.IsShortCircuit,
+            Lock = trackCircuit.TrackCircuitState.IsLocked
+        };
+    }
+
+    private static TrackCircuitData ToTrackCircuitDataHidden(TrackCircuit trackCircuit)
+    {
+        return new()
+        {
+            Last = "溝月レイル",
             Name = trackCircuit.Name,
             On = trackCircuit.TrackCircuitState.IsShortCircuit,
             Lock = trackCircuit.TrackCircuitState.IsLocked
