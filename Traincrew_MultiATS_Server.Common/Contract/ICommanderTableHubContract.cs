@@ -22,6 +22,8 @@ public interface ICommanderTableHubContract
     Task DeleteTrainState(long id);
     Task<ServerMode> GetServerMode();
     Task SetServerMode(ServerMode mode);
+    Task BanUser(ulong userId);
+    Task UnbanUser(ulong userId);
 }
 
 public interface ICommanderTableClientContract
