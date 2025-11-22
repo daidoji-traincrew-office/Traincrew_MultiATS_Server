@@ -47,37 +47,39 @@ public class SignalService(
     public async Task<List<SignalData>> CalcAllSignalIndication()
     {
         // 1. 全信号の詳細情報を取得
-        var allSignals = await signalRepository.GetSignalsForCalcIndication();
-        var signals = allSignals.ToDictionary(x => x.Name);
+        var signals = await signalRepository.GetSignalsForCalcIndication();
+        var signalByName = signals.ToDictionary(x => x.Name);
 
         // 2. depth=1の先の信号情報を全取得
         var nextSignalsDepth1 = await nextSignalRepository.GetAllByDepth(1);
 
-        // NextSignal情報を辞書化
-        var nextSignalDict = nextSignalsDepth1
+        // 3.NextSignal情報を辞書化
+        var nextSignalBySignalNames = nextSignalsDepth1
             .GroupBy(x => x.SourceSignalName)
             .ToDictionary(
                 g => g.Key,
                 g => g.Select(x => x.TargetSignalName).ToList()
             );
 
-        // 3. SignalRouteを全取得
-        var routes = await signalRouteRepository.GetAllRoutes();
+        // 4. SignalRouteを全取得
+        var routesBySignalNames = await signalRouteRepository.GetAllRoutes();
 
-        // 4. 信号名をHashSetに入れて、結果用Dictionaryを定義
-        var remainingSignals = allSignals.Select(x => x.Name).ToHashSet();
+        // 5. 信号名をHashSetに入れて、結果用Dictionaryを定義
+        var remainingSignals = signals.Select(x => x.Name).ToHashSet();
         var result = new Dictionary<string, SignalIndication>();
 
-        // 5-7. HashSetから信号名を取得し、現示を計算。HashSetが空になるまで繰り返し
+        // 6. HashSetから信号名を取得し、現示を計算。HashSetが空になるまで繰り返し
         while (remainingSignals.Count > 0)
         {
             // HashSetから信号名を一つ取得
             var signalName = remainingSignals.First();
 
             // 信号現示を計算（計算過程で先の信号機の現示を計算した場合、HashSetから削除される）
-            CalcSignalIndicationRecursive(signalName, signals, nextSignalDict, routes, result, remainingSignals);
+            CalcSignalIndicationRecursive(
+                signalName, signalByName, nextSignalBySignalNames, routesBySignalNames, result, remainingSignals);
         }
 
+        // 7. 最後に結果を返す
         return result
             .Select(pair => ToSignalData(pair.Key, ToPhase(pair.Value)))
             .ToList();
