@@ -49,6 +49,7 @@ using Traincrew_MultiATS_Server.Repositories.TrainDiagram;
 using Traincrew_MultiATS_Server.Repositories.Transaction;
 using Traincrew_MultiATS_Server.Repositories.TtcWindow;
 using Traincrew_MultiATS_Server.Repositories.TtcWindowLink;
+using Traincrew_MultiATS_Server.Repositories.UserDisconnection;
 using Traincrew_MultiATS_Server.Scheduler;
 using Traincrew_MultiATS_Server.Services;
 using static OpenIddict.Abstractions.OpenIddictConstants;
@@ -494,6 +495,8 @@ public class Program
             .AddScoped<ITtcWindowRepository, TtcWindowRepository>()
             .AddScoped<ITtcWindowLinkRepository, TtcWindowLinkRepository>()
             .AddScoped<ITransactionRepository, TransactionRepository>()
+            .AddScoped<IUserDisconnectionRepository, UserDisconnectionRepository>()
+            .AddScoped<BannedUserService>()
             .AddScoped<CommanderTableService>()
             .AddScoped<DirectionRouteService>()
             .AddScoped<InterlockingService>()
@@ -577,7 +580,10 @@ public class Program
         {
             tracing.AddAspNetCoreInstrumentation();
             tracing.AddHttpClientInstrumentation();
-            tracing.AddEntityFrameworkCoreInstrumentation();
+            tracing.AddEntityFrameworkCoreInstrumentation(options =>
+            {
+                options.SetDbStatementForText = true;
+            });
             tracing.AddSource(ActivitySources.Scheduler.Name);
             tracing.AddSource(ActivitySources.Hubs.Name);
         });

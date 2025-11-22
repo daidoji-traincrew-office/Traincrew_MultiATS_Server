@@ -20,6 +20,7 @@ public partial class TrainService(
     ITrainCarRepository trainCarRepository,
     ITrainDiagramRepository trainDiagramRepository,
     ITransactionRepository transactionRepository,
+    BannedUserService bannedUserService,
     IGeneralRepository generalRepository
 )
 {
@@ -28,6 +29,16 @@ public partial class TrainService(
 
     public async Task<ServerToATSData> CreateAtsData(ulong clientDriverId, AtsToServerData clientData)
     {
+        // 接続拒否チェック
+        var isBanned = await bannedUserService.IsUserBannedAsync(clientDriverId);
+        if (isBanned)
+        {
+            return new()
+            {
+                IsDisconnected = true
+            };
+        }
+
         var clientTrainNumber = clientData.DiaName;
         // 軌道回路情報の更新
         var oldTrackCircuitList = await trackCircuitService.GetTrackCircuitsByTrainNumber(clientTrainNumber);

@@ -196,4 +196,8 @@ public class ServerToATSData
     /// 編成構成不一致
     /// </summary>
     public bool IsCarMismatch;
+    /// <summary>
+    /// 接続拒否状態
+    /// </summary>
+    public bool IsDisconnected { get; set; } = false;
 }

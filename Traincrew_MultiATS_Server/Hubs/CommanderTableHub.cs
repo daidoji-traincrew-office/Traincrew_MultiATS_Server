@@ -20,7 +20,8 @@ public class CommanderTableHub(
     OperationInformationService operationInformationService,
     ProtectionService protectionService,
     ServerService serverService,
-    CommanderTableService commanderTableService
+    CommanderTableService commanderTableService,
+    BannedUserService bannedUserService
 ) : Hub<ICommanderTableClientContract>, ICommanderTableHubContract
 {
     public async Task<DataToCommanderTable> SendData_CommanderTable()
@@ -113,5 +114,15 @@ public class CommanderTableHub(
     public async Task SetServerMode(ServerMode mode)
     {
         await serverService.SetServerModeAsync(mode);
+    }
+
+    public async Task BanUser(ulong userId)
+    {
+        await bannedUserService.BanUserAsync(userId);
+    }
+
+    public async Task UnbanUser(ulong userId)
+    {
+        await bannedUserService.UnbanUserAsync(userId);
     }
 }
