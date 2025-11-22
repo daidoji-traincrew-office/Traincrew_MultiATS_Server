@@ -1,4 +1,4 @@
-h1:YamXFSt3GMGimQlEtLJC2WVlbcywNgJYcR7yW/yFn78=
+h1:aGoZgGjOQqdkRU6CEOXIF8/78Xa9rF6ZgkxovOujzPo=
 20241105144637_create_openiddict.sql h1:e3YP3bvDT2pkUc506P3fgKJoLzdNnzBgjkBNMKvEKoI=
 20241221070718_create_interlocking_tables.sql h1:bHtt4Hbmv5aMY0jvfDoG7eeY6IpChCnNrvSCAn9cdcU=
 20241221081310_switching_machine_reversed.sql h1:e7qP5i8sHtWVXpkbnbo3n/6smp6Z/lqQxwa4Yp+EQ1w=
@@ -66,3 +66,4 @@ h1:YamXFSt3GMGimQlEtLJC2WVlbcywNgJYcR7yW/yFn78=
 20250909013415_remove_lock_state.sql h1:Dmmn8j0ndl/MoZOJtjqSIWPntSpvqRs0bE86sTFr/C8=
 20251004165405_add_x_and_s_relay_to_route_state.sql h1:1XSV6/PZroc11C8tVJHmltxRTGmjmYilw5DcPQCPEoY=
 20251004170421_add_throw_out_control_type.sql h1:fUM5B5gBwPgoe6H7dzopDqrGjTqldiPwnfAXG8Ygn/M=
+20251122105132_add_user_disconnection_state.sql h1:IXCY5efozPS74Pw+mOjdmNQn7v0XqiuF5G+HWhU+Pxw=
