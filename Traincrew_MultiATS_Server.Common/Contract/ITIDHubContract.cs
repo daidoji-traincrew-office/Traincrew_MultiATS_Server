@@ -10,4 +10,5 @@ public interface ITIDHubContract
 public interface ITIDClientContract
 {
     Task ReceiveData(ConstantDataToTID data);
+    Task ReceiveSignalData(List<SignalData> signalData);
 }

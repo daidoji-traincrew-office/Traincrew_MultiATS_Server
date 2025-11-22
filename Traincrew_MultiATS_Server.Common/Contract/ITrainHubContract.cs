@@ -11,4 +11,5 @@ public interface ITrainHubContract
 public interface ITrainClientContract
 {
     Task ReceiveData(ServerToATSDataBySchedule data);
+    Task ReceiveSignalData(List<SignalData> signalData);
 }

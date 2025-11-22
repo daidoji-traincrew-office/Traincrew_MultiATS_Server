@@ -29,4 +29,5 @@ public interface ICommanderTableClientContract
 {
     Task ReceiveData(DataToCommanderTable data);
     Task ReceiveServerMode(ServerMode serverMode);
+    Task ReceiveSignalData(List<SignalData> signalData);
 }

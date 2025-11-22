@@ -43,8 +43,8 @@ public class SignalService(
     /// <summary>
     /// 全信号機の現示を計算する
     /// </summary>
-    /// <returns>信号機名をキーとし、信号現示を値とする辞書</returns>
-    public async Task<Dictionary<string, SignalIndication>> CalcAllSignalIndication()
+    /// <returns>信号機の現示データのリスト</returns>
+    public async Task<List<SignalData>> CalcAllSignalIndication()
     {
         // 1. 全信号の詳細情報を取得
         var allSignals = await signalRepository.GetSignalsForCalcIndication();
@@ -78,7 +78,9 @@ public class SignalService(
             CalcSignalIndicationRecursive(signalName, signals, nextSignalDict, routes, result, remainingSignals);
         }
 
-        return result;
+        return result
+            .Select(pair => ToSignalData(pair.Key, ToPhase(pair.Value)))
+            .ToList();
     }
 
     /// <summary>

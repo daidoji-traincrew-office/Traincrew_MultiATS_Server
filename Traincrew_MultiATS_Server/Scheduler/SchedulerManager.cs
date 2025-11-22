@@ -23,7 +23,8 @@ public class SchedulerManager(
             new TIDHubScheduler(serviceScopeFactory),
             new CommanderTableHubScheduler(serviceScopeFactory),
             new DestinationButtonScheduler(serviceScopeFactory),
-            new TrainScheduler(serviceScopeFactory)
+            new TrainScheduler(serviceScopeFactory),
+            new SignalScheduler(serviceScopeFactory)
         ];
     }
 
