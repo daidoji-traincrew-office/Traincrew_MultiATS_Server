@@ -10,20 +10,15 @@ public class DataToCTCP
     /// </summary>
     public List<TrackCircuitData> TrackCircuits { get; set; }
 
-    /// <summary>
-    /// 信号機情報リスト
-    /// </summary>
-    public List<SignalData> Signals { get; set; }
-
     /// <summama
     /// CTCてこ情報リスト
     /// </summary>
-    public List<InterlockingLeverData> CTCLevers { get; set; }
+    public List<RouteData> RouteDatas { get; set; }
 
     /// <summary>
-    /// 物理鍵てこ情報リスト
+    /// 集中・駅扱状態
     /// </summary>
-    public List<InterlockingKeyLeverData> PhysicalKeyLevers { get; set; }
+    public Dictionary<string, CenterControlState> CenterControlStates { get; set; }
 
     /// <summary>
     /// 列番情報リスト
@@ -34,4 +29,10 @@ public class DataToCTCP
     /// 表示灯情報リスト
     /// </summary>
     public Dictionary<string, bool> Lamps { get; set; }
+}
+
+public enum CenterControlState
+{
+    StationControl,
+    CenterControl
 }
