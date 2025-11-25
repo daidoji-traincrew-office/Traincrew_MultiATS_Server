@@ -15,6 +15,14 @@ public class RouteRepository(ApplicationDbContext context) : IRouteRepository
             .ToListAsync();
     }
 
+    public async Task<List<Models.Route>> GetByTcNameWithState(string tcName)
+    {
+        return await context.Routes
+            .Include(r => r.RouteState)
+            .Where(r => r.TcName == tcName)
+            .ToListAsync();
+    }
+
     public async Task<List<ulong>> GetIdsWhereLeverRelayOrThrowOutIsRaised()
     {
         return await context.Routes

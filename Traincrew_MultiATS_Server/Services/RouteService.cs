@@ -40,16 +40,4 @@ public class RouteService(IRouteRepository routeRepository)
         var routes = await routeRepository.GetByIdsWithState(routeIds);
         return routes.Select(ToRouteData).ToList();
     }
-
-    public async Task<List<InterlockingLeverData>> GetAllCTCLeverData()
-    {
-        var routeIds = await routeRepository.GetIdsForAll();
-        var routes = await routeRepository.GetByIdsWithState(routeIds);
-        return routes.Select(r => new InterlockingLeverData
-        {
-            Name = r.Name,
-            State = r.RouteState.IsCtcRelayRaised == RaiseDrop.Raise ? LCR.Center : LCR.Right,
-        }).ToList();
-
-    }
 }

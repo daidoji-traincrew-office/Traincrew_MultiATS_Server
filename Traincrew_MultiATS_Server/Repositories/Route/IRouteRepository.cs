@@ -6,6 +6,12 @@ public interface IRouteRepository
     /// IDから進路を取得する
     /// </summary>
     Task<List<Models.Route>> GetByIdsWithState(List<ulong> ids);
+
+    /// <summary>
+    /// TcNameから進路を取得する
+    /// </summary>
+    Task<List<Models.Route>> GetByTcNameWithState(string tcName);
+
     /// <summary>
     /// てこ反応リレーまたは総括制御XRリレー、総括制御YSリレーが扛上している進路のIDを取得する
     /// </summary>

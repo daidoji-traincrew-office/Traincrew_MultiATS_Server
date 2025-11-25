@@ -19,8 +19,8 @@ public class CTCPHub(CTCPService ctcpService) : Hub<ICTCPClientContract>, ICTCPH
         return await ctcpService.SendData_CTCP();
     }
 
-    public async Task<InterlockingLeverData> SetCTCLeverData(InterlockingLeverData leverData)
+    public async Task<Common.Models.RouteData> SetCtcRelay(string TcName, RaiseDrop raiseDrop)
     {
-        return await ctcpService.SetPhysicalLeverData(leverData);
+        return await ctcpService.SetCtcRelay(TcName, raiseDrop);
     }
 }
