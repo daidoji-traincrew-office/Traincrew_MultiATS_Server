@@ -10,7 +10,7 @@ public class SchedulerManager(
     private bool _isRunning;
     private List<Scheduler> _schedulers = [];
     private ServerModeScheduler? _serverModeScheduler;
-    
+
     private void InitSchedulers()
     {
         _schedulers =
@@ -21,6 +21,7 @@ public class SchedulerManager(
             new TtcStationControlScheduler(serviceScopeFactory),
             new InterlockingHubScheduler(serviceScopeFactory),
             new TIDHubScheduler(serviceScopeFactory),
+            new CTCPHubScheduler(serviceScopeFactory),
             new CommanderTableHubScheduler(serviceScopeFactory),
             new DestinationButtonScheduler(serviceScopeFactory)
         ];

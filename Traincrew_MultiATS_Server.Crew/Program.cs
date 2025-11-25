@@ -243,6 +243,7 @@ public class Program
             app.MapControllers(),
             app.MapHub<TrainHub>("/hub/train"),
             app.MapHub<TIDHub>("/hub/TID"),
+            app.MapHub<CTCPHub>("/hub/CTCP"),
             app.MapHub<InterlockingHub>("/hub/interlocking"),
             app.MapHub<CommanderTableHub>("/hub/commander_table"),
         ];
