@@ -500,6 +500,7 @@ public class Program
             .AddScoped<ITtcWindowLinkRepository, TtcWindowLinkRepository>()
             .AddScoped<ITransactionRepository, TransactionRepository>()
             .AddScoped<CommanderTableService>()
+            .AddScoped<CTCPService>()
             .AddScoped<DirectionRouteService>()
             .AddScoped<InterlockingService>()
             .AddScoped<OperationNotificationService>()
