@@ -1,7 +1,6 @@
 using System.Text;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.SignalR.Client;
-using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Traincrew_MultiATS_Server.Common.Contract;
 using Traincrew_MultiATS_Server.Common.Models;
@@ -16,6 +15,7 @@ public class WebApplicationFixture : IAsyncLifetime
     private const string TIDHubPath = "/hub/TID";
     private const string InterlockingHubPath = "/hub/interlocking";
     private const string CommanderTableHubPath = "/hub/commander_table";
+    private const string CTCPHubPath = "/hub/CTCP";
 
     private WebApplicationFactory<Program> factory = new();
 
@@ -132,6 +132,27 @@ public class WebApplicationFixture : IAsyncLifetime
             .Build();
 
         var hubContract = connection.CreateHubProxy<ICommanderTableHubContract>();
+        if (receiver != null)
+        {
+            connection.Register(receiver);
+        }
+
+        return (connection, hubContract);
+    }
+
+    /// <summary>
+    /// ICTCPHubContractとICTCPClientContract用のHubConnectionを生成し、両方を返します。
+    /// </summary>
+    /// <param name="receiver">クライアント側のコントラクトを実装したインスタンス</param>
+    /// <returns>HubConnectionとICTCPHubContract</returns>
+    public (HubConnection, ICTCPHubContract) CreateCTCPHub(ICTCPClientContract? receiver = null)
+    {
+        var connection = new HubConnectionBuilder()
+            .WithUrl(new Uri(factory.Server.BaseAddress, CTCPHubPath),
+                o => { o.HttpMessageHandlerFactory = _ => factory.Server.CreateHandler(); })
+            .Build();
+
+        var hubContract = connection.CreateHubProxy<ICTCPHubContract>();
         if (receiver != null)
         {
             connection.Register(receiver);
