@@ -1,0 +1,114 @@
+name: Interlocking Logic Integration Test
+
+on:
+  push: {}
+  pull_request: {}
+  workflow_dispatch: {}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false  # 駅ごとの失敗で全体を止めない
+      matrix:
+        # 単一駅での並列実行（デフォルト）
+        station:
+          - TH58
+          - TH59
+          - TH61
+          - TH62
+          - TH63
+          - TH64
+          - TH65
+          - TH66S
+          - TH67
+          - TH70
+          - TH71
+          - TH75
+          - TH76
+
+        # Matrix上限に達した場合は、以下のようにグループ化可能
+        # station:
+        #   - TH58,TH59,TH61
+        #   - TH62,TH63,TH64
+        #   - TH65,TH66S,TH67
+        #   - TH70,TH71
+        #   - TH75,TH76
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.2.2
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        if: github.event_name == 'pull_request'
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+
+      - name: Merge PR branch into base branch
+        if: github.event_name == 'pull_request'
+        run: |
+          git fetch origin "refs/heads/${{ github.event.pull_request.base.ref }}:refs/remotes/origin/${{ github.event.pull_request.base.ref }}"
+          git fetch origin "refs/heads/${{ github.event.pull_request.head.ref }}:refs/remotes/origin/${{ github.event.pull_request.head.ref }}"
+          git checkout ${{ github.event.pull_request.base.ref }}
+          git merge --no-ff "origin/${{ github.event.pull_request.head.ref }}"
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4.3.1
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build solution
+        run: dotnet build --no-restore --configuration Release
+
+      - name: Start Database
+        working-directory: ./Database
+        run: docker compose up -d
+
+      - name: Wait for Database to be ready
+        run: |
+          echo "Waiting for PostgreSQL to be ready..."
+          max_attempts=30
+          attempt=0
+          until docker compose exec -T db pg_isready -U postgres -d traincrew_multiats || [ $attempt -eq $max_attempts ]; do
+            attempt=$((attempt + 1))
+            echo "Attempt $attempt/$max_attempts: Database not ready yet..."
+            sleep 1
+          done
+
+          if [ $attempt -eq $max_attempts ]; then
+            echo "Database failed to become ready after $max_attempts seconds"
+            exit 1
+          fi
+
+          echo "Database is ready!"
+          sleep 2
+        working-directory: ./Database
+
+      - name: Run Interlocking Logic Tests for ${{ matrix.station }}
+        working-directory: ./Traincrew_MultiATS_Server.IT
+        run: |
+          dotnet test \
+            --no-build \
+            --configuration Release \
+            --filter "FullyQualifiedName~InterlockingLogicTest" \
+            --logger "trx;LogFileName=${{ matrix.station }}_results.trx"
+        env:
+          TEST_STATION_ID: ${{ matrix.station }}
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.station }}
+          path: "Traincrew_MultiATS_Server.IT/TestResults/**/*_results.trx"
+
+      - name: Output Database Logs
+        if: always()
+        working-directory: ./Database
+        run: docker compose logs

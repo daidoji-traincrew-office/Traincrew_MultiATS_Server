@@ -46,7 +46,7 @@ jobs:
 
       - name: Run Integration Tests
         working-directory: ./Traincrew_MultiATS_Server.IT
-        run: dotnet test --no-build --configuration Release
+        run: dotnet test --no-build --configuration Release --filter "FullyQualifiedName!~InterlockingLogicTest"
       - name: Output Database Logs
         # 何故かログを出すとITが通るのでこうしている
         if: always()

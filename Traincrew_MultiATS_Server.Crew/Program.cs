@@ -455,8 +455,8 @@ public class Program
         };
 
         // ローカルで複数ポートで動かす場合のリダイレクトURIを全部登録する
-        Enumerable.Range(0, 10)
-            .Select(i => new Uri($"http://localhost:{49152 + i}/"))
+        Enumerable.Range(49152, 16384)
+            .Select(port => new Uri($"http://localhost:{port}/"))
             .ToList()
             .ForEach(uri => applicationDescriptor.RedirectUris.Add(uri));
 
