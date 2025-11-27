@@ -113,7 +113,7 @@ public class CTCPService(
         var route = routes[0];
 
         //進路のCTCリレー状態を更新
-        route.RouteState.IsSignalControlRaised = raiseDrop;
+        route.RouteState.IsCtcRelayRaised = raiseDrop;
 
         //更新した進路を保存
         await generalRepository.Save(route.RouteState);
