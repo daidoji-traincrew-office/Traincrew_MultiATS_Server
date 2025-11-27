@@ -43,13 +43,9 @@ public class CTCPService(
         var stations = await stationRepository.GetWhereIsStation();
         var stationIds = stations.Select(station => station.Id).ToList();
         var trackCircuits = await trackCircuitService.GetAllTrackCircuitDataList();
-        var directionSelfControlLevers = await directionSelfControlLeverRepository.GetAllWithState();
-        var directions = await directionRouteService.GetAllDirectionData();
+        //var directionSelfControlLevers = await directionSelfControlLeverRepository.GetAllWithState();
+        //var directions = await directionRouteService.GetAllDirectionData();
 
-        // List<string> clientData.ActiveStationsListの駅IDから、指定された駅にある信号機名称をList<string>で返すやつ
-        var signalNames = await signalService.GetSignalNamesByStationIds(stationIds);
-        // それら全部の信号の現示計算
-        var signalIndications = await signalService.CalcSignalIndication(signalNames);
         // 各ランプの状態を取得
         var lamps = await GetLamps(stationIds);
         // 列番窓を取得
@@ -70,8 +66,7 @@ public class CTCPService(
         {
             TrackCircuits = trackCircuits,
 
-            // Todo: 方向てこのほうのリストを連結する
-            RouteDatas = await routeService.GetActiveRoutes(),
+            RouteDatas = await routeService.GetAllRoutes(),
 
             CenterControlStates = centerControlStates,
 

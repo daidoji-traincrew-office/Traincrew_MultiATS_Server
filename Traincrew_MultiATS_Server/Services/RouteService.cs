@@ -40,4 +40,11 @@ public class RouteService(IRouteRepository routeRepository)
         var routes = await routeRepository.GetByIdsWithState(routeIds);
         return routes.Select(ToRouteData).ToList();
     }
+
+    public async Task<List<RouteData>> GetAllRoutes()
+    {
+        var routeIds = await routeRepository.GetIdsForAll();
+        var routes = await routeRepository.GetByIdsWithState(routeIds);
+        return routes.Select(ToRouteData).ToList();
+    }
 }
