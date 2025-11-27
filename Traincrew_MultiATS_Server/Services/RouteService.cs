@@ -30,6 +30,10 @@ public class RouteService(IRouteRepository routeRepository)
                 IsLeverRelayRaised = route.RouteState.IsLeverRelayRaised,
                 IsThrowOutXRRelayRaised = route.RouteState.IsThrowOutXRRelayRaised,
                 IsThrowOutYSRelayRaised = route.RouteState.IsThrowOutYSRelayRaised,
+                IsRouteRelayWithoutSwitchingMachineRaised = route.RouteState.IsRouteRelayWithoutSwitchingMachineRaised,
+                IsThrowOutXRelayRaised = route.RouteState.IsThrowOutXRelayRaised,
+                IsThrowOutSRelayRaised = route.RouteState.IsThrowOutSRelayRaised,
+                IsCtcRelayRaised = route.RouteState.IsCtcRelayRaised
             }
         };
     }
