@@ -14,7 +14,7 @@ namespace Traincrew_MultiATS_Server.Hubs;
 )]
 public class CTCPHub(CTCPService ctcpService) : Hub<ICTCPClientContract>, ICTCPHubContract
 {
-    public async Task<DataToCTCP> SendData_CTCP(List<string> activeStationsList)
+    public async Task<DataToCTCP> SendData_CTCP()
     {
         return await ctcpService.SendData_CTCP();
     }
