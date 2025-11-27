@@ -128,8 +128,13 @@ public class RendoService(
         var routeIdsIsRaised = await routeRepository.GetIdsWhereLeverRelayOrThrowOutIsRaised();
         // てこが倒れている、または着点ボタンが押されている進路のIDを全取得
         var routeIdsToOpen = await routeRepository.GetIdsToOpen();
+        // CTCリレーが扛上している進路のIDを全取得
+        var routeIdsCtcIsRaised = await routeRepository.GetIdsWhereCtcRelayIsRaised();
+
+        // 処理対象の進路IDを集合にまとめる
         var routeIdSet = routeIdsIsRaised
             .Concat(routeIdsToOpen)
+            .Concat(routeIdsCtcIsRaised)
             .ToHashSet();
         var keys = routeIdSet.ToList();
 
@@ -194,7 +199,7 @@ public class RendoService(
         // DestinationButtonを取得
         var buttonsByName = (await destinationButtonRepository.GetByNames(destinationButtonNames))
             .ToDictionary(b => b.Name);
-        
+
         // 駅扱いてこのIDを取得
         var routeCentralControlLeverIdByRouteId =
             (await lockConditionByRouteCentralControlLeverRepository.GetByRouteIds(routeIds))
@@ -297,7 +302,7 @@ public class RendoService(
             // 駅扱いてこ
             var routeCentralControlLever = routeCentralControlLeverByRouteIds.GetValueOrDefault(route.Id);
             // CTC制御状態を確認する(CHR相当)
-            if (routeCentralControlLever?.RouteCentralControlLeverState is {IsChrRelayRaised: RaiseDrop.Raise})
+            if (routeCentralControlLever?.RouteCentralControlLeverState is { IsChrRelayRaised: RaiseDrop.Raise })
             {
                 isLeverRelayRaised = routeState.IsCtcRelayRaised;
             }
@@ -457,7 +462,7 @@ public class RendoService(
                     (
                         (
                             routeState is
-                                { IsThrowOutYSRelayRaised: RaiseDrop.Drop, IsThrowOutXRRelayRaised: RaiseDrop.Drop }
+                            { IsThrowOutYSRelayRaised: RaiseDrop.Drop, IsThrowOutXRRelayRaised: RaiseDrop.Drop }
                             &&
                             (
                                 routeLeverDestinationButton.Direction == LR.Left && leverState == LCR.Left
@@ -1768,7 +1773,7 @@ public class RendoService(
                 && switchingMachine.SwitchingMachineState.IsReverse == o.IsReverse,
             // 接近鎖錠と進路鎖錠リレー扛上かどうか
             Route route => route.RouteState is
-                { IsApproachLockMRRaised: RaiseDrop.Raise, IsRouteLockRaised: RaiseDrop.Raise },
+            { IsApproachLockMRRaised: RaiseDrop.Raise, IsRouteLockRaised: RaiseDrop.Raise },
             // 軌道回路が短絡していないこと
             TrackCircuit trackCircuit => !trackCircuit.TrackCircuitState.IsShortCircuit,
             DirectionRoute directionRoute => o.IsLR == LR.Left
@@ -1800,7 +1805,7 @@ public class RendoService(
             SwitchingMachine switchingMachine => switchingMachine.SwitchingMachineState.IsReverse == o.IsReverse,
             // 接近鎖錠と進路鎖錠リレー扛上かどうか
             Route route => route.RouteState is
-                { IsApproachLockMRRaised: RaiseDrop.Raise, IsRouteLockRaised: RaiseDrop.Raise },
+            { IsApproachLockMRRaised: RaiseDrop.Raise, IsRouteLockRaised: RaiseDrop.Raise },
             // 軌道回路が短絡していないこと
             TrackCircuit trackCircuit => !trackCircuit.TrackCircuitState.IsShortCircuit,
             DirectionRoute directionRoute => o.IsLR == LR.Left
@@ -1957,16 +1962,16 @@ public class RendoService(
                 return childLockConditions[lockCondition.Id].Any(childLockCondition =>
                     EvaluateLockCondition(childLockCondition, childLockConditions, interlockingObjects, predicate));
             case LockConditionType.Not:
-            {
-                var childLockCondition = childLockConditions[lockCondition.Id];
-                if (childLockCondition.Count != 1)
                 {
-                    throw new InvalidOperationException("Not条件は1つの条件に対してのみ適用される必要があります。");
-                }
+                    var childLockCondition = childLockConditions[lockCondition.Id];
+                    if (childLockCondition.Count != 1)
+                    {
+                        throw new InvalidOperationException("Not条件は1つの条件に対してのみ適用される必要があります。");
+                    }
 
-                return !EvaluateLockCondition(
-                    childLockCondition.First(), childLockConditions, interlockingObjects, predicate);
-            }
+                    return !EvaluateLockCondition(
+                        childLockCondition.First(), childLockConditions, interlockingObjects, predicate);
+                }
         }
 
         if (lockCondition is not LockConditionObject lockConditionObject)

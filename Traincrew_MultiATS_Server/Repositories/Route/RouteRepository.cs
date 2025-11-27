@@ -202,4 +202,17 @@ public class RouteRepository(ApplicationDbContext context) : IRouteRepository
                 r.SetProperty(routeState => routeState.IsThrowOutSRelayRaised, RaiseDrop.Drop)
             );
     }
+
+    /// <summary>
+    /// CTCリレーが扛上している進路のIDを取得する
+    /// </summary>
+    /// <returns>CTCリレーが扛上している進路のIDのリスト</returns>
+    public async Task<List<ulong>> GetIdsWhereCtcRelayIsRaised()
+    {
+        return await context.Routes
+            .Include(r => r.RouteState)
+            .Where(r => r.RouteState.IsCtcRelayRaised == RaiseDrop.Raise)
+            .Select(r => r.Id)
+            .ToListAsync();
+    }
 }

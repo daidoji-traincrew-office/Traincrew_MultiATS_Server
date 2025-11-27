@@ -93,4 +93,9 @@ public interface IRouteRepository
     /// </summary>
     /// <param name="targetIds">総括制御Sリレーを維持する進路のIDリスト</param>
     Task DropThrowOutSRelayExceptByIds(List<ulong> targetIds);
+    /// <summary>
+    /// CTCリレーが扛上している進路のIDを取得する
+    /// </summary>
+    /// <returns>CTCリレーが扛上している進路のIDのリスト</returns>
+    Task<List<ulong>> GetIdsWhereCtcRelayIsRaised();
 }
