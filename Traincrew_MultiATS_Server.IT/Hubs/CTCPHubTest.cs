@@ -37,7 +37,7 @@ public class CTCPHubTest(WebApplicationFixture factory)
             await connection.StartAsync(TestContext.Current.CancellationToken);
 
             // Act
-            result = await hub.SendData_CTCP([]);
+            result = await hub.SendData_CTCP();
         }
 
         // Assert
