@@ -9,10 +9,13 @@ delete from ttc_window_track_circuit;
 delete from ttc_window;
 
 delete from switching_machine_route;
+delete from lock_condition_by_route_central_control_lever;
 delete from lock_condition_object;
 delete from lock_condition;
 delete from lock;
 
+delete from route_central_control_lever_state;
+delete from route_central_control_lever;
 delete from signal_state;
 delete from next_signal;
 delete from track_circuit_signal;
@@ -48,6 +51,10 @@ delete from switching_machine_route;
 delete from switching_machine_state;
 delete from switching_machine;
 
+delete from train_car_state;
+delete from train_state;
+delete from train_diagram;
+delete from train_type;
 
 
 delete from interlocking_object;
