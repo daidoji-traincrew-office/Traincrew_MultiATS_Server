@@ -10,7 +10,7 @@ public class DataToCTCP
     /// </summary>
     public List<TrackCircuitData> TrackCircuits { get; set; }
 
-    /// <summama
+    /// <summary>
     /// CTCてこ情報リスト
     /// </summary>
     public List<RouteData> RouteDatas { get; set; }
