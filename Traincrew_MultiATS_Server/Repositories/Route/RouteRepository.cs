@@ -204,9 +204,9 @@ public class RouteRepository(ApplicationDbContext context) : IRouteRepository
     }
 
     /// <summary>
-    /// CTCƒŠƒŒ[‚ªKã‚µ‚Ä‚¢‚éi˜H‚ÌID‚ğæ“¾‚·‚é
+    /// CTCãƒªãƒ¬ãƒ¼ãŒæ‰›ä¸Šã—ã¦ã„ã‚‹é€²è·¯ã®IDã‚’å–å¾—ã™ã‚‹
     /// </summary>
-    /// <returns>CTCƒŠƒŒ[‚ªKã‚µ‚Ä‚¢‚éi˜H‚ÌID‚ÌƒŠƒXƒg</returns>
+    /// <returns>CTCãƒªãƒ¬ãƒ¼ãŒæ‰›ä¸Šã—ã¦ã„ã‚‹é€²è·¯ã®IDã®ãƒªã‚¹ãƒˆ</returns>
     public async Task<List<ulong>> GetIdsWhereCtcRelayIsRaised()
     {
         return await context.Routes
