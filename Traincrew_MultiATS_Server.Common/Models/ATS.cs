@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations.Schema;
-
 namespace Traincrew_MultiATS_Server.Common.Models;
 
 public class OperationNotificationData
