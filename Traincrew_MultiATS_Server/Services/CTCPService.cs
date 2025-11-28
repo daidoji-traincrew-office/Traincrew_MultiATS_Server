@@ -1,16 +1,11 @@
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Models;
-using Traincrew_MultiATS_Server.Repositories.Datetime;
-using Traincrew_MultiATS_Server.Repositories.DestinationButton;
-using Traincrew_MultiATS_Server.Repositories.DirectionSelfControlLever;
 using Traincrew_MultiATS_Server.Repositories.General;
-using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
-using Traincrew_MultiATS_Server.Repositories.Lever;
-using Traincrew_MultiATS_Server.Repositories.LockConditionByRouteCentralControlLever;
 using Traincrew_MultiATS_Server.Repositories.Mutex;
 using Traincrew_MultiATS_Server.Repositories.Route;
 using Traincrew_MultiATS_Server.Repositories.RouteCentralControlLever;
 using Traincrew_MultiATS_Server.Repositories.Station;
+using RouteData = Traincrew_MultiATS_Server.Common.Models.RouteData;
 
 namespace Traincrew_MultiATS_Server.Services;
 
@@ -19,21 +14,12 @@ namespace Traincrew_MultiATS_Server.Services;
 /// </summary>
 public class CTCPService(
     IRouteRepository routeRepository,
-    IDateTimeRepository dateTimeRepository,
-    DiscordService discordService,
-    IInterlockingObjectRepository interlockingObjectRepository,
-    IDestinationButtonRepository destinationButtonRepository,
     IGeneralRepository generalRepository,
     IStationRepository stationRepository,
-    ILeverRepository leverRepository,
-    IDirectionSelfControlLeverRepository directionSelfControlLeverRepository,
     IRouteCentralControlLeverRepository routeCentralControlLeverRepository,
     TrackCircuitService trackCircuitService,
     TtcStationControlService ttcStationControlService,
     RouteService routeService,
-    SwitchingMachineService switchingMachineService,
-    DirectionRouteService directionRouteService,
-    SignalService signalService,
     IMutexRepository mutexRepository)
 {
 
@@ -88,7 +74,7 @@ public class CTCPService(
     /// <param name="raiseDrop">リレー状態</param>
     /// <returns></returns>
     /// <exception cref="ArgumentException"></exception>
-    public async Task<Common.Models.RouteData> SetCtcRelay(string TcName, RaiseDrop raiseDrop)
+    public async Task<RouteData> SetCtcRelay(string TcName, RaiseDrop raiseDrop)
     {
         //進路名から進路を取得
         var routes = await routeRepository.GetByTcNameWithState(TcName);
@@ -114,14 +100,14 @@ public class CTCPService(
         await generalRepository.Save(route.RouteState);
 
         //更新後の進路データを返す
-        return new Common.Models.RouteData
+        return new RouteData
         {
             TcName = route.TcName,
             RouteType = route.RouteType,
             RootId = route.RootId,
             Indicator = route.Indicator,
             ApproachLockTime = route.ApproachLockTime,
-            RouteState = new Common.Models.RouteStateData
+            RouteState = new RouteStateData
             {
                 IsLeverRelayRaised = route.RouteState.IsLeverRelayRaised,
                 IsRouteRelayRaised = route.RouteState.IsRouteRelayRaised,
