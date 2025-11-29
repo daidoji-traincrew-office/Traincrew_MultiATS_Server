@@ -21,6 +21,7 @@ public class SchedulerManager(
             new TtcStationControlScheduler(serviceScopeFactory),
             new InterlockingHubScheduler(serviceScopeFactory),
             new TIDHubScheduler(serviceScopeFactory),
+            new CTCPHubScheduler(serviceScopeFactory),
             new CommanderTableHubScheduler(serviceScopeFactory),
             new DestinationButtonScheduler(serviceScopeFactory),
             new TrainScheduler(serviceScopeFactory)

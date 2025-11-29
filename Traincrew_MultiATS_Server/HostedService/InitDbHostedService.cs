@@ -28,7 +28,7 @@ public class InitDbHostedService(
         var datetimeRepository = scope.ServiceProvider.GetRequiredService<IDateTimeRepository>();
         var lockConditionRepository = scope.ServiceProvider.GetRequiredService<ILockConditionRepository>();
         var serverService = scope.ServiceProvider.GetRequiredService<ServerService>();
-        var schedulerManager =  scope.ServiceProvider.GetRequiredService<SchedulerManager>();
+        var schedulerManager = scope.ServiceProvider.GetRequiredService<SchedulerManager>();
         var dbInitializer = await CreateDBInitializer(context, lockConditionRepository, cancellationToken);
         if (dbInitializer != null)
         {
@@ -265,7 +265,7 @@ public class InitDbHostedService(
 
         await context.SaveChangesAsync(cancellationToken);
     }
-    
+
     private async Task InitServerStatus(
         ApplicationDbContext context,
         CancellationToken cancellationToken)
@@ -1257,6 +1257,7 @@ public partial class DbRendoTableInitializer
         PreprocessCsv();
         await InitLever();
         await InitDirectionSelfControlLever();
+        await InitRouteCentralControlLever();
         await InitDestinationButtons();
         await InitRoutes();
     }
@@ -1434,6 +1435,42 @@ public partial class DbRendoTableInitializer
         await context.SaveChangesAsync(cancellationToken);
     }
 
+    private async Task InitRouteCentralControlLever()
+    {
+        // 該当駅の全てのてこを取得
+        var leverNames = (await context.RouteCentralControlLevers
+            .Where(l => l.Name.StartsWith(stationId))
+            .Select(l => l.Name)
+            .ToListAsync(cancellationToken)).ToHashSet();
+        foreach (var rendoTableCsv in rendoTableCsvs)
+        {
+            if (!rendoTableCsv.Name.Contains("CTC"))
+            {
+                continue;
+            }
+
+            // てこがすでに存在する場合はcontinue
+            var name = CalcLeverName(rendoTableCsv.Start, stationId);
+            if (rendoTableCsv.Start.Length <= 0 || !leverNames.Add(name))
+            {
+                continue;
+            }
+
+            context.RouteCentralControlLevers.Add(new()
+            {
+                Name = name,
+                Type = ObjectType.RouteCentralControlLever,
+                RouteCentralControlLeverState = new()
+                {
+                    IsInsertedKey = false,
+                    IsReversed = NR.Normal
+                }
+            });
+        }
+
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
     private async Task InitDestinationButtons()
     {
         // 既存の着点ボタン名を一括取得
@@ -1597,6 +1634,14 @@ public partial class DbRendoTableInitializer
                 .Select(l => l.ObjectId)
                 .ToListAsync(cancellationToken))
             .ToHashSet();
+        var locksByRouteCentralControlLevers = (await context.LockConditionByRouteCentralControlLevers
+                .Select(l => new
+                {
+                    l.RouteCentralControlLeverId, l.RouteId
+                })
+                .ToListAsync(cancellationToken)
+            )
+            .ToHashSet();
         var throwOutControl = await context.ThrowOutControls
             .ToListAsync(cancellationToken);
         var leverNamesById = await context.Levers
@@ -1618,8 +1663,12 @@ public partial class DbRendoTableInitializer
             .ToList();
         var directionRoutesByName = directionRoutes
             .ToDictionary(r => r.Name, r => r);
-        var directionRoutesById = directionRoutes
-            .ToDictionary(r => r.Id, r => r);
+        // CTC切替てこのDict
+        var routeCentralControlLevers = interlockingObjects
+            .OfType<RouteCentralControlLever>()
+            .ToList();
+        var routeCentralControlLeversByName = routeCentralControlLevers
+            .ToDictionary(l => l.Name, l => l);
         // 転てつ器のDict
         var switchingMachines = interlockingObjects
             .OfType<SwitchingMachine>()
@@ -1822,12 +1871,6 @@ public partial class DbRendoTableInitializer
                 LockType.Route, isRouteLock: true);
 
             // 接近鎖錠
-            // Todo: 大道寺13Lの進路は山線用進路なので、一旦スルー(パースするとエラーが出るので)
-            if (stationId == "TH65" && rendoTableCsv.Start == "13L")
-            {
-                continue;
-            }
-
             await RegisterLocks(rendoTableCsv.ApproachLock, route.Id, searchObjectsForApproachLock,
                 LockType.Approach);
             await RegisterFinalTrackCircuitId(
@@ -1858,7 +1901,37 @@ public partial class DbRendoTableInitializer
                 searchDirectionRoutes, isLr);
         }
 
-        // Todo: CTC進路用の処理
+        // CTC切換てこの処理
+        foreach (var rendoTableCsv in rendoTableCsvs)
+        {
+            var leverName = CalcLeverName(rendoTableCsv.Start, stationId);
+            var routeCentralControlLever = routeCentralControlLeversByName.GetValueOrDefault(leverName);
+            if (routeCentralControlLever == null || rendoTableCsv.End != "R")
+            {
+                // Todo: CTC切換てこでrouteCentralControlLeverがnullならエラーを返す
+                continue;
+            }
+
+            var lockItems = CalcLockItems(rendoTableCsv.LockToSwitchingMachine, false)
+                .SelectMany(lockItem => lockItem.Children)
+                .ToList();
+            var targetRoutes = (await Task.WhenAll(lockItems.Select(searchOtherObjects)))
+                .SelectMany(x => x.OfType<Route>())
+                .ToList();
+            var entities = targetRoutes
+                .Select(r => new LockConditionByRouteCentralControlLever
+                {
+                    RouteCentralControlLeverId = routeCentralControlLever.Id,
+                    RouteId = r.Id
+                })
+                .Where(condition => !locksByRouteCentralControlLevers.Contains(new
+                {
+                    condition.RouteCentralControlLeverId, condition.RouteId
+                }));
+
+            context.LockConditionByRouteCentralControlLevers.AddRange(entities);
+            await context.SaveChangesAsync(cancellationToken);
+        }
 
         // 転てつ器のてっ査鎖錠を処理する
         foreach (var rendoTableCsv in rendoTableCsvs)
@@ -1981,14 +2054,7 @@ public partial class DbRendoTableInitializer
         var targetObjects = await searchTargetObjects(item);
         if (targetObjects.Count == 0)
         {
-            if (item.Name.Contains('Z'))
-            {
-                logger.Log(LogLevel.Warning,
-                    "誘導進路の進路名が見つかりません。処理をスキップします: {} {}", item.StationId, item.Name);
-                return;
-            }
             // Todo: 方向てこ、開放てこに対する処理
-
             throw new InvalidOperationException($"対象のオブジェクトが見つかりません: {item.StationId} {item.Name}");
         }
 
@@ -2459,4 +2525,3 @@ public partial class DbRendoTableInitializer
         return $"{stationId}_{start}{(end.StartsWith('(') ? "" : end)}";
     }
 }
-

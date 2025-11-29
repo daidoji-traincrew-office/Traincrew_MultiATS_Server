@@ -27,12 +27,14 @@ using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
 using Traincrew_MultiATS_Server.Repositories.Lever;
 using Traincrew_MultiATS_Server.Repositories.Lock;
 using Traincrew_MultiATS_Server.Repositories.LockCondition;
+using Traincrew_MultiATS_Server.Repositories.LockConditionByRouteCentralControlLever;
 using Traincrew_MultiATS_Server.Repositories.Mutex;
 using Traincrew_MultiATS_Server.Repositories.NextSignal;
 using Traincrew_MultiATS_Server.Repositories.OperationInformation;
 using Traincrew_MultiATS_Server.Repositories.OperationNotification;
 using Traincrew_MultiATS_Server.Repositories.Protection;
 using Traincrew_MultiATS_Server.Repositories.Route;
+using Traincrew_MultiATS_Server.Repositories.RouteCentralControlLever;
 using Traincrew_MultiATS_Server.Repositories.RouteLeverDestinationButton;
 using Traincrew_MultiATS_Server.Repositories.RouteLockTrackCircuit;
 using Traincrew_MultiATS_Server.Repositories.Server;
@@ -241,6 +243,7 @@ public class Program
             app.MapControllers(),
             app.MapHub<TrainHub>("/hub/train"),
             app.MapHub<TIDHub>("/hub/TID"),
+            app.MapHub<CTCPHub>("/hub/CTCP"),
             app.MapHub<InterlockingHub>("/hub/interlocking"),
             app.MapHub<CommanderTableHub>("/hub/commander_table"),
         ];
@@ -452,8 +455,8 @@ public class Program
         };
 
         // ローカルで複数ポートで動かす場合のリダイレクトURIを全部登録する
-        Enumerable.Range(0, 10)
-            .Select(i => new Uri($"http://localhost:{49152 + i}/"))
+        Enumerable.Range(49152, 16384)
+            .Select(port => new Uri($"http://localhost:{port}/"))
             .ToList()
             .ForEach(uri => applicationDescriptor.RedirectUris.Add(uri));
 
@@ -472,12 +475,14 @@ public class Program
             .AddScoped<IInterlockingObjectRepository, InterlockingObjectRepository>()
             .AddScoped<ILockRepository, LockRepository>()
             .AddScoped<ILockConditionRepository, LockConditionRepository>()
+            .AddScoped<ILockConditionByRouteCentralControlLeverRepository, LockConditionByRouteCentralControlLeverRepository>()
             .AddScoped<ILeverRepository, LeverRepository>()
             .AddScoped<INextSignalRepository, NextSignalRepository>()
             .AddScoped<IOperationNotificationRepository, OperationNotificationRepository>()
             .AddScoped<IOperationInformationRepository, OperationInformationRepository>()
             .AddScoped<IProtectionRepository, ProtectionRepository>()
             .AddScoped<IRouteRepository, RouteRepository>()
+            .AddScoped<IRouteCentralControlLeverRepository, RouteCentralControlLeverRepository>()
             .AddScoped<IRouteLeverDestinationRepository, RouteLeverDestinationRepository>()
             .AddScoped<IRouteLockTrackCircuitRepository, RouteLockTrackCircuitRepository>()
             .AddScoped<IServerRepository, ServerRepository>()
@@ -495,6 +500,7 @@ public class Program
             .AddScoped<ITtcWindowLinkRepository, TtcWindowLinkRepository>()
             .AddScoped<ITransactionRepository, TransactionRepository>()
             .AddScoped<CommanderTableService>()
+            .AddScoped<CTCPService>()
             .AddScoped<DateTimeService>()
             .AddScoped<DirectionRouteService>()
             .AddScoped<InterlockingService>()

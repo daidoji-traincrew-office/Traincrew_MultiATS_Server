@@ -86,7 +86,7 @@ CREATE TABLE station
     is_passenger_station BOOLEAN      NOT NULL  -- 旅客駅かどうか
 );
 
-CREATE TYPE object_type AS ENUM ('route', 'switching_machine', 'track_circuit', 'lever', 'direction_route', 'direction_self_control_lever');
+CREATE TYPE object_type AS ENUM ('route', 'switching_machine', 'track_circuit', 'lever', 'direction_route', 'direction_self_control_lever', 'route_central_control_lever');
 
 -- object(進路、転てつ機、軌道回路、てこ)を表す
 -- 以上4つのIDの一元管理を行う
@@ -233,6 +233,23 @@ CREATE TABLE direction_self_control_lever
 (
     id BIGINT PRIMARY KEY REFERENCES interlocking_object (id) -- ID
 );
+
+-- 集中てこ(進路集中てこ用)
+CREATE TABLE route_central_control_lever
+(
+    id BIGINT PRIMARY KEY REFERENCES interlocking_object (id) -- ID
+);
+
+-- 進路と集中てこの鎖錠条件
+CREATE TABLE lock_condition_by_route_central_control_lever
+(
+    id                              BIGSERIAL PRIMARY KEY,
+    route_id                        BIGINT REFERENCES route (id) NOT NULL,                        -- 進路のID
+    route_central_control_lever_id  BIGINT REFERENCES route_central_control_lever (id) NOT NULL,  -- 集中てこのID
+    UNIQUE (route_id, route_central_control_lever_id)
+);
+CREATE INDEX lock_condition_by_route_central_control_lever_route_id_index ON lock_condition_by_route_central_control_lever (route_id);
+CREATE INDEX lock_condition_by_route_central_control_lever_rcl_id_index ON lock_condition_by_route_central_control_lever (route_central_control_lever_id);
 
 -- 方向進路
 CREATE TABLE direction_route
@@ -419,7 +436,7 @@ CREATE TABLE station_timer_state
     is_teu_relay_raised raise_drop  NOT NULL DEFAULT 'drop',
     is_ten_relay_raised raise_drop  NOT NULL DEFAULT 'drop',
     is_ter_relay_raised raise_drop  NOT NULL DEFAULT 'raise',
-    teu_relay_raised_at TIMESTAMP NULL     DEFAULT NULL,
+    teu_relay_raised_at TIMESTAMP   NULL     DEFAULT NULL,
     UNIQUE (station_id, seconds)
 );
 
@@ -437,6 +454,17 @@ CREATE TABLE direction_self_control_lever_state
     is_inserted_key BOOL NOT NULL DEFAULT 'false',                                   -- 鍵が挿入されているか
     is_reversed     nr   NOT NULL DEFAULT 'normal'                                   -- てこの位置
 );
+
+-- 集中てこ状態
+CREATE TABLE route_central_control_lever_state
+(
+    id                  BIGINT PRIMARY KEY REFERENCES route_central_control_lever (ID), -- てこのID
+    is_inserted_key     BOOL       NOT NULL DEFAULT 'false',                            -- 鍵が挿入されているか
+    is_reversed         nr         NOT NULL DEFAULT 'normal',                           -- てこの位置
+    is_chr_relay_raised raise_drop NOT NULL DEFAULT 'drop'                              -- chrリレー扛上しているか
+);
+
+-- CTCてこ状態
 
 -- 方向てこ状態
 CREATE TABLE direction_route_state
@@ -500,7 +528,8 @@ CREATE TABLE route_state
     is_throw_out_xr_relay_raised                    raise_drop NOT NULL,                      -- xrリレーが上がっているか
     is_throw_out_ys_relay_raised                    raise_drop NOT NULL,                      -- ysリレーが上がっているか
     is_throw_out_x_relay_raised                     raise_drop NOT NULL DEFAULT 'drop',       -- xリレーが上がっているか
-    is_throw_out_s_relay_raised                     raise_drop NOT NULL DEFAULT 'drop'        -- sリレーが上がっているか
+    is_throw_out_s_relay_raised                     raise_drop NOT NULL DEFAULT 'drop',       -- sリレーが上がっているか
+    is_ctc_relay_raised                             raise_drop NOT NULL DEFAULT 'drop'        -- CTCリレーが上がっているか
 );
 
 -- 信号機状態
@@ -532,7 +561,7 @@ CREATE TYPE operation_notification_type AS ENUM (
     'other',
     'class',
     'tenmatsusho'
-);
+    );
 CREATE TABLE operation_notification_state
 (
     display_name VARCHAR(100) REFERENCES operation_notification_display (name) PRIMARY KEY, -- 告知機の名前
@@ -579,11 +608,11 @@ CREATE TABLE train_car_state
 
 -- 運行情報等の種類
 CREATE TYPE operation_information_type AS ENUM (
-    'advertisement',    -- 広告
-    'normal',           -- 平常運転
-    'delay',            -- 遅延
-    'suspended'         -- 運転見合わせ
-);
+    'advertisement', -- 広告
+    'normal', -- 平常運転
+    'delay', -- 遅延
+    'suspended' -- 運転見合わせ
+    );
 
 -- 運行情報等
 CREATE TABLE operation_information_state
@@ -601,7 +630,8 @@ CREATE INDEX operation_information_state_end_time_index ON operation_information
 CREATE TYPE server_mode AS ENUM ('off', 'private', 'public');
 
 -- サーバー状態テーブル(基本Entityは1つの想定)
-CREATE TABLE server_state (
+CREATE TABLE server_state
+(
     id          SERIAL PRIMARY KEY,
     mode        server_mode NOT NULL,
     time_offset INTEGER NOT NULL DEFAULT 0

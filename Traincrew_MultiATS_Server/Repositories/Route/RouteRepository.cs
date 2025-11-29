@@ -15,6 +15,14 @@ public class RouteRepository(ApplicationDbContext context) : IRouteRepository
             .ToListAsync();
     }
 
+    public async Task<List<Models.Route>> GetByTcNameWithState(string tcName)
+    {
+        return await context.Routes
+            .Include(r => r.RouteState)
+            .Where(r => r.TcName == tcName)
+            .ToListAsync();
+    }
+
     public async Task<List<Models.Route>> GetByStationIds(List<string> stationIds)
     {
         return await context.Routes
@@ -158,6 +166,14 @@ public class RouteRepository(ApplicationDbContext context) : IRouteRepository
             .ToListAsync();
     }
 
+    public async Task<List<ulong>> GetIdsForAll()
+    {
+        return await context.Routes
+            .Include(r => r.RouteState)
+            .Select(r => r.Id)
+            .ToListAsync();
+    }
+
     public async Task<List<Models.Route>> GetWhereApproachLockMSRelayIsRaised()
     {
         return await context.Routes
@@ -185,5 +201,18 @@ public class RouteRepository(ApplicationDbContext context) : IRouteRepository
             .ExecuteUpdateAsync(r =>
                 r.SetProperty(routeState => routeState.IsThrowOutSRelayRaised, RaiseDrop.Drop)
             );
+    }
+
+    /// <summary>
+    /// CTCリレーが扛上している進路のIDを取得する
+    /// </summary>
+    /// <returns>CTCリレーが扛上している進路のIDのリスト</returns>
+    public async Task<List<ulong>> GetIdsWhereCtcRelayIsRaised()
+    {
+        return await context.Routes
+            .Include(r => r.RouteState)
+            .Where(r => r.RouteState.IsCtcRelayRaised == RaiseDrop.Raise)
+            .Select(r => r.Id)
+            .ToListAsync();
     }
 }
