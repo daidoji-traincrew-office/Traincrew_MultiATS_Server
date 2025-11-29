@@ -14,6 +14,7 @@ public class InterlockingObjectRepository(ApplicationDbContext context) : IInter
             .Include(obj => ((Models.Lever)obj).LeverState)
             .Include(obj => ((Models.DirectionRoute)obj).DirectionRouteState)
             .Include(obj => ((Models.DirectionSelfControlLever)obj).DirectionSelfControlLeverState)
+            .Include(obj => ((Models.RouteCentralControlLever)obj).RouteCentralControlLeverState)
             .ToListAsync();
     }
     public Task<List<Models.InterlockingObject>> GetObjectByIds(IEnumerable<ulong> ids)
@@ -34,6 +35,7 @@ public class InterlockingObjectRepository(ApplicationDbContext context) : IInter
             .Include(obj => ((Models.Lever)obj).LeverState)
             .Include(obj => ((Models.DirectionRoute)obj).DirectionRouteState)
             .Include(obj => ((Models.DirectionSelfControlLever)obj).DirectionSelfControlLeverState)
+            .Include(obj => ((Models.RouteCentralControlLever)obj).RouteCentralControlLeverState)
             .ToListAsync();
     }
     public Task<Models.InterlockingObject> GetObject(string name)
@@ -53,6 +55,7 @@ public class InterlockingObjectRepository(ApplicationDbContext context) : IInter
             .Include(obj => ((Models.Lever)obj).LeverState)
             .Include(obj => ((Models.DirectionRoute)obj).DirectionRouteState)
             .Include(obj => ((Models.DirectionSelfControlLever)obj).DirectionSelfControlLeverState)
+            .Include(obj => ((Models.RouteCentralControlLever)obj).RouteCentralControlLeverState)
             .ToListAsync();
     }
 }

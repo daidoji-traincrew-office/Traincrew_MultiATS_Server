@@ -6,6 +6,12 @@ public interface IRouteRepository
     /// IDから進路を取得する
     /// </summary>
     Task<List<Models.Route>> GetByIdsWithState(List<ulong> ids);
+
+    /// <summary>
+    /// TcNameから進路を取得する
+    /// </summary>
+    Task<List<Models.Route>> GetByTcNameWithState(string tcName);
+
     /// <summary>
     /// 駅IDから進路を取得する
     /// </summary>
@@ -64,6 +70,13 @@ public interface IRouteRepository
     /// </summary>
     /// <returns> 進路照査リレーが扛上している または 接近鎖状の掛かっている進路のリスト </returns>
     Task<List<ulong>> GetIdsForApproachLockRelay();
+
+    /// <summary>
+    /// すべての進路IDを取得する
+    /// </summary>
+    /// <returns>全ての進路のリスト</returns>
+    Task<List<ulong>> GetIdsForAll();
+
     /// <summary>
     /// 接近鎖錠MSリレーが扛上しているすべての進路を取得する
     /// </summary>
@@ -80,4 +93,9 @@ public interface IRouteRepository
     /// </summary>
     /// <param name="targetIds">総括制御Sリレーを維持する進路のIDリスト</param>
     Task DropThrowOutSRelayExceptByIds(List<ulong> targetIds);
+    /// <summary>
+    /// CTCリレーが扛上している進路のIDを取得する
+    /// </summary>
+    /// <returns>CTCリレーが扛上している進路のIDのリスト</returns>
+    Task<List<ulong>> GetIdsWhereCtcRelayIsRaised();
 }

@@ -28,6 +28,10 @@ public class RouteService(IRouteRepository routeRepository)
                 IsLeverRelayRaised = route.RouteState.IsLeverRelayRaised,
                 IsThrowOutXRRelayRaised = route.RouteState.IsThrowOutXRRelayRaised,
                 IsThrowOutYSRelayRaised = route.RouteState.IsThrowOutYSRelayRaised,
+                IsRouteRelayWithoutSwitchingMachineRaised = route.RouteState.IsRouteRelayWithoutSwitchingMachineRaised,
+                IsThrowOutXRelayRaised = route.RouteState.IsThrowOutXRelayRaised,
+                IsThrowOutSRelayRaised = route.RouteState.IsThrowOutSRelayRaised,
+                IsCtcRelayRaised = route.RouteState.IsCtcRelayRaised
             }
         };
     }
@@ -35,6 +39,13 @@ public class RouteService(IRouteRepository routeRepository)
     public async Task<List<RouteData>> GetActiveRoutes()
     {
         var routeIds = await routeRepository.GetIdsWhereRouteRelayWithoutSwitchingMachineIsRaised();
+        var routes = await routeRepository.GetByIdsWithState(routeIds);
+        return routes.Select(ToRouteData).ToList();
+    }
+
+    public async Task<List<RouteData>> GetAllRoutes()
+    {
+        var routeIds = await routeRepository.GetIdsForAll();
         var routes = await routeRepository.GetByIdsWithState(routeIds);
         return routes.Select(ToRouteData).ToList();
     }
