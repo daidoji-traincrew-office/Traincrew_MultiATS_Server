@@ -1,0 +1,6 @@
+-- Create "lock_condition_by_route_central_control_lever" table
+CREATE TABLE "lock_condition_by_route_central_control_lever" ("id" bigserial NOT NULL, "route_id" bigint NOT NULL, "route_central_control_lever_id" bigint NOT NULL, PRIMARY KEY ("id"), CONSTRAINT "lock_condition_by_route_centr_route_id_route_central_contro_key" UNIQUE ("route_id", "route_central_control_lever_id"), CONSTRAINT "lock_condition_by_route_centr_route_central_control_lever__fkey" FOREIGN KEY ("route_central_control_lever_id") REFERENCES "route_central_control_lever" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION, CONSTRAINT "lock_condition_by_route_central_control_lever_route_id_fkey" FOREIGN KEY ("route_id") REFERENCES "route" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION);
+-- Create index "lock_condition_by_route_central_control_lever_rcl_id_index" to table: "lock_condition_by_route_central_control_lever"
+CREATE INDEX "lock_condition_by_route_central_control_lever_rcl_id_index" ON "lock_condition_by_route_central_control_lever" ("route_central_control_lever_id");
+-- Create index "lock_condition_by_route_central_control_lever_route_id_index" to table: "lock_condition_by_route_central_control_lever"
+CREATE INDEX "lock_condition_by_route_central_control_lever_route_id_index" ON "lock_condition_by_route_central_control_lever" ("route_id");
