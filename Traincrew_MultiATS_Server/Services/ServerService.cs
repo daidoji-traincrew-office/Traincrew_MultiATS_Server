@@ -51,4 +51,14 @@ public class ServerService(
             await schedulerManager.Start();
         }
     }
+
+    public async Task<int> GetTimeOffsetAsync()
+    {
+        return await serverRepository.GetTimeOffset();
+    }
+
+    public async Task SetTimeOffsetAsync(int timeOffset)
+    {
+        await serverRepository.SetTimeOffsetAsync(timeOffset);
+    }
 }

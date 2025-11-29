@@ -47,7 +47,7 @@ public partial class TrainService(
             trackCircuitList = oldTrackCircuitList;
         }
 
-        // ☆情報は割と常に送るため共通で演算する   
+        // ☆情報は割と常に送るため共通で演算する
         var serverData = new ServerToATSData
         {
             // 在線している軌道回路上で防護無線が発報されているか確認

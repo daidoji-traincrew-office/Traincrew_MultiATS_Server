@@ -501,6 +501,7 @@ public class Program
             .AddScoped<ITransactionRepository, TransactionRepository>()
             .AddScoped<CommanderTableService>()
             .AddScoped<CTCPService>()
+            .AddScoped<DateTimeService>()
             .AddScoped<DirectionRouteService>()
             .AddScoped<InterlockingService>()
             .AddScoped<OperationNotificationService>()

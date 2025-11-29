@@ -22,6 +22,7 @@ public interface ICommanderTableHubContract
     Task DeleteTrainState(long id);
     Task<ServerMode> GetServerMode();
     Task SetServerMode(ServerMode mode);
+    Task SetTimeOffset(int timeOffset);
 }
 
 public interface ICommanderTableClientContract
