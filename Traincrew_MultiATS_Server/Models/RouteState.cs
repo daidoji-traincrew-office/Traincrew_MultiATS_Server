@@ -61,5 +61,10 @@ public class RouteState
     /// </summary>
     [Column("is_throw_out_s_relay_raised")]
     public RaiseDrop IsThrowOutSRelayRaised { get; set; }
+    /// <summary>
+    /// CTCリレー
+    /// </summary>
+    [Column("is_ctc_relay_raised")]
+    public RaiseDrop IsCtcRelayRaised { get; set; }
     // ReSharper restore InconsistentNaming
 }

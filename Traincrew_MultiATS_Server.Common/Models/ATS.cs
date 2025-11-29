@@ -152,6 +152,26 @@ public class RouteStateData
     /// 総括反応中継リレー
     /// </summary>
     public RaiseDrop IsThrowOutYSRelayRaised { get; set; }
+
+    /// <summary>
+    /// 転てつ器を除いた進路照査リレー
+    /// </summary>
+    public RaiseDrop IsRouteRelayWithoutSwitchingMachineRaised { get; set; }
+
+    /// <summary>
+    /// xリレー
+    /// </summary>
+    public RaiseDrop IsThrowOutXRelayRaised { get; set; }
+
+    /// <summary>
+    /// Sリレー
+    /// </summary>
+    public RaiseDrop IsThrowOutSRelayRaised { get; set; }
+
+    /// <summary>
+    /// CTCリレー
+    /// </summary>
+    public RaiseDrop IsCtcRelayRaised { get; set; }
 }
 
 public class ServerToATSData

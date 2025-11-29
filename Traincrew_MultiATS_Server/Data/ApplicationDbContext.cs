@@ -45,6 +45,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<TrainDiagram> TrainDiagrams { get; set; }
     public DbSet<OperationInformationState> OperationInformationStates { get; set; }
     public DbSet<ServerState> ServerStates { get; set; }
+    public DbSet<RouteCentralControlLever> RouteCentralControlLevers { get; set; }
+    public DbSet<RouteCentralControlLeverState>  RouteCentralControlLeverStates { get; set; }
+    public DbSet<LockConditionByRouteCentralControlLever> LockConditionByRouteCentralControlLevers { get; set; }
     public DbSet<UserDisconnectionState> UserDisconnectionStates { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -196,8 +199,26 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .WithMany()
             .HasForeignKey(rldb => rldb.DestinationButtonName)
             .HasPrincipalKey(db => db.Name);
+        
+        modelBuilder.Entity<RouteCentralControlLever>()
+            .HasOne(rl => rl.RouteCentralControlLeverState)
+            .WithOne()
+            .HasForeignKey<RouteCentralControlLeverState>(rls => rls.Id)
+            .HasPrincipalKey<RouteCentralControlLever>(rl => rl.Id);
 
-        // Convert all column names to snake_case 
+        modelBuilder.Entity<LockConditionByRouteCentralControlLever>()
+            .HasOne<Route>()
+            .WithMany()
+            .HasForeignKey(lcbrcl => lcbrcl.RouteId)
+            .HasPrincipalKey(r => r.Id);
+
+        modelBuilder.Entity<LockConditionByRouteCentralControlLever>()
+            .HasOne<RouteCentralControlLever>()
+            .WithMany()
+            .HasForeignKey(lcbrcl => lcbrcl.RouteCentralControlLeverId)
+            .HasPrincipalKey(rcl => rcl.Id);
+
+        // Convert all column names to snake_case
         foreach (var entity in modelBuilder.Model.GetEntityTypes())
         {
             if (entity.ClrType.Name == nameof(SignalIndication))

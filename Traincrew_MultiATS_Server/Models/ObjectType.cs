@@ -7,5 +7,6 @@ public enum ObjectType
     TrackCircuit,
     Lever,
     DirectionRoute,
-    DirectionSelfControlLever
+    DirectionSelfControlLever,
+    RouteCentralControlLever
 }
