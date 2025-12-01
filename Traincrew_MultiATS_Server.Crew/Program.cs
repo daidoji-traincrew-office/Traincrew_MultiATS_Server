@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using OpenIddict.Abstractions;
@@ -14,6 +15,7 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 using Traincrew_MultiATS_Server.Activity;
 using Traincrew_MultiATS_Server.Authentication;
+using Traincrew_MultiATS_Server.Crew.Activity;
 using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.HostedService;
 using Traincrew_MultiATS_Server.Hubs;
@@ -229,6 +231,7 @@ public class Program
     private static void ConfigureSignalRService(WebApplicationBuilder builder)
     {
         // SignalRの設定
+        builder.Services.AddSingleton(typeof(IHubFilter), typeof(SignalRMetricsHubFilter));
         builder.Services.AddSignalR(options =>
         {
             options.ClientTimeoutInterval = TimeSpan.FromMinutes(3);
