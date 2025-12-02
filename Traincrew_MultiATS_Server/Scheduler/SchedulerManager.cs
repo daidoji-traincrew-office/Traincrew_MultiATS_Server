@@ -23,7 +23,8 @@ public class SchedulerManager(
             new TIDHubScheduler(serviceScopeFactory),
             new CTCPHubScheduler(serviceScopeFactory),
             new CommanderTableHubScheduler(serviceScopeFactory),
-            new DestinationButtonScheduler(serviceScopeFactory)
+            new DestinationButtonScheduler(serviceScopeFactory),
+            new MetricsCollectorScheduler(serviceScopeFactory)
         ];
     }
 
