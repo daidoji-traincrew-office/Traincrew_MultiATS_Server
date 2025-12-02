@@ -55,4 +55,9 @@ public class TrainRepository(ApplicationDbContext context) : ITrainRepository
         return await context.TrainStates
             .FirstOrDefaultAsync(ts => ts.Id == id);
     }
+
+    public async Task<int> GetCount()
+    {
+        return await context.TrainStates.CountAsync();
+    }
 }
