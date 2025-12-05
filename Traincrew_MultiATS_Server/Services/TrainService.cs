@@ -35,7 +35,8 @@ public partial class TrainService(
         {
             return new()
             {
-                IsDisconnected = true
+                IsDisconnected = true,
+                StatusFlags = ServerStatusFlags.IsDisconnected
             };
         }
 
@@ -164,6 +165,7 @@ public partial class TrainService(
             {
                 // 早着の列車情報は登録しない
                 serverData.IsOnPreviousTrain = true;
+                serverData.StatusFlags |= ServerStatusFlags.IsOnPreviousTrain;
                 return null;
             }
 
@@ -172,6 +174,7 @@ public partial class TrainService(
             {
                 // 鎖錠の列車情報は登録しない
                 serverData.IsLocked = true;
+                serverData.StatusFlags |= ServerStatusFlags.IsLocked;
                 return null;
             }
 
@@ -201,8 +204,9 @@ public partial class TrainService(
             )
             {
                 // 2.交代前応答
-                // 送信してきたクライアントに対し交代前応答を行い、送信された情報は在線情報含めてすべて破棄する。  
+                // 送信してきたクライアントに対し交代前応答を行い、送信された情報は在線情報含めてすべて破棄する。
                 serverData.IsTherePreviousTrain = true;
+                serverData.StatusFlags |= ServerStatusFlags.IsTherePreviousTrain;
                 return null;
             }
 
@@ -213,6 +217,7 @@ public partial class TrainService(
             {
                 // 早着の列車情報は登録しない
                 serverData.IsOnPreviousTrain = true;
+                serverData.StatusFlags |= ServerStatusFlags.IsOnPreviousTrain;
                 return null;
             }
 
@@ -221,6 +226,7 @@ public partial class TrainService(
             {
                 // 鎖錠の列車情報は登録しない
                 serverData.IsLocked = true;
+                serverData.StatusFlags |= ServerStatusFlags.IsLocked;
                 return null;
             }
 
@@ -232,6 +238,7 @@ public partial class TrainService(
             {
                 // 早着の列車情報は登録しない
                 serverData.IsOnPreviousTrain = true;
+                serverData.StatusFlags |= ServerStatusFlags.IsOnPreviousTrain;
                 return null;
             }
 
@@ -265,6 +272,7 @@ public partial class TrainService(
                 )
                 {
                     serverData.IsMaybeWarp = true;
+                    serverData.StatusFlags |= ServerStatusFlags.IsMaybeWarp;
                     return null;
                 }
 
