@@ -81,7 +81,7 @@ public partial class TrainService(
         await using var transaction = await transactionRepository.BeginTransactionAsync(IsolationLevel.RepeatableRead);
         // 運番が同じ列車の情報を取得する
         var trainState = await RegisterOrUpdateTrainState(
-            clientDriverId, clientData, oldTrackCircuitList, trackCircuitList, incrementalTrackCircuitDataList,
+            clientDriverId, clientData, trackCircuitList, incrementalTrackCircuitDataList,
             serverData);
 
         if (trainState == null)
@@ -126,10 +126,9 @@ public partial class TrainService(
     /// <param name="incrementalTrackCircuitDataList">新規登録する軌道回路データリスト</param>
     /// <param name="serverData">サーバーからクライアントへのデータ</param>
     /// <returns>列車状態。登録しない場合はnull。</returns>
-    internal async Task<TrainState?> RegisterOrUpdateTrainState(
+    private async Task<TrainState?> RegisterOrUpdateTrainState(
         ulong clientDriverId,
         AtsToServerData clientData,
-        List<TrackCircuit> oldTrackCircuits,
         List<TrackCircuit> trackCircuits,
         List<TrackCircuitData> incrementalTrackCircuitDataList,
         ServerToATSData serverData)
@@ -168,7 +167,15 @@ public partial class TrainService(
                 return null;
             }
 
-            //1-2.9999列番の場合は列車情報を登録しない。
+            //1-1-2.在線させる軌道回路が、１つでも鎖錠されていた場合、鎖錠として登録処理しない。
+            if (trackCircuits.Any(tc => tc.TrackCircuitState.IsLocked))
+            {
+                // 鎖錠の列車情報は登録しない
+                serverData.IsLocked = true;
+                return null;
+            }
+
+            //1-3.9999列番の場合は列車情報を登録しない。
             if (clientData.DiaName == "9999")
             {
                 await trackCircuitService.SetTrackCircuitDataList(incrementalTrackCircuitDataList, clientTrainNumber);
@@ -206,6 +213,14 @@ public partial class TrainService(
             {
                 // 早着の列車情報は登録しない
                 serverData.IsOnPreviousTrain = true;
+                return null;
+            }
+
+            //2-1. 在線させる軌道回路が、１つでも鎖錠されていた場合、鎖錠として登録処理しない。
+            if (trackCircuits.Any(tc => tc.TrackCircuitState.IsLocked))
+            {
+                // 鎖錠の列車情報は登録しない
+                serverData.IsLocked = true;
                 return null;
             }
 

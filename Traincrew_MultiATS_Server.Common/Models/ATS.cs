@@ -220,4 +220,8 @@ public class ServerToATSData
     /// 接続拒否状態
     /// </summary>
     public bool IsDisconnected { get; set; } = false;
+    /// <summary>
+    /// 鎖錠状態
+    /// </summary>
+    public bool IsLocked { get; set; } = false;
 }
