@@ -636,3 +636,8 @@ CREATE TABLE server_state
     mode        server_mode NOT NULL,
     time_offset INTEGER NOT NULL DEFAULT 0
 );
+
+-- ユーザー接続拒否状態テーブル
+CREATE TABLE user_disconnection_state (
+    user_id BIGINT PRIMARY KEY -- ユーザーID(Discord ID)
+);

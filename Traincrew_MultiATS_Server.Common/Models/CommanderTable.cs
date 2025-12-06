@@ -37,6 +37,7 @@ public class DataToCommanderTable
     public List<ProtectionRadioData> ProtectionRadioDataList { get; set; }
     public List<TrainStateData> TrainStateDataList { get; set; }
     public int TimeOffset { get; set; }
+    public List<ulong> BannedUserIdList { get; set; }
 }
 
 public class ProtectionRadioData
