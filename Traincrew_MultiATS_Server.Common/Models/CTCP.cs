@@ -29,6 +29,11 @@ public class DataToCTCP
     /// 表示灯情報リスト
     /// </summary>
     public Dictionary<string, bool> Lamps { get; set; }
+
+    /// <summary>
+    /// 時差
+    /// </summary>
+    public long TimeOffset { get; set; }
 }
 
 public enum CenterControlState
