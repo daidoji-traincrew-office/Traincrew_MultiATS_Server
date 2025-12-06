@@ -20,7 +20,8 @@ public class CTCPService(
     TrackCircuitService trackCircuitService,
     TtcStationControlService ttcStationControlService,
     RouteService routeService,
-    IMutexRepository mutexRepository)
+    IMutexRepository mutexRepository,
+    ServerService serverService)
 {
 
     public async Task<DataToCTCP> SendData_CTCP()
@@ -47,6 +48,8 @@ public class CTCPService(
                 ? CenterControlState.CenterControl
                 : CenterControlState.StationControl);
 
+        // 時差を取得
+        var timeOffset = await serverService.GetTimeOffsetAsync();
 
         var response = new DataToCTCP
         {
@@ -60,8 +63,10 @@ public class CTCPService(
                 .Select(ToRetsubanData)
                 .ToList(),
 
-            // 各ランプの状態 
-            Lamps = lamps
+            // 各ランプの状態
+            Lamps = lamps,
+
+            TimeOffset = timeOffset
         };
 
         return response;
@@ -76,6 +81,7 @@ public class CTCPService(
     /// <exception cref="ArgumentException"></exception>
     public async Task<RouteData> SetCtcRelay(string TcName, RaiseDrop raiseDrop)
     {
+        await using var mutex = await mutexRepository.AcquireAsync(nameof(InterlockingService));
         //進路名から進路を取得
         var routes = await routeRepository.GetByTcNameWithState(TcName);
 

@@ -7,5 +7,7 @@ public interface IServerRepository
 {
     Task<ServerState?> GetServerStateAsync();
     Task SetServerStateAsync(ServerMode mode);
+    Task<int> GetTimeOffset();
+    Task SetTimeOffsetAsync(int timeOffset);
 }
 

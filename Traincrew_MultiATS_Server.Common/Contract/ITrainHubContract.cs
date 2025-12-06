@@ -10,5 +10,5 @@ public interface ITrainHubContract
 
 public interface ITrainClientContract
 {
-    // クライアント側のメソッド定義は不要
+    Task ReceiveData(ServerToATSDataBySchedule data);
 }
