@@ -3,8 +3,6 @@ name: Claude Code Review
 on:
   pull_request:
     types: [opened, synchronize]
-    branches-ignore:
-      - 'master_update/*'
     # Optional: Only run on specific file changes
     # paths:
     #   - "src/**/*.ts"
@@ -14,6 +12,8 @@ on:
 
 jobs:
   claude-review:
+    # Skip if PR is from master_update/* branch
+    if: ${{ !startsWith(github.head_ref, 'master_update/') }}
     # Optional: Filter by PR author
     # if: |
     #   github.event.pull_request.user.login == 'external-contributor' ||
