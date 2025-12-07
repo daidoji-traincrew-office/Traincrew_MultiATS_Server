@@ -80,6 +80,8 @@ jobs:
           fi
           git commit -m "マスター更新 $(date +'%Y%m%d')"
           git push -u origin ${{ steps.branch.outputs.name }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Check if PR exists
         id: check_pr
