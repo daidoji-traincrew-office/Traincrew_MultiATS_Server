@@ -20,7 +20,9 @@ public partial class TrainService(
     ITrainCarRepository trainCarRepository,
     ITrainDiagramRepository trainDiagramRepository,
     ITransactionRepository transactionRepository,
-    IGeneralRepository generalRepository
+    BannedUserService bannedUserService,
+    IGeneralRepository generalRepository,
+    ServerService serverService
 )
 {
     [GeneratedRegex(@"\d+")]
@@ -28,6 +30,26 @@ public partial class TrainService(
 
     public async Task<ServerToATSData> CreateAtsData(ulong clientDriverId, AtsToServerData clientData)
     {
+        var serverMode = await serverService.GetServerModeAsync();
+        // 定時処理が停止している場合、その旨だけ返す
+        if (serverMode == ServerMode.Off)
+        {
+            return new()
+            {
+                ServerMode = serverMode
+            };
+        }
+        // 接続拒否チェック
+        var isBanned = await bannedUserService.IsUserBannedAsync(clientDriverId);
+        if (isBanned)
+        {
+            return new()
+            {
+                IsDisconnected = true,
+                StatusFlags = ServerStatusFlags.IsDisconnected
+            };
+        }
+
         var clientTrainNumber = clientData.DiaName;
         // 軌道回路情報の更新
         var oldTrackCircuitList = await trackCircuitService.GetTrackCircuitsByTrainNumber(clientTrainNumber);
@@ -47,7 +69,7 @@ public partial class TrainService(
             trackCircuitList = oldTrackCircuitList;
         }
 
-        // ☆情報は割と常に送るため共通で演算する   
+        // ☆情報は割と常に送るため共通で演算する
         var serverData = new ServerToATSData
         {
             // 在線している軌道回路上で防護無線が発報されているか確認
@@ -70,7 +92,7 @@ public partial class TrainService(
         await using var transaction = await transactionRepository.BeginTransactionAsync(IsolationLevel.RepeatableRead);
         // 運番が同じ列車の情報を取得する
         var trainState = await RegisterOrUpdateTrainState(
-            clientDriverId, clientData, oldTrackCircuitList, trackCircuitList, incrementalTrackCircuitDataList,
+            clientDriverId, clientData, trackCircuitList, incrementalTrackCircuitDataList,
             serverData);
 
         if (trainState == null)
@@ -107,6 +129,22 @@ public partial class TrainService(
     }
 
     /// <summary>
+    /// スケジューラーから定期的にATSに送信するデータを生成する。
+    /// </summary>
+    /// <returns>ATS向けデータ</returns>
+    public async Task<ServerToATSDataBySchedule> CreateDataBySchedule()
+    {
+        var timeOffset = await serverService.GetTimeOffsetAsync();
+        var routeData = await routeService.GetActiveRoutes();
+
+        return new()
+        {
+            TimeOffset = timeOffset,
+            RouteData = routeData
+        };
+    }
+
+    /// <summary>
     /// 列車情報の新規登録または更新を行う。
     /// </summary>
     /// <param name="clientDriverId">運転士ID</param>
@@ -115,10 +153,9 @@ public partial class TrainService(
     /// <param name="incrementalTrackCircuitDataList">新規登録する軌道回路データリスト</param>
     /// <param name="serverData">サーバーからクライアントへのデータ</param>
     /// <returns>列車状態。登録しない場合はnull。</returns>
-    internal async Task<TrainState?> RegisterOrUpdateTrainState(
+    private async Task<TrainState?> RegisterOrUpdateTrainState(
         ulong clientDriverId,
         AtsToServerData clientData,
-        List<TrackCircuit> oldTrackCircuits,
         List<TrackCircuit> trackCircuits,
         List<TrackCircuitData> incrementalTrackCircuitDataList,
         ServerToATSData serverData)
@@ -154,10 +191,20 @@ public partial class TrainService(
             {
                 // 早着の列車情報は登録しない
                 serverData.IsOnPreviousTrain = true;
+                serverData.StatusFlags |= ServerStatusFlags.IsOnPreviousTrain;
                 return null;
             }
 
-            //1-2.9999列番の場合は列車情報を登録しない。
+            //1-1-2.在線させる軌道回路が、１つでも鎖錠されていた場合、鎖錠として登録処理しない。
+            if (trackCircuits.Any(tc => tc.TrackCircuitState.IsLocked))
+            {
+                // 鎖錠の列車情報は登録しない
+                serverData.IsLocked = true;
+                serverData.StatusFlags |= ServerStatusFlags.IsLocked;
+                return null;
+            }
+
+            //1-3.9999列番の場合は列車情報を登録しない。
             if (clientData.DiaName == "9999")
             {
                 await trackCircuitService.SetTrackCircuitDataList(incrementalTrackCircuitDataList, clientTrainNumber);
@@ -183,8 +230,9 @@ public partial class TrainService(
             )
             {
                 // 2.交代前応答
-                // 送信してきたクライアントに対し交代前応答を行い、送信された情報は在線情報含めてすべて破棄する。  
+                // 送信してきたクライアントに対し交代前応答を行い、送信された情報は在線情報含めてすべて破棄する。
                 serverData.IsTherePreviousTrain = true;
+                serverData.StatusFlags |= ServerStatusFlags.IsTherePreviousTrain;
                 return null;
             }
 
@@ -195,6 +243,16 @@ public partial class TrainService(
             {
                 // 早着の列車情報は登録しない
                 serverData.IsOnPreviousTrain = true;
+                serverData.StatusFlags |= ServerStatusFlags.IsOnPreviousTrain;
+                return null;
+            }
+
+            //2-1. 在線させる軌道回路が、１つでも鎖錠されていた場合、鎖錠として登録処理しない。
+            if (trackCircuits.Any(tc => tc.TrackCircuitState.IsLocked))
+            {
+                // 鎖錠の列車情報は登録しない
+                serverData.IsLocked = true;
+                serverData.StatusFlags |= ServerStatusFlags.IsLocked;
                 return null;
             }
 
@@ -206,6 +264,7 @@ public partial class TrainService(
             {
                 // 早着の列車情報は登録しない
                 serverData.IsOnPreviousTrain = true;
+                serverData.StatusFlags |= ServerStatusFlags.IsOnPreviousTrain;
                 return null;
             }
 
@@ -239,6 +298,7 @@ public partial class TrainService(
                 )
                 {
                     serverData.IsMaybeWarp = true;
+                    serverData.StatusFlags |= ServerStatusFlags.IsMaybeWarp;
                     return null;
                 }
 
@@ -444,7 +504,7 @@ public partial class TrainService(
     /// </summary>
     /// <param name="trainNumber">列車番号</param>
     /// <returns></returns>
-    private static int GetDiaNumberFromTrainNumber(string trainNumber)
+    public static int GetDiaNumberFromTrainNumber(string trainNumber)
     {
         if (trainNumber == "9999")
         {

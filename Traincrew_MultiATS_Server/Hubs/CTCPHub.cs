@@ -4,6 +4,7 @@ using OpenIddict.Validation.AspNetCore;
 using Traincrew_MultiATS_Server.Common.Contract;
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Services;
+using RouteData = Traincrew_MultiATS_Server.Common.Models.RouteData;
 
 namespace Traincrew_MultiATS_Server.Hubs;
 
@@ -19,7 +20,7 @@ public class CTCPHub(CTCPService ctcpService) : Hub<ICTCPClientContract>, ICTCPH
         return await ctcpService.SendData_CTCP();
     }
 
-    public async Task<Common.Models.RouteData> SetCtcRelay(string TcName, RaiseDrop raiseDrop)
+    public async Task<RouteData> SetCtcRelay(string TcName, RaiseDrop raiseDrop)
     {
         return await ctcpService.SetCtcRelay(TcName, raiseDrop);
     }

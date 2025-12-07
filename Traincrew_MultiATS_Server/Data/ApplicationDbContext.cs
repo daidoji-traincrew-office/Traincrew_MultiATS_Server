@@ -48,6 +48,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<RouteCentralControlLever> RouteCentralControlLevers { get; set; }
     public DbSet<RouteCentralControlLeverState>  RouteCentralControlLeverStates { get; set; }
     public DbSet<LockConditionByRouteCentralControlLever> LockConditionByRouteCentralControlLevers { get; set; }
+    public DbSet<UserDisconnectionState> UserDisconnectionStates { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -217,7 +218,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasForeignKey(lcbrcl => lcbrcl.RouteCentralControlLeverId)
             .HasPrincipalKey(rcl => rcl.Id);
 
-        // Convert all column names to snake_case 
+        // Convert all column names to snake_case
         foreach (var entity in modelBuilder.Model.GetEntityTypes())
         {
             if (entity.ClrType.Name == nameof(SignalIndication))

@@ -23,7 +23,9 @@ public class SchedulerManager(
             new TIDHubScheduler(serviceScopeFactory),
             new CTCPHubScheduler(serviceScopeFactory),
             new CommanderTableHubScheduler(serviceScopeFactory),
-            new DestinationButtonScheduler(serviceScopeFactory)
+            new DestinationButtonScheduler(serviceScopeFactory),
+            new TrainScheduler(serviceScopeFactory),
+            new SignalScheduler(serviceScopeFactory)
         ];
     }
 
@@ -34,6 +36,7 @@ public class SchedulerManager(
         {
             return;
         }
+
         InitSchedulers();
         _isRunning = true;
     }
@@ -50,6 +53,7 @@ public class SchedulerManager(
         {
             return;
         }
+
         await Task.WhenAll(_schedulers.Select(s => s.Stop()));
         _schedulers.Clear();
         _isRunning = false;

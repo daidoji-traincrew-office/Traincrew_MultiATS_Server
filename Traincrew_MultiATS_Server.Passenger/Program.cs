@@ -17,6 +17,7 @@ using Traincrew_MultiATS_Server.Repositories.Train;
 using Traincrew_MultiATS_Server.Repositories.TrainCar;
 using Traincrew_MultiATS_Server.Repositories.TrainDiagram;
 using Traincrew_MultiATS_Server.Repositories.Transaction;
+using Traincrew_MultiATS_Server.Repositories.UserDisconnection;
 using Traincrew_MultiATS_Server.Scheduler;
 using Traincrew_MultiATS_Server.Services;
 
@@ -86,7 +87,9 @@ public class Program
             .AddScoped<ITrainDiagramRepository, TrainDiagramRepository>()
             .AddScoped<ITrainRepository, TrainRepository>()
             .AddScoped<ITransactionRepository, TransactionRepository>()
+            .AddScoped<IUserDisconnectionRepository, UserDisconnectionRepository>()
             // Service (ABC順)
+            .AddScoped<BannedUserService>()
             .AddScoped<OperationInformationService>()
             .AddScoped<OperationNotificationService>()
             .AddScoped<PassengerService>()

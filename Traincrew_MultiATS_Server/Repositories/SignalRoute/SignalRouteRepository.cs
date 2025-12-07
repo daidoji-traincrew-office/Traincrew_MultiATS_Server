@@ -36,4 +36,27 @@ public class SignalRouteRepository(ApplicationDbContext context) : ISignalRouteR
             .Where(sr => routeIds.Contains(sr.RouteId))
             .ToListAsync();
     }
+
+    public async Task<Dictionary<string, List<Models.Route>>> GetAllRoutes()
+    {
+        return await context.SignalRoutes
+            .Include(sr => sr.Route)
+            .ThenInclude(r => r.RouteState)
+            .Select(sr => new
+            {
+                sr.SignalName,
+                Route = new Models.Route
+                {
+                    RouteState = sr.Route.RouteState == null ? null : new RouteState
+                    {
+                        IsSignalControlRaised = sr.Route.RouteState.IsSignalControlRaised
+                    }
+                }
+            })
+            .GroupBy(sr => sr.SignalName)
+            .ToDictionaryAsync(
+                g => g.Key,
+                g => g.Select(sr => sr.Route).ToList()
+            );
+    }
 }

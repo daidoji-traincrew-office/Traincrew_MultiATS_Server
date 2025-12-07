@@ -30,7 +30,8 @@ public class InterlockingService(
     SwitchingMachineService switchingMachineService,
     DirectionRouteService directionRouteService,
     SignalService signalService,
-    IMutexRepository mutexRepository)
+    IMutexRepository mutexRepository,
+    ServerService serverService)
 {
 
     public async Task<DataToInterlocking> SendData_Interlocking()
@@ -45,6 +46,7 @@ public class InterlockingService(
         var routeCentralControlLevers = await routeCentralControlLeverRepository.GetAllWithState();
         var directions = await directionRouteService.GetAllDirectionData();
         var destinationButtons = await destinationButtonRepository.GetAllWithState();
+        var timeOffset = await serverService.GetTimeOffsetAsync();
 
         // List<string> clientData.ActiveStationsListの駅IDから、指定された駅にある信号機名称をList<string>で返すやつ
         var signalNames = await signalService.GetSignalNamesByStationIds(stationIds);
@@ -81,12 +83,14 @@ public class InterlockingService(
                 .Select(ToRetsubanData)
                 .ToList(),
 
-            // 各ランプの状態 
+            // 各ランプの状態
             Lamps = lamps,
 
             Signals = signalIndications
                 .Select(pair => SignalService.ToSignalData(pair.Key, pair.Value))
-                .ToList()
+                .ToList(),
+
+            TimeOffset = timeOffset
         };
 
         return response;

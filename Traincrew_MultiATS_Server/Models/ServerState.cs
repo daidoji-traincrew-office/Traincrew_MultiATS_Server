@@ -8,4 +8,6 @@ public class ServerState
 {
     public int Id { get; set; }
     public ServerMode Mode { get; set; }
+    [Column("time_offset")]
+    public int TimeOffset { get; set; } = 0;
 }

@@ -22,10 +22,14 @@ public interface ICommanderTableHubContract
     Task DeleteTrainState(long id);
     Task<ServerMode> GetServerMode();
     Task SetServerMode(ServerMode mode);
+    Task SetTimeOffset(int timeOffset);
+    Task BanUser(ulong userId);
+    Task UnbanUser(ulong userId);
 }
 
 public interface ICommanderTableClientContract
 {
     Task ReceiveData(DataToCommanderTable data);
     Task ReceiveServerMode(ServerMode serverMode);
+    Task ReceiveSignalData(List<SignalData> signalData);
 }
