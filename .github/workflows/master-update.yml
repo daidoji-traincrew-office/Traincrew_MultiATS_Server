@@ -63,8 +63,16 @@ jobs:
           RENDO_SPREADSHEET_ID: ${{ secrets.RENDO_SPREADSHEET_ID }}
           MASTER_SPREADSHEET_ID: ${{ secrets.MASTER_SPREADSHEET_ID }}
 
+      - name: Generate GitHub App Token
+        id: generate_token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
       - name: Commit and push 
         run: |
+          git remote set-url origin https://x-access-token:${{ steps.generate_token.outputs.token }}@github.com/${{ github.repository }} 
           git add ${{ env.DATA_DIR }}
           if git diff --staged --quiet; then
             echo "No changes to commit"
@@ -80,13 +88,6 @@ jobs:
           echo "exists=$PR_EXISTS" >> $GITHUB_OUTPUT
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Generate GitHub App Token
-        id: generate_token
-        uses: actions/create-github-app-token@v1
-        with:
-          app-id: ${{ secrets.APP_ID }}
-          private-key: ${{ secrets.APP_PRIVATE_KEY }}
 
       - name: Create Pull Request
         if: steps.check_pr.outputs.exists == '0'
