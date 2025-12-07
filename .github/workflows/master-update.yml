@@ -16,10 +16,18 @@ jobs:
       id-token: write
 
     steps:
+      - name: Generate GitHub App Token
+        id: generate_token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
       - name: Checkout repository
         uses: actions/checkout@v4.2.2
         with:
           fetch-depth: 0
+          token: ${{ steps.generate_token.outputs.token }}
 
       - name: Set branch name
         id: branch
@@ -63,16 +71,8 @@ jobs:
           RENDO_SPREADSHEET_ID: ${{ secrets.RENDO_SPREADSHEET_ID }}
           MASTER_SPREADSHEET_ID: ${{ secrets.MASTER_SPREADSHEET_ID }}
 
-      - name: Generate GitHub App Token
-        id: generate_token
-        uses: actions/create-github-app-token@v1
-        with:
-          app-id: ${{ secrets.APP_ID }}
-          private-key: ${{ secrets.APP_PRIVATE_KEY }}
-
-      - name: Commit and push 
+      - name: Commit and push
         run: |
-          git remote set-url origin https://x-access-token:${{ steps.generate_token.outputs.token }}@github.com/${{ github.repository }} 
           git add ${{ env.DATA_DIR }}
           if git diff --staged --quiet; then
             echo "No changes to commit"
@@ -80,8 +80,6 @@ jobs:
           fi
           git commit -m "マスター更新 $(date +'%Y%m%d')"
           git push -u origin ${{ steps.branch.outputs.name }}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Check if PR exists
         id: check_pr
@@ -112,4 +110,4 @@ jobs:
           EOF
           )"
         env:
-          GH_TOKEN: ${{ steps.generate_token.outputs.token }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
