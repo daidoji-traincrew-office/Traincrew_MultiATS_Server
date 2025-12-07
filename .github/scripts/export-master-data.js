@@ -38,7 +38,7 @@ const MASTER_RANGES = [
     ['TTC列番窓', 'TTC列番窓', ['A1:I188']],
     ['TTC列番窓リンク設定', 'TTC列番窓リンク設定', ['A1:J415']],
     ['種別設定', '種別', ['A1:B1', 'A3:B25']],
-    ['列車設定[通常]', '列車', ['A1:E313']]
+    ['列車設定[通常]', '列車', ['A1:E1000']]
 ];
 
 const MASTER_RANGES_NO_REMOVE_FIRST_EMPTY = [
