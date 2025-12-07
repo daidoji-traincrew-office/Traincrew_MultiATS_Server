@@ -36,7 +36,7 @@ public partial class TrainService(
         {
             return new()
             {
-                ServerMode = serverMode
+                StatusFlags = ServerStatusFlags.IsServerStopped
             };
         }
         // 接続拒否チェック
