@@ -45,7 +45,6 @@ public partial class TrainService(
         {
             return new()
             {
-                IsDisconnected = true,
                 StatusFlags = ServerStatusFlags.IsDisconnected
             };
         }
@@ -190,7 +189,6 @@ public partial class TrainService(
                     otherTrainState.DriverId != null && otherTrainState.DriverId != clientDriverId))
             {
                 // 早着の列車情報は登録しない
-                serverData.IsOnPreviousTrain = true;
                 serverData.StatusFlags |= ServerStatusFlags.IsOnPreviousTrain;
                 return null;
             }
@@ -199,7 +197,6 @@ public partial class TrainService(
             if (trackCircuits.Any(tc => tc.TrackCircuitState.IsLocked))
             {
                 // 鎖錠の列車情報は登録しない
-                serverData.IsLocked = true;
                 serverData.StatusFlags |= ServerStatusFlags.IsLocked;
                 return null;
             }
@@ -231,7 +228,6 @@ public partial class TrainService(
             {
                 // 2.交代前応答
                 // 送信してきたクライアントに対し交代前応答を行い、送信された情報は在線情報含めてすべて破棄する。
-                serverData.IsTherePreviousTrain = true;
                 serverData.StatusFlags |= ServerStatusFlags.IsTherePreviousTrain;
                 return null;
             }
@@ -242,7 +238,6 @@ public partial class TrainService(
                     otherTrainState.DriverId != null && otherTrainState.DriverId != clientDriverId))
             {
                 // 早着の列車情報は登録しない
-                serverData.IsOnPreviousTrain = true;
                 serverData.StatusFlags |= ServerStatusFlags.IsOnPreviousTrain;
                 return null;
             }
@@ -251,7 +246,6 @@ public partial class TrainService(
             if (trackCircuits.Any(tc => tc.TrackCircuitState.IsLocked))
             {
                 // 鎖錠の列車情報は登録しない
-                serverData.IsLocked = true;
                 serverData.StatusFlags |= ServerStatusFlags.IsLocked;
                 return null;
             }
@@ -263,7 +257,6 @@ public partial class TrainService(
                     .Count(trainNumber => !string.IsNullOrEmpty(trainNumber)) >= 2)
             {
                 // 早着の列車情報は登録しない
-                serverData.IsOnPreviousTrain = true;
                 serverData.StatusFlags |= ServerStatusFlags.IsOnPreviousTrain;
                 return null;
             }
@@ -297,7 +290,6 @@ public partial class TrainService(
                     && trackCircuits.Any(tc => !oldTrackCircuitNames.Contains(tc.Name))
                 )
                 {
-                    serverData.IsMaybeWarp = true;
                     serverData.StatusFlags |= ServerStatusFlags.IsMaybeWarp;
                     return null;
                 }
