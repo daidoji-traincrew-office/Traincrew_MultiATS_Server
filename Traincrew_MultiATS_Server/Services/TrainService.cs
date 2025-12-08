@@ -82,12 +82,6 @@ public partial class TrainService(
         serverData.OperationNotificationData = await operationNotificationService
             .GetOperationNotificationDataByTrackCircuitIds(trackCircuitList.Select(tc => tc.Id).ToList());
 
-        // 信号現示の計算
-        var isUp = IsTrainUpOrDown(clientTrainNumber);
-        serverData.NextSignalData = await signalService.GetSignalIndicationDataByTrackCircuits(trackCircuitList, isUp);
-        // 開通進路の情報
-        serverData.RouteData = await routeService.GetActiveRoutes();
-
         // トランザクション開始
         await using var transaction = await transactionRepository.BeginTransactionAsync(IsolationLevel.RepeatableRead);
         // 運番が同じ列車の情報を取得する
@@ -504,7 +498,7 @@ public partial class TrainService(
     /// </summary>
     /// <param name="trainNumber">列車番号</param>
     /// <returns></returns>
-    public static int GetDiaNumberFromTrainNumber(string trainNumber)
+    private static int GetDiaNumberFromTrainNumber(string trainNumber)
     {
         if (trainNumber == "9999")
         {

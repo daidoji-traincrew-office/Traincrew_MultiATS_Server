@@ -203,14 +203,6 @@ public enum ServerStatusFlags
 public class ServerToATSData
 {
     /// <summary>
-    /// 次信号の状態
-    /// </summary>
-    public List<SignalData> NextSignalData { get; set; } = [];
-    /// <summary>
-    /// 次々信号の状態
-    /// </summary>
-    public List<SignalData> DoubleNextSignalData { get; set; } = [];
-    /// <summary>
     /// 防護無線の状態
     /// </summary>
     public bool BougoState { get; set; } = false;
@@ -222,10 +214,6 @@ public class ServerToATSData
     /// 運転告知器の状態
     /// </summary>
     public OperationNotificationData? OperationNotificationData { get; set; } = null;
-    /// <summary>
-    /// 進路情報
-    /// </summary>
-    public List<RouteData> RouteData { get; set; } = [];
     /// <summary>
     /// 踏みつぶし状態
     /// </summary>
