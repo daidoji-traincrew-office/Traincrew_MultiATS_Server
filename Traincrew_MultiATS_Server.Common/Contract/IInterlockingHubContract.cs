@@ -13,4 +13,5 @@ public interface IInterlockingHubContract
 public interface IInterlockingClientContract
 {
     Task ReceiveData(DataToInterlocking data);
+    Task ReceiveSignalData(List<SignalData> signalData);
 }
