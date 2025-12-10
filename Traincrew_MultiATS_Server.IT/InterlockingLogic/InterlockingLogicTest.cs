@@ -25,12 +25,15 @@ public class InterlockingLogicTest(WebApplicationFixture factory) : IAsyncLifeti
     private IInterlockingHubContract? _hub;
     private HubConnection? _connection;
     private TaskCompletionSource<DataToInterlocking>? _dataReceived;
+    private TaskCompletionSource<List<SignalData>>? _signalDataReceived;
     private volatile DataToInterlocking? _latestData;
+    private volatile List<SignalData>? _latestSignalData;
 
     public async ValueTask InitializeAsync()
     {
         // InterlockingHub接続を確立
         _dataReceived = new();
+        _signalDataReceived = new();
 
         var mockClientContract = new Mock<IInterlockingClientContract>();
         mockClientContract
@@ -45,11 +48,26 @@ public class InterlockingLogicTest(WebApplicationFixture factory) : IAsyncLifeti
             })
             .Returns(Task.CompletedTask);
 
+        mockClientContract
+            .Setup(client => client.ReceiveSignalData(It.IsAny<List<SignalData>>()))
+            .Callback<List<SignalData>>(signalData =>
+            {
+                _latestSignalData = signalData;
+                if (!_signalDataReceived.Task.IsCompleted)
+                {
+                    _signalDataReceived.TrySetResult(signalData);
+                }
+            })
+            .Returns(Task.CompletedTask);
+
         (_connection, _hub) = factory.CreateInterlockingHub(mockClientContract.Object);
         await _connection.StartAsync(TestContext.Current.CancellationToken);
 
         // 初回データ受信を待機
-        await _dataReceived.Task.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+        await Task.WhenAll(
+            _dataReceived.Task.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken),
+            _signalDataReceived.Task.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken)
+        );
     }
 
     public async ValueTask DisposeAsync()
@@ -190,11 +208,11 @@ public class InterlockingLogicTest(WebApplicationFixture factory) : IAsyncLifeti
     private bool CheckSignalsOpen(RouteTestCase testCase)
     {
         // ローカル変数にコピーして、途中で変更されないようにする（競合状態を防止）
-        var currentData = _latestData;
+        var currentSignalData = _latestSignalData;
 
         // メイン信号機の開通確認
-        // currentDataがNullの場合、mainSignalはNullになる
-        var mainSignal = currentData?.Signals.FirstOrDefault(s => s.Name == testCase.SignalName);
+        // currentSignalDataがNullの場合、mainSignalはNullになる
+        var mainSignal = currentSignalData?.FirstOrDefault(s => s.Name == testCase.SignalName);
         if (mainSignal == null || mainSignal.phase == Phase.None || mainSignal.phase == Phase.R)
         {
             return false;
@@ -208,7 +226,7 @@ public class InterlockingLogicTest(WebApplicationFixture factory) : IAsyncLifeti
 
         foreach (var targetSignalName in testCase.ThrowOutControlTargetSignals)
         {
-            var targetSignal = currentData.Signals.FirstOrDefault(s => s.Name == targetSignalName);
+            var targetSignal = currentSignalData?.FirstOrDefault(s => s.Name == targetSignalName);
             if (targetSignal == null || targetSignal.phase == Phase.None || targetSignal.phase == Phase.R)
             {
                 return false;

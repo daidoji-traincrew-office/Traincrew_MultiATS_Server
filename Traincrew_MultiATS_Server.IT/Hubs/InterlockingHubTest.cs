@@ -120,10 +120,69 @@ public class InterlockingHubTest(WebApplicationFixture factory)
         }
     }
 
+    [Fact]
+    public async Task ReceiveSignalData_Interlocking_ValidatesReceivedSignalData()
+    {
+        // Arrange
+        var tsvFiles = Directory.GetFiles(
+            Path.Combine(AppContext.BaseDirectory, "Hubs", "InterlockingHubTestData"),
+            "*.tsv"
+        );
+
+        var tcs = new TaskCompletionSource<List<SignalData>>();
+
+        var mockClientContract = new Mock<IInterlockingClientContract>();
+        mockClientContract
+            .Setup(client => client.ReceiveSignalData(It.IsAny<List<SignalData>>()))
+            .Callback<List<SignalData>>(signalData =>
+            {
+                if (tcs.Task.IsCompleted)
+                {
+                    return;
+                }
+
+                tcs.SetResult(signalData);
+            })
+            .Returns(Task.CompletedTask);
+
+        var (connection, _) = factory.CreateInterlockingHub(mockClientContract.Object);
+
+        List<SignalData> signalData;
+        await using (connection)
+        {
+            await connection.StartAsync(TestContext.Current.CancellationToken);
+            // Act
+            signalData = await tcs.Task.WaitAsync(TimeSpan.FromSeconds(3), TestContext.Current.CancellationToken);
+        }
+
+        foreach (var tsvFile in tsvFiles)
+        {
+            using var reader = new StreamReader(tsvFile, Encoding.GetEncoding("Shift-jis"));
+            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                Delimiter = "\t",
+                HasHeaderRecord = true
+            };
+            using var csv = new CsvReader(reader, config);
+            var expectedData = csv.GetRecords<dynamic>()
+                .Select(row => new InterlockingData
+                {
+                    ServerType = MapServerType(row.ServerType),
+                    ServerName = row.ServerName,
+                    PointNameA = row.PointNameA,
+                    PointNameB = row.PointNameB,
+                    DirectionName = row.DirectionName,
+                    UniqueName = row.UniqueName
+                })
+                .ToList();
+            // Assert
+            AssertValidSignalDataFromTsv(signalData, expectedData);
+        }
+    }
+
     private static void AssertValidDataFromTsv(DataToInterlocking data, List<InterlockingData> expectedData)
     {
         var physicalLeverNames = data.PhysicalLevers.Select(l => l.Name).ToHashSet();
-        var signalNames = data.Signals.Select(s => s.Name).ToHashSet();
         var physicalButtonNames = data.PhysicalButtons.Select(b => b.Name).ToHashSet();
         var directionNames = data.Directions.Select(d => d.Name).ToHashSet();
         var retsubanNames = data.Retsubans.Select(r => r.Name).ToHashSet();
@@ -143,9 +202,6 @@ public class InterlockingHubTest(WebApplicationFixture factory)
                             case ServerType.PhysicalLevers:
                                 Assert.Contains(row.ServerName, physicalLeverNames);
                                 break;
-                            case ServerType.Signals:
-                                Assert.Contains(row.ServerName, signalNames);
-                                break;
                             case ServerType.PhysicalButtons:
                                 Assert.Contains(row.ServerName, physicalButtonNames);
                                 break;
@@ -164,8 +220,10 @@ public class InterlockingHubTest(WebApplicationFixture factory)
                                 Assert.Contains(row.ServerName, physicalKeyLeverNames);
                                 break;
                             case ServerType.Points:
+                            case ServerType.Signals:
                             case ServerType.Empty:
                                 // 転てつ器はPointNameAに書かれるのでここでは確認しない
+                                // 信号機は別なテストで確認
                                 // Emptyは確認しない
                                 break;
                             default:
@@ -188,6 +246,25 @@ public class InterlockingHubTest(WebApplicationFixture factory)
                     if (!string.IsNullOrWhiteSpace(row.DirectionName))
                     {
                         Assert.Contains(row.DirectionName, directionNames);
+                    }
+                }
+            )
+            .ToArray();
+        Assert.Multiple(actions);
+    }
+
+    private static void AssertValidSignalDataFromTsv(List<SignalData> signalData, List<InterlockingData> expectedData)
+    {
+        var signalNames = signalData.Select(s => s.Name).ToHashSet();
+
+        var actions = expectedData
+            .Where(IsMustAssertData)
+            .Where(row => row.ServerType == ServerType.Signals)
+            .Select<InterlockingData, Action>(row => () =>
+                {
+                    if (!string.IsNullOrWhiteSpace(row.ServerName))
+                    {
+                        Assert.Contains(row.ServerName, signalNames);
                     }
                 }
             )
