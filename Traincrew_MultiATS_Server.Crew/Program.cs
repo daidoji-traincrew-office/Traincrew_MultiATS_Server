@@ -215,13 +215,26 @@ public class Program
     private static void ConfigureDatabaseService(WebApplicationBuilder builder)
     {
         // DBの設定
-        var dataSourceBuilder = new NpgsqlDataSourceBuilder(builder.Configuration.GetConnectionString("DefaultConnection"));
-        // Enumのマッピング
-        EnumTypeMapper.MapEnumForNpgsql(dataSourceBuilder);
-        var dataSource = dataSourceBuilder.Build();
+        var databaseProvider = builder.Configuration["DatabaseProvider"] ?? "PostgreSQL";
+        var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
         {
-            options.UseNpgsql(dataSource);
+            if (databaseProvider.Equals("SQLite", StringComparison.OrdinalIgnoreCase))
+            {
+                // SQLiteを使用
+                options.UseSqlite(connectionString ?? "Data Source=multiats.db");
+            }
+            else
+            {
+                // PostgreSQLを使用（デフォルト）
+                var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
+                // Enumのマッピング
+                EnumTypeMapper.MapEnumForNpgsql(dataSourceBuilder);
+                var dataSource = dataSourceBuilder.Build();
+                options.UseNpgsql(dataSource);
+            }
+
             // Todo: セッションであることを考えると、Redisを使ったほうが良いかも
             options.UseOpenIddict();
         });

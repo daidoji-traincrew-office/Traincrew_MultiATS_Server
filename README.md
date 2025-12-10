@@ -4,7 +4,56 @@ Traincrew運転会用のマルチATSサーバー。
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/daidoji-traincrew-office/Traincrew_MultiATS_Server)
 
-## 開発者向け初期セットアップ
+## ローカルモード（SQLite）で動かす
+
+PostgreSQLなしでローカル環境で動作させる場合、SQLiteモードを使用できます。
+
+### Development環境での起動
+
+Development環境では、デフォルトでSQLiteが有効になっています。
+
+```bash
+# 乗務員用サーバー
+cd Traincrew_MultiATS_Server.Crew
+dotnet run -lp https
+
+# お客様用サーバー
+cd Traincrew_MultiATS_Server.Passenger
+dotnet run -lp https
+```
+
+サーバー起動後、カレントディレクトリに`multiats.db`ファイルが作成されます。
+
+### 設定の変更
+
+データベースプロバイダーと認証設定は`appsettings.json`または`appsettings.Development.json`で変更できます：
+
+```json
+{
+  "EnableAuthorization": false,  // 認証の有効/無効（Crewサーバーのみ）
+  "DatabaseProvider": "SQLite",   // "SQLite" または "PostgreSQL"
+  "ConnectionStrings": {
+    "DefaultConnection": "Data Source=multiats.db"
+  }
+}
+```
+
+### Production環境での設定
+
+Production環境では、デフォルトでPostgreSQLと認証が有効になっています。
+SQLiteを使用したい場合は、`appsettings.json`を編集してください：
+
+```json
+{
+  "EnableAuthorization": false,
+  "DatabaseProvider": "SQLite",
+  "ConnectionStrings": {
+    "DefaultConnection": "Data Source=multiats.db"
+  }
+}
+```
+
+## 開発者向け初期セットアップ（PostgreSQL使用時）
 
 ### Docker
 Dockerを入れる

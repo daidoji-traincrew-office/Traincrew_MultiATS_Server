@@ -124,10 +124,24 @@ public class Program
     private static void ConfigureDatabaseService(WebApplicationBuilder builder)
     {
         // DBの設定
-        var dataSourceBuilder =
-            new NpgsqlDataSourceBuilder(builder.Configuration.GetConnectionString("DefaultConnection"));
-        EnumTypeMapper.MapEnumForNpgsql(dataSourceBuilder);
-        var dataSource = dataSourceBuilder.Build();
-        builder.Services.AddDbContext<ApplicationDbContext>(options => { options.UseNpgsql(dataSource); });
+        var databaseProvider = builder.Configuration["DatabaseProvider"] ?? "PostgreSQL";
+        var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+        builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        {
+            if (databaseProvider.Equals("SQLite", StringComparison.OrdinalIgnoreCase))
+            {
+                // SQLiteを使用
+                options.UseSqlite(connectionString ?? "Data Source=multiats.db");
+            }
+            else
+            {
+                // PostgreSQLを使用（デフォルト）
+                var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
+                EnumTypeMapper.MapEnumForNpgsql(dataSourceBuilder);
+                var dataSource = dataSourceBuilder.Build();
+                options.UseNpgsql(dataSource);
+            }
+        });
     }
 }

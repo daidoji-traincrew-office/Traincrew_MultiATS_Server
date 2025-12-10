@@ -54,6 +54,12 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     {
         base.OnModelCreating(modelBuilder);
 
+        // SQLiteの場合、Enumを文字列として保存
+        if (Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite")
+        {
+            ConfigureEnumsForSqlite(modelBuilder);
+        }
+
         modelBuilder.Entity<StationTimerState>()
             .HasOne<Station>()
             .WithMany()
@@ -251,5 +257,27 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         return string.Concat(
                 input.Select((x, i) => i > 0 && char.IsUpper(x) ? "_" + x : x.ToString()))
             .ToLower();
+    }
+
+    private static void ConfigureEnumsForSqlite(ModelBuilder modelBuilder)
+    {
+        // SQLiteではEnumを文字列として保存する
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            foreach (var property in entityType.GetProperties())
+            {
+                if (property.ClrType.IsEnum)
+                {
+                    var converterType = typeof(Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<,>)
+                        .MakeGenericType(property.ClrType, typeof(string));
+                    var toStringMethod = property.ClrType.GetMethod("ToString", Type.EmptyTypes);
+                    var parseMethod = typeof(Enum).GetMethod("Parse", new[] { typeof(Type), typeof(string) });
+
+                    modelBuilder.Entity(entityType.ClrType)
+                        .Property(property.Name)
+                        .HasConversion<string>();
+                }
+            }
+        }
     }
 }
