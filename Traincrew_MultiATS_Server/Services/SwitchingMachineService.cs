@@ -6,6 +6,7 @@ using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
 using Traincrew_MultiATS_Server.Repositories.Lever;
 using Traincrew_MultiATS_Server.Repositories.LockCondition;
 using Traincrew_MultiATS_Server.Repositories.LockConditionByRouteCentralControlLever;
+using Traincrew_MultiATS_Server.Repositories.Server;
 using Traincrew_MultiATS_Server.Repositories.SwitchingMachine;
 using Traincrew_MultiATS_Server.Repositories.SwitchingMachineRoute;
 using Route = Traincrew_MultiATS_Server.Models.Route;
@@ -20,6 +21,7 @@ public class SwitchingMachineService(
     ILockConditionRepository lockConditionRepository,
     ILeverRepository leverRepository,
     ILockConditionByRouteCentralControlLeverRepository lockConditionByRouteCentralControlLeverRepository,
+    IServerRepository serverRepository,
     IGeneralRepository generalRepository
 )
 {
@@ -31,9 +33,10 @@ public class SwitchingMachineService(
     public async Task SwitchingMachineControl()
     {
         // こいつは定常で全駅回すので駅ごとに分けるやつの対象外
-        // Todo: クラスのstaticにしたほうが良いかも
-        var switchMoveTime = TimeSpan.FromSeconds(5);
-        var switchReturnTime = TimeSpan.FromMilliseconds(500);
+        // ServerStateから転轍機の時間設定を取得
+        var serverState = await serverRepository.GetServerStateAsync();
+        var switchMoveTime = TimeSpan.FromMilliseconds(serverState?.SwitchMoveTime ?? 5000);
+        var switchReturnTime = TimeSpan.FromMilliseconds(serverState?.SwitchReturnTime ?? 500);
         // 処理が必要な転てつ器のIDを取得
         // 1. 転換中の転てつ器
         var movingSwitchingMachineIds = await switchingMachineRepository.GetIdsWhereMoving();
