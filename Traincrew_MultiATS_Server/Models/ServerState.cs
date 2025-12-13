@@ -10,4 +10,10 @@ public class ServerState
     public ServerMode Mode { get; set; }
     [Column("time_offset")]
     public int TimeOffset { get; set; } = 0;
+    [Column("switch_move_time")]
+    public int SwitchMoveTime { get; set; } = 0;
+    [Column("switch_return_time")]
+    public int SwitchReturnTime { get; set; } = 0;
+    [Column("use_one_second_relay")]
+    public bool UseOneSecondRelay { get; set; } = false;
 }
