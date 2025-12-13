@@ -6,7 +6,7 @@ namespace Traincrew_MultiATS_Server.Models;
 public class SignalCsv
 {
     public required string Name { get; set; } // DB名
-    public required string ImplementedSection { get; set; } // 実装済み区間
+    public required bool IsImplemented { get; set; } // 実装済み区間
     public required string TypeName { get; set; } // 何灯式
     public required List<string> NextSignalNames { get; set; } // 次の信号機のDB名1-5
     public required List<string> RouteNames { get; set; } // 対応進路名1-11
@@ -21,7 +21,7 @@ public sealed class SignalCsvMap : ClassMap<SignalCsv>
     public SignalCsvMap()
     {
         Map(m => m.Name).Name("DB名");
-        Map(m => m.ImplementedSection).Name("実装済み区間");
+        Map(m => m.IsImplemented).Convert(row => IsFieldEqualToO(row, "実装済み区間"));
         Map(m => m.TypeName).Name("何灯式");
         Map(m => m.NextSignalNames).Convert(GetNextSignalNames);
         Map(m => m.RouteNames).Convert(GetRouteNames);
@@ -58,5 +58,11 @@ public sealed class SignalCsvMap : ClassMap<SignalCsv>
     {
         var value = row.Row.GetField(fieldName);
         return !string.IsNullOrWhiteSpace(value) && value != "なし" ? value : null;
+    }
+
+    private static bool IsFieldEqualToO(ConvertFromStringArgs row, string fieldName)
+    {
+        var value = row.Row.GetField(fieldName);
+        return value == "O";
     }
 }
