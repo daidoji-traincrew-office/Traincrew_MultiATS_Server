@@ -14,6 +14,7 @@ using Traincrew_MultiATS_Server.Repositories.Route;
 using Traincrew_MultiATS_Server.Repositories.RouteCentralControlLever;
 using Traincrew_MultiATS_Server.Repositories.RouteLeverDestinationButton;
 using Traincrew_MultiATS_Server.Repositories.RouteLockTrackCircuit;
+using Traincrew_MultiATS_Server.Repositories.Server;
 using Traincrew_MultiATS_Server.Repositories.Station;
 using Traincrew_MultiATS_Server.Repositories.SwitchingMachine;
 using Traincrew_MultiATS_Server.Repositories.SwitchingMachineRoute;
@@ -50,6 +51,7 @@ public class RendoService(
     IRouteCentralControlLeverRepository routeCentralControlLeverRepository,
     ILockConditionByRouteCentralControlLeverRepository lockConditionByRouteCentralControlLeverRepository,
     IGeneralRepository generalRepository,
+    IServerRepository serverRepository,
     ILogger<RendoService> logger)
 {
     /// <summary>
@@ -805,6 +807,10 @@ public class RendoService(
     /// </summary>
     public async Task TimerRelay()
     {
+        // ServerStateから1秒リレー使用設定を取得
+        var serverState = await serverRepository.GetServerStateAsync();
+        var useOneSecondRelay = serverState?.UseOneSecondRelay ?? false;
+
         // 接近鎖錠MSが扛上している進路を全部取ってくる
         var routes = await routeRepository.GetWhereApproachLockMSRelayIsRaised();
         // 進路の接近鎖錠MSリレーが扛上している進路が持っている駅とタイマーのセット
@@ -832,7 +838,9 @@ public class RendoService(
                 if (teuRelayRaisedAt == null)
                 {
                     isTeuRelayRaised = RaiseDrop.Drop;
-                    teuRelayRaisedAt = dateTimeRepository.GetNow().AddSeconds(stationTimerState.Seconds);
+                    // 1秒リレーを使う場合は常に1秒、使わない場合は駅時素の秒数を使用
+                    var secondsToAdd = useOneSecondRelay ? 1 : stationTimerState.Seconds;
+                    teuRelayRaisedAt = dateTimeRepository.GetNow().AddSeconds(secondsToAdd);
                 }
             }
             else
