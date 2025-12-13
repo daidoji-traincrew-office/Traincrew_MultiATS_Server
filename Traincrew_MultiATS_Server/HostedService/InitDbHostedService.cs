@@ -53,6 +53,7 @@ public class InitDbHostedService(
         await InitThrowOutControls(context, cancellationToken);
         await InitSignal(context, cancellationToken);
         await InitNextSignal(context, cancellationToken);
+        await InitializeSignalRoute(context, cancellationToken);
 
         if (dbInitializer != null)
         {
@@ -819,6 +820,43 @@ public class InitDbHostedService(
         }
     }
 
+    private async Task InitializeSignalRoute(ApplicationDbContext context, CancellationToken cancellationToken)
+    {
+        // CSVから信号データを読み込む
+        var signalDataList = LoadSignalDataFromCsv();
+
+        var signalRoutes = await context.SignalRoutes
+            .Include(sr => sr.Route)
+            .ToListAsync(cancellationToken);
+        var routes = await context.Routes
+            .ToDictionaryAsync(r => r.Name, cancellationToken);
+        foreach (var signal in signalDataList)
+        {
+            foreach (var routeName in signal.RouteNames ?? [])
+            {
+                // Todo: FW 全探索なので改善したほうがいいかも
+                if (signalRoutes.Any(sr => sr.SignalName == signal.Name && sr.Route.Name == routeName))
+                {
+                    continue;
+                }
+
+                if (!routes.TryGetValue(routeName, out var route))
+                {
+                    // Todo: 例外を出す
+                    continue;
+                }
+
+                context.SignalRoutes.Add(new()
+                {
+                    SignalName = signal.Name,
+                    RouteId = route.Id
+                });
+            }
+        }
+
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
     /// <summary>
     /// UnchangedなEntityをすべてDetachする。
     /// </summary>
@@ -866,7 +904,6 @@ internal partial class DbInitializer(
     internal async Task InitializeAfterCreateRoute()
     {
         await InitTrackCircuitSignal();
-        await InitializeSignalRoute();
     }
 
     internal async Task InitializeAfterCreateLockCondition()
@@ -1045,40 +1082,6 @@ internal partial class DbInitializer(
                     TrackCircuitId = trackCircuitEntity.Id,
                     SignalName = signalName,
                     IsUp = false
-                });
-            }
-        }
-
-        await context.SaveChangesAsync(cancellationToken);
-    }
-
-    private async Task InitializeSignalRoute()
-    {
-        var signalRoutes = await context.SignalRoutes
-            .Include(sr => sr.Route)
-            .ToListAsync(cancellationToken);
-        var routes = await context.Routes
-            .ToDictionaryAsync(r => r.Name, cancellationToken);
-        foreach (var signal in DBBase.signalDataList)
-        {
-            foreach (var routeName in signal.RouteNames)
-            {
-                // Todo: FW 全探索なので改善したほうがいいかも
-                if (signalRoutes.Any(sr => sr.SignalName == signal.Name && sr.Route.Name == routeName))
-                {
-                    continue;
-                }
-
-                if (!routes.TryGetValue(routeName, out var route))
-                {
-                    // Todo: 例外を出す
-                    continue;
-                }
-
-                context.SignalRoutes.Add(new()
-                {
-                    SignalName = signal.Name,
-                    RouteId = route.Id
                 });
             }
         }
