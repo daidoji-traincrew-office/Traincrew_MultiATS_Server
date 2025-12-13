@@ -619,7 +619,7 @@ public class InitDbHostedService(
         await context.SaveChangesAsync(cancellationToken);
     }
 
-    private List<JsonSignalData> LoadSignalDataFromCsv()
+    private List<SignalCsv> LoadSignalDataFromCsv()
     {
         var csvFilePath = "./Data/信号リスト.csv";
         using var reader = new StreamReader(csvFilePath);
@@ -628,13 +628,10 @@ public class InitDbHostedService(
             HasHeaderRecord = true,
         });
         csv.Context.RegisterClassMap<SignalCsvMap>();
-        var records = csv.GetRecords<SignalCsv>().ToList();
-        return records
-            .Select(r => r.ToJsonSignalData())
-            .ToList();
+        return csv.GetRecords<SignalCsv>().ToList();
     }
 
-    private async Task InitSignal(ApplicationDbContext context, List<JsonSignalData> signalDataList, CancellationToken cancellationToken)
+    private async Task InitSignal(ApplicationDbContext context, List<SignalCsv> signalDataList, CancellationToken cancellationToken)
     {
         // 軌道回路情報を取得
         var trackCircuits = await context.TrackCircuits
@@ -726,7 +723,7 @@ public class InitDbHostedService(
         await context.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task InitNextSignal(ApplicationDbContext context, List<JsonSignalData> signalDataList, CancellationToken cancellationToken)
+    private async Task InitNextSignal(ApplicationDbContext context, List<SignalCsv> signalDataList, CancellationToken cancellationToken)
     {
         const int maxDepth = 4;
         foreach (var signalData in signalDataList)
@@ -816,7 +813,7 @@ public class InitDbHostedService(
         }
     }
 
-    private async Task InitializeSignalRoute(ApplicationDbContext context, List<JsonSignalData> signalDataList, CancellationToken cancellationToken)
+    private async Task InitializeSignalRoute(ApplicationDbContext context, List<SignalCsv> signalDataList, CancellationToken cancellationToken)
     {
         var signalRoutes = await context.SignalRoutes
             .Include(sr => sr.Route)
