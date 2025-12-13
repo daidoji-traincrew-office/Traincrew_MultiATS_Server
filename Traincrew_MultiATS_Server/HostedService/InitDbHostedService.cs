@@ -51,9 +51,11 @@ public class InitDbHostedService(
         await InitTtcWindows(context, cancellationToken);
         await InitTtcWindowLinks(context, cancellationToken);
         await InitThrowOutControls(context, cancellationToken);
-        await InitSignal(context, cancellationToken);
-        await InitNextSignal(context, cancellationToken);
-        await InitializeSignalRoute(context, cancellationToken);
+        // CSVから信号データを読み込む
+        var signalDataList = LoadSignalDataFromCsv();
+        await InitSignal(context, signalDataList, cancellationToken);
+        await InitNextSignal(context, signalDataList, cancellationToken);
+        await InitializeSignalRoute(context, signalDataList, cancellationToken);
 
         if (dbInitializer != null)
         {
@@ -632,11 +634,8 @@ public class InitDbHostedService(
             .ToList();
     }
 
-    private async Task InitSignal(ApplicationDbContext context, CancellationToken cancellationToken)
+    private async Task InitSignal(ApplicationDbContext context, List<JsonSignalData> signalDataList, CancellationToken cancellationToken)
     {
-        // CSVから信号データを読み込む
-        var signalDataList = LoadSignalDataFromCsv();
-
         // 軌道回路情報を取得
         var trackCircuits = await context.TrackCircuits
             .Select(tc => new { tc.Id, tc.Name })
@@ -727,11 +726,8 @@ public class InitDbHostedService(
         await context.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task InitNextSignal(ApplicationDbContext context, CancellationToken cancellationToken)
+    private async Task InitNextSignal(ApplicationDbContext context, List<JsonSignalData> signalDataList, CancellationToken cancellationToken)
     {
-        // CSVから信号データを読み込む
-        var signalDataList = LoadSignalDataFromCsv();
-
         const int maxDepth = 4;
         foreach (var signalData in signalDataList)
         {
@@ -820,11 +816,8 @@ public class InitDbHostedService(
         }
     }
 
-    private async Task InitializeSignalRoute(ApplicationDbContext context, CancellationToken cancellationToken)
+    private async Task InitializeSignalRoute(ApplicationDbContext context, List<JsonSignalData> signalDataList, CancellationToken cancellationToken)
     {
-        // CSVから信号データを読み込む
-        var signalDataList = LoadSignalDataFromCsv();
-
         var signalRoutes = await context.SignalRoutes
             .Include(sr => sr.Route)
             .ToListAsync(cancellationToken);
