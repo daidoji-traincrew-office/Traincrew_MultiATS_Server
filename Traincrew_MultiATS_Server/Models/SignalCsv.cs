@@ -13,21 +13,6 @@ public class SignalCsv
     public string? DirectionRouteRight { get; set; } // 対応方向進路名2
     public string? Direction { get; set; } // 向き
     public string? TrackCircuitName { get; set; } // 防護区間軌道回路
-
-    public JsonSignalData ToJsonSignalData()
-    {
-        return new()
-        {
-            Name = Name,
-            TypeName = TypeName,
-            NextSignalNames = NextSignalNames.Count > 0 ? NextSignalNames : null,
-            RouteNames = RouteNames.Count > 0 ? RouteNames : null,
-            DirectionRouteLeft = DirectionRouteLeft,
-            DirectionRouteRight = DirectionRouteRight,
-            Direction = Direction,
-            TrackCircuitName = TrackCircuitName
-        };
-    }
 }
 
 public sealed class SignalCsvMap : ClassMap<SignalCsv>
