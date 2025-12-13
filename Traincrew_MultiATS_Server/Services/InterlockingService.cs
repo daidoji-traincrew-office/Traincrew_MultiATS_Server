@@ -48,10 +48,6 @@ public class InterlockingService(
         var destinationButtons = await destinationButtonRepository.GetAllWithState();
         var timeOffset = await serverService.GetTimeOffsetAsync();
 
-        // List<string> clientData.ActiveStationsListの駅IDから、指定された駅にある信号機名称をList<string>で返すやつ
-        var signalNames = await signalService.GetSignalNamesByStationIds(stationIds);
-        // それら全部の信号の現示計算
-        var signalIndications = await signalService.CalcSignalIndication(signalNames, getDetailedIndication: false);
         // 各ランプの状態を取得
         var lamps = await GetLamps(stationIds, directionSelfControlLevers, routeCentralControlLevers);
         // 列番窓を取得
@@ -85,10 +81,6 @@ public class InterlockingService(
 
             // 各ランプの状態
             Lamps = lamps,
-
-            Signals = signalIndications
-                .Select(pair => SignalService.ToSignalData(pair.Key, pair.Value))
-                .ToList(),
 
             TimeOffset = timeOffset
         };
