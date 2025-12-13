@@ -61,4 +61,14 @@ public class ServerService(
     {
         await serverRepository.SetTimeOffsetAsync(timeOffset);
     }
+
+    public async Task SetSwitchMoveTimeAsync(int switchMoveTime)
+    {
+        await serverRepository.SetSwitchMoveTimeAsync(switchMoveTime);
+    }
+
+    public async Task SetUseOneSecondRelayAsync(bool useOneSecondRelay)
+    {
+        await serverRepository.SetUseOneSecondRelayAsync(useOneSecondRelay);
+    }
 }
