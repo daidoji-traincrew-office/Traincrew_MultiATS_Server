@@ -10,6 +10,7 @@ public class Signal
     public string Name { get; init; }
     [Column("type")]
     public string TypeName { get; init; }
+    public bool ShouldSend { get; init; }
     public string? StationId { get; init; }
     public SignalType Type { get; init; }
     public SignalState SignalState { get; init; }

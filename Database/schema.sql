@@ -301,7 +301,8 @@ CREATE TABLE signal
     track_circuit_id         BIGINT REFERENCES track_circuit (ID),                -- 閉そく信号機の軌道回路
     direction_route_left_id  BIGINT REFERENCES direction_route (id),              -- 左方向進路
     direction_route_right_id BIGINT REFERENCES direction_route (id),              -- 右方向進路
-    direction                lr                                                   -- LR向き
+    direction                lr,                                                  -- LR向き
+    should_send              BOOLEAN                                   NOT NULL DEFAULT true -- 信号送信フラグ
 );
 CREATE INDEX signal_station_id_index ON signal (station_id);
 
