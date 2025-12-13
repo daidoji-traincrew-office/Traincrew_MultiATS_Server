@@ -74,9 +74,10 @@ public class SignalRepository(ApplicationDbContext context) : ISignalRepository
             .ToListAsync();
     }
 
-    public async Task<List<Models.Signal>> GetSignalsForCalcIndication()
+    public async Task<List<Models.Signal>> GetSignalsForCalcIndication(bool shouldSendOnly)
     {
         return await context.Signals
+            .Where(s => !shouldSendOnly || s.ShouldSend)
             .Include(s => s.SignalState)
             .Include(s => s.Type)
             .Include(s => s.TrackCircuit)
