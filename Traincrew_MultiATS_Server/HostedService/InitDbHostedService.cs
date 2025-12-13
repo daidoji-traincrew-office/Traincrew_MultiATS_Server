@@ -707,6 +707,7 @@ public class InitDbHostedService(
             context.Signals.Add(new()
             {
                 Name = signalData.Name,
+                ShouldSend = signalData.IsImplemented,
                 StationId = stationId,
                 TrackCircuitId = trackCircuitId > 0 ? trackCircuitId : null,
                 TypeName = signalData.TypeName,
