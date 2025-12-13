@@ -632,9 +632,12 @@ CREATE TYPE server_mode AS ENUM ('off', 'private', 'public');
 -- サーバー状態テーブル(基本Entityは1つの想定)
 CREATE TABLE server_state
 (
-    id          SERIAL PRIMARY KEY,
-    mode        server_mode NOT NULL,
-    time_offset INTEGER NOT NULL DEFAULT 0
+    id                  SERIAL PRIMARY KEY,
+    mode                server_mode NOT NULL,
+    time_offset         INTEGER NOT NULL DEFAULT 0,
+    switch_move_time    INTEGER NOT NULL DEFAULT 5000,  -- 転轍機の転換にかかる時間(ms)
+    switch_return_time  INTEGER NOT NULL DEFAULT 500,   -- 転轍器が転換中に転換方向を変えるのにかかる時間(ms)
+    use_one_second_relay BOOLEAN NOT NULL DEFAULT false -- 接近鎖錠の時素に1秒リレーを使うかどうか
 );
 
 -- ユーザー接続拒否状態テーブル
