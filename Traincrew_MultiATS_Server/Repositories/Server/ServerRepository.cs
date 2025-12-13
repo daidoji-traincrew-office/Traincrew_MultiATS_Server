@@ -45,4 +45,12 @@ public class ServerRepository(ApplicationDbContext context) : IServerRepository
         context.ServerStates.Add(serverState);
         await context.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task SetSwitchMoveTimeAsync(int switchMoveTime)
+    {
+        await context.ServerStates
+            .ExecuteUpdateAsync(property => property
+                .SetProperty(serverState => serverState.SwitchMoveTime, switchMoveTime)
+            );
+    }
 }
