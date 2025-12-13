@@ -51,6 +51,8 @@ public class InitDbHostedService(
         await InitTtcWindows(context, cancellationToken);
         await InitTtcWindowLinks(context, cancellationToken);
         await InitThrowOutControls(context, cancellationToken);
+        await InitSignal(context, cancellationToken);
+        await InitNextSignal(context, cancellationToken);
 
         if (dbInitializer != null)
         {
@@ -614,6 +616,209 @@ public class InitDbHostedService(
         await context.SaveChangesAsync(cancellationToken);
     }
 
+    private List<JsonSignalData> LoadSignalDataFromCsv()
+    {
+        var csvFilePath = "./Data/信号リスト.csv";
+        using var reader = new StreamReader(csvFilePath);
+        using var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)
+        {
+            HasHeaderRecord = true,
+        });
+        csv.Context.RegisterClassMap<SignalCsvMap>();
+        var records = csv.GetRecords<SignalCsv>().ToList();
+        return records
+            .Select(r => r.ToJsonSignalData())
+            .ToList();
+    }
+
+    private async Task InitSignal(ApplicationDbContext context, CancellationToken cancellationToken)
+    {
+        // CSVから信号データを読み込む
+        var signalDataList = LoadSignalDataFromCsv();
+
+        // 軌道回路情報を取得
+        var trackCircuits = await context.TrackCircuits
+            .Select(tc => new { tc.Id, tc.Name })
+            .ToDictionaryAsync(tc => tc.Name, tc => tc.Id, cancellationToken);
+        // 既に登録済みの信号情報を取得
+        var signalNames = (await context.Signals
+            .Select(s => s.Name)
+            .ToListAsync(cancellationToken)).ToHashSet();
+        // 駅マスタから停車場を取得
+        var stations = await context.Stations
+            .Where(station => station.IsStation)
+            .ToListAsync(cancellationToken);
+        // DirectionRoutesを事前に取得してDictionaryに格納
+        var directionRoutes = await context.DirectionRoutes
+            .ToDictionaryAsync(dr => dr.Name, dr => dr.Id, cancellationToken);
+
+        // 信号情報登録
+        foreach (var signalData in signalDataList)
+        {
+            // 既に登録済みの場合、スキップ
+            if (signalNames.Contains(signalData.Name))
+            {
+                continue;
+            }
+
+            // 軌道回路初期化
+            ulong trackCircuitId = 0;
+            // 明示的に指定された軌道回路名がある場合はそれを使用
+            if (signalData.TrackCircuitName != null)
+            {
+                trackCircuits.TryGetValue(signalData.TrackCircuitName, out trackCircuitId);
+            }
+            // それ以外で閉塞信号機の場合、閉塞信号機の軌道回路を使う
+            else if (signalData.Name.StartsWith("上り閉塞") || signalData.Name.StartsWith("下り閉塞"))
+            {
+                var trackCircuitName = $"{signalData.Name.Replace("閉塞", "")}T";
+                trackCircuits.TryGetValue(trackCircuitName, out trackCircuitId);
+            }
+
+            var stationId = stations
+                .Where(s => signalData.Name.StartsWith(s.Name))
+                .Select(s => s.Id)
+                .FirstOrDefault();
+
+            // 方向進路および方向の初期化
+            ulong? directionRouteLeftId = null;
+            ulong? directionRouteRightId = null;
+            if (signalData.DirectionRouteLeft != null)
+            {
+                if (!directionRoutes.TryGetValue(signalData.DirectionRouteLeft, out var directionRouteId))
+                {
+                    throw new InvalidOperationException($"方向進路が見つかりません: {signalData.DirectionRouteLeft}");
+                }
+
+                directionRouteLeftId = directionRouteId;
+            }
+
+            if (signalData.DirectionRouteRight != null)
+            {
+                if (!directionRoutes.TryGetValue(signalData.DirectionRouteRight, out var directionRouteId))
+                {
+                    throw new InvalidOperationException($"方向進路が見つかりません: {signalData.DirectionRouteRight}");
+                }
+
+                directionRouteRightId = directionRouteId;
+            }
+
+            LR? direction = signalData.Direction != null
+                ? signalData.Direction == "L" ? LR.Left : signalData.Direction == "R" ? LR.Right : null
+                : null;
+
+            context.Signals.Add(new()
+            {
+                Name = signalData.Name,
+                StationId = stationId,
+                TrackCircuitId = trackCircuitId > 0 ? trackCircuitId : null,
+                TypeName = signalData.TypeName,
+                SignalState = new()
+                {
+                    IsLighted = true,
+                },
+                DirectionRouteLeftId = directionRouteLeftId,
+                DirectionRouteRightId = directionRouteRightId,
+                Direction = direction
+            });
+        }
+
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task InitNextSignal(ApplicationDbContext context, CancellationToken cancellationToken)
+    {
+        // CSVから信号データを読み込む
+        var signalDataList = LoadSignalDataFromCsv();
+
+        const int maxDepth = 4;
+        foreach (var signalData in signalDataList)
+        {
+            var nextSignalNames = signalData.NextSignalNames ?? [];
+            foreach (var nextSignalName in nextSignalNames)
+            {
+                // Todo: ここでN+1問題が発生しているので、改善したほうが良いかも
+                // 既に登録済みの場合、スキップ
+                if (context.NextSignals.Any(ns =>
+                        ns.SignalName == signalData.Name && ns.TargetSignalName == nextSignalName))
+                {
+                    continue;
+                }
+
+                context.NextSignals.Add(new()
+                {
+                    SignalName = signalData.Name,
+                    SourceSignalName = signalData.Name,
+                    TargetSignalName = nextSignalName,
+                    Depth = 1
+                });
+            }
+        }
+
+        await context.SaveChangesAsync(cancellationToken);
+
+        var allSignals = await context.Signals.ToListAsync(cancellationToken);
+        var nextSignalList = await context.NextSignals
+            .Where(ns => ns.Depth == 1)
+            .GroupBy(ns => ns.SignalName)
+            .ToListAsync(cancellationToken);
+        var nextSignalDict = nextSignalList
+            .ToDictionary(
+                g => g.Key,
+                g => g.Select(ns => ns.TargetSignalName).ToList()
+            );
+        // Todo: このロジック、絶対テスト書いたほうがいい(若干複雑な処理をしてしまったので)
+        for (var depth = 2; depth <= maxDepth; depth++)
+        {
+            var nextNextSignalDict = await context.NextSignals
+                .Where(ns => ns.Depth == depth - 1)
+                .GroupBy(ns => ns.SignalName)
+                .ToDictionaryAsync(
+                    g => g.Key,
+                    g => g.Select(ns => ns.TargetSignalName).ToList(),
+                    cancellationToken
+                );
+            List<NextSignal> nextNextSignals = [];
+            // 全信号機でループ
+            foreach (var signal in allSignals)
+            {
+                // 次信号機がない場合はスキップ
+                if (!nextNextSignalDict.TryGetValue(signal.Name, out var nextSignals))
+                {
+                    continue;
+                }
+
+                foreach (var nextSignal in nextSignals)
+                {
+                    // 次信号機の次信号機を取ってくる
+                    if (!nextSignalDict.TryGetValue(nextSignal, out var nnSignals))
+                    {
+                        continue;
+                    }
+
+                    foreach (var nextNextSignal in nnSignals)
+                    {
+                        // Todo: N+1問題が発生しているので、改善したほうが良いかも
+                        if (context.NextSignals.Any(ns =>
+                                ns.SignalName == signal.Name && ns.TargetSignalName == nextNextSignal))
+                        {
+                            continue;
+                        }
+
+                        context.NextSignals.Add(new()
+                        {
+                            SignalName = signal.Name,
+                            SourceSignalName = nextSignal,
+                            TargetSignalName = nextNextSignal,
+                            Depth = depth
+                        });
+                        await context.SaveChangesAsync(cancellationToken);
+                    }
+                }
+            }
+        }
+    }
+
     /// <summary>
     /// UnchangedなEntityをすべてDetachする。
     /// </summary>
@@ -660,8 +865,6 @@ internal partial class DbInitializer(
 
     internal async Task InitializeAfterCreateRoute()
     {
-        await InitSignal();
-        await InitNextSignal();
         await InitTrackCircuitSignal();
         await InitializeSignalRoute();
     }
@@ -764,98 +967,6 @@ internal partial class DbInitializer(
         await context.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task InitSignal()
-    {
-        // 軌道回路情報を取得
-        var trackCircuits = await context.TrackCircuits
-            .Select(tc => new { tc.Id, tc.Name })
-            .ToDictionaryAsync(tc => tc.Name, tc => tc.Id, cancellationToken);
-        // 既に登録済みの信号情報を取得
-        var signalNames = (await context.Signals
-            .Select(s => s.Name)
-            .ToListAsync(cancellationToken)).ToHashSet();
-        // 駅マスタから停車場を取得
-        var stations = await context.Stations
-            .Where(station => station.IsStation)
-            .ToListAsync(cancellationToken);
-        // DirectionRoutesを事前に取得してDictionaryに格納
-        var directionRoutes = await context.DirectionRoutes
-            .ToDictionaryAsync(dr => dr.Name, dr => dr.Id, cancellationToken);
-
-        // 信号情報登録
-        foreach (var signalData in DBBase.signalDataList)
-        {
-            // 既に登録済みの場合、スキップ
-            if (signalNames.Contains(signalData.Name))
-            {
-                continue;
-            }
-
-            // 軌道回路初期化
-            ulong trackCircuitId = 0;
-            // 明示的に指定された軌道回路名がある場合はそれを使用
-            if (signalData.TrackCircuitName != null)
-            {
-                trackCircuits.TryGetValue(signalData.TrackCircuitName, out trackCircuitId);
-            }
-            // それ以外で閉塞信号機の場合、閉塞信号機の軌道回路を使う
-            else if (signalData.Name.StartsWith("上り閉塞") || signalData.Name.StartsWith("下り閉塞"))
-            {
-                var trackCircuitName = $"{signalData.Name.Replace("閉塞", "")}T";
-                trackCircuits.TryGetValue(trackCircuitName, out trackCircuitId);
-            }
-
-            var stationId = stations
-                .Where(s => signalData.Name.StartsWith(s.Name))
-                .Select(s => s.Id)
-                .FirstOrDefault();
-
-            // 方向進路および方向の初期化
-            ulong? directionRouteLeftId = null;
-            ulong? directionRouteRightId = null;
-            if (signalData.DirectionRouteLeft != null)
-            {
-                if (!directionRoutes.TryGetValue(signalData.DirectionRouteLeft, out var directionRouteId))
-                {
-                    throw new InvalidOperationException($"方向進路が見つかりません: {signalData.DirectionRouteLeft}");
-                }
-
-                directionRouteLeftId = directionRouteId;
-            }
-
-            if (signalData.DirectionRouteRight != null)
-            {
-                if (!directionRoutes.TryGetValue(signalData.DirectionRouteRight, out var directionRouteId))
-                {
-                    throw new InvalidOperationException($"方向進路が見つかりません: {signalData.DirectionRouteRight}");
-                }
-
-                directionRouteRightId = directionRouteId;
-            }
-
-            LR? direction = signalData.Direction != null
-                ? signalData.Direction == "L" ? LR.Left : signalData.Direction == "R" ? LR.Right : null
-                : null;
-
-            context.Signals.Add(new()
-            {
-                Name = signalData.Name,
-                StationId = stationId,
-                TrackCircuitId = trackCircuitId > 0 ? trackCircuitId : null,
-                TypeName = signalData.TypeName,
-                SignalState = new()
-                {
-                    IsLighted = true,
-                },
-                DirectionRouteLeftId = directionRouteLeftId,
-                DirectionRouteRightId = directionRouteRightId,
-                Direction = direction
-            });
-        }
-
-        await context.SaveChangesAsync(cancellationToken);
-    }
-
     private async Task InitSignalType()
     {
         var signalTypeNames = (await context.SignalTypes
@@ -893,96 +1004,6 @@ internal partial class DbInitializer(
             "G" => SignalIndication.G,
             _ => SignalIndication.R
         };
-    }
-
-    private async Task InitNextSignal()
-    {
-        const int maxDepth = 4;
-        foreach (var signalData in DBBase.signalDataList)
-        {
-            var nextSignalNames = signalData.NextSignalNames ?? [];
-            foreach (var nextSignalName in nextSignalNames)
-            {
-                // Todo: ここでN+1問題が発生しているので、改善したほうが良いかも
-                // 既に登録済みの場合、スキップ
-                if (context.NextSignals.Any(ns =>
-                        ns.SignalName == signalData.Name && ns.TargetSignalName == nextSignalName))
-                {
-                    continue;
-                }
-
-                context.NextSignals.Add(new()
-                {
-                    SignalName = signalData.Name,
-                    SourceSignalName = signalData.Name,
-                    TargetSignalName = nextSignalName,
-                    Depth = 1
-                });
-            }
-        }
-
-        await context.SaveChangesAsync(cancellationToken);
-
-        var allSignals = await context.Signals.ToListAsync(cancellationToken);
-        var nextSignalList = await context.NextSignals
-            .Where(ns => ns.Depth == 1)
-            .GroupBy(ns => ns.SignalName)
-            .ToListAsync(cancellationToken);
-        var nextSignalDict = nextSignalList
-            .ToDictionary(
-                g => g.Key,
-                g => g.Select(ns => ns.TargetSignalName).ToList()
-            );
-        // Todo: このロジック、絶対テスト書いたほうがいい(若干複雑な処理をしてしまったので)
-        for (var depth = 2; depth <= maxDepth; depth++)
-        {
-            var nextNextSignalDict = await context.NextSignals
-                .Where(ns => ns.Depth == depth - 1)
-                .GroupBy(ns => ns.SignalName)
-                .ToDictionaryAsync(
-                    g => g.Key,
-                    g => g.Select(ns => ns.TargetSignalName).ToList(),
-                    cancellationToken
-                );
-            List<NextSignal> nextNextSignals = [];
-            // 全信号機でループ
-            foreach (var signal in allSignals)
-            {
-                // 次信号機がない場合はスキップ
-                if (!nextNextSignalDict.TryGetValue(signal.Name, out var nextSignals))
-                {
-                    continue;
-                }
-
-                foreach (var nextSignal in nextSignals)
-                {
-                    // 次信号機の次信号機を取ってくる
-                    if (!nextSignalDict.TryGetValue(nextSignal, out var nnSignals))
-                    {
-                        continue;
-                    }
-
-                    foreach (var nextNextSignal in nnSignals)
-                    {
-                        // Todo: N+1問題が発生しているので、改善したほうが良いかも
-                        if (context.NextSignals.Any(ns =>
-                                ns.SignalName == signal.Name && ns.TargetSignalName == nextNextSignal))
-                        {
-                            continue;
-                        }
-
-                        context.NextSignals.Add(new()
-                        {
-                            SignalName = signal.Name,
-                            SourceSignalName = nextSignal,
-                            TargetSignalName = nextNextSignal,
-                            Depth = depth
-                        });
-                        await context.SaveChangesAsync(cancellationToken);
-                    }
-                }
-            }
-        }
     }
 
     private async Task InitTrackCircuitSignal()
