@@ -43,11 +43,12 @@ public class SignalService(
     /// <summary>
     /// 全信号機の現示を計算する
     /// </summary>
+    /// <param name="shouldSendOnly">実装済み区間のみ送るか、すべて送るかどうか</param>
     /// <returns>信号機の現示データのリスト</returns>
-    public async Task<List<SignalData>> CalcAllSignalIndication()
+    public async Task<List<SignalData>> CalcAllSignalIndication(bool shouldSendOnly = true)
     {
         // 1. 全信号の詳細情報を取得
-        var allSignals = await signalRepository.GetSignalsForCalcIndication();
+        var allSignals = await signalRepository.GetSignalsForCalcIndication(shouldSendOnly);
         var signals = allSignals.ToDictionary(x => x.Name);
 
         // 2. depth=1の先の信号情報を全取得
