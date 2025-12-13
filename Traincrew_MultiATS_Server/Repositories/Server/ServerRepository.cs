@@ -39,4 +39,12 @@ public class ServerRepository(ApplicationDbContext context) : IServerRepository
                 .SetProperty(serverState => serverState.TimeOffset, timeOffset)
             );
     }
+
+    public async Task SetSwitchMoveTimeAsync(int switchMoveTime)
+    {
+        await context.ServerStates
+            .ExecuteUpdateAsync(property => property
+                .SetProperty(serverState => serverState.SwitchMoveTime, switchMoveTime)
+            );
+    }
 }

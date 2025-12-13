@@ -8,6 +8,7 @@ using Traincrew_MultiATS_Server.IT.TestUtilities;
 using Traincrew_MultiATS_Server.Repositories.Lever;
 using Traincrew_MultiATS_Server.Repositories.Route;
 using Traincrew_MultiATS_Server.Repositories.RouteLeverDestinationButton;
+using Traincrew_MultiATS_Server.Repositories.Server;
 using Traincrew_MultiATS_Server.Repositories.SignalRoute;
 using Traincrew_MultiATS_Server.Repositories.Station;
 using Traincrew_MultiATS_Server.Repositories.ThrowOutControl;
@@ -29,6 +30,12 @@ public class InterlockingLogicTest(WebApplicationFixture factory) : IAsyncLifeti
 
     public async ValueTask InitializeAsync()
     {
+        {
+            // スコープをすぐに破棄したいので、ブロックで定義を行っている
+            using var scope = factory.Services.CreateScope();
+            var serverRepository = scope.ServiceProvider.GetRequiredService<IServerRepository>();
+            await serverRepository.SetSwitchMoveTimeAsync(250);
+        }
         // InterlockingHub接続を確立
         _dataReceived = new();
 
