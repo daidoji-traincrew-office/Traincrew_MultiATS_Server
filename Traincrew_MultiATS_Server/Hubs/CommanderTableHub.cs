@@ -121,6 +121,16 @@ public class CommanderTableHub(
         await serverService.SetTimeOffsetAsync(timeOffset);
     }
 
+    public async Task SetSwitchMoveTime(int switchMoveTime)
+    {
+        await serverService.SetSwitchMoveTimeAsync(switchMoveTime);
+    }
+
+    public async Task SetUseOneSecondRelay(bool useOneSecondRelay)
+    {
+        await serverService.SetUseOneSecondRelayAsync(useOneSecondRelay);
+    }
+
     public async Task BanUser(ulong userId)
     {
         await bannedUserService.BanUserAsync(userId);

@@ -10,5 +10,6 @@ public interface IServerRepository
     Task<int> GetTimeOffset();
     Task SetTimeOffsetAsync(int timeOffset);
     Task SetSwitchMoveTimeAsync(int switchMoveTime);
+    Task SetUseOneSecondRelayAsync(bool useOneSecondRelay);
 }
 

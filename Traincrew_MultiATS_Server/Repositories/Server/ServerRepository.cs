@@ -47,4 +47,12 @@ public class ServerRepository(ApplicationDbContext context) : IServerRepository
                 .SetProperty(serverState => serverState.SwitchMoveTime, switchMoveTime)
             );
     }
+
+    public async Task SetUseOneSecondRelayAsync(bool useOneSecondRelay)
+    {
+        await context.ServerStates
+            .ExecuteUpdateAsync(property => property
+                .SetProperty(serverState => serverState.UseOneSecondRelay, useOneSecondRelay)
+            );
+    }
 }
