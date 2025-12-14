@@ -49,9 +49,7 @@ public class TrainHubTest(WebApplicationFixture factory)
 
                 // Assert
                 Assert.NotNull(result);
-                Assert.False(result.IsTherePreviousTrain);
-                Assert.False(result.IsOnPreviousTrain);
-                Assert.False(result.IsMaybeWarp);
+                Assert.Equal(ServerStatusFlags.None, result.StatusFlags);
             }
             finally
             {
@@ -128,9 +126,7 @@ public class TrainHubTest(WebApplicationFixture factory)
 
                 // Assert
                 Assert.NotNull(result);
-                Assert.False(result.IsTherePreviousTrain);
-                Assert.False(result.IsOnPreviousTrain);
-                Assert.False(result.IsMaybeWarp);
+                Assert.Equal(ServerStatusFlags.None, result.StatusFlags);
 
                 // DB上でDriverIdがセットされていることを確認
                 await using (var scope = factory.Services.CreateAsyncScope())
@@ -202,7 +198,7 @@ public class TrainHubTest(WebApplicationFixture factory)
 
                 // Assert
                 Assert.NotNull(result);
-                Assert.True(result.IsTherePreviousTrain); // 交代前応答
+                Assert.True(result.StatusFlags.HasFlag(ServerStatusFlags.IsTherePreviousTrain)); // 交代前応答
             }
             finally
             {
@@ -265,9 +261,7 @@ public class TrainHubTest(WebApplicationFixture factory)
 
                 // Assert
                 Assert.NotNull(result);
-                Assert.False(result.IsTherePreviousTrain);
-                Assert.False(result.IsOnPreviousTrain);
-                Assert.False(result.IsMaybeWarp);
+                Assert.Equal(ServerStatusFlags.None, result.StatusFlags);
                 // DB上でDriverIdが変わらず、列番も変わらないこと
                 await using (var scope = factory.Services.CreateAsyncScope())
                 {
@@ -338,9 +332,7 @@ public class TrainHubTest(WebApplicationFixture factory)
 
                 // Assert
                 Assert.NotNull(result);
-                Assert.False(result.IsTherePreviousTrain);
-                Assert.False(result.IsOnPreviousTrain);
-                Assert.False(result.IsMaybeWarp);
+                Assert.Equal(ServerStatusFlags.None, result.StatusFlags);
                 // DB上でDriverIdが変わらず、列番が変更されていること
                 await using (var scope = factory.Services.CreateAsyncScope())
                 {
@@ -413,9 +405,7 @@ public class TrainHubTest(WebApplicationFixture factory)
 
                 // Assert
                 Assert.NotNull(result);
-                Assert.False(result.IsTherePreviousTrain);
-                Assert.False(result.IsOnPreviousTrain);
-                Assert.False(result.IsMaybeWarp);
+                Assert.Equal(ServerStatusFlags.None, result.StatusFlags);
                 // DB上でDriverIdが変わらず、列番が変更されていること
                 await using (var scope = factory.Services.CreateAsyncScope())
                 {
@@ -494,9 +484,7 @@ public class TrainHubTest(WebApplicationFixture factory)
 
                 // Assert
                 Assert.NotNull(result);
-                Assert.False(result.IsTherePreviousTrain);
-                Assert.False(result.IsOnPreviousTrain);
-                Assert.True(result.IsMaybeWarp);
+                Assert.True(result.StatusFlags.HasFlag(ServerStatusFlags.IsMaybeWarp));
                 // DB上でDriverIdがnullのままであることを確認
                 await using (var scope = factory.Services.CreateAsyncScope())
                 {

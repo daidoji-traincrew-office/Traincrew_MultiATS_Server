@@ -14,6 +14,7 @@ public class SignalScheduler(IServiceScopeFactory serviceScopeFactory) : Schedul
         var trainHubContext = scope.ServiceProvider.GetRequiredService<IHubContext<TrainHub, ITrainClientContract>>();
         var tidHubContext = scope.ServiceProvider.GetRequiredService<IHubContext<TIDHub, ITIDClientContract>>();
         var commanderTableHubContext = scope.ServiceProvider.GetRequiredService<IHubContext<CommanderTableHub, ICommanderTableClientContract>>();
+        var interlockingHubContext = scope.ServiceProvider.GetRequiredService<IHubContext<InterlockingHub, IInterlockingClientContract>>();
         var signalService = scope.ServiceProvider.GetRequiredService<SignalService>();
 
         var signalData = await signalService.CalcAllSignalIndication();
@@ -21,7 +22,8 @@ public class SignalScheduler(IServiceScopeFactory serviceScopeFactory) : Schedul
         await Task.WhenAll(
             trainHubContext.Clients.All.ReceiveSignalData(signalData),
             tidHubContext.Clients.All.ReceiveSignalData(signalData),
-            commanderTableHubContext.Clients.All.ReceiveSignalData(signalData)
+            commanderTableHubContext.Clients.All.ReceiveSignalData(signalData),
+            interlockingHubContext.Clients.All.ReceiveSignalData(signalData)
         );
     }
 }

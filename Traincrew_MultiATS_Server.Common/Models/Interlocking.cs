@@ -16,11 +16,6 @@ public class DataToInterlocking
     public List<SwitchData> Points { get; set; }
 
     /// <summary>
-    /// 信号機情報リスト
-    /// </summary>
-    public List<SignalData> Signals { get; set; }
-
-    /// <summary>
     /// 物理てこ情報リスト
     /// </summary>
     public List<InterlockingLeverData> PhysicalLevers { get; set; }

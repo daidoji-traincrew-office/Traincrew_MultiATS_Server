@@ -197,19 +197,15 @@ public enum ServerStatusFlags
     /// <summary>
     /// 鎖錠状態
     /// </summary>
-    IsLocked = 1 << 4
+    IsLocked = 1 << 4,
+    /// <summary>
+    /// 地上装置停止中
+    /// </summary>
+    IsServerStopped = 1 << 5
 }
 
 public class ServerToATSData
 {
-    /// <summary>
-    /// 次信号の状態
-    /// </summary>
-    public List<SignalData> NextSignalData { get; set; } = [];
-    /// <summary>
-    /// 次々信号の状態
-    /// </summary>
-    public List<SignalData> DoubleNextSignalData { get; set; } = [];
     /// <summary>
     /// 防護無線の状態
     /// </summary>
@@ -222,38 +218,6 @@ public class ServerToATSData
     /// 運転告知器の状態
     /// </summary>
     public OperationNotificationData? OperationNotificationData { get; set; } = null;
-    /// <summary>
-    /// 進路情報
-    /// </summary>
-    public List<RouteData> RouteData { get; set; } = [];
-    /// <summary>
-    /// 踏みつぶし状態
-    /// </summary>
-    public bool IsOnPreviousTrain { get; set; } = false;
-    /// <summary>
-    /// 同一運番状態
-    /// </summary>
-    public bool IsTherePreviousTrain { get; set; } = false;
-    /// <summary>
-    /// ワープの可能性あり状態
-    /// </summary>
-    public bool IsMaybeWarp { get; set; } = false;
-    /// <summary>
-    /// 編成構成不一致
-    /// </summary>
-    public bool IsCarMismatch;
-    /// <summary>
-    /// サーバーモード
-    /// </summary>
-    public ServerMode ServerMode { get; set; } = ServerMode.Off;
-    /// <summary>
-    /// 接続拒否状態
-    /// </summary>
-    public bool IsDisconnected { get; set; } = false;
-    /// <summary>
-    /// 鎖錠状態
-    /// </summary>
-    public bool IsLocked { get; set; } = false;
     /// <summary>
     /// ステータスフラグ(ビットフラグ)
     /// </summary>

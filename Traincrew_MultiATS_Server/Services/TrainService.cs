@@ -36,7 +36,7 @@ public partial class TrainService(
         {
             return new()
             {
-                ServerMode = serverMode
+                StatusFlags = ServerStatusFlags.IsServerStopped
             };
         }
         // 接続拒否チェック
@@ -45,7 +45,6 @@ public partial class TrainService(
         {
             return new()
             {
-                IsDisconnected = true,
                 StatusFlags = ServerStatusFlags.IsDisconnected
             };
         }
@@ -81,12 +80,6 @@ public partial class TrainService(
         // 運転告知器の表示
         serverData.OperationNotificationData = await operationNotificationService
             .GetOperationNotificationDataByTrackCircuitIds(trackCircuitList.Select(tc => tc.Id).ToList());
-
-        // 信号現示の計算
-        var isUp = IsTrainUpOrDown(clientTrainNumber);
-        serverData.NextSignalData = await signalService.GetSignalIndicationDataByTrackCircuits(trackCircuitList, isUp);
-        // 開通進路の情報
-        serverData.RouteData = await routeService.GetActiveRoutes();
 
         // トランザクション開始
         await using var transaction = await transactionRepository.BeginTransactionAsync(IsolationLevel.RepeatableRead);
@@ -190,7 +183,6 @@ public partial class TrainService(
                     otherTrainState.DriverId != null && otherTrainState.DriverId != clientDriverId))
             {
                 // 早着の列車情報は登録しない
-                serverData.IsOnPreviousTrain = true;
                 serverData.StatusFlags |= ServerStatusFlags.IsOnPreviousTrain;
                 return null;
             }
@@ -199,7 +191,6 @@ public partial class TrainService(
             if (trackCircuits.Any(tc => tc.TrackCircuitState.IsLocked))
             {
                 // 鎖錠の列車情報は登録しない
-                serverData.IsLocked = true;
                 serverData.StatusFlags |= ServerStatusFlags.IsLocked;
                 return null;
             }
@@ -231,7 +222,6 @@ public partial class TrainService(
             {
                 // 2.交代前応答
                 // 送信してきたクライアントに対し交代前応答を行い、送信された情報は在線情報含めてすべて破棄する。
-                serverData.IsTherePreviousTrain = true;
                 serverData.StatusFlags |= ServerStatusFlags.IsTherePreviousTrain;
                 return null;
             }
@@ -242,7 +232,6 @@ public partial class TrainService(
                     otherTrainState.DriverId != null && otherTrainState.DriverId != clientDriverId))
             {
                 // 早着の列車情報は登録しない
-                serverData.IsOnPreviousTrain = true;
                 serverData.StatusFlags |= ServerStatusFlags.IsOnPreviousTrain;
                 return null;
             }
@@ -251,7 +240,6 @@ public partial class TrainService(
             if (trackCircuits.Any(tc => tc.TrackCircuitState.IsLocked))
             {
                 // 鎖錠の列車情報は登録しない
-                serverData.IsLocked = true;
                 serverData.StatusFlags |= ServerStatusFlags.IsLocked;
                 return null;
             }
@@ -263,7 +251,6 @@ public partial class TrainService(
                     .Count(trainNumber => !string.IsNullOrEmpty(trainNumber)) >= 2)
             {
                 // 早着の列車情報は登録しない
-                serverData.IsOnPreviousTrain = true;
                 serverData.StatusFlags |= ServerStatusFlags.IsOnPreviousTrain;
                 return null;
             }
@@ -297,7 +284,6 @@ public partial class TrainService(
                     && trackCircuits.Any(tc => !oldTrackCircuitNames.Contains(tc.Name))
                 )
                 {
-                    serverData.IsMaybeWarp = true;
                     serverData.StatusFlags |= ServerStatusFlags.IsMaybeWarp;
                     return null;
                 }
@@ -504,7 +490,7 @@ public partial class TrainService(
     /// </summary>
     /// <param name="trainNumber">列車番号</param>
     /// <returns></returns>
-    public static int GetDiaNumberFromTrainNumber(string trainNumber)
+    private static int GetDiaNumberFromTrainNumber(string trainNumber)
     {
         if (trainNumber == "9999")
         {
