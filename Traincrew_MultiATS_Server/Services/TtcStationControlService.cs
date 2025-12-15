@@ -183,6 +183,12 @@ public class TtcStationControlService(
             }
 
             var trainNumber = trackCircuit.TrackCircuitState.TrainNumber;
+            if (sourceTtcWindow.TtcWindowState.TrainNumber != trainNumber)
+            {
+                // 軌道回路の列番と前窓の列番が異なる場合はスキップ   
+                continue;
+            }
+
             // 変更後（複数件取得し、Anyで条件確認）
             var targetTtcWindowLinkRouteConditions =
                 ttcWindowLinkRouteConditions.Where(obj => obj.TtcWindowLinkId == ttcWindowLink.Id).ToList();
