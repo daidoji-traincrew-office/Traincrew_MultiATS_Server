@@ -94,6 +94,7 @@ jobs:
         run: |
           gh pr create \
             --title "マスター更新 $(date +'%Y%m%d')" \
+            --reviewer Kesigomon,${{ github.actor }} \
             --body "$(cat <<'EOF'
           ## 概要
           Googleスプレッドシートからマスターデータを更新しました。
@@ -109,6 +110,3 @@ jobs:
           )"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Request Review
-        if: steps.check_pr.outputs.exists == '0'
-        run: gh pr review --request-reviews Kesigomon,${{ github.actor }}
