@@ -89,6 +89,9 @@ public class OperationNotificationDisplayDbInitializer(
         await _context.SaveChangesAsync(cancellationToken);
         _logger.LogInformation("Initialized {Count} operation notification displays", addedCount);
 
-        foreach (var trackCircuit in changedTrackCircuits) _context.Entry(trackCircuit).State = EntityState.Detached;
+        foreach (var trackCircuit in changedTrackCircuits)
+        {
+            _context.Entry(trackCircuit).State = EntityState.Detached;
+        }
     }
 }

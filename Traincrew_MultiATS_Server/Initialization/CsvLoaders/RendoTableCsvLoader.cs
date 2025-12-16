@@ -53,7 +53,10 @@ public class RendoTableCsvLoader(ILogger<RendoTableCsvLoader> logger)
         await csv.ReadAsync();
 
         var records = new List<RendoTableCSV>();
-        await foreach (var record in csv.GetRecordsAsync<RendoTableCSV>(cancellationToken)) records.Add(record);
+        await foreach (var record in csv.GetRecordsAsync<RendoTableCSV>(cancellationToken))
+        {
+            records.Add(record);
+        }
 
         logger.LogInformation("Loaded {Count} records from {FilePath}", records.Count, filePath);
         return records;

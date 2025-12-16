@@ -205,20 +205,22 @@ public class SignalDbInitializer(ApplicationDbContext context, ILogger<SignalDbI
             .ToDictionaryAsync(r => r.Name, cancellationToken);
 
         foreach (var signal in signalDataList)
-        foreach (var routeName in signal.RouteNames ?? [])
         {
-            // Todo: FW 全探索なので改善したほうがいいかも
-            if (signalRoutes.Any(sr => sr.SignalName == signal.Name && sr.Route.Name == routeName)) continue;
-
-            if (!routes.TryGetValue(routeName, out var route))
-                // Todo: 例外を出す
-                continue;
-
-            _context.SignalRoutes.Add(new()
+            foreach (var routeName in signal.RouteNames ?? [])
             {
-                SignalName = signal.Name,
-                RouteId = route.Id
-            });
+                // Todo: FW 全探索なので改善したほうがいいかも
+                if (signalRoutes.Any(sr => sr.SignalName == signal.Name && sr.Route.Name == routeName)) continue;
+
+                if (!routes.TryGetValue(routeName, out var route))
+                    // Todo: 例外を出す
+                    continue;
+
+                _context.SignalRoutes.Add(new()
+                {
+                    SignalName = signal.Name,
+                    RouteId = route.Id
+                });
+            }
         }
 
         await _context.SaveChangesAsync(cancellationToken);

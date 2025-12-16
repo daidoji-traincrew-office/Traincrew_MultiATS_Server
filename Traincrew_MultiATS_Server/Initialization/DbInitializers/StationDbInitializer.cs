@@ -56,19 +56,21 @@ public class StationDbInitializer(ApplicationDbContext context, ILogger<StationD
 
         var addedCount = 0;
         foreach (var stationId in stationIds)
-        foreach (var seconds in new[] { 30, 60 })
         {
-            if (stationTimerStates.Contains(new { StationId = stationId, Seconds = seconds })) continue;
-
-            _context.StationTimerStates.Add(new()
+            foreach (var seconds in new[] { 30, 60 })
             {
-                StationId = stationId,
-                Seconds = seconds,
-                IsTeuRelayRaised = RaiseDrop.Drop,
-                IsTenRelayRaised = RaiseDrop.Drop,
-                IsTerRelayRaised = RaiseDrop.Raise
-            });
-            addedCount++;
+                if (stationTimerStates.Contains(new { StationId = stationId, Seconds = seconds })) continue;
+
+                _context.StationTimerStates.Add(new()
+                {
+                    StationId = stationId,
+                    Seconds = seconds,
+                    IsTeuRelayRaised = RaiseDrop.Drop,
+                    IsTenRelayRaised = RaiseDrop.Drop,
+                    IsTerRelayRaised = RaiseDrop.Raise
+                });
+                addedCount++;
+            }
         }
 
         await _context.SaveChangesAsync(cancellationToken);

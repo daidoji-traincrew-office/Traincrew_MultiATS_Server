@@ -393,6 +393,7 @@ public partial class DbRendoTableInitializer
 
         // 進路とてこと着点ボタンの関連付けを追加
         foreach (var (route, leverId, direction, buttonName) in routes)
+        {
             context.RouteLeverDestinationButtons.Add(new()
             {
                 RouteId = route.Id,
@@ -400,6 +401,7 @@ public partial class DbRendoTableInitializer
                 Direction = direction,
                 DestinationButtonName = buttonName
             });
+        }
 
         await context.SaveChangesAsync(cancellationToken);
     }
@@ -767,8 +769,10 @@ public partial class DbRendoTableInitializer
 
             context.LockConditions.Add(current);
             foreach (var child in item.Children)
+            {
                 await RegisterLocksInner(
                     child, lockObject, current, routeIdForSwitchingMachineRoute, searchTargetObjects);
+            }
 
             return;
         }
@@ -850,8 +854,10 @@ public partial class DbRendoTableInitializer
             reversedChildren.Reverse();
             foreach (var child in reversedChildren)
                 // 登録ができたらreturnする
+            {
                 if (await RegisterFinalTrackCircuitIdInner(child, route, searchTargetObjects))
                     return true;
+            }
         }
 
         targetObjects = await searchTargetObjects(lockItem);

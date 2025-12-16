@@ -37,7 +37,10 @@ public class DatabaseInitializationOrchestrator(
 
         // Phase 4: Initialize Rendo Table objects (per station)
         var rendoTableInitializers = await CreateRendoTableInitializersAsync(cancellationToken);
-        foreach (var initializer in rendoTableInitializers) await initializer.InitializeObjects();
+        foreach (var initializer in rendoTableInitializers)
+        {
+            await initializer.InitializeObjects();
+        }
 
         DetachUnchangedEntities();
 
@@ -53,7 +56,10 @@ public class DatabaseInitializationOrchestrator(
         DetachUnchangedEntities();
 
         // Phase 8: Initialize locks (per station)
-        foreach (var initializer in rendoTableInitializers) await initializer.InitializeLocks();
+        foreach (var initializer in rendoTableInitializers)
+        {
+            await initializer.InitializeLocks();
+        }
 
         // Phase 9: Finalize initialization (if infrastructure data available)
         if (infrastructureData != null)
@@ -190,7 +196,10 @@ public class DatabaseInitializationOrchestrator(
             .Where(e => e.State == EntityState.Unchanged)
             .ToList();
 
-        foreach (var entry in unchangedEntries) entry.State = EntityState.Detached;
+        foreach (var entry in unchangedEntries)
+        {
+            entry.State = EntityState.Detached;
+        }
 
         logger.LogDebug("Detached {Count} unchanged entities", unchangedEntries.Count);
     }

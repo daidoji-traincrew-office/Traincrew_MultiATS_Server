@@ -63,18 +63,23 @@ public class TtcDbInitializer(ApplicationDbContext context, ILogger<TtcDbInitial
             });
 
             foreach (var displayStation in record.DisplayStations)
+            {
                 _context.TtcWindowDisplayStations.Add(new()
                 {
                     TtcWindowName = record.Name,
                     StationId = displayStation
                 });
+            }
 
             foreach (var trackCircuit in record.TrackCircuits)
+            {
                 _context.TtcWindowTrackCircuits.Add(new()
                 {
                     TtcWindowName = record.Name,
                     TrackCircuitId = trackCircuitIdByName[trackCircuit]
                 });
+            }
+
             addedCount++;
         }
 

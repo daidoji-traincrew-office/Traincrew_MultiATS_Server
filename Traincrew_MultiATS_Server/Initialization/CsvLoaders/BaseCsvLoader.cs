@@ -40,8 +40,8 @@ public abstract class BaseCsvLoader<T>(ILogger logger)
 
         if (!hasHeaderRecord) await csv.ReadAsync();
 
-        var records = new List<T>();
-        await foreach (var record in csv.GetRecordsAsync<T>(cancellationToken)) records.Add(record);
+        var records = await csv.GetRecordsAsync<T>(cancellationToken)
+            .ToListAsync(cancellationToken: cancellationToken);
 
         _logger.LogInformation("Loaded {Count} records from {FilePath}", records.Count, filePath);
         return records;

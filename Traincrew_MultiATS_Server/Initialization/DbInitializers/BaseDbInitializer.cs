@@ -25,6 +25,9 @@ public abstract class BaseDbInitializer(ApplicationDbContext context, ILogger lo
             .Where(e => e.State == EntityState.Unchanged)
             .ToList();
 
-        foreach (var entry in unchangedEntries) entry.State = EntityState.Detached;
+        foreach (var entry in unchangedEntries)
+        {
+            entry.State = EntityState.Detached;
+        }
     }
 }
