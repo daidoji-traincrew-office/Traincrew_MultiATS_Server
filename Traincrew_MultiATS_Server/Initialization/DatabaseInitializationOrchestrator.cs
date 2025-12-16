@@ -25,44 +25,45 @@ public class DatabaseInitializationOrchestrator(
     {
         logger.LogInformation("Starting database initialization");
 
-        // Phase 1: Load stationList
+        // Phase 1: StationCsvLoader - 駅一覧の読み込み
         var stationLoader = new StationCsvLoader(loggerFactory.CreateLogger<StationCsvLoader>());
         var stationList = await stationLoader.LoadAsync(cancellationToken);
 
-        // Phase 2: Initialize stations
+        // Phase 2: StationDbInitializer - 駅の初期化
         var stationInitializer = new StationDbInitializer(context, loggerFactory.CreateLogger<StationDbInitializer>());
         await stationInitializer.InitializeStationsAsync(stationList, cancellationToken);
         await stationInitializer.InitializeStationTimerStatesAsync(cancellationToken);
 
-        // Phase 3: Load trackCircuitList
+        // Phase 3: TrackCircuitCsvLoader - 軌道回路一覧の読み込み
         var trackCircuitLoader = new TrackCircuitCsvLoader(loggerFactory.CreateLogger<TrackCircuitCsvLoader>());
         var trackCircuitList = await trackCircuitLoader.LoadAsync(cancellationToken);
 
-        // Phase 4: Initialize track circuits
+        // Phase 4: TrackCircuitDbInitializer - 軌道回路の初期化
         var trackCircuitInitializer = new TrackCircuitDbInitializer(context, loggerFactory.CreateLogger<TrackCircuitDbInitializer>());
         await trackCircuitInitializer.InitializeTrackCircuitsAsync(trackCircuitList, cancellationToken);
 
-        // Phase 5: Load signalTypeList
+        // Phase 5: SignalTypeCsvLoader - 信号タイプ一覧の読み込み
         var signalTypeLoader = new SignalTypeCsvLoader(loggerFactory.CreateLogger<SignalTypeCsvLoader>());
         var signalTypeList = await signalTypeLoader.LoadAsync(cancellationToken);
 
-        // Phase 6: Initialize signal types
+        // Phase 6: SignalTypeDbInitializer - 信号タイプの初期化
         var signalTypeInitializer = new SignalTypeDbInitializer(context, loggerFactory.CreateLogger<SignalTypeDbInitializer>());
         await signalTypeInitializer.InitializeSignalTypesAsync(signalTypeList, cancellationToken);
 
-        // Phase 7: Load train data
+        // Phase 7: TrainTypeCsvLoader - 列車タイプデータの読み込み
         var trainTypeLoader = new TrainTypeCsvLoader(loggerFactory.CreateLogger<TrainTypeCsvLoader>());
         var trainTypeList = trainTypeLoader.Load();
 
+        // Phase 8: TrainDiagramCsvLoader - 列車ダイヤデータの読み込み
         var trainDiagramLoader = new TrainDiagramCsvLoader(loggerFactory.CreateLogger<TrainDiagramCsvLoader>());
         var trainDiagramList = trainDiagramLoader.Load();
 
-        // Phase 8: Initialize train data
+        // Phase 9: TrainDbInitializer - 列車データの初期化
         var trainInitializer = new TrainDbInitializer(context, loggerFactory.CreateLogger<TrainDbInitializer>());
         await trainInitializer.InitializeTrainTypesAsync(trainTypeList, cancellationToken);
         await trainInitializer.InitializeTrainDiagramsAsync(trainDiagramList, cancellationToken);
 
-        // Phase 9: Initialize Rendo Table objects (per station)
+        // Phase 10: DbRendoTableInitializer - 連動表オブジェクトの初期化（駅ごと）
         var rendoTableInitializers = await CreateRendoTableInitializersAsync(cancellationToken);
         foreach (var initializer in rendoTableInitializers)
         {
@@ -71,14 +72,22 @@ public class DatabaseInitializationOrchestrator(
 
         DetachUnchangedEntities();
 
-        // Phase 10: Load operational data
+        // Phase 11: OperationNotificationDisplayCsvLoader - 運行通知表示データの読み込み
         var operationNotificationDisplayCsvLoader = new OperationNotificationDisplayCsvLoader(loggerFactory.CreateLogger<OperationNotificationDisplayCsvLoader>());
+
+        // Phase 12: RouteLockTrackCircuitCsvLoader - 進路鎖錠軌道回路データの読み込み
         var routeLockTrackCircuitCsvLoader = new RouteLockTrackCircuitCsvLoader(loggerFactory.CreateLogger<RouteLockTrackCircuitCsvLoader>());
+
+        // Phase 13: TtcWindowCsvLoader - TTCウィンドウデータの読み込み
         var ttcWindowCsvLoader = new TtcWindowCsvLoader(loggerFactory.CreateLogger<TtcWindowCsvLoader>());
+
+        // Phase 14: TtcWindowLinkCsvLoader - TTCウィンドウリンクデータの読み込み
         var ttcWindowLinkCsvLoader = new TtcWindowLinkCsvLoader(loggerFactory.CreateLogger<TtcWindowLinkCsvLoader>());
+
+        // Phase 15: ThrowOutControlCsvLoader - 投出制御データの読み込み
         var throwOutControlCsvLoader = new ThrowOutControlCsvLoader(loggerFactory.CreateLogger<ThrowOutControlCsvLoader>());
 
-        // Phase 11: Initialize operational entities
+        // Phase 16: OperationNotificationDisplayDbInitializer - 運行通知の初期化
         var operationNotificationInitializer = new OperationNotificationDisplayDbInitializer(
             context,
             datetimeRepository,
@@ -86,44 +95,48 @@ public class DatabaseInitializationOrchestrator(
             operationNotificationDisplayCsvLoader);
         await operationNotificationInitializer.InitializeAsync(cancellationToken);
 
+        // Phase 17: RouteDbInitializer - 進路の初期化
         var routeInitializer = new RouteDbInitializer(context, loggerFactory.CreateLogger<RouteDbInitializer>(), routeLockTrackCircuitCsvLoader);
         await routeInitializer.InitializeAsync(cancellationToken);
 
+        // Phase 18: ServerStatusDbInitializer - サーバーステータスの初期化
         var serverStatusInitializer =
             new ServerStatusDbInitializer(context, loggerFactory.CreateLogger<ServerStatusDbInitializer>());
         await serverStatusInitializer.InitializeAsync(cancellationToken);
 
+        // Phase 19: TtcDbInitializer - TTCの初期化
         var ttcInitializer = new TtcDbInitializer(context, loggerFactory.CreateLogger<TtcDbInitializer>(), ttcWindowCsvLoader, ttcWindowLinkCsvLoader);
         await ttcInitializer.InitializeAsync(cancellationToken);
 
+        // Phase 20: ThrowOutControlDbInitializer - 投出制御の初期化
         var throwOutControlInitializer = new ThrowOutControlDbInitializer(
             context,
             loggerFactory.CreateLogger<ThrowOutControlDbInitializer>(),
             throwOutControlCsvLoader);
         await throwOutControlInitializer.InitializeAsync(cancellationToken);
 
-        // Phase 12: Load signal data
+        // Phase 21: SignalCsvLoader - 信号データの読み込み
         var signalLoader = new SignalCsvLoader(loggerFactory.CreateLogger<SignalCsvLoader>());
         var signalDataList = signalLoader.Load();
 
-        // Phase 13: Initialize signals and routes
+        // Phase 22: SignalDbInitializer - 信号と進路の初期化
         var signalInitializer = new SignalDbInitializer(context, loggerFactory.CreateLogger<SignalDbInitializer>());
         await signalInitializer.InitializeSignalsAsync(signalDataList, cancellationToken);
         await signalInitializer.InitializeNextSignalsAsync(signalDataList, cancellationToken);
         await signalInitializer.InitializeSignalRoutesAsync(signalDataList, cancellationToken);
 
-        // Phase 14: Initialize track circuit signals
+        // Phase 23: TrackCircuitDbInitializer - 軌道回路信号の初期化
         await trackCircuitInitializer.InitializeTrackCircuitSignalsAsync(trackCircuitList, cancellationToken);
 
         DetachUnchangedEntities();
 
-        // Phase 15: Initialize locks (per station)
+        // Phase 24: DbRendoTableInitializer - 鎖錠の初期化（駅ごと）
         foreach (var initializer in rendoTableInitializers)
         {
             await initializer.InitializeLocks();
         }
 
-        // Phase 16: Finalize initialization
+        // Phase 25: Finalize - 初期化の完了処理
         DetachUnchangedEntities();
         await FinalizeInitializationAsync(cancellationToken);
 
