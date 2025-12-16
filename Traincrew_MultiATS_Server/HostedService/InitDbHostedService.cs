@@ -14,7 +14,7 @@ using Route = Traincrew_MultiATS_Server.Models.Route;
 
 namespace Traincrew_MultiATS_Server.HostedService;
 
-public class InitDbHostedService(
+public partial class InitDbHostedService(
     IServiceScopeFactory serviceScopeFactory,
     ILoggerFactory loggerFactory,
     ILogger<InitDbHostedService> logger
@@ -28,10 +28,14 @@ public class InitDbHostedService(
         var lockConditionRepository = scope.ServiceProvider.GetRequiredService<ILockConditionRepository>();
         var serverService = scope.ServiceProvider.GetRequiredService<ServerService>();
         var schedulerManager = scope.ServiceProvider.GetRequiredService<SchedulerManager>();
-        var dbInitializer = await CreateDBInitializer(context, lockConditionRepository, cancellationToken);
-        if (dbInitializer != null)
+
+        var csvData = await LoadCsvData(cancellationToken);
+        if (csvData != null)
         {
-            await dbInitializer.Initialize();
+            await InitStation(context, csvData.StationList, cancellationToken);
+            await InitStationTimerState(context, cancellationToken);
+            await InitTrackCircuit(context, csvData.TrackCircuitList, cancellationToken);
+            await InitSignalType(context, csvData.SignalTypeList, cancellationToken);
         }
 
         await InitTrainTypes(context, cancellationToken);
@@ -56,9 +60,9 @@ public class InitDbHostedService(
         await InitNextSignal(context, signalDataList, cancellationToken);
         await InitializeSignalRoute(context, signalDataList, cancellationToken);
 
-        if (dbInitializer != null)
+        if (csvData != null)
         {
-            await dbInitializer.InitializeAfterCreateRoute();
+            await InitTrackCircuitSignal(context, csvData.TrackCircuitList, cancellationToken);
         }
 
         DetachUnchangedEntities(context);
@@ -67,19 +71,18 @@ public class InitDbHostedService(
             await initializer.InitializeLocks();
         }
 
-        if (dbInitializer != null)
+        if (csvData != null)
         {
             DetachUnchangedEntities(context);
-            await dbInitializer.InitializeAfterCreateLockCondition();
+            await InitializeSwitchingMachineRoutes(context, lockConditionRepository, cancellationToken);
+            await SetStationIdToInterlockingObject(context, cancellationToken);
         }
 
         schedulerManager.StartServerModeScheduler();
         await serverService.UpdateSchedulerAsync();
     }
 
-    private async Task<DbInitializer?> CreateDBInitializer(ApplicationDbContext context,
-        ILockConditionRepository lockConditionRepository,
-        CancellationToken cancellationToken)
+    private async Task<CsvData?> LoadCsvData(CancellationToken cancellationToken)
     {
         var stationFile = new FileInfo("./Data/駅・停車場.csv");
         var trackCircuitFile = new FileInfo("./Data/軌道回路に対する計算するべき信号機リスト.csv");
@@ -119,8 +122,7 @@ public class InitDbHostedService(
             .GetRecordsAsync<SignalTypeCsv>(cancellationToken)
             .ToListAsync(cancellationToken);
 
-        var logger = loggerFactory.CreateLogger<DbInitializer>();
-        return new DbInitializer(stationList, trackCircuitList, signalTypeList, context, lockConditionRepository, logger, cancellationToken);
+        return new CsvData(stationList, trackCircuitList, signalTypeList);
     }
 
     private async Task<List<DbRendoTableInitializer>> CreateDbRendoTableInitializer(
@@ -904,40 +906,8 @@ public class InitDbHostedService(
         await schedulerManager.Stop();
         await schedulerManager.StopServerModeScheduler();
     }
-}
 
-internal partial class DbInitializer(
-    List<StationCsv> stationList,
-    List<TrackCircuitCsv> trackCircuitList,
-    List<SignalTypeCsv> signalTypeList,
-    ApplicationDbContext context,
-    ILockConditionRepository lockConditionRepository,
-    ILogger<DbInitializer> logger,
-    CancellationToken cancellationToken)
-{
-    [GeneratedRegex(@"^(TH(\d{1,2}S?))_")]
-    private static partial Regex RegexStationId();
-
-    internal async Task Initialize()
-    {
-        await InitStation();
-        await InitStationTimerState();
-        await InitTrackCircuit();
-        await InitSignalType();
-    }
-
-    internal async Task InitializeAfterCreateRoute()
-    {
-        await InitTrackCircuitSignal();
-    }
-
-    internal async Task InitializeAfterCreateLockCondition()
-    {
-        await InitializeSwitchingMachineRoutes();
-        await SetStationIdToInterlockingObject();
-    }
-
-    private async Task InitStation()
+    private async Task InitStation(ApplicationDbContext context, List<StationCsv> stationList, CancellationToken cancellationToken)
     {
         var stationNames = (await context.Stations
             .Select(s => s.Name)
@@ -961,7 +931,7 @@ internal partial class DbInitializer(
         await context.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task InitStationTimerState()
+    private async Task InitStationTimerState(ApplicationDbContext context, CancellationToken cancellationToken)
     {
         var stationIds = (await context.Stations
             .Where(s => s.IsStation)
@@ -993,7 +963,7 @@ internal partial class DbInitializer(
         await context.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task InitTrackCircuit()
+    private async Task InitTrackCircuit(ApplicationDbContext context, List<TrackCircuitCsv> trackCircuitList, CancellationToken cancellationToken)
     {
         // 全軌道回路情報を取得
         var trackCircuitNames = (await context.TrackCircuits
@@ -1029,7 +999,7 @@ internal partial class DbInitializer(
         await context.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task InitSignalType()
+    private async Task InitSignalType(ApplicationDbContext context, List<SignalTypeCsv> signalTypeList, CancellationToken cancellationToken)
     {
         var signalTypeNames = (await context.SignalTypes
             .Select(st => st.Name)
@@ -1068,7 +1038,7 @@ internal partial class DbInitializer(
         };
     }
 
-    private async Task InitTrackCircuitSignal()
+    private async Task InitTrackCircuitSignal(ApplicationDbContext context, List<TrackCircuitCsv> trackCircuitList, CancellationToken cancellationToken)
     {
         foreach (var trackCircuit in trackCircuitList)
         {
@@ -1114,10 +1084,13 @@ internal partial class DbInitializer(
         await context.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task SetStationIdToInterlockingObject()
+    [GeneratedRegex(@"^(TH(\d{1,2}S?))_")]
+    private static partial Regex RegexStationId();
+
+    private async Task SetStationIdToInterlockingObject(ApplicationDbContext context, CancellationToken cancellationToken)
     {
         var interlockingObjects = await context.InterlockingObjects
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
         foreach (var interlockingObject in interlockingObjects)
         {
             var match = RegexStationId().Match(interlockingObject.Name);
@@ -1131,24 +1104,24 @@ internal partial class DbInitializer(
             context.Update(interlockingObject);
         }
 
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task InitializeSwitchingMachineRoutes()
+    private async Task InitializeSwitchingMachineRoutes(ApplicationDbContext context, ILockConditionRepository lockConditionRepository, CancellationToken cancellationToken)
     {
         var switchingMachinesRoutes = await context.SwitchingMachineRoutes
             .Select(smr => new { smr.RouteId, smr.SwitchingMachineId })
             .AsAsyncEnumerable()
-            .ToHashSetAsync();
-        var routeIds = await context.Routes.Select(r => r.Id).ToListAsync();
+            .ToHashSetAsync(cancellationToken);
+        var routeIds = await context.Routes.Select(r => r.Id).ToListAsync(cancellationToken);
         var switchingMachineIds = await context.SwitchingMachines
             .Select(sm => sm.Id)
             .AsAsyncEnumerable()
-            .ToHashSetAsync();
+            .ToHashSetAsync(cancellationToken);
         var trackCircuitIds = await context.TrackCircuits
             .Select(tc => tc.Id)
             .AsAsyncEnumerable()
-            .ToHashSetAsync();
+            .ToHashSetAsync(cancellationToken);
         var directLockConditionsByRouteIds = await lockConditionRepository
             .GetConditionsByObjectIdsAndType(routeIds, LockType.Lock);
         // 進路の進路鎖錠欄
@@ -1201,9 +1174,11 @@ internal partial class DbInitializer(
             }
         }
 
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(cancellationToken);
     }
 }
+
+record CsvData(List<StationCsv> StationList, List<TrackCircuitCsv> TrackCircuitList, List<SignalTypeCsv> SignalTypeList);
 
 public partial class DbRendoTableInitializer
 {
