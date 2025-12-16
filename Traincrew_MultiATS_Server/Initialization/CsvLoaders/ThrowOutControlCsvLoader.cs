@@ -11,7 +11,7 @@ public class ThrowOutControlCsvLoader(ILogger<ThrowOutControlCsvLoader> logger)
     public async Task<List<ThrowOutControlCsv>> LoadAsync(CancellationToken cancellationToken = default)
     {
         return await LoadCsvAsync(
-            "./Data/総括制御ペア一覧.csv",
+            CsvFilePaths.ThrowOutControl,
             false,
             new ThrowOutControlCsvMap(),
             cancellationToken);

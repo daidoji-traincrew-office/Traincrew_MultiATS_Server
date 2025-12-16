@@ -10,7 +10,7 @@ public class StationCsvLoader(ILogger<StationCsvLoader> logger) : BaseCsvLoader<
     public async Task<List<StationCsv>> LoadAsync(CancellationToken cancellationToken = default)
     {
         return await LoadCsvAsync(
-            "./Data/駅・停車場.csv",
+            CsvFilePaths.Station,
             true,
             new StationCsvMap(),
             cancellationToken);

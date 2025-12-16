@@ -11,7 +11,7 @@ public class OperationNotificationDisplayCsvLoader(ILogger<OperationNotification
     public async Task<List<OperationNotificationDisplayCsv>> LoadAsync(CancellationToken cancellationToken = default)
     {
         return await LoadCsvAsync(
-            "./Data/運転告知器.csv",
+            CsvFilePaths.OperationNotificationDisplay,
             false,
             new OperationNotificationDisplayCsvMap(),
             cancellationToken);

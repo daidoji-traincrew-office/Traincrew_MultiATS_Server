@@ -10,7 +10,7 @@ public class TrainTypeCsvLoader(ILogger<TrainTypeCsvLoader> logger) : BaseCsvLoa
     public List<TrainTypeCsv> Load()
     {
         return LoadCsv(
-            "./Data/種別.csv",
+            CsvFilePaths.TrainType,
             true,
             new TrainTypeCsvMap());
     }
@@ -24,7 +24,7 @@ public class TrainDiagramCsvLoader(ILogger<TrainDiagramCsvLoader> logger) : Base
     public List<TrainDiagramCsv> Load()
     {
         return LoadCsv(
-            "./Data/列車.csv",
+            CsvFilePaths.TrainDiagram,
             true,
             new TrainDiagramCsvMap());
     }

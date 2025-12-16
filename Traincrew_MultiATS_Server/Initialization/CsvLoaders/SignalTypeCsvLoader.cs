@@ -10,7 +10,7 @@ public class SignalTypeCsvLoader(ILogger<SignalTypeCsvLoader> logger) : BaseCsvL
     public async Task<List<SignalTypeCsv>> LoadAsync(CancellationToken cancellationToken = default)
     {
         return await LoadCsvAsync(
-            "./Data/信号何灯式リスト.csv",
+            CsvFilePaths.SignalType,
             true,
             new SignalTypeCsvMap(),
             cancellationToken);

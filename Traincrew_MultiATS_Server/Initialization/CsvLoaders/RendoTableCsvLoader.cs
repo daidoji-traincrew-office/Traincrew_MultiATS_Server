@@ -17,7 +17,7 @@ public class RendoTableCsvLoader(ILogger<RendoTableCsvLoader> logger)
     public async Task<Dictionary<string, List<RendoTableCSV>>> LoadAllAsync(
         CancellationToken cancellationToken = default)
     {
-        var rendoTableDir = new DirectoryInfo("./Data/RendoTable");
+        var rendoTableDir = new DirectoryInfo(CsvFilePaths.RendoTableDirectory);
         if (!rendoTableDir.Exists)
         {
             logger.LogWarning("RendoTable directory not found: {Path}", rendoTableDir.FullName);

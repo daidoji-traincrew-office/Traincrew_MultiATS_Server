@@ -10,7 +10,7 @@ public class TrackCircuitCsvLoader(ILogger<TrackCircuitCsvLoader> logger) : Base
     public async Task<List<TrackCircuitCsv>> LoadAsync(CancellationToken cancellationToken = default)
     {
         return await LoadCsvAsync(
-            "./Data/軌道回路に対する計算するべき信号機リスト.csv",
+            CsvFilePaths.TrackCircuit,
             true,
             new TrackCircuitCsvMap(),
             cancellationToken);

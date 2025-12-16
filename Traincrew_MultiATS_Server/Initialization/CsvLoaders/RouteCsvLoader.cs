@@ -11,7 +11,7 @@ public class RouteLockTrackCircuitCsvLoader(ILogger<RouteLockTrackCircuitCsvLoad
     public async Task<List<RouteLockTrackCircuitCsv>> LoadAsync(CancellationToken cancellationToken = default)
     {
         return await LoadCsvAsync(
-            "./Data/進路.csv",
+            CsvFilePaths.RouteLockTrackCircuit,
             false,
             new RouteLockTrackCircuitCsvMap(),
             cancellationToken);

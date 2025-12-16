@@ -10,7 +10,7 @@ public class SignalCsvLoader(ILogger<SignalCsvLoader> logger) : BaseCsvLoader<Si
     public List<SignalCsv> Load()
     {
         return LoadCsv(
-            "./Data/信号リスト.csv",
+            CsvFilePaths.Signal,
             true,
             new SignalCsvMap());
     }

@@ -10,7 +10,7 @@ public class TtcWindowCsvLoader(ILogger<TtcWindowCsvLoader> logger) : BaseCsvLoa
     public async Task<List<TtcWindowCsv>> LoadAsync(CancellationToken cancellationToken = default)
     {
         return await LoadCsvAsync(
-            "./Data/TTC列番窓.csv",
+            CsvFilePaths.TtcWindow,
             false,
             new TtcWindowCsvMap(),
             cancellationToken);
@@ -25,7 +25,7 @@ public class TtcWindowLinkCsvLoader(ILogger<TtcWindowLinkCsvLoader> logger) : Ba
     public async Task<List<TtcWindowLinkCsv>> LoadAsync(CancellationToken cancellationToken = default)
     {
         return await LoadCsvAsync(
-            "./Data/TTC列番窓リンク設定.csv",
+            CsvFilePaths.TtcWindowLink,
             false,
             new TtcWindowLinkCsvMap(),
             cancellationToken);
