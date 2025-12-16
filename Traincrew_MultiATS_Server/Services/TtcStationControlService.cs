@@ -215,7 +215,7 @@ public class TtcStationControlService(
             {
                 var routeState = routes.GetValueOrDefault(cond.RouteId)?.RouteState;
                 return routeState != null &&
-                       (routeState.IsRouteLockRaised == RaiseDrop.Drop || routeState.IsApproachLockMRRaised == RaiseDrop.Raise);
+                       (routeState.IsRouteLockRaised == RaiseDrop.Drop && routeState.IsApproachLockMRRaised == RaiseDrop.Raise);
             }))
             {
                 continue;
