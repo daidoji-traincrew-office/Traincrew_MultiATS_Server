@@ -11,31 +11,21 @@ namespace Traincrew_MultiATS_Server.HostedService;
 /// Hosted service for database initialization at application startup
 /// Coordinates initialization and scheduler management
 /// </summary>
-public class InitDbHostedService : IHostedService
+public class InitDbHostedService(
+    IServiceScopeFactory serviceScopeFactory,
+    ILoggerFactory loggerFactory,
+    ILogger<InitDbHostedService> logger)
+    : IHostedService
 {
-    private readonly IServiceScopeFactory _serviceScopeFactory;
-    private readonly ILoggerFactory _loggerFactory;
-    private readonly ILogger<InitDbHostedService> _logger;
-
-    public InitDbHostedService(
-        IServiceScopeFactory serviceScopeFactory,
-        ILoggerFactory loggerFactory,
-        ILogger<InitDbHostedService> logger)
-    {
-        _serviceScopeFactory = serviceScopeFactory;
-        _loggerFactory = loggerFactory;
-        _logger = logger;
-    }
-
     /// <summary>
     /// Called when the application starts
     /// Initializes the database and starts the scheduler
     /// </summary>
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("InitDbHostedService starting");
+        logger.LogInformation("InitDbHostedService starting");
 
-        using var scope = _serviceScopeFactory.CreateScope();
+        using var scope = serviceScopeFactory.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         var datetimeRepository = scope.ServiceProvider.GetRequiredService<IDateTimeRepository>();
         var lockConditionRepository = scope.ServiceProvider.GetRequiredService<ILockConditionRepository>();
@@ -47,8 +37,8 @@ public class InitDbHostedService : IHostedService
             context,
             datetimeRepository,
             lockConditionRepository,
-            _loggerFactory,
-            _loggerFactory.CreateLogger<DatabaseInitializationOrchestrator>());
+            loggerFactory,
+            loggerFactory.CreateLogger<DatabaseInitializationOrchestrator>());
 
         await orchestrator.InitializeAsync(cancellationToken);
 
@@ -56,7 +46,7 @@ public class InitDbHostedService : IHostedService
         schedulerManager.StartServerModeScheduler();
         await serverService.UpdateSchedulerAsync();
 
-        _logger.LogInformation("InitDbHostedService started successfully");
+        logger.LogInformation("InitDbHostedService started successfully");
     }
 
     /// <summary>
@@ -65,15 +55,15 @@ public class InitDbHostedService : IHostedService
     /// </summary>
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("InitDbHostedService stopping");
+        logger.LogInformation("InitDbHostedService stopping");
 
-        using var scope = _serviceScopeFactory.CreateScope();
+        using var scope = serviceScopeFactory.CreateScope();
         var schedulerManager = scope.ServiceProvider.GetRequiredService<SchedulerManager>();
 
         await schedulerManager.Stop();
         await schedulerManager.StopServerModeScheduler();
 
-        _logger.LogInformation("InitDbHostedService stopped");
+        logger.LogInformation("InitDbHostedService stopped");
 
         await Task.CompletedTask;
     }
