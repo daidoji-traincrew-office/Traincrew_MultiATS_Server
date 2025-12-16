@@ -70,8 +70,8 @@ public class InitDbHostedService : IHostedService
         using var scope = _serviceScopeFactory.CreateScope();
         var schedulerManager = scope.ServiceProvider.GetRequiredService<SchedulerManager>();
 
-        schedulerManager.Stop();
-        schedulerManager.StopServerModeScheduler();
+        await schedulerManager.Stop();
+        await schedulerManager.StopServerModeScheduler();
 
         _logger.LogInformation("InitDbHostedService stopped");
 
