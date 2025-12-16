@@ -1,5 +1,4 @@
 using System.Globalization;
-using System.Text.Json;
 using System.Text.RegularExpressions;
 using CsvHelper;
 using CsvHelper.Configuration;
@@ -82,12 +81,46 @@ public class InitDbHostedService(
         ILockConditionRepository lockConditionRepository,
         CancellationToken cancellationToken)
     {
-        var jsonstring = await File.ReadAllTextAsync("./Data/DBBase.json", cancellationToken);
-        var DBBase = JsonSerializer.Deserialize<DBBasejson>(jsonstring);
+        var stationFile = new FileInfo("./Data/駅・停車場.csv");
+        var trackCircuitFile = new FileInfo("./Data/軌道回路に対する計算するべき信号機リスト.csv");
+        var signalTypeFile = new FileInfo("./Data/信号何灯式リスト.csv");
+
+        if (!stationFile.Exists || !trackCircuitFile.Exists || !signalTypeFile.Exists)
+        {
+            return null;
+        }
+
+        var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+        {
+            HasHeaderRecord = true,
+        };
+
+        // 駅リストを読み込む
+        using var stationReader = new StreamReader(stationFile.FullName);
+        using var stationCsv = new CsvReader(stationReader, config);
+        stationCsv.Context.RegisterClassMap<StationCsvMap>();
+        var stationList = await stationCsv
+            .GetRecordsAsync<StationCsv>(cancellationToken)
+            .ToListAsync(cancellationToken);
+
+        // 軌道回路リストを読み込む
+        using var trackCircuitReader = new StreamReader(trackCircuitFile.FullName);
+        using var trackCircuitCsv = new CsvReader(trackCircuitReader, config);
+        trackCircuitCsv.Context.RegisterClassMap<TrackCircuitCsvMap>();
+        var trackCircuitList = await trackCircuitCsv
+            .GetRecordsAsync<TrackCircuitCsv>(cancellationToken)
+            .ToListAsync(cancellationToken);
+
+        // 信号灯式リストを読み込む
+        using var signalTypeReader = new StreamReader(signalTypeFile.FullName);
+        using var signalTypeCsv = new CsvReader(signalTypeReader, config);
+        signalTypeCsv.Context.RegisterClassMap<SignalTypeCsvMap>();
+        var signalTypeList = await signalTypeCsv
+            .GetRecordsAsync<SignalTypeCsv>(cancellationToken)
+            .ToListAsync(cancellationToken);
+
         var logger = loggerFactory.CreateLogger<DbInitializer>();
-        return DBBase != null
-            ? new DbInitializer(DBBase, context, lockConditionRepository, logger, cancellationToken)
-            : null;
+        return new DbInitializer(stationList, trackCircuitList, signalTypeList, context, lockConditionRepository, logger, cancellationToken);
     }
 
     private async Task<List<DbRendoTableInitializer>> CreateDbRendoTableInitializer(
@@ -874,7 +907,9 @@ public class InitDbHostedService(
 }
 
 internal partial class DbInitializer(
-    DBBasejson DBBase,
+    List<StationCsv> stationList,
+    List<TrackCircuitCsv> trackCircuitList,
+    List<SignalTypeCsv> signalTypeList,
     ApplicationDbContext context,
     ILockConditionRepository lockConditionRepository,
     ILogger<DbInitializer> logger,
@@ -907,7 +942,7 @@ internal partial class DbInitializer(
         var stationNames = (await context.Stations
             .Select(s => s.Name)
             .ToListAsync(cancellationToken)).ToHashSet();
-        foreach (var station in DBBase.stationList)
+        foreach (var station in stationList)
         {
             if (stationNames.Contains(station.Name))
             {
@@ -965,7 +1000,7 @@ internal partial class DbInitializer(
             .Select(tc => tc.Name)
             .ToListAsync(cancellationToken)).ToHashSet();
 
-        foreach (var item in DBBase.trackCircuitList)
+        foreach (var item in trackCircuitList)
         {
             if (trackCircuitNames.Contains(item.Name))
             {
@@ -999,7 +1034,7 @@ internal partial class DbInitializer(
         var signalTypeNames = (await context.SignalTypes
             .Select(st => st.Name)
             .ToListAsync(cancellationToken)).ToHashSet();
-        foreach (var signalTypeData in DBBase.signalTypeList)
+        foreach (var signalTypeData in signalTypeList)
         {
             if (signalTypeNames.Contains(signalTypeData.Name))
             {
@@ -1035,13 +1070,13 @@ internal partial class DbInitializer(
 
     private async Task InitTrackCircuitSignal()
     {
-        foreach (var trackCircuit in DBBase.trackCircuitList)
+        foreach (var trackCircuit in trackCircuitList)
         {
             var trackCircuitEntity = await context.TrackCircuits
                 .FirstOrDefaultAsync(tc => tc.Name == trackCircuit.Name, cancellationToken);
 
             if (trackCircuitEntity == null) continue;
-            foreach (var signalName in trackCircuit.NextSignalNamesUp ?? [])
+            foreach (var signalName in trackCircuit.NextSignalNamesUp)
             {
                 // Todo: ここでN+1問題が発生しているので、改善したほうが良いかも
                 if (context.TrackCircuitSignals.Any(tcs =>
@@ -1058,7 +1093,7 @@ internal partial class DbInitializer(
                 });
             }
 
-            foreach (var signalName in trackCircuit.NextSignalNamesDown ?? [])
+            foreach (var signalName in trackCircuit.NextSignalNamesDown)
             {
                 // Todo: ここでN+1問題が発生しているので、改善したほうが良いかも
                 if (context.TrackCircuitSignals.Any(tcs =>
