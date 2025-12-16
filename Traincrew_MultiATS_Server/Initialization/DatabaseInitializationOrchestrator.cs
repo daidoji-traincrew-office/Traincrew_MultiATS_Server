@@ -26,24 +26,35 @@ public class DatabaseInitializationOrchestrator(
     {
         logger.LogInformation("Starting database initialization");
 
-        // Phase 1: Load infrastructure CSV data
+        // Phase 1: Load stationList
         var stationLoader = new StationCsvLoader(loggerFactory.CreateLogger<StationCsvLoader>());
-        var trackCircuitLoader = new TrackCircuitCsvLoader(loggerFactory.CreateLogger<TrackCircuitCsvLoader>());
-        var signalTypeLoader = new SignalTypeCsvLoader(loggerFactory.CreateLogger<SignalTypeCsvLoader>());
-
         var stationList = await stationLoader.LoadAsync(cancellationToken);
+
+        // Phase 2: Initialize stations
+        var stationInitializer = new StationDbInitializer(context, loggerFactory.CreateLogger<StationDbInitializer>());
+        await stationInitializer.InitializeStationsAsync(stationList, cancellationToken);
+        await stationInitializer.InitializeStationTimerStatesAsync(cancellationToken);
+
+        // Phase 3: Load trackCircuitList
+        var trackCircuitLoader = new TrackCircuitCsvLoader(loggerFactory.CreateLogger<TrackCircuitCsvLoader>());
         var trackCircuitList = await trackCircuitLoader.LoadAsync(cancellationToken);
+
+        // Phase 4: Initialize track circuits
+        var trackCircuitInitializer = new TrackCircuitDbInitializer(context, loggerFactory.CreateLogger<TrackCircuitDbInitializer>());
+        await trackCircuitInitializer.InitializeTrackCircuitsAsync(trackCircuitList, cancellationToken);
+
+        // Phase 5: Load signalTypeList
+        var signalTypeLoader = new SignalTypeCsvLoader(loggerFactory.CreateLogger<SignalTypeCsvLoader>());
         var signalTypeList = await signalTypeLoader.LoadAsync(cancellationToken);
 
-        var hasInfrastructureData = stationList.Count > 0 && trackCircuitList.Count > 0 && signalTypeList.Count > 0;
+        // Phase 6: Initialize signal types
+        var signalTypeInitializer = new SignalTypeDbInitializer(context, loggerFactory.CreateLogger<SignalTypeDbInitializer>());
+        await signalTypeInitializer.InitializeSignalTypesAsync(signalTypeList, cancellationToken);
 
-        // Phase 2: Initialize infrastructure entities (if CSV data available)
-        if (hasInfrastructureData) await InitializeInfrastructureAsync(stationList, trackCircuitList, signalTypeList, cancellationToken);
-
-        // Phase 3: Initialize train data
+        // Phase 7: Initialize train data
         await InitializeTrainDataAsync(cancellationToken);
 
-        // Phase 4: Initialize Rendo Table objects (per station)
+        // Phase 8: Initialize Rendo Table objects (per station)
         var rendoTableInitializers = await CreateRendoTableInitializersAsync(cancellationToken);
         foreach (var initializer in rendoTableInitializers)
         {
@@ -52,53 +63,28 @@ public class DatabaseInitializationOrchestrator(
 
         DetachUnchangedEntities();
 
-        // Phase 5: Initialize operational entities
+        // Phase 9: Initialize operational entities
         await InitializeOperationalEntitiesAsync(cancellationToken);
 
-        // Phase 6: Initialize signals and routes
+        // Phase 10: Initialize signals and routes
         await InitializeSignalsAndRoutesAsync(cancellationToken);
 
-        // Phase 7: Initialize track circuit signals (if infrastructure data available)
-        if (hasInfrastructureData) await InitializeTrackCircuitSignalsAsync(trackCircuitList, cancellationToken);
+        // Phase 11: Initialize track circuit signals
+        await InitializeTrackCircuitSignalsAsync(trackCircuitList, cancellationToken);
 
         DetachUnchangedEntities();
 
-        // Phase 8: Initialize locks (per station)
+        // Phase 12: Initialize locks (per station)
         foreach (var initializer in rendoTableInitializers)
         {
             await initializer.InitializeLocks();
         }
 
-        // Phase 9: Finalize initialization (if infrastructure data available)
-        if (hasInfrastructureData)
-        {
-            DetachUnchangedEntities();
-            await FinalizeInitializationAsync(cancellationToken);
-        }
+        // Phase 13: Finalize initialization
+        DetachUnchangedEntities();
+        await FinalizeInitializationAsync(cancellationToken);
 
         logger.LogInformation("Database initialization completed");
-    }
-
-    private async Task InitializeInfrastructureAsync(
-        List<StationCsv> stationList,
-        List<TrackCircuitCsv> trackCircuitList,
-        List<SignalTypeCsv> signalTypeList,
-        CancellationToken cancellationToken)
-    {
-        logger.LogInformation("Initializing infrastructure entities");
-
-        var stationInitializer =
-            new StationDbInitializer(context, loggerFactory.CreateLogger<StationDbInitializer>());
-        await stationInitializer.InitializeStationsAsync(stationList, cancellationToken);
-        await stationInitializer.InitializeStationTimerStatesAsync(cancellationToken);
-
-        var trackCircuitInitializer =
-            new TrackCircuitDbInitializer(context, loggerFactory.CreateLogger<TrackCircuitDbInitializer>());
-        await trackCircuitInitializer.InitializeTrackCircuitsAsync(trackCircuitList, cancellationToken);
-
-        var signalTypeInitializer =
-            new SignalTypeDbInitializer(context, loggerFactory.CreateLogger<SignalTypeDbInitializer>());
-        await signalTypeInitializer.InitializeSignalTypesAsync(signalTypeList, cancellationToken);
     }
 
     private async Task InitializeTrainDataAsync(CancellationToken cancellationToken)
