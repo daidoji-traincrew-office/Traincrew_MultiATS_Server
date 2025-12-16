@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.Initialization.CsvLoaders;
 using Traincrew_MultiATS_Server.Initialization.DbInitializers;
+using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.LockCondition;
 
@@ -26,11 +27,18 @@ public class DatabaseInitializationOrchestrator(
         logger.LogInformation("Starting database initialization");
 
         // Phase 1: Load infrastructure CSV data
-        var infrastructureLoader = new InfrastructureCsvLoader(loggerFactory.CreateLogger<InfrastructureCsvLoader>());
-        var infrastructureData = await infrastructureLoader.LoadAsync(cancellationToken);
+        var stationLoader = new StationCsvLoader(loggerFactory.CreateLogger<StationCsvLoader>());
+        var trackCircuitLoader = new TrackCircuitCsvLoader(loggerFactory.CreateLogger<TrackCircuitCsvLoader>());
+        var signalTypeLoader = new SignalTypeCsvLoader(loggerFactory.CreateLogger<SignalTypeCsvLoader>());
+
+        var stationList = await stationLoader.LoadAsync(cancellationToken);
+        var trackCircuitList = await trackCircuitLoader.LoadAsync(cancellationToken);
+        var signalTypeList = await signalTypeLoader.LoadAsync(cancellationToken);
+
+        var hasInfrastructureData = stationList.Count > 0 && trackCircuitList.Count > 0 && signalTypeList.Count > 0;
 
         // Phase 2: Initialize infrastructure entities (if CSV data available)
-        if (infrastructureData != null) await InitializeInfrastructureAsync(infrastructureData, cancellationToken);
+        if (hasInfrastructureData) await InitializeInfrastructureAsync(stationList, trackCircuitList, signalTypeList, cancellationToken);
 
         // Phase 3: Initialize train data
         await InitializeTrainDataAsync(cancellationToken);
@@ -51,7 +59,7 @@ public class DatabaseInitializationOrchestrator(
         await InitializeSignalsAndRoutesAsync(cancellationToken);
 
         // Phase 7: Initialize track circuit signals (if infrastructure data available)
-        if (infrastructureData != null) await InitializeTrackCircuitSignalsAsync(infrastructureData, cancellationToken);
+        if (hasInfrastructureData) await InitializeTrackCircuitSignalsAsync(trackCircuitList, cancellationToken);
 
         DetachUnchangedEntities();
 
@@ -62,7 +70,7 @@ public class DatabaseInitializationOrchestrator(
         }
 
         // Phase 9: Finalize initialization (if infrastructure data available)
-        if (infrastructureData != null)
+        if (hasInfrastructureData)
         {
             DetachUnchangedEntities();
             await FinalizeInitializationAsync(cancellationToken);
@@ -71,22 +79,26 @@ public class DatabaseInitializationOrchestrator(
         logger.LogInformation("Database initialization completed");
     }
 
-    private async Task InitializeInfrastructureAsync(InfrastructureCsvData data, CancellationToken cancellationToken)
+    private async Task InitializeInfrastructureAsync(
+        List<StationCsv> stationList,
+        List<TrackCircuitCsv> trackCircuitList,
+        List<SignalTypeCsv> signalTypeList,
+        CancellationToken cancellationToken)
     {
         logger.LogInformation("Initializing infrastructure entities");
 
         var stationInitializer =
             new StationDbInitializer(context, loggerFactory.CreateLogger<StationDbInitializer>());
-        await stationInitializer.InitializeStationsAsync(data.StationList, cancellationToken);
+        await stationInitializer.InitializeStationsAsync(stationList, cancellationToken);
         await stationInitializer.InitializeStationTimerStatesAsync(cancellationToken);
 
         var trackCircuitInitializer =
             new TrackCircuitDbInitializer(context, loggerFactory.CreateLogger<TrackCircuitDbInitializer>());
-        await trackCircuitInitializer.InitializeTrackCircuitsAsync(data.TrackCircuitList, cancellationToken);
+        await trackCircuitInitializer.InitializeTrackCircuitsAsync(trackCircuitList, cancellationToken);
 
         var signalTypeInitializer =
             new SignalTypeDbInitializer(context, loggerFactory.CreateLogger<SignalTypeDbInitializer>());
-        await signalTypeInitializer.InitializeSignalTypesAsync(data.SignalTypeList, cancellationToken);
+        await signalTypeInitializer.InitializeSignalTypesAsync(signalTypeList, cancellationToken);
     }
 
     private async Task InitializeTrainDataAsync(CancellationToken cancellationToken)
@@ -175,14 +187,14 @@ public class DatabaseInitializationOrchestrator(
         await signalInitializer.InitializeSignalRoutesAsync(signalDataList, cancellationToken);
     }
 
-    private async Task InitializeTrackCircuitSignalsAsync(InfrastructureCsvData data,
+    private async Task InitializeTrackCircuitSignalsAsync(List<TrackCircuitCsv> trackCircuitList,
         CancellationToken cancellationToken)
     {
         logger.LogInformation("Initializing track circuit signals");
 
         var trackCircuitInitializer =
             new TrackCircuitDbInitializer(context, loggerFactory.CreateLogger<TrackCircuitDbInitializer>());
-        await trackCircuitInitializer.InitializeTrackCircuitSignalsAsync(data.TrackCircuitList, cancellationToken);
+        await trackCircuitInitializer.InitializeTrackCircuitSignalsAsync(trackCircuitList, cancellationToken);
     }
 
     private async Task FinalizeInitializationAsync(CancellationToken cancellationToken)
