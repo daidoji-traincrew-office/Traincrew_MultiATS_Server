@@ -1,9 +1,7 @@
-using System.Globalization;
-using CsvHelper;
-using CsvHelper.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Data;
+using Traincrew_MultiATS_Server.Initialization.CsvLoaders;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 
@@ -15,7 +13,8 @@ namespace Traincrew_MultiATS_Server.Initialization.DbInitializers;
 public class OperationNotificationDisplayDbInitializer(
     ApplicationDbContext context,
     IDateTimeRepository dateTimeRepository,
-    ILogger<OperationNotificationDisplayDbInitializer> logger)
+    ILogger<OperationNotificationDisplayDbInitializer> logger,
+    OperationNotificationDisplayCsvLoader csvLoader)
     : BaseDbInitializer(context, logger)
 {
     /// <summary>
@@ -23,25 +22,7 @@ public class OperationNotificationDisplayDbInitializer(
     /// </summary>
     public override async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
-        var file = new FileInfo("./Data/運転告知器.csv");
-        if (!file.Exists)
-        {
-            _logger.LogWarning("Operation notification display CSV file not found: {FilePath}", file.FullName);
-            return;
-        }
-
-        var config = new CsvConfiguration(CultureInfo.InvariantCulture)
-        {
-            HasHeaderRecord = false
-        };
-        using var reader = new StreamReader(file.FullName);
-        // ヘッダー行を読み飛ばす
-        await reader.ReadLineAsync(cancellationToken);
-        using var csv = new CsvReader(reader, config);
-        csv.Context.RegisterClassMap<OperationNotificationDisplayCsvMap>();
-        var records = await csv
-            .GetRecordsAsync<OperationNotificationDisplayCsv>(cancellationToken)
-            .ToListAsync(cancellationToken);
+        var records = await csvLoader.LoadAsync(cancellationToken);
         var trackCircuitNames = records
             .SelectMany(r => r.TrackCircuitNames)
             .ToList();

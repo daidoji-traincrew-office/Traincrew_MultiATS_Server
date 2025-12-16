@@ -133,10 +133,12 @@ public class DatabaseInitializationOrchestrator(
     {
         logger.LogInformation("Initializing operational entities");
 
+        var operationNotificationDisplayCsvLoader = new OperationNotificationDisplayCsvLoader(loggerFactory.CreateLogger<OperationNotificationDisplayCsvLoader>());
         var operationNotificationInitializer = new OperationNotificationDisplayDbInitializer(
             context,
             datetimeRepository,
-            loggerFactory.CreateLogger<OperationNotificationDisplayDbInitializer>());
+            loggerFactory.CreateLogger<OperationNotificationDisplayDbInitializer>(),
+            operationNotificationDisplayCsvLoader);
         await operationNotificationInitializer.InitializeAsync(cancellationToken);
 
         var routeLockTrackCircuitCsvLoader = new RouteLockTrackCircuitCsvLoader(loggerFactory.CreateLogger<RouteLockTrackCircuitCsvLoader>());
