@@ -24,7 +24,10 @@ public class StationDbInitializer(ApplicationDbContext context, ILogger<StationD
         var addedCount = 0;
         foreach (var station in stationList)
         {
-            if (stationNames.Contains(station.Name)) continue;
+            if (stationNames.Contains(station.Name))
+            {
+                continue;
+            }
 
             _context.Stations.Add(new()
             {
@@ -59,7 +62,10 @@ public class StationDbInitializer(ApplicationDbContext context, ILogger<StationD
         {
             foreach (var seconds in new[] { 30, 60 })
             {
-                if (stationTimerStates.Contains(new { StationId = stationId, Seconds = seconds })) continue;
+                if (stationTimerStates.Contains(new { StationId = stationId, Seconds = seconds }))
+                {
+                    continue;
+                }
 
                 _context.StationTimerStates.Add(new()
                 {

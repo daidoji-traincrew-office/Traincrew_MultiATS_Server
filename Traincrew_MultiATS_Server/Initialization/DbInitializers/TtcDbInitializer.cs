@@ -32,7 +32,10 @@ public class TtcDbInitializer(
         var addedCount = 0;
         foreach (var record in records)
         {
-            if (existingWindows.Contains(record.Name)) continue;
+            if (existingWindows.Contains(record.Name))
+            {
+                continue;
+            }
 
             _context.TtcWindows.Add(new()
             {
@@ -89,7 +92,10 @@ public class TtcDbInitializer(
         var addedCount = 0;
         foreach (var record in records)
         {
-            if (existingLinks.Contains(new { record.Source, record.Target })) continue;
+            if (existingLinks.Contains(new { record.Source, record.Target }))
+            {
+                continue;
+            }
 
             var ttcWindowLink = new TtcWindowLink
             {
@@ -105,7 +111,10 @@ public class TtcDbInitializer(
 
             foreach (var routeCondition in record.RouteConditions)
             {
-                if (!routeIdByName.TryGetValue(routeCondition, out var routeId)) continue;
+                if (!routeIdByName.TryGetValue(routeCondition, out var routeId))
+                {
+                    continue;
+                }
 
                 _context.TtcWindowLinkRouteConditions.Add(new()
                 {

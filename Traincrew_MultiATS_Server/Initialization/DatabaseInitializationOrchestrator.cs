@@ -139,7 +139,6 @@ public class DatabaseInitializationOrchestrator(
         // Phase 25: Finalize - 初期化の完了処理
         DetachUnchangedEntities();
         await FinalizeInitializationAsync(cancellationToken);
-
         logger.LogInformation("Database initialization completed");
     }
 

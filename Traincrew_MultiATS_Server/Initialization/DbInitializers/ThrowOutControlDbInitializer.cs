@@ -53,17 +53,27 @@ public class ThrowOutControlDbInitializer(
                 case ThrowOutControlType.WithLever:
                 case ThrowOutControlType.WithoutLever:
                     // てこあり/てこナシの場合、総括制御先は通常の進路
-                    if (!routesByName.TryGetValue(record.TargetLever, out var targetRoute)) continue;
+                    if (!routesByName.TryGetValue(record.TargetLever, out var targetRoute))
+                    {
+                        continue;
+                    }
+
                     target = targetRoute;
                     break;
 
                 case ThrowOutControlType.Direction:
                     // 方向の場合、方向進路を探す
-                    if (string.IsNullOrEmpty(record.LeverCondition)) continue;
+                    if (string.IsNullOrEmpty(record.LeverCondition))
+                    {
+                        continue;
+                    }
 
                     // record.LeverConditionから方向進路名を取得（末尾を除いてFに置換）
                     var directionRouteName = record.TargetLever[..^1] + "F";
-                    if (!directionRoutesByName.TryGetValue(directionRouteName, out var directionRoute)) continue;
+                    if (!directionRoutesByName.TryGetValue(directionRouteName, out var directionRoute))
+                    {
+                        continue;
+                    }
 
                     target = directionRoute;
                     // 総括制御先のてこ名の末尾から方向を判定
@@ -87,7 +97,10 @@ public class ThrowOutControlDbInitializer(
             }
 
             // 既に登録済みの場合はスキップ
-            if (existingThrowOutControls.Contains(new { SourceId = sourceRoute.Id, TargetId = target.Id })) continue;
+            if (existingThrowOutControls.Contains(new { SourceId = sourceRoute.Id, TargetId = target.Id }))
+            {
+                continue;
+            }
 
             _context.ThrowOutControls.Add(new()
             {

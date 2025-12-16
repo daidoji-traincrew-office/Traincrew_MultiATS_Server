@@ -30,7 +30,10 @@ public partial class SwitchingMachineRouteDbInitializer(
         foreach (var interlockingObject in interlockingObjects)
         {
             var match = RegexStationId().Match(interlockingObject.Name);
-            if (!match.Success) continue;
+            if (!match.Success)
+            {
+                continue;
+            }
 
             var stationId = match.Groups[1].Value;
             interlockingObject.StationId = stationId;
@@ -91,7 +94,9 @@ public partial class SwitchingMachineRouteDbInitializer(
                 // 既に登録済みの場合、スキップ
                 if (switchingMachinesRoutes.Contains(new
                         { RouteId = routeId, SwitchingMachineId = switchingMachineId }))
+                {
                     continue;
+                }
 
                 var detectorLockConditions = detectorLockConditionsBySwitchingMachineIds
                     .GetValueOrDefault(switchingMachineId, [])

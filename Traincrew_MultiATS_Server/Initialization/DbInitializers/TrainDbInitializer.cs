@@ -21,7 +21,10 @@ public class TrainDbInitializer(ApplicationDbContext context, ILogger<TrainDbIni
         var addedCount = 0;
         foreach (var record in trainTypeList)
         {
-            if (existingIds.Contains(record.Id)) continue;
+            if (existingIds.Contains(record.Id))
+            {
+                continue;
+            }
 
             _context.TrainTypes.Add(new()
             {
@@ -46,7 +49,10 @@ public class TrainDbInitializer(ApplicationDbContext context, ILogger<TrainDbIni
         var addedCount = 0;
         foreach (var record in trainDiagramList)
         {
-            if (existingNumbers.Contains(record.TrainNumber)) continue;
+            if (existingNumbers.Contains(record.TrainNumber))
+            {
+                continue;
+            }
 
             _context.TrainDiagrams.Add(new()
             {

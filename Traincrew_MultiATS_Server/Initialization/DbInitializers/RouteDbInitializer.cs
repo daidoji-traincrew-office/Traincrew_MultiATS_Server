@@ -33,16 +33,24 @@ public class RouteDbInitializer(
         foreach (var record in records)
         {
             // 該当進路が登録されていない場合スキップ
-            if (!routes.TryGetValue(record.RouteName, out var routeId)) continue;
+            if (!routes.TryGetValue(record.RouteName, out var routeId))
+            {
+                continue;
+            }
 
             foreach (var trackCircuitName in record.TrackCircuitNames)
             {
                 // 該当軌道回路が登録されていない場合スキップ
-                if (!trackCircuits.TryGetValue(trackCircuitName, out var trackCircuitId)) continue;
+                if (!trackCircuits.TryGetValue(trackCircuitName, out var trackCircuitId))
+                {
+                    continue;
+                }
 
                 // 既に登録済みの場合、スキップ
                 if (routeLockTrackCircuits.Contains(new { RouteId = routeId, TrackCircuitId = trackCircuitId }))
+                {
                     continue;
+                }
 
                 _context.RouteLockTrackCircuits.Add(new()
                 {

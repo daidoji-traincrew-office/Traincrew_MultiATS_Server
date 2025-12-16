@@ -36,9 +36,15 @@ public abstract class BaseCsvLoader<T>(ILogger logger)
         using var reader = new StreamReader(filePath);
         using var csv = new CsvReader(reader, config);
 
-        if (csvMap != null) csv.Context.RegisterClassMap(csvMap);
+        if (csvMap != null)
+        {
+            csv.Context.RegisterClassMap(csvMap);
+        }
 
-        if (!hasHeaderRecord) await csv.ReadAsync();
+        if (!hasHeaderRecord)
+        {
+            await csv.ReadAsync();
+        }
 
         var records = await csv.GetRecordsAsync<T>(cancellationToken)
             .ToListAsync(cancellationToken: cancellationToken);
@@ -70,9 +76,15 @@ public abstract class BaseCsvLoader<T>(ILogger logger)
         using var reader = new StreamReader(filePath);
         using var csv = new CsvReader(reader, config);
 
-        if (csvMap != null) csv.Context.RegisterClassMap(csvMap);
+        if (csvMap != null)
+        {
+            csv.Context.RegisterClassMap(csvMap);
+        }
 
-        if (!hasHeaderRecord) csv.Read();
+        if (!hasHeaderRecord)
+        {
+            csv.Read();
+        }
 
         var records = csv.GetRecords<T>().ToList();
 

@@ -24,7 +24,10 @@ public class TrackCircuitDbInitializer(ApplicationDbContext context, ILogger<Tra
         var addedCount = 0;
         foreach (var item in trackCircuitList)
         {
-            if (trackCircuitNames.Contains(item.Name)) continue;
+            if (trackCircuitNames.Contains(item.Name))
+            {
+                continue;
+            }
 
             _context.TrackCircuits.Add(new()
             {
@@ -61,19 +64,28 @@ public class TrackCircuitDbInitializer(ApplicationDbContext context, ILogger<Tra
             var trackCircuitEntity = await _context.TrackCircuits
                 .FirstOrDefaultAsync(tc => tc.Name == trackCircuit.Name, cancellationToken);
 
-            if (trackCircuitEntity == null) continue;
+            if (trackCircuitEntity == null)
+            {
+                continue;
+            }
 
             foreach (var signalName in trackCircuit.NextSignalNamesUp)
             {
                 // Todo: ここでN+1問題が発生しているので、改善したほうが良いかも
                 var signal = await _context.Signals
                     .FirstOrDefaultAsync(s => s.Name == signalName, cancellationToken);
-                if (signal == null) continue;
+                if (signal == null)
+                {
+                    continue;
+                }
 
                 var exists = await _context.TrackCircuitSignals
                     .AnyAsync(tcs => tcs.TrackCircuitId == trackCircuitEntity.Id && tcs.SignalName == signal.Name,
                         cancellationToken);
-                if (exists) continue;
+                if (exists)
+                {
+                    continue;
+                }
 
                 _context.TrackCircuitSignals.Add(new()
                 {
@@ -87,12 +99,18 @@ public class TrackCircuitDbInitializer(ApplicationDbContext context, ILogger<Tra
             {
                 var signal = await _context.Signals
                     .FirstOrDefaultAsync(s => s.Name == signalName, cancellationToken);
-                if (signal == null) continue;
+                if (signal == null)
+                {
+                    continue;
+                }
 
                 var exists = await _context.TrackCircuitSignals
                     .AnyAsync(tcs => tcs.TrackCircuitId == trackCircuitEntity.Id && tcs.SignalName == signal.Name,
                         cancellationToken);
-                if (exists) continue;
+                if (exists)
+                {
+                    continue;
+                }
 
                 _context.TrackCircuitSignals.Add(new()
                 {

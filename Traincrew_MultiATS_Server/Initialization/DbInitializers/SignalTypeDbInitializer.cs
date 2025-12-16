@@ -23,7 +23,10 @@ public class SignalTypeDbInitializer(ApplicationDbContext context, ILogger<Signa
         var addedCount = 0;
         foreach (var signalTypeData in signalTypeList)
         {
-            if (signalTypeNames.Contains(signalTypeData.Name)) continue;
+            if (signalTypeNames.Contains(signalTypeData.Name))
+            {
+                continue;
+            }
 
             _context.SignalTypes.Add(new()
             {

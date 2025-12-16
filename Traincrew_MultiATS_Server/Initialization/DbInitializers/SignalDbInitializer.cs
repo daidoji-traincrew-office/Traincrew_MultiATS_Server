@@ -40,7 +40,10 @@ public class SignalDbInitializer(ApplicationDbContext context, ILogger<SignalDbI
         foreach (var signalData in signalDataList)
         {
             // 既に登録済みの場合、スキップ
-            if (signalNames.Contains(signalData.Name)) continue;
+            if (signalNames.Contains(signalData.Name))
+            {
+                continue;
+            }
 
             // 軌道回路初期化
             ulong trackCircuitId = 0;
@@ -67,7 +70,9 @@ public class SignalDbInitializer(ApplicationDbContext context, ILogger<SignalDbI
             if (signalData.DirectionRouteLeft != null)
             {
                 if (!directionRoutes.TryGetValue(signalData.DirectionRouteLeft, out var directionRouteId))
+                {
                     throw new InvalidOperationException($"方向進路が見つかりません: {signalData.DirectionRouteLeft}");
+                }
 
                 directionRouteLeftId = directionRouteId;
             }
@@ -75,7 +80,9 @@ public class SignalDbInitializer(ApplicationDbContext context, ILogger<SignalDbI
             if (signalData.DirectionRouteRight != null)
             {
                 if (!directionRoutes.TryGetValue(signalData.DirectionRouteRight, out var directionRouteId))
+                {
                     throw new InvalidOperationException($"方向進路が見つかりません: {signalData.DirectionRouteRight}");
+                }
 
                 directionRouteRightId = directionRouteId;
             }
@@ -121,7 +128,9 @@ public class SignalDbInitializer(ApplicationDbContext context, ILogger<SignalDbI
                 // 既に登録済みの場合、スキップ
                 if (_context.NextSignals.Any(ns =>
                         ns.SignalName == signalData.Name && ns.TargetSignalName == nextSignalName))
+                {
                     continue;
+                }
 
                 _context.NextSignals.Add(new()
                 {
@@ -162,19 +171,27 @@ public class SignalDbInitializer(ApplicationDbContext context, ILogger<SignalDbI
             foreach (var signal in allSignals)
             {
                 // 次信号機がない場合はスキップ
-                if (!nextNextSignalDict.TryGetValue(signal.Name, out var nextSignals)) continue;
+                if (!nextNextSignalDict.TryGetValue(signal.Name, out var nextSignals))
+                {
+                    continue;
+                }
 
                 foreach (var nextSignal in nextSignals)
                 {
                     // 次信号機の次信号機を取ってくる
-                    if (!nextSignalDict.TryGetValue(nextSignal, out var nnSignals)) continue;
+                    if (!nextSignalDict.TryGetValue(nextSignal, out var nnSignals))
+                    {
+                        continue;
+                    }
 
                     foreach (var nextNextSignal in nnSignals)
                     {
                         // Todo: N+1問題が発生しているので、改善したほうが良いかも
                         if (_context.NextSignals.Any(ns =>
                                 ns.SignalName == signal.Name && ns.TargetSignalName == nextNextSignal))
+                        {
                             continue;
+                        }
 
                         _context.NextSignals.Add(new()
                         {
@@ -209,11 +226,16 @@ public class SignalDbInitializer(ApplicationDbContext context, ILogger<SignalDbI
             foreach (var routeName in signal.RouteNames ?? [])
             {
                 // Todo: FW 全探索なので改善したほうがいいかも
-                if (signalRoutes.Any(sr => sr.SignalName == signal.Name && sr.Route.Name == routeName)) continue;
+                if (signalRoutes.Any(sr => sr.SignalName == signal.Name && sr.Route.Name == routeName))
+                {
+                    continue;
+                }
 
                 if (!routes.TryGetValue(routeName, out var route))
                     // Todo: 例外を出す
+                {
                     continue;
+                }
 
                 _context.SignalRoutes.Add(new()
                 {

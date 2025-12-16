@@ -38,7 +38,10 @@ public class OperationNotificationDisplayDbInitializer(
         foreach (var record in records)
         {
             var name = record.Name;
-            if (operationNotificationDisplayNames.Contains(name)) continue;
+            if (operationNotificationDisplayNames.Contains(name))
+            {
+                continue;
+            }
 
             _context.OperationNotificationDisplays.Add(new()
             {
@@ -57,7 +60,10 @@ public class OperationNotificationDisplayDbInitializer(
 
             foreach (var trackCircuitName in record.TrackCircuitNames)
             {
-                if (!trackCircuits.TryGetValue(trackCircuitName, out var trackCircuit)) continue;
+                if (!trackCircuits.TryGetValue(trackCircuitName, out var trackCircuit))
+                {
+                    continue;
+                }
 
                 trackCircuit.OperationNotificationDisplayName = name;
                 _context.TrackCircuits.Update(trackCircuit);
