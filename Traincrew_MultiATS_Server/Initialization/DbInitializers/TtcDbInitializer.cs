@@ -1,8 +1,6 @@
-using System.Globalization;
-using CsvHelper;
-using CsvHelper.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Traincrew_MultiATS_Server.Data;
+using Traincrew_MultiATS_Server.Initialization.CsvLoaders;
 using Traincrew_MultiATS_Server.Models;
 
 namespace Traincrew_MultiATS_Server.Initialization.DbInitializers;
@@ -10,7 +8,11 @@ namespace Traincrew_MultiATS_Server.Initialization.DbInitializers;
 /// <summary>
 ///     Initializes TTC (Train Traffic Control) window and window link entities in the database
 /// </summary>
-public class TtcDbInitializer(ApplicationDbContext context, ILogger<TtcDbInitializer> logger)
+public class TtcDbInitializer(
+    ApplicationDbContext context,
+    ILogger<TtcDbInitializer> logger,
+    TtcWindowCsvLoader windowCsvLoader,
+    TtcWindowLinkCsvLoader windowLinkCsvLoader)
     : BaseDbInitializer(context, logger)
 {
     /// <summary>
@@ -18,26 +20,7 @@ public class TtcDbInitializer(ApplicationDbContext context, ILogger<TtcDbInitial
     /// </summary>
     public async Task InitializeTtcWindowsAsync(CancellationToken cancellationToken = default)
     {
-        var file = new FileInfo("./Data/TTC列番窓.csv");
-        if (!file.Exists)
-        {
-            _logger.LogWarning("TTC windows CSV file not found: {FilePath}", file.FullName);
-            return;
-        }
-
-        var config = new CsvConfiguration(CultureInfo.InvariantCulture)
-        {
-            HasHeaderRecord = false
-        };
-        using var reader = new StreamReader(file.FullName);
-        // ヘッダー行を読み飛ばす
-        await reader.ReadLineAsync(cancellationToken);
-
-        using var csv = new CsvReader(reader, config);
-        csv.Context.RegisterClassMap<TtcWindowCsvMap>();
-        var records = await csv
-            .GetRecordsAsync<TtcWindowCsv>(cancellationToken)
-            .ToListAsync(cancellationToken);
+        var records = await windowCsvLoader.LoadAsync(cancellationToken);
 
         var existingWindows = await _context.TtcWindows
             .Select(w => w.Name)
@@ -92,25 +75,7 @@ public class TtcDbInitializer(ApplicationDbContext context, ILogger<TtcDbInitial
     /// </summary>
     public async Task InitializeTtcWindowLinksAsync(CancellationToken cancellationToken = default)
     {
-        var file = new FileInfo("./Data/TTC列番窓リンク設定.csv");
-        if (!file.Exists)
-        {
-            _logger.LogWarning("TTC window links CSV file not found: {FilePath}", file.FullName);
-            return;
-        }
-
-        var config = new CsvConfiguration(CultureInfo.InvariantCulture)
-        {
-            HasHeaderRecord = false
-        };
-        using var reader = new StreamReader(file.FullName);
-        // ヘッダー行を読み飛ばす
-        await reader.ReadLineAsync(cancellationToken);
-
-        using var csv = new CsvReader(reader, config);
-        csv.Context.RegisterClassMap<TtcWindowLinkCsvMap>();
-        var records = await csv
-            .GetRecordsAsync<TtcWindowLinkCsv>(cancellationToken).ToListAsync(cancellationToken);
+        var records = await windowLinkCsvLoader.LoadAsync(cancellationToken);
 
         var existingLinks = await _context.TtcWindowLinks
             .Select(l => new { Source = l.SourceTtcWindowName, Target = l.TargetTtcWindowName })

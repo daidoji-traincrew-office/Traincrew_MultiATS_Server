@@ -139,19 +139,24 @@ public class DatabaseInitializationOrchestrator(
             loggerFactory.CreateLogger<OperationNotificationDisplayDbInitializer>());
         await operationNotificationInitializer.InitializeAsync(cancellationToken);
 
-        var routeInitializer = new RouteDbInitializer(context, loggerFactory.CreateLogger<RouteDbInitializer>());
+        var routeLockTrackCircuitCsvLoader = new RouteLockTrackCircuitCsvLoader(loggerFactory.CreateLogger<RouteLockTrackCircuitCsvLoader>());
+        var routeInitializer = new RouteDbInitializer(context, loggerFactory.CreateLogger<RouteDbInitializer>(), routeLockTrackCircuitCsvLoader);
         await routeInitializer.InitializeAsync(cancellationToken);
 
         var serverStatusInitializer =
             new ServerStatusDbInitializer(context, loggerFactory.CreateLogger<ServerStatusDbInitializer>());
         await serverStatusInitializer.InitializeAsync(cancellationToken);
 
-        var ttcInitializer = new TtcDbInitializer(context, loggerFactory.CreateLogger<TtcDbInitializer>());
+        var ttcWindowCsvLoader = new TtcWindowCsvLoader(loggerFactory.CreateLogger<TtcWindowCsvLoader>());
+        var ttcWindowLinkCsvLoader = new TtcWindowLinkCsvLoader(loggerFactory.CreateLogger<TtcWindowLinkCsvLoader>());
+        var ttcInitializer = new TtcDbInitializer(context, loggerFactory.CreateLogger<TtcDbInitializer>(), ttcWindowCsvLoader, ttcWindowLinkCsvLoader);
         await ttcInitializer.InitializeAsync(cancellationToken);
 
+        var throwOutControlCsvLoader = new ThrowOutControlCsvLoader(loggerFactory.CreateLogger<ThrowOutControlCsvLoader>());
         var throwOutControlInitializer = new ThrowOutControlDbInitializer(
             context,
-            loggerFactory.CreateLogger<ThrowOutControlDbInitializer>());
+            loggerFactory.CreateLogger<ThrowOutControlDbInitializer>(),
+            throwOutControlCsvLoader);
         await throwOutControlInitializer.InitializeAsync(cancellationToken);
     }
 

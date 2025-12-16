@@ -1,16 +1,16 @@
-using System.Globalization;
-using CsvHelper;
-using CsvHelper.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Traincrew_MultiATS_Server.Data;
-using Traincrew_MultiATS_Server.Models;
+using Traincrew_MultiATS_Server.Initialization.CsvLoaders;
 
 namespace Traincrew_MultiATS_Server.Initialization.DbInitializers;
 
 /// <summary>
 ///     Initializes route lock track circuit relationships from CSV data
 /// </summary>
-public class RouteDbInitializer(ApplicationDbContext context, ILogger<RouteDbInitializer> logger)
+public class RouteDbInitializer(
+    ApplicationDbContext context,
+    ILogger<RouteDbInitializer> logger,
+    RouteLockTrackCircuitCsvLoader csvLoader)
     : BaseDbInitializer(context, logger)
 {
     /// <summary>
@@ -18,25 +18,7 @@ public class RouteDbInitializer(ApplicationDbContext context, ILogger<RouteDbIni
     /// </summary>
     public override async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
-        var file = new FileInfo("./Data/進路.csv");
-        if (!file.Exists)
-        {
-            _logger.LogWarning("Route CSV file not found: {FilePath}", file.FullName);
-            return;
-        }
-
-        var config = new CsvConfiguration(CultureInfo.InvariantCulture)
-        {
-            HasHeaderRecord = false
-        };
-        using var reader = new StreamReader(file.FullName);
-        // ヘッダー行を読み飛ばす
-        await reader.ReadLineAsync(cancellationToken);
-        using var csv = new CsvReader(reader, config);
-        csv.Context.RegisterClassMap<RouteLockTrackCircuitCsvMap>();
-        var records = await csv
-            .GetRecordsAsync<RouteLockTrackCircuitCsv>(cancellationToken)
-            .ToListAsync(cancellationToken);
+        var records = await csvLoader.LoadAsync(cancellationToken);
         var routes = await _context.Routes
             .Select(r => new { r.Name, r.Id })
             .ToDictionaryAsync(r => r.Name, r => r.Id, cancellationToken);

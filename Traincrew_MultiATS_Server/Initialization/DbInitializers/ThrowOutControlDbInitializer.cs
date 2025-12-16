@@ -1,8 +1,6 @@
-using System.Globalization;
-using CsvHelper;
-using CsvHelper.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Traincrew_MultiATS_Server.Data;
+using Traincrew_MultiATS_Server.Initialization.CsvLoaders;
 using Traincrew_MultiATS_Server.Models;
 
 namespace Traincrew_MultiATS_Server.Initialization.DbInitializers;
@@ -10,7 +8,10 @@ namespace Traincrew_MultiATS_Server.Initialization.DbInitializers;
 /// <summary>
 ///     Initializes throw out control entities in the database
 /// </summary>
-public class ThrowOutControlDbInitializer(ApplicationDbContext context, ILogger<ThrowOutControlDbInitializer> logger)
+public class ThrowOutControlDbInitializer(
+    ApplicationDbContext context,
+    ILogger<ThrowOutControlDbInitializer> logger,
+    ThrowOutControlCsvLoader csvLoader)
     : BaseDbInitializer(context, logger)
 {
     /// <summary>
@@ -18,25 +19,7 @@ public class ThrowOutControlDbInitializer(ApplicationDbContext context, ILogger<
     /// </summary>
     public override async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
-        var file = new FileInfo("./Data/総括制御ペア一覧.csv");
-        if (!file.Exists)
-        {
-            _logger.LogWarning("Throw out control CSV file not found: {FilePath}", file.FullName);
-            return;
-        }
-
-        var config = new CsvConfiguration(CultureInfo.InvariantCulture)
-        {
-            HasHeaderRecord = false
-        };
-        using var reader = new StreamReader(file.FullName);
-        // ヘッダー行を読み飛ばす
-        await reader.ReadLineAsync(cancellationToken);
-        using var csv = new CsvReader(reader, config);
-        csv.Context.RegisterClassMap<ThrowOutControlCsvMap>();
-        var records = await csv
-            .GetRecordsAsync<ThrowOutControlCsv>(cancellationToken)
-            .ToListAsync(cancellationToken);
+        var records = await csvLoader.LoadAsync(cancellationToken);
 
         var routesByName = await _context.Routes
             .ToDictionaryAsync(r => r.Name, r => r, cancellationToken);
