@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.Initialization.CsvLoaders;
 using Traincrew_MultiATS_Server.Initialization.DbInitializers;
-using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.LockCondition;
 
@@ -51,10 +50,19 @@ public class DatabaseInitializationOrchestrator(
         var signalTypeInitializer = new SignalTypeDbInitializer(context, loggerFactory.CreateLogger<SignalTypeDbInitializer>());
         await signalTypeInitializer.InitializeSignalTypesAsync(signalTypeList, cancellationToken);
 
-        // Phase 7: Initialize train data
-        await InitializeTrainDataAsync(cancellationToken);
+        // Phase 7: Load train data
+        var trainTypeLoader = new TrainTypeCsvLoader(loggerFactory.CreateLogger<TrainTypeCsvLoader>());
+        var trainTypeList = trainTypeLoader.Load();
 
-        // Phase 8: Initialize Rendo Table objects (per station)
+        var trainDiagramLoader = new TrainDiagramCsvLoader(loggerFactory.CreateLogger<TrainDiagramCsvLoader>());
+        var trainDiagramList = trainDiagramLoader.Load();
+
+        // Phase 8: Initialize train data
+        var trainInitializer = new TrainDbInitializer(context, loggerFactory.CreateLogger<TrainDbInitializer>());
+        await trainInitializer.InitializeTrainTypesAsync(trainTypeList, cancellationToken);
+        await trainInitializer.InitializeTrainDiagramsAsync(trainDiagramList, cancellationToken);
+
+        // Phase 9: Initialize Rendo Table objects (per station)
         var rendoTableInitializers = await CreateRendoTableInitializersAsync(cancellationToken);
         foreach (var initializer in rendoTableInitializers)
         {
@@ -63,43 +71,63 @@ public class DatabaseInitializationOrchestrator(
 
         DetachUnchangedEntities();
 
-        // Phase 9: Initialize operational entities
-        await InitializeOperationalEntitiesAsync(cancellationToken);
+        // Phase 10: Load operational data
+        var operationNotificationDisplayCsvLoader = new OperationNotificationDisplayCsvLoader(loggerFactory.CreateLogger<OperationNotificationDisplayCsvLoader>());
+        var routeLockTrackCircuitCsvLoader = new RouteLockTrackCircuitCsvLoader(loggerFactory.CreateLogger<RouteLockTrackCircuitCsvLoader>());
+        var ttcWindowCsvLoader = new TtcWindowCsvLoader(loggerFactory.CreateLogger<TtcWindowCsvLoader>());
+        var ttcWindowLinkCsvLoader = new TtcWindowLinkCsvLoader(loggerFactory.CreateLogger<TtcWindowLinkCsvLoader>());
+        var throwOutControlCsvLoader = new ThrowOutControlCsvLoader(loggerFactory.CreateLogger<ThrowOutControlCsvLoader>());
 
-        // Phase 10: Initialize signals and routes
-        await InitializeSignalsAndRoutesAsync(cancellationToken);
+        // Phase 11: Initialize operational entities
+        var operationNotificationInitializer = new OperationNotificationDisplayDbInitializer(
+            context,
+            datetimeRepository,
+            loggerFactory.CreateLogger<OperationNotificationDisplayDbInitializer>(),
+            operationNotificationDisplayCsvLoader);
+        await operationNotificationInitializer.InitializeAsync(cancellationToken);
 
-        // Phase 11: Initialize track circuit signals
-        await InitializeTrackCircuitSignalsAsync(trackCircuitList, cancellationToken);
+        var routeInitializer = new RouteDbInitializer(context, loggerFactory.CreateLogger<RouteDbInitializer>(), routeLockTrackCircuitCsvLoader);
+        await routeInitializer.InitializeAsync(cancellationToken);
+
+        var serverStatusInitializer =
+            new ServerStatusDbInitializer(context, loggerFactory.CreateLogger<ServerStatusDbInitializer>());
+        await serverStatusInitializer.InitializeAsync(cancellationToken);
+
+        var ttcInitializer = new TtcDbInitializer(context, loggerFactory.CreateLogger<TtcDbInitializer>(), ttcWindowCsvLoader, ttcWindowLinkCsvLoader);
+        await ttcInitializer.InitializeAsync(cancellationToken);
+
+        var throwOutControlInitializer = new ThrowOutControlDbInitializer(
+            context,
+            loggerFactory.CreateLogger<ThrowOutControlDbInitializer>(),
+            throwOutControlCsvLoader);
+        await throwOutControlInitializer.InitializeAsync(cancellationToken);
+
+        // Phase 12: Load signal data
+        var signalLoader = new SignalCsvLoader(loggerFactory.CreateLogger<SignalCsvLoader>());
+        var signalDataList = signalLoader.Load();
+
+        // Phase 13: Initialize signals and routes
+        var signalInitializer = new SignalDbInitializer(context, loggerFactory.CreateLogger<SignalDbInitializer>());
+        await signalInitializer.InitializeSignalsAsync(signalDataList, cancellationToken);
+        await signalInitializer.InitializeNextSignalsAsync(signalDataList, cancellationToken);
+        await signalInitializer.InitializeSignalRoutesAsync(signalDataList, cancellationToken);
+
+        // Phase 14: Initialize track circuit signals
+        await trackCircuitInitializer.InitializeTrackCircuitSignalsAsync(trackCircuitList, cancellationToken);
 
         DetachUnchangedEntities();
 
-        // Phase 12: Initialize locks (per station)
+        // Phase 15: Initialize locks (per station)
         foreach (var initializer in rendoTableInitializers)
         {
             await initializer.InitializeLocks();
         }
 
-        // Phase 13: Finalize initialization
+        // Phase 16: Finalize initialization
         DetachUnchangedEntities();
         await FinalizeInitializationAsync(cancellationToken);
 
         logger.LogInformation("Database initialization completed");
-    }
-
-    private async Task InitializeTrainDataAsync(CancellationToken cancellationToken)
-    {
-        logger.LogInformation("Initializing train data");
-
-        var trainTypeLoader = new TrainTypeCsvLoader(loggerFactory.CreateLogger<TrainTypeCsvLoader>());
-        var trainTypeList = trainTypeLoader.Load();
-
-        var trainDiagramLoader = new TrainDiagramCsvLoader(loggerFactory.CreateLogger<TrainDiagramCsvLoader>());
-        var trainDiagramList = trainDiagramLoader.Load();
-
-        var trainInitializer = new TrainDbInitializer(context, loggerFactory.CreateLogger<TrainDbInitializer>());
-        await trainInitializer.InitializeTrainTypesAsync(trainTypeList, cancellationToken);
-        await trainInitializer.InitializeTrainDiagramsAsync(trainDiagramList, cancellationToken);
     }
 
     private async Task<List<DbRendoTableInitializer>> CreateRendoTableInitializersAsync(
@@ -125,62 +153,6 @@ public class DatabaseInitializationOrchestrator(
 
         logger.LogInformation("Created {Count} Rendo Table initializers", initializers.Count);
         return initializers;
-    }
-
-    private async Task InitializeOperationalEntitiesAsync(CancellationToken cancellationToken)
-    {
-        logger.LogInformation("Initializing operational entities");
-
-        var operationNotificationDisplayCsvLoader = new OperationNotificationDisplayCsvLoader(loggerFactory.CreateLogger<OperationNotificationDisplayCsvLoader>());
-        var operationNotificationInitializer = new OperationNotificationDisplayDbInitializer(
-            context,
-            datetimeRepository,
-            loggerFactory.CreateLogger<OperationNotificationDisplayDbInitializer>(),
-            operationNotificationDisplayCsvLoader);
-        await operationNotificationInitializer.InitializeAsync(cancellationToken);
-
-        var routeLockTrackCircuitCsvLoader = new RouteLockTrackCircuitCsvLoader(loggerFactory.CreateLogger<RouteLockTrackCircuitCsvLoader>());
-        var routeInitializer = new RouteDbInitializer(context, loggerFactory.CreateLogger<RouteDbInitializer>(), routeLockTrackCircuitCsvLoader);
-        await routeInitializer.InitializeAsync(cancellationToken);
-
-        var serverStatusInitializer =
-            new ServerStatusDbInitializer(context, loggerFactory.CreateLogger<ServerStatusDbInitializer>());
-        await serverStatusInitializer.InitializeAsync(cancellationToken);
-
-        var ttcWindowCsvLoader = new TtcWindowCsvLoader(loggerFactory.CreateLogger<TtcWindowCsvLoader>());
-        var ttcWindowLinkCsvLoader = new TtcWindowLinkCsvLoader(loggerFactory.CreateLogger<TtcWindowLinkCsvLoader>());
-        var ttcInitializer = new TtcDbInitializer(context, loggerFactory.CreateLogger<TtcDbInitializer>(), ttcWindowCsvLoader, ttcWindowLinkCsvLoader);
-        await ttcInitializer.InitializeAsync(cancellationToken);
-
-        var throwOutControlCsvLoader = new ThrowOutControlCsvLoader(loggerFactory.CreateLogger<ThrowOutControlCsvLoader>());
-        var throwOutControlInitializer = new ThrowOutControlDbInitializer(
-            context,
-            loggerFactory.CreateLogger<ThrowOutControlDbInitializer>(),
-            throwOutControlCsvLoader);
-        await throwOutControlInitializer.InitializeAsync(cancellationToken);
-    }
-
-    private async Task InitializeSignalsAndRoutesAsync(CancellationToken cancellationToken)
-    {
-        logger.LogInformation("Initializing signals and routes");
-
-        var signalLoader = new SignalCsvLoader(loggerFactory.CreateLogger<SignalCsvLoader>());
-        var signalDataList = signalLoader.Load();
-
-        var signalInitializer = new SignalDbInitializer(context, loggerFactory.CreateLogger<SignalDbInitializer>());
-        await signalInitializer.InitializeSignalsAsync(signalDataList, cancellationToken);
-        await signalInitializer.InitializeNextSignalsAsync(signalDataList, cancellationToken);
-        await signalInitializer.InitializeSignalRoutesAsync(signalDataList, cancellationToken);
-    }
-
-    private async Task InitializeTrackCircuitSignalsAsync(List<TrackCircuitCsv> trackCircuitList,
-        CancellationToken cancellationToken)
-    {
-        logger.LogInformation("Initializing track circuit signals");
-
-        var trackCircuitInitializer =
-            new TrackCircuitDbInitializer(context, loggerFactory.CreateLogger<TrackCircuitDbInitializer>());
-        await trackCircuitInitializer.InitializeTrackCircuitSignalsAsync(trackCircuitList, cancellationToken);
     }
 
     private async Task FinalizeInitializationAsync(CancellationToken cancellationToken)
