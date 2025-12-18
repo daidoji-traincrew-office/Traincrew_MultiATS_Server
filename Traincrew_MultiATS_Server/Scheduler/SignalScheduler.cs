@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.SignalR;
 using Traincrew_MultiATS_Server.Common.Contract;
+using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Hubs;
 using Traincrew_MultiATS_Server.Services;
 
@@ -9,15 +10,40 @@ public class SignalScheduler(IServiceScopeFactory serviceScopeFactory) : Schedul
 {
     protected override int Interval => 250;
 
+    private Dictionary<string, Phase> _oldSignalDataByName = [];
+
     protected override async Task ExecuteTaskAsync(IServiceScope scope, System.Diagnostics.Activity? activity)
     {
         var trainHubContext = scope.ServiceProvider.GetRequiredService<IHubContext<TrainHub, ITrainClientContract>>();
         var tidHubContext = scope.ServiceProvider.GetRequiredService<IHubContext<TIDHub, ITIDClientContract>>();
-        var commanderTableHubContext = scope.ServiceProvider.GetRequiredService<IHubContext<CommanderTableHub, ICommanderTableClientContract>>();
-        var interlockingHubContext = scope.ServiceProvider.GetRequiredService<IHubContext<InterlockingHub, IInterlockingClientContract>>();
+        var commanderTableHubContext = scope.ServiceProvider
+            .GetRequiredService<IHubContext<CommanderTableHub, ICommanderTableClientContract>>();
+        var interlockingHubContext = scope.ServiceProvider
+            .GetRequiredService<IHubContext<InterlockingHub, IInterlockingClientContract>>();
         var signalService = scope.ServiceProvider.GetRequiredService<SignalService>();
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<SignalScheduler>>();
 
         var signalData = await signalService.CalcAllSignalIndication();
+
+        // 信号現示の変化をログ出力
+        var changes = signalData
+            .Select(signal => new
+            {
+                signal.Name,
+                OldPhase = _oldSignalDataByName.GetValueOrDefault(signal.Name, Phase.None),
+                signal.phase
+            })
+            .Where(x => x.OldPhase != x.phase)
+            .Select(x => $"{x.Name}:{x.OldPhase}→{x.phase}")
+            .ToList();
+
+        if (changes.Count > 0)
+        {
+            logger.LogDebug("信号現示変化: {Changes}", string.Join("\n", changes));
+        }
+
+        // 現在の信号データを保存
+        _oldSignalDataByName = signalData.ToDictionary(s => s.Name, s => s.phase);
 
         await Task.WhenAll(
             trainHubContext.Clients.All.ReceiveSignalData(signalData),
