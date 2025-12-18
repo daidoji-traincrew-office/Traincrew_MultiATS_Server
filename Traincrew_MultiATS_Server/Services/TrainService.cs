@@ -99,8 +99,8 @@ public partial class TrainService(
         // 在線軌道回路の更新
         if (incrementalTrackCircuitDataList.Count > 0 || decrementalTrackCircuitDataList.Count > 0)
         {
-            logger.LogDebug("[在線更新] 列車: {trainNumber}, 落下: [{NewTrackCircuits}], 扛上: [{EndTrackCircuits}]",
-                clientTrainNumber,
+            logger.LogDebug("[{LogType}] 列車: {trainNumber}, 落下: [{NewTrackCircuits}], 扛上: [{EndTrackCircuits}]",
+                "在線更新", clientTrainNumber,
                 string.Join(", ", incrementalTrackCircuitDataList.Select(tc => tc.Name)),
                 string.Join(", ", decrementalTrackCircuitDataList.Select(tc => tc.Name)));
         }

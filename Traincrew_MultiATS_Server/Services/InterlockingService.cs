@@ -149,8 +149,8 @@ public class InterlockingService(
 
         if (oldState != leverData.State)
         {
-            logger.LogDebug("[てこ操作] 名前: {Name} 状態: {OldState} -> {NewState}",
-                lever.Name, oldState, leverData.State);
+            logger.LogDebug("[{LogType}] 名前: {LeverName} 状態: {OldState} -> {NewState}",
+                "てこ操作", lever.Name, oldState, leverData.State);
         }
 
         await generalRepository.Save(lever);
@@ -287,8 +287,8 @@ public class InterlockingService(
 
         if (oldIsRaised != buttonData.IsRaised)
         {
-            logger.LogDebug("[着点操作] 名前: {Name} 状態: {OldState} -> {NewState}",
-                buttonObject.DestinationButtonState.Name, oldIsRaised, buttonData.IsRaised);
+            logger.LogDebug("[{LogType}] 名前: {ButtonName} 状態: {OldState} -> {NewState}",
+                "着点操作", buttonObject.DestinationButtonState.Name, oldIsRaised, buttonData.IsRaised);
         }
 
         await generalRepository.Save(buttonObject.DestinationButtonState);
