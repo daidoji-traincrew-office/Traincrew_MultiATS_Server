@@ -38,7 +38,8 @@ public class SignalScheduler(IServiceScopeFactory serviceScopeFactory) : Schedul
 
         foreach (var change in changes)
         {
-           logger.LogDebug("[信号現示変化] 名前: {Name} 現示: {OldPhase} -> {Phase}", change.Name, change.OldPhase, change.Phase);
+           logger.LogDebug("[{LogType}] 名前: {SignalName} 現示: {OldPhase} -> {Phase}",
+               "信号現示変化", change.Name, change.OldPhase, change.Phase);
         }
 
         // 現在の信号データを保存
