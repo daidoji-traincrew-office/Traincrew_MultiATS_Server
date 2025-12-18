@@ -31,15 +31,14 @@ public class SignalScheduler(IServiceScopeFactory serviceScopeFactory) : Schedul
             {
                 signal.Name,
                 OldPhase = _oldSignalDataByName.GetValueOrDefault(signal.Name, Phase.None),
-                signal.phase
+                Phase = signal.phase
             })
-            .Where(x => x.OldPhase != x.phase)
-            .Select(x => $"{x.Name}:{x.OldPhase}→{x.phase}")
+            .Where(x => x.OldPhase != x.Phase)
             .ToList();
 
-        if (changes.Count > 0)
+        foreach (var change in changes)
         {
-            logger.LogDebug("信号現示変化: {Changes}", string.Join("\n", changes));
+           logger.LogDebug("[信号現示変化] 名前: {Name} 現示: {OldPhase} -> {Phase}", change.Name, change.OldPhase, change.Phase);
         }
 
         // 現在の信号データを保存
