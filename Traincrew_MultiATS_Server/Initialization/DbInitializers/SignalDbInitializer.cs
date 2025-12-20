@@ -119,37 +119,46 @@ public class SignalDbInitializer(ApplicationDbContext context, ILogger<SignalDbI
         CancellationToken cancellationToken = default)
     {
         const int maxDepth = 4;
+
+        // 既存のNextSignalsを事前に取得してHashSetに格納（N+1問題の回避）
+        var existingNextSignals = await _context.NextSignals
+            .ToListAsync(cancellationToken);
+        var existingNextSignalSet = existingNextSignals
+            .Select(ns => (ns.SignalName, ns.TargetSignalName))
+            .ToHashSet();
+
         foreach (var signalData in signalDataList)
         {
             var nextSignalNames = signalData.NextSignalNames ?? [];
             foreach (var nextSignalName in nextSignalNames)
             {
-                // Todo: ここでN+1問題が発生しているので、改善したほうが良いかも
                 // 既に登録済みの場合、スキップ
-                if (_context.NextSignals.Any(ns =>
-                        ns.SignalName == signalData.Name && ns.TargetSignalName == nextSignalName))
+                if (existingNextSignalSet.Contains((signalData.Name, nextSignalName)))
                 {
                     continue;
                 }
 
-                _context.NextSignals.Add(new()
+                var nextSignal = new NextSignal
                 {
                     SignalName = signalData.Name,
                     SourceSignalName = signalData.Name,
                     TargetSignalName = nextSignalName,
                     Depth = 1
-                });
+                };
+
+                _context.NextSignals.Add(nextSignal);
+                existingNextSignals.Add(nextSignal);
+                // 追加したものもHashSetに追加して、後続の処理で重複を防ぐ
+                existingNextSignalSet.Add((signalData.Name, nextSignalName));
             }
         }
 
         await _context.SaveChangesAsync(cancellationToken);
 
         var allSignals = await _context.Signals.ToListAsync(cancellationToken);
-        var nextSignalList = await _context.NextSignals
+        var nextSignalsBySignalName = existingNextSignals
             .Where(ns => ns.Depth == 1)
             .GroupBy(ns => ns.SignalName)
-            .ToListAsync(cancellationToken);
-        var nextSignalDict = nextSignalList
             .ToDictionary(
                 g => g.Key,
                 g => g.Select(ns => ns.TargetSignalName).ToList()
@@ -158,15 +167,13 @@ public class SignalDbInitializer(ApplicationDbContext context, ILogger<SignalDbI
         // Todo: このロジック、絶対テスト書いたほうがいい(若干複雑な処理をしてしまったので)
         for (var depth = 2; depth <= maxDepth; depth++)
         {
-            var nextNextSignalDict = await _context.NextSignals
+            var nextNextSignalDict = existingNextSignals
                 .Where(ns => ns.Depth == depth - 1)
                 .GroupBy(ns => ns.SignalName)
-                .ToDictionaryAsync(
+                .ToDictionary(
                     g => g.Key,
-                    g => g.Select(ns => ns.TargetSignalName).ToList(),
-                    cancellationToken
+                    g => g.Select(ns => ns.TargetSignalName).ToList()
                 );
-            List<NextSignal> nextNextSignals = [];
             // 全信号機でループ
             foreach (var signal in allSignals)
             {
@@ -179,31 +186,37 @@ public class SignalDbInitializer(ApplicationDbContext context, ILogger<SignalDbI
                 foreach (var nextSignal in nextSignals)
                 {
                     // 次信号機の次信号機を取ってくる
-                    if (!nextSignalDict.TryGetValue(nextSignal, out var nnSignals))
+                    if (!nextSignalsBySignalName.TryGetValue(nextSignal, out var nnSignals))
                     {
                         continue;
                     }
 
-                    foreach (var nextNextSignal in nnSignals)
+                    foreach (var nnSignalName in nnSignals)
                     {
-                        // Todo: N+1問題が発生しているので、改善したほうが良いかも
-                        if (_context.NextSignals.Any(ns =>
-                                ns.SignalName == signal.Name && ns.TargetSignalName == nextNextSignal))
+                        // 既に登録済みの場合、スキップ
+                        if (existingNextSignalSet.Contains((signal.Name, nnSignalName)))
                         {
                             continue;
                         }
 
-                        _context.NextSignals.Add(new()
+                        var nnSignal = new NextSignal
                         {
                             SignalName = signal.Name,
                             SourceSignalName = nextSignal,
-                            TargetSignalName = nextNextSignal,
+                            TargetSignalName = nnSignalName,
                             Depth = depth
-                        });
-                        await _context.SaveChangesAsync(cancellationToken);
+                        };
+
+                        _context.NextSignals.Add(nnSignal);
+                        existingNextSignals.Add(nnSignal);
+                        // 追加したものもHashSetに追加して、後続の処理で重複を防ぐ
+                        existingNextSignalSet.Add((signal.Name, nnSignal.TargetSignalName));
                     }
                 }
             }
+
+            // 各depthの処理が終わった後にまとめて保存
+            await _context.SaveChangesAsync(cancellationToken);
         }
 
         _logger.LogInformation("Initialized next signals up to depth {MaxDepth}", maxDepth);
