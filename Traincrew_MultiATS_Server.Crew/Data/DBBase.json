@@ -4977,11 +4977,41 @@
             "TrackCircuitName": null
         },
         {
+            "Name": "大道寺下り場内11L中継",
+            "phase": 1,
+            "TypeName": "中継（灯列）",
+            "NextSignalNames": [
+                "大道寺下り場内11L"
+            ],
+            "RouteNames": [
+                "TH65_12L"
+            ],
+            "DirectionRouteLeft": null,
+            "DirectionRouteRight": null,
+            "Direction": null,
+            "TrackCircuitName": null
+        },
+        {
             "Name": "大道寺下り場内12L",
             "phase": 1,
             "TypeName": "4灯YY式",
             "NextSignalNames": [
                 "大道寺下り出発6L"
+            ],
+            "RouteNames": [
+                "TH65_12L"
+            ],
+            "DirectionRouteLeft": null,
+            "DirectionRouteRight": null,
+            "Direction": null,
+            "TrackCircuitName": null
+        },
+        {
+            "Name": "大道寺下り場内12L中継",
+            "phase": 1,
+            "TypeName": "中継（灯列）",
+            "NextSignalNames": [
+                "大道寺下り場内12L"
             ],
             "RouteNames": [
                 "TH65_12L"
@@ -9280,27 +9310,7 @@
             "LeverConditionName": ""
         },
         {
-            "SourceRouteName": "TH65_31LSC",
-            "TargetRouteName": "TH65_27L",
-            "LeverConditionName": ""
-        },
-        {
-            "SourceRouteName": "TH65_32LSC",
-            "TargetRouteName": "TH65_27L",
-            "LeverConditionName": ""
-        },
-        {
             "SourceRouteName": "TH65_29LSD",
-            "TargetRouteName": "TH65_28L",
-            "LeverConditionName": ""
-        },
-        {
-            "SourceRouteName": "TH65_31LSD",
-            "TargetRouteName": "TH65_28L",
-            "LeverConditionName": ""
-        },
-        {
-            "SourceRouteName": "TH65_32LSD",
             "TargetRouteName": "TH65_28L",
             "LeverConditionName": ""
         },
@@ -9507,6 +9517,11 @@
         {
             "SourceRouteName": "TH58_8R",
             "TargetRouteName": "TH58_10L",
+            "LeverConditionName": "TH58_99N"
+        },
+        {
+            "SourceRouteName": "TH57_12L",
+            "TargetRouteName": "TH58_1R",
             "LeverConditionName": "TH58_99N"
         }
     ]
