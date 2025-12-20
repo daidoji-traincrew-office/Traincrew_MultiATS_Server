@@ -476,6 +476,7 @@ public partial class TrainService(
     public async Task DeleteTrainState(string trainNumber)
     {
         await trainCarRepository.DeleteByTrainNumber(trainNumber);
+        await trainSignalStateRepository.DeleteByTrainNumber(trainNumber);
         await trainRepository.DeleteByTrainNumber(trainNumber);
     }
 
