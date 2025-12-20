@@ -26,7 +26,8 @@ public partial class TrainService(
     IGeneralRepository generalRepository,
     ServerService serverService,
     INextSignalRepository nextSignalRepository,
-    ITrainSignalStateRepository trainSignalStateRepository
+    ITrainSignalStateRepository trainSignalStateRepository,
+    ILogger<TrainService> logger
 )
 {
     [GeneratedRegex(@"\d+")]
@@ -100,6 +101,13 @@ public partial class TrainService(
         }
 
         // 在線軌道回路の更新
+        if (incrementalTrackCircuitDataList.Count > 0 || decrementalTrackCircuitDataList.Count > 0)
+        {
+            logger.LogDebug("[{LogType}] 列車: {trainNumber}, 落下: [{NewTrackCircuits}], 扛上: [{EndTrackCircuits}]",
+                "在線更新", clientTrainNumber,
+                string.Join(", ", incrementalTrackCircuitDataList.Select(tc => tc.Name)),
+                string.Join(", ", decrementalTrackCircuitDataList.Select(tc => tc.Name)));
+        }
         await trackCircuitService.SetTrackCircuitDataList(incrementalTrackCircuitDataList, clientTrainNumber);
         await trackCircuitService.ClearTrackCircuitDataList(decrementalTrackCircuitDataList);
 
