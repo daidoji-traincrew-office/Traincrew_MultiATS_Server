@@ -608,6 +608,10 @@ public partial class TrainService(
         var nextSignals = await nextSignalRepository.GetNextSignalByNamesOrderByDepthDesc(signalNames);
 
         // TargetSignalNameでFlatten.Distinctして返す
-        return nextSignals.Select(ns => ns.TargetSignalName).Distinct().ToList();
+        return nextSignals
+            .Select(ns => ns.TargetSignalName)
+            .Concat(signalNames)
+            .Distinct()
+            .ToList();
     }
 }
