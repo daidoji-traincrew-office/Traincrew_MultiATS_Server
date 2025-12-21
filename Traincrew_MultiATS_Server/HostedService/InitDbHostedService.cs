@@ -959,6 +959,7 @@ internal partial class DbInitializer(
             // 既に "Z -> X中継" のリンクが存在する場合は除外
             .Where(link => !depth1NextSignals.Any(ns =>
                 ns.SignalName == link.SourceSignalName && ns.TargetSignalName == link.RelaySignalName))
+            .Distinct()
             // NextSignalオブジェクトを生成
             .Select(link => new NextSignal
             {
