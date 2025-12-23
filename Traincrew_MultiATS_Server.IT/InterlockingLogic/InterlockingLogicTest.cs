@@ -1,3 +1,4 @@
+using System.Text;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
@@ -138,8 +139,12 @@ public class InterlockingLogicTest(WebApplicationFixture factory) : IAsyncLifeti
         try
         {
             var success = await ExecuteRouteTestAsync(testCase, _hub);
+
+            // テストが失敗した場合、デバッグ情報を出力
+            var debugInfo = success ? "" : await GetDebugInfoAsync(testCase.StationId);
+
             Assert.True(success,
-                $"進路 {testCase.RouteName} の信号機 {testCase.SignalName} が開通しませんでした");
+                $"進路 {testCase.RouteName} の信号機 {testCase.SignalName} が開通しませんでした\n{debugInfo}");
         }
         finally
         {
@@ -234,5 +239,80 @@ public class InterlockingLogicTest(WebApplicationFixture factory) : IAsyncLifeti
         }
 
         return true;
+    }
+
+    /// <summary>
+    /// デバッグ情報を取得する
+    /// 指定された駅IDで始まる進路と軌道回路の状態を取得して返す
+    /// </summary>
+    private async Task<string> GetDebugInfoAsync(string stationId)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine();
+        sb.AppendLine("=== デバッグ情報 ===");
+        sb.AppendLine($"駅ID: {stationId}");
+        sb.AppendLine();
+
+        try
+        {
+            // 駅IDで始まる進路を取得
+            using var scope = factory.Services.CreateScope();
+            var routeRepository = scope.ServiceProvider.GetRequiredService<IRouteRepository>();
+            var routes = await routeRepository.GetByStationIds([stationId]);
+
+            sb.AppendLine($"--- 進路情報 ({routes.Count}件) ---");
+            foreach (var route in routes.OrderBy(r => r.Name))
+            {
+                sb.AppendLine($"進路: {route.Name} (ID: {route.Id})");
+                if (route.RouteState != null)
+                {
+                    sb.AppendLine($"  てこ反応リレー: {route.RouteState.IsLeverRelayRaised}");
+                    sb.AppendLine($"  転てつ器無し進路照査リレー: {route.RouteState.IsRouteRelayWithoutSwitchingMachineRaised}");
+                    sb.AppendLine($"  進路照査リレー: {route.RouteState.IsRouteRelayRaised}");
+                    sb.AppendLine($"  信号制御リレー: {route.RouteState.IsSignalControlRaised}");
+                    sb.AppendLine($"  接近鎖錠リレー(MR): {route.RouteState.IsApproachLockMRRaised}");
+                    sb.AppendLine($"  接近鎖錠リレー(MS): {route.RouteState.IsApproachLockMSRaised}");
+                    sb.AppendLine($"  進路鎖錠リレー: {route.RouteState.IsRouteLockRaised}");
+                    sb.AppendLine($"  総括反応リレー(XR): {route.RouteState.IsThrowOutXRRelayRaised}");
+                    sb.AppendLine($"  総括反応中継リレー(YS): {route.RouteState.IsThrowOutYSRelayRaised}");
+                    sb.AppendLine($"  総括Xリレー: {route.RouteState.IsThrowOutXRelayRaised}");
+                    sb.AppendLine($"  総括Sリレー: {route.RouteState.IsThrowOutSRelayRaised}");
+                    sb.AppendLine($"  CTCリレー: {route.RouteState.IsCtcRelayRaised}");
+                }
+                sb.AppendLine();
+            }
+
+            // 軌道回路情報を取得（駅IDで始まるもの）
+            var currentData = _latestData;
+            if (currentData?.TrackCircuits != null)
+            {
+                var stationTrackCircuits = currentData.TrackCircuits
+                    .Where(tc => tc.Name.StartsWith(stationId))
+                    .OrderBy(tc => tc.Name)
+                    .ToList();
+
+                sb.AppendLine($"--- 軌道回路情報 ({stationTrackCircuits.Count}件) ---");
+                foreach (var tc in stationTrackCircuits)
+                {
+                    sb.AppendLine($"軌道回路: {tc.Name}");
+                    sb.AppendLine($"  状態(On): {tc.On}");
+                    sb.AppendLine($"  ロック: {tc.Lock}");
+                    sb.AppendLine($"  最後に踏んだ列車: {(string.IsNullOrEmpty(tc.Last) ? "(なし)" : tc.Last)}");
+                    sb.AppendLine();
+                }
+            }
+            else
+            {
+                sb.AppendLine("--- 軌道回路情報 ---");
+                sb.AppendLine("軌道回路データが取得できませんでした");
+            }
+        }
+        catch (System.Exception ex)
+        {
+            sb.AppendLine($"デバッグ情報の取得中にエラーが発生しました: {ex.Message}");
+        }
+
+        sb.AppendLine("==================");
+        return sb.ToString();
     }
 }
