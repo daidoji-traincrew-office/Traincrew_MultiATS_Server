@@ -594,6 +594,7 @@ public partial class TrainService(
     /// <returns>次の信号機名リスト</returns>
     private async Task<List<string>> GetNextSignalNames(string trainNumber, List<string> visibleSignalNames)
     {
+        const int maxDepth = 3;
         List<string> signalNames;
 
         if (visibleSignalNames is { Count: > 0 })
@@ -613,7 +614,7 @@ public partial class TrainService(
         }
 
         // NextSignal.SignalNameが一致しているものをすべて取得
-        var nextSignals = await nextSignalRepository.GetNextSignalByNamesOrderByDepthDesc(signalNames);
+        var nextSignals = await nextSignalRepository.GetByNamesAndMaxDepthOrderByDepth(signalNames, maxDepth);
 
         // TargetSignalNameでFlatten.Distinctして返す
         return nextSignals

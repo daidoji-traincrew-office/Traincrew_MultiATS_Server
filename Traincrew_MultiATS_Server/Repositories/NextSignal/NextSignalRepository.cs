@@ -26,4 +26,12 @@ public class NextSignalRepository(ApplicationDbContext context): INextSignalRepo
             .Where(s => s.Depth == depth)
             .ToListAsync();
     }
+
+    public async Task<List<Models.NextSignal>> GetByNamesAndMaxDepthOrderByDepth(List<string> signalNames, int depth)
+    {
+        return await context.NextSignals
+            .Where(s => signalNames.Contains(s.SignalName) && s.Depth <= depth)
+            .OrderBy(s => s.Depth)
+            .ToListAsync();
+    }
 }
