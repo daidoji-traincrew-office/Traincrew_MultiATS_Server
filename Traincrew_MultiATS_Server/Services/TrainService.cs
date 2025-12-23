@@ -617,9 +617,8 @@ public partial class TrainService(
         var nextSignals = await nextSignalRepository.GetByNamesAndMaxDepthOrderByDepth(signalNames, maxDepth);
 
         // TargetSignalNameでFlatten.Distinctして返す
-        return nextSignals
-            .Select(ns => ns.TargetSignalName)
-            .Concat(signalNames)
+        return signalNames
+            .Concat(nextSignals.Select(ns => ns.TargetSignalName))
             .Distinct()
             .ToList();
     }
