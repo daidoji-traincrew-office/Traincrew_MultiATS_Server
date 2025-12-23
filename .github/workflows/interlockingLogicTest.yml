@@ -110,13 +110,6 @@ jobs:
         env:
           TEST_STATION_ID: ${{ matrix.station }}
 
-      - name: Upload Test Results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results-${{ matrix.station }}
-          path: "Traincrew_MultiATS_Server.IT/TestResults/**/*_results.trx"
-
       - name: Output Database Logs
         if: always()
         working-directory: ./Database
