@@ -258,7 +258,9 @@ public class InterlockingLogicTest(WebApplicationFixture factory) : IAsyncLifeti
             // 駅IDで始まる進路を取得
             using var scope = factory.Services.CreateScope();
             var routeRepository = scope.ServiceProvider.GetRequiredService<IRouteRepository>();
-            var routes = await routeRepository.GetByStationIds([stationId]);
+            var routes = await routeRepository.GetByIdsWithState(
+                (await routeRepository.GetByStationIds([stationId])).Select(r => r.Id).ToList()
+            );
 
             sb.AppendLine($"--- 進路情報 ({routes.Count}件) ---");
             foreach (var route in routes.OrderBy(r => r.Name))
