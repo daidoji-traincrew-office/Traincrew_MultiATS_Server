@@ -155,7 +155,7 @@ public class InterlockingLogicTest(WebApplicationFixture factory) : IAsyncLifeti
                 State = LCR.Center
             });
             // クリーンアップ後、少し待機して状態を安定させる
-            await Task.Delay(TimeSpan.FromMilliseconds(500), TestContext.Current.CancellationToken);
+            await Task.Delay(TimeSpan.FromMilliseconds(1000), TestContext.Current.CancellationToken);
         }
     }
 
