@@ -13,19 +13,28 @@ jobs:
       matrix:
         # 単一駅での並列実行（デフォルト）
         station:
-          - TH58
-          - TH59
-          - TH61
-          - TH62
-          - TH63
-          - TH64
-          - TH65
-          - TH66S
-          - TH67
-          - TH70
           - TH71
-          - TH75
-          - TH76
+          - TH71
+          - TH71
+          - TH71
+          - TH71
+          - TH71
+          - TH71
+          - TH71
+          - TH71
+          - TH71
+          - TH71
+          - TH71
+          - TH71
+          - TH71
+          - TH71
+          - TH71
+          - TH71
+          - TH71
+          - TH71
+          - TH71
+          - TH71
+          - TH71
 
         # Matrix上限に達した場合は、以下のようにグループ化可能
         # station:
