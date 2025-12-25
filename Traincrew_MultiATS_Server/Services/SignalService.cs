@@ -172,8 +172,11 @@ public class SignalService(
                 signal.DirectionRouteRight.DirectionRouteState.isLr == signal.Direction)
         )
         {
-            // 次の信号機名を取得
-            var nextSignalNames = nextSignalDict.GetValueOrDefault(signalName, []);
+            // 次の信号機名を取得(ただし、中継信号機は除外する)
+            var nextSignalNames = nextSignalDict
+                .GetValueOrDefault(signalName, [])
+                .Where(x => !x.Contains("中継"))
+                .ToList();
             // 次の信号機の情報を取得
             var nextSignalIndications = nextSignalNames
                 .Select(x => CalcSignalIndicationRecursive(x, signals, nextSignalDict, routeDict, cache, remainingSignals))

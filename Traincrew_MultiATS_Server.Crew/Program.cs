@@ -48,6 +48,7 @@ using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
 using Traincrew_MultiATS_Server.Repositories.Train;
 using Traincrew_MultiATS_Server.Repositories.TrainCar;
 using Traincrew_MultiATS_Server.Repositories.TrainDiagram;
+using Traincrew_MultiATS_Server.Repositories.TrainSignalState;
 using Traincrew_MultiATS_Server.Repositories.Transaction;
 using Traincrew_MultiATS_Server.Repositories.TtcWindow;
 using Traincrew_MultiATS_Server.Repositories.TtcWindowLink;
@@ -497,6 +498,7 @@ public class Program
             .AddScoped<ITrainRepository, TrainRepository>()
             .AddScoped<ITrainCarRepository, TrainCarRepository>()
             .AddScoped<ITrainDiagramRepository, TrainDiagramRepository>()
+            .AddScoped<ITrainSignalStateRepository, TrainSignalStateRepository>()
             .AddScoped<ITtcWindowRepository, TtcWindowRepository>()
             .AddScoped<ITtcWindowLinkRepository, TtcWindowLinkRepository>()
             .AddScoped<ITransactionRepository, TransactionRepository>()
