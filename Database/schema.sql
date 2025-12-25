@@ -590,6 +590,17 @@ CREATE TABLE train_state
 );
 CREATE index train_state_dia_number_index ON train_state USING hash (dia_number);
 
+-- 列車信号状態
+CREATE TABLE train_signal_state
+(
+    id           BIGSERIAL PRIMARY KEY,                             -- ID
+    train_number VARCHAR(100) NOT NULL,                             -- 列車番号
+    signal_name  VARCHAR(100) NOT NULL REFERENCES signal (name),    -- 信号名
+    UNIQUE (train_number, signal_name)
+);
+CREATE INDEX train_signal_state_train_number_index ON train_signal_state (train_number);
+CREATE INDEX train_signal_state_signal_name_index ON train_signal_state (signal_name);
+
 -- 列車車両情報
 CREATE TABLE train_car_state
 (
