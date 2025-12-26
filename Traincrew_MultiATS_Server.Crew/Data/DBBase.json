@@ -2577,6 +2577,198 @@
             "ProtectionZone": 6
         },
         {
+            "Name": "TH66S_1T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_2T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_3T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_4T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_5T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_6T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_7T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_8T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_9T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_21T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_22T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_23T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_27T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_28T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_29T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_30T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_61T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_69T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_70T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_71T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_72T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_73T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_74T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_76T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
             "Name": "TH67_1RAT",
             "Last": "",
             "On": false,
