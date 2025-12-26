@@ -137,8 +137,9 @@ public class TtcStationControlService(
     {
         if (recallCounter > 20)
         {
-            // Todo: ロガー仕込んでおいたほうが安全な気がする
             //再帰呼出しが20回を超えた場合は無限ループの可能性があるので終了
+            logger.LogError("TrainTrackingProcess reached maximum recursion limit (20) for SourceTtcWindowName: {SourceTtcWindowName}",
+                SourceTtcWindowName);
             return;
         }
 
