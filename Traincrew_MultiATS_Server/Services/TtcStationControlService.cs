@@ -214,7 +214,6 @@ public class TtcStationControlService(
                 continue;
             }
 
-
             if (!trackCircuit.TrackCircuitState.IsShortCircuit)
             {
                 continue;
