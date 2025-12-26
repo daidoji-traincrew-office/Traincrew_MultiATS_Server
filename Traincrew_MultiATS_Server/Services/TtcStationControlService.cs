@@ -279,7 +279,7 @@ public class TtcStationControlService(
             //再起呼出してその次に行かないか確認する
             await TrainTrackingProcess(targetTtcWindow.Name, ttcWindowLinks, ttcWindows,
                 ttcWindowLinkRouteConditions, trackCircuits, routes, routeLockTrackCircuitCountByRouteId,
-                recallCounter++);
+                recallCounter + 1);
         }
     }
 
