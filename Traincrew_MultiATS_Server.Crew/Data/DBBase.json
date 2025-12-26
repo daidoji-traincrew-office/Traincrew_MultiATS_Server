@@ -2577,6 +2577,198 @@
             "ProtectionZone": 6
         },
         {
+            "Name": "TH66S_1T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_2T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_3T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_4T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_5T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_6T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_7T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_8T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_9T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_21T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_22T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_23T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_27T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_28T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_29T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_30T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_61T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_69T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_70T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_71T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_72T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_73T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_74T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
+            "Name": "TH66S_76T",
+            "Last": "",
+            "On": false,
+            "NextSignalNamesUp": [],
+            "NextSignalNamesDown": [],
+            "ProtectionZone": 6
+        },
+        {
             "Name": "TH67_1RAT",
             "Last": "",
             "On": false,
@@ -3950,228 +4142,6 @@
                 "下り閉塞71"
             ],
             "ProtectionZone": 3
-        },
-        {
-            "Name": "下り89T",
-            "Last": "",
-            "On": false,
-            "NextSignalNamesUp": [],
-            "NextSignalNamesDown": [
-                "津崎下り場内6LC",
-                "津崎下り場内6LD"
-            ],
-            "ProtectionZone": 3
-        },
-        {
-            "Name": "下り103T",
-            "Last": "",
-            "On": false,
-            "NextSignalNamesUp": [],
-            "NextSignalNamesDown": [
-                "浜園下り場内5L"
-            ],
-            "ProtectionZone": 4
-        },
-        {
-            "Name": "下り105T",
-            "Last": "",
-            "On": false,
-            "NextSignalNamesUp": [],
-            "NextSignalNamesDown": [
-                "下り閉塞103"
-            ],
-            "ProtectionZone": 4
-        },
-        {
-            "Name": "下り111T",
-            "Last": "",
-            "On": false,
-            "NextSignalNamesUp": [],
-            "NextSignalNamesDown": [
-                "下り閉塞105"
-            ],
-            "ProtectionZone": 4
-        },
-        {
-            "Name": "下り117T",
-            "Last": "",
-            "On": false,
-            "NextSignalNamesUp": [],
-            "NextSignalNamesDown": [
-                "下り閉塞111"
-            ],
-            "ProtectionZone": 4
-        },
-        {
-            "Name": "下り123T",
-            "Last": "",
-            "On": false,
-            "NextSignalNamesUp": [],
-            "NextSignalNamesDown": [
-                "下り閉塞117"
-            ],
-            "ProtectionZone": 4
-        },
-        {
-            "Name": "下り137T",
-            "Last": "",
-            "On": false,
-            "NextSignalNamesUp": [],
-            "NextSignalNamesDown": [
-                "新野崎下り場内10LC",
-                "新野崎下り場内10LD"
-            ],
-            "ProtectionZone": 5
-        },
-        {
-            "Name": "下り143T",
-            "Last": "",
-            "On": false,
-            "NextSignalNamesUp": [],
-            "NextSignalNamesDown": [
-                "下り閉塞137"
-            ],
-            "ProtectionZone": 5
-        },
-        {
-            "Name": "下り145T",
-            "Last": "",
-            "On": false,
-            "NextSignalNamesUp": [],
-            "NextSignalNamesDown": [
-                "下り閉塞143"
-            ],
-            "ProtectionZone": 5
-        },
-        {
-            "Name": "下り151T",
-            "Last": "",
-            "On": false,
-            "NextSignalNamesUp": [],
-            "NextSignalNamesDown": [
-                "下り閉塞145"
-            ],
-            "ProtectionZone": 6
-        },
-        {
-            "Name": "下り237T",
-            "Last": "",
-            "On": false,
-            "NextSignalNamesUp": [],
-            "NextSignalNamesDown": [
-                "日野森下り場内6L"
-            ],
-            "ProtectionZone": 10
-        },
-        {
-            "Name": "下り241T",
-            "Last": "",
-            "On": false,
-            "NextSignalNamesUp": [],
-            "NextSignalNamesDown": [
-                "下り閉塞237"
-            ],
-            "ProtectionZone": 10
-        },
-        {
-            "Name": "下り245T",
-            "Last": "",
-            "On": false,
-            "NextSignalNamesUp": [],
-            "NextSignalNamesDown": [
-                "下り閉塞241"
-            ],
-            "ProtectionZone": 10
-        },
-        {
-            "Name": "下り249T",
-            "Last": "",
-            "On": false,
-            "NextSignalNamesUp": [],
-            "NextSignalNamesDown": [
-                "下り閉塞245"
-            ],
-            "ProtectionZone": 10
-        },
-        {
-            "Name": "下り305T",
-            "Last": "",
-            "On": false,
-            "NextSignalNamesUp": [],
-            "NextSignalNamesDown": [],
-            "ProtectionZone": null
-        },
-        {
-            "Name": "下り311T",
-            "Last": "",
-            "On": false,
-            "NextSignalNamesUp": [],
-            "NextSignalNamesDown": [],
-            "ProtectionZone": null
-        },
-        {
-            "Name": "下り313T",
-            "Last": "",
-            "On": false,
-            "NextSignalNamesUp": [],
-            "NextSignalNamesDown": [],
-            "ProtectionZone": null
-        },
-        {
-            "Name": "下り317T",
-            "Last": "",
-            "On": false,
-            "NextSignalNamesUp": [],
-            "NextSignalNamesDown": [],
-            "ProtectionZone": null
-        },
-        {
-            "Name": "下り323T",
-            "Last": "",
-            "On": false,
-            "NextSignalNamesUp": [],
-            "NextSignalNamesDown": [],
-            "ProtectionZone": null
-        },
-        {
-            "Name": "下り397T",
-            "Last": "",
-            "On": false,
-            "NextSignalNamesUp": [],
-            "NextSignalNamesDown": [],
-            "ProtectionZone": null
-        },
-        {
-            "Name": "下り403T",
-            "Last": "",
-            "On": false,
-            "NextSignalNamesUp": [],
-            "NextSignalNamesDown": [],
-            "ProtectionZone": null
-        },
-        {
-            "Name": "下り405T",
-            "Last": "",
-            "On": false,
-            "NextSignalNamesUp": [],
-            "NextSignalNamesDown": [],
-            "ProtectionZone": null
-        },
-        {
-            "Name": "下り419T",
-            "Last": "",
-            "On": false,
-            "NextSignalNamesUp": [],
-            "NextSignalNamesDown": [],
-            "ProtectionZone": null
-        },
-        {
-            "Name": "下り425T",
-            "Last": "",
-            "On": false,
-            "NextSignalNamesUp": [],
-            "NextSignalNamesDown": [],
-            "ProtectionZone": null
         }
     ],
     "signalDataList": [
