@@ -222,7 +222,7 @@ public class TtcStationControlService(
             var trainNumber = trackCircuit.TrackCircuitState.TrainNumber;
             if (sourceTtcWindow.TtcWindowState.TrainNumber != trainNumber)
             {
-                // 軌道回路の列番と前窓の列番が異なる場合はスキップ   
+                // 軌道回路の列番と前窓の列番が異なる場合はスキップ
                 continue;
             }
 
