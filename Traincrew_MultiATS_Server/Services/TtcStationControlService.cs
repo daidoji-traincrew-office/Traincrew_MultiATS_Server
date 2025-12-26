@@ -3,6 +3,7 @@ using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.General;
 using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
 using Traincrew_MultiATS_Server.Repositories.Route;
+using Traincrew_MultiATS_Server.Repositories.RouteLockTrackCircuit;
 using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
 using Traincrew_MultiATS_Server.Repositories.TtcWindow;
 using Traincrew_MultiATS_Server.Repositories.TtcWindowLink;
@@ -16,6 +17,7 @@ public class TtcStationControlService(
     IInterlockingObjectRepository interlockingObjectRepository,
     ITrackCircuitRepository trackCircuitRepository,
     IRouteRepository routeRepository,
+    IRouteLockTrackCircuitRepository routeLockTrackCircuitRepository,
     IGeneralRepository generalRepository
 )
 {
@@ -51,6 +53,12 @@ public class TtcStationControlService(
         //進路IDに対応する進路オブジェクトを取得
         var routes = (await routeRepository.GetByIdsWithState(routeIds))
             .ToDictionary(obj => obj.Id);
+
+        //進路鎖錠の対象軌道回路数を進路IDごとに取得
+        var routeLockTrackCircuits = await routeLockTrackCircuitRepository.GetByRouteIds(routeIds);
+        var routeLockTrackCircuitCountByRouteId = routeLockTrackCircuits
+            .GroupBy(obj => obj.RouteId)
+            .ToDictionary(group => group.Key, group => group.Count());
 
         foreach (var ttcWindow in ttcWindows)
         {
@@ -107,7 +115,8 @@ public class TtcStationControlService(
                 ttcWindows,
                 ttcWindowLinkRouteConditions,
                 trackCircuits,
-                routes
+                routes,
+                routeLockTrackCircuitCountByRouteId
             );
         }
     }
@@ -119,6 +128,7 @@ public class TtcStationControlService(
         List<TtcWindowLinkRouteCondition> ttcWindowLinkRouteConditions,
         Dictionary<ulong, TrackCircuit> trackCircuits,
         Dictionary<ulong, Route> routes,
+        Dictionary<ulong, int> routeLockTrackCircuitCountByRouteId,
         int recallCounter = 0
         )
     {
@@ -172,9 +182,9 @@ public class TtcStationControlService(
                     sourceTtcWindow.TtcWindowState.TrainNumber = string.Empty;
                     await generalRepository.Save(sourceTtcWindow.TtcWindowState);
                     await generalRepository.Save(targetTtcWindow.TtcWindowState);
-                    //再起呼出してその次に行かないか確認する
-                    await TrainTrackingProcess(targetTtcWindow.Name, ttcWindowLinks, ttcWindows,
-                        ttcWindowLinkRouteConditions, trackCircuits, routes, recallCounter++);
+            //再起呼出してその次に行かないか確認する
+            await TrainTrackingProcess(targetTtcWindow.Name, ttcWindowLinks, ttcWindows,
+                ttcWindowLinkRouteConditions, trackCircuits, routes, routeLockTrackCircuitCountByRouteId, recallCounter++);
                 }
                 continue;
             }
@@ -211,11 +221,28 @@ public class TtcStationControlService(
             }
 
             // いずれかの進路が条件を満たしていればOK
+            // 進路鎖錠の対象軌道回路が1回路の場合は進路鎖錠条件を無視する
             if (!targetTtcWindowLinkRouteConditions.Any(cond =>
             {
                 var routeState = routes.GetValueOrDefault(cond.RouteId)?.RouteState;
-                return routeState != null &&
-                       (routeState.IsRouteLockRaised == RaiseDrop.Drop && routeState.IsApproachLockMRRaised == RaiseDrop.Raise);
+                if (routeState == null)
+                {
+                    return false;
+                }
+                // 接近鎖錠MRリレーが扛上していない場合は条件を満たさない
+                if (routeState.IsApproachLockMRRaised != RaiseDrop.Raise)
+                {
+                    return false;
+                }
+                // 進路鎖錠の対象軌道回路数を取得（存在しない場合は0とする）
+                var trackCircuitCount = routeLockTrackCircuitCountByRouteId.GetValueOrDefault(cond.RouteId, 0);
+                // 対象軌道回路が1回路の場合は進路鎖錠条件を無視
+                if (trackCircuitCount == 1)
+                {
+                    return true;
+                }
+                // 通常は進路鎖錠が落下していることを確認
+                return routeState.IsRouteLockRaised == RaiseDrop.Drop;
             }))
             {
                 continue;
@@ -233,7 +260,7 @@ public class TtcStationControlService(
             await generalRepository.Save(targetTtcWindow.TtcWindowState);
             //再起呼出してその次に行かないか確認する
             await TrainTrackingProcess(targetTtcWindow.Name, ttcWindowLinks, ttcWindows,
-                ttcWindowLinkRouteConditions, trackCircuits, routes, recallCounter++);
+                ttcWindowLinkRouteConditions, trackCircuits, routes, routeLockTrackCircuitCountByRouteId, recallCounter++);
         }
     }
 
