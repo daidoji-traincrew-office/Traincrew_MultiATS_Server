@@ -3,8 +3,8 @@ const fs = require('fs').promises;
 const path = require('path');
 
 // スプレッドシートのID
-const RENDO_SPREADSHEET_ID = process.env.RENDO_SPREADSHEET_ID; 
-const MASTER_SPREADSHEET_ID = process.env.MASTER_SPREADSHEET_ID 
+const RENDO_SPREADSHEET_ID = process.env.RENDO_SPREADSHEET_ID;
+const MASTER_SPREADSHEET_ID = process.env.MASTER_SPREADSHEET_ID
 
 // データディレクトリ
 const DATA_DIR = path.join(process.cwd(), 'Traincrew_MultiATS_Server.Crew', 'Data');
@@ -17,7 +17,7 @@ const RENDO_RANGES = [
     ['津崎', 'TH71', ['C26:S41']],
     ['浜園', 'TH70', ['C22:S33']],
     ['新野崎', 'TH67', ['C28:S57']],
-    ['江ノ原', 'TH66S', ['', 'C6:S53', 'C7:S57', 'C7:S18']],
+    ['江ノ原', 'TH66S', ['', 'C6:S53', 'C7:S57', 'C7:S38']],
     ['大道寺', 'TH65', ['C32:S56', 'C7:S56', 'C6:S58']],
     ['藤江', 'TH64', ['C34:S57']],
     ['水越', 'TH63', ['C30:S53']],
@@ -49,7 +49,7 @@ const MASTER_RANGES_NO_REMOVE_FIRST_EMPTY = [
  * Google Sheets APIクライアントを初期化
  */
 async function getAuthClient() {
-    const {GoogleAuth} = require('google-auth-library');
+    const { GoogleAuth } = require('google-auth-library');
 
     const authOptions = {
         scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly']
@@ -167,11 +167,11 @@ async function main() {
     try {
         // 認証クライアントを取得
         const authClient = await getAuthClient();
-        const sheets = sheetsApi.sheets({version: 'v4', auth: authClient});
+        const sheets = sheetsApi.sheets({ version: 'v4', auth: authClient });
 
         // ディレクトリを作成
-        await fs.mkdir(DATA_DIR, {recursive: true});
-        await fs.mkdir(RENDO_DIR, {recursive: true});
+        await fs.mkdir(DATA_DIR, { recursive: true });
+        await fs.mkdir(RENDO_DIR, { recursive: true });
 
         console.log('連動図表のエクスポートを開始します...');
         await exportOneDataToCSV(
