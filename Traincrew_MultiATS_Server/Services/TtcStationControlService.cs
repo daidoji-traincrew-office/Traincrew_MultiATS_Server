@@ -88,6 +88,7 @@ public class TtcStationControlService(
                             //trackCircuitsListとshortCircuitTrackCircuitsの軌道回路の数が一致する場合のみ、列番を設定する
                             if (shortCircuitTrackCircuits.Count == trackCircuitsList.Count && ttcWindow.TtcWindowState.TrainNumber != trainNumber)
                             {
+                                // Todo: 全探索になっているので、列番が一致するTtcWindowを高速に検索するためのデータ構造を検討する
                                 var duplicatedWindows = ttcWindows
                                     .Where(w => w != ttcWindow
                                         && w.TtcWindowState != null
