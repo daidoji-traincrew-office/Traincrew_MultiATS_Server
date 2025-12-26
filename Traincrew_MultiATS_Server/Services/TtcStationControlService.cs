@@ -18,7 +18,8 @@ public class TtcStationControlService(
     ITrackCircuitRepository trackCircuitRepository,
     IRouteRepository routeRepository,
     IRouteLockTrackCircuitRepository routeLockTrackCircuitRepository,
-    IGeneralRepository generalRepository
+    IGeneralRepository generalRepository,
+    ILogger<TtcStationControlService> logger
 )
 {
     public async Task TrainTracking()
@@ -198,6 +199,14 @@ public class TtcStationControlService(
 
             //窓リンクに対応する軌道回路オブジェクトを取得
             var trackCircuit = trackCircuits.GetValueOrDefault(ttcWindowLink.TrackCircuitCondition.Value);
+
+            if (trackCircuit == null)
+            {
+                logger.LogError(
+                    "Track circuit not found for TtcWindowLink ID: {ttcWindowLinkId}, TrackCircuitId: {trackCircuitId}",
+                    ttcWindowLink.Id, ttcWindowLink.TrackCircuitCondition.Value);
+                continue;
+            }
 
 
             if (!trackCircuit.TrackCircuitState.IsShortCircuit)
