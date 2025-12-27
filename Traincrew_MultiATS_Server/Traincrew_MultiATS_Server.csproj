@@ -21,7 +21,7 @@
     </ItemGroup>
     <!-- Exclude System.Linq.Async for .NET 10 as it's now included in the framework -->
     <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
-        <PackageReference Include="System.Linq.Async" ExcludeAssets="compile" />
+        <PackageReference Include="System.Linq.Async" Version="7.0.0" ExcludeAssets="compile" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\Traincrew_MultiATS_Server.Common\Traincrew_MultiATS_Server.Common.csproj"/>
