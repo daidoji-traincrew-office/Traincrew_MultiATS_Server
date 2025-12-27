@@ -19,7 +19,11 @@ COPY --link Traincrew_MultiATS_Server.Common/ Traincrew_MultiATS_Server.Common/
 COPY --link Traincrew_MultiATS_Server/ Traincrew_MultiATS_Server/
 COPY --link Traincrew_MultiATS_Server.Passenger/ Traincrew_MultiATS_Server.Passenger/
 # Publish app with specific project file
-RUN dotnet publish Traincrew_MultiATS_Server.Passenger/Traincrew_MultiATS_Server.Passenger.csproj -a $TARGETARCH --no-restore -o /app
+RUN dotnet publish Traincrew_MultiATS_Server.Passenger/Traincrew_MultiATS_Server.Passenger.csproj \
+    -a $TARGETARCH \
+    --no-restore \
+    -o /app \
+    -p:TargetFramework=net10.0
 
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:10.0
