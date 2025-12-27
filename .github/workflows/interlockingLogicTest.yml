@@ -64,7 +64,7 @@ jobs:
         run: dotnet restore
 
       - name: Build solution
-        run: dotnet build --no-restore --configuration Release
+        run: dotnet build --no-restore --configuration Release -p:TargetFramework=net10.0
 
       - name: Start Database
         working-directory: ./Database
