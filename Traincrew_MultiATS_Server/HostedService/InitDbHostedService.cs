@@ -11,6 +11,7 @@ using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.LockCondition;
 using Traincrew_MultiATS_Server.Scheduler;
 using Traincrew_MultiATS_Server.Services;
+using Lock = Traincrew_MultiATS_Server.Models.Lock;
 using Route = Traincrew_MultiATS_Server.Models.Route;
 
 namespace Traincrew_MultiATS_Server.HostedService;
@@ -117,7 +118,7 @@ public class InitDbHostedService(
             using var csv = new CsvReader(reader, config);
             var records = await csv
                 .GetRecordsAsync<RendoTableCSV>(cancellationToken)
-                .ToListAsync(cancellationToken);
+                .ToListAsync(cancellationToken: cancellationToken);
             var initializer =
                 new DbRendoTableInitializer(stationId, records, context, dateTimeRepository, logger, cancellationToken);
             initializers.Add(initializer);
@@ -148,7 +149,7 @@ public class InitDbHostedService(
         csv.Context.RegisterClassMap<OperationNotificationDisplayCsvMap>();
         var records = await csv
             .GetRecordsAsync<OperationNotificationDisplayCsv>(cancellationToken)
-            .ToListAsync(cancellationToken);
+            .ToListAsync(cancellationToken: cancellationToken);
         var trackCircuitNames = records
             .SelectMany(r => r.TrackCircuitNames)
             .ToList();
@@ -223,7 +224,7 @@ public class InitDbHostedService(
         csv.Context.RegisterClassMap<RouteLockTrackCircuitCsvMap>();
         var records = await csv
             .GetRecordsAsync<RouteLockTrackCircuitCsv>(cancellationToken)
-            .ToListAsync(cancellationToken);
+            .ToListAsync(cancellationToken: cancellationToken);
         var routes = await context.Routes
             .Select(r => new { r.Name, r.Id })
             .ToDictionaryAsync(r => r.Name, r => r.Id, cancellationToken);
@@ -303,12 +304,12 @@ public class InitDbHostedService(
         csv.Context.RegisterClassMap<TtcWindowCsvMap>();
         var records = await csv
             .GetRecordsAsync<TtcWindowCsv>(cancellationToken)
-            .ToListAsync(cancellationToken);
+            .ToListAsync(cancellationToken: cancellationToken);
 
         var existingWindows = await context.TtcWindows
             .Select(w => w.Name)
             .AsAsyncEnumerable()
-            .ToHashSetAsync(cancellationToken);
+            .ToHashSetAsync(cancellationToken: cancellationToken);
         var trackCircuitIdByName = await context.TrackCircuits
             .ToDictionaryAsync(tc => tc.Name, tc => tc.Id, cancellationToken);
 
@@ -371,12 +372,12 @@ public class InitDbHostedService(
         using var csv = new CsvReader(reader, config);
         csv.Context.RegisterClassMap<TtcWindowLinkCsvMap>();
         var records = await csv
-            .GetRecordsAsync<TtcWindowLinkCsv>(cancellationToken).ToListAsync(cancellationToken);
+            .GetRecordsAsync<TtcWindowLinkCsv>(cancellationToken).ToListAsync(cancellationToken: cancellationToken);
 
         var existingLinks = await context.TtcWindowLinks
             .Select(l => new { Source = l.SourceTtcWindowName, Target = l.TargetTtcWindowName })
             .AsAsyncEnumerable()
-            .ToHashSetAsync(cancellationToken);
+            .ToHashSetAsync(cancellationToken: cancellationToken);
         var trackCircuitIdByName = await context.TrackCircuits
             .ToDictionaryAsync(tc => tc.Name, tc => tc.Id, cancellationToken);
         var routeIdByName = await context.Routes
@@ -519,7 +520,7 @@ public class InitDbHostedService(
         csv.Context.RegisterClassMap<ThrowOutControlCsvMap>();
         var records = await csv
             .GetRecordsAsync<ThrowOutControlCsv>(cancellationToken)
-            .ToListAsync(cancellationToken);
+            .ToListAsync(cancellationToken: cancellationToken);
 
         var routesByName = await context.Routes
             .ToDictionaryAsync(r => r.Name, r => r, cancellationToken);
@@ -1140,16 +1141,16 @@ internal partial class DbInitializer(
         var switchingMachinesRoutes = await context.SwitchingMachineRoutes
             .Select(smr => new { smr.RouteId, smr.SwitchingMachineId })
             .AsAsyncEnumerable()
-            .ToHashSetAsync();
+            .ToHashSetAsync(cancellationToken: default);
         var routeIds = await context.Routes.Select(r => r.Id).ToListAsync();
         var switchingMachineIds = await context.SwitchingMachines
             .Select(sm => sm.Id)
             .AsAsyncEnumerable()
-            .ToHashSetAsync();
+            .ToHashSetAsync(cancellationToken: default);
         var trackCircuitIds = await context.TrackCircuits
             .Select(tc => tc.Id)
             .AsAsyncEnumerable()
-            .ToHashSetAsync();
+            .ToHashSetAsync(cancellationToken: default);
         var directLockConditionsByRouteIds = await lockConditionRepository
             .GetConditionsByObjectIdsAndType(routeIds, LockType.Lock);
         // 進路の進路鎖錠欄
