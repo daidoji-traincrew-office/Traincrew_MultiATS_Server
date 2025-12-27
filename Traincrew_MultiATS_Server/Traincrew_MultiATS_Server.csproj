@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
-        <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+        <TargetFramework>net10.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <OutputType>library</OutputType>
@@ -18,9 +18,7 @@
         <PackageReference Include="OpenIddict.AspNetCore" Version="5.8.0"/>
         <PackageReference Include="OpenIddict.EntityFrameworkCore" Version="5.8.0"/>
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2"/>
-    </ItemGroup>
-    <!-- Exclude System.Linq.Async for .NET 10 as it's now included in the framework -->
-    <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
+        <!-- Exclude System.Linq.Async for .NET 10 as it's now included in the framework -->
         <PackageReference Include="System.Linq.Async" Version="7.0.0" ExcludeAssets="compile" />
     </ItemGroup>
     <ItemGroup>

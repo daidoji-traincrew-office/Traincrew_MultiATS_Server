@@ -22,8 +22,7 @@ COPY --link Traincrew_MultiATS_Server.Passenger/ Traincrew_MultiATS_Server.Passe
 RUN dotnet publish Traincrew_MultiATS_Server.Passenger/Traincrew_MultiATS_Server.Passenger.csproj \
     -a $TARGETARCH \
     --no-restore \
-    -o /app \
-    -p:TargetFramework=net10.0
+    -o /app
 
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:10.0

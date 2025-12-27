@@ -20,8 +20,7 @@ COPY --link Traincrew_MultiATS_Server.Crew/* Traincrew_MultiATS_Server.Crew/
 RUN cd ./Traincrew_MultiATS_Server.Crew \
     && dotnet publish -a $TARGETARCH \
       --no-restore \
-      -o /app \
-      -p:TargetFramework=net10.0
+      -o /app
 
 
 # Runtime stage
