@@ -3,9 +3,11 @@ using System.Text.RegularExpressions;
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.General;
+using Traincrew_MultiATS_Server.Repositories.NextSignal;
 using Traincrew_MultiATS_Server.Repositories.Train;
 using Traincrew_MultiATS_Server.Repositories.TrainCar;
 using Traincrew_MultiATS_Server.Repositories.TrainDiagram;
+using Traincrew_MultiATS_Server.Repositories.TrainSignalState;
 using Traincrew_MultiATS_Server.Repositories.Transaction;
 
 namespace Traincrew_MultiATS_Server.Services;
@@ -22,7 +24,10 @@ public partial class TrainService(
     ITransactionRepository transactionRepository,
     BannedUserService bannedUserService,
     IGeneralRepository generalRepository,
-    ServerService serverService
+    ServerService serverService,
+    INextSignalRepository nextSignalRepository,
+    ITrainSignalStateRepository trainSignalStateRepository,
+    ILogger<TrainService> logger
 )
 {
     [GeneratedRegex(@"\d+")]
@@ -96,11 +101,28 @@ public partial class TrainService(
         }
 
         // 在線軌道回路の更新
+        if (incrementalTrackCircuitDataList.Count > 0 || decrementalTrackCircuitDataList.Count > 0)
+        {
+            logger.LogDebug("[{LogType}] 列車: {trainNumber}, 落下: [{NewTrackCircuits}], 扛上: [{EndTrackCircuits}]",
+                "在線更新", clientTrainNumber,
+                string.Join(", ", incrementalTrackCircuitDataList.Select(tc => tc.Name)),
+                string.Join(", ", decrementalTrackCircuitDataList.Select(tc => tc.Name)));
+        }
         await trackCircuitService.SetTrackCircuitDataList(incrementalTrackCircuitDataList, clientTrainNumber);
         await trackCircuitService.ClearTrackCircuitDataList(decrementalTrackCircuitDataList);
 
         // 車両情報の登録
         await UpdateTrainCarStates(trainState.Id, clientData.CarStates);
+
+        // TrainSignalStateの更新
+        if (clientData.VisibleSignalNames is { Count: > 0 })
+        {
+            await trainSignalStateRepository.UpdateByTrainNumber(clientTrainNumber, clientData.VisibleSignalNames);
+        }
+
+        // NextSignalNamesの設定
+        serverData.NextSignalNames = await GetNextSignalNames(clientTrainNumber, clientData.VisibleSignalNames);
+
         await transaction.CommitAsync();
         return serverData;
     }
@@ -462,6 +484,7 @@ public partial class TrainService(
     public async Task DeleteTrainState(string trainNumber)
     {
         await trainCarRepository.DeleteByTrainNumber(trainNumber);
+        await trainSignalStateRepository.DeleteByTrainNumber(trainNumber);
         await trainRepository.DeleteByTrainNumber(trainNumber);
     }
 
@@ -559,5 +582,44 @@ public partial class TrainService(
         // 上りか下りか判断(偶数なら上り、奇数なら下り)
         var lastDiaNumber = trainNumber.Last(char.IsDigit) - '0';
         return lastDiaNumber % 2 == 0;
+    }
+
+    /// <summary>
+    /// NextSignalNamesを取得
+    /// VisibleSignalNamesが空ならTrainSignalStateのものを、そうでないならVisibleSignalNamesのものを使って、
+    /// NextSignal.SignalNameが一致しているものをすべて取得し、TargetSignalNameでFlatten.Distinctして返す
+    /// </summary>
+    /// <param name="trainNumber">列車番号</param>
+    /// <param name="visibleSignalNames">可視信号機名リスト</param>
+    /// <returns>次の信号機名リスト</returns>
+    private async Task<List<string>> GetNextSignalNames(string trainNumber, List<string> visibleSignalNames)
+    {
+        const int maxDepth = 3;
+        List<string> signalNames;
+
+        if (visibleSignalNames is { Count: > 0 })
+        {
+            // VisibleSignalNamesを使用
+            signalNames = visibleSignalNames;
+        }
+        else
+        {
+            // TrainSignalStateから取得
+            signalNames = await trainSignalStateRepository.GetSignalNamesByTrainNumber(trainNumber);
+        }
+
+        if (signalNames.Count == 0)
+        {
+            return [];
+        }
+
+        // NextSignal.SignalNameが一致しているものをすべて取得
+        var nextSignals = await nextSignalRepository.GetByNamesAndMaxDepthOrderByDepth(signalNames, maxDepth);
+
+        // TargetSignalNameでFlatten.Distinctして返す
+        return signalNames
+            .Concat(nextSignals.Select(ns => ns.TargetSignalName))
+            .Distinct()
+            .ToList();
     }
 }

@@ -98,6 +98,8 @@ public class AtsToServerData
     //将来用
     public int PNotch { get; init; }
     public int BNotch { get; init; }
+
+    public List<string> VisibleSignalNames { get; init; } = [];
 }
 
 public class RouteData
@@ -222,6 +224,10 @@ public class ServerToATSData
     /// ステータスフラグ(ビットフラグ)
     /// </summary>
     public ServerStatusFlags StatusFlags { get; set; } = ServerStatusFlags.None;
+    /// <summary>
+    /// 次の信号機名リスト
+    /// </summary>
+    public List<string> NextSignalNames { get; set; } = [];
 }
 
 public class ServerToATSDataBySchedule

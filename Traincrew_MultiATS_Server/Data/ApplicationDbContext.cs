@@ -49,6 +49,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<RouteCentralControlLeverState>  RouteCentralControlLeverStates { get; set; }
     public DbSet<LockConditionByRouteCentralControlLever> LockConditionByRouteCentralControlLevers { get; set; }
     public DbSet<UserDisconnectionState> UserDisconnectionStates { get; set; }
+    public DbSet<TrainSignalState> TrainSignalStates { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -217,6 +218,22 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .WithMany()
             .HasForeignKey(lcbrcl => lcbrcl.RouteCentralControlLeverId)
             .HasPrincipalKey(rcl => rcl.Id);
+
+        modelBuilder.Entity<TrainSignalState>()
+            .HasOne(tss => tss.Signal)
+            .WithMany()
+            .HasForeignKey(tss => tss.SignalName)
+            .HasPrincipalKey(s => s.Name);
+
+        modelBuilder.Entity<TrainSignalState>()
+            .HasIndex(tss => new { tss.TrainNumber, tss.SignalName })
+            .IsUnique();
+
+        modelBuilder.Entity<TrainSignalState>()
+            .HasIndex(tss => tss.TrainNumber);
+
+        modelBuilder.Entity<TrainSignalState>()
+            .HasIndex(tss => tss.SignalName);
 
         // Convert all column names to snake_case
         foreach (var entity in modelBuilder.Model.GetEntityTypes())

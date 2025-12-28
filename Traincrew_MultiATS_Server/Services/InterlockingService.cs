@@ -31,7 +31,8 @@ public class InterlockingService(
     DirectionRouteService directionRouteService,
     SignalService signalService,
     IMutexRepository mutexRepository,
-    ServerService serverService)
+    ServerService serverService,
+    ILogger<InterlockingService> logger)
 {
 
     public async Task<DataToInterlocking> SendData_Interlocking()
@@ -143,7 +144,15 @@ public class InterlockingService(
             throw new ArgumentException("Invalid lever name");
         }
 
+        var oldState = lever.LeverState.IsReversed;
         lever.LeverState.IsReversed = leverData.State;
+
+        if (oldState != leverData.State)
+        {
+            logger.LogDebug("[{LogType}] 名前: {LeverName} 状態: {OldState} -> {NewState}",
+                "てこ操作", lever.Name, oldState, leverData.State);
+        }
+
         await generalRepository.Save(lever);
         return new()
         {
@@ -261,7 +270,7 @@ public class InterlockingService(
     /// 着点ボタンの物理状態を設定する
     /// </summary>
     /// <param name="buttonData"></param>
-    /// <returns></returns>     
+    /// <returns></returns>
     /// <exception cref="ArgumentException"></exception>
     public async Task<DestinationButtonData> SetDestinationButtonState(DestinationButtonData buttonData)
     {
@@ -272,8 +281,16 @@ public class InterlockingService(
             throw new ArgumentException("Invalid button name");
         }
 
+        var oldIsRaised = buttonObject.DestinationButtonState.IsRaised;
         buttonObject.DestinationButtonState.OperatedAt = dateTimeRepository.GetNow();
         buttonObject.DestinationButtonState.IsRaised = buttonData.IsRaised;
+
+        if (oldIsRaised != buttonData.IsRaised)
+        {
+            logger.LogDebug("[{LogType}] 名前: {ButtonName} 状態: {OldState} -> {NewState}",
+                "着点操作", buttonObject.DestinationButtonState.Name, oldIsRaised, buttonData.IsRaised);
+        }
+
         await generalRepository.Save(buttonObject.DestinationButtonState);
         return new()
         {

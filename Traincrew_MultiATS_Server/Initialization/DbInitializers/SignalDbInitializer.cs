@@ -155,6 +155,56 @@ public class SignalDbInitializer(ApplicationDbContext context, ILogger<SignalDbI
 
         await _context.SaveChangesAsync(cancellationToken);
 
+        // 中継信号機のリンクも追加する
+        // 例:
+        // depth=1のリンクとして以下があった場合
+        // - 上り閉塞6 -> 上り閉塞8
+        // - 上り閉塞8中継 -> 上り閉塞8
+        // 以下のリンクも追加する
+        // - 上り閉塞6 -> 上り閉塞8中継
+
+        var depth1NextSignals = await context.NextSignals
+            .Where(ns => ns.Depth == 1)
+            .ToListAsync(cancellationToken);
+
+        // 中継信号機のリンクを特定 (例: "X中継 -> Y")
+        var relaySignalLinks = depth1NextSignals
+            .Where(ns => ns.SignalName.Contains("中継"))
+            .ToList();
+
+        // 中継信号機へのリンクを宣言的に生成
+        var relayLinksToAdd = relaySignalLinks
+            .SelectMany(relayLink =>
+            {
+                var relaySignalName = relayLink.SignalName;  // X中継
+                var targetSignalName = relayLink.TargetSignalName;  // Y
+
+                // "Z -> Y" のようなリンクを探して、"Z -> X中継" のペアを作成
+                return depth1NextSignals
+                    .Where(ns => ns.TargetSignalName == targetSignalName && ns.SignalName != relaySignalName)
+                    .Select(signalToTarget => new
+                    {
+                        SourceSignalName = signalToTarget.SignalName,  // Z
+                        RelaySignalName = relaySignalName  // X中継
+                    });
+            })
+            // 既に "Z -> X中継" のリンクが存在する場合は除外
+            .Where(link => !depth1NextSignals.Any(ns =>
+                ns.SignalName == link.SourceSignalName && ns.TargetSignalName == link.RelaySignalName))
+            .Distinct()
+            // NextSignalオブジェクトを生成
+            .Select(link => new NextSignal
+            {
+                SignalName = link.SourceSignalName,
+                SourceSignalName = link.SourceSignalName,
+                TargetSignalName = link.RelaySignalName,
+                Depth = 1
+            })
+            .ToList();
+
+        context.NextSignals.AddRange(relayLinksToAdd);
+        await context.SaveChangesAsync(cancellationToken);
+
         var allSignals = await _context.Signals.ToListAsync(cancellationToken);
         var nextSignalsBySignalName = existingNextSignals
             .Where(ns => ns.Depth == 1)
