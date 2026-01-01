@@ -349,29 +349,34 @@ public class InterlockingService(
         }
 
         // 保存
-        await generalRepository.Save(lever.LeverState);
+        await generalRepository.Save(lever);
 
-        return ToLeverData(lever);
-    }
-
-    /// <summary>
-    /// Entity → Body 変換
-    /// </summary>
-    private static InterlockingLeverData ToLeverData(Models.Lever lever)
-    {
-        return new InterlockingLeverData
+        return new()
         {
             Name = lever.Name,
             State = lever.LeverState.IsReversed
         };
     }
 
-    private static DestinationButtonData ToDestinationButtonData(DestinationButtonState state)
+    /// <summary>
+    /// Entity → Body 変換
+    /// </summary>
+    public static InterlockingLeverData ToLeverData(Lever lever)
+    {
+        return new()
+        {
+            Name = lever.Name,
+            State = lever.LeverState.IsReversed
+        };
+    }
+
+    public static DestinationButtonData ToDestinationButtonData(DestinationButtonState state)
     {
         return new DestinationButtonData
         {
             Name = state.Name,
-            IsRaised = state.IsRaised == RaiseDrop.Raise
+            IsRaised = state.IsRaised,
+            OperatedAt = state.OperatedAt
         };
     }
 }
@@ -390,7 +395,7 @@ public class InterlockingService(
 
 データベースアクセスを行うRepositoryを実装します。
 
-### 3.1 インターフェース定義
+### 5.1 インターフェース定義
 
 **ファイル:** `Traincrew_MultiATS_Server/Repositories/Lever/ILeverRepository.cs`
 
@@ -411,7 +416,7 @@ public interface ILeverRepository
 }
 ```
 
-### 3.2 実装クラス
+### 5.2 実装クラス
 
 **ファイル:** `Traincrew_MultiATS_Server/Repositories/Lever/LeverRepository.cs`
 
@@ -443,80 +448,6 @@ public class LeverRepository(ApplicationDbContext context) : ILeverRepository
 - Primary Constructor を使用 (`ApplicationDbContext context`)
 - `.Include()` で関連エンティティを明示的にロード（N+1問題を回避）
 - Repository のみが `ApplicationDbContext` にアクセスできる
-
----
-
-## ステップ5: Hub実装
-
-SignalR Hubを実装します。
-
-**ファイル:** `Traincrew_MultiATS_Server/Hubs/InterlockingHub.cs`
-
-```csharp
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.SignalR;
-using OpenIddict.Validation.AspNetCore;
-using Traincrew_MultiATS_Server.Common.Contract;
-using Traincrew_MultiATS_Server.Common.Models;
-using Traincrew_MultiATS_Server.Services;
-using static OpenIddict.Abstractions.OpenIddictConstants;
-
-namespace Traincrew_MultiATS_Server.Hubs;
-
-/// <summary>
-/// 連動Hub (信号係員操作可・司令主任鍵使用可)
-/// </summary>
-[Authorize(
-    AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme,
-    Policy = "InterlockingPolicy"
-)]
-public class InterlockingHub(InterlockingService interlockingService)
-    : Hub<IInterlockingClientContract>, IInterlockingHubContract
-{
-    /// <summary>
-    /// 連動データを送信する
-    /// </summary>
-    public async Task<DataToInterlocking> SendData_Interlocking(List<string> activeStationsList)
-    {
-        return await interlockingService.SendData_Interlocking();
-    }
-
-    /// <summary>
-    /// 物理てこデータを設定する
-    /// </summary>
-    public async Task<InterlockingLeverData> SetPhysicalLeverData(InterlockingLeverData leverData)
-    {
-        return await interlockingService.SetPhysicalLeverData(leverData);
-    }
-
-    /// <summary>
-    /// 物理鍵てこデータを設定する
-    /// </summary>
-    public async Task<InterlockingKeyLeverData> SetPhysicalKeyLeverData(InterlockingKeyLeverData keyLeverData)
-    {
-        // 認証情報からMemberIDを取得
-        var memberIdString = Context.User?.FindFirst(Claims.Subject)?.Value;
-        ulong? memberId = memberIdString != null ? ulong.Parse(memberIdString) : null;
-
-        return await interlockingService.SetPhysicalKeyLeverData(keyLeverData, memberId);
-    }
-
-    /// <summary>
-    /// 着点ボタン状態を設定する
-    /// </summary>
-    public async Task<DestinationButtonData> SetDestinationButtonState(DestinationButtonData buttonData)
-    {
-        return await interlockingService.SetDestinationButtonState(buttonData);
-    }
-}
-```
-
-**重要ポイント:**
-- `Hub<IInterlockingClientContract>` でクライアント通知用インターフェースを指定
-- `IInterlockingHubContract` を実装してサーバーメソッドを提供
-- `[Authorize]` で認証・認可を設定
-- Hubメソッド内では基本的にServiceを呼び出すだけ
-- `Context.User` でクライアントの認証情報を取得可能
 
 ---
 
