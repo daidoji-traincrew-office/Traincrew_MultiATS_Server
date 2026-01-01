@@ -682,7 +682,7 @@ builder.Services.AddHostedService<SchedulerManager>();
 Hub実装の流れは以下の通りです：
 
 1. **Interface定義**: `IXxxHubContract` と `IXxxClientContract` を定義
-2. **Body定義**: DTOクラスを定義
+2. **Body定義**: Bodyクラスを定義
 3. **Hub実装**: SignalR Hubを実装
 4. **Service実装**: ビジネスロジック層を実装
 5. **Repository実装**: データアクセス層を実装
@@ -693,7 +693,7 @@ Hub実装の流れは以下の通りです：
 - **Hub → Service → Repository → DbContext** の順でアクセス
 - Repositoryのみが `DbContext` にアクセスする
 - Hubメソッドはシンプルに保ち、ロジックはServiceに委譲する
-- DTOには必ずXMLコメントを記述する
+- Bodyには必ずXMLコメントを記述する
 - ログ出力で重要な操作を記録する
 - 単一エンティティの更新は `GeneralRepository` を使用
 - 一括更新・削除は `ExecuteUpdateAsync` / `ExecuteDeleteAsync` を使用
