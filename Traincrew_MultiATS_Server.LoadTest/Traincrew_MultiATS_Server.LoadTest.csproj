@@ -11,6 +11,10 @@
     <ItemGroup>
       <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.2" />
       <PackageReference Include="Microsoft.AspNetCore.SignalR.Client.Core" Version="9.0.2" />
+      <PackageReference Include="TypedSignalR.Client" Version="3.6.0" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Traincrew_MultiATS_Server.Common\Traincrew_MultiATS_Server.Common.csproj"/>
     </ItemGroup>
 
 </Project>
