@@ -123,10 +123,10 @@ public abstract class TaskBase
     protected abstract string HubPath { get; }
     private readonly List<CancellationTokenSource> _cancellationTokens = [];
 
-    protected abstract Task ExecuteHubMethodInternal(HubConnection connection, CancellationToken token);
+    protected abstract Task ExecuteHubMethodInternal(HubConnection connection, int index, CancellationToken token);
 
     // タスクを実行するメソッド
-    private async Task ExecuteTask(CancellationToken token)
+    private async Task ExecuteTask(int index, CancellationToken token)
     {
         try
         {
@@ -140,7 +140,7 @@ public abstract class TaskBase
             while (true)
             {
                 var delay = Task.Delay(Delay, token);
-                await ExecuteHubMethodInternal(connection, token);
+                await ExecuteHubMethodInternal(connection, index, token);
                 await delay;
             }
         }
@@ -165,7 +165,8 @@ public abstract class TaskBase
     public void IncrementAndExecute()
     {
         var source = new CancellationTokenSource();
-        Task.Run(() => ExecuteTask(source.Token), CancellationToken.None);
+        var index = _cancellationTokens.Count;
+        Task.Run(() => ExecuteTask(index, source.Token), CancellationToken.None);
         _cancellationTokens.Add(source);
     }
 
@@ -182,21 +183,57 @@ public class ATS : TaskBase
 {
     protected override int Delay => 100;
     protected override string HubPath => "train";
+    private static readonly List<string> trackCircuits =
+    [
+        "TH76_5LAT",
+        "TH76_5LBT",
+        "TH76_5LCT",
+        "TH76_5LDT",
+        "TH75_5RAT",
+        "TH75_5RBT",
+        "TH75_9LCT",
+        "TH71_1RAT",
+        "TH71_1RBT",
+        "TH71_6LCT",
+        "TH71_6LDT",
+        "TH70_1RAT",
+        "TH70_5LBT",
+        "TH67_1RAT",
+        "TH67_1RBT",
+        "TH67_4LT",
+        "TH67_5LT",
+        "TH65_2RT",
+        "TH65_3RT",
+        "TH65_11LT",
+        "TH65_12LT",
+        "TH64_12RT",
+        "TH64_15LT",
+        "TH63_12RT",
+        "TH63_15LT",
+        "TH62_12RT",
+        "TH62_15LT",
+        "TH61_2RAT",
+        "TH61_2RBT",
+        "TH61_6LT",
+        "TH59_11RT",
+        "TH59_13LT",
+        "TH58_2RAT",
+        "TH58_9LCT"
+    ];
 
-    protected override async Task ExecuteHubMethodInternal(HubConnection connection, CancellationToken token)
+    protected override async Task ExecuteHubMethodInternal(HubConnection connection, int index, CancellationToken token)
     {
         var hub = connection.CreateHubProxy<ITrainHubContract>();
-        var data = GenerateData();
+        var data = GenerateData(index);
         await hub.SendData_ATS(data);
     }
 
-    private AtsToServerData GenerateData()
+    private AtsToServerData GenerateData(int index)
     {
-        var random = new Random();
-        var diaName = random.Next(1, 100).ToString();
+        var diaName = $"10{2 * index:D2}";
         while (true)
         {
-            List<string> trackCircuit = [];
+            List<string> trackCircuit = [trackCircuits[index]];
             var returnData = new AtsToServerData
             {
                 DiaName = diaName,
@@ -228,7 +265,7 @@ public class Signal : TaskBase
     protected override int Delay => 100;
     protected override string HubPath => "interlocking";
 
-    protected override async Task ExecuteHubMethodInternal(HubConnection connection, CancellationToken token)
+    protected override async Task ExecuteHubMethodInternal(HubConnection connection, int index, CancellationToken token)
     {
         var hub = connection.CreateHubProxy<IInterlockingHubContract>();
         var activeStations = GenerateData();
@@ -261,7 +298,7 @@ public class TID : TaskBase
     protected override int Delay => 333;
     protected override string HubPath => "TID";
 
-    protected override async Task ExecuteHubMethodInternal(HubConnection connection, CancellationToken token)
+    protected override async Task ExecuteHubMethodInternal(HubConnection connection, int index, CancellationToken token)
     {
         var hub = connection.CreateHubProxy<ITIDHubContract>();
         await hub.SendData_TID();
