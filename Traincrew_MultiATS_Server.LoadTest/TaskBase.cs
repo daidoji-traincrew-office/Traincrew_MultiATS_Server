@@ -2,17 +2,12 @@
 using System.IO;
 using System.Text.Json;
 using Microsoft.AspNetCore.SignalR.Client;
+using Traincrew_MultiATS_Server.Common.Contract;
+using Traincrew_MultiATS_Server.Common.Models;
+using TypedSignalR.Client;
 
 namespace Traincrew_MultiATS_Server.LoadTest;
 
-
-public class ConstantDataFromInterlocking
-{
-    /// <summary>
-    /// 常時送信用駅データリスト
-    /// </summary>
-    public List<string> ActiveStationsList { get; set; }
-}
 
 public class SignalTypeData
 {
@@ -122,29 +117,14 @@ public class TrackCircuitData : IEquatable<TrackCircuitData>
     }
 }
 
-public class DataToServer
-{
-    public int BNotch { get; init; }
-    public bool BougoState { get; init; }
-    public List<CarState> CarStates { get; init; }
-    public string DiaName { get; init; }
-    public List<TrackCircuitData> OnTrackList { get; init; }
-
-    public int PNotch { get; init; }
-
-    //将来用
-    public float Speed { get; init; }
-}
-
-
 public abstract class TaskBase
 {
     protected abstract int Delay { get; }
-    protected abstract string Path { get; }
-    protected abstract string Method { get; }
-    protected abstract Object?  Object { get; }
+    protected abstract string HubPath { get; }
     private readonly List<CancellationTokenSource> _cancellationTokens = [];
-    
+
+    protected abstract Task ExecuteHubMethodInternal(HubConnection connection, CancellationToken token);
+
     // タスクを実行するメソッド
     private async Task ExecuteTask(CancellationToken token)
     {
@@ -152,21 +132,15 @@ public abstract class TaskBase
         {
             // Todo: ServerAddress.csから取得できるようにしたほうが良いかな
             var connection = new HubConnectionBuilder()
-            .WithUrl($"https://localhost:7232/hub/{Path}" )
-            .WithAutomaticReconnect()
-            .Build();
+                .WithUrl($"https://localhost:7232/hub/{HubPath}")
+                .WithAutomaticReconnect()
+                .Build();
+
             await connection.StartAsync(token);
             while (true)
             {
                 var delay = Task.Delay(Delay, token);
-                if (Object is null)
-                {
-                    await connection.InvokeAsync(Method,token);
-                }
-                else
-                {
-                    await connection.InvokeAsync(Method,Object,token);
-                }
+                await ExecuteHubMethodInternal(connection, token);
                 await delay;
             }
         }
@@ -206,39 +180,42 @@ public abstract class TaskBase
 
 public class ATS : TaskBase
 {
-    public static Init_Data init_Data = new Init_Data();
-    public static List<TrackCircuitData> DB_TrackCircuitDataList = init_Data.Get_TrackCuircuitDataList();
-    public static List<TrackCircuitData> Current_TrackCircuitDataList = new List<TrackCircuitData>();
     protected override int Delay => 100;
-    protected override string Path => "train";
-    protected override string Method => "SendData_ATS";
-    protected override object Object => GenerateData();
+    protected override string HubPath => "train";
 
-    public async Task<DataToServer> GenerateData()
+    protected override async Task ExecuteHubMethodInternal(HubConnection connection, CancellationToken token)
     {
-        bool flag = false;
-        Random random = new Random();
-        string diaName = random.Next(1, 100).ToString();
+        var hub = connection.CreateHubProxy<ITrainHubContract>();
+        var data = GenerateData();
+        await hub.SendData_ATS(data);
+    }
+
+    private AtsToServerData GenerateData()
+    {
+        var random = new Random();
+        var diaName = random.Next(1, 100).ToString();
         while (true)
         {
-            DataToServer returnData = new DataToServer()
+            List<string> trackCircuit = [];
+            var returnData = new AtsToServerData
             {
                 DiaName = diaName,
-                OnTrackList = new List<TrackCircuitData>
-                {
-                    new TrackCircuitData{Name = DB_TrackCircuitDataList[random.Next(DB_TrackCircuitDataList.Count())].Name, Last = diaName, On = true}
-                },
+                OnTrackList = trackCircuit
+                    .Select(tc => new Traincrew_MultiATS_Server.Common.Models.TrackCircuitData
+                    {
+                        Name = tc,
+                        Last = "",
+                        On = false,
+                        Lock = false
+                    })
+                    .ToList(),
+                BNotch = 0,
+                PNotch = 0,
+                Speed = 0,
+                BougoState = false,
+                CarStates = []
             };
-            foreach (var item in Current_TrackCircuitDataList)
-            {
-                if (item.Name == returnData.OnTrackList.First().Name)
-                    flag = true;
-            }
-            if (!flag)
-            {
-                returnData.OnTrackList.ForEach(Current_TrackCircuitDataList.Add);
-                return returnData;
-            }
+            return returnData;
         }
     }
 }
@@ -249,10 +226,16 @@ public class Signal : TaskBase
     public static List<string> stationList = init_Data.Get_stationList();
     public static List<string> current_stationList = new List<string>();
     protected override int Delay => 100;
-    protected override string Path => "interlocking";
-    protected override string Method => "SendData_Interlocking";
-    protected override object Object => GenerateData();
-    public ConstantDataFromInterlocking GenerateData()
+    protected override string HubPath => "interlocking";
+
+    protected override async Task ExecuteHubMethodInternal(HubConnection connection, CancellationToken token)
+    {
+        var hub = connection.CreateHubProxy<IInterlockingHubContract>();
+        var activeStations = GenerateData();
+        await hub.SendData_Interlocking(activeStations);
+    }
+
+    public List<string> GenerateData()
     {
         Random random = new Random();
         while (true)
@@ -266,26 +249,22 @@ public class Signal : TaskBase
             }
             if (!flag)
             {
-                ConstantDataFromInterlocking constantData = new ConstantDataFromInterlocking()
-                {
-                    ActiveStationsList = new List<string>() { stationList[random.Next(stationList.Count)] }
-                };
-                return constantData;
+                current_stationList.Add(station);
+                return new List<string> { station };
             }
         }
-
     }
 }
 
 public class TID : TaskBase
 {
     protected override int Delay => 333;
-    protected override string Path => "TID";
-    protected override string Method => "SendData_TID";
-    protected override object? Object => GenerateData();
-    public Object? GenerateData()
+    protected override string HubPath => "TID";
+
+    protected override async Task ExecuteHubMethodInternal(HubConnection connection, CancellationToken token)
     {
-        return null;
+        var hub = connection.CreateHubProxy<ITIDHubContract>();
+        await hub.SendData_TID();
     }
 }
 
