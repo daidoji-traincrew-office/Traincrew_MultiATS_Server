@@ -9,114 +9,6 @@ using TypedSignalR.Client;
 namespace Traincrew_MultiATS_Server.LoadTest;
 
 
-public class SignalTypeData
-{
-    public string Name { get; init; }
-    public string RIndication { get; init; }
-    public string YYIndication { get; init; }
-    public string YIndication { get; init; }
-    public string YGIndication { get; init; }
-    public string GIndication { get; init; }
-}
-
-public class Station
-{
-    [Key]
-    public required string Id { get; init; }
-    public required string Name { get; init; }
-    public required bool IsStation { get; init; }
-    public required bool IsPassengerStation { get; init; }
-}
-
-public enum Phase
-{
-    None,
-    R,
-    YY,
-    Y,
-    YG,
-    G
-}
-
-public class SignalData
-{
-    public string Name { get; init; }
-    public Phase phase { get; init; } = Phase.None;
-
-}
-
-public class JsonTrackCircuitData : TrackCircuitData
-{
-    public int? ProtectionZone { get; init; } = null;
-    public List<string> NextSignalNamesUp { get; init; } = [];
-    public List<string> NextSignalNamesDown { get; init; } = [];
-}
-
-public class JsonSignalData : SignalData
-{
-    public string TypeName { get; init; }
-    public List<string>? NextSignalNames { get; init; } = null;
-    public List<string>? RouteNames { get; init; } = null;
-}
-
-public class ThrowOutControlData
-{
-    public string SourceRouteName { get; init; } = "";
-    public string TargetRouteName { get; init; } = "";
-    public string LeverConditionName { get; init; } = "";
-}
-
-public class DBBasejson
-{
-    public List<Station> stationList { get; set; }
-    public List<JsonTrackCircuitData> trackCircuitList { get; set; }
-    public List<JsonSignalData> signalDataList { get; set; }
-    public List<SignalTypeData> signalTypeList { get; set; }
-    public List<ThrowOutControlData> throwOutControlList { get; set; }
-}
-
-public class CarState
-{
-    public float Ampare;
-    public float BC_Press;
-    public string CarModel;
-    public bool DoorClose;
-    public bool HasConductorCab = false;
-    public bool HasDriverCab = false;
-    public bool HasMotor = false;
-    public bool HasPantograph = false;
-}
-
-public class TrackCircuitData : IEquatable<TrackCircuitData>
-{
-    public string Last { get; init; } // 軌道回路を踏んだ列車の名前
-    public required string Name { get; init; }
-    public bool Lock { get; init; }
-    public bool On { get; init; }
-
-    public override string ToString()
-    {
-        return $"{Name}/{Last}/{On}";
-    }
-
-    public bool Equals(TrackCircuitData? other)
-    {
-        if (other is null) return false;
-        if (ReferenceEquals(this, other)) return true;
-        return Name == other.Name;
-    }
-
-    public override bool Equals(object? obj)
-    {
-        return Equals(obj as TrackCircuitData);
-    }
-
-    public override int GetHashCode()
-    {
-        return Name.GetHashCode();
-    }
-}
-
 public abstract class TaskBase
 {
     protected abstract int Delay { get; }
@@ -238,7 +130,7 @@ public class ATS : TaskBase
             {
                 DiaName = diaName,
                 OnTrackList = trackCircuit
-                    .Select(tc => new Traincrew_MultiATS_Server.Common.Models.TrackCircuitData
+                    .Select(tc => new TrackCircuitData
                     {
                         Name = tc,
                         Last = "",
@@ -259,37 +151,13 @@ public class ATS : TaskBase
 
 public class Signal : TaskBase
 {
-    public static Init_Data init_Data = new Init_Data();
-    public static List<string> stationList = init_Data.Get_stationList();
-    public static List<string> current_stationList = new List<string>();
     protected override int Delay => 100;
     protected override string HubPath => "interlocking";
 
     protected override async Task ExecuteHubMethodInternal(HubConnection connection, int index, CancellationToken token)
     {
         var hub = connection.CreateHubProxy<IInterlockingHubContract>();
-        var activeStations = GenerateData();
-        await hub.SendData_Interlocking(activeStations);
-    }
-
-    public List<string> GenerateData()
-    {
-        Random random = new Random();
-        while (true)
-        {
-            bool flag = false;
-            string station = stationList[random.Next(stationList.Count)];
-            foreach (var item in current_stationList)
-            {
-                if (station == item)
-                    flag = true;
-            }
-            if (!flag)
-            {
-                current_stationList.Add(station);
-                return new List<string> { station };
-            }
-        }
+        // Todo: Implement signal data generation and sending
     }
 }
 
@@ -302,30 +170,5 @@ public class TID : TaskBase
     {
         var hub = connection.CreateHubProxy<ITIDHubContract>();
         await hub.SendData_TID();
-    }
-}
-
-public class Init_Data
-{
-    public List<TrackCircuitData> Get_TrackCuircuitDataList()
-    {
-        //相対パスに修正しておく
-        var jsonstring = File.ReadAllText("G:\\prog\\Traincrew_MultiATS_Server\\Traincrew_MultiATS_Server\\Data\\DBBase.json");
-        var DBBase = JsonSerializer.Deserialize<DBBasejson>(jsonstring);
-        List<TrackCircuitData> returnData = new List<TrackCircuitData>();
-        foreach (var item in DBBase.trackCircuitList)
-        {
-            returnData.Add(new TrackCircuitData { Name = item.Name});
-        }
-        return returnData;
-    }
-
-    public List<string> Get_stationList()
-    {
-        //相対パスに修正しておく
-        var jsonstring = File.ReadAllText("G:\\prog\\Traincrew_MultiATS_Server\\Traincrew_MultiATS_Server\\Data\\DBBase.json");
-        var DBBase = JsonSerializer.Deserialize<DBBasejson>(jsonstring);
-        List<string> returnData = DBBase.stationList.Select(x => x.Name).ToList();
-        return returnData;
     }
 }
