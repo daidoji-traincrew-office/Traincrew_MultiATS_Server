@@ -22,6 +22,7 @@ jobs:
         with:
           solution: ./Traincrew_MultiATS_Server.sln
           tool-version: 2025.2.3
+          dotnetcoresdk: 8.0.x
 
     permissions:
       security-events: write
