@@ -29,6 +29,10 @@ jobs:
             }
           }
           EOF
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build solution
+        run: dotnet build --no-restore --configuration Release
       - name: Annotate
         # You may pin to the exact commit or the version.
         uses: JetBrains/ReSharper-InspectCode@v0.11
@@ -36,6 +40,7 @@ jobs:
           solution: ./Traincrew_MultiATS_Server.sln
           tool-version: 2025.2.3
           dotnetcoresdk: 8.0.x
+          no-build: true
 
     permissions:
       security-events: write
