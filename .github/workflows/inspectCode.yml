@@ -41,6 +41,7 @@ jobs:
           tool-version: 2025.2.3
           dotnetcoresdk: 8.0.x
           no-build: true
+          build: false
 
     permissions:
       security-events: write
