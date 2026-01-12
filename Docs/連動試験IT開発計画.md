@@ -180,7 +180,7 @@ var testCases = routeLeverButtons.Select(rldb =>
 Traincrew_MultiATS_Server.IT/
 ├── InterlockingLogic/
 │   ├── InterlockingLogicTest.cs            # 統一テストクラス
-│   └── RouteTestCase.cs                    # テストケースDTO
+│   └── RouteTestCase.cs                    # テストケースBody
 └── TestUtilities/
     └── RouteTestCaseGenerator.cs           # テストケース生成ヘルパー
 ```
