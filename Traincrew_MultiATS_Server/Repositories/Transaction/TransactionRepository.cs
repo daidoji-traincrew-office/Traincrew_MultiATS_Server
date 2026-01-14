@@ -16,9 +16,21 @@ public class TransactionRepository(ApplicationDbContext context) : ITransactionR
         return new EfCoreTransactionScope(transaction);
     }
 
+    public async Task<ITransactionScope> BeginTransactionAsync(CancellationToken cancellationToken)
+    {
+        var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
+        return new EfCoreTransactionScope(transaction);
+    }
+
     public async Task<ITransactionScope> BeginTransactionAsync(IsolationLevel isolationLevel)
     {
         var transaction = await context.Database.BeginTransactionAsync(isolationLevel);
+        return new EfCoreTransactionScope(transaction);
+    }
+
+    public async Task<ITransactionScope> BeginTransactionAsync(IsolationLevel isolationLevel, CancellationToken cancellationToken)
+    {
+        var transaction = await context.Database.BeginTransactionAsync(isolationLevel, cancellationToken);
         return new EfCoreTransactionScope(transaction);
     }
 }
@@ -30,10 +42,22 @@ public class EfCoreTransactionScope(IDbContextTransaction transaction) : ITransa
     {
         await transaction.CommitAsync();
     }
+
+    public async Task CommitAsync(CancellationToken cancellationToken)
+    {
+        await transaction.CommitAsync(cancellationToken);
+    }
+
     public async Task RollbackAsync()
     {
         await transaction.RollbackAsync();
     }
+
+    public async Task RollbackAsync(CancellationToken cancellationToken)
+    {
+        await transaction.RollbackAsync(cancellationToken);
+    }
+
     public async ValueTask DisposeAsync()
     {
         await transaction.DisposeAsync();
