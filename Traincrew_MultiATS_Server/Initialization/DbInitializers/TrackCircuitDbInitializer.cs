@@ -59,30 +59,43 @@ public class TrackCircuitDbInitializer(ApplicationDbContext context, ILogger<Tra
     public async Task InitializeTrackCircuitSignalsAsync(List<TrackCircuitCsv> trackCircuitList,
         CancellationToken cancellationToken = default)
     {
+        var trackCircuitNames = trackCircuitList.Select(tc => tc.Name).ToHashSet();
+        var trackCircuitEntities = await _context.TrackCircuits
+            .Where(tc => trackCircuitNames.Contains(tc.Name))
+            .ToDictionaryAsync(tc => tc.Name, cancellationToken);
+
+        var allSignalNames = trackCircuitList
+            .SelectMany(tc => tc.NextSignalNamesUp.Concat(tc.NextSignalNamesDown))
+            .Distinct()
+            .ToHashSet();
+        var signals = await _context.Signals
+            .Where(s => allSignalNames.Contains(s.Name))
+            .ToDictionaryAsync(s => s.Name, cancellationToken);
+
+        var trackCircuitIds = trackCircuitEntities.Values.Select(tc => tc.Id).ToHashSet();
+        var existingRelations = await _context.TrackCircuitSignals
+            .Where(tcs => trackCircuitIds.Contains(tcs.TrackCircuitId))
+            .Select(tcs => new { tcs.TrackCircuitId, tcs.SignalName })
+            .ToListAsync(cancellationToken);
+        var existingRelationsSet = existingRelations
+            .Select(r => (r.TrackCircuitId, r.SignalName))
+            .ToHashSet();
+
         foreach (var trackCircuit in trackCircuitList)
         {
-            var trackCircuitEntity = await _context.TrackCircuits
-                .FirstOrDefaultAsync(tc => tc.Name == trackCircuit.Name, cancellationToken);
-
-            if (trackCircuitEntity == null)
+            if (!trackCircuitEntities.TryGetValue(trackCircuit.Name, out var trackCircuitEntity))
             {
                 continue;
             }
 
             foreach (var signalName in trackCircuit.NextSignalNamesUp)
             {
-                // Todo: ここでN+1問題が発生しているので、改善したほうが良いかも
-                var signal = await _context.Signals
-                    .FirstOrDefaultAsync(s => s.Name == signalName, cancellationToken);
-                if (signal == null)
+                if (!signals.TryGetValue(signalName, out var signal))
                 {
                     continue;
                 }
 
-                var exists = await _context.TrackCircuitSignals
-                    .AnyAsync(tcs => tcs.TrackCircuitId == trackCircuitEntity.Id && tcs.SignalName == signal.Name,
-                        cancellationToken);
-                if (exists)
+                if (existingRelationsSet.Contains((trackCircuitEntity.Id, signal.Name)))
                 {
                     continue;
                 }
@@ -97,17 +110,12 @@ public class TrackCircuitDbInitializer(ApplicationDbContext context, ILogger<Tra
 
             foreach (var signalName in trackCircuit.NextSignalNamesDown)
             {
-                var signal = await _context.Signals
-                    .FirstOrDefaultAsync(s => s.Name == signalName, cancellationToken);
-                if (signal == null)
+                if (!signals.TryGetValue(signalName, out var signal))
                 {
                     continue;
                 }
 
-                var exists = await _context.TrackCircuitSignals
-                    .AnyAsync(tcs => tcs.TrackCircuitId == trackCircuitEntity.Id && tcs.SignalName == signal.Name,
-                        cancellationToken);
-                if (exists)
+                if (existingRelationsSet.Contains((trackCircuitEntity.Id, signal.Name)))
                 {
                     continue;
                 }
