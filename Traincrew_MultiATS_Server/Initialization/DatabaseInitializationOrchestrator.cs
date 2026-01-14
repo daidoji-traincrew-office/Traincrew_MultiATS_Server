@@ -3,7 +3,11 @@ using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.Initialization.CsvLoaders;
 using Traincrew_MultiATS_Server.Initialization.DbInitializers;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
+using Traincrew_MultiATS_Server.Repositories.Lock;
 using Traincrew_MultiATS_Server.Repositories.LockCondition;
+using Traincrew_MultiATS_Server.Repositories.LockConditionByRouteCentralControlLever;
+using Traincrew_MultiATS_Server.Repositories.SwitchingMachineRoute;
+using Traincrew_MultiATS_Server.Repositories.Transaction;
 
 namespace Traincrew_MultiATS_Server.Initialization;
 
@@ -17,6 +21,10 @@ public class DatabaseInitializationOrchestrator(
     ILoggerFactory loggerFactory,
     IDateTimeRepository datetimeRepository,
     ILockConditionRepository lockConditionRepository,
+    ILockRepository lockRepository,
+    ILockConditionByRouteCentralControlLeverRepository lockConditionByRouteCentralControlLeverRepository,
+    ISwitchingMachineRouteRepository switchingMachineRouteRepository,
+    ITransactionRepository transactionRepository,
     ILogger<DatabaseInitializationOrchestrator> logger)
 {
     /// <summary>
@@ -131,15 +139,26 @@ public class DatabaseInitializationOrchestrator(
 
         DetachUnchangedEntities();
 
-        // Phase 24: DbRendoTableInitializer - 鎖錠の初期化（駅ごと）
-        foreach (var initializer in rendoTableInitializers)
-        {
-            await initializer.InitializeLocks();
+        await using(var transaction = await transactionRepository.BeginTransactionAsync(cancellationToken)){
+            // 常に最新化するため、既存のデータを削除する
+            logger.LogInformation("Deleting existing lock-related data");
+            await switchingMachineRouteRepository.DeleteAll();
+            await lockConditionRepository.DeleteAll();
+            await lockRepository.DeleteAll();
+            await lockConditionByRouteCentralControlLeverRepository.DeleteAll();
+            logger.LogInformation("Existing lock-related data deleted");
+
+            // Phase 24: DbRendoTableInitializer - 鎖錠の初期化（駅ごと）
+            foreach (var initializer in rendoTableInitializers)
+            {
+                await initializer.InitializeLocks();
+            }
+             // Phase 25: Finalize - 初期化の完了処理
+            DetachUnchangedEntities();
+            await FinalizeInitializationAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
         }
 
-        // Phase 25: Finalize - 初期化の完了処理
-        DetachUnchangedEntities();
-        await FinalizeInitializationAsync(cancellationToken);
         logger.LogInformation("Database initialization completed");
     }
 
