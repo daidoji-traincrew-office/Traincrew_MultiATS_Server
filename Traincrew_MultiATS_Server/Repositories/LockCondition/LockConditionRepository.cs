@@ -39,6 +39,9 @@ public class LockConditionRepository(ApplicationDbContext context) : ILockCondit
 
     public async Task DeleteAll()
     {
-        await context.LockConditions.ExecuteDeleteAsync();
+        // TPT (Table-Per-Type) inheritance requires manual deletion in correct order
+        // Delete from derived table first, then base table
+        await context.Database.ExecuteSqlRawAsync("DELETE FROM lock_condition_object");
+        await context.Database.ExecuteSqlRawAsync("DELETE FROM lock_condition");
     }
 }
