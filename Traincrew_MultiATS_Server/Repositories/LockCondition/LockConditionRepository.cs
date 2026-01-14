@@ -33,7 +33,12 @@ public class LockConditionRepository(ApplicationDbContext context) : ILockCondit
             .Join(context.LockConditions, l => l.Id, lc => lc.LockId, (l, lc) => new { l.ObjectId, lc })
             .GroupBy(x => x.ObjectId)
             .ToDictionaryAsync(
-                x => x.Key, 
+                x => x.Key,
                 x => x.Select(y => y.lc).OrderBy(lc => lc.Id).ToList());
+    }
+
+    public async Task DeleteAll()
+    {
+        await context.LockConditions.ExecuteDeleteAsync();
     }
 }

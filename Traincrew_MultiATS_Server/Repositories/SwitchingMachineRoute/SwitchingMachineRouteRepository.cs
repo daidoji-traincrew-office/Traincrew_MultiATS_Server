@@ -29,4 +29,9 @@ public class SwitchingMachineRouteRepository(ApplicationDbContext context) : ISw
                 g => g.FirstOrDefault()
             );
     }
+
+    public async Task DeleteAll()
+    {
+        await context.SwitchingMachineRoutes.ExecuteDeleteAsync();
+    }
 }
