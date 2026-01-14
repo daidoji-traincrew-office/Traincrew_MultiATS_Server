@@ -1,7 +1,4 @@
-using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.Initialization;
-using Traincrew_MultiATS_Server.Repositories.Datetime;
-using Traincrew_MultiATS_Server.Repositories.LockCondition;
 using Traincrew_MultiATS_Server.Scheduler;
 using Traincrew_MultiATS_Server.Services;
 
@@ -13,7 +10,6 @@ namespace Traincrew_MultiATS_Server.HostedService;
 /// </summary>
 public class InitDbHostedService(
     IServiceScopeFactory serviceScopeFactory,
-    ILoggerFactory loggerFactory,
     ILogger<InitDbHostedService> logger)
     : IHostedService
 {
@@ -25,24 +21,15 @@ public class InitDbHostedService(
     {
         logger.LogInformation("InitDbHostedService starting");
 
+        // Initialize database using orchestrator from DI container
         using var scope = serviceScopeFactory.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var datetimeRepository = scope.ServiceProvider.GetRequiredService<IDateTimeRepository>();
-        var lockConditionRepository = scope.ServiceProvider.GetRequiredService<ILockConditionRepository>();
-        var serverService = scope.ServiceProvider.GetRequiredService<ServerService>();
-        var schedulerManager = scope.ServiceProvider.GetRequiredService<SchedulerManager>();
-
-        // Initialize database using orchestrator
-        var orchestrator = new DatabaseInitializationOrchestrator(
-            context,
-            datetimeRepository,
-            lockConditionRepository,
-            loggerFactory,
-            loggerFactory.CreateLogger<DatabaseInitializationOrchestrator>());
-
+        var orchestrator = scope.ServiceProvider.GetRequiredService<DatabaseInitializationOrchestrator>();
         await orchestrator.InitializeAsync(cancellationToken);
 
         // Start server mode scheduler
+        var serverService = scope.ServiceProvider.GetRequiredService<ServerService>();
+        var schedulerManager = scope.ServiceProvider.GetRequiredService<SchedulerManager>();
+
         schedulerManager.StartServerModeScheduler();
         await serverService.UpdateSchedulerAsync();
 

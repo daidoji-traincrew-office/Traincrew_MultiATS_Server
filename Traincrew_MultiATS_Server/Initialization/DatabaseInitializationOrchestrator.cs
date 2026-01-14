@@ -10,12 +10,13 @@ namespace Traincrew_MultiATS_Server.Initialization;
 /// <summary>
 ///     Orchestrates the database initialization sequence
 ///     Coordinates CSV loading and database initialization in the correct order
+///     Manages DI scopes for initialization
 /// </summary>
 public class DatabaseInitializationOrchestrator(
     ApplicationDbContext context,
+    ILoggerFactory loggerFactory,
     IDateTimeRepository datetimeRepository,
     ILockConditionRepository lockConditionRepository,
-    ILoggerFactory loggerFactory,
     ILogger<DatabaseInitializationOrchestrator> logger)
 {
     /// <summary>
@@ -167,7 +168,8 @@ public class DatabaseInitializationOrchestrator(
         return initializers;
     }
 
-    private async Task FinalizeInitializationAsync(CancellationToken cancellationToken)
+    private async Task FinalizeInitializationAsync(
+        CancellationToken cancellationToken)
     {
         logger.LogInformation("Finalizing initialization");
 
