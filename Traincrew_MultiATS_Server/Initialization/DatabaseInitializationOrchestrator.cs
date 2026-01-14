@@ -85,7 +85,7 @@ public class DatabaseInitializationOrchestrator(
         // Phase 14: TtcWindowLinkCsvLoader - TTCウィンドウリンクデータの読み込み
         var ttcWindowLinkCsvLoader = new TtcWindowLinkCsvLoader(loggerFactory.CreateLogger<TtcWindowLinkCsvLoader>());
 
-        // Phase 15: ThrowOutControlCsvLoader - 投出制御データの読み込み
+        // Phase 15: ThrowOutControlCsvLoader - 総括制御データの読み込み
         var throwOutControlCsvLoader = new ThrowOutControlCsvLoader(loggerFactory.CreateLogger<ThrowOutControlCsvLoader>());
 
         // Phase 16: OperationNotificationDisplayDbInitializer - 運行通知の初期化
@@ -109,7 +109,7 @@ public class DatabaseInitializationOrchestrator(
         var ttcInitializer = new TtcDbInitializer(context, loggerFactory.CreateLogger<TtcDbInitializer>(), ttcWindowCsvLoader, ttcWindowLinkCsvLoader);
         await ttcInitializer.InitializeAsync(cancellationToken);
 
-        // Phase 20: ThrowOutControlDbInitializer - 投出制御の初期化
+        // Phase 20: ThrowOutControlDbInitializer - 総括制御の初期化
         var throwOutControlInitializer = new ThrowOutControlDbInitializer(
             context,
             loggerFactory.CreateLogger<ThrowOutControlDbInitializer>(),
