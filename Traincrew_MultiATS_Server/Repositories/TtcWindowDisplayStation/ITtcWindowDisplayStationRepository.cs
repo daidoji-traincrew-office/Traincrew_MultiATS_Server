@@ -1,5 +1,0 @@
-namespace Traincrew_MultiATS_Server.Repositories.TtcWindowDisplayStation;
-
-public interface ITtcWindowDisplayStationRepository
-{
-}
