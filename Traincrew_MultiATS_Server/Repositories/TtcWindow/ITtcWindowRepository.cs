@@ -14,8 +14,8 @@ namespace Traincrew_MultiATS_Server.Repositories.TtcWindow
         /// すべてのTtcWindow名を取得する
         /// </summary>
         /// <param name="cancellationToken">キャンセルトークン</param>
-        /// <returns>TtcWindow名のハッシュセット</returns>
-        Task<HashSet<string>> GetAllWindowNamesAsync(CancellationToken cancellationToken = default);
+        /// <returns>TtcWindow名のList</returns>
+        Task<List<string>> GetAllWindowNamesAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
         /// 変更を保存する

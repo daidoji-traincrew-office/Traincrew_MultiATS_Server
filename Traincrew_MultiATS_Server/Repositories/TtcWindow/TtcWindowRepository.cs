@@ -65,11 +65,15 @@ public class TtcWindowRepository(ApplicationDbContext context) : ITtcWindowRepos
             .ToListAsync();
     }
 
-    public async Task<HashSet<string>> GetAllWindowNamesAsync(CancellationToken cancellationToken = default)
+    public async Task<List<string>> GetAllWindowNamesAsync(CancellationToken cancellationToken = default)
     {
-        var names = await context.TtcWindows
+        return await context.TtcWindows
             .Select(w => w.Name)
             .ToListAsync(cancellationToken);
-        return names.ToHashSet();
+    }
+
+    public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        await context.SaveChangesAsync(cancellationToken);
     }
 }

@@ -20,6 +20,12 @@ public class RouteLockTrackCircuitRepository(ApplicationDbContext context): IRou
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<List<Models.RouteLockTrackCircuit>> GetAll(CancellationToken cancellationToken = default)
+    {
+        return await context.RouteLockTrackCircuits
+            .ToListAsync(cancellationToken);
+    }
+
     public void Add(Models.RouteLockTrackCircuit routeLockTrackCircuit)
     {
         context.RouteLockTrackCircuits.Add(routeLockTrackCircuit);

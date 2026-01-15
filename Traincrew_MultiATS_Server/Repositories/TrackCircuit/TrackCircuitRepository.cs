@@ -124,12 +124,11 @@ public class TrackCircuitRepository(ApplicationDbContext context) : ITrackCircui
             );
     }
 
-    public async Task<HashSet<string>> GetAllNames(CancellationToken cancellationToken = default)
+    public async Task<List<string>> GetAllNames(CancellationToken cancellationToken = default)
     {
-        var names = await context.TrackCircuits
+        return await context.TrackCircuits
             .Select(tc => tc.Name)
             .ToListAsync(cancellationToken);
-        return names.ToHashSet();
     }
 
     public async Task<Dictionary<string, Models.TrackCircuit>> GetTrackCircuitsByNamesAsync(
@@ -140,7 +139,7 @@ public class TrackCircuitRepository(ApplicationDbContext context) : ITrackCircui
             .ToDictionaryAsync(tc => tc.Name, cancellationToken);
     }
 
-    public async Task<Dictionary<string, ulong>> GetIdsByName(CancellationToken cancellationToken = default)
+    public async Task<Dictionary<string, ulong>> GetAllIdsForName(CancellationToken cancellationToken = default)
     {
         return await context.TrackCircuits
             .Select(tc => new { tc.Name, tc.Id })

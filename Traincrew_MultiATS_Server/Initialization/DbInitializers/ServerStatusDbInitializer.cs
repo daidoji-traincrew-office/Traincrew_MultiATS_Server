@@ -1,5 +1,4 @@
 using Traincrew_MultiATS_Server.Common.Models;
-using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.General;
 using Traincrew_MultiATS_Server.Repositories.Server;
@@ -27,10 +26,11 @@ public class ServerStatusDbInitializer(
             return;
         }
 
-        await serverRepository.AddServerStateAsync(new ServerState
+        await generalRepository.Add(new ServerState
         {
-            Mode = ServerMode.Off
+            Mode = ServerMode.Off,
+            TimeOffset = 0
         }, cancellationToken);
-        _logger.LogInformation("Initialized server status with mode: {Mode}", ServerMode.Off);
+        _logger.LogInformation("Initialized server status with mode: {Mode}, TimeOffset: {TimeOffset}", ServerMode.Off, 0);
     }
 }

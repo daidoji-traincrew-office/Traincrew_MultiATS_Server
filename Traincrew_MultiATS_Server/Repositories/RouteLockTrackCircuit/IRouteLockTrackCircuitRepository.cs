@@ -12,6 +12,13 @@ public interface IRouteLockTrackCircuitRepository
     Task<List<(ulong RouteId, ulong TrackCircuitId)>> GetAllPairs(CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// 全てのRouteLockTrackCircuitを取得する
+    /// </summary>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    /// <returns>RouteLockTrackCircuitのリスト</returns>
+    Task<List<Models.RouteLockTrackCircuit>> GetAll(CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// RouteLockTrackCircuitを追加する
     /// </summary>
     /// <param name="routeLockTrackCircuit">追加するRouteLockTrackCircuit</param>

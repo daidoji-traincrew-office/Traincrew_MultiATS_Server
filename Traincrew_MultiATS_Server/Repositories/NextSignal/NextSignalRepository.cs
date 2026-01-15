@@ -50,4 +50,9 @@ public class NextSignalRepository(ApplicationDbContext context): INextSignalRepo
                 g => g.Select(ns => ns.TargetSignalName).ToList(),
                 cancellationToken);
     }
+
+    public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        await context.SaveChangesAsync(cancellationToken);
+    }
 }

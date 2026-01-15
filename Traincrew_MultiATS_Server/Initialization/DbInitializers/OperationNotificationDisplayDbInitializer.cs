@@ -1,5 +1,4 @@
 using Traincrew_MultiATS_Server.Common.Models;
-using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.Initialization.CsvLoaders;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
@@ -71,8 +70,8 @@ public class OperationNotificationDisplayDbInitializer(
             }
         }
 
-        await generalRepository.AddAll(newDisplays);
-        await generalRepository.SaveAll(updatedTrackCircuits);
+        await generalRepository.AddAll(newDisplays, cancellationToken);
+        await generalRepository.SaveAll(updatedTrackCircuits, cancellationToken);
         _logger.LogInformation("Initialized {Count} operation notification displays", newDisplays.Count);
     }
 }

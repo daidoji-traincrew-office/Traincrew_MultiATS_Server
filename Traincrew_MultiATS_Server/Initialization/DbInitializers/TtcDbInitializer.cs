@@ -4,7 +4,6 @@ using Traincrew_MultiATS_Server.Repositories.General;
 using Traincrew_MultiATS_Server.Repositories.Route;
 using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
 using Traincrew_MultiATS_Server.Repositories.TtcWindow;
-using Traincrew_MultiATS_Server.Repositories.TtcWindowDisplayStation;
 using Traincrew_MultiATS_Server.Repositories.TtcWindowLink;
 using Traincrew_MultiATS_Server.Repositories.TtcWindowLinkRouteCondition;
 using Traincrew_MultiATS_Server.Repositories.TtcWindowTrackCircuit;
@@ -19,7 +18,6 @@ public class TtcDbInitializer(
     TtcWindowCsvLoader windowCsvLoader,
     TtcWindowLinkCsvLoader windowLinkCsvLoader,
     ITtcWindowRepository ttcWindowRepository,
-    ITtcWindowDisplayStationRepository ttcWindowDisplayStationRepository,
     ITtcWindowTrackCircuitRepository ttcWindowTrackCircuitRepository,
     ITtcWindowLinkRepository ttcWindowLinkRepository,
     ITtcWindowLinkRouteConditionRepository ttcWindowLinkRouteConditionRepository,
@@ -35,8 +33,8 @@ public class TtcDbInitializer(
     {
         var records = await windowCsvLoader.LoadAsync(cancellationToken);
 
-        var existingWindows = await ttcWindowRepository.GetAllWindowNamesAsync(cancellationToken);
-        var trackCircuitIdByName = await trackCircuitRepository.GetIdsByName(cancellationToken);
+        var existingWindows = (await ttcWindowRepository.GetAllWindowNamesAsync(cancellationToken)).ToHashSet();
+        var trackCircuitIdByName = await trackCircuitRepository.GetAllIdsForName(cancellationToken);
 
         var ttcWindowsToAdd = new List<TtcWindow>();
         var displayStationsToAdd = new List<TtcWindowDisplayStation>();
@@ -79,9 +77,9 @@ public class TtcDbInitializer(
             }
         }
 
-        await generalRepository.AddAll(ttcWindowsToAdd);
-        await generalRepository.AddAll(displayStationsToAdd);
-        await generalRepository.AddAll(windowTrackCircuitsToAdd);
+        await generalRepository.AddAll(ttcWindowsToAdd, cancellationToken);
+        await generalRepository.AddAll(displayStationsToAdd, cancellationToken);
+        await generalRepository.AddAll(windowTrackCircuitsToAdd, cancellationToken);
         _logger.LogInformation("Initialized {Count} TTC windows", ttcWindowsToAdd.Count);
     }
 
@@ -93,7 +91,7 @@ public class TtcDbInitializer(
         var records = await windowLinkCsvLoader.LoadAsync(cancellationToken);
 
         var existingLinks = await ttcWindowLinkRepository.GetAllLinkPairsAsync(cancellationToken);
-        var trackCircuitIdByName = await trackCircuitRepository.GetIdsByName(cancellationToken);
+        var trackCircuitIdByName = await trackCircuitRepository.GetAllIdsForName(cancellationToken);
         var routeIdByName = await routeRepository.GetIdsByName(cancellationToken);
 
         var ttcWindowLinksToAdd = new List<TtcWindowLink>();
@@ -133,8 +131,8 @@ public class TtcDbInitializer(
             }
         }
 
-        await generalRepository.AddAll(ttcWindowLinksToAdd);
-        await generalRepository.AddAll(linkRouteConditionsToAdd);
+        await generalRepository.AddAll(ttcWindowLinksToAdd, cancellationToken);
+        await generalRepository.AddAll(linkRouteConditionsToAdd, cancellationToken);
         _logger.LogInformation("Initialized {Count} TTC window links", ttcWindowLinksToAdd.Count);
     }
 

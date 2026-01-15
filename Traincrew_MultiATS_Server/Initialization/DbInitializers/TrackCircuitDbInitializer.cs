@@ -1,9 +1,8 @@
 using Traincrew_MultiATS_Server.Common.Models;
-using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.General;
-using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
 using Traincrew_MultiATS_Server.Repositories.Signal;
+using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
 using Traincrew_MultiATS_Server.Repositories.TrackCircuitSignal;
 
 namespace Traincrew_MultiATS_Server.Initialization.DbInitializers;
@@ -25,7 +24,7 @@ public class TrackCircuitDbInitializer(
     public async Task InitializeTrackCircuitsAsync(List<TrackCircuitCsv> trackCircuitList,
         CancellationToken cancellationToken = default)
     {
-        var trackCircuitNames = await trackCircuitRepository.GetAllNames(cancellationToken);
+        var trackCircuitNames = (await trackCircuitRepository.GetAllNames(cancellationToken)).ToHashSet();
 
         var trackCircuits = new List<TrackCircuit>();
         foreach (var item in trackCircuitList)
@@ -54,7 +53,7 @@ public class TrackCircuitDbInitializer(
             });
         }
 
-        await generalRepository.AddAll(trackCircuits);
+        await generalRepository.AddAll(trackCircuits, cancellationToken);
         _logger.LogInformation("Initialized {Count} track circuits", trackCircuits.Count);
     }
 
@@ -127,7 +126,7 @@ public class TrackCircuitDbInitializer(
             }
         }
 
-        await generalRepository.AddAll(trackCircuitSignals);
+        await generalRepository.AddAll(trackCircuitSignals, cancellationToken);
         _logger.LogInformation("Initialized track circuit signals");
     }
 

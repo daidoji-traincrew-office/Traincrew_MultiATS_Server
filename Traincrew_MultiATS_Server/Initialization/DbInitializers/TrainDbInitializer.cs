@@ -1,8 +1,7 @@
-using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.General;
-using Traincrew_MultiATS_Server.Repositories.TrainType;
 using Traincrew_MultiATS_Server.Repositories.TrainDiagram;
+using Traincrew_MultiATS_Server.Repositories.TrainType;
 
 namespace Traincrew_MultiATS_Server.Initialization.DbInitializers;
 
@@ -24,7 +23,7 @@ public class TrainDbInitializer(
     {
         var existingIds = await trainTypeRepository.GetIdsForAll(cancellationToken);
 
-        var trainTypes = new List<Models.TrainType>();
+        var trainTypes = new List<TrainType>();
         foreach (var record in trainTypeList)
         {
             if (existingIds.Contains(record.Id))
@@ -39,7 +38,7 @@ public class TrainDbInitializer(
             });
         }
 
-        await generalRepository.AddAll(trainTypes);
+        await generalRepository.AddAll(trainTypes, cancellationToken);
         _logger.LogInformation("Initialized {Count} train types", trainTypes.Count);
     }
 
@@ -51,7 +50,7 @@ public class TrainDbInitializer(
     {
         var existingNumbers = await trainDiagramRepository.GetTrainNumbersForAll(cancellationToken);
 
-        var trainDiagrams = new List<Models.TrainDiagram>();
+        var trainDiagrams = new List<TrainDiagram>();
         foreach (var record in trainDiagramList)
         {
             if (existingNumbers.Contains(record.TrainNumber))
@@ -69,7 +68,7 @@ public class TrainDbInitializer(
             });
         }
 
-        await generalRepository.AddAll(trainDiagrams);
+        await generalRepository.AddAll(trainDiagrams, cancellationToken);
         _logger.LogInformation("Initialized {Count} train diagrams", trainDiagrams.Count);
     }
 

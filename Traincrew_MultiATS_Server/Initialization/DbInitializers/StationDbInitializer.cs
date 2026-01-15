@@ -1,5 +1,4 @@
 using Traincrew_MultiATS_Server.Common.Models;
-using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.General;
 using Traincrew_MultiATS_Server.Repositories.Station;
@@ -22,9 +21,9 @@ public class StationDbInitializer(
     public async Task InitializeStationsAsync(List<StationCsv> stationList,
         CancellationToken cancellationToken = default)
     {
-        var stationNames = await stationRepository.GetAllNames(cancellationToken);
+        var stationNames = (await stationRepository.GetAllNames(cancellationToken)).ToHashSet();
 
-        var stations = new List<Models.Station>();
+        var stations = new List<Station>();
         foreach (var station in stationList)
         {
             if (stationNames.Contains(station.Name))
@@ -41,7 +40,7 @@ public class StationDbInitializer(
             });
         }
 
-        await generalRepository.AddAll(stations);
+        await generalRepository.AddAll(stations, cancellationToken);
         _logger.LogInformation("Initialized {Count} stations", stations.Count);
     }
 
@@ -50,7 +49,7 @@ public class StationDbInitializer(
     /// </summary>
     public async Task InitializeStationTimerStatesAsync(CancellationToken cancellationToken = default)
     {
-        var stationIds = await stationRepository.GetIdsWhereIsStation(cancellationToken);
+        var stationIds = (await stationRepository.GetIdsWhereIsStation(cancellationToken)).ToHashSet();
 
         var stationTimerStates = await stationTimerStateRepository.GetExistingTimerStates(cancellationToken);
 
@@ -75,7 +74,7 @@ public class StationDbInitializer(
             }
         }
 
-        await generalRepository.AddAll(timerStates);
+        await generalRepository.AddAll(timerStates, cancellationToken);
         _logger.LogInformation("Initialized {Count} station timer states", timerStates.Count);
     }
 

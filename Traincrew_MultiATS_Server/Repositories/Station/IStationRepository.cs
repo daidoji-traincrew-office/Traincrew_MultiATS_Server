@@ -48,15 +48,15 @@ public interface IStationRepository
     /// すべての停車場の名前を取得する
     /// </summary>
     /// <param name="cancellationToken">キャンセルトークン</param>
-    /// <returns>停車場名のHashSet</returns>
-    Task<HashSet<string>> GetAllNames(CancellationToken cancellationToken = default);
+    /// <returns>停車場名のList</returns>
+    Task<List<string>> GetAllNames(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// IsStation=trueの停車場IDを取得する
     /// </summary>
     /// <param name="cancellationToken">キャンセルトークン</param>
-    /// <returns>停車場IDのHashSet</returns>
-    Task<HashSet<string>> GetIdsWhereIsStation(CancellationToken cancellationToken = default);
+    /// <returns>停車場IDのList</returns>
+    Task<List<string>> GetIdsWhereIsStation(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Stationを追加する

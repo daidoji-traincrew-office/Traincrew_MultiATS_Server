@@ -1,4 +1,3 @@
-using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.General;
 using Traincrew_MultiATS_Server.Repositories.SignalType;
@@ -20,9 +19,9 @@ public class SignalTypeDbInitializer(
     public async Task InitializeSignalTypesAsync(List<SignalTypeCsv> signalTypeList,
         CancellationToken cancellationToken = default)
     {
-        var signalTypeNames = await signalTypeRepository.GetAllNames(cancellationToken);
+        var signalTypeNames = (await signalTypeRepository.GetAllNames(cancellationToken)).ToHashSet();
 
-        var signalTypes = new List<Models.SignalType>();
+        var signalTypes = new List<SignalType>();
         foreach (var signalTypeData in signalTypeList)
         {
             if (signalTypeNames.Contains(signalTypeData.Name))
@@ -41,7 +40,7 @@ public class SignalTypeDbInitializer(
             });
         }
 
-        await generalRepository.AddAll(signalTypes);
+        await generalRepository.AddAll(signalTypes, cancellationToken);
         _logger.LogInformation("Initialized {Count} signal types", signalTypes.Count);
     }
 

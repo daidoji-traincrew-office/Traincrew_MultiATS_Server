@@ -34,4 +34,9 @@ public class TtcWindowLinkRepository(ApplicationDbContext context) : ITtcWindowL
             .ToListAsync(cancellationToken);
         return links.Select(l => (l.SourceTtcWindowName, l.TargetTtcWindowName)).ToHashSet();
     }
+
+    public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        await context.SaveChangesAsync(cancellationToken);
+    }
 }

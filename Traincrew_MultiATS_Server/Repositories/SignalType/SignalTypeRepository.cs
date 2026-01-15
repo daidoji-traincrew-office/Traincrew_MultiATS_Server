@@ -5,10 +5,10 @@ namespace Traincrew_MultiATS_Server.Repositories.SignalType;
 
 public class SignalTypeRepository(ApplicationDbContext context) : ISignalTypeRepository
 {
-    public async Task<HashSet<string>> GetAllNames(CancellationToken cancellationToken = default)
+    public async Task<List<string>> GetAllNames(CancellationToken cancellationToken = default)
     {
-        return (await context.SignalTypes
+        return await context.SignalTypes
             .Select(st => st.Name)
-            .ToListAsync(cancellationToken)).ToHashSet();
+            .ToListAsync(cancellationToken);
     }
 }

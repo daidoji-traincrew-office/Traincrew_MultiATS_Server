@@ -1,7 +1,5 @@
-using System.Text.RegularExpressions;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.General;
-using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
 using Traincrew_MultiATS_Server.Repositories.LockCondition;
 using Traincrew_MultiATS_Server.Repositories.Route;
 using Traincrew_MultiATS_Server.Repositories.SwitchingMachine;
@@ -11,11 +9,10 @@ using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
 namespace Traincrew_MultiATS_Server.Initialization.DbInitializers;
 
 /// <summary>
-///     Initializes switching machine route relationships and sets station IDs for interlocking objects
+///     Initializes switching machine route relationships
 /// </summary>
-public partial class SwitchingMachineRouteDbInitializer(
+public class SwitchingMachineRouteDbInitializer(
     ILogger<SwitchingMachineRouteDbInitializer> logger,
-    IInterlockingObjectRepository interlockingObjectRepository,
     ISwitchingMachineRepository switchingMachineRepository,
     ISwitchingMachineRouteRepository switchingMachineRouteRepository,
     IRouteRepository routeRepository,
@@ -24,35 +21,6 @@ public partial class SwitchingMachineRouteDbInitializer(
     IGeneralRepository generalRepository)
     : BaseDbInitializer(logger)
 {
-    [GeneratedRegex(@"^(TH(\d{1,2}S?))_")]
-    private static partial Regex RegexStationId();
-
-    /// <summary>
-    ///     Set station ID to interlocking objects based on naming pattern
-    /// </summary>
-    public async Task SetStationIdToInterlockingObjectAsync(CancellationToken cancellationToken = default)
-    {
-        var interlockingObjects = await interlockingObjectRepository.GetAllAsync(cancellationToken);
-
-        var updatedCount = 0;
-        foreach (var interlockingObject in interlockingObjects)
-        {
-            var match = RegexStationId().Match(interlockingObject.Name);
-            if (!match.Success)
-            {
-                continue;
-            }
-
-            var stationId = match.Groups[1].Value;
-            interlockingObject.StationId = stationId;
-            interlockingObjectRepository.Update(interlockingObject);
-            updatedCount++;
-        }
-
-        await interlockingObjectRepository.SaveChangesAsync(cancellationToken);
-        _logger.LogInformation("Set station ID for {Count} interlocking objects", updatedCount);
-    }
-
     /// <summary>
     ///     Initialize switching machine routes based on lock conditions
     /// </summary>
@@ -62,7 +30,7 @@ public partial class SwitchingMachineRouteDbInitializer(
         var routeIds = await routeRepository.GetIdsForAll();
         var switchingMachineIds = await switchingMachineRepository.GetAllIdsAsync(cancellationToken);
         var trackCircuitIds = await trackCircuitRepository.GetAllNames(cancellationToken);
-        var trackCircuitIdByName = await trackCircuitRepository.GetIdsByName(cancellationToken);
+        var trackCircuitIdByName = await trackCircuitRepository.GetAllIdsForName(cancellationToken);
         var trackCircuitIdsSet = trackCircuitIdByName.Values.ToHashSet();
 
         var directLockConditionsByRouteIds = await lockConditionRepository
@@ -118,13 +86,12 @@ public partial class SwitchingMachineRouteDbInitializer(
             }
         }
 
-        await generalRepository.AddAll(switchingMachineRoutesToAdd);
+        await generalRepository.AddAll(switchingMachineRoutesToAdd, cancellationToken);
         _logger.LogInformation("Initialized {Count} switching machine routes", switchingMachineRoutesToAdd.Count);
     }
 
     public override async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
-        await SetStationIdToInterlockingObjectAsync(cancellationToken);
         await InitializeSwitchingMachineRoutesAsync(cancellationToken);
     }
 }

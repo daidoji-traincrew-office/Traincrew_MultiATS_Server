@@ -1,5 +1,5 @@
-using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.Initialization.CsvLoaders;
+using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.General;
 using Traincrew_MultiATS_Server.Repositories.Route;
 using Traincrew_MultiATS_Server.Repositories.RouteLockTrackCircuit;
@@ -10,8 +10,8 @@ namespace Traincrew_MultiATS_Server.Initialization.DbInitializers;
 /// <summary>
 ///     Initializes route lock track circuit relationships from CSV data
 /// </summary>
-public class RouteDbInitializer(
-    ILogger<RouteDbInitializer> logger,
+public class RouteLockTrackCircuitDbInitializer(
+    ILogger<RouteLockTrackCircuitDbInitializer> logger,
     RouteLockTrackCircuitCsvLoader csvLoader,
     IRouteRepository routeRepository,
     ITrackCircuitRepository trackCircuitRepository,
@@ -26,11 +26,13 @@ public class RouteDbInitializer(
     {
         var records = await csvLoader.LoadAsync(cancellationToken);
         var routes = await routeRepository.GetIdsByName(cancellationToken);
-        var trackCircuits = await trackCircuitRepository.GetIdsByName(cancellationToken);
+        var trackCircuits = await trackCircuitRepository.GetAllIdsForName(cancellationToken);
         var routeLockTrackCircuits = (await routeLockTrackCircuitRepository
-            .GetAllPairs(cancellationToken)).ToHashSet();
+            .GetAll(cancellationToken))
+            .Select(x => (x.RouteId, x.TrackCircuitId))
+            .ToHashSet();
 
-        var routeLockTrackCircuitList = new List<Models.RouteLockTrackCircuit>();
+        var routeLockTrackCircuitList = new List<RouteLockTrackCircuit>();
         foreach (var record in records)
         {
             // 該当進路が登録されていない場合スキップ
@@ -61,7 +63,7 @@ public class RouteDbInitializer(
             }
         }
 
-        await generalRepository.AddAll(routeLockTrackCircuitList);
+        await generalRepository.AddAll(routeLockTrackCircuitList, cancellationToken);
         _logger.LogInformation("Initialized {Count} route lock track circuits", routeLockTrackCircuitList.Count);
     }
 }

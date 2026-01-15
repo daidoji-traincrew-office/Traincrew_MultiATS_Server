@@ -1,5 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.DirectionRoute;
 using Traincrew_MultiATS_Server.Repositories.General;
@@ -34,7 +32,7 @@ public class SignalDbInitializer(
         CancellationToken cancellationToken = default)
     {
         // 軌道回路情報を取得
-        var trackCircuits = await trackCircuitRepository.GetIdsByName(cancellationToken);
+        var trackCircuits = await trackCircuitRepository.GetAllIdsForName(cancellationToken);
 
         // 既に登録済みの信号情報を取得
         var signalNames = await signalRepository.GetAllNames(cancellationToken);

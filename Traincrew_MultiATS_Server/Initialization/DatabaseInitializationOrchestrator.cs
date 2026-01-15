@@ -28,7 +28,6 @@ using Traincrew_MultiATS_Server.Repositories.TrainDiagram;
 using Traincrew_MultiATS_Server.Repositories.TrainType;
 using Traincrew_MultiATS_Server.Repositories.Transaction;
 using Traincrew_MultiATS_Server.Repositories.TtcWindow;
-using Traincrew_MultiATS_Server.Repositories.TtcWindowDisplayStation;
 using Traincrew_MultiATS_Server.Repositories.TtcWindowLink;
 using Traincrew_MultiATS_Server.Repositories.TtcWindowLinkRouteCondition;
 using Traincrew_MultiATS_Server.Repositories.TtcWindowTrackCircuit;
@@ -68,12 +67,13 @@ public class DatabaseInitializationOrchestrator(
     ITrainTypeRepository trainTypeRepository,
     ITransactionRepository transactionRepository,
     ITtcWindowRepository ttcWindowRepository,
-    ITtcWindowDisplayStationRepository ttcWindowDisplayStationRepository,
     ITtcWindowLinkRepository ttcWindowLinkRepository,
     ITtcWindowLinkRouteConditionRepository ttcWindowLinkRouteConditionRepository,
     ITtcWindowTrackCircuitRepository ttcWindowTrackCircuitRepository,
     IServerRepository serverRepository,
     ISignalTypeRepository signalTypeRepository,
+    InterlockingObjectDbInitializer interlockingObjectDbInitializer,
+    SwitchingMachineRouteDbInitializer switchingMachineRouteDbInitializer,
     ILogger<DatabaseInitializationOrchestrator> logger)
 {
     /// <summary>
@@ -171,9 +171,9 @@ public class DatabaseInitializationOrchestrator(
             generalRepository);
         await operationNotificationInitializer.InitializeAsync(cancellationToken);
 
-        // Phase 17: RouteDbInitializer - 進路の初期化
-        var routeInitializer = new RouteDbInitializer(
-            loggerFactory.CreateLogger<RouteDbInitializer>(),
+        // Phase 17: RouteLockTrackCircuitDbInitializer - 進路の初期化
+        var routeInitializer = new RouteLockTrackCircuitDbInitializer(
+            loggerFactory.CreateLogger<RouteLockTrackCircuitDbInitializer>(),
             routeLockTrackCircuitCsvLoader,
             routeRepository,
             trackCircuitRepository,
@@ -194,7 +194,6 @@ public class DatabaseInitializationOrchestrator(
             ttcWindowCsvLoader,
             ttcWindowLinkCsvLoader,
             ttcWindowRepository,
-            ttcWindowDisplayStationRepository,
             ttcWindowTrackCircuitRepository,
             ttcWindowLinkRepository,
             ttcWindowLinkRouteConditionRepository,
@@ -291,17 +290,8 @@ public class DatabaseInitializationOrchestrator(
     {
         logger.LogInformation("Finalizing initialization");
 
-        var switchingMachineRouteInitializer = new SwitchingMachineRouteDbInitializer(
-            loggerFactory.CreateLogger<SwitchingMachineRouteDbInitializer>(),
-            interlockingObjectRepository,
-            switchingMachineRepository,
-            switchingMachineRouteRepository,
-            routeRepository,
-            trackCircuitRepository,
-            lockConditionRepository,
-            generalRepository);
-        await switchingMachineRouteInitializer.SetStationIdToInterlockingObjectAsync(cancellationToken);
-        await switchingMachineRouteInitializer.InitializeSwitchingMachineRoutesAsync(cancellationToken);
+        await interlockingObjectDbInitializer.InitializeAsync(cancellationToken);
+        await switchingMachineRouteDbInitializer.InitializeSwitchingMachineRoutesAsync(cancellationToken);
     }
 
     private void DetachUnchangedEntities()

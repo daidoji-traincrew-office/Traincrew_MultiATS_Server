@@ -124,7 +124,7 @@ public class ThrowOutControlDbInitializer(
         await directionRouteRepository.SaveChangesAsync(cancellationToken);
 
         // Add throw out controls
-        await generalRepository.AddAll(throwOutControlsToAdd);
+        await generalRepository.AddAll(throwOutControlsToAdd, cancellationToken);
         _logger.LogInformation("Initialized {Count} throw out controls", throwOutControlsToAdd.Count);
     }
 }

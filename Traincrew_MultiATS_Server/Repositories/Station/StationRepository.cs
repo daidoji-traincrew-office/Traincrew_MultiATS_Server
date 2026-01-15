@@ -44,23 +44,19 @@ public class StationRepository(ApplicationDbContext context) : IStationRepositor
             .ToListAsync();
     }
 
-    public async Task<HashSet<string>> GetAllNames(CancellationToken cancellationToken = default)
+    public async Task<List<string>> GetAllNames(CancellationToken cancellationToken = default)
     {
-        var names = await context.Stations
+        return await context.Stations
             .Select(s => s.Name)
             .ToListAsync(cancellationToken);
-
-        return names.ToHashSet();
     }
 
-    public async Task<HashSet<string>> GetIdsWhereIsStation(CancellationToken cancellationToken = default)
+    public async Task<List<string>> GetIdsWhereIsStation(CancellationToken cancellationToken = default)
     {
-        var ids = await context.Stations
+        return await context.Stations
             .Where(s => s.IsStation)
             .Select(s => s.Id)
             .ToListAsync(cancellationToken);
-
-        return ids.ToHashSet();
     }
 
     public void Add(Models.Station station)
