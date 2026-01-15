@@ -1,8 +1,12 @@
 using System.Text.RegularExpressions;
-using Microsoft.EntityFrameworkCore;
-using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.Models;
+using Traincrew_MultiATS_Server.Repositories.General;
+using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
 using Traincrew_MultiATS_Server.Repositories.LockCondition;
+using Traincrew_MultiATS_Server.Repositories.Route;
+using Traincrew_MultiATS_Server.Repositories.SwitchingMachine;
+using Traincrew_MultiATS_Server.Repositories.SwitchingMachineRoute;
+using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
 
 namespace Traincrew_MultiATS_Server.Initialization.DbInitializers;
 
@@ -10,10 +14,15 @@ namespace Traincrew_MultiATS_Server.Initialization.DbInitializers;
 ///     Initializes switching machine route relationships and sets station IDs for interlocking objects
 /// </summary>
 public partial class SwitchingMachineRouteDbInitializer(
-    ApplicationDbContext context,
+    ILogger<SwitchingMachineRouteDbInitializer> logger,
+    IInterlockingObjectRepository interlockingObjectRepository,
+    ISwitchingMachineRepository switchingMachineRepository,
+    ISwitchingMachineRouteRepository switchingMachineRouteRepository,
+    IRouteRepository routeRepository,
+    ITrackCircuitRepository trackCircuitRepository,
     ILockConditionRepository lockConditionRepository,
-    ILogger<SwitchingMachineRouteDbInitializer> logger)
-    : BaseDbInitializer(context, logger)
+    IGeneralRepository generalRepository)
+    : BaseDbInitializer(logger)
 {
     [GeneratedRegex(@"^(TH(\d{1,2}S?))_")]
     private static partial Regex RegexStationId();
@@ -23,8 +32,7 @@ public partial class SwitchingMachineRouteDbInitializer(
     /// </summary>
     public async Task SetStationIdToInterlockingObjectAsync(CancellationToken cancellationToken = default)
     {
-        var interlockingObjects = await _context.InterlockingObjects
-            .ToListAsync(cancellationToken);
+        var interlockingObjects = await interlockingObjectRepository.GetAllAsync(cancellationToken);
 
         var updatedCount = 0;
         foreach (var interlockingObject in interlockingObjects)
@@ -37,11 +45,11 @@ public partial class SwitchingMachineRouteDbInitializer(
 
             var stationId = match.Groups[1].Value;
             interlockingObject.StationId = stationId;
-            _context.Update(interlockingObject);
+            interlockingObjectRepository.Update(interlockingObject);
             updatedCount++;
         }
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await interlockingObjectRepository.SaveChangesAsync(cancellationToken);
         _logger.LogInformation("Set station ID for {Count} interlocking objects", updatedCount);
     }
 
@@ -50,19 +58,13 @@ public partial class SwitchingMachineRouteDbInitializer(
     /// </summary>
     public async Task InitializeSwitchingMachineRoutesAsync(CancellationToken cancellationToken = default)
     {
-        var switchingMachinesRoutes = await _context.SwitchingMachineRoutes
-            .Select(smr => new { smr.RouteId, smr.SwitchingMachineId })
-            .AsAsyncEnumerable()
-            .ToHashSetAsync(cancellationToken);
-        var routeIds = await _context.Routes.Select(r => r.Id).ToListAsync(cancellationToken);
-        var switchingMachineIds = await _context.SwitchingMachines
-            .Select(sm => sm.Id)
-            .AsAsyncEnumerable()
-            .ToHashSetAsync(cancellationToken);
-        var trackCircuitIds = await _context.TrackCircuits
-            .Select(tc => tc.Id)
-            .AsAsyncEnumerable()
-            .ToHashSetAsync(cancellationToken);
+        var switchingMachinesRoutes = await switchingMachineRouteRepository.GetAllPairsAsync(cancellationToken);
+        var routeIds = await routeRepository.GetIdsForAll();
+        var switchingMachineIds = await switchingMachineRepository.GetAllIdsAsync(cancellationToken);
+        var trackCircuitIds = await trackCircuitRepository.GetAllNames(cancellationToken);
+        var trackCircuitIdByName = await trackCircuitRepository.GetIdsByName(cancellationToken);
+        var trackCircuitIdsSet = trackCircuitIdByName.Values.ToHashSet();
+
         var directLockConditionsByRouteIds = await lockConditionRepository
             .GetConditionsByObjectIdsAndType(routeIds, LockType.Lock);
         // 進路の進路鎖錠欄
@@ -72,7 +74,7 @@ public partial class SwitchingMachineRouteDbInitializer(
         var detectorLockConditionsBySwitchingMachineIds = await lockConditionRepository
             .GetConditionsByObjectIdsAndType(switchingMachineIds.ToList(), LockType.Detector);
 
-        var addedCount = 0;
+        var switchingMachineRoutesToAdd = new List<SwitchingMachineRoute>();
         foreach (var routeId in routeIds)
         {
             var directLockConditions = directLockConditionsByRouteIds.GetValueOrDefault(routeId, []);
@@ -92,8 +94,7 @@ public partial class SwitchingMachineRouteDbInitializer(
                 // 対象転てつ器を取得
                 var switchingMachineId = lockCondition.ObjectId;
                 // 既に登録済みの場合、スキップ
-                if (switchingMachinesRoutes.Contains(new
-                        { RouteId = routeId, SwitchingMachineId = switchingMachineId }))
+                if (switchingMachinesRoutes.Contains((routeId, switchingMachineId)))
                 {
                     continue;
                 }
@@ -101,12 +102,12 @@ public partial class SwitchingMachineRouteDbInitializer(
                 var detectorLockConditions = detectorLockConditionsBySwitchingMachineIds
                     .GetValueOrDefault(switchingMachineId, [])
                     .OfType<LockConditionObject>()
-                    .Where(lco => trackCircuitIds.Contains(lco.ObjectId))
+                    .Where(lco => trackCircuitIdsSet.Contains(lco.ObjectId))
                     .ToList();
                 // てっ鎖鎖錠欄に含まれている軌道回路のうち、どれか１つでも
                 // 進路鎖錠欄に含まれていれば、True
 
-                _context.SwitchingMachineRoutes.Add(new()
+                switchingMachineRoutesToAdd.Add(new()
                 {
                     RouteId = routeId,
                     SwitchingMachineId = switchingMachineId,
@@ -114,12 +115,11 @@ public partial class SwitchingMachineRouteDbInitializer(
                     OnRouteLock = detectorLockConditions
                         .Any(lco => targetRouteLockConditionObjectIds.Contains(lco.ObjectId))
                 });
-                addedCount++;
             }
         }
 
-        await _context.SaveChangesAsync(cancellationToken);
-        _logger.LogInformation("Initialized {Count} switching machine routes", addedCount);
+        await generalRepository.AddAll(switchingMachineRoutesToAdd);
+        _logger.LogInformation("Initialized {Count} switching machine routes", switchingMachineRoutesToAdd.Count);
     }
 
     public override async Task InitializeAsync(CancellationToken cancellationToken = default)

@@ -1,9 +1,11 @@
-using Microsoft.EntityFrameworkCore;
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.Initialization.CsvLoaders;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
+using Traincrew_MultiATS_Server.Repositories.General;
+using Traincrew_MultiATS_Server.Repositories.OperationNotificationDisplay;
+using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
 
 namespace Traincrew_MultiATS_Server.Initialization.DbInitializers;
 
@@ -11,11 +13,13 @@ namespace Traincrew_MultiATS_Server.Initialization.DbInitializers;
 ///     Initializes operation notification display entities in the database
 /// </summary>
 public class OperationNotificationDisplayDbInitializer(
-    ApplicationDbContext context,
-    IDateTimeRepository dateTimeRepository,
     ILogger<OperationNotificationDisplayDbInitializer> logger,
-    OperationNotificationDisplayCsvLoader csvLoader)
-    : BaseDbInitializer(context, logger)
+    IDateTimeRepository dateTimeRepository,
+    IOperationNotificationDisplayRepository operationNotificationDisplayRepository,
+    ITrackCircuitRepository trackCircuitRepository,
+    OperationNotificationDisplayCsvLoader csvLoader,
+    IGeneralRepository generalRepository)
+    : BaseDbInitializer(logger)
 {
     /// <summary>
     ///     Initialize operation notification displays from CSV file (運転告知器.csv)
@@ -26,15 +30,12 @@ public class OperationNotificationDisplayDbInitializer(
         var trackCircuitNames = records
             .SelectMany(r => r.TrackCircuitNames)
             .ToList();
-        var trackCircuits = await _context.TrackCircuits
-            .Where(tc => trackCircuitNames.Contains(tc.Name))
-            .ToDictionaryAsync(tc => tc.Name, cancellationToken);
-        var operationNotificationDisplayNames = await _context.OperationNotificationDisplays
-            .Select(ond => ond.Name)
-            .ToListAsync(cancellationToken);
-        List<TrackCircuit> changedTrackCircuits = [];
+        var trackCircuits = await trackCircuitRepository.GetByNames(trackCircuitNames, cancellationToken);
+        var operationNotificationDisplayNames = await operationNotificationDisplayRepository.GetAllNames(cancellationToken);
 
-        var addedCount = 0;
+        var newDisplays = new List<OperationNotificationDisplay>();
+        var updatedTrackCircuits = new List<TrackCircuit>();
+
         foreach (var record in records)
         {
             var name = record.Name;
@@ -43,7 +44,7 @@ public class OperationNotificationDisplayDbInitializer(
                 continue;
             }
 
-            _context.OperationNotificationDisplays.Add(new()
+            newDisplays.Add(new()
             {
                 Name = name,
                 StationId = record.StationId,
@@ -66,19 +67,12 @@ public class OperationNotificationDisplayDbInitializer(
                 }
 
                 trackCircuit.OperationNotificationDisplayName = name;
-                _context.TrackCircuits.Update(trackCircuit);
-                changedTrackCircuits.Add(trackCircuit);
+                updatedTrackCircuits.Add(trackCircuit);
             }
-
-            addedCount++;
         }
 
-        await _context.SaveChangesAsync(cancellationToken);
-        _logger.LogInformation("Initialized {Count} operation notification displays", addedCount);
-
-        foreach (var trackCircuit in changedTrackCircuits)
-        {
-            _context.Entry(trackCircuit).State = EntityState.Detached;
-        }
+        await generalRepository.AddAll(newDisplays);
+        await generalRepository.SaveAll(updatedTrackCircuits);
+        _logger.LogInformation("Initialized {Count} operation notification displays", newDisplays.Count);
     }
 }

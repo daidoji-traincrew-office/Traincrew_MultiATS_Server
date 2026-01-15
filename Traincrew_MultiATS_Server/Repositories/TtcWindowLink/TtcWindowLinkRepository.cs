@@ -27,4 +27,22 @@ public class TtcWindowLinkRepository(ApplicationDbContext context) : ITtcWindowL
             .Where(obj => obj.TtcWindowLinkId == ttcWindowLinkId)
             .ToListAsync();
     }
+
+    public async Task<HashSet<(string Source, string Target)>> GetAllLinkPairsAsync(CancellationToken cancellationToken = default)
+    {
+        var links = await context.TtcWindowLinks
+            .Select(l => new { l.SourceTtcWindowName, l.TargetTtcWindowName })
+            .ToListAsync(cancellationToken);
+        return links.Select(l => (l.SourceTtcWindowName, l.TargetTtcWindowName)).ToHashSet();
+    }
+
+    public async Task AddAsync(Models.TtcWindowLink ttcWindowLink, CancellationToken cancellationToken = default)
+    {
+        await context.TtcWindowLinks.AddAsync(ttcWindowLink, cancellationToken);
+    }
+
+    public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        await context.SaveChangesAsync(cancellationToken);
+    }
 }

@@ -1,15 +1,20 @@
-using Microsoft.EntityFrameworkCore;
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.Models;
+using Traincrew_MultiATS_Server.Repositories.General;
+using Traincrew_MultiATS_Server.Repositories.Station;
 
 namespace Traincrew_MultiATS_Server.Initialization.DbInitializers;
 
 /// <summary>
 ///     Initializes station and station timer state entities in the database
 /// </summary>
-public class StationDbInitializer(ApplicationDbContext context, ILogger<StationDbInitializer> logger)
-    : BaseDbInitializer(context, logger)
+public class StationDbInitializer(
+    ILogger<StationDbInitializer> logger,
+    IStationRepository stationRepository,
+    IStationTimerStateRepository stationTimerStateRepository,
+    IGeneralRepository generalRepository)
+    : BaseDbInitializer(logger)
 {
     /// <summary>
     ///     Initialize stations from CSV data
@@ -17,11 +22,9 @@ public class StationDbInitializer(ApplicationDbContext context, ILogger<StationD
     public async Task InitializeStationsAsync(List<StationCsv> stationList,
         CancellationToken cancellationToken = default)
     {
-        var stationNames = (await _context.Stations
-            .Select(s => s.Name)
-            .ToListAsync(cancellationToken)).ToHashSet();
+        var stationNames = await stationRepository.GetAllNames(cancellationToken);
 
-        var addedCount = 0;
+        var stations = new List<Models.Station>();
         foreach (var station in stationList)
         {
             if (stationNames.Contains(station.Name))
@@ -29,18 +32,17 @@ public class StationDbInitializer(ApplicationDbContext context, ILogger<StationD
                 continue;
             }
 
-            _context.Stations.Add(new()
+            stations.Add(new()
             {
                 Id = station.Id,
                 Name = station.Name,
                 IsStation = station.IsStation,
                 IsPassengerStation = station.IsPassengerStation
             });
-            addedCount++;
         }
 
-        await _context.SaveChangesAsync(cancellationToken);
-        _logger.LogInformation("Initialized {Count} stations", addedCount);
+        await generalRepository.AddAll(stations);
+        _logger.LogInformation("Initialized {Count} stations", stations.Count);
     }
 
     /// <summary>
@@ -48,26 +50,21 @@ public class StationDbInitializer(ApplicationDbContext context, ILogger<StationD
     /// </summary>
     public async Task InitializeStationTimerStatesAsync(CancellationToken cancellationToken = default)
     {
-        var stationIds = (await _context.Stations
-            .Where(s => s.IsStation)
-            .Select(s => s.Id)
-            .ToListAsync(cancellationToken)).ToHashSet();
+        var stationIds = await stationRepository.GetIdsWhereIsStation(cancellationToken);
 
-        var stationTimerStates = (await _context.StationTimerStates
-            .Select(s => new { s.StationId, s.Seconds })
-            .ToListAsync(cancellationToken)).ToHashSet();
+        var stationTimerStates = await stationTimerStateRepository.GetExistingTimerStates(cancellationToken);
 
-        var addedCount = 0;
+        var timerStates = new List<StationTimerState>();
         foreach (var stationId in stationIds)
         {
             foreach (var seconds in new[] { 30, 60 })
             {
-                if (stationTimerStates.Contains(new { StationId = stationId, Seconds = seconds }))
+                if (stationTimerStates.Contains((stationId, seconds)))
                 {
                     continue;
                 }
 
-                _context.StationTimerStates.Add(new()
+                timerStates.Add(new()
                 {
                     StationId = stationId,
                     Seconds = seconds,
@@ -75,12 +72,11 @@ public class StationDbInitializer(ApplicationDbContext context, ILogger<StationD
                     IsTenRelayRaised = RaiseDrop.Drop,
                     IsTerRelayRaised = RaiseDrop.Raise
                 });
-                addedCount++;
             }
         }
 
-        await _context.SaveChangesAsync(cancellationToken);
-        _logger.LogInformation("Initialized {Count} station timer states", addedCount);
+        await generalRepository.AddAll(timerStates);
+        _logger.LogInformation("Initialized {Count} station timer states", timerStates.Count);
     }
 
     public override async Task InitializeAsync(CancellationToken cancellationToken = default)

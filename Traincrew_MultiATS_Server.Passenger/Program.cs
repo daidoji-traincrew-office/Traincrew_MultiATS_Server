@@ -7,6 +7,7 @@ using Traincrew_MultiATS_Server.Repositories.Mutex;
 using Traincrew_MultiATS_Server.Repositories.NextSignal;
 using Traincrew_MultiATS_Server.Repositories.OperationInformation;
 using Traincrew_MultiATS_Server.Repositories.OperationNotification;
+using Traincrew_MultiATS_Server.Repositories.OperationNotificationDisplay;
 using Traincrew_MultiATS_Server.Repositories.Protection;
 using Traincrew_MultiATS_Server.Repositories.Route;
 using Traincrew_MultiATS_Server.Repositories.Server;
@@ -16,6 +17,7 @@ using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
 using Traincrew_MultiATS_Server.Repositories.Train;
 using Traincrew_MultiATS_Server.Repositories.TrainCar;
 using Traincrew_MultiATS_Server.Repositories.TrainDiagram;
+using Traincrew_MultiATS_Server.Repositories.TrainType;
 using Traincrew_MultiATS_Server.Repositories.TrainSignalState;
 using Traincrew_MultiATS_Server.Repositories.Transaction;
 using Traincrew_MultiATS_Server.Repositories.UserDisconnection;
@@ -78,6 +80,7 @@ public class Program
             .AddScoped<INextSignalRepository, NextSignalRepository>()
             .AddScoped<IOperationInformationRepository, OperationInformationRepository>()
             .AddScoped<IOperationNotificationRepository, OperationNotificationRepository>()
+            .AddScoped<IOperationNotificationDisplayRepository, OperationNotificationDisplayRepository>()
             .AddScoped<IProtectionRepository, ProtectionRepository>()
             .AddScoped<IRouteRepository, RouteRepository>()
             .AddScoped<IServerRepository, ServerRepository>()
@@ -87,6 +90,7 @@ public class Program
             .AddScoped<ITrainCarRepository, TrainCarRepository>()
             .AddScoped<ITrainDiagramRepository, TrainDiagramRepository>()
             .AddScoped<ITrainRepository, TrainRepository>()
+            .AddScoped<ITrainTypeRepository, TrainTypeRepository>()
             .AddScoped<ITrainSignalStateRepository, TrainSignalStateRepository>()
             .AddScoped<ITransactionRepository, TransactionRepository>()
             .AddScoped<IUserDisconnectionRepository, UserDisconnectionRepository>()

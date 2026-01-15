@@ -1,14 +1,20 @@
-using Microsoft.EntityFrameworkCore;
 using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.Models;
+using Traincrew_MultiATS_Server.Repositories.General;
+using Traincrew_MultiATS_Server.Repositories.TrainType;
+using Traincrew_MultiATS_Server.Repositories.TrainDiagram;
 
 namespace Traincrew_MultiATS_Server.Initialization.DbInitializers;
 
 /// <summary>
 ///     Initializes train type and train diagram entities in the database
 /// </summary>
-public class TrainDbInitializer(ApplicationDbContext context, ILogger<TrainDbInitializer> logger)
-    : BaseDbInitializer(context, logger)
+public class TrainDbInitializer(
+    ILogger<TrainDbInitializer> logger,
+    ITrainTypeRepository trainTypeRepository,
+    ITrainDiagramRepository trainDiagramRepository,
+    IGeneralRepository generalRepository)
+    : BaseDbInitializer(logger)
 {
     /// <summary>
     ///     Initialize train types from CSV data
@@ -16,9 +22,9 @@ public class TrainDbInitializer(ApplicationDbContext context, ILogger<TrainDbIni
     public async Task InitializeTrainTypesAsync(List<TrainTypeCsv> trainTypeList,
         CancellationToken cancellationToken = default)
     {
-        var existingIds = await _context.TrainTypes.Select(t => t.Id).ToListAsync(cancellationToken);
+        var existingIds = await trainTypeRepository.GetIdsForAll(cancellationToken);
 
-        var addedCount = 0;
+        var trainTypes = new List<Models.TrainType>();
         foreach (var record in trainTypeList)
         {
             if (existingIds.Contains(record.Id))
@@ -26,16 +32,15 @@ public class TrainDbInitializer(ApplicationDbContext context, ILogger<TrainDbIni
                 continue;
             }
 
-            _context.TrainTypes.Add(new()
+            trainTypes.Add(new()
             {
                 Id = record.Id,
                 Name = record.Name
             });
-            addedCount++;
         }
 
-        await _context.SaveChangesAsync(cancellationToken);
-        _logger.LogInformation("Initialized {Count} train types", addedCount);
+        await generalRepository.AddAll(trainTypes);
+        _logger.LogInformation("Initialized {Count} train types", trainTypes.Count);
     }
 
     /// <summary>
@@ -44,9 +49,9 @@ public class TrainDbInitializer(ApplicationDbContext context, ILogger<TrainDbIni
     public async Task InitializeTrainDiagramsAsync(List<TrainDiagramCsv> trainDiagramList,
         CancellationToken cancellationToken = default)
     {
-        var existingNumbers = await _context.TrainDiagrams.Select(t => t.TrainNumber).ToListAsync(cancellationToken);
+        var existingNumbers = await trainDiagramRepository.GetTrainNumbersForAll(cancellationToken);
 
-        var addedCount = 0;
+        var trainDiagrams = new List<Models.TrainDiagram>();
         foreach (var record in trainDiagramList)
         {
             if (existingNumbers.Contains(record.TrainNumber))
@@ -54,7 +59,7 @@ public class TrainDbInitializer(ApplicationDbContext context, ILogger<TrainDbIni
                 continue;
             }
 
-            _context.TrainDiagrams.Add(new()
+            trainDiagrams.Add(new()
             {
                 TrainNumber = record.TrainNumber,
                 TrainTypeId = record.TypeId,
@@ -62,11 +67,10 @@ public class TrainDbInitializer(ApplicationDbContext context, ILogger<TrainDbIni
                 ToStationId = record.ToStationId,
                 DiaId = record.DiaId
             });
-            addedCount++;
         }
 
-        await _context.SaveChangesAsync(cancellationToken);
-        _logger.LogInformation("Initialized {Count} train diagrams", addedCount);
+        await generalRepository.AddAll(trainDiagrams);
+        _logger.LogInformation("Initialized {Count} train diagrams", trainDiagrams.Count);
     }
 
     public override async Task InitializeAsync(CancellationToken cancellationToken = default)

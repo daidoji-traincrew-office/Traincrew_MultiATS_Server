@@ -54,4 +54,36 @@ public class ThrowOutControlRepository(ApplicationDbContext context) : IThrowOut
             .Where(t => controlTypes.Contains(t.ControlType))
             .ToListAsync();
     }
+
+    /// <summary>
+    /// すべてのThrowOutControlのSourceIdとTargetIdのペアを取得する
+    /// </summary>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    /// <returns>SourceIdとTargetIdのペアのHashSet</returns>
+    public async Task<HashSet<(ulong SourceId, ulong TargetId)>> GetAllPairsAsync(CancellationToken cancellationToken = default)
+    {
+        var pairs = await context.ThrowOutControls
+            .Select(toc => new { toc.SourceId, toc.TargetId })
+            .ToListAsync(cancellationToken);
+        return pairs.Select(p => (p.SourceId, p.TargetId)).ToHashSet();
+    }
+
+    /// <summary>
+    /// ThrowOutControlを追加する
+    /// </summary>
+    /// <param name="throwOutControl">追加するThrowOutControl</param>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    public async Task AddAsync(Models.ThrowOutControl throwOutControl, CancellationToken cancellationToken = default)
+    {
+        await context.ThrowOutControls.AddAsync(throwOutControl, cancellationToken);
+    }
+
+    /// <summary>
+    /// 変更を保存する
+    /// </summary>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        await context.SaveChangesAsync(cancellationToken);
+    }
 }

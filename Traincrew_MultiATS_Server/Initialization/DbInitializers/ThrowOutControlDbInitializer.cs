@@ -1,7 +1,10 @@
-using Microsoft.EntityFrameworkCore;
-using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.Initialization.CsvLoaders;
 using Traincrew_MultiATS_Server.Models;
+using Traincrew_MultiATS_Server.Repositories.DirectionRoute;
+using Traincrew_MultiATS_Server.Repositories.DirectionSelfControlLever;
+using Traincrew_MultiATS_Server.Repositories.General;
+using Traincrew_MultiATS_Server.Repositories.Route;
+using Traincrew_MultiATS_Server.Repositories.ThrowOutControl;
 
 namespace Traincrew_MultiATS_Server.Initialization.DbInitializers;
 
@@ -9,10 +12,14 @@ namespace Traincrew_MultiATS_Server.Initialization.DbInitializers;
 ///     Initializes throw out control entities in the database
 /// </summary>
 public class ThrowOutControlDbInitializer(
-    ApplicationDbContext context,
     ILogger<ThrowOutControlDbInitializer> logger,
-    ThrowOutControlCsvLoader csvLoader)
-    : BaseDbInitializer(context, logger)
+    ThrowOutControlCsvLoader csvLoader,
+    IRouteRepository routeRepository,
+    IDirectionRouteRepository directionRouteRepository,
+    IDirectionSelfControlLeverRepository directionSelfControlLeverRepository,
+    IThrowOutControlRepository throwOutControlRepository,
+    IGeneralRepository generalRepository)
+    : BaseDbInitializer(logger)
 {
     /// <summary>
     ///     Initialize throw out controls from CSV file (総括制御ペア一覧.csv)
@@ -21,18 +28,14 @@ public class ThrowOutControlDbInitializer(
     {
         var records = await csvLoader.LoadAsync(cancellationToken);
 
-        var routesByName = await _context.Routes
-            .ToDictionaryAsync(r => r.Name, r => r, cancellationToken);
-        var directionRoutesByName = await _context.DirectionRoutes
-            .ToDictionaryAsync(dr => dr.Name, dr => dr, cancellationToken);
-        var directionSelfControlLeversByName = await _context.DirectionSelfControlLevers
-            .ToDictionaryAsync(dscl => dscl.Name, dscl => dscl, cancellationToken);
-        var existingThrowOutControls = (await _context.ThrowOutControls
-                .Select(toc => new { toc.SourceId, toc.TargetId })
-                .ToListAsync(cancellationToken))
-            .ToHashSet();
+        var routesByName = await routeRepository.GetByNames(cancellationToken);
+        var directionRoutesByName = await directionRouteRepository.GetByNamesAsDictionaryAsync(cancellationToken);
+        var directionSelfControlLeversByName = await directionSelfControlLeverRepository.GetByNamesAsDictionaryAsync(cancellationToken);
+        var existingThrowOutControls = await throwOutControlRepository.GetAllPairsAsync(cancellationToken);
 
-        var addedCount = 0;
+        var throwOutControlsToAdd = new List<ThrowOutControl>();
+        var directionRoutesToUpdate = new List<DirectionRoute>();
+
         foreach (var record in records)
         {
             // 総括制御元の進路を取得
@@ -87,7 +90,7 @@ public class ThrowOutControlDbInitializer(
                         conditionLeverId = directionSelfControlLever.Id;
                         directionRoute.DirectionSelfControlLeverId = conditionLeverId;
                         conditionNr = NR.Normal;
-                        _context.DirectionRoutes.Update(directionRoute);
+                        directionRoutesToUpdate.Add(directionRoute);
                     }
 
                     break;
@@ -97,12 +100,12 @@ public class ThrowOutControlDbInitializer(
             }
 
             // 既に登録済みの場合はスキップ
-            if (existingThrowOutControls.Contains(new { SourceId = sourceRoute.Id, TargetId = target.Id }))
+            if (existingThrowOutControls.Contains((sourceRoute.Id, target.Id)))
             {
                 continue;
             }
 
-            _context.ThrowOutControls.Add(new()
+            throwOutControlsToAdd.Add(new()
             {
                 SourceId = sourceRoute.Id,
                 TargetId = target.Id,
@@ -111,10 +114,17 @@ public class ThrowOutControlDbInitializer(
                 ConditionNr = conditionNr,
                 ControlType = record.Type
             });
-            addedCount++;
         }
 
-        await _context.SaveChangesAsync(cancellationToken);
-        _logger.LogInformation("Initialized {Count} throw out controls", addedCount);
+        // Update direction routes
+        foreach (var directionRoute in directionRoutesToUpdate)
+        {
+            directionRouteRepository.Update(directionRoute);
+        }
+        await directionRouteRepository.SaveChangesAsync(cancellationToken);
+
+        // Add throw out controls
+        await generalRepository.AddAll(throwOutControlsToAdd);
+        _logger.LogInformation("Initialized {Count} throw out controls", throwOutControlsToAdd.Count);
     }
 }

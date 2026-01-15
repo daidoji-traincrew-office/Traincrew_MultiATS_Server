@@ -98,4 +98,18 @@ public interface IRouteRepository
     /// </summary>
     /// <returns>CTCリレーが扛上している進路のIDのリスト</returns>
     Task<List<ulong>> GetIdsWhereCtcRelayIsRaised();
+
+    /// <summary>
+    /// 進路名から進路IDへのマッピングを取得する
+    /// </summary>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    /// <returns>進路名をキー、進路IDを値とする辞書</returns>
+    Task<Dictionary<string, ulong>> GetIdsByName(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 進路名から進路エンティティへのマッピングを取得する
+    /// </summary>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    /// <returns>進路名をキー、進路エンティティを値とする辞書</returns>
+    Task<Dictionary<string, Models.Route>> GetByNames(CancellationToken cancellationToken = default);
 }

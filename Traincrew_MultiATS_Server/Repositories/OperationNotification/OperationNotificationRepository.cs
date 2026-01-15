@@ -1,20 +1,19 @@
 using Microsoft.EntityFrameworkCore;
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Data;
-using Traincrew_MultiATS_Server.Models;
 
 namespace Traincrew_MultiATS_Server.Repositories.OperationNotification;
 
 public class OperationNotificationRepository(ApplicationDbContext context) : IOperationNotificationRepository
 {
-    public async Task<List<OperationNotificationDisplay>> GetAllDisplay()
+    public async Task<List<Models.OperationNotificationDisplay>> GetAllDisplay()
     {
         return await context.OperationNotificationDisplays
             .Include(d => d.OperationNotificationState)
             .ToListAsync();
     }
 
-    public async Task<List<OperationNotificationDisplay?>> GetDisplayByTrackCircuitIds(List<ulong> trackCircuitIds)
+    public async Task<List<Models.OperationNotificationDisplay?>> GetDisplayByTrackCircuitIds(List<ulong> trackCircuitIds)
     {
         return await context.TrackCircuits
             .Where(tc => trackCircuitIds.Contains(tc.Id))
@@ -29,7 +28,7 @@ public class OperationNotificationRepository(ApplicationDbContext context) : IOp
     public async Task SetNoneWhereKaijoOrTorikeshiAndOperatedBeforeOrEqual(DateTime operatedAt)
     {
         await context.OperationNotificationStates
-            .Where(s => 
+            .Where(s =>
                 (s.Type ==  OperationNotificationType.Kaijo || s.Type == OperationNotificationType.Torikeshi) && s.OperatedAt <= operatedAt)
             .ExecuteUpdateAsync(s => s
                 .SetProperty(ons => ons.Type, OperationNotificationType.None)

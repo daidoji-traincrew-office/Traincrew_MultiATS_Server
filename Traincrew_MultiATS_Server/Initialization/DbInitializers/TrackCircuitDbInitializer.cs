@@ -1,15 +1,23 @@
-using Microsoft.EntityFrameworkCore;
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.Models;
+using Traincrew_MultiATS_Server.Repositories.General;
+using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
+using Traincrew_MultiATS_Server.Repositories.Signal;
+using Traincrew_MultiATS_Server.Repositories.TrackCircuitSignal;
 
 namespace Traincrew_MultiATS_Server.Initialization.DbInitializers;
 
 /// <summary>
 ///     Initializes track circuit entities in the database
 /// </summary>
-public class TrackCircuitDbInitializer(ApplicationDbContext context, ILogger<TrackCircuitDbInitializer> logger)
-    : BaseDbInitializer(context, logger)
+public class TrackCircuitDbInitializer(
+    ILogger<TrackCircuitDbInitializer> logger,
+    ITrackCircuitRepository trackCircuitRepository,
+    ISignalRepository signalRepository,
+    ITrackCircuitSignalRepository trackCircuitSignalRepository,
+    IGeneralRepository generalRepository)
+    : BaseDbInitializer(logger)
 {
     /// <summary>
     ///     Initialize track circuits from CSV data
@@ -17,11 +25,9 @@ public class TrackCircuitDbInitializer(ApplicationDbContext context, ILogger<Tra
     public async Task InitializeTrackCircuitsAsync(List<TrackCircuitCsv> trackCircuitList,
         CancellationToken cancellationToken = default)
     {
-        var trackCircuitNames = (await _context.TrackCircuits
-            .Select(tc => tc.Name)
-            .ToListAsync(cancellationToken)).ToHashSet();
+        var trackCircuitNames = await trackCircuitRepository.GetAllNames(cancellationToken);
 
-        var addedCount = 0;
+        var trackCircuits = new List<TrackCircuit>();
         foreach (var item in trackCircuitList)
         {
             if (trackCircuitNames.Contains(item.Name))
@@ -29,7 +35,7 @@ public class TrackCircuitDbInitializer(ApplicationDbContext context, ILogger<Tra
                 continue;
             }
 
-            _context.TrackCircuits.Add(new()
+            trackCircuits.Add(new()
             {
                 // Todo: ProtectionZoneの未定義部分がなくなったら、ProtectionZoneのデフォルト値の設定を解除
                 ProtectionZone = item.ProtectionZone ?? 99,
@@ -46,11 +52,10 @@ public class TrackCircuitDbInitializer(ApplicationDbContext context, ILogger<Tra
                     RaisedAt = null
                 }
             });
-            addedCount++;
         }
 
-        await _context.SaveChangesAsync(cancellationToken);
-        _logger.LogInformation("Initialized {Count} track circuits", addedCount);
+        await generalRepository.AddAll(trackCircuits);
+        _logger.LogInformation("Initialized {Count} track circuits", trackCircuits.Count);
     }
 
     /// <summary>
@@ -60,27 +65,20 @@ public class TrackCircuitDbInitializer(ApplicationDbContext context, ILogger<Tra
         CancellationToken cancellationToken = default)
     {
         var trackCircuitNames = trackCircuitList.Select(tc => tc.Name).ToHashSet();
-        var trackCircuitEntities = await _context.TrackCircuits
-            .Where(tc => trackCircuitNames.Contains(tc.Name))
-            .ToDictionaryAsync(tc => tc.Name, cancellationToken);
+        var trackCircuitEntities = await trackCircuitRepository.GetTrackCircuitsByNamesAsync(
+            trackCircuitNames, cancellationToken);
 
         var allSignalNames = trackCircuitList
             .SelectMany(tc => tc.NextSignalNamesUp.Concat(tc.NextSignalNamesDown))
             .Distinct()
             .ToHashSet();
-        var signals = await _context.Signals
-            .Where(s => allSignalNames.Contains(s.Name))
-            .ToDictionaryAsync(s => s.Name, cancellationToken);
+        var signals = await signalRepository.GetSignalsByNamesAsync(allSignalNames, cancellationToken);
 
         var trackCircuitIds = trackCircuitEntities.Values.Select(tc => tc.Id).ToHashSet();
-        var existingRelations = await _context.TrackCircuitSignals
-            .Where(tcs => trackCircuitIds.Contains(tcs.TrackCircuitId))
-            .Select(tcs => new { tcs.TrackCircuitId, tcs.SignalName })
-            .ToListAsync(cancellationToken);
-        var existingRelationsSet = existingRelations
-            .Select(r => (r.TrackCircuitId, r.SignalName))
-            .ToHashSet();
+        var existingRelationsSet = await trackCircuitSignalRepository.GetExistingRelations(
+            trackCircuitIds, cancellationToken);
 
+        var trackCircuitSignals = new List<TrackCircuitSignal>();
         foreach (var trackCircuit in trackCircuitList)
         {
             if (!trackCircuitEntities.TryGetValue(trackCircuit.Name, out var trackCircuitEntity))
@@ -100,7 +98,7 @@ public class TrackCircuitDbInitializer(ApplicationDbContext context, ILogger<Tra
                     continue;
                 }
 
-                _context.TrackCircuitSignals.Add(new()
+                trackCircuitSignals.Add(new()
                 {
                     TrackCircuitId = trackCircuitEntity.Id,
                     SignalName = signal.Name,
@@ -120,7 +118,7 @@ public class TrackCircuitDbInitializer(ApplicationDbContext context, ILogger<Tra
                     continue;
                 }
 
-                _context.TrackCircuitSignals.Add(new()
+                trackCircuitSignals.Add(new()
                 {
                     TrackCircuitId = trackCircuitEntity.Id,
                     SignalName = signal.Name,
@@ -129,7 +127,7 @@ public class TrackCircuitDbInitializer(ApplicationDbContext context, ILogger<Tra
             }
         }
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await generalRepository.AddAll(trackCircuitSignals);
         _logger.LogInformation("Initialized track circuit signals");
     }
 

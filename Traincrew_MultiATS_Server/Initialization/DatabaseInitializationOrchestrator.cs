@@ -3,11 +3,35 @@ using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.Initialization.CsvLoaders;
 using Traincrew_MultiATS_Server.Initialization.DbInitializers;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
+using Traincrew_MultiATS_Server.Repositories.DirectionRoute;
+using Traincrew_MultiATS_Server.Repositories.DirectionSelfControlLever;
+using Traincrew_MultiATS_Server.Repositories.General;
+using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
 using Traincrew_MultiATS_Server.Repositories.Lock;
 using Traincrew_MultiATS_Server.Repositories.LockCondition;
 using Traincrew_MultiATS_Server.Repositories.LockConditionByRouteCentralControlLever;
+using Traincrew_MultiATS_Server.Repositories.NextSignal;
+using Traincrew_MultiATS_Server.Repositories.OperationNotificationDisplay;
+using Traincrew_MultiATS_Server.Repositories.Route;
+using Traincrew_MultiATS_Server.Repositories.RouteLockTrackCircuit;
+using Traincrew_MultiATS_Server.Repositories.Server;
+using Traincrew_MultiATS_Server.Repositories.Signal;
+using Traincrew_MultiATS_Server.Repositories.SignalRoute;
+using Traincrew_MultiATS_Server.Repositories.SignalType;
+using Traincrew_MultiATS_Server.Repositories.Station;
+using Traincrew_MultiATS_Server.Repositories.SwitchingMachine;
 using Traincrew_MultiATS_Server.Repositories.SwitchingMachineRoute;
+using Traincrew_MultiATS_Server.Repositories.ThrowOutControl;
+using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
+using Traincrew_MultiATS_Server.Repositories.TrackCircuitSignal;
+using Traincrew_MultiATS_Server.Repositories.TrainDiagram;
+using Traincrew_MultiATS_Server.Repositories.TrainType;
 using Traincrew_MultiATS_Server.Repositories.Transaction;
+using Traincrew_MultiATS_Server.Repositories.TtcWindow;
+using Traincrew_MultiATS_Server.Repositories.TtcWindowDisplayStation;
+using Traincrew_MultiATS_Server.Repositories.TtcWindowLink;
+using Traincrew_MultiATS_Server.Repositories.TtcWindowLinkRouteCondition;
+using Traincrew_MultiATS_Server.Repositories.TtcWindowTrackCircuit;
 
 namespace Traincrew_MultiATS_Server.Initialization;
 
@@ -20,11 +44,36 @@ public class DatabaseInitializationOrchestrator(
     ApplicationDbContext context,
     ILoggerFactory loggerFactory,
     IDateTimeRepository datetimeRepository,
+    IDirectionRouteRepository directionRouteRepository,
+    IDirectionSelfControlLeverRepository directionSelfControlLeverRepository,
+    IGeneralRepository generalRepository,
+    IInterlockingObjectRepository interlockingObjectRepository,
     ILockConditionRepository lockConditionRepository,
     ILockRepository lockRepository,
     ILockConditionByRouteCentralControlLeverRepository lockConditionByRouteCentralControlLeverRepository,
+    INextSignalRepository nextSignalRepository,
+    IOperationNotificationDisplayRepository operationNotificationDisplayRepository,
+    IRouteRepository routeRepository,
+    IRouteLockTrackCircuitRepository routeLockTrackCircuitRepository,
+    ISignalRepository signalRepository,
+    ISignalRouteRepository signalRouteRepository,
+    IStationRepository stationRepository,
+    IStationTimerStateRepository stationTimerStateRepository,
+    ISwitchingMachineRepository switchingMachineRepository,
     ISwitchingMachineRouteRepository switchingMachineRouteRepository,
+    IThrowOutControlRepository throwOutControlRepository,
+    ITrackCircuitRepository trackCircuitRepository,
+    ITrackCircuitSignalRepository trackCircuitSignalRepository,
+    ITrainDiagramRepository trainDiagramRepository,
+    ITrainTypeRepository trainTypeRepository,
     ITransactionRepository transactionRepository,
+    ITtcWindowRepository ttcWindowRepository,
+    ITtcWindowDisplayStationRepository ttcWindowDisplayStationRepository,
+    ITtcWindowLinkRepository ttcWindowLinkRepository,
+    ITtcWindowLinkRouteConditionRepository ttcWindowLinkRouteConditionRepository,
+    ITtcWindowTrackCircuitRepository ttcWindowTrackCircuitRepository,
+    IServerRepository serverRepository,
+    ISignalTypeRepository signalTypeRepository,
     ILogger<DatabaseInitializationOrchestrator> logger)
 {
     /// <summary>
@@ -39,7 +88,11 @@ public class DatabaseInitializationOrchestrator(
         var stationList = await stationLoader.LoadAsync(cancellationToken);
 
         // Phase 2: StationDbInitializer - 駅の初期化
-        var stationInitializer = new StationDbInitializer(context, loggerFactory.CreateLogger<StationDbInitializer>());
+        var stationInitializer = new StationDbInitializer(
+            loggerFactory.CreateLogger<StationDbInitializer>(),
+            stationRepository,
+            stationTimerStateRepository,
+            generalRepository);
         await stationInitializer.InitializeStationsAsync(stationList, cancellationToken);
         await stationInitializer.InitializeStationTimerStatesAsync(cancellationToken);
 
@@ -48,7 +101,12 @@ public class DatabaseInitializationOrchestrator(
         var trackCircuitList = await trackCircuitLoader.LoadAsync(cancellationToken);
 
         // Phase 4: TrackCircuitDbInitializer - 軌道回路の初期化
-        var trackCircuitInitializer = new TrackCircuitDbInitializer(context, loggerFactory.CreateLogger<TrackCircuitDbInitializer>());
+        var trackCircuitInitializer = new TrackCircuitDbInitializer(
+            loggerFactory.CreateLogger<TrackCircuitDbInitializer>(),
+            trackCircuitRepository,
+            signalRepository,
+            trackCircuitSignalRepository,
+            generalRepository);
         await trackCircuitInitializer.InitializeTrackCircuitsAsync(trackCircuitList, cancellationToken);
 
         // Phase 5: SignalTypeCsvLoader - 信号タイプ一覧の読み込み
@@ -56,7 +114,10 @@ public class DatabaseInitializationOrchestrator(
         var signalTypeList = await signalTypeLoader.LoadAsync(cancellationToken);
 
         // Phase 6: SignalTypeDbInitializer - 信号タイプの初期化
-        var signalTypeInitializer = new SignalTypeDbInitializer(context, loggerFactory.CreateLogger<SignalTypeDbInitializer>());
+        var signalTypeInitializer = new SignalTypeDbInitializer(
+            loggerFactory.CreateLogger<SignalTypeDbInitializer>(),
+            signalTypeRepository,
+            generalRepository);
         await signalTypeInitializer.InitializeSignalTypesAsync(signalTypeList, cancellationToken);
 
         // Phase 7: TrainTypeCsvLoader - 列車タイプデータの読み込み
@@ -68,7 +129,11 @@ public class DatabaseInitializationOrchestrator(
         var trainDiagramList = trainDiagramLoader.Load();
 
         // Phase 9: TrainDbInitializer - 列車データの初期化
-        var trainInitializer = new TrainDbInitializer(context, loggerFactory.CreateLogger<TrainDbInitializer>());
+        var trainInitializer = new TrainDbInitializer(
+            loggerFactory.CreateLogger<TrainDbInitializer>(),
+            trainTypeRepository,
+            trainDiagramRepository,
+            generalRepository);
         await trainInitializer.InitializeTrainTypesAsync(trainTypeList, cancellationToken);
         await trainInitializer.InitializeTrainDiagramsAsync(trainDiagramList, cancellationToken);
 
@@ -98,30 +163,55 @@ public class DatabaseInitializationOrchestrator(
 
         // Phase 16: OperationNotificationDisplayDbInitializer - 運行通知の初期化
         var operationNotificationInitializer = new OperationNotificationDisplayDbInitializer(
-            context,
-            datetimeRepository,
             loggerFactory.CreateLogger<OperationNotificationDisplayDbInitializer>(),
-            operationNotificationDisplayCsvLoader);
+            datetimeRepository,
+            operationNotificationDisplayRepository,
+            trackCircuitRepository,
+            operationNotificationDisplayCsvLoader,
+            generalRepository);
         await operationNotificationInitializer.InitializeAsync(cancellationToken);
 
         // Phase 17: RouteDbInitializer - 進路の初期化
-        var routeInitializer = new RouteDbInitializer(context, loggerFactory.CreateLogger<RouteDbInitializer>(), routeLockTrackCircuitCsvLoader);
+        var routeInitializer = new RouteDbInitializer(
+            loggerFactory.CreateLogger<RouteDbInitializer>(),
+            routeLockTrackCircuitCsvLoader,
+            routeRepository,
+            trackCircuitRepository,
+            routeLockTrackCircuitRepository,
+            generalRepository);
         await routeInitializer.InitializeAsync(cancellationToken);
 
         // Phase 18: ServerStatusDbInitializer - サーバーステータスの初期化
-        var serverStatusInitializer =
-            new ServerStatusDbInitializer(context, loggerFactory.CreateLogger<ServerStatusDbInitializer>());
+        var serverStatusInitializer = new ServerStatusDbInitializer(
+            loggerFactory.CreateLogger<ServerStatusDbInitializer>(),
+            serverRepository,
+            generalRepository);
         await serverStatusInitializer.InitializeAsync(cancellationToken);
 
         // Phase 19: TtcDbInitializer - TTCの初期化
-        var ttcInitializer = new TtcDbInitializer(context, loggerFactory.CreateLogger<TtcDbInitializer>(), ttcWindowCsvLoader, ttcWindowLinkCsvLoader);
+        var ttcInitializer = new TtcDbInitializer(
+            loggerFactory.CreateLogger<TtcDbInitializer>(),
+            ttcWindowCsvLoader,
+            ttcWindowLinkCsvLoader,
+            ttcWindowRepository,
+            ttcWindowDisplayStationRepository,
+            ttcWindowTrackCircuitRepository,
+            ttcWindowLinkRepository,
+            ttcWindowLinkRouteConditionRepository,
+            trackCircuitRepository,
+            routeRepository,
+            generalRepository);
         await ttcInitializer.InitializeAsync(cancellationToken);
 
         // Phase 20: ThrowOutControlDbInitializer - 総括制御の初期化
         var throwOutControlInitializer = new ThrowOutControlDbInitializer(
-            context,
             loggerFactory.CreateLogger<ThrowOutControlDbInitializer>(),
-            throwOutControlCsvLoader);
+            throwOutControlCsvLoader,
+            routeRepository,
+            directionRouteRepository,
+            directionSelfControlLeverRepository,
+            throwOutControlRepository,
+            generalRepository);
         await throwOutControlInitializer.InitializeAsync(cancellationToken);
 
         // Phase 21: SignalCsvLoader - 信号データの読み込み
@@ -129,7 +219,16 @@ public class DatabaseInitializationOrchestrator(
         var signalDataList = signalLoader.Load();
 
         // Phase 22: SignalDbInitializer - 信号と進路の初期化
-        var signalInitializer = new SignalDbInitializer(context, loggerFactory.CreateLogger<SignalDbInitializer>());
+        var signalInitializer = new SignalDbInitializer(
+            loggerFactory.CreateLogger<SignalDbInitializer>(),
+            signalRepository,
+            nextSignalRepository,
+            signalRouteRepository,
+            trackCircuitRepository,
+            stationRepository,
+            directionRouteRepository,
+            routeRepository,
+            generalRepository);
         await signalInitializer.InitializeSignalsAsync(signalDataList, cancellationToken);
         await signalInitializer.InitializeNextSignalsAsync(signalDataList, cancellationToken);
         await signalInitializer.InitializeSignalRoutesAsync(signalDataList, cancellationToken);
@@ -193,9 +292,14 @@ public class DatabaseInitializationOrchestrator(
         logger.LogInformation("Finalizing initialization");
 
         var switchingMachineRouteInitializer = new SwitchingMachineRouteDbInitializer(
-            context,
+            loggerFactory.CreateLogger<SwitchingMachineRouteDbInitializer>(),
+            interlockingObjectRepository,
+            switchingMachineRepository,
+            switchingMachineRouteRepository,
+            routeRepository,
+            trackCircuitRepository,
             lockConditionRepository,
-            loggerFactory.CreateLogger<SwitchingMachineRouteDbInitializer>());
+            generalRepository);
         await switchingMachineRouteInitializer.SetStationIdToInterlockingObjectAsync(cancellationToken);
         await switchingMachineRouteInitializer.InitializeSwitchingMachineRoutesAsync(cancellationToken);
     }

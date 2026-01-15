@@ -17,4 +17,16 @@ public class TrainDiagramRepository(ApplicationDbContext context) : ITrainDiagra
             .Where(td => trainNumbers.Contains(td.TrainNumber))
             .ToListAsync();
     }
+
+    public async Task<List<string>> GetTrainNumbersForAll(CancellationToken cancellationToken = default)
+    {
+        return await context.TrainDiagrams
+            .Select(td => td.TrainNumber)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task AddAsync(Models.TrainDiagram trainDiagram, CancellationToken cancellationToken = default)
+    {
+        await context.TrainDiagrams.AddAsync(trainDiagram, cancellationToken);
+    }
 }

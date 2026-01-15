@@ -1,14 +1,18 @@
-using Microsoft.EntityFrameworkCore;
 using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.Models;
+using Traincrew_MultiATS_Server.Repositories.General;
+using Traincrew_MultiATS_Server.Repositories.SignalType;
 
 namespace Traincrew_MultiATS_Server.Initialization.DbInitializers;
 
 /// <summary>
 ///     Initializes signal type entities in the database
 /// </summary>
-public class SignalTypeDbInitializer(ApplicationDbContext context, ILogger<SignalTypeDbInitializer> logger)
-    : BaseDbInitializer(context, logger)
+public class SignalTypeDbInitializer(
+    ILogger<SignalTypeDbInitializer> logger,
+    ISignalTypeRepository signalTypeRepository,
+    IGeneralRepository generalRepository)
+    : BaseDbInitializer(logger)
 {
     /// <summary>
     ///     Initialize signal types from CSV data
@@ -16,11 +20,9 @@ public class SignalTypeDbInitializer(ApplicationDbContext context, ILogger<Signa
     public async Task InitializeSignalTypesAsync(List<SignalTypeCsv> signalTypeList,
         CancellationToken cancellationToken = default)
     {
-        var signalTypeNames = (await _context.SignalTypes
-            .Select(st => st.Name)
-            .ToListAsync(cancellationToken)).ToHashSet();
+        var signalTypeNames = await signalTypeRepository.GetAllNames(cancellationToken);
 
-        var addedCount = 0;
+        var signalTypes = new List<Models.SignalType>();
         foreach (var signalTypeData in signalTypeList)
         {
             if (signalTypeNames.Contains(signalTypeData.Name))
@@ -28,7 +30,7 @@ public class SignalTypeDbInitializer(ApplicationDbContext context, ILogger<Signa
                 continue;
             }
 
-            _context.SignalTypes.Add(new()
+            signalTypes.Add(new()
             {
                 Name = signalTypeData.Name,
                 RIndication = GetSignalIndication(signalTypeData.RIndication),
@@ -37,11 +39,10 @@ public class SignalTypeDbInitializer(ApplicationDbContext context, ILogger<Signa
                 YGIndication = GetSignalIndication(signalTypeData.YGIndication),
                 GIndication = GetSignalIndication(signalTypeData.GIndication)
             });
-            addedCount++;
         }
 
-        await _context.SaveChangesAsync(cancellationToken);
-        _logger.LogInformation("Initialized {Count} signal types", addedCount);
+        await generalRepository.AddAll(signalTypes);
+        _logger.LogInformation("Initialized {Count} signal types", signalTypes.Count);
     }
 
     private static SignalIndication GetSignalIndication(string indication)

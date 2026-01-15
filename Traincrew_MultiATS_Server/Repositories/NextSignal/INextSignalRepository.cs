@@ -31,4 +31,39 @@ public interface INextSignalRepository
     /// <param name="depth">最大Depth値（この値以下のものを取得）</param>
     /// <returns>NextSignalのリスト（Depth昇順）</returns>
     public Task<List<Models.NextSignal>> GetByNamesAndMaxDepthOrderByDepth(List<string> signalNames, int depth);
+
+    /// <summary>
+    /// 全てのNextSignalを取得する
+    /// </summary>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    /// <returns>NextSignalのリスト</returns>
+    Task<List<Models.NextSignal>> GetAllAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// NextSignalを追加する
+    /// </summary>
+    /// <param name="nextSignal">追加するNextSignal</param>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    Task AddAsync(Models.NextSignal nextSignal, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 複数のNextSignalを追加する
+    /// </summary>
+    /// <param name="nextSignals">追加するNextSignalのリスト</param>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    Task AddRangeAsync(IEnumerable<Models.NextSignal> nextSignals, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 変更を保存する
+    /// </summary>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    Task SaveChangesAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 指定されたDepth以下のNextSignalをDepth昇順でグループ化して取得する
+    /// </summary>
+    /// <param name="depth">最大Depth値</param>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    /// <returns>SignalNameをキーとしたDictionary</returns>
+    Task<Dictionary<string, List<string>>> GetByDepthGroupedBySignalNameAsync(int depth, CancellationToken cancellationToken = default);
 }

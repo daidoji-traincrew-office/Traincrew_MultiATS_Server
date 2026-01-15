@@ -9,5 +9,25 @@ namespace Traincrew_MultiATS_Server.Repositories.TtcWindow
         Task<List<Models.TtcWindowTrackCircuit>> ttcWindowTrackCircuitsById(List<string> ttcWindowName);
         Task<List<Models.TtcWindow>> GetTtcWindowsByStationIdsWithState(List<string> stationIds);
         Task<List<Models.TtcWindow>> GetTtcWindowsByTrainNumber(string diaName);
+
+        /// <summary>
+        /// すべてのTtcWindow名を取得する
+        /// </summary>
+        /// <param name="cancellationToken">キャンセルトークン</param>
+        /// <returns>TtcWindow名のハッシュセット</returns>
+        Task<HashSet<string>> GetAllWindowNamesAsync(CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// TtcWindowを追加する
+        /// </summary>
+        /// <param name="ttcWindow">追加するTtcWindow</param>
+        /// <param name="cancellationToken">キャンセルトークン</param>
+        Task AddAsync(Models.TtcWindow ttcWindow, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// 変更を保存する
+        /// </summary>
+        /// <param name="cancellationToken">キャンセルトークン</param>
+        Task SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }

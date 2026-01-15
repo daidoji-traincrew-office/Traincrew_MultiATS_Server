@@ -1,14 +1,31 @@
 using Microsoft.EntityFrameworkCore;
 using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.Models;
+using Traincrew_MultiATS_Server.Repositories.DirectionRoute;
+using Traincrew_MultiATS_Server.Repositories.General;
+using Traincrew_MultiATS_Server.Repositories.NextSignal;
+using Traincrew_MultiATS_Server.Repositories.Route;
+using Traincrew_MultiATS_Server.Repositories.Signal;
+using Traincrew_MultiATS_Server.Repositories.SignalRoute;
+using Traincrew_MultiATS_Server.Repositories.Station;
+using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
 
 namespace Traincrew_MultiATS_Server.Initialization.DbInitializers;
 
 /// <summary>
 ///     Initializes signal entities and related data in the database
 /// </summary>
-public class SignalDbInitializer(ApplicationDbContext context, ILogger<SignalDbInitializer> logger)
-    : BaseDbInitializer(context, logger)
+public class SignalDbInitializer(
+    ILogger<SignalDbInitializer> logger,
+    ISignalRepository signalRepository,
+    INextSignalRepository nextSignalRepository,
+    ISignalRouteRepository signalRouteRepository,
+    ITrackCircuitRepository trackCircuitRepository,
+    IStationRepository stationRepository,
+    IDirectionRouteRepository directionRouteRepository,
+    IRouteRepository routeRepository,
+    IGeneralRepository generalRepository)
+    : BaseDbInitializer(logger)
 {
     /// <summary>
     ///     Initialize signals from CSV data
@@ -17,25 +34,18 @@ public class SignalDbInitializer(ApplicationDbContext context, ILogger<SignalDbI
         CancellationToken cancellationToken = default)
     {
         // 軌道回路情報を取得
-        var trackCircuits = await _context.TrackCircuits
-            .Select(tc => new { tc.Id, tc.Name })
-            .ToDictionaryAsync(tc => tc.Name, tc => tc.Id, cancellationToken);
+        var trackCircuits = await trackCircuitRepository.GetIdsByName(cancellationToken);
 
         // 既に登録済みの信号情報を取得
-        var signalNames = (await _context.Signals
-            .Select(s => s.Name)
-            .ToListAsync(cancellationToken)).ToHashSet();
+        var signalNames = await signalRepository.GetAllNames(cancellationToken);
 
         // 駅マスタから停車場を取得
-        var stations = await _context.Stations
-            .Where(station => station.IsStation)
-            .ToListAsync(cancellationToken);
+        var stations = await stationRepository.GetWhereIsStation();
 
         // DirectionRoutesを事前に取得してDictionaryに格納
-        var directionRoutes = await _context.DirectionRoutes
-            .ToDictionaryAsync(dr => dr.Name, dr => dr.Id, cancellationToken);
+        var directionRoutes = await directionRouteRepository.GetIdsByNameAsync(cancellationToken);
 
-        var addedCount = 0;
+        var signalList = new List<Signal>();
         // 信号情報登録
         foreach (var signalData in signalDataList)
         {
@@ -91,7 +101,7 @@ public class SignalDbInitializer(ApplicationDbContext context, ILogger<SignalDbI
                 ? signalData.Direction == "L" ? LR.Left : signalData.Direction == "R" ? LR.Right : null
                 : null;
 
-            _context.Signals.Add(new()
+            signalList.Add(new()
             {
                 Name = signalData.Name,
                 StationId = stationId,
@@ -105,11 +115,10 @@ public class SignalDbInitializer(ApplicationDbContext context, ILogger<SignalDbI
                 DirectionRouteRightId = directionRouteRightId,
                 Direction = direction
             });
-            addedCount++;
         }
 
-        await _context.SaveChangesAsync(cancellationToken);
-        _logger.LogInformation("Initialized {Count} signals", addedCount);
+        await generalRepository.AddAll(signalList);
+        _logger.LogInformation("Initialized {Count} signals", signalList.Count);
     }
 
     /// <summary>
@@ -121,12 +130,12 @@ public class SignalDbInitializer(ApplicationDbContext context, ILogger<SignalDbI
         const int maxDepth = 4;
 
         // 既存のNextSignalsを事前に取得してHashSetに格納（N+1問題の回避）
-        var existingNextSignals = await _context.NextSignals
-            .ToListAsync(cancellationToken);
+        var existingNextSignals = await nextSignalRepository.GetAllAsync(cancellationToken);
         var existingNextSignalSet = existingNextSignals
             .Select(ns => (ns.SignalName, ns.TargetSignalName))
             .ToHashSet();
 
+        var nextSignalList = new List<NextSignal>();
         foreach (var signalData in signalDataList)
         {
             var nextSignalNames = signalData.NextSignalNames ?? [];
@@ -146,14 +155,14 @@ public class SignalDbInitializer(ApplicationDbContext context, ILogger<SignalDbI
                     Depth = 1
                 };
 
-                _context.NextSignals.Add(nextSignal);
+                nextSignalList.Add(nextSignal);
                 existingNextSignals.Add(nextSignal);
                 // 追加したものもHashSetに追加して、後続の処理で重複を防ぐ
                 existingNextSignalSet.Add((signalData.Name, nextSignalName));
             }
         }
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await generalRepository.AddAll(nextSignalList);
 
         // 中継信号機のリンクも追加する
         // 例:
@@ -163,9 +172,7 @@ public class SignalDbInitializer(ApplicationDbContext context, ILogger<SignalDbI
         // 以下のリンクも追加する
         // - 上り閉塞6 -> 上り閉塞8中継
 
-        var depth1NextSignals = await context.NextSignals
-            .Where(ns => ns.Depth == 1)
-            .ToListAsync(cancellationToken);
+        var depth1NextSignals = await nextSignalRepository.GetAllByDepth(1);
 
         // 中継信号機のリンクを特定 (例: "X中継 -> Y")
         var relaySignalLinks = depth1NextSignals
@@ -202,10 +209,9 @@ public class SignalDbInitializer(ApplicationDbContext context, ILogger<SignalDbI
             })
             .ToList();
 
-        context.NextSignals.AddRange(relayLinksToAdd);
-        await context.SaveChangesAsync(cancellationToken);
+        await generalRepository.AddAll(relayLinksToAdd);
 
-        var allSignals = await _context.Signals.ToListAsync(cancellationToken);
+        var allSignals = await signalRepository.GetAll();
         var nextSignalsBySignalName = existingNextSignals
             .Where(ns => ns.Depth == 1)
             .GroupBy(ns => ns.SignalName)
@@ -224,6 +230,7 @@ public class SignalDbInitializer(ApplicationDbContext context, ILogger<SignalDbI
                     g => g.Key,
                     g => g.Select(ns => ns.TargetSignalName).ToList()
                 );
+            var depthNextSignalList = new List<NextSignal>();
             // 全信号機でループ
             foreach (var signal in allSignals)
             {
@@ -257,7 +264,7 @@ public class SignalDbInitializer(ApplicationDbContext context, ILogger<SignalDbI
                             Depth = depth
                         };
 
-                        _context.NextSignals.Add(nnSignal);
+                        depthNextSignalList.Add(nnSignal);
                         existingNextSignals.Add(nnSignal);
                         // 追加したものもHashSetに追加して、後続の処理で重複を防ぐ
                         existingNextSignalSet.Add((signal.Name, nnSignal.TargetSignalName));
@@ -266,7 +273,7 @@ public class SignalDbInitializer(ApplicationDbContext context, ILogger<SignalDbI
             }
 
             // 各depthの処理が終わった後にまとめて保存
-            await _context.SaveChangesAsync(cancellationToken);
+            await generalRepository.AddAll(depthNextSignalList);
         }
 
         _logger.LogInformation("Initialized next signals up to depth {MaxDepth}", maxDepth);
@@ -278,12 +285,10 @@ public class SignalDbInitializer(ApplicationDbContext context, ILogger<SignalDbI
     public async Task InitializeSignalRoutesAsync(List<SignalCsv> signalDataList,
         CancellationToken cancellationToken = default)
     {
-        var signalRoutes = await _context.SignalRoutes
-            .Include(sr => sr.Route)
-            .ToListAsync(cancellationToken);
-        var routes = await _context.Routes
-            .ToDictionaryAsync(r => r.Name, cancellationToken);
+        var signalRoutes = await signalRouteRepository.GetAllWithRoutesAsync(cancellationToken);
+        var routes = await routeRepository.GetIdsByName(cancellationToken);
 
+        var signalRouteList = new List<SignalRoute>();
         foreach (var signal in signalDataList)
         {
             foreach (var routeName in signal.RouteNames ?? [])
@@ -294,21 +299,21 @@ public class SignalDbInitializer(ApplicationDbContext context, ILogger<SignalDbI
                     continue;
                 }
 
-                if (!routes.TryGetValue(routeName, out var route))
+                if (!routes.TryGetValue(routeName, out var routeId))
                     // Todo: 例外を出す
                 {
                     continue;
                 }
 
-                _context.SignalRoutes.Add(new()
+                signalRouteList.Add(new()
                 {
                     SignalName = signal.Name,
-                    RouteId = route.Id
+                    RouteId = routeId
                 });
             }
         }
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await generalRepository.AddAll(signalRouteList);
         _logger.LogInformation("Initialized signal routes");
     }
 
