@@ -20,13 +20,6 @@ public interface IThrowOutControlRepository
     Task<HashSet<(ulong SourceId, ulong TargetId)>> GetAllPairsAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// ThrowOutControlを追加する
-    /// </summary>
-    /// <param name="throwOutControl">追加するThrowOutControl</param>
-    /// <param name="cancellationToken">キャンセルトークン</param>
-    Task AddAsync(Models.ThrowOutControl throwOutControl, CancellationToken cancellationToken = default);
-
-    /// <summary>
     /// 変更を保存する
     /// </summary>
     /// <param name="cancellationToken">キャンセルトークン</param>

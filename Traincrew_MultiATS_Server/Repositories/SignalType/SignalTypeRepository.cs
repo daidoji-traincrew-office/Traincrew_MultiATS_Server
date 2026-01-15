@@ -11,9 +11,4 @@ public class SignalTypeRepository(ApplicationDbContext context) : ISignalTypeRep
             .Select(st => st.Name)
             .ToListAsync(cancellationToken)).ToHashSet();
     }
-
-    public async Task AddAsync(Models.SignalType signalType, CancellationToken cancellationToken = default)
-    {
-        await context.SignalTypes.AddAsync(signalType, cancellationToken);
-    }
 }

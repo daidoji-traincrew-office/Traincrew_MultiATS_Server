@@ -135,9 +135,4 @@ public class SignalRepository(ApplicationDbContext context) : ISignalRepository
             .ToListAsync(cancellationToken);
         return names.ToHashSet();
     }
-
-    public async Task AddAsync(Models.Signal signal, CancellationToken cancellationToken = default)
-    {
-        await context.Signals.AddAsync(signal, cancellationToken);
-    }
 }

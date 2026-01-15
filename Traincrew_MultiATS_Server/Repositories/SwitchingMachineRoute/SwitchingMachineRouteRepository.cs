@@ -43,11 +43,6 @@ public class SwitchingMachineRouteRepository(ApplicationDbContext context) : ISw
         return pairs.Select(p => (p.RouteId, p.SwitchingMachineId)).ToHashSet();
     }
 
-    public async Task AddAsync(Models.SwitchingMachineRoute switchingMachineRoute, CancellationToken cancellationToken = default)
-    {
-        await context.SwitchingMachineRoutes.AddAsync(switchingMachineRoute, cancellationToken);
-    }
-
     public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         await context.SaveChangesAsync(cancellationToken);

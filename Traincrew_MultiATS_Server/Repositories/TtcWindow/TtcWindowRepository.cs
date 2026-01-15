@@ -74,11 +74,6 @@ public class TtcWindowRepository(ApplicationDbContext context) : ITtcWindowRepos
         return names.ToHashSet();
     }
 
-    public async Task AddAsync(Models.TtcWindow ttcWindow, CancellationToken cancellationToken = default)
-    {
-        await context.TtcWindows.AddAsync(ttcWindow, cancellationToken);
-    }
-
     public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         await context.SaveChangesAsync(cancellationToken);

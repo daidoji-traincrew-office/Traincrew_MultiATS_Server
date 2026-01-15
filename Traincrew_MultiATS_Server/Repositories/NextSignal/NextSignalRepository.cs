@@ -40,16 +40,6 @@ public class NextSignalRepository(ApplicationDbContext context): INextSignalRepo
         return await context.NextSignals.ToListAsync(cancellationToken);
     }
 
-    public async Task AddAsync(Models.NextSignal nextSignal, CancellationToken cancellationToken = default)
-    {
-        await context.NextSignals.AddAsync(nextSignal, cancellationToken);
-    }
-
-    public async Task AddRangeAsync(IEnumerable<Models.NextSignal> nextSignals, CancellationToken cancellationToken = default)
-    {
-        await context.NextSignals.AddRangeAsync(nextSignals, cancellationToken);
-    }
-
     public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         await context.SaveChangesAsync(cancellationToken);

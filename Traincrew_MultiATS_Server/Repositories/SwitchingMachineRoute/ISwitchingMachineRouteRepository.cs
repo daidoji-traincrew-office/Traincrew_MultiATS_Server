@@ -15,13 +15,6 @@ public interface ISwitchingMachineRouteRepository
     Task<HashSet<(ulong RouteId, ulong SwitchingMachineId)>> GetAllPairsAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// 転てつ器進路を追加する
-    /// </summary>
-    /// <param name="switchingMachineRoute">追加する転てつ器進路</param>
-    /// <param name="cancellationToken">キャンセルトークン</param>
-    Task AddAsync(Models.SwitchingMachineRoute switchingMachineRoute, CancellationToken cancellationToken = default);
-
-    /// <summary>
     /// 変更を保存する
     /// </summary>
     /// <param name="cancellationToken">キャンセルトークン</param>

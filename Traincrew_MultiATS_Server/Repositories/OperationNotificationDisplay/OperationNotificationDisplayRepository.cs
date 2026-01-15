@@ -11,9 +11,4 @@ public class OperationNotificationDisplayRepository(ApplicationDbContext context
             .Select(ond => ond.Name)
             .ToListAsync(cancellationToken);
     }
-
-    public async Task AddAsync(Models.OperationNotificationDisplay operationNotificationDisplay, CancellationToken cancellationToken = default)
-    {
-        await context.OperationNotificationDisplays.AddAsync(operationNotificationDisplay, cancellationToken);
-    }
 }

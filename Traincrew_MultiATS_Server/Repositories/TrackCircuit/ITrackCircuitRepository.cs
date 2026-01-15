@@ -23,13 +23,6 @@ public interface ITrackCircuitRepository
     Task<HashSet<string>> GetAllNames(CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// TrackCircuitを追加する
-    /// </summary>
-    /// <param name="trackCircuit">追加するTrackCircuit</param>
-    /// <param name="cancellationToken">キャンセルトークン</param>
-    Task AddAsync(Models.TrackCircuit trackCircuit, CancellationToken cancellationToken = default);
-
-    /// <summary>
     /// TrackCircuit名からIDへのマッピングを取得する
     /// </summary>
     /// <param name="trackCircuitNames">TrackCircuit名のリスト</param>

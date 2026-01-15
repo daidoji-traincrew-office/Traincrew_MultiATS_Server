@@ -23,13 +23,6 @@ public interface ISignalRouteRepository
     Task<List<Models.SignalRoute>> GetAllWithRoutesAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// SignalRouteを追加する
-    /// </summary>
-    /// <param name="signalRoute">追加するSignalRoute</param>
-    /// <param name="cancellationToken">キャンセルトークン</param>
-    Task AddAsync(Models.SignalRoute signalRoute, CancellationToken cancellationToken = default);
-
-    /// <summary>
     /// 変更を保存する
     /// </summary>
     /// <param name="cancellationToken">キャンセルトークン</param>

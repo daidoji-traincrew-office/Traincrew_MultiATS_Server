@@ -22,11 +22,4 @@ public interface ISignalRepository
     /// <param name="cancellationToken">キャンセルトークン</param>
     /// <returns>Signal名のHashSet</returns>
     Task<HashSet<string>> GetAllNames(CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Signalを追加する
-    /// </summary>
-    /// <param name="signal">追加するSignal</param>
-    /// <param name="cancellationToken">キャンセルトークン</param>
-    Task AddAsync(Models.Signal signal, CancellationToken cancellationToken = default);
 }

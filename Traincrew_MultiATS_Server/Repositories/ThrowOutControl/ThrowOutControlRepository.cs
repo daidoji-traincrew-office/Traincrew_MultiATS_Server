@@ -69,16 +69,6 @@ public class ThrowOutControlRepository(ApplicationDbContext context) : IThrowOut
     }
 
     /// <summary>
-    /// ThrowOutControlを追加する
-    /// </summary>
-    /// <param name="throwOutControl">追加するThrowOutControl</param>
-    /// <param name="cancellationToken">キャンセルトークン</param>
-    public async Task AddAsync(Models.ThrowOutControl throwOutControl, CancellationToken cancellationToken = default)
-    {
-        await context.ThrowOutControls.AddAsync(throwOutControl, cancellationToken);
-    }
-
-    /// <summary>
     /// 変更を保存する
     /// </summary>
     /// <param name="cancellationToken">キャンセルトークン</param>

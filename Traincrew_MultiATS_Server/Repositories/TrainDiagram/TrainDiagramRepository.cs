@@ -24,9 +24,4 @@ public class TrainDiagramRepository(ApplicationDbContext context) : ITrainDiagra
             .Select(td => td.TrainNumber)
             .ToListAsync(cancellationToken);
     }
-
-    public async Task AddAsync(Models.TrainDiagram trainDiagram, CancellationToken cancellationToken = default)
-    {
-        await context.TrainDiagrams.AddAsync(trainDiagram, cancellationToken);
-    }
 }

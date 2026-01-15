@@ -17,9 +17,4 @@ public class TrackCircuitSignalRepository(ApplicationDbContext context) : ITrack
             .Select(r => (r.TrackCircuitId, r.SignalName))
             .ToHashSet();
     }
-
-    public async Task AddAsync(Models.TrackCircuitSignal trackCircuitSignal, CancellationToken cancellationToken = default)
-    {
-        await context.TrackCircuitSignals.AddAsync(trackCircuitSignal, cancellationToken);
-    }
 }

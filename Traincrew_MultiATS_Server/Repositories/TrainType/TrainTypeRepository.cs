@@ -11,9 +11,4 @@ public class TrainTypeRepository(ApplicationDbContext context) : ITrainTypeRepos
             .Select(t => t.Id)
             .ToListAsync(cancellationToken);
     }
-
-    public async Task AddAsync(Models.TrainType trainType, CancellationToken cancellationToken = default)
-    {
-        await context.TrainTypes.AddAsync(trainType, cancellationToken);
-    }
 }

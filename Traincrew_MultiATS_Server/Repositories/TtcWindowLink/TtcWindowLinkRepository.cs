@@ -36,11 +36,6 @@ public class TtcWindowLinkRepository(ApplicationDbContext context) : ITtcWindowL
         return links.Select(l => (l.SourceTtcWindowName, l.TargetTtcWindowName)).ToHashSet();
     }
 
-    public async Task AddAsync(Models.TtcWindowLink ttcWindowLink, CancellationToken cancellationToken = default)
-    {
-        await context.TtcWindowLinks.AddAsync(ttcWindowLink, cancellationToken);
-    }
-
     public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         await context.SaveChangesAsync(cancellationToken);

@@ -67,11 +67,6 @@ public class SignalRouteRepository(ApplicationDbContext context) : ISignalRouteR
             .ToListAsync(cancellationToken);
     }
 
-    public async Task AddAsync(Models.SignalRoute signalRoute, CancellationToken cancellationToken = default)
-    {
-        await context.SignalRoutes.AddAsync(signalRoute, cancellationToken);
-    }
-
     public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         await context.SaveChangesAsync(cancellationToken);

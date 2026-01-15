@@ -40,20 +40,6 @@ public interface INextSignalRepository
     Task<List<Models.NextSignal>> GetAllAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// NextSignalを追加する
-    /// </summary>
-    /// <param name="nextSignal">追加するNextSignal</param>
-    /// <param name="cancellationToken">キャンセルトークン</param>
-    Task AddAsync(Models.NextSignal nextSignal, CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// 複数のNextSignalを追加する
-    /// </summary>
-    /// <param name="nextSignals">追加するNextSignalのリスト</param>
-    /// <param name="cancellationToken">キャンセルトークン</param>
-    Task AddRangeAsync(IEnumerable<Models.NextSignal> nextSignals, CancellationToken cancellationToken = default);
-
-    /// <summary>
     /// 変更を保存する
     /// </summary>
     /// <param name="cancellationToken">キャンセルトークン</param>

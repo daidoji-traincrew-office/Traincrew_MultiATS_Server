@@ -18,13 +18,6 @@ namespace Traincrew_MultiATS_Server.Repositories.TtcWindow
         Task<HashSet<string>> GetAllWindowNamesAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// TtcWindowを追加する
-        /// </summary>
-        /// <param name="ttcWindow">追加するTtcWindow</param>
-        /// <param name="cancellationToken">キャンセルトークン</param>
-        Task AddAsync(Models.TtcWindow ttcWindow, CancellationToken cancellationToken = default);
-
-        /// <summary>
         /// 変更を保存する
         /// </summary>
         /// <param name="cancellationToken">キャンセルトークン</param>

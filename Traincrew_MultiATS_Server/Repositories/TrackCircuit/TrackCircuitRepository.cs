@@ -132,11 +132,6 @@ public class TrackCircuitRepository(ApplicationDbContext context) : ITrackCircui
         return names.ToHashSet();
     }
 
-    public async Task AddAsync(Models.TrackCircuit trackCircuit, CancellationToken cancellationToken = default)
-    {
-        await context.TrackCircuits.AddAsync(trackCircuit, cancellationToken);
-    }
-
     public async Task<Dictionary<string, Models.TrackCircuit>> GetTrackCircuitsByNamesAsync(
         HashSet<string> trackCircuitNames, CancellationToken cancellationToken = default)
     {

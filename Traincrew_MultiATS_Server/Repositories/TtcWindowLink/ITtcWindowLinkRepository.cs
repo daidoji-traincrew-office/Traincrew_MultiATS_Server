@@ -15,13 +15,6 @@
         Task<HashSet<(string Source, string Target)>> GetAllLinkPairsAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// TtcWindowLinkを追加する
-        /// </summary>
-        /// <param name="ttcWindowLink">追加するTtcWindowLink</param>
-        /// <param name="cancellationToken">キャンセルトークン</param>
-        Task AddAsync(Models.TtcWindowLink ttcWindowLink, CancellationToken cancellationToken = default);
-
-        /// <summary>
         /// 変更を保存する
         /// </summary>
         /// <param name="cancellationToken">キャンセルトークン</param>
