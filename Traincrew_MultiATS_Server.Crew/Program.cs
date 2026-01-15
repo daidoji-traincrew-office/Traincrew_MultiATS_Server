@@ -18,6 +18,8 @@ using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.HostedService;
 using Traincrew_MultiATS_Server.Hubs;
 using Traincrew_MultiATS_Server.Initialization;
+using Traincrew_MultiATS_Server.Initialization.CsvLoaders;
+using Traincrew_MultiATS_Server.Initialization.DbInitializers;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.DestinationButton;
 using Traincrew_MultiATS_Server.Repositories.DirectionRoute;
@@ -52,8 +54,8 @@ using Traincrew_MultiATS_Server.Repositories.TrackCircuitSignal;
 using Traincrew_MultiATS_Server.Repositories.Train;
 using Traincrew_MultiATS_Server.Repositories.TrainCar;
 using Traincrew_MultiATS_Server.Repositories.TrainDiagram;
-using Traincrew_MultiATS_Server.Repositories.TrainType;
 using Traincrew_MultiATS_Server.Repositories.TrainSignalState;
+using Traincrew_MultiATS_Server.Repositories.TrainType;
 using Traincrew_MultiATS_Server.Repositories.Transaction;
 using Traincrew_MultiATS_Server.Repositories.TtcWindow;
 using Traincrew_MultiATS_Server.Repositories.TtcWindowLink;
@@ -474,6 +476,33 @@ public class Program
     {
         // DI周り
         builder.Services
+            // CSV Loaders
+            .AddScoped<StationCsvLoader>()
+            .AddScoped<TrackCircuitCsvLoader>()
+            .AddScoped<SignalTypeCsvLoader>()
+            .AddScoped<TrainTypeCsvLoader>()
+            .AddScoped<TrainDiagramCsvLoader>()
+            .AddScoped<RendoTableCsvLoader>()
+            .AddScoped<OperationNotificationDisplayCsvLoader>()
+            .AddScoped<RouteLockTrackCircuitCsvLoader>()
+            .AddScoped<TtcWindowCsvLoader>()
+            .AddScoped<TtcWindowLinkCsvLoader>()
+            .AddScoped<ThrowOutControlCsvLoader>()
+            .AddScoped<SignalCsvLoader>()
+            // DB Initializers
+            .AddScoped<StationDbInitializer>()
+            .AddScoped<TrackCircuitDbInitializer>()
+            .AddScoped<SignalTypeDbInitializer>()
+            .AddScoped<TrainDbInitializer>()
+            .AddScoped<OperationNotificationDisplayDbInitializer>()
+            .AddScoped<RouteLockTrackCircuitDbInitializer>()
+            .AddScoped<ServerStatusDbInitializer>()
+            .AddScoped<TtcDbInitializer>()
+            .AddScoped<ThrowOutControlDbInitializer>()
+            .AddScoped<SignalDbInitializer>()
+            .AddScoped<InterlockingObjectDbInitializer>()
+            .AddScoped<SwitchingMachineRouteDbInitializer>()
+            // Orchestrator
             .AddScoped<DatabaseInitializationOrchestrator>()
             .AddScoped<IDateTimeRepository, DateTimeRepository>()
             .AddScoped<IDestinationButtonRepository, DestinationButtonRepository>()
