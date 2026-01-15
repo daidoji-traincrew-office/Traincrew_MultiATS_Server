@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Traincrew_MultiATS_Server.Data;
-using Traincrew_MultiATS_Server.Repositories.TtcWindow;
 
 namespace Traincrew_MultiATS_Server.Repositories.TtcWindowLink;
 public class TtcWindowLinkRepository(ApplicationDbContext context) : ITtcWindowLinkRepository
@@ -34,10 +33,5 @@ public class TtcWindowLinkRepository(ApplicationDbContext context) : ITtcWindowL
             .Select(l => new { l.SourceTtcWindowName, l.TargetTtcWindowName })
             .ToListAsync(cancellationToken);
         return links.Select(l => (l.SourceTtcWindowName, l.TargetTtcWindowName)).ToHashSet();
-    }
-
-    public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
-    {
-        await context.SaveChangesAsync(cancellationToken);
     }
 }

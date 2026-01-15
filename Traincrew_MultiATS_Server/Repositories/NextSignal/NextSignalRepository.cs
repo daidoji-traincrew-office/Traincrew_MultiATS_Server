@@ -40,11 +40,6 @@ public class NextSignalRepository(ApplicationDbContext context): INextSignalRepo
         return await context.NextSignals.ToListAsync(cancellationToken);
     }
 
-    public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
-    {
-        await context.SaveChangesAsync(cancellationToken);
-    }
-
     public async Task<Dictionary<string, List<string>>> GetByDepthGroupedBySignalNameAsync(int depth, CancellationToken cancellationToken = default)
     {
         return await context.NextSignals

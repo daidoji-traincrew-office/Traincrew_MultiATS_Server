@@ -50,12 +50,4 @@ public class DirectionRouteRepository(ApplicationDbContext context) : IDirection
         context.DirectionRoutes.Update(directionRoute);
     }
 
-    /// <summary>
-    /// 変更を保存する
-    /// </summary>
-    /// <param name="cancellationToken">キャンセルトークン</param>
-    public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
-    {
-        await context.SaveChangesAsync(cancellationToken);
-    }
 }

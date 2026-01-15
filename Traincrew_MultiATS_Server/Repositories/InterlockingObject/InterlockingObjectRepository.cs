@@ -68,9 +68,4 @@ public class InterlockingObjectRepository(ApplicationDbContext context) : IInter
     {
         context.InterlockingObjects.Update(interlockingObject);
     }
-
-    public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
-    {
-        await context.SaveChangesAsync(cancellationToken);
-    }
 }

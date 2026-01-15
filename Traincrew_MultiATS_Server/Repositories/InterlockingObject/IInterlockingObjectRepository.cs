@@ -33,9 +33,4 @@ public interface IInterlockingObjectRepository
     /// <param name="interlockingObject">更新する連動オブジェクト</param>
     public void Update(Models.InterlockingObject interlockingObject);
 
-    /// <summary>
-    /// 変更を保存する
-    /// </summary>
-    /// <param name="cancellationToken">キャンセルトークン</param>
-    public Task SaveChangesAsync(CancellationToken cancellationToken = default);
 }

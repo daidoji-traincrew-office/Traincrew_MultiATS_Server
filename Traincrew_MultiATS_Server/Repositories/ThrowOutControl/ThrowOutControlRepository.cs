@@ -67,13 +67,4 @@ public class ThrowOutControlRepository(ApplicationDbContext context) : IThrowOut
             .ToListAsync(cancellationToken);
         return pairs.Select(p => (p.SourceId, p.TargetId)).ToHashSet();
     }
-
-    /// <summary>
-    /// 変更を保存する
-    /// </summary>
-    /// <param name="cancellationToken">キャンセルトークン</param>
-    public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
-    {
-        await context.SaveChangesAsync(cancellationToken);
-    }
 }
