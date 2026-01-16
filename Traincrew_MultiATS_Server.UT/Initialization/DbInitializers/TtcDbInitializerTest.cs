@@ -302,9 +302,9 @@ public class TtcDbInitializerTest
             r => r.AddAll(It.Is<List<TtcWindowLinkRouteCondition>>(list =>
                 list.Count == 2 &&
                 list[0].RouteId == 100 &&
-                list[0].TtcWindowLink.Id == 1 &&
+                list[0].TtcWindowLinkId == 1 &&
                 list[1].RouteId == 200 &&
-                list[1].TtcWindowLink.Id == 1
+                list[1].TtcWindowLinkId == 1
             ), It.IsAny<CancellationToken>()),
             Times.Once);
     }
