@@ -287,13 +287,18 @@ public class SignalDbInitializer(
         var signalRoutes = await signalRouteRepository.GetAllWithRoutesAsync(cancellationToken);
         var routes = await routeRepository.GetIdsByName(cancellationToken);
 
+        // 既存のSignalRouteをHashSetに格納してO(1)で重複チェック
+        var existingSignalRouteSet = signalRoutes
+            .Select(sr => (sr.SignalName, sr.Route.Name))
+            .ToHashSet();
+
         var signalRouteList = new List<SignalRoute>();
         foreach (var signal in signalDataList)
         {
             foreach (var routeName in signal.RouteNames ?? [])
             {
-                // Todo: FW 全探索なので改善したほうがいいかも
-                if (signalRoutes.Any(sr => sr.SignalName == signal.Name && sr.Route.Name == routeName))
+                // すでにあるならスキップ
+                if (existingSignalRouteSet.Contains((signal.Name, routeName)))
                 {
                     continue;
                 }
