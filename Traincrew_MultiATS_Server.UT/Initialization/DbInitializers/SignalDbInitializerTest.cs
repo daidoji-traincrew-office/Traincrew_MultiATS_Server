@@ -76,13 +76,13 @@ public class SignalDbInitializerTest
 
         // Assert
         _generalRepositoryMock.Verify(
-            r => r.AddAll(It.Is<List<Signal>>(list =>
-                list.Count == 1 &&
-                list[0].Name == "Signal1" &&
-                list[0].TypeName == "Type1" &&
-                list[0].TrackCircuitId == 100 &&
-                list[0].StationId == "ST1"
-            ), It.IsAny<CancellationToken>()),
+            r => r.AddAll(It.Is<IEnumerable<Signal>>(signals =>
+                signals.Count() == 1 &&
+                signals.ElementAt(0).Name == "Signal1" &&
+                signals.ElementAt(0).TypeName == "Type1" &&
+                signals.ElementAt(0).TrackCircuitId == 100 &&
+                signals.ElementAt(0).StationId == "ST1"
+            )),
             Times.Once);
     }
 
@@ -130,7 +130,7 @@ public class SignalDbInitializerTest
 
         // Assert
         _generalRepositoryMock.Verify(
-            r => r.AddAll(It.Is<List<Signal>>(list => list.Count == 0), It.IsAny<CancellationToken>()),
+            r => r.AddAll(It.Is<IEnumerable<Signal>>(list => list.Count() == 0)),
             Times.Once);
     }
 
@@ -220,13 +220,13 @@ public class SignalDbInitializerTest
 
         // Assert
         _generalRepositoryMock.Verify(
-            r => r.AddAll(It.Is<List<NextSignal>>(list =>
-                list.Count == 1 &&
-                list[0].SignalName == "Signal1" &&
-                list[0].SourceSignalName == "Signal1" &&
-                list[0].TargetSignalName == "Signal2" &&
-                list[0].Depth == 1
-            ), It.IsAny<CancellationToken>()),
+            r => r.AddAll(It.Is<IEnumerable<NextSignal>>(list =>
+                list.Count() == 1 &&
+                list.First().SignalName == "Signal1" &&
+                list.First().SourceSignalName == "Signal1" &&
+                list.First().TargetSignalName == "Signal2" &&
+                list.First().Depth == 1
+            )),
             Times.AtLeastOnce);
     }
 
@@ -273,11 +273,11 @@ public class SignalDbInitializerTest
 
         // Assert
         _generalRepositoryMock.Verify(
-            r => r.AddAll(It.Is<List<SignalRoute>>(list =>
-                list.Count == 1 &&
-                list[0].SignalName == "Signal1" &&
-                list[0].RouteId == 1
-            ), It.IsAny<CancellationToken>()),
+            r => r.AddAll(It.Is<IEnumerable<SignalRoute>>(list =>
+                list.Count() == 1 &&
+                list.First().SignalName == "Signal1" &&
+                list.First().RouteId == 1
+            )),
             Times.Once);
     }
 
@@ -332,7 +332,7 @@ public class SignalDbInitializerTest
 
         // Assert
         _generalRepositoryMock.Verify(
-            r => r.AddAll(It.Is<List<SignalRoute>>(list => list.Count == 0), It.IsAny<CancellationToken>()),
+            r => r.AddAll(It.Is<IEnumerable<SignalRoute>>(list => list.Count() == 0)),
             Times.Once);
     }
 
@@ -357,7 +357,7 @@ public class SignalDbInitializerTest
 
         // Assert
         _generalRepositoryMock.Verify(
-            r => r.AddAll(It.IsAny<List<Signal>>(), It.IsAny<CancellationToken>()),
+            r => r.AddAll(It.IsAny<IEnumerable<Signal>>()),
             Times.Never);
     }
 
@@ -408,10 +408,10 @@ public class SignalDbInitializerTest
 
         // Assert
         _generalRepositoryMock.Verify(
-            r => r.AddAll(It.Is<List<Signal>>(list =>
-                list.Count == 1 &&
-                list[0].TrackCircuitId == 100
-            ), It.IsAny<CancellationToken>()),
+            r => r.AddAll(It.Is<IEnumerable<Signal>>(list =>
+                list.Count() == 1 &&
+                list.First().TrackCircuitId == 100
+            )),
             Times.Once);
     }
 }

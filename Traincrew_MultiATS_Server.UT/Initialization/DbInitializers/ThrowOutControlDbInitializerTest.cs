@@ -15,12 +15,18 @@ namespace Traincrew_MultiATS_Server.UT.Initialization.DbInitializers;
 public class ThrowOutControlDbInitializerTest
 {
     private readonly Mock<ILogger<ThrowOutControlDbInitializer>> _loggerMock = new();
-    private readonly Mock<ThrowOutControlCsvLoader> _csvLoaderMock = new();
+    private readonly Mock<ILogger<ThrowOutControlCsvLoader>> _csvLoaderLoggerMock = new();
+    private readonly Mock<ThrowOutControlCsvLoader> _csvLoaderMock;
     private readonly Mock<IRouteRepository> _routeRepositoryMock = new();
     private readonly Mock<IDirectionRouteRepository> _directionRouteRepositoryMock = new();
     private readonly Mock<IDirectionSelfControlLeverRepository> _directionSelfControlLeverRepositoryMock = new();
     private readonly Mock<IThrowOutControlRepository> _throwOutControlRepositoryMock = new();
     private readonly Mock<IGeneralRepository> _generalRepositoryMock = new();
+
+    public ThrowOutControlDbInitializerTest()
+    {
+        _csvLoaderMock = new Mock<ThrowOutControlCsvLoader>(_csvLoaderLoggerMock.Object);
+    }
 
     [Fact]
     [DisplayName("てこタイプの出鎖制御が正常に追加されること")]

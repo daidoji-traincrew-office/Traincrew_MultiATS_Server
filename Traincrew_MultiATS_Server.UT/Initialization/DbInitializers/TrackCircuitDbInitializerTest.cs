@@ -397,8 +397,8 @@ public class TrackCircuitDbInitializerTest
             .ReturnsAsync([]);
 
         TrackCircuit? capturedTrackCircuit = null;
-        _generalRepositoryMock.Setup(r => r.AddAll(It.IsAny<List<TrackCircuit>>(), It.IsAny<CancellationToken>()))
-            .Callback<List<TrackCircuit>, CancellationToken>((tcs, _) => capturedTrackCircuit = tcs.FirstOrDefault());
+        _generalRepositoryMock.Setup(r => r.AddAll(It.IsAny<IEnumerable<TrackCircuit>>(), It.IsAny<CancellationToken>()))
+            .Callback<IEnumerable<TrackCircuit>, CancellationToken>((tcs, _) => capturedTrackCircuit = tcs.FirstOrDefault());
 
         var initializer = new TrackCircuitDbInitializer(
             _loggerMock.Object,

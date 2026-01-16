@@ -14,11 +14,17 @@ namespace Traincrew_MultiATS_Server.UT.Initialization.DbInitializers;
 public class RouteDbInitializerTest
 {
     private readonly Mock<ILogger<RouteLockTrackCircuitDbInitializer>> _loggerMock = new();
-    private readonly Mock<RouteLockTrackCircuitCsvLoader> _csvLoaderMock = new();
+    private readonly Mock<ILogger<RouteLockTrackCircuitCsvLoader>> _csvLoaderLoggerMock = new();
+    private readonly Mock<RouteLockTrackCircuitCsvLoader> _csvLoaderMock;
     private readonly Mock<IRouteRepository> _routeRepositoryMock = new();
     private readonly Mock<ITrackCircuitRepository> _trackCircuitRepositoryMock = new();
     private readonly Mock<IRouteLockTrackCircuitRepository> _routeLockTrackCircuitRepositoryMock = new();
     private readonly Mock<IGeneralRepository> _generalRepositoryMock = new();
+
+    public RouteDbInitializerTest()
+    {
+        _csvLoaderMock = new Mock<RouteLockTrackCircuitCsvLoader>(_csvLoaderLoggerMock.Object);
+    }
 
     [Fact]
     [DisplayName("データが有効な場合、進路鎖錠軌道回路が正常に追加されること")]

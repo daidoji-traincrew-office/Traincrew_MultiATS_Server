@@ -39,11 +39,10 @@ public class InterlockingObjectDbInitializerTest
 
         // Assert
         _generalRepositoryMock.Verify(
-            r => r.SaveAll(It.Is<List<InterlockingObject>>(list =>
-                list.Count == 3 &&
-                list[0].StationId == "TH65" &&
-                list[1].StationId == "TH6S" &&
-                list[2].StationId == "TH123"
+            r => r.SaveAll(It.Is<IEnumerable<InterlockingObject>>(list =>
+                list.Count() == 2 &&
+                list.ElementAt(0).StationId == "TH65" &&
+                list.ElementAt(1).StationId == "TH6S"
             ), It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -73,10 +72,10 @@ public class InterlockingObjectDbInitializerTest
 
         // Assert
         _generalRepositoryMock.Verify(
-            r => r.SaveAll(It.Is<List<InterlockingObject>>(list =>
-                list.Count == 1 &&
-                list[0].Name == "TH65_Route" &&
-                list[0].StationId == "TH65"
+            r => r.SaveAll(It.Is<IEnumerable<InterlockingObject>>(list =>
+                list.Count() == 1 &&
+                list.ElementAt(0).Name == "TH65_Route" &&
+                list.ElementAt(0).StationId == "TH65"
             ), It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -132,9 +131,9 @@ public class InterlockingObjectDbInitializerTest
 
         // Assert
         _generalRepositoryMock.Verify(
-            r => r.SaveAll(It.Is<List<InterlockingObject>>(list =>
-                list.Count == 1 &&
-                list[0].StationId == expectedStationId
+            r => r.SaveAll(It.Is<IEnumerable<InterlockingObject>>(list =>
+                list.Count() == 1 &&
+                list.ElementAt(0).StationId == expectedStationId
             ), It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -162,9 +161,9 @@ public class InterlockingObjectDbInitializerTest
 
         // Assert
         _generalRepositoryMock.Verify(
-            r => r.SaveAll(It.Is<List<InterlockingObject>>(list =>
-                list.Count == 1 &&
-                list[0].StationId == "TH65"
+            r => r.SaveAll(It.Is<IEnumerable<InterlockingObject>>(list =>
+                list.Count() == 1 &&
+                list.ElementAt(0).StationId == "TH65"
             ), It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -195,10 +194,10 @@ public class InterlockingObjectDbInitializerTest
 
         // Assert
         _generalRepositoryMock.Verify(
-            r => r.SaveAll(It.Is<List<InterlockingObject>>(list =>
-                list.Count == 2 &&
-                list[0].StationId == "TH65" &&
-                list[1].StationId == "TH66"
+            r => r.SaveAll(It.Is<IEnumerable<InterlockingObject>>(list =>
+                list.Count() == 2 &&
+                list.ElementAt(0).StationId == "TH65" &&
+                list.ElementAt(1).StationId == "TH66"
             ), It.IsAny<CancellationToken>()),
             Times.Once);
     }

@@ -18,8 +18,14 @@ public class OperationNotificationDisplayDbInitializerTest
     private readonly Mock<IDateTimeRepository> _dateTimeRepositoryMock = new();
     private readonly Mock<IOperationNotificationDisplayRepository> _operationNotificationDisplayRepositoryMock = new();
     private readonly Mock<ITrackCircuitRepository> _trackCircuitRepositoryMock = new();
-    private readonly Mock<OperationNotificationDisplayCsvLoader> _csvLoaderMock = new();
+    private readonly Mock<ILogger<OperationNotificationDisplayCsvLoader>> _csvLoaderLoggerMock = new();
+    private readonly Mock<OperationNotificationDisplayCsvLoader> _csvLoaderMock;
     private readonly Mock<IGeneralRepository> _generalRepositoryMock = new();
+
+    public OperationNotificationDisplayDbInitializerTest()
+    {
+        _csvLoaderMock = new Mock<OperationNotificationDisplayCsvLoader>(_csvLoaderLoggerMock.Object);
+    }
 
     [Fact]
     [DisplayName("データが有効な場合、運転通告表示が正常に追加されること")]
@@ -216,8 +222,8 @@ public class OperationNotificationDisplayDbInitializerTest
 
         OperationNotificationDisplay? capturedDisplay = null;
         _generalRepositoryMock.Setup(r =>
-                r.AddAll(It.IsAny<List<OperationNotificationDisplay>>(), It.IsAny<CancellationToken>()))
-            .Callback<List<OperationNotificationDisplay>, CancellationToken>((displays, _) =>
+                r.AddAll(It.IsAny<IEnumerable<OperationNotificationDisplay>>(), It.IsAny<CancellationToken>()))
+            .Callback<IEnumerable<OperationNotificationDisplay>, CancellationToken>((displays, _) =>
                 capturedDisplay = displays.FirstOrDefault());
 
         var initializer = new OperationNotificationDisplayDbInitializer(

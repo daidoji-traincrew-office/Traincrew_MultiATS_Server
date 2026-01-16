@@ -266,8 +266,8 @@ public class StationDbInitializerTest
         StationTimerState? capturedState30 = null;
         StationTimerState? capturedState60 = null;
 
-        _generalRepositoryMock.Setup(r => r.AddAll(It.IsAny<List<StationTimerState>>(), It.IsAny<CancellationToken>()))
-            .Callback<List<StationTimerState>, CancellationToken>((states, _) =>
+        _generalRepositoryMock.Setup(r => r.AddAll(It.IsAny<IEnumerable<StationTimerState>>(), It.IsAny<CancellationToken>()))
+            .Callback<IEnumerable<StationTimerState>, CancellationToken>((states, _) =>
             {
                 capturedState30 = states.FirstOrDefault(s => s.Seconds == 30);
                 capturedState60 = states.FirstOrDefault(s => s.Seconds == 60);

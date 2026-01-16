@@ -17,8 +17,10 @@ namespace Traincrew_MultiATS_Server.UT.Initialization.DbInitializers;
 public class TtcDbInitializerTest
 {
     private readonly Mock<ILogger<TtcDbInitializer>> _loggerMock = new();
-    private readonly Mock<TtcWindowCsvLoader> _windowCsvLoaderMock = new();
-    private readonly Mock<TtcWindowLinkCsvLoader> _windowLinkCsvLoaderMock = new();
+    private readonly Mock<ILogger<TtcWindowCsvLoader>> _windowCsvLoaderLoggerMock = new();
+    private readonly Mock<ILogger<TtcWindowLinkCsvLoader>> _windowLinkCsvLoaderLoggerMock = new();
+    private readonly Mock<TtcWindowCsvLoader> _windowCsvLoaderMock;
+    private readonly Mock<TtcWindowLinkCsvLoader> _windowLinkCsvLoaderMock;
     private readonly Mock<ITtcWindowRepository> _ttcWindowRepositoryMock = new();
     private readonly Mock<ITtcWindowTrackCircuitRepository> _ttcWindowTrackCircuitRepositoryMock = new();
     private readonly Mock<ITtcWindowLinkRepository> _ttcWindowLinkRepositoryMock = new();
@@ -26,6 +28,12 @@ public class TtcDbInitializerTest
     private readonly Mock<ITrackCircuitRepository> _trackCircuitRepositoryMock = new();
     private readonly Mock<IRouteRepository> _routeRepositoryMock = new();
     private readonly Mock<IGeneralRepository> _generalRepositoryMock = new();
+
+    public TtcDbInitializerTest()
+    {
+        _windowCsvLoaderMock = new Mock<TtcWindowCsvLoader>(_windowCsvLoaderLoggerMock.Object);
+        _windowLinkCsvLoaderMock = new Mock<TtcWindowLinkCsvLoader>(_windowLinkCsvLoaderLoggerMock.Object);
+    }
 
     [Fact]
     [DisplayName("データが有効な場合、TTC窓が正常に追加されること")]

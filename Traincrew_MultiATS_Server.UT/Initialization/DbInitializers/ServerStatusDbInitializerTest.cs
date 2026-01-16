@@ -99,7 +99,7 @@ public class ServerStatusDbInitializerTest
     {
         // Arrange
         _serverRepositoryMock.Setup(r => r.GetServerStateAsync())
-            .ReturnsAsync((ServerState?)null);
+            .ThrowsAsync(new OperationCanceledException());
 
         var initializer = new ServerStatusDbInitializer(
             _loggerMock.Object,
