@@ -208,7 +208,8 @@ public class SignalDbInitializer(
             .ToList();
 
         await generalRepository.AddAll(relayLinksToAdd, cancellationToken);
-
+        
+        existingNextSignals.AddRange(relayLinksToAdd);
         var allSignals = await signalRepository.GetAll();
         var nextSignalsBySignalName = existingNextSignals
             .Where(ns => ns.Depth == 1)
