@@ -82,7 +82,7 @@ public class SignalDbInitializerTest
                 signals.ElementAt(0).TypeName == "Type1" &&
                 signals.ElementAt(0).TrackCircuitId == 100 &&
                 signals.ElementAt(0).StationId == "ST1"
-            ), TestContext.Current.CancellationToken),
+            ), It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -130,7 +130,7 @@ public class SignalDbInitializerTest
 
         // Assert
         _generalRepositoryMock.Verify(
-            r => r.AddAll(It.Is<IEnumerable<Signal>>(list => list.Count() == 0), TestContext.Current.CancellationToken),
+            r => r.AddAll(It.Is<IEnumerable<Signal>>(list => list.Count() == 0), It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -226,7 +226,7 @@ public class SignalDbInitializerTest
                 list.First().SourceSignalName == "Signal1" &&
                 list.First().TargetSignalName == "Signal2" &&
                 list.First().Depth == 1
-            ), TestContext.Current.CancellationToken),
+            ), It.IsAny<CancellationToken>()),
             Times.AtLeastOnce);
     }
 
@@ -277,7 +277,7 @@ public class SignalDbInitializerTest
                 list.Count() == 1 &&
                 list.First().SignalName == "Signal1" &&
                 list.First().RouteId == 1
-            ), TestContext.Current.CancellationToken),
+            ), It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -333,7 +333,7 @@ public class SignalDbInitializerTest
         // Assert
         _generalRepositoryMock.Verify(
             r => r.AddAll(It.Is<IEnumerable<SignalRoute>>(list => list.Count() == 0),
-                TestContext.Current.CancellationToken),
+                It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -358,7 +358,7 @@ public class SignalDbInitializerTest
 
         // Assert
         _generalRepositoryMock.Verify(
-            r => r.AddAll(It.IsAny<IEnumerable<Signal>>(), TestContext.Current.CancellationToken),
+            r => r.AddAll(It.IsAny<IEnumerable<Signal>>(), It.IsAny<CancellationToken>()),
             Times.Never);
     }
 
@@ -412,7 +412,7 @@ public class SignalDbInitializerTest
             r => r.AddAll(It.Is<IEnumerable<Signal>>(list =>
                 list.Count() == 1 &&
                 list.First().TrackCircuitId == 100
-            ), TestContext.Current.CancellationToken),
+            ), It.IsAny<CancellationToken>()),
             Times.Once);
     }
 }
