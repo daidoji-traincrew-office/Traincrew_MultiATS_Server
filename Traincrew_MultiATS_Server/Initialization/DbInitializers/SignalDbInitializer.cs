@@ -115,7 +115,7 @@ public class SignalDbInitializer(
             });
         }
 
-        await generalRepository.AddAll(signalList);
+        await generalRepository.AddAll(signalList, cancellationToken);
         logger.LogInformation("Initialized {Count} signals", signalList.Count);
     }
 
@@ -160,7 +160,7 @@ public class SignalDbInitializer(
             }
         }
 
-        await generalRepository.AddAll(nextSignalList);
+        await generalRepository.AddAll(nextSignalList, cancellationToken);
 
         // 中継信号機のリンクも追加する
         // 例:
@@ -207,7 +207,7 @@ public class SignalDbInitializer(
             })
             .ToList();
 
-        await generalRepository.AddAll(relayLinksToAdd);
+        await generalRepository.AddAll(relayLinksToAdd, cancellationToken);
 
         var allSignals = await signalRepository.GetAll();
         var nextSignalsBySignalName = existingNextSignals
@@ -271,7 +271,7 @@ public class SignalDbInitializer(
             }
 
             // 各depthの処理が終わった後にまとめて保存
-            await generalRepository.AddAll(depthNextSignalList);
+            await generalRepository.AddAll(depthNextSignalList, cancellationToken);
         }
 
         logger.LogInformation("Initialized next signals up to depth {MaxDepth}", maxDepth);
@@ -311,7 +311,7 @@ public class SignalDbInitializer(
             }
         }
 
-        await generalRepository.AddAll(signalRouteList);
+        await generalRepository.AddAll(signalRouteList, cancellationToken);
         logger.LogInformation("Initialized signal routes");
     }
 
