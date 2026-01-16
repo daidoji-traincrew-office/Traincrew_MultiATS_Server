@@ -1,0 +1,490 @@
+Table: destination_button
+RowCount: 100
+Schema:
+name|character varying|NO|
+station_id|character varying|NO|
+
+
+Table: destination_button_state
+RowCount: 100
+Schema:
+name|character varying|NO|
+is_raised|USER-DEFINED|NO|
+operated_at|timestamp without time zone|NO|
+
+
+Table: direction_route
+RowCount: 11
+Schema:
+id|bigint|NO|
+lever_id|bigint|NO|
+direction_self_control_lever_id|bigint|YES|
+l_lock_lever_id|bigint|YES|
+l_lock_lever_direction|USER-DEFINED|YES|
+l_single_locked_lever_id|bigint|YES|
+l_single_locked_lever_direction|USER-DEFINED|YES|
+r_lock_lever_id|bigint|YES|
+r_lock_lever_direction|USER-DEFINED|YES|
+r_single_locked_lever_id|bigint|YES|
+r_single_locked_lever_direction|USER-DEFINED|YES|
+
+
+Table: direction_route_state
+RowCount: 11
+Schema:
+id|bigint|NO|
+is_lr|USER-DEFINED|NO|'left'::lr
+is_fl_relay_raised|USER-DEFINED|NO|'drop'::raise_drop
+is_lfys_relay_raised|USER-DEFINED|NO|'drop'::raise_drop
+is_rfys_relay_raised|USER-DEFINED|NO|'drop'::raise_drop
+is_ly_relay_raised|USER-DEFINED|NO|'drop'::raise_drop
+is_ry_relay_raised|USER-DEFINED|NO|'drop'::raise_drop
+is_l_relay_raised|USER-DEFINED|NO|'drop'::raise_drop
+is_r_relay_raised|USER-DEFINED|NO|'drop'::raise_drop
+
+
+Table: direction_self_control_lever
+RowCount: 11
+Schema:
+id|bigint|NO|
+
+
+Table: direction_self_control_lever_state
+RowCount: 11
+Schema:
+id|bigint|NO|
+is_inserted_key|boolean|NO|false
+is_reversed|USER-DEFINED|NO|'normal'::nr
+
+
+Table: interlocking_object
+RowCount: 1084
+Schema:
+id|bigint|NO|nextval('interlocking_object_id_seq'::regclass)
+type|USER-DEFINED|NO|
+name|character varying|NO|
+station_id|character varying|YES|
+description|text|YES|
+
+
+Table: lever
+RowCount: 258
+Schema:
+id|bigint|NO|
+lever_type|USER-DEFINED|NO|
+switching_machine_id|bigint|YES|
+
+
+Table: lever_state
+RowCount: 258
+Schema:
+id|bigint|NO|
+is_reversed|USER-DEFINED|NO|
+
+
+Table: lock
+RowCount: 1905
+Schema:
+id|bigint|NO|nextval('lock_id_seq'::regclass)
+object_id|bigint|YES|
+type|USER-DEFINED|NO|
+route_lock_group|integer|YES|
+
+
+Table: lock_condition
+RowCount: 7026
+Schema:
+id|bigint|NO|nextval('lock_condition_id_seq'::regclass)
+lock_id|bigint|NO|
+parent_id|bigint|YES|
+type|USER-DEFINED|NO|
+
+
+Table: lock_condition_by_route_central_control_lever
+RowCount: 255
+Schema:
+id|bigint|NO|nextval('lock_condition_by_route_central_control_lever_id_seq'::regclass)
+route_id|bigint|NO|
+route_central_control_lever_id|bigint|NO|
+
+
+Table: lock_condition_object
+RowCount: 4965
+Schema:
+id|bigint|NO|
+object_id|bigint|NO|
+timer_seconds|integer|YES|
+is_reverse|USER-DEFINED|NO|
+is_single_lock|boolean|NO|
+is_lr|USER-DEFINED|YES|
+
+
+Table: next_signal
+RowCount: 1202
+Schema:
+id|bigint|NO|nextval('next_signal_id_seq'::regclass)
+signal_name|character varying|NO|
+source_signal_name|character varying|NO|
+target_signal_name|character varying|NO|
+depth|integer|NO|
+
+
+Table: operation_information_state
+RowCount: 0
+Schema:
+id|bigint|NO|nextval('operation_information_state_id_seq'::regclass)
+type|USER-DEFINED|NO|
+content|text|NO|
+start_time|timestamp without time zone|NO|
+end_time|timestamp without time zone|NO|
+
+
+Table: operation_notification_display
+RowCount: 48
+Schema:
+name|character varying|NO|
+station_id|character varying|NO|
+is_up|boolean|NO|
+is_down|boolean|NO|
+
+
+Table: operation_notification_state
+RowCount: 48
+Schema:
+display_name|character varying|NO|
+type|USER-DEFINED|NO|
+content|text|NO|
+operated_at|timestamp without time zone|NO|
+
+
+Table: protection_zone_state
+RowCount: 0
+Schema:
+id|bigint|NO|nextval('protection_zone_state_id_seq'::regclass)
+protection_zone|bigint|NO|
+train_number|character varying|NO|
+
+
+Table: route
+RowCount: 321
+Schema:
+id|bigint|NO|
+tc_name|character varying|NO|
+route_type|USER-DEFINED|NO|
+root_id|bigint|YES|
+indicator|character varying|YES|
+approach_lock_time|integer|YES|
+approach_lock_final_track_circuit_id|bigint|YES|
+
+
+Table: route_central_control_lever
+RowCount: 13
+Schema:
+id|bigint|NO|
+
+
+Table: route_central_control_lever_state
+RowCount: 13
+Schema:
+id|bigint|NO|
+is_inserted_key|boolean|NO|false
+is_reversed|USER-DEFINED|NO|'normal'::nr
+is_chr_relay_raised|USER-DEFINED|NO|'drop'::raise_drop
+
+
+Table: route_include
+RowCount: 0
+Schema:
+source_lever_id|bigint|NO|
+target_lever_id|bigint|NO|
+
+
+Table: route_lever_destination_button
+RowCount: 321
+Schema:
+id|bigint|NO|nextval('route_lever_destination_button_id_seq'::regclass)
+route_id|bigint|NO|
+lever_id|bigint|NO|
+destination_button_name|character varying|YES|
+direction|USER-DEFINED|NO|
+
+
+Table: route_lock_track_circuit
+RowCount: 825
+Schema:
+id|bigint|NO|nextval('route_lock_track_circuit_id_seq'::regclass)
+route_id|bigint|NO|
+track_circuit_id|bigint|NO|
+
+
+Table: route_state
+RowCount: 321
+Schema:
+id|bigint|NO|
+is_lever_relay_raised|USER-DEFINED|NO|
+is_route_relay_raised|USER-DEFINED|NO|
+is_route_relay_without_switching_machine_raised|USER-DEFINED|NO|'drop'::raise_drop
+is_signal_control_raised|USER-DEFINED|NO|
+is_approach_lock_mr_raised|USER-DEFINED|NO|
+is_approach_lock_ms_raised|USER-DEFINED|NO|
+is_route_lock_raised|USER-DEFINED|NO|
+is_throw_out_xr_relay_raised|USER-DEFINED|NO|
+is_throw_out_ys_relay_raised|USER-DEFINED|NO|
+is_throw_out_x_relay_raised|USER-DEFINED|NO|'drop'::raise_drop
+is_throw_out_s_relay_raised|USER-DEFINED|NO|'drop'::raise_drop
+is_ctc_relay_raised|USER-DEFINED|NO|'drop'::raise_drop
+
+
+Table: server_state
+RowCount: 1
+Schema:
+id|integer|NO|nextval('server_state_id_seq'::regclass)
+mode|USER-DEFINED|NO|
+time_offset|integer|NO|0
+
+
+Table: signal
+RowCount: 365
+Schema:
+name|character varying|NO|
+station_id|character varying|YES|
+type|character varying|NO|
+track_circuit_id|bigint|YES|
+direction_route_left_id|bigint|YES|
+direction_route_right_id|bigint|YES|
+direction|USER-DEFINED|YES|
+
+
+Table: signal_route
+RowCount: 245
+Schema:
+id|bigint|NO|nextval('signal_route_id_seq'::regclass)
+signal_name|character varying|NO|
+route_id|bigint|NO|
+
+
+Table: signal_state
+RowCount: 365
+Schema:
+signal_name|character varying|NO|
+is_lighted|boolean|NO|
+
+
+Table: signal_type
+RowCount: 16
+Schema:
+name|character varying|NO|
+r_indication|USER-DEFINED|NO|
+yy_indication|USER-DEFINED|NO|
+y_indication|USER-DEFINED|NO|
+yg_indication|USER-DEFINED|NO|
+g_indication|USER-DEFINED|NO|
+
+
+Table: station
+RowCount: 79
+Schema:
+id|character varying|NO|
+name|character varying|NO|
+is_station|boolean|NO|
+is_passenger_station|boolean|NO|
+
+
+Table: station_interlocking_object
+RowCount: 0
+Schema:
+station_id|character varying|NO|
+object_id|bigint|NO|
+
+
+Table: station_timer_state
+RowCount: 76
+Schema:
+id|bigint|NO|nextval('station_timer_state_id_seq'::regclass)
+station_id|character varying|NO|
+seconds|integer|NO|
+is_teu_relay_raised|USER-DEFINED|NO|'drop'::raise_drop
+is_ten_relay_raised|USER-DEFINED|NO|'drop'::raise_drop
+is_ter_relay_raised|USER-DEFINED|NO|'raise'::raise_drop
+teu_relay_raised_at|timestamp without time zone|YES|
+
+
+Table: switching_machine
+RowCount: 77
+Schema:
+id|bigint|NO|
+tc_name|character varying|NO|
+
+
+Table: switching_machine_route
+RowCount: 744
+Schema:
+id|bigint|NO|nextval('switching_machine_route_id_seq'::regclass)
+switching_machine_id|bigint|NO|
+route_id|bigint|NO|
+is_reverse|USER-DEFINED|NO|
+on_route_lock|boolean|NO|false
+
+
+Table: switching_machine_state
+RowCount: 77
+Schema:
+id|bigint|NO|
+is_switching|boolean|NO|
+is_reverse|USER-DEFINED|NO|
+switch_end_time|timestamp without time zone|NO|CURRENT_TIMESTAMP
+
+
+Table: throw_out_control
+RowCount: 61
+Schema:
+id|bigint|NO|nextval('throw_out_control_id_seq'::regclass)
+control_type|USER-DEFINED|NO|
+source_id|bigint|NO|
+source_lr|USER-DEFINED|YES|
+target_id|bigint|NO|
+target_lr|USER-DEFINED|YES|
+condition_lever_id|bigint|YES|
+condition_nr|USER-DEFINED|YES|
+
+
+Table: track_circuit
+RowCount: 393
+Schema:
+id|bigint|NO|
+protection_zone|integer|NO|
+operation_notification_display_name|character varying|YES|
+
+
+Table: track_circuit_signal
+RowCount: 431
+Schema:
+id|bigint|NO|nextval('track_circuit_signal_id_seq'::regclass)
+track_circuit_id|bigint|NO|
+is_up|boolean|NO|
+signal_name|character varying|NO|
+
+
+Table: track_circuit_state
+RowCount: 393
+Schema:
+id|bigint|NO|
+train_number|character varying|YES|
+is_short_circuit|boolean|NO|
+is_locked|boolean|NO|
+unlocked_at|timestamp without time zone|YES|
+locked_by|bigint|YES|
+is_correction_raise_relay_raised|USER-DEFINED|NO|'drop'::raise_drop
+raised_at|timestamp without time zone|YES|
+is_correction_drop_relay_raised|USER-DEFINED|NO|'drop'::raise_drop
+dropped_at|timestamp without time zone|YES|
+
+
+Table: train_car_state
+RowCount: 0
+Schema:
+train_state_id|bigint|NO|
+index|integer|NO|
+car_model|character varying|NO|
+has_pantograph|boolean|NO|false
+has_driver_cab|boolean|NO|false
+has_conductor_cab|boolean|NO|false
+has_motor|boolean|NO|false
+door_close|boolean|NO|true
+bc_press|double precision|NO|0
+ampare|double precision|NO|0
+
+
+Table: train_diagram
+RowCount: 374
+Schema:
+train_number|character varying|NO|
+train_type_id|bigint|NO|
+from_station_id|character varying|NO|
+to_station_id|character varying|NO|
+dia_id|integer|NO|
+
+
+Table: train_signal_state
+RowCount: 0
+Schema:
+id|bigint|NO|nextval('train_signal_state_id_seq'::regclass)
+train_number|character varying|NO|
+signal_name|character varying|NO|
+
+
+Table: train_state
+RowCount: 0
+Schema:
+id|bigint|NO|nextval('train_state_id_seq'::regclass)
+train_number|character varying|NO|
+dia_number|integer|NO|
+from_station_id|character varying|NO|
+to_station_id|character varying|NO|
+delay|integer|NO|0
+driver_id|bigint|YES|
+
+
+Table: train_type
+RowCount: 24
+Schema:
+id|bigint|NO|
+name|character varying|NO|
+
+
+Table: ttc_window
+RowCount: 152
+Schema:
+name|character varying|NO|
+station_id|character varying|NO|
+type|USER-DEFINED|NO|
+
+
+Table: ttc_window_display_station
+RowCount: 49
+Schema:
+id|bigint|NO|nextval('ttc_window_display_station_id_seq'::regclass)
+ttc_window_name|character varying|NO|
+station_id|character varying|NO|
+
+
+Table: ttc_window_link
+RowCount: 230
+Schema:
+id|bigint|NO|nextval('ttc_window_link_id_seq'::regclass)
+source_ttc_window_name|character varying|NO|
+target_ttc_window_name|character varying|NO|
+type|USER-DEFINED|NO|
+is_empty_sending|boolean|NO|
+track_circuit_condition|bigint|YES|
+
+
+Table: ttc_window_link_route_condition
+RowCount: 0
+Schema:
+id|bigint|NO|nextval('ttc_window_link_route_condition_id_seq'::regclass)
+ttc_window_link_id|bigint|NO|
+route_id|bigint|NO|
+
+
+Table: ttc_window_state
+RowCount: 152
+Schema:
+name|character varying|NO|
+train_number|character varying|NO|
+
+
+Table: ttc_window_track_circuit
+RowCount: 49
+Schema:
+id|bigint|NO|nextval('ttc_window_track_circuit_id_seq'::regclass)
+ttc_window_name|character varying|NO|
+track_circuit_id|bigint|NO|
+
+
+Table: user_disconnection_state
+RowCount: 0
+Schema:
+user_id|bigint|NO|
+
+

@@ -1,7 +1,5 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Traincrew_MultiATS_Server.Data;
-using Traincrew_MultiATS_Server.Initialization;
 using Traincrew_MultiATS_Server.IT.Fixture;
 using Traincrew_MultiATS_Server.IT.TestUtilities;
 
@@ -16,13 +14,6 @@ public class DatabaseInitializerSnapshotTest(WebApplicationFixture factory)
         // Arrange
         await using var scope = factory.Services.CreateAsyncScope();
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var orchestrator = scope.ServiceProvider.GetRequiredService<DatabaseInitializationOrchestrator>();
-
-        // すべてのデータを削除してDBを空にする
-        await ClearDatabaseAsync(context);
-
-        // Act - DBを初期化する
-        await orchestrator.InitializeAsync(TestContext.Current.CancellationToken);
 
         // 初期化後のスナップショットを取得
         var actualSnapshot = await DatabaseSnapshotHelper.CreateSnapshotAsync(context, TestContext.Current.CancellationToken);
@@ -39,16 +30,8 @@ public class DatabaseInitializerSnapshotTest(WebApplicationFixture factory)
     {
         // このテストは手動で実行してスナップショットファイルを生成するためのもの
         // 通常のテスト実行ではスキップされる
-
         await using var scope = factory.Services.CreateAsyncScope();
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var orchestrator = scope.ServiceProvider.GetRequiredService<DatabaseInitializationOrchestrator>();
-
-        // すべてのデータを削除してDBを空にする
-        await ClearDatabaseAsync(context);
-
-        // DBを初期化する
-        await orchestrator.InitializeAsync(TestContext.Current.CancellationToken);
 
         // スナップショットを取得
         var snapshot = await DatabaseSnapshotHelper.CreateSnapshotAsync(context, TestContext.Current.CancellationToken);
@@ -57,61 +40,6 @@ public class DatabaseInitializerSnapshotTest(WebApplicationFixture factory)
         var snapshotPath = GetSnapshotFilePath();
         var serialized = DatabaseSnapshotHelper.SerializeSnapshot(snapshot);
         await File.WriteAllTextAsync(snapshotPath, serialized, TestContext.Current.CancellationToken);
-    }
-
-    private async Task ClearDatabaseAsync(ApplicationDbContext context)
-    {
-        // トランザクション内ですべてのデータを削除
-        await using var transaction = await context.Database.BeginTransactionAsync(TestContext.Current.CancellationToken);
-
-        try
-        {
-            // 外部キー制約を一時的に無効化
-            await context.Database.ExecuteSqlRawAsync("SET session_replication_role = 'replica';", TestContext.Current.CancellationToken);
-
-            // すべてのテーブルをクリア(OpenIddictテーブルとマイグレーションテーブルを除く)
-            var tableNames = await GetTableNamesForCleanupAsync(context);
-            foreach (var tableName in tableNames)
-            {
-                await context.Database.ExecuteSqlRawAsync($"TRUNCATE TABLE \"{tableName}\" CASCADE;", TestContext.Current.CancellationToken);
-            }
-
-            // 外部キー制約を再度有効化
-            await context.Database.ExecuteSqlRawAsync("SET session_replication_role = 'origin';", TestContext.Current.CancellationToken);
-
-            await transaction.CommitAsync(TestContext.Current.CancellationToken);
-        }
-        catch
-        {
-            await transaction.RollbackAsync(TestContext.Current.CancellationToken);
-            throw;
-        }
-    }
-
-    private async Task<List<string>> GetTableNamesForCleanupAsync(ApplicationDbContext context)
-    {
-        const string query = """
-            SELECT table_name
-            FROM information_schema.tables
-            WHERE table_schema = 'public'
-            AND table_type = 'BASE TABLE'
-            AND table_name NOT LIKE '__EFMigrationsHistory'
-            AND table_name NOT LIKE 'OpenIddict%'
-            ORDER BY table_name;
-            """;
-
-        var connection = context.Database.GetDbConnection();
-        await using var command = connection.CreateCommand();
-        command.CommandText = query;
-
-        var tableNames = new List<string>();
-        await using var reader = await command.ExecuteReaderAsync(TestContext.Current.CancellationToken);
-        while (await reader.ReadAsync(TestContext.Current.CancellationToken))
-        {
-            tableNames.Add(reader.GetString(0));
-        }
-
-        return tableNames;
     }
 
     private async Task<DatabaseSnapshot> LoadExpectedSnapshotAsync()
