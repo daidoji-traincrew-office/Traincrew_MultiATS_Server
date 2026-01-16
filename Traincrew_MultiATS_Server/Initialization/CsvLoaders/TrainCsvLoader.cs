@@ -7,12 +7,13 @@ namespace Traincrew_MultiATS_Server.Initialization.CsvLoaders;
 /// </summary>
 public class TrainTypeCsvLoader(ILogger<TrainTypeCsvLoader> logger) : BaseCsvLoader<TrainTypeCsv>(logger)
 {
-    public List<TrainTypeCsv> Load()
+    public async Task<List<TrainTypeCsv>> LoadAsync(CancellationToken cancellationToken = default)
     {
-        return LoadCsv(
+        return await LoadCsvAsync(
             CsvFilePaths.TrainType,
             true,
-            new TrainTypeCsvMap());
+            new TrainTypeCsvMap(),
+            cancellationToken);
     }
 }
 
@@ -21,11 +22,12 @@ public class TrainTypeCsvLoader(ILogger<TrainTypeCsvLoader> logger) : BaseCsvLoa
 /// </summary>
 public class TrainDiagramCsvLoader(ILogger<TrainDiagramCsvLoader> logger) : BaseCsvLoader<TrainDiagramCsv>(logger)
 {
-    public List<TrainDiagramCsv> Load()
+    public async Task<List<TrainDiagramCsv>> LoadAsync(CancellationToken cancellationToken = default)
     {
-        return LoadCsv(
+        return await LoadCsvAsync(
             CsvFilePaths.TrainDiagram,
             true,
-            new TrainDiagramCsvMap());
+            new TrainDiagramCsvMap(),
+            cancellationToken);
     }
 }

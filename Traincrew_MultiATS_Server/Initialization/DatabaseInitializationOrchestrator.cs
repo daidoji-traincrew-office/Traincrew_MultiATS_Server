@@ -73,10 +73,10 @@ public class DatabaseInitializationOrchestrator(
         await signalTypeDbInitializer.InitializeSignalTypesAsync(signalTypeList, cancellationToken);
 
         // Phase 7: TrainTypeCsvLoader - 列車タイプデータの読み込み
-        var trainTypeList = trainTypeCsvLoader.Load();
+        var trainTypeList = await trainTypeCsvLoader.LoadAsync(cancellationToken);
 
         // Phase 8: TrainDiagramCsvLoader - 列車ダイヤデータの読み込み
-        var trainDiagramList = trainDiagramCsvLoader.Load();
+        var trainDiagramList = await trainDiagramCsvLoader.LoadAsync(cancellationToken);
 
         // Phase 9: TrainDbInitializer - 列車データの初期化
         await trainDbInitializer.InitializeTrainTypesAsync(trainTypeList, cancellationToken);
