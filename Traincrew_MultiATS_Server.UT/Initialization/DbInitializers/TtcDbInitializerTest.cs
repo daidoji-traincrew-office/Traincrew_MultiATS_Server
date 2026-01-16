@@ -69,9 +69,7 @@ public class TtcDbInitializerTest
             _windowCsvLoaderMock.Object,
             _windowLinkCsvLoaderMock.Object,
             _ttcWindowRepositoryMock.Object,
-            _ttcWindowTrackCircuitRepositoryMock.Object,
             _ttcWindowLinkRepositoryMock.Object,
-            _ttcWindowLinkRouteConditionRepositoryMock.Object,
             _trackCircuitRepositoryMock.Object,
             _routeRepositoryMock.Object,
             _generalRepositoryMock.Object);
@@ -134,9 +132,7 @@ public class TtcDbInitializerTest
             _windowCsvLoaderMock.Object,
             _windowLinkCsvLoaderMock.Object,
             _ttcWindowRepositoryMock.Object,
-            _ttcWindowTrackCircuitRepositoryMock.Object,
             _ttcWindowLinkRepositoryMock.Object,
-            _ttcWindowLinkRouteConditionRepositoryMock.Object,
             _trackCircuitRepositoryMock.Object,
             _routeRepositoryMock.Object,
             _generalRepositoryMock.Object);
@@ -187,9 +183,7 @@ public class TtcDbInitializerTest
             _windowCsvLoaderMock.Object,
             _windowLinkCsvLoaderMock.Object,
             _ttcWindowRepositoryMock.Object,
-            _ttcWindowTrackCircuitRepositoryMock.Object,
             _ttcWindowLinkRepositoryMock.Object,
-            _ttcWindowLinkRouteConditionRepositoryMock.Object,
             _trackCircuitRepositoryMock.Object,
             _routeRepositoryMock.Object,
             _generalRepositoryMock.Object);
@@ -249,9 +243,7 @@ public class TtcDbInitializerTest
             _windowCsvLoaderMock.Object,
             _windowLinkCsvLoaderMock.Object,
             _ttcWindowRepositoryMock.Object,
-            _ttcWindowTrackCircuitRepositoryMock.Object,
             _ttcWindowLinkRepositoryMock.Object,
-            _ttcWindowLinkRouteConditionRepositoryMock.Object,
             _trackCircuitRepositoryMock.Object,
             _routeRepositoryMock.Object,
             _generalRepositoryMock.Object);
@@ -287,9 +279,7 @@ public class TtcDbInitializerTest
             _windowCsvLoaderMock.Object,
             _windowLinkCsvLoaderMock.Object,
             _ttcWindowRepositoryMock.Object,
-            _ttcWindowTrackCircuitRepositoryMock.Object,
             _ttcWindowLinkRepositoryMock.Object,
-            _ttcWindowLinkRouteConditionRepositoryMock.Object,
             _trackCircuitRepositoryMock.Object,
             _routeRepositoryMock.Object,
             _generalRepositoryMock.Object);
