@@ -8,7 +8,7 @@ namespace Traincrew_MultiATS_Server.Initialization.CsvLoaders;
 public class RouteLockTrackCircuitCsvLoader(ILogger<RouteLockTrackCircuitCsvLoader> logger)
     : BaseCsvLoader<RouteLockTrackCircuitCsv>(logger)
 {
-    public async Task<List<RouteLockTrackCircuitCsv>> LoadAsync(CancellationToken cancellationToken = default)
+    public virtual async Task<List<RouteLockTrackCircuitCsv>> LoadAsync(CancellationToken cancellationToken = default)
     {
         return await LoadCsvAsync(
             CsvFilePaths.RouteLockTrackCircuit,

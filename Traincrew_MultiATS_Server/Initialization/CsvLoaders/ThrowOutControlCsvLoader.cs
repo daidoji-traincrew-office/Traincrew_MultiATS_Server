@@ -8,7 +8,7 @@ namespace Traincrew_MultiATS_Server.Initialization.CsvLoaders;
 public class ThrowOutControlCsvLoader(ILogger<ThrowOutControlCsvLoader> logger)
     : BaseCsvLoader<ThrowOutControlCsv>(logger)
 {
-    public async Task<List<ThrowOutControlCsv>> LoadAsync(CancellationToken cancellationToken = default)
+    public virtual async Task<List<ThrowOutControlCsv>> LoadAsync(CancellationToken cancellationToken = default)
     {
         return await LoadCsvAsync(
             CsvFilePaths.ThrowOutControl,

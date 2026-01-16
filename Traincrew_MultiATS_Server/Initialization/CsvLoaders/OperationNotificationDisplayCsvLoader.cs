@@ -8,7 +8,7 @@ namespace Traincrew_MultiATS_Server.Initialization.CsvLoaders;
 public class OperationNotificationDisplayCsvLoader(ILogger<OperationNotificationDisplayCsvLoader> logger)
     : BaseCsvLoader<OperationNotificationDisplayCsv>(logger)
 {
-    public async Task<List<OperationNotificationDisplayCsv>> LoadAsync(CancellationToken cancellationToken = default)
+    public virtual async Task<List<OperationNotificationDisplayCsv>> LoadAsync(CancellationToken cancellationToken = default)
     {
         return await LoadCsvAsync(
             CsvFilePaths.OperationNotificationDisplay,

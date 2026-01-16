@@ -7,7 +7,7 @@ namespace Traincrew_MultiATS_Server.Initialization.CsvLoaders;
 /// </summary>
 public class TtcWindowCsvLoader(ILogger<TtcWindowCsvLoader> logger) : BaseCsvLoader<TtcWindowCsv>(logger)
 {
-    public async Task<List<TtcWindowCsv>> LoadAsync(CancellationToken cancellationToken = default)
+    public virtual async Task<List<TtcWindowCsv>> LoadAsync(CancellationToken cancellationToken = default)
     {
         return await LoadCsvAsync(
             CsvFilePaths.TtcWindow,
@@ -22,7 +22,7 @@ public class TtcWindowCsvLoader(ILogger<TtcWindowCsvLoader> logger) : BaseCsvLoa
 /// </summary>
 public class TtcWindowLinkCsvLoader(ILogger<TtcWindowLinkCsvLoader> logger) : BaseCsvLoader<TtcWindowLinkCsv>(logger)
 {
-    public async Task<List<TtcWindowLinkCsv>> LoadAsync(CancellationToken cancellationToken = default)
+    public virtual async Task<List<TtcWindowLinkCsv>> LoadAsync(CancellationToken cancellationToken = default)
     {
         return await LoadCsvAsync(
             CsvFilePaths.TtcWindowLink,
