@@ -25,9 +25,8 @@ public class TtcDbInitializer(
     /// <summary>
     ///     Initialize TTC windows from CSV file (TTC列番窓.csv)
     /// </summary>
-    public async Task InitializeTtcWindowsAsync(CancellationToken cancellationToken = default)
+    public async Task InitializeTtcWindowsAsync(IEnumerable<TtcWindowCsv> records, CancellationToken cancellationToken = default)
     {
-        var records = await windowCsvLoader.LoadAsync(cancellationToken);
 
         var existingWindows = (await ttcWindowRepository.GetAllWindowNamesAsync(cancellationToken)).ToHashSet();
         var trackCircuitIdByName = await trackCircuitRepository.GetAllIdsForName(cancellationToken);
@@ -82,16 +81,12 @@ public class TtcDbInitializer(
     /// <summary>
     ///     Initialize TTC window links from CSV file (TTC列番窓リンク設定.csv)
     /// </summary>
-    public async Task InitializeTtcWindowLinksAsync(CancellationToken cancellationToken = default)
+    public async Task InitializeTtcWindowLinksAsync(IEnumerable<TtcWindowLinkCsv> records, CancellationToken cancellationToken = default)
     {
-        var records = await windowLinkCsvLoader.LoadAsync(cancellationToken);
-
         var existingLinks = await ttcWindowLinkRepository.GetAllLinkPairsAsync(cancellationToken);
         var trackCircuitIdByName = await trackCircuitRepository.GetAllIdsForName(cancellationToken);
-        var routeIdByName = await routeRepository.GetIdsByName(cancellationToken);
 
         var ttcWindowLinksToAdd = new List<TtcWindowLink>();
-        var linkRouteConditionsToAdd = new List<TtcWindowLinkRouteCondition>();
 
         foreach (var record in records)
         {
@@ -111,10 +106,46 @@ public class TtcDbInitializer(
                     : null
             };
             ttcWindowLinksToAdd.Add(ttcWindowLink);
+        }
+
+        await generalRepository.AddAll(ttcWindowLinksToAdd, cancellationToken);
+        logger.LogInformation("Initialized {Count} TTC window links", ttcWindowLinksToAdd.Count);
+    }
+
+    /// <summary>
+    ///     Initialize TTC window link route conditions from CSV file (TTC列番窓リンク設定.csv)
+    /// </summary>
+    public async Task InitializeTtcWindowLinkRouteConditionsAsync(IEnumerable<TtcWindowLinkCsv> records, CancellationToken cancellationToken = default)
+    {
+        var allLinks = await ttcWindowLinkRepository.GetAllTtcWindowLink();
+        var linksByPair = allLinks.ToDictionary(
+            link => (link.SourceTtcWindowName, link.TargetTtcWindowName),
+            link => link
+        );
+        var routeIdByName = await routeRepository.GetIdsByName(cancellationToken);
+
+        var existingConditions = await ttcWindowLinkRepository.GetAllTtcWindowLinkRouteConditions();
+        var existingPairs = existingConditions
+            .Select(c => (c.TtcWindowLinkId, c.RouteId))
+            .ToHashSet();
+
+        var linkRouteConditionsToAdd = new List<TtcWindowLinkRouteCondition>();
+
+        foreach (var record in records)
+        {
+            if (!linksByPair.TryGetValue((record.Source, record.Target), out var ttcWindowLink))
+            {
+                continue;
+            }
 
             foreach (var routeCondition in record.RouteConditions)
             {
                 if (!routeIdByName.TryGetValue(routeCondition, out var routeId))
+                {
+                    continue;
+                }
+
+                if (existingPairs.Contains((ttcWindowLink.Id, routeId)))
                 {
                     continue;
                 }
@@ -127,14 +158,17 @@ public class TtcDbInitializer(
             }
         }
 
-        await generalRepository.AddAll(ttcWindowLinksToAdd, cancellationToken);
         await generalRepository.AddAll(linkRouteConditionsToAdd, cancellationToken);
-        logger.LogInformation("Initialized {Count} TTC window links", ttcWindowLinksToAdd.Count);
+        logger.LogInformation("Initialized {Count} TTC window link route conditions", linkRouteConditionsToAdd.Count);
     }
 
     public override async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
-        await InitializeTtcWindowsAsync(cancellationToken);
-        await InitializeTtcWindowLinksAsync(cancellationToken);
+        var windowRecords = await windowCsvLoader.LoadAsync(cancellationToken);
+        var windowLinkRecords = await windowLinkCsvLoader.LoadAsync(cancellationToken);
+
+        await InitializeTtcWindowsAsync(windowRecords, cancellationToken);
+        await InitializeTtcWindowLinksAsync(windowLinkRecords, cancellationToken);
+        await InitializeTtcWindowLinkRouteConditionsAsync(windowLinkRecords, cancellationToken);
     }
 }

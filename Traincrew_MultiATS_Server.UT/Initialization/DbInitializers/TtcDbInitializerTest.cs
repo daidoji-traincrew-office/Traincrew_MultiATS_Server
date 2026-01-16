@@ -58,7 +58,6 @@ public class TtcDbInitializerTest
             { "TC2", 200 }
         };
 
-        _windowCsvLoaderMock.Setup(l => l.LoadAsync(It.IsAny<CancellationToken>())).ReturnsAsync(csvRecords);
         _ttcWindowRepositoryMock.Setup(r => r.GetAllWindowNamesAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
         _trackCircuitRepositoryMock.Setup(r => r.GetAllIdsForName(It.IsAny<CancellationToken>()))
@@ -75,7 +74,7 @@ public class TtcDbInitializerTest
             _generalRepositoryMock.Object);
 
         // Act
-        await initializer.InitializeTtcWindowsAsync(TestContext.Current.CancellationToken);
+        await initializer.InitializeTtcWindowsAsync(csvRecords, TestContext.Current.CancellationToken);
 
         // Assert
         _generalRepositoryMock.Verify(
@@ -121,7 +120,6 @@ public class TtcDbInitializerTest
             }
         };
 
-        _windowCsvLoaderMock.Setup(l => l.LoadAsync(It.IsAny<CancellationToken>())).ReturnsAsync(csvRecords);
         _ttcWindowRepositoryMock.Setup(r => r.GetAllWindowNamesAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(["Window1"]);
         _trackCircuitRepositoryMock.Setup(r => r.GetAllIdsForName(It.IsAny<CancellationToken>()))
@@ -138,7 +136,7 @@ public class TtcDbInitializerTest
             _generalRepositoryMock.Object);
 
         // Act
-        await initializer.InitializeTtcWindowsAsync(TestContext.Current.CancellationToken);
+        await initializer.InitializeTtcWindowsAsync(csvRecords, TestContext.Current.CancellationToken);
 
         // Assert
         _generalRepositoryMock.Verify(
@@ -171,12 +169,10 @@ public class TtcDbInitializerTest
             { "Route2", 2 }
         };
 
-        _windowLinkCsvLoaderMock.Setup(l => l.LoadAsync(It.IsAny<CancellationToken>())).ReturnsAsync(csvRecords);
         _ttcWindowLinkRepositoryMock.Setup(r => r.GetAllLinkPairsAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(new HashSet<(string, string)>());
         _trackCircuitRepositoryMock.Setup(r => r.GetAllIdsForName(It.IsAny<CancellationToken>()))
             .ReturnsAsync(trackCircuitIdByName);
-        _routeRepositoryMock.Setup(r => r.GetIdsByName(It.IsAny<CancellationToken>())).ReturnsAsync(routeIdByName);
 
         var initializer = new TtcDbInitializer(
             _loggerMock.Object,
@@ -189,7 +185,7 @@ public class TtcDbInitializerTest
             _generalRepositoryMock.Object);
 
         // Act
-        await initializer.InitializeTtcWindowLinksAsync(TestContext.Current.CancellationToken);
+        await initializer.InitializeTtcWindowLinksAsync(csvRecords, TestContext.Current.CancellationToken);
 
         // Assert
         _generalRepositoryMock.Verify(
@@ -200,12 +196,6 @@ public class TtcDbInitializerTest
                 list[0].Type == TtcWindowLinkType.Up &&
                 list[0].IsEmptySending == true &&
                 list[0].TrackCircuitCondition == 100
-            ), It.IsAny<CancellationToken>()),
-            Times.Once);
-
-        _generalRepositoryMock.Verify(
-            r => r.AddAll(It.Is<List<TtcWindowLinkRouteCondition>>(list =>
-                list.Count == 2
             ), It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -230,12 +220,9 @@ public class TtcDbInitializerTest
 
         var existingLinks = new HashSet<(string, string)> { ("Window1", "Window2") };
 
-        _windowLinkCsvLoaderMock.Setup(l => l.LoadAsync(It.IsAny<CancellationToken>())).ReturnsAsync(csvRecords);
         _ttcWindowLinkRepositoryMock.Setup(r => r.GetAllLinkPairsAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(existingLinks);
         _trackCircuitRepositoryMock.Setup(r => r.GetAllIdsForName(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Dictionary<string, ulong>());
-        _routeRepositoryMock.Setup(r => r.GetIdsByName(It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Dictionary<string, ulong>());
 
         var initializer = new TtcDbInitializer(
@@ -249,11 +236,250 @@ public class TtcDbInitializerTest
             _generalRepositoryMock.Object);
 
         // Act
-        await initializer.InitializeTtcWindowLinksAsync(TestContext.Current.CancellationToken);
+        await initializer.InitializeTtcWindowLinksAsync(csvRecords, TestContext.Current.CancellationToken);
 
         // Assert
         _generalRepositoryMock.Verify(
             r => r.AddAll(It.Is<List<TtcWindowLink>>(list => list.Count == 0), It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Fact]
+    [DisplayName("データが有効な場合、TTC窓リンクルート条件が正常に追加されること")]
+    public async Task InitializeTtcWindowLinkRouteConditionsAsync_ShouldAddRouteConditions_WhenDataIsValid()
+    {
+        // Arrange
+        var csvRecords = new List<TtcWindowLinkCsv>
+        {
+            new()
+            {
+                Source = "Window1",
+                Target = "Window2",
+                Type = TtcWindowLinkType.Up,
+                IsEmptySending = true,
+                TrackCircuitCondition = null,
+                RouteConditions = ["Route1", "Route2"]
+            }
+        };
+
+        var existingLink = new TtcWindowLink
+        {
+            Id = 1,
+            SourceTtcWindowName = "Window1",
+            TargetTtcWindowName = "Window2",
+            Type = TtcWindowLinkType.Up,
+            IsEmptySending = true
+        };
+
+        var routeIdByName = new Dictionary<string, ulong>
+        {
+            { "Route1", 100 },
+            { "Route2", 200 }
+        };
+
+        _ttcWindowLinkRepositoryMock.Setup(r => r.GetAllTtcWindowLink())
+            .ReturnsAsync([existingLink]);
+        _ttcWindowLinkRepositoryMock.Setup(r => r.GetAllTtcWindowLinkRouteConditions())
+            .ReturnsAsync([]);
+        _routeRepositoryMock.Setup(r => r.GetIdsByName(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(routeIdByName);
+
+        var initializer = new TtcDbInitializer(
+            _loggerMock.Object,
+            _windowCsvLoaderMock.Object,
+            _windowLinkCsvLoaderMock.Object,
+            _ttcWindowRepositoryMock.Object,
+            _ttcWindowLinkRepositoryMock.Object,
+            _trackCircuitRepositoryMock.Object,
+            _routeRepositoryMock.Object,
+            _generalRepositoryMock.Object);
+
+        // Act
+        await initializer.InitializeTtcWindowLinkRouteConditionsAsync(csvRecords, TestContext.Current.CancellationToken);
+
+        // Assert
+        _generalRepositoryMock.Verify(
+            r => r.AddAll(It.Is<List<TtcWindowLinkRouteCondition>>(list =>
+                list.Count == 2 &&
+                list[0].RouteId == 100 &&
+                list[0].TtcWindowLink.Id == 1 &&
+                list[1].RouteId == 200 &&
+                list[1].TtcWindowLink.Id == 1
+            ), It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Fact]
+    [DisplayName("既存のルート条件が存在する場合、スキップされること")]
+    public async Task InitializeTtcWindowLinkRouteConditionsAsync_ShouldSkipExistingConditions()
+    {
+        // Arrange
+        var csvRecords = new List<TtcWindowLinkCsv>
+        {
+            new()
+            {
+                Source = "Window1",
+                Target = "Window2",
+                Type = TtcWindowLinkType.Up,
+                IsEmptySending = true,
+                TrackCircuitCondition = null,
+                RouteConditions = ["Route1"]
+            }
+        };
+
+        var existingLink = new TtcWindowLink
+        {
+            Id = 1,
+            SourceTtcWindowName = "Window1",
+            TargetTtcWindowName = "Window2",
+            Type = TtcWindowLinkType.Up,
+            IsEmptySending = true
+        };
+
+        var existingCondition = new TtcWindowLinkRouteCondition
+        {
+            TtcWindowLinkId = 1,
+            RouteId = 100
+        };
+
+        var routeIdByName = new Dictionary<string, ulong>
+        {
+            { "Route1", 100 }
+        };
+
+        _ttcWindowLinkRepositoryMock.Setup(r => r.GetAllTtcWindowLink())
+            .ReturnsAsync([existingLink]);
+        _ttcWindowLinkRepositoryMock.Setup(r => r.GetAllTtcWindowLinkRouteConditions())
+            .ReturnsAsync([existingCondition]);
+        _routeRepositoryMock.Setup(r => r.GetIdsByName(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(routeIdByName);
+
+        var initializer = new TtcDbInitializer(
+            _loggerMock.Object,
+            _windowCsvLoaderMock.Object,
+            _windowLinkCsvLoaderMock.Object,
+            _ttcWindowRepositoryMock.Object,
+            _ttcWindowLinkRepositoryMock.Object,
+            _trackCircuitRepositoryMock.Object,
+            _routeRepositoryMock.Object,
+            _generalRepositoryMock.Object);
+
+        // Act
+        await initializer.InitializeTtcWindowLinkRouteConditionsAsync(csvRecords, TestContext.Current.CancellationToken);
+
+        // Assert
+        _generalRepositoryMock.Verify(
+            r => r.AddAll(It.Is<List<TtcWindowLinkRouteCondition>>(list => list.Count == 0), It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Fact]
+    [DisplayName("リンクが存在しない場合、ルート条件がスキップされること")]
+    public async Task InitializeTtcWindowLinkRouteConditionsAsync_ShouldSkipConditions_WhenLinkDoesNotExist()
+    {
+        // Arrange
+        var csvRecords = new List<TtcWindowLinkCsv>
+        {
+            new()
+            {
+                Source = "Window1",
+                Target = "Window2",
+                Type = TtcWindowLinkType.Up,
+                IsEmptySending = true,
+                TrackCircuitCondition = null,
+                RouteConditions = ["Route1"]
+            }
+        };
+
+        var routeIdByName = new Dictionary<string, ulong>
+        {
+            { "Route1", 100 }
+        };
+
+        _ttcWindowLinkRepositoryMock.Setup(r => r.GetAllTtcWindowLink())
+            .ReturnsAsync([]);
+        _ttcWindowLinkRepositoryMock.Setup(r => r.GetAllTtcWindowLinkRouteConditions())
+            .ReturnsAsync([]);
+        _routeRepositoryMock.Setup(r => r.GetIdsByName(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(routeIdByName);
+
+        var initializer = new TtcDbInitializer(
+            _loggerMock.Object,
+            _windowCsvLoaderMock.Object,
+            _windowLinkCsvLoaderMock.Object,
+            _ttcWindowRepositoryMock.Object,
+            _ttcWindowLinkRepositoryMock.Object,
+            _trackCircuitRepositoryMock.Object,
+            _routeRepositoryMock.Object,
+            _generalRepositoryMock.Object);
+
+        // Act
+        await initializer.InitializeTtcWindowLinkRouteConditionsAsync(csvRecords, TestContext.Current.CancellationToken);
+
+        // Assert
+        _generalRepositoryMock.Verify(
+            r => r.AddAll(It.Is<List<TtcWindowLinkRouteCondition>>(list => list.Count == 0), It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Fact]
+    [DisplayName("ルートが存在しない場合、そのルート条件がスキップされること")]
+    public async Task InitializeTtcWindowLinkRouteConditionsAsync_ShouldSkipConditions_WhenRouteDoesNotExist()
+    {
+        // Arrange
+        var csvRecords = new List<TtcWindowLinkCsv>
+        {
+            new()
+            {
+                Source = "Window1",
+                Target = "Window2",
+                Type = TtcWindowLinkType.Up,
+                IsEmptySending = true,
+                TrackCircuitCondition = null,
+                RouteConditions = ["Route1", "NonExistentRoute"]
+            }
+        };
+
+        var existingLink = new TtcWindowLink
+        {
+            Id = 1,
+            SourceTtcWindowName = "Window1",
+            TargetTtcWindowName = "Window2",
+            Type = TtcWindowLinkType.Up,
+            IsEmptySending = true
+        };
+
+        var routeIdByName = new Dictionary<string, ulong>
+        {
+            { "Route1", 100 }
+        };
+
+        _ttcWindowLinkRepositoryMock.Setup(r => r.GetAllTtcWindowLink())
+            .ReturnsAsync([existingLink]);
+        _ttcWindowLinkRepositoryMock.Setup(r => r.GetAllTtcWindowLinkRouteConditions())
+            .ReturnsAsync([]);
+        _routeRepositoryMock.Setup(r => r.GetIdsByName(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(routeIdByName);
+
+        var initializer = new TtcDbInitializer(
+            _loggerMock.Object,
+            _windowCsvLoaderMock.Object,
+            _windowLinkCsvLoaderMock.Object,
+            _ttcWindowRepositoryMock.Object,
+            _ttcWindowLinkRepositoryMock.Object,
+            _trackCircuitRepositoryMock.Object,
+            _routeRepositoryMock.Object,
+            _generalRepositoryMock.Object);
+
+        // Act
+        await initializer.InitializeTtcWindowLinkRouteConditionsAsync(csvRecords, TestContext.Current.CancellationToken);
+
+        // Assert
+        _generalRepositoryMock.Verify(
+            r => r.AddAll(It.Is<List<TtcWindowLinkRouteCondition>>(list =>
+                list.Count == 1 &&
+                list[0].RouteId == 100
+            ), It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -269,6 +495,10 @@ public class TtcDbInitializerTest
             .ReturnsAsync([]);
         _ttcWindowLinkRepositoryMock.Setup(r => r.GetAllLinkPairsAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(new HashSet<(string, string)>());
+        _ttcWindowLinkRepositoryMock.Setup(r => r.GetAllTtcWindowLink())
+            .ReturnsAsync([]);
+        _ttcWindowLinkRepositoryMock.Setup(r => r.GetAllTtcWindowLinkRouteConditions())
+            .ReturnsAsync([]);
         _trackCircuitRepositoryMock.Setup(r => r.GetAllIdsForName(It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Dictionary<string, ulong>());
         _routeRepositoryMock.Setup(r => r.GetIdsByName(It.IsAny<CancellationToken>()))
