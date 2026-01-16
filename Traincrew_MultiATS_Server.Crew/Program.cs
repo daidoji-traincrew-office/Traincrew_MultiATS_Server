@@ -59,6 +59,8 @@ using Traincrew_MultiATS_Server.Repositories.TrainType;
 using Traincrew_MultiATS_Server.Repositories.Transaction;
 using Traincrew_MultiATS_Server.Repositories.TtcWindow;
 using Traincrew_MultiATS_Server.Repositories.TtcWindowLink;
+using Traincrew_MultiATS_Server.Repositories.TtcWindowLinkRouteCondition;
+using Traincrew_MultiATS_Server.Repositories.TtcWindowTrackCircuit;
 using Traincrew_MultiATS_Server.Repositories.UserDisconnection;
 using Traincrew_MultiATS_Server.Scheduler;
 using Traincrew_MultiATS_Server.Services;
@@ -541,6 +543,8 @@ public class Program
             .AddScoped<ITrainSignalStateRepository, TrainSignalStateRepository>()
             .AddScoped<ITtcWindowRepository, TtcWindowRepository>()
             .AddScoped<ITtcWindowLinkRepository, TtcWindowLinkRepository>()
+            .AddScoped<ITtcWindowTrackCircuitRepository, TtcWindowTrackCircuitRepository>()
+            .AddScoped<ITtcWindowLinkRouteConditionRepository, TtcWindowLinkRouteConditionRepository>()
             .AddScoped<ITransactionRepository, TransactionRepository>()
             .AddScoped<IUserDisconnectionRepository, UserDisconnectionRepository>()
             .AddScoped<BannedUserService>()
