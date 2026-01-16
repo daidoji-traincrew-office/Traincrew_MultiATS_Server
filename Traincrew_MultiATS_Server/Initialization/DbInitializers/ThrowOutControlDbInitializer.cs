@@ -19,7 +19,7 @@ public class ThrowOutControlDbInitializer(
     IDirectionSelfControlLeverRepository directionSelfControlLeverRepository,
     IThrowOutControlRepository throwOutControlRepository,
     IGeneralRepository generalRepository)
-    : BaseDbInitializer(logger)
+    : BaseDbInitializer
 {
     /// <summary>
     ///     Initialize throw out controls from CSV file (総括制御ペア一覧.csv)
@@ -41,7 +41,7 @@ public class ThrowOutControlDbInitializer(
             // 総括制御元の進路を取得
             if (!routesByName.TryGetValue(record.SourceLever, out var sourceRoute))
             {
-                _logger.LogWarning("総括制御元が見つかりません。処理をスキップします。: {SourceLever}", record.SourceLever);
+                logger.LogWarning("総括制御元が見つかりません。処理をスキップします。: {SourceLever}", record.SourceLever);
                 continue;
             }
 
@@ -125,6 +125,6 @@ public class ThrowOutControlDbInitializer(
 
         // Add throw out controls
         await generalRepository.AddAll(throwOutControlsToAdd, cancellationToken);
-        _logger.LogInformation("Initialized {Count} throw out controls", throwOutControlsToAdd.Count);
+        logger.LogInformation("Initialized {Count} throw out controls", throwOutControlsToAdd.Count);
     }
 }

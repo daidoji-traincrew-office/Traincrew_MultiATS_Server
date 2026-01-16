@@ -17,7 +17,7 @@ public class RouteLockTrackCircuitDbInitializer(
     ITrackCircuitRepository trackCircuitRepository,
     IRouteLockTrackCircuitRepository routeLockTrackCircuitRepository,
     IGeneralRepository generalRepository)
-    : BaseDbInitializer(logger)
+    : BaseDbInitializer
 {
     /// <summary>
     ///     Initialize route lock track circuits from CSV file (進路.csv)
@@ -64,6 +64,6 @@ public class RouteLockTrackCircuitDbInitializer(
         }
 
         await generalRepository.AddAll(routeLockTrackCircuitList, cancellationToken);
-        _logger.LogInformation("Initialized {Count} route lock track circuits", routeLockTrackCircuitList.Count);
+        logger.LogInformation("Initialized {Count} route lock track circuits", routeLockTrackCircuitList.Count);
     }
 }

@@ -18,7 +18,7 @@ public class OperationNotificationDisplayDbInitializer(
     ITrackCircuitRepository trackCircuitRepository,
     OperationNotificationDisplayCsvLoader csvLoader,
     IGeneralRepository generalRepository)
-    : BaseDbInitializer(logger)
+    : BaseDbInitializer
 {
     /// <summary>
     ///     Initialize operation notification displays from CSV file (運転告知器.csv)
@@ -72,6 +72,6 @@ public class OperationNotificationDisplayDbInitializer(
 
         await generalRepository.AddAll(newDisplays, cancellationToken);
         await generalRepository.SaveAll(updatedTrackCircuits, cancellationToken);
-        _logger.LogInformation("Initialized {Count} operation notification displays", newDisplays.Count);
+        logger.LogInformation("Initialized {Count} operation notification displays", newDisplays.Count);
     }
 }

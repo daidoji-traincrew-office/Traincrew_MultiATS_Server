@@ -12,7 +12,7 @@ public partial class InterlockingObjectDbInitializer(
     ILogger<InterlockingObjectDbInitializer> logger,
     IInterlockingObjectRepository interlockingObjectRepository,
     IGeneralRepository generalRepository)
-    : BaseDbInitializer(logger)
+    : BaseDbInitializer
 {
     [GeneratedRegex(@"^(TH(\d{1,2}S?))_")]
     private static partial Regex RegexStationId();
@@ -39,6 +39,6 @@ public partial class InterlockingObjectDbInitializer(
         }
 
         await generalRepository.SaveAll(updatedObjects, cancellationToken);
-        _logger.LogInformation("Set station ID for {Count} interlocking objects", updatedObjects.Count);
+        logger.LogInformation("Set station ID for {Count} interlocking objects", updatedObjects.Count);
     }
 }

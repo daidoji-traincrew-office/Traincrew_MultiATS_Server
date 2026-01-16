@@ -23,7 +23,7 @@ public class SignalDbInitializer(
     IDirectionRouteRepository directionRouteRepository,
     IRouteRepository routeRepository,
     IGeneralRepository generalRepository)
-    : BaseDbInitializer(logger)
+    : BaseDbInitializer
 {
     /// <summary>
     ///     Initialize signals from CSV data
@@ -116,7 +116,7 @@ public class SignalDbInitializer(
         }
 
         await generalRepository.AddAll(signalList);
-        _logger.LogInformation("Initialized {Count} signals", signalList.Count);
+        logger.LogInformation("Initialized {Count} signals", signalList.Count);
     }
 
     /// <summary>
@@ -274,7 +274,7 @@ public class SignalDbInitializer(
             await generalRepository.AddAll(depthNextSignalList);
         }
 
-        _logger.LogInformation("Initialized next signals up to depth {MaxDepth}", maxDepth);
+        logger.LogInformation("Initialized next signals up to depth {MaxDepth}", maxDepth);
     }
 
     /// <summary>
@@ -312,7 +312,7 @@ public class SignalDbInitializer(
         }
 
         await generalRepository.AddAll(signalRouteList);
-        _logger.LogInformation("Initialized signal routes");
+        logger.LogInformation("Initialized signal routes");
     }
 
     public override async Task InitializeAsync(CancellationToken cancellationToken = default)

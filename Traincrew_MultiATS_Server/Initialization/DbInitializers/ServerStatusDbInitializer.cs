@@ -12,7 +12,7 @@ public class ServerStatusDbInitializer(
     ILogger<ServerStatusDbInitializer> logger,
     IServerRepository serverRepository,
     IGeneralRepository generalRepository)
-    : BaseDbInitializer(logger)
+    : BaseDbInitializer
 {
     /// <summary>
     ///     Initialize server status if not already exists
@@ -22,7 +22,7 @@ public class ServerStatusDbInitializer(
         var serverState = await serverRepository.GetServerStateAsync();
         if (serverState != null)
         {
-            _logger.LogInformation("Server status already initialized");
+            logger.LogInformation("Server status already initialized");
             return;
         }
 
@@ -31,6 +31,6 @@ public class ServerStatusDbInitializer(
             Mode = ServerMode.Off,
             TimeOffset = 0
         }, cancellationToken);
-        _logger.LogInformation("Initialized server status with mode: {Mode}, TimeOffset: {TimeOffset}", ServerMode.Off, 0);
+        logger.LogInformation("Initialized server status with mode: {Mode}, TimeOffset: {TimeOffset}", ServerMode.Off, 0);
     }
 }

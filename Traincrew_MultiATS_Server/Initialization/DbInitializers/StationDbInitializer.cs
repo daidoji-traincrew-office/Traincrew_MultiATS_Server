@@ -13,7 +13,7 @@ public class StationDbInitializer(
     IStationRepository stationRepository,
     IStationTimerStateRepository stationTimerStateRepository,
     IGeneralRepository generalRepository)
-    : BaseDbInitializer(logger)
+    : BaseDbInitializer
 {
     /// <summary>
     ///     Initialize stations from CSV data
@@ -41,7 +41,7 @@ public class StationDbInitializer(
         }
 
         await generalRepository.AddAll(stations, cancellationToken);
-        _logger.LogInformation("Initialized {Count} stations", stations.Count);
+        logger.LogInformation("Initialized {Count} stations", stations.Count);
     }
 
     /// <summary>
@@ -75,7 +75,7 @@ public class StationDbInitializer(
         }
 
         await generalRepository.AddAll(timerStates, cancellationToken);
-        _logger.LogInformation("Initialized {Count} station timer states", timerStates.Count);
+        logger.LogInformation("Initialized {Count} station timer states", timerStates.Count);
     }
 
     public override async Task InitializeAsync(CancellationToken cancellationToken = default)

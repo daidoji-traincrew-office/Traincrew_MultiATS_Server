@@ -19,7 +19,7 @@ public class SwitchingMachineRouteDbInitializer(
     ITrackCircuitRepository trackCircuitRepository,
     ILockConditionRepository lockConditionRepository,
     IGeneralRepository generalRepository)
-    : BaseDbInitializer(logger)
+    : BaseDbInitializer
 {
     /// <summary>
     ///     Initialize switching machine routes based on lock conditions
@@ -87,7 +87,7 @@ public class SwitchingMachineRouteDbInitializer(
         }
 
         await generalRepository.AddAll(switchingMachineRoutesToAdd, cancellationToken);
-        _logger.LogInformation("Initialized {Count} switching machine routes", switchingMachineRoutesToAdd.Count);
+        logger.LogInformation("Initialized {Count} switching machine routes", switchingMachineRoutesToAdd.Count);
     }
 
     public override async Task InitializeAsync(CancellationToken cancellationToken = default)

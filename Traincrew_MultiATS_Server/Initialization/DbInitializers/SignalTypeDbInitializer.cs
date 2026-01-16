@@ -11,7 +11,7 @@ public class SignalTypeDbInitializer(
     ILogger<SignalTypeDbInitializer> logger,
     ISignalTypeRepository signalTypeRepository,
     IGeneralRepository generalRepository)
-    : BaseDbInitializer(logger)
+    : BaseDbInitializer
 {
     /// <summary>
     ///     Initialize signal types from CSV data
@@ -41,7 +41,7 @@ public class SignalTypeDbInitializer(
         }
 
         await generalRepository.AddAll(signalTypes, cancellationToken);
-        _logger.LogInformation("Initialized {Count} signal types", signalTypes.Count);
+        logger.LogInformation("Initialized {Count} signal types", signalTypes.Count);
     }
 
     private static SignalIndication GetSignalIndication(string indication)

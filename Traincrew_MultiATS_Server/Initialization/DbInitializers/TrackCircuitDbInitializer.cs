@@ -16,7 +16,7 @@ public class TrackCircuitDbInitializer(
     ISignalRepository signalRepository,
     ITrackCircuitSignalRepository trackCircuitSignalRepository,
     IGeneralRepository generalRepository)
-    : BaseDbInitializer(logger)
+    : BaseDbInitializer
 {
     /// <summary>
     ///     Initialize track circuits from CSV data
@@ -54,7 +54,7 @@ public class TrackCircuitDbInitializer(
         }
 
         await generalRepository.AddAll(trackCircuits, cancellationToken);
-        _logger.LogInformation("Initialized {Count} track circuits", trackCircuits.Count);
+        logger.LogInformation("Initialized {Count} track circuits", trackCircuits.Count);
     }
 
     /// <summary>
@@ -127,7 +127,7 @@ public class TrackCircuitDbInitializer(
         }
 
         await generalRepository.AddAll(trackCircuitSignals, cancellationToken);
-        _logger.LogInformation("Initialized track circuit signals");
+        logger.LogInformation("Initialized track circuit signals");
     }
 
     public override async Task InitializeAsync(CancellationToken cancellationToken = default)

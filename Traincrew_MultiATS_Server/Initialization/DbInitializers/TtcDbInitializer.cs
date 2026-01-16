@@ -24,7 +24,7 @@ public class TtcDbInitializer(
     ITrackCircuitRepository trackCircuitRepository,
     IRouteRepository routeRepository,
     IGeneralRepository generalRepository)
-    : BaseDbInitializer(logger)
+    : BaseDbInitializer
 {
     /// <summary>
     ///     Initialize TTC windows from CSV file (TTC列番窓.csv)
@@ -80,7 +80,7 @@ public class TtcDbInitializer(
         await generalRepository.AddAll(ttcWindowsToAdd, cancellationToken);
         await generalRepository.AddAll(displayStationsToAdd, cancellationToken);
         await generalRepository.AddAll(windowTrackCircuitsToAdd, cancellationToken);
-        _logger.LogInformation("Initialized {Count} TTC windows", ttcWindowsToAdd.Count);
+        logger.LogInformation("Initialized {Count} TTC windows", ttcWindowsToAdd.Count);
     }
 
     /// <summary>
@@ -133,7 +133,7 @@ public class TtcDbInitializer(
 
         await generalRepository.AddAll(ttcWindowLinksToAdd, cancellationToken);
         await generalRepository.AddAll(linkRouteConditionsToAdd, cancellationToken);
-        _logger.LogInformation("Initialized {Count} TTC window links", ttcWindowLinksToAdd.Count);
+        logger.LogInformation("Initialized {Count} TTC window links", ttcWindowLinksToAdd.Count);
     }
 
     public override async Task InitializeAsync(CancellationToken cancellationToken = default)

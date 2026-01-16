@@ -13,7 +13,7 @@ public class TrainDbInitializer(
     ITrainTypeRepository trainTypeRepository,
     ITrainDiagramRepository trainDiagramRepository,
     IGeneralRepository generalRepository)
-    : BaseDbInitializer(logger)
+    : BaseDbInitializer
 {
     /// <summary>
     ///     Initialize train types from CSV data
@@ -39,7 +39,7 @@ public class TrainDbInitializer(
         }
 
         await generalRepository.AddAll(trainTypes, cancellationToken);
-        _logger.LogInformation("Initialized {Count} train types", trainTypes.Count);
+        logger.LogInformation("Initialized {Count} train types", trainTypes.Count);
     }
 
     /// <summary>
@@ -69,7 +69,7 @@ public class TrainDbInitializer(
         }
 
         await generalRepository.AddAll(trainDiagrams, cancellationToken);
-        _logger.LogInformation("Initialized {Count} train diagrams", trainDiagrams.Count);
+        logger.LogInformation("Initialized {Count} train diagrams", trainDiagrams.Count);
     }
 
     public override async Task InitializeAsync(CancellationToken cancellationToken = default)
