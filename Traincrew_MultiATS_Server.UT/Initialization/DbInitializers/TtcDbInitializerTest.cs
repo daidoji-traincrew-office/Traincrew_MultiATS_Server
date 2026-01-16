@@ -31,8 +31,8 @@ public class TtcDbInitializerTest
 
     public TtcDbInitializerTest()
     {
-        _windowCsvLoaderMock = new Mock<TtcWindowCsvLoader>(_windowCsvLoaderLoggerMock.Object);
-        _windowLinkCsvLoaderMock = new Mock<TtcWindowLinkCsvLoader>(_windowLinkCsvLoaderLoggerMock.Object);
+        _windowCsvLoaderMock = new(_windowCsvLoaderLoggerMock.Object);
+        _windowLinkCsvLoaderMock = new(_windowLinkCsvLoaderLoggerMock.Object);
     }
 
     [Fact]

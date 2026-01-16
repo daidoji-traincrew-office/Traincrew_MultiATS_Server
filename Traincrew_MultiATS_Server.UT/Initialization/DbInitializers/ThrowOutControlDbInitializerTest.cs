@@ -25,7 +25,7 @@ public class ThrowOutControlDbInitializerTest
 
     public ThrowOutControlDbInitializerTest()
     {
-        _csvLoaderMock = new Mock<ThrowOutControlCsvLoader>(_csvLoaderLoggerMock.Object);
+        _csvLoaderMock = new(_csvLoaderLoggerMock.Object);
     }
 
     [Fact]
@@ -46,8 +46,8 @@ public class ThrowOutControlDbInitializerTest
 
         var routesByName = new Dictionary<string, Route>
         {
-            { "Route1", new Route { Id = 1, Name = "Route1" } },
-            { "Route2", new Route { Id = 2, Name = "Route2" } }
+            { "Route1", new() { Id = 1, Name = "Route1" } },
+            { "Route2", new() { Id = 2, Name = "Route2" } }
         };
 
         _csvLoaderMock.Setup(l => l.LoadAsync(It.IsAny<CancellationToken>())).ReturnsAsync(csvRecords);
@@ -103,17 +103,17 @@ public class ThrowOutControlDbInitializerTest
 
         var routesByName = new Dictionary<string, Route>
         {
-            { "Route1", new Route { Id = 1, Name = "Route1" } }
+            { "Route1", new() { Id = 1, Name = "Route1" } }
         };
 
         var directionRoutesByName = new Dictionary<string, DirectionRoute>
         {
-            { "DirectionF", new DirectionRoute { Id = 3, Name = "DirectionF" } }
+            { "DirectionF", new() { Id = 3, Name = "DirectionF" } }
         };
 
         var directionSelfControlLeversByName = new Dictionary<string, DirectionSelfControlLever>
         {
-            { "Lever", new DirectionSelfControlLever { Id = 10, Name = "Lever" } }
+            { "Lever", new() { Id = 10, Name = "Lever" } }
         };
 
         _csvLoaderMock.Setup(l => l.LoadAsync(It.IsAny<CancellationToken>())).ReturnsAsync(csvRecords);
@@ -172,8 +172,8 @@ public class ThrowOutControlDbInitializerTest
 
         var routesByName = new Dictionary<string, Route>
         {
-            { "Route1", new Route { Id = 1, Name = "Route1" } },
-            { "Route2", new Route { Id = 2, Name = "Route2" } }
+            { "Route1", new() { Id = 1, Name = "Route1" } },
+            { "Route2", new() { Id = 2, Name = "Route2" } }
         };
 
         var existingPairs = new HashSet<(ulong, ulong)> { (1, 2) };
@@ -225,7 +225,7 @@ public class ThrowOutControlDbInitializerTest
 
         var routesByName = new Dictionary<string, Route>
         {
-            { "Route2", new Route { Id = 2, Name = "Route2" } }
+            { "Route2", new() { Id = 2, Name = "Route2" } }
         };
 
         _csvLoaderMock.Setup(l => l.LoadAsync(It.IsAny<CancellationToken>())).ReturnsAsync(csvRecords);

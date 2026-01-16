@@ -24,7 +24,7 @@ public class OperationNotificationDisplayDbInitializerTest
 
     public OperationNotificationDisplayDbInitializerTest()
     {
-        _csvLoaderMock = new Mock<OperationNotificationDisplayCsvLoader>(_csvLoaderLoggerMock.Object);
+        _csvLoaderMock = new(_csvLoaderLoggerMock.Object);
     }
 
     [Fact]
@@ -47,8 +47,8 @@ public class OperationNotificationDisplayDbInitializerTest
 
         var trackCircuits = new Dictionary<string, TrackCircuit>
         {
-            { "TC1", new TrackCircuit { Id = 100, Name = "TC1" } },
-            { "TC2", new TrackCircuit { Id = 200, Name = "TC2" } }
+            { "TC1", new() { Id = 100, Name = "TC1" } },
+            { "TC2", new() { Id = 200, Name = "TC2" } }
         };
 
         _csvLoaderMock.Setup(l => l.LoadAsync(It.IsAny<CancellationToken>())).ReturnsAsync(csvRecords);
@@ -159,8 +159,8 @@ public class OperationNotificationDisplayDbInitializerTest
 
         var trackCircuits = new Dictionary<string, TrackCircuit>
         {
-            { "TC1", new TrackCircuit { Id = 100, Name = "TC1" } },
-            { "TC2", new TrackCircuit { Id = 200, Name = "TC2" } }
+            { "TC1", new() { Id = 100, Name = "TC1" } },
+            { "TC2", new() { Id = 200, Name = "TC2" } }
         };
 
         _csvLoaderMock.Setup(l => l.LoadAsync(It.IsAny<CancellationToken>())).ReturnsAsync(csvRecords);

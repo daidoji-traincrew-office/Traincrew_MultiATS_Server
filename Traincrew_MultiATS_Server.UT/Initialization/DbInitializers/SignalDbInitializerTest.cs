@@ -307,7 +307,7 @@ public class SignalDbInitializerTest
             {
                 SignalName = "Signal1",
                 RouteId = 1,
-                Route = new Route { Id = 1, Name = "Route1" }
+                Route = new() { Id = 1, Name = "Route1" }
             }
         };
         var routeIdByName = new Dictionary<string, ulong> { { "Route1", 1 } };

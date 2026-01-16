@@ -23,7 +23,7 @@ public class RouteDbInitializerTest
 
     public RouteDbInitializerTest()
     {
-        _csvLoaderMock = new Mock<RouteLockTrackCircuitCsvLoader>(_csvLoaderLoggerMock.Object);
+        _csvLoaderMock = new(_csvLoaderLoggerMock.Object);
     }
 
     [Fact]

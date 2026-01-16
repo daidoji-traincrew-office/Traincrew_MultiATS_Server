@@ -164,13 +164,13 @@ public class TrackCircuitDbInitializerTest
 
         var trackCircuitEntities = new Dictionary<string, TrackCircuit>
         {
-            { "TC1", new TrackCircuit { Id = 100, Name = "TC1" } }
+            { "TC1", new() { Id = 100, Name = "TC1" } }
         };
 
         var signals = new Dictionary<string, Signal>
         {
-            { "Signal1", new Signal { Name = "Signal1" } },
-            { "Signal2", new Signal { Name = "Signal2" } }
+            { "Signal1", new() { Name = "Signal1" } },
+            { "Signal2", new() { Name = "Signal2" } }
         };
 
         _trackCircuitRepositoryMock
@@ -221,12 +221,12 @@ public class TrackCircuitDbInitializerTest
 
         var trackCircuitEntities = new Dictionary<string, TrackCircuit>
         {
-            { "TC1", new TrackCircuit { Id = 100, Name = "TC1" } }
+            { "TC1", new() { Id = 100, Name = "TC1" } }
         };
 
         var signals = new Dictionary<string, Signal>
         {
-            { "Signal1", new Signal { Name = "Signal1" } }
+            { "Signal1", new() { Name = "Signal1" } }
         };
 
         var existingRelations = new HashSet<(ulong, string)> { (100, "Signal1") };
@@ -277,7 +277,7 @@ public class TrackCircuitDbInitializerTest
         var trackCircuitEntities = new Dictionary<string, TrackCircuit>();
         var signals = new Dictionary<string, Signal>
         {
-            { "Signal1", new Signal { Name = "Signal1" } }
+            { "Signal1", new() { Name = "Signal1" } }
         };
 
         _trackCircuitRepositoryMock
@@ -325,7 +325,7 @@ public class TrackCircuitDbInitializerTest
 
         var trackCircuitEntities = new Dictionary<string, TrackCircuit>
         {
-            { "TC1", new TrackCircuit { Id = 100, Name = "TC1" } }
+            { "TC1", new() { Id = 100, Name = "TC1" } }
         };
 
         var signals = new Dictionary<string, Signal>();
