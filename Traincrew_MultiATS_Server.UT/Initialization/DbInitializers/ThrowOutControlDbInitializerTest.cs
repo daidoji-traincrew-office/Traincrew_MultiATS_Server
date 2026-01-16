@@ -29,7 +29,7 @@ public class ThrowOutControlDbInitializerTest
     }
 
     [Fact]
-    [DisplayName("てこタイプの出鎖制御が正常に追加されること")]
+    [DisplayName("てこタイプの総括制御が正常に追加されること")]
     public async Task InitializeAsync_ShouldAddThrowOutControls_WithLeverType()
     {
         // Arrange
@@ -86,7 +86,7 @@ public class ThrowOutControlDbInitializerTest
     }
 
     [Fact]
-    [DisplayName("方向タイプの出鎖制御が正常に追加されること")]
+    [DisplayName("方向タイプの総括制御が正常に追加されること")]
     public async Task InitializeAsync_ShouldAddThrowOutControls_DirectionType()
     {
         // Arrange
