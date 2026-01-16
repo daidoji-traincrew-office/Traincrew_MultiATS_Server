@@ -30,26 +30,18 @@ public static class DatabaseSnapshotHelper
 
     private static async Task<List<string>> GetTableNamesAsync(ApplicationDbContext context, CancellationToken cancellationToken)
     {
-        const string query = """
-            SELECT table_name
-            FROM information_schema.tables
-            WHERE table_schema = 'public'
-            AND table_type = 'BASE TABLE'
-            AND table_name NOT LIKE '__EFMigrationsHistory'
-            AND table_name NOT LIKE 'OpenIddict%'
-            ORDER BY table_name;
-            """;
-
-        var connection = context.Database.GetDbConnection();
-        await using var command = connection.CreateCommand();
-        command.CommandText = query;
-
-        var tableNames = new List<string>();
-        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
-        while (await reader.ReadAsync(cancellationToken))
-        {
-            tableNames.Add(reader.GetString(0));
-        }
+        var tableNames = await context.Database
+            .SqlQuery<string>(
+                $"""
+                SELECT table_name
+                FROM information_schema.tables
+                WHERE table_schema = 'public'
+                AND table_type = 'BASE TABLE'
+                AND table_name NOT LIKE '__EFMigrationsHistory'
+                AND table_name NOT LIKE 'OpenIddict%'
+                ORDER BY table_name
+                """)
+            .ToListAsync(cancellationToken);
 
         return tableNames;
     }
@@ -68,46 +60,41 @@ public static class DatabaseSnapshotHelper
 
     private static async Task<int> GetRowCountAsync(ApplicationDbContext context, string tableName, CancellationToken cancellationToken)
     {
-        var connection = context.Database.GetDbConnection();
-        await using var command = connection.CreateCommand();
-        command.CommandText = $"SELECT COUNT(*) FROM \"{tableName}\"";
+        // Note: tableName is passed as a parameter through FormattableString interpolation, preventing SQL injection
+        FormattableString query = $"SELECT COUNT(*) FROM \"{tableName}\"";
+        var result = await context.Database
+            .SqlQuery<long>(query)
+            .FirstAsync(cancellationToken);
 
-        var result = await command.ExecuteScalarAsync(cancellationToken);
         return Convert.ToInt32(result);
     }
 
     private static async Task<string> GetTableSchemaAsync(ApplicationDbContext context, string tableName, CancellationToken cancellationToken)
     {
-        const string query = """
-            SELECT column_name, data_type, is_nullable, column_default
-            FROM information_schema.columns
-            WHERE table_schema = 'public' AND table_name = @tableName
-            ORDER BY ordinal_position;
-            """;
-
-        var connection = context.Database.GetDbConnection();
-        await using var command = connection.CreateCommand();
-        command.CommandText = query;
-
-        var parameter = command.CreateParameter();
-        parameter.ParameterName = "@tableName";
-        parameter.Value = tableName;
-        command.Parameters.Add(parameter);
+        // Note: tableName is passed as a parameter through FormattableString interpolation, preventing SQL injection
+        var columns = await context.Database
+            .SqlQuery<ColumnInfo>(
+                $"""
+                SELECT column_name AS "ColumnName",
+                       data_type AS "DataType",
+                       is_nullable AS "IsNullable",
+                       column_default AS "ColumnDefault"
+                FROM information_schema.columns
+                WHERE table_schema = 'public' AND table_name = {tableName}
+                ORDER BY ordinal_position
+                """)
+            .ToListAsync(cancellationToken);
 
         var schema = new StringBuilder();
-        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
-        while (await reader.ReadAsync(cancellationToken))
+        foreach (var column in columns)
         {
-            var columnName = reader.GetString(0);
-            var dataType = reader.GetString(1);
-            var isNullable = reader.GetString(2);
-            var columnDefault = reader.IsDBNull(3) ? null : reader.GetString(3);
-
-            schema.AppendLine($"{columnName}|{dataType}|{isNullable}|{columnDefault}");
+            schema.AppendLine($"{column.ColumnName}|{column.DataType}|{column.IsNullable}|{column.ColumnDefault}");
         }
 
         return schema.ToString();
     }
+
+    private record ColumnInfo(string ColumnName, string DataType, string IsNullable, string? ColumnDefault);
 
     /// <summary>
     /// Serializes a snapshot to a JSON-like format for comparison
