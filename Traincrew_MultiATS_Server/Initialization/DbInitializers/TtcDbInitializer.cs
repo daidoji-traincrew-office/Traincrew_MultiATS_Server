@@ -5,8 +5,6 @@ using Traincrew_MultiATS_Server.Repositories.Route;
 using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
 using Traincrew_MultiATS_Server.Repositories.TtcWindow;
 using Traincrew_MultiATS_Server.Repositories.TtcWindowLink;
-using Traincrew_MultiATS_Server.Repositories.TtcWindowLinkRouteCondition;
-using Traincrew_MultiATS_Server.Repositories.TtcWindowTrackCircuit;
 
 namespace Traincrew_MultiATS_Server.Initialization.DbInitializers;
 
@@ -18,9 +16,7 @@ public class TtcDbInitializer(
     TtcWindowCsvLoader windowCsvLoader,
     TtcWindowLinkCsvLoader windowLinkCsvLoader,
     ITtcWindowRepository ttcWindowRepository,
-    ITtcWindowTrackCircuitRepository ttcWindowTrackCircuitRepository,
     ITtcWindowLinkRepository ttcWindowLinkRepository,
-    ITtcWindowLinkRouteConditionRepository ttcWindowLinkRouteConditionRepository,
     ITrackCircuitRepository trackCircuitRepository,
     IRouteRepository routeRepository,
     IGeneralRepository generalRepository)
