@@ -153,7 +153,7 @@ public class TtcDbInitializer(
                 linkRouteConditionsToAdd.Add(new()
                 {
                     RouteId = routeId,
-                    TtcWindowLink = ttcWindowLink
+                    TtcWindowLinkId = ttcWindowLink.Id
                 });
             }
         }
