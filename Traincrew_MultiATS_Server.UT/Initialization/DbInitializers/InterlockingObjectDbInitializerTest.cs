@@ -22,8 +22,8 @@ public class InterlockingObjectDbInitializerTest
         var interlockingObjects = new List<InterlockingObject>
         {
             new Route { Id = 1, Name = "TH65_Route1", StationId = null },
-            new Route { Id = 2, Name = "TH6S_Route2", StationId = null },
-            new Route { Id = 3, Name = "TH123_Route3", StationId = null }
+            new Route { Id = 2, Name = "TH66S_Route2", StationId = null },
+            new Route { Id = 3, Name = "TH12_Route3", StationId = null }
         };
 
         _interlockingObjectRepositoryMock.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
@@ -40,9 +40,10 @@ public class InterlockingObjectDbInitializerTest
         // Assert
         _generalRepositoryMock.Verify(
             r => r.SaveAll(It.Is<IEnumerable<InterlockingObject>>(list =>
-                list.Count() == 2 &&
+                list.Count() == 3 &&
                 list.ElementAt(0).StationId == "TH65" &&
-                list.ElementAt(1).StationId == "TH6S"
+                list.ElementAt(1).StationId == "TH6S" &&
+                list.ElementAt(2).StationId == "TH12"
             ), It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -105,10 +106,10 @@ public class InterlockingObjectDbInitializerTest
 
     [Theory]
     [InlineData("TH65_Signal", "TH65")]
-    [InlineData("TH6S_Route", "TH6S")]
-    [InlineData("TH1_Test", "TH1")]
-    [InlineData("TH99_Object", "TH99")]
-    [InlineData("TH12S_Item", "TH12S")]
+    [InlineData("TH55S_Route", "TH55S")]
+    [InlineData("TH01_Test", "TH01")]
+    [InlineData("TH76_Object", "TH76")]
+    [InlineData("TH02S_Item", "TH02S")]
     [DisplayName("オブジェクト名から正しく駅IDが抽出されること")]
     public async Task InitializeAsync_ShouldExtractCorrectStationId(string objectName, string expectedStationId)
     {
