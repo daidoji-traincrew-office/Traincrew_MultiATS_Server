@@ -42,7 +42,7 @@ public class InterlockingObjectDbInitializerTest
             r => r.SaveAll(It.Is<IEnumerable<InterlockingObject>>(list =>
                 list.Count() == 3 &&
                 list.ElementAt(0).StationId == "TH65" &&
-                list.ElementAt(1).StationId == "TH6S" &&
+                list.ElementAt(1).StationId == "TH66S" &&
                 list.ElementAt(2).StationId == "TH12"
             ), It.IsAny<CancellationToken>()),
             Times.Once);
