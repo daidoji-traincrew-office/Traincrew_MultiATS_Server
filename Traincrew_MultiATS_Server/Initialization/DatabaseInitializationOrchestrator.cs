@@ -52,7 +52,7 @@ public class DatabaseInitializationOrchestrator(
     public async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Starting database initialization");
-
+        await using var transaction = await transactionRepository.BeginTransactionAsync(cancellationToken);
         // Phase 1: StationCsvLoader - 駅一覧の読み込み
         var stationList = await stationCsvLoader.LoadAsync(cancellationToken);
 
@@ -119,25 +119,24 @@ public class DatabaseInitializationOrchestrator(
 
         DetachUnchangedEntities();
 
-        await using(var transaction = await transactionRepository.BeginTransactionAsync(cancellationToken)){
-            // 常に最新化するため、既存のデータを削除する
-            logger.LogInformation("Deleting existing lock-related data");
-            await switchingMachineRouteRepository.DeleteAll();
-            await lockConditionRepository.DeleteAll();
-            await lockRepository.DeleteAll();
-            await lockConditionByRouteCentralControlLeverRepository.DeleteAll();
-            logger.LogInformation("Existing lock-related data deleted");
+        // 常に最新化するため、既存のデータを削除する
+        logger.LogInformation("Deleting existing lock-related data");
+        await switchingMachineRouteRepository.DeleteAll();
+        await lockConditionRepository.DeleteAll();
+        await lockRepository.DeleteAll();
+        await lockConditionByRouteCentralControlLeverRepository.DeleteAll();
+        logger.LogInformation("Existing lock-related data deleted");
 
-            // Phase 24: DbRendoTableInitializer - 鎖錠の初期化（駅ごと）
-            foreach (var initializer in rendoTableInitializers)
-            {
-                await initializer.InitializeLocks();
-            }
-             // Phase 25: Finalize - 初期化の完了処理
-            DetachUnchangedEntities();
-            await FinalizeInitializationAsync(cancellationToken);
-            await transaction.CommitAsync(cancellationToken);
+        // Phase 24: DbRendoTableInitializer - 鎖錠の初期化（駅ごと）
+        foreach (var initializer in rendoTableInitializers)
+        {
+            await initializer.InitializeLocks();
         }
+
+        // Phase 25: Finalize - 初期化の完了処理
+        DetachUnchangedEntities();
+        await FinalizeInitializationAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
 
         logger.LogInformation("Database initialization completed");
     }
