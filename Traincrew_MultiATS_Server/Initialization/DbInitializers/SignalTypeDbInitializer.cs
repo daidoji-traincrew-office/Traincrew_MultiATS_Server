@@ -24,6 +24,7 @@ public class SignalTypeDbInitializer(
         var signalTypes = new List<SignalType>();
         foreach (var signalTypeData in signalTypeList)
         {
+            // すでにあるならスキップ
             if (signalTypeNames.Contains(signalTypeData.Name))
             {
                 continue;

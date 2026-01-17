@@ -31,6 +31,6 @@ public class ServerStatusDbInitializer(
             Mode = ServerMode.Off,
             TimeOffset = 0
         }, cancellationToken);
-        logger.LogInformation("Initialized server status with mode: {Mode}, TimeOffset: {TimeOffset}", ServerMode.Off, 0);
+        logger.LogInformation("Initialized server status");
     }
 }

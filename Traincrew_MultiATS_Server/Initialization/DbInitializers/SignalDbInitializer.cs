@@ -32,6 +32,7 @@ public class SignalDbInitializer(
         CancellationToken cancellationToken = default)
     {
         // 軌道回路情報を取得
+        // Todo: GetAllIdForNameにメソッド名変える
         var trackCircuits = await trackCircuitRepository.GetAllIdsForName(cancellationToken);
 
         // 既に登録済みの信号情報を取得
@@ -303,8 +304,8 @@ public class SignalDbInitializer(
                     continue;
                 }
 
+                // Todo: 例外を出す
                 if (!routes.TryGetValue(routeName, out var routeId))
-                    // Todo: 例外を出す
                 {
                     continue;
                 }

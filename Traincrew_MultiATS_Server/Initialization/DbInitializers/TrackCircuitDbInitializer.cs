@@ -80,6 +80,7 @@ public class TrackCircuitDbInitializer(
         var trackCircuitSignals = new List<TrackCircuitSignal>();
         foreach (var trackCircuit in trackCircuitList)
         {
+            // Todo: エラーを出す
             if (!trackCircuitEntities.TryGetValue(trackCircuit.Name, out var trackCircuitEntity))
             {
                 continue;
@@ -87,6 +88,7 @@ public class TrackCircuitDbInitializer(
 
             foreach (var signalName in trackCircuit.NextSignalNamesUp)
             {
+                // Todo: エラーを出す   
                 if (!signals.TryGetValue(signalName, out var signal))
                 {
                     continue;
@@ -107,6 +109,7 @@ public class TrackCircuitDbInitializer(
 
             foreach (var signalName in trackCircuit.NextSignalNamesDown)
             {
+                // Todo: エラーを出す
                 if (!signals.TryGetValue(signalName, out var signal))
                 {
                     continue;

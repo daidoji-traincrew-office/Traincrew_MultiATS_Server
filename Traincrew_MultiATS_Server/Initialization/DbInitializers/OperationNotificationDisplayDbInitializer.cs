@@ -38,6 +38,7 @@ public class OperationNotificationDisplayDbInitializer(
         foreach (var record in records)
         {
             var name = record.Name;
+            // 登録済みの場合、スキップ
             if (operationNotificationDisplayNames.Contains(name))
             {
                 continue;
@@ -60,6 +61,7 @@ public class OperationNotificationDisplayDbInitializer(
 
             foreach (var trackCircuitName in record.TrackCircuitNames)
             {
+                // Todo: 該当軌道回路がない場合、エラーを出す
                 if (!trackCircuits.TryGetValue(trackCircuitName, out var trackCircuit))
                 {
                     continue;

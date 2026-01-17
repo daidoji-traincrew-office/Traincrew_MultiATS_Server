@@ -122,6 +122,7 @@ public class TtcDbInitializer(
             link => (link.SourceTtcWindowName, link.TargetTtcWindowName),
             link => link
         );
+        // Todo: メソッド名変更(AllIdForNameにする)
         var routeIdByName = await routeRepository.GetIdsByName(cancellationToken);
 
         var existingConditions = await ttcWindowLinkRepository.GetAllTtcWindowLinkRouteConditions();
@@ -133,6 +134,7 @@ public class TtcDbInitializer(
 
         foreach (var record in records)
         {
+            // Todo: 存在しない場合エラー 
             if (!linksByPair.TryGetValue((record.Source, record.Target), out var ttcWindowLink))
             {
                 continue;
@@ -140,6 +142,7 @@ public class TtcDbInitializer(
 
             foreach (var routeCondition in record.RouteConditions)
             {
+                // Todo: 存在しない場合エラー 
                 if (!routeIdByName.TryGetValue(routeCondition, out var routeId))
                 {
                     continue;
