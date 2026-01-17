@@ -92,12 +92,13 @@ public class RendoService(
             // 関連する進路のてこ反応リレーがすべて落下しているかチェック
             var allRelatedRoutesAreDrop = relatedLockConditions
                 .All(lc => routeById.TryGetValue(lc.RouteId, out var route)
-                        && route.RouteState.IsLeverRelayRaised == RaiseDrop.Drop);
+                           && route.RouteState.IsLeverRelayRaised == RaiseDrop.Drop);
 
             if (!allRelatedRoutesAreDrop)
             {
                 continue;
             }
+
             lever.RouteCentralControlLeverState.IsChrRelayRaised = RaiseDrop.Raise;
             await generalRepository.Save(lever.RouteCentralControlLeverState);
         }
@@ -1763,7 +1764,7 @@ public class RendoService(
                 && switchingMachine.SwitchingMachineState.IsReverse == o.IsReverse,
             // 接近鎖錠と進路鎖錠リレー扛上かどうか
             Route route => route.RouteState is
-            { IsApproachLockMRRaised: RaiseDrop.Raise, IsRouteLockRaised: RaiseDrop.Raise },
+                { IsApproachLockMRRaised: RaiseDrop.Raise, IsRouteLockRaised: RaiseDrop.Raise },
             // 軌道回路が短絡していないこと
             TrackCircuit trackCircuit => !trackCircuit.TrackCircuitState.IsShortCircuit,
             DirectionRoute directionRoute => o.IsLR == LR.Left
@@ -1795,7 +1796,7 @@ public class RendoService(
             SwitchingMachine switchingMachine => switchingMachine.SwitchingMachineState.IsReverse == o.IsReverse,
             // 接近鎖錠と進路鎖錠リレー扛上かどうか
             Route route => route.RouteState is
-            { IsApproachLockMRRaised: RaiseDrop.Raise, IsRouteLockRaised: RaiseDrop.Raise },
+                { IsApproachLockMRRaised: RaiseDrop.Raise, IsRouteLockRaised: RaiseDrop.Raise },
             // 軌道回路が短絡していないこと
             TrackCircuit trackCircuit => !trackCircuit.TrackCircuitState.IsShortCircuit,
             DirectionRoute directionRoute => o.IsLR == LR.Left
@@ -1952,16 +1953,16 @@ public class RendoService(
                 return childLockConditions[lockCondition.Id].Any(childLockCondition =>
                     EvaluateLockCondition(childLockCondition, childLockConditions, interlockingObjects, predicate));
             case LockConditionType.Not:
+            {
+                var childLockCondition = childLockConditions[lockCondition.Id];
+                if (childLockCondition.Count != 1)
                 {
-                    var childLockCondition = childLockConditions[lockCondition.Id];
-                    if (childLockCondition.Count != 1)
-                    {
-                        throw new InvalidOperationException("Not条件は1つの条件に対してのみ適用される必要があります。");
-                    }
-
-                    return !EvaluateLockCondition(
-                        childLockCondition.First(), childLockConditions, interlockingObjects, predicate);
+                    throw new InvalidOperationException("Not条件は1つの条件に対してのみ適用される必要があります。");
                 }
+
+                return !EvaluateLockCondition(
+                    childLockCondition.First(), childLockConditions, interlockingObjects, predicate);
+            }
         }
 
         if (lockCondition is not LockConditionObject lockConditionObject)
