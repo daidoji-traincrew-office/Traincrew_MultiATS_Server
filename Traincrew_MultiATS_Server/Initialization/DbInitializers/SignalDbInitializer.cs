@@ -303,10 +303,9 @@ public class SignalDbInitializer(
                     continue;
                 }
 
-                // Todo: エラーを出す
                 if (!routes.TryGetValue(routeName, out var routeId))
                 {
-                    continue;
+                    throw new InvalidOperationException($"進路 '{routeName}' が見つかりません。信号機 '{signal.Name}' の信号進路の初期化に失敗しました。");
                 }
 
                 signalRouteList.Add(new()
