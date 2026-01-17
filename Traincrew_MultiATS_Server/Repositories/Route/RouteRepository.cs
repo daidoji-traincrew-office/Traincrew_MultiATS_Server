@@ -215,4 +215,27 @@ public class RouteRepository(ApplicationDbContext context) : IRouteRepository
             .Select(r => r.Id)
             .ToListAsync();
     }
+
+    /// <summary>
+    /// 進路名から進路IDへのマッピングを取得する
+    /// </summary>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    /// <returns>進路名をキー、進路IDを値とする辞書</returns>
+    public async Task<Dictionary<string, ulong>> GetAllIdForName(CancellationToken cancellationToken = default)
+    {
+        return await context.Routes
+            .Select(r => new { r.Name, r.Id })
+            .ToDictionaryAsync(r => r.Name, r => r.Id, cancellationToken);
+    }
+
+    /// <summary>
+    /// 進路名から進路エンティティへのマッピングを取得する
+    /// </summary>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    /// <returns>進路名をキー、進路エンティティを値とする辞書</returns>
+    public async Task<Dictionary<string, Models.Route>> GetByNames(CancellationToken cancellationToken = default)
+    {
+        return await context.Routes
+            .ToDictionaryAsync(r => r.Name, cancellationToken);
+    }
 }

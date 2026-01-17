@@ -14,4 +14,17 @@ public interface ISignalRouteRepository
     /// </summary>
     /// <returns>信号機名をキーとし、進路のリストを値とする辞書</returns>
     Task<Dictionary<string, List<Models.Route>>> GetAllRoutes();
+
+    /// <summary>
+    /// 全てのSignalRouteをRouteと共に取得する
+    /// </summary>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    /// <returns>SignalRouteのリスト</returns>
+    Task<List<Models.SignalRoute>> GetAllWithRoutesAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 変更を保存する
+    /// </summary>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    Task SaveChangesAsync(CancellationToken cancellationToken = default);
 }

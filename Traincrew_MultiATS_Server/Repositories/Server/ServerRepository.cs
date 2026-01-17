@@ -39,4 +39,10 @@ public class ServerRepository(ApplicationDbContext context) : IServerRepository
                 .SetProperty(serverState => serverState.TimeOffset, timeOffset)
             );
     }
+
+    public async Task AddServerStateAsync(ServerState serverState, CancellationToken cancellationToken = default)
+    {
+        context.ServerStates.Add(serverState);
+        await context.SaveChangesAsync(cancellationToken);
+    }
 }

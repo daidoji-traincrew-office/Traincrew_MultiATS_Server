@@ -119,4 +119,20 @@ public class SignalRepository(ApplicationDbContext context) : ISignalRepository
             })
             .ToListAsync();
     }
+
+    public async Task<Dictionary<string, Models.Signal>> GetSignalsByNamesAsync(
+        HashSet<string> signalNames, CancellationToken cancellationToken = default)
+    {
+        return await context.Signals
+            .Where(s => signalNames.Contains(s.Name))
+            .ToDictionaryAsync(s => s.Name, cancellationToken);
+    }
+
+    public async Task<HashSet<string>> GetAllNames(CancellationToken cancellationToken = default)
+    {
+        var names = await context.Signals
+            .Select(s => s.Name)
+            .ToListAsync(cancellationToken);
+        return names.ToHashSet();
+    }
 }

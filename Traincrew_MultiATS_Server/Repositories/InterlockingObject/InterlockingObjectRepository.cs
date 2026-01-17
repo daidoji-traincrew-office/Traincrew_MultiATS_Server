@@ -58,4 +58,14 @@ public class InterlockingObjectRepository(ApplicationDbContext context) : IInter
             .Include(obj => ((Models.RouteCentralControlLever)obj).RouteCentralControlLeverState)
             .ToListAsync();
     }
+
+    public async Task<List<Models.InterlockingObject>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        return await context.InterlockingObjects.ToListAsync(cancellationToken);
+    }
+
+    public void Update(Models.InterlockingObject interlockingObject)
+    {
+        context.InterlockingObjects.Update(interlockingObject);
+    }
 }

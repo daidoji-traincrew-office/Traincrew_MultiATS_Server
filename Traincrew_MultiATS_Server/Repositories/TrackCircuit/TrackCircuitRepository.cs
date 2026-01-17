@@ -123,4 +123,43 @@ public class TrackCircuitRepository(ApplicationDbContext context) : ITrackCircui
                 x => x.Select(y => y.tc).First()
             );
     }
+
+    public async Task<List<string>> GetAllNames(CancellationToken cancellationToken = default)
+    {
+        return await context.TrackCircuits
+            .Select(tc => tc.Name)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<Dictionary<string, Models.TrackCircuit>> GetTrackCircuitsByNamesAsync(
+        HashSet<string> trackCircuitNames, CancellationToken cancellationToken = default)
+    {
+        return await context.TrackCircuits
+            .Where(tc => trackCircuitNames.Contains(tc.Name))
+            .ToDictionaryAsync(tc => tc.Name, cancellationToken);
+    }
+
+    public async Task<Dictionary<string, ulong>> GetAllIdForName(CancellationToken cancellationToken = default)
+    {
+        return await context.TrackCircuits
+            .Select(tc => new { tc.Name, tc.Id })
+            .ToDictionaryAsync(tc => tc.Name, tc => tc.Id, cancellationToken);
+    }
+
+    public async Task<Dictionary<string, Models.TrackCircuit>> GetByNames(List<string> trackCircuitNames, CancellationToken cancellationToken = default)
+    {
+        return await context.TrackCircuits
+            .Where(tc => trackCircuitNames.Contains(tc.Name))
+            .ToDictionaryAsync(tc => tc.Name, cancellationToken);
+    }
+
+    public void Update(Models.TrackCircuit trackCircuit)
+    {
+        context.TrackCircuits.Update(trackCircuit);
+    }
+
+    public void Detach(Models.TrackCircuit trackCircuit)
+    {
+        context.Entry(trackCircuit).State = EntityState.Detached;
+    }
 }

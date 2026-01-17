@@ -17,6 +17,9 @@ using Traincrew_MultiATS_Server.Authentication;
 using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.HostedService;
 using Traincrew_MultiATS_Server.Hubs;
+using Traincrew_MultiATS_Server.Initialization;
+using Traincrew_MultiATS_Server.Initialization.CsvLoaders;
+using Traincrew_MultiATS_Server.Initialization.DbInitializers;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.DestinationButton;
 using Traincrew_MultiATS_Server.Repositories.DirectionRoute;
@@ -32,6 +35,7 @@ using Traincrew_MultiATS_Server.Repositories.Mutex;
 using Traincrew_MultiATS_Server.Repositories.NextSignal;
 using Traincrew_MultiATS_Server.Repositories.OperationInformation;
 using Traincrew_MultiATS_Server.Repositories.OperationNotification;
+using Traincrew_MultiATS_Server.Repositories.OperationNotificationDisplay;
 using Traincrew_MultiATS_Server.Repositories.Protection;
 using Traincrew_MultiATS_Server.Repositories.Route;
 using Traincrew_MultiATS_Server.Repositories.RouteCentralControlLever;
@@ -40,18 +44,23 @@ using Traincrew_MultiATS_Server.Repositories.RouteLockTrackCircuit;
 using Traincrew_MultiATS_Server.Repositories.Server;
 using Traincrew_MultiATS_Server.Repositories.Signal;
 using Traincrew_MultiATS_Server.Repositories.SignalRoute;
+using Traincrew_MultiATS_Server.Repositories.SignalType;
 using Traincrew_MultiATS_Server.Repositories.Station;
 using Traincrew_MultiATS_Server.Repositories.SwitchingMachine;
 using Traincrew_MultiATS_Server.Repositories.SwitchingMachineRoute;
 using Traincrew_MultiATS_Server.Repositories.ThrowOutControl;
 using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
+using Traincrew_MultiATS_Server.Repositories.TrackCircuitSignal;
 using Traincrew_MultiATS_Server.Repositories.Train;
 using Traincrew_MultiATS_Server.Repositories.TrainCar;
 using Traincrew_MultiATS_Server.Repositories.TrainDiagram;
 using Traincrew_MultiATS_Server.Repositories.TrainSignalState;
+using Traincrew_MultiATS_Server.Repositories.TrainType;
 using Traincrew_MultiATS_Server.Repositories.Transaction;
 using Traincrew_MultiATS_Server.Repositories.TtcWindow;
 using Traincrew_MultiATS_Server.Repositories.TtcWindowLink;
+using Traincrew_MultiATS_Server.Repositories.TtcWindowLinkRouteCondition;
+using Traincrew_MultiATS_Server.Repositories.TtcWindowTrackCircuit;
 using Traincrew_MultiATS_Server.Repositories.UserDisconnection;
 using Traincrew_MultiATS_Server.Scheduler;
 using Traincrew_MultiATS_Server.Services;
@@ -469,6 +478,34 @@ public class Program
     {
         // DI周り
         builder.Services
+            // CSV Loaders
+            .AddScoped<StationCsvLoader>()
+            .AddScoped<TrackCircuitCsvLoader>()
+            .AddScoped<SignalTypeCsvLoader>()
+            .AddScoped<TrainTypeCsvLoader>()
+            .AddScoped<TrainDiagramCsvLoader>()
+            .AddScoped<RendoTableCsvLoader>()
+            .AddScoped<OperationNotificationDisplayCsvLoader>()
+            .AddScoped<RouteLockTrackCircuitCsvLoader>()
+            .AddScoped<TtcWindowCsvLoader>()
+            .AddScoped<TtcWindowLinkCsvLoader>()
+            .AddScoped<ThrowOutControlCsvLoader>()
+            .AddScoped<SignalCsvLoader>()
+            // DB Initializers
+            .AddScoped<StationDbInitializer>()
+            .AddScoped<TrackCircuitDbInitializer>()
+            .AddScoped<SignalTypeDbInitializer>()
+            .AddScoped<TrainDbInitializer>()
+            .AddScoped<OperationNotificationDisplayDbInitializer>()
+            .AddScoped<RouteLockTrackCircuitDbInitializer>()
+            .AddScoped<ServerStatusDbInitializer>()
+            .AddScoped<TtcDbInitializer>()
+            .AddScoped<ThrowOutControlDbInitializer>()
+            .AddScoped<SignalDbInitializer>()
+            .AddScoped<InterlockingObjectDbInitializer>()
+            .AddScoped<SwitchingMachineRouteDbInitializer>()
+            // Orchestrator
+            .AddScoped<DatabaseInitializationOrchestrator>()
             .AddScoped<IDateTimeRepository, DateTimeRepository>()
             .AddScoped<IDestinationButtonRepository, DestinationButtonRepository>()
             .AddScoped<IDirectionRouteRepository, DirectionRouteRepository>()
@@ -481,6 +518,7 @@ public class Program
             .AddScoped<ILeverRepository, LeverRepository>()
             .AddScoped<INextSignalRepository, NextSignalRepository>()
             .AddScoped<IOperationNotificationRepository, OperationNotificationRepository>()
+            .AddScoped<IOperationNotificationDisplayRepository, OperationNotificationDisplayRepository>()
             .AddScoped<IOperationInformationRepository, OperationInformationRepository>()
             .AddScoped<IProtectionRepository, ProtectionRepository>()
             .AddScoped<IRouteRepository, RouteRepository>()
@@ -490,17 +528,23 @@ public class Program
             .AddScoped<IServerRepository, ServerRepository>()
             .AddScoped<ISignalRepository, SignalRepository>()
             .AddScoped<ISignalRouteRepository, SignalRouteRepository>()
+            .AddScoped<ISignalTypeRepository, SignalTypeRepository>()
             .AddScoped<IStationRepository, StationRepository>()
+            .AddScoped<IStationTimerStateRepository, StationTimerStateRepository>()
             .AddScoped<ISwitchingMachineRepository, SwitchingMachineRepository>()
             .AddScoped<ISwitchingMachineRouteRepository, SwitchingMachineRouteRepository>()
             .AddScoped<IThrowOutControlRepository, ThrowOutControlRepository>()
             .AddScoped<ITrackCircuitRepository, TrackCircuitRepository>()
+            .AddScoped<ITrackCircuitSignalRepository, TrackCircuitSignalRepository>()
             .AddScoped<ITrainRepository, TrainRepository>()
             .AddScoped<ITrainCarRepository, TrainCarRepository>()
             .AddScoped<ITrainDiagramRepository, TrainDiagramRepository>()
+            .AddScoped<ITrainTypeRepository, TrainTypeRepository>()
             .AddScoped<ITrainSignalStateRepository, TrainSignalStateRepository>()
             .AddScoped<ITtcWindowRepository, TtcWindowRepository>()
             .AddScoped<ITtcWindowLinkRepository, TtcWindowLinkRepository>()
+            .AddScoped<ITtcWindowTrackCircuitRepository, TtcWindowTrackCircuitRepository>()
+            .AddScoped<ITtcWindowLinkRouteConditionRepository, TtcWindowLinkRouteConditionRepository>()
             .AddScoped<ITransactionRepository, TransactionRepository>()
             .AddScoped<IUserDisconnectionRepository, UserDisconnectionRepository>()
             .AddScoped<BannedUserService>()

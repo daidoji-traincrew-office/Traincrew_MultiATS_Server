@@ -30,4 +30,9 @@ public class LockConditionByRouteCentralControlLeverRepository(ApplicationDbCont
         return await context.LockConditionByRouteCentralControlLevers
             .ToListAsync();
     }
+
+    public async Task DeleteAll()
+    {
+        await context.LockConditionByRouteCentralControlLevers.ExecuteDeleteAsync();
+    }
 }

@@ -27,4 +27,9 @@ public interface ILockConditionByRouteCentralControlLeverRepository
     /// </summary>
     /// <returns>すべての鎖錠条件のリスト</returns>
     Task<List<Models.LockConditionByRouteCentralControlLever>> GetAll();
+
+    /// <summary>
+    /// すべての鎖錠条件を削除する
+    /// </summary>
+    Task DeleteAll();
 }

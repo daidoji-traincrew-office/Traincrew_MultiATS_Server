@@ -9,5 +9,6 @@ public interface IServerRepository
     Task SetServerStateAsync(ServerMode mode);
     Task<int> GetTimeOffset();
     Task SetTimeOffsetAsync(int timeOffset);
+    Task AddServerStateAsync(ServerState serverState, CancellationToken cancellationToken = default);
 }
 

@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Traincrew_MultiATS_Server.Data;
-using Traincrew_MultiATS_Server.Models;
 
 namespace Traincrew_MultiATS_Server.Repositories.TtcWindow;
 
@@ -64,5 +63,17 @@ public class TtcWindowRepository(ApplicationDbContext context) : ITtcWindowRepos
             .Include(t => t.TtcWindowState)
             .Where(t => t.TtcWindowState.TrainNumber == trainNumber)
             .ToListAsync();
+    }
+
+    public async Task<List<string>> GetAllWindowNamesAsync(CancellationToken cancellationToken = default)
+    {
+        return await context.TtcWindows
+            .Select(w => w.Name)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        await context.SaveChangesAsync(cancellationToken);
     }
 }

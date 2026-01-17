@@ -56,4 +56,19 @@ public class SwitchingMachineRepository(ApplicationDbContext context) : ISwitchi
             .Where(sm => ids.Contains(sm.Id))
             .ToListAsync();
     }
+
+    public async Task<HashSet<ulong>> GetAllIdsAsync(CancellationToken cancellationToken = default)
+    {
+        var ids = await context.SwitchingMachines
+            .Select(sm => sm.Id)
+            .ToListAsync(cancellationToken);
+        return ids.ToHashSet();
+    }
+
+    public async Task<Dictionary<string, ulong>> GetIdsByNameAsync(CancellationToken cancellationToken = default)
+    {
+        return await context.SwitchingMachines
+            .Select(sm => new { sm.Name, sm.Id })
+            .ToDictionaryAsync(sm => sm.Name, sm => sm.Id, cancellationToken);
+    }
 }

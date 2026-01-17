@@ -19,4 +19,18 @@ public interface IInterlockingObjectRepository
     public Task<List<Models.InterlockingObject>> GetObjectByIdsWithState(IEnumerable<ulong> ids);
     public Task<Models.InterlockingObject> GetObject(string name);
     public Task<List<Models.InterlockingObject>> GetObjectsByStationIdsWithState(List<string> stationIds);
+
+    /// <summary>
+    /// すべての連動オブジェクトを取得する
+    /// </summary>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    /// <returns>連動オブジェクトのリスト</returns>
+    public Task<List<Models.InterlockingObject>> GetAllAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 連動オブジェクトを更新する
+    /// </summary>
+    /// <param name="interlockingObject">更新する連動オブジェクト</param>
+    public void Update(Models.InterlockingObject interlockingObject);
+
 }

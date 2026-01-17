@@ -193,7 +193,8 @@ CREATE TABLE ttc_window_link
     target_ttc_window_name  VARCHAR(100) REFERENCES ttc_window (name) NOT NULL, -- リンク先の列番窓の名前
     type                    ttc_window_link_type                      NOT NULL, -- リンクの種類
     is_empty_sending        BOOLEAN                                   NOT NULL, -- 空送りかどうか
-    track_circuit_condition BIGINT REFERENCES track_circuit (id)                -- 移行条件の軌道回路ID
+    track_circuit_condition BIGINT REFERENCES track_circuit (id),               -- 移行条件の軌道回路ID
+    UNIQUE (source_ttc_window_name, target_ttc_window_name)
 );
 
 -- 移行条件進路リスト
