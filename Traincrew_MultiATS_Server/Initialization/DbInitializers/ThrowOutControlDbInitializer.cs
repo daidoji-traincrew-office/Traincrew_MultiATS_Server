@@ -96,7 +96,7 @@ public class ThrowOutControlDbInitializer(
                     break;
 
                 default:
-                    // Todo: Warningを出しておく
+                    logger.LogWarning("サポートされていない総括制御タイプです。総括制御元: {SourceLever}, タイプ: {Type}", record.SourceLever, record.Type);
                     continue;
             }
 
