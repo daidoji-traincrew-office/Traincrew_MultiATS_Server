@@ -240,6 +240,8 @@ public class RendoService(
             // 対象進路
             var route = routeById[routeLeverDestinationButton.RouteId];
             var routeState = route.RouteState!;
+
+            // この進路に対する総括制御
             var sourceThrowOutControl = sourceThrowOutControls.GetValueOrDefault(route.Id, []);
 
             // 鎖錠条件 
@@ -249,9 +251,6 @@ public class RendoService(
             var isXRelayRaised = RaiseDrop.Drop;
             var isThrowOutXRRelayRaised = RaiseDrop.Drop;
             var isThrowOutYSRelayRaised = RaiseDrop.Drop;
-
-            // 駅扱いてこ
-            var routeCentralControlLever = routeCentralControlLeverByRouteIds.GetValueOrDefault(route.Id);
 
             // この進路に対して「てこナシ」な総括制御
             var sourceThrowOutControlWithoutLever = sourceThrowOutControl
@@ -287,65 +286,20 @@ public class RendoService(
 
                 isLeverRelayRaised = isXRelayRaised;
             }
-            // 集中の場合、CTC制御状態を確認する(CHR相当)
-            else if (routeCentralControlLever?.RouteCentralControlLeverState is { IsChrRelayRaised: RaiseDrop.Raise })
-            {
-                isLeverRelayRaised = routeState.IsCtcRelayRaised;
-            }
-            // 駅扱の場合、てことボタンで判断をする
             else
             {
                 // 対象てこ
                 var lever = leverById[routeLeverDestinationButton.LeverId];
-                // 対象ボタン
-                DestinationButton button;
-                if (routeLeverDestinationButton.DestinationButtonName != null)
-                {
-                    button = buttonsByName[routeLeverDestinationButton.DestinationButtonName];
-                }
-                else
-                {
-                    button = new()
-                    {
-                        Name = "TH99_DummyP",
-                        StationId = "TH99",
-                        DestinationButtonState = new() { IsRaised = RaiseDrop.Raise }
-                    };
-                }
-
-                // てこ状態を取得
                 var leverState = lever.LeverState.IsReversed;
-
-                // 同一のレバーを持つ自分以外の進路を取得
-                var otherRoutes = routesByLeverId[routeLeverDestinationButton.LeverId]
-                    .Where(r => r.Id != route.Id)
-                    .ToList();
-                
+                // 駅扱いてこ
+                var routeCentralControlLever = routeCentralControlLeverByRouteIds.GetValueOrDefault(route.Id);
+                // 集中扱い中(=駅扱いでない)かどうか
+                var isCentralControl =
+                    routeCentralControlLever?.RouteCentralControlLeverState is { IsChrRelayRaised: RaiseDrop.Raise };
                 // この進路に対して「てこあり」な総括制御
                 var sourceThrowOutControlWithLever = sourceThrowOutControl
                     .Where(toc => toc.ControlType == ThrowOutControlType.WithLever)
                     .ToList();
-                // この進路に対して総括制御「される」進路
-                var targetThrowOutRoutes = targetThrowOutControls.GetValueOrDefault(route.Id, [])
-                    .SelectMany(toc =>
-                    {
-                        // 進路IDから進路を取得
-                        var targetRoute = routeById.GetValueOrDefault(toc.TargetId);
-                        // 進路が存在する場合は返す
-                        return targetRoute != null ? new[] { targetRoute } : [];
-                    })
-                    .ToList();
-                // targetThrowOutRoutes の TargetId をキーとする辞書を生成
-                var targetSourceThrowOutRoutes = targetThrowOutRoutes
-                    .ToDictionary(
-                        targetRoute => targetRoute.Id, // TargetId をキーに
-                        targetRoute => sourceThrowOutControls.GetValueOrDefault(targetRoute.Id, []) // SourceId のリストを取得
-                            .Select(toc => routeById[toc.SourceId])
-                            .Distinct()
-                            .Where(r => r.Id != route.Id)
-                            .ToList()
-                    );
-
                 // Refactor: それぞれの条件をメソッド化した方が良い
                 if (sourceThrowOutControlWithLever.Count > 0)
                 {
@@ -365,6 +319,8 @@ public class RendoService(
                         .ToList();
 
                     isThrowOutXRRelayRaised =
+                        !isCentralControl
+                        &&
                         sourceOtherRoutes.All(r => r.RouteState.IsLeverRelayRaised == RaiseDrop.Drop)
                         &&
                         //総括する各進路の根本レバーのずれかが倒れているか
@@ -440,49 +396,96 @@ public class RendoService(
                             : RaiseDrop.Drop;
                 }
 
-                isLeverRelayRaised =
-                    otherRoutes.All(route => route.RouteState.IsLeverRelayRaised == RaiseDrop.Drop)
-                    &&
-                    (
+                // 集中の場合、CTC制御状態を確認する(CHR相当)
+                if (isCentralControl)
+                {
+                    isLeverRelayRaised = routeState.IsCtcRelayRaised;
+                }
+                // 駅扱の場合、てことボタンで判断をする
+                else
+                {
+                    // 対象ボタン
+                    var button = routeLeverDestinationButton.DestinationButtonName != null
+                        ? buttonsByName[routeLeverDestinationButton.DestinationButtonName]
+                        : new()
+                        {
+                            Name = "TH99_DummyP",
+                            StationId = "TH99",
+                            DestinationButtonState = new() { IsRaised = RaiseDrop.Raise }
+                        };
+
+                    // 同一のレバーを持つ自分以外の進路を取得
+                    var otherRoutes = routesByLeverId[routeLeverDestinationButton.LeverId]
+                        .Where(r => r.Id != route.Id)
+                        .ToList();
+
+                    // この進路に対して総括制御「される」進路
+                    var targetThrowOutRoutes = targetThrowOutControls.GetValueOrDefault(route.Id, [])
+                        .SelectMany(toc =>
+                        {
+                            // 進路IDから進路を取得
+                            var targetRoute = routeById.GetValueOrDefault(toc.TargetId);
+                            // 進路が存在する場合は返す
+                            return targetRoute != null ? new[] { targetRoute } : [];
+                        })
+                        .ToList();
+                    // targetThrowOutRoutes の TargetId をキーとする辞書を生成
+                    var targetSourceThrowOutRoutes = targetThrowOutRoutes
+                        .ToDictionary(
+                            targetRoute => targetRoute.Id, // TargetId をキーに
+                            targetRoute => sourceThrowOutControls
+                                .GetValueOrDefault(targetRoute.Id, []) // SourceId のリストを取得
+                                .Select(toc => routeById[toc.SourceId])
+                                .Distinct()
+                                .Where(r => r.Id != route.Id)
+                                .ToList()
+                        );
+
+                    isLeverRelayRaised =
+                        otherRoutes.All(route => route.RouteState.IsLeverRelayRaised == RaiseDrop.Drop)
+                        &&
                         (
-                            routeState is
-                                { IsThrowOutYSRelayRaised: RaiseDrop.Drop, IsThrowOutXRRelayRaised: RaiseDrop.Drop }
-                            &&
                             (
-                                routeLeverDestinationButton.Direction == LR.Left && leverState == LCR.Left
-                                ||
-                                routeLeverDestinationButton.Direction == LR.Right && leverState == LCR.Right
+                                routeState is
+                                    { IsThrowOutYSRelayRaised: RaiseDrop.Drop, IsThrowOutXRRelayRaised: RaiseDrop.Drop }
+                                &&
+                                (
+                                    routeLeverDestinationButton.Direction == LR.Left && leverState == LCR.Left
+                                    ||
+                                    routeLeverDestinationButton.Direction == LR.Right && leverState == LCR.Right
+                                )
                             )
+                            ||
+                            routeState.IsThrowOutYSRelayRaised == RaiseDrop.Raise
+                            ||
+                            routeState.IsThrowOutXRelayRaised == RaiseDrop.Raise
                         )
-                        ||
-                        routeState.IsThrowOutYSRelayRaised == RaiseDrop.Raise
-                        ||
-                        routeState.IsThrowOutXRelayRaised == RaiseDrop.Raise
-                    )
-                    &&
-                    (
-                        button.DestinationButtonState.IsRaised == RaiseDrop.Raise
-                        ||
+                        &&
                         (
-                            routeState.IsLeverRelayRaised == RaiseDrop.Raise
-                            && targetThrowOutRoutes.All(r => r.RouteState.IsThrowOutXRRelayRaised == RaiseDrop.Drop)
-                        )
-                        ||
-                        targetThrowOutRoutes.Any(r =>
-                            r.RouteState.IsLeverRelayRaised == RaiseDrop.Raise
-                            &&
-                            r.RouteState.IsThrowOutXRRelayRaised == RaiseDrop.Raise
-                            &&
-                            targetSourceThrowOutRoutes[r.Id].All(sr =>
-                                sr.RouteState.IsLeverRelayRaised == RaiseDrop.Drop
+                            button.DestinationButtonState.IsRaised == RaiseDrop.Raise
+                            ||
+                            (
+                                routeState.IsLeverRelayRaised == RaiseDrop.Raise
+                                && targetThrowOutRoutes.All(r => r.RouteState.IsThrowOutXRRelayRaised == RaiseDrop.Drop)
                             )
+                            ||
+                            targetThrowOutRoutes.Any(r =>
+                                r.RouteState.IsLeverRelayRaised == RaiseDrop.Raise
+                                &&
+                                r.RouteState.IsThrowOutXRRelayRaised == RaiseDrop.Raise
+                                &&
+                                targetSourceThrowOutRoutes[r.Id].All(sr =>
+                                    sr.RouteState.IsLeverRelayRaised == RaiseDrop.Drop
+                                )
+                            )
+                            ||
+                            routeState.IsThrowOutXRelayRaised == RaiseDrop.Raise
                         )
-                        ||
-                        routeState.IsThrowOutXRelayRaised == RaiseDrop.Raise
-                    )
-                        ? RaiseDrop.Raise
-                        : RaiseDrop.Drop;
+                            ? RaiseDrop.Raise
+                            : RaiseDrop.Drop;
+                }
             }
+
 
             // 鎖錠条件を満たしていないなら、てこ反応リレーを落下させる
             // (鎖錠条件を満たせずに「てこ反応リレー」が落下するとしても、他のリレーの処理も行いたいため、処理の最後に一律で落とす実装にする)
