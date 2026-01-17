@@ -48,8 +48,8 @@ public class RouteDbInitializerTest
         };
 
         _csvLoaderMock.Setup(l => l.LoadAsync(It.IsAny<CancellationToken>())).ReturnsAsync(csvRecords);
-        _routeRepositoryMock.Setup(r => r.GetIdsByName(It.IsAny<CancellationToken>())).ReturnsAsync(routeIdByName);
-        _trackCircuitRepositoryMock.Setup(r => r.GetAllIdsForName(It.IsAny<CancellationToken>()))
+        _routeRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>())).ReturnsAsync(routeIdByName);
+        _trackCircuitRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>()))
             .ReturnsAsync(trackCircuitIdByName);
         _routeLockTrackCircuitRepositoryMock.Setup(r => r.GetAll(It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
@@ -95,8 +95,8 @@ public class RouteDbInitializerTest
         var trackCircuitIdByName = new Dictionary<string, ulong> { { "TC1", 100 } };
 
         _csvLoaderMock.Setup(l => l.LoadAsync(It.IsAny<CancellationToken>())).ReturnsAsync(csvRecords);
-        _routeRepositoryMock.Setup(r => r.GetIdsByName(It.IsAny<CancellationToken>())).ReturnsAsync(routeIdByName);
-        _trackCircuitRepositoryMock.Setup(r => r.GetAllIdsForName(It.IsAny<CancellationToken>()))
+        _routeRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>())).ReturnsAsync(routeIdByName);
+        _trackCircuitRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>()))
             .ReturnsAsync(trackCircuitIdByName);
         _routeLockTrackCircuitRepositoryMock.Setup(r => r.GetAll(It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
@@ -135,8 +135,8 @@ public class RouteDbInitializerTest
         var trackCircuitIdByName = new Dictionary<string, ulong> { { "TC1", 100 } };
 
         _csvLoaderMock.Setup(l => l.LoadAsync(It.IsAny<CancellationToken>())).ReturnsAsync(csvRecords);
-        _routeRepositoryMock.Setup(r => r.GetIdsByName(It.IsAny<CancellationToken>())).ReturnsAsync(routeIdByName);
-        _trackCircuitRepositoryMock.Setup(r => r.GetAllIdsForName(It.IsAny<CancellationToken>()))
+        _routeRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>())).ReturnsAsync(routeIdByName);
+        _trackCircuitRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>()))
             .ReturnsAsync(trackCircuitIdByName);
         _routeLockTrackCircuitRepositoryMock.Setup(r => r.GetAll(It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
@@ -184,8 +184,8 @@ public class RouteDbInitializerTest
         };
 
         _csvLoaderMock.Setup(l => l.LoadAsync(It.IsAny<CancellationToken>())).ReturnsAsync(csvRecords);
-        _routeRepositoryMock.Setup(r => r.GetIdsByName(It.IsAny<CancellationToken>())).ReturnsAsync(routeIdByName);
-        _trackCircuitRepositoryMock.Setup(r => r.GetAllIdsForName(It.IsAny<CancellationToken>()))
+        _routeRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>())).ReturnsAsync(routeIdByName);
+        _trackCircuitRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>()))
             .ReturnsAsync(trackCircuitIdByName);
         _routeLockTrackCircuitRepositoryMock.Setup(r => r.GetAll(It.IsAny<CancellationToken>()))
             .ReturnsAsync(existingPairs);
@@ -217,9 +217,9 @@ public class RouteDbInitializerTest
         // Arrange
         _csvLoaderMock.Setup(l => l.LoadAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
-        _routeRepositoryMock.Setup(r => r.GetIdsByName(It.IsAny<CancellationToken>()))
+        _routeRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Dictionary<string, ulong>());
-        _trackCircuitRepositoryMock.Setup(r => r.GetAllIdsForName(It.IsAny<CancellationToken>()))
+        _trackCircuitRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Dictionary<string, ulong>());
         _routeLockTrackCircuitRepositoryMock.Setup(r => r.GetAll(It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
@@ -272,8 +272,8 @@ public class RouteDbInitializerTest
         };
 
         _csvLoaderMock.Setup(l => l.LoadAsync(It.IsAny<CancellationToken>())).ReturnsAsync(csvRecords);
-        _routeRepositoryMock.Setup(r => r.GetIdsByName(It.IsAny<CancellationToken>())).ReturnsAsync(routeIdByName);
-        _trackCircuitRepositoryMock.Setup(r => r.GetAllIdsForName(It.IsAny<CancellationToken>()))
+        _routeRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>())).ReturnsAsync(routeIdByName);
+        _trackCircuitRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>()))
             .ReturnsAsync(trackCircuitIdByName);
         _routeLockTrackCircuitRepositoryMock.Setup(r => r.GetAll(It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);

@@ -104,7 +104,7 @@ public interface IRouteRepository
     /// </summary>
     /// <param name="cancellationToken">キャンセルトークン</param>
     /// <returns>進路名をキー、進路IDを値とする辞書</returns>
-    Task<Dictionary<string, ulong>> GetIdsByName(CancellationToken cancellationToken = default);
+    Task<Dictionary<string, ulong>> GetAllIdForName(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// 進路名から進路エンティティへのマッピングを取得する

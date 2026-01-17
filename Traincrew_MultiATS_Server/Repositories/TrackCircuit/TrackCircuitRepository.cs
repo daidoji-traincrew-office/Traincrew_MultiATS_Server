@@ -139,7 +139,7 @@ public class TrackCircuitRepository(ApplicationDbContext context) : ITrackCircui
             .ToDictionaryAsync(tc => tc.Name, cancellationToken);
     }
 
-    public async Task<Dictionary<string, ulong>> GetAllIdsForName(CancellationToken cancellationToken = default)
+    public async Task<Dictionary<string, ulong>> GetAllIdForName(CancellationToken cancellationToken = default)
     {
         return await context.TrackCircuits
             .Select(tc => new { tc.Name, tc.Id })

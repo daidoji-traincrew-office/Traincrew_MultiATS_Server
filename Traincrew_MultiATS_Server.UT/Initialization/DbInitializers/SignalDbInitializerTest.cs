@@ -54,7 +54,7 @@ public class SignalDbInitializerTest
 
         _signalRepositoryMock.Setup(r => r.GetAllNames(It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
-        _trackCircuitRepositoryMock.Setup(r => r.GetAllIdsForName(It.IsAny<CancellationToken>()))
+        _trackCircuitRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>()))
             .ReturnsAsync(trackCircuits);
         _stationRepositoryMock.Setup(r => r.GetWhereIsStation()).ReturnsAsync(stations);
         _directionRouteRepositoryMock.Setup(r => r.GetIdsByNameAsync(It.IsAny<CancellationToken>()))
@@ -108,7 +108,7 @@ public class SignalDbInitializerTest
 
         _signalRepositoryMock.Setup(r => r.GetAllNames(It.IsAny<CancellationToken>()))
             .ReturnsAsync(["Signal1"]);
-        _trackCircuitRepositoryMock.Setup(r => r.GetAllIdsForName(It.IsAny<CancellationToken>()))
+        _trackCircuitRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Dictionary<string, ulong>());
         _stationRepositoryMock.Setup(r => r.GetWhereIsStation()).ReturnsAsync([]);
         _directionRouteRepositoryMock.Setup(r => r.GetIdsByNameAsync(It.IsAny<CancellationToken>()))
@@ -156,7 +156,7 @@ public class SignalDbInitializerTest
 
         _signalRepositoryMock.Setup(r => r.GetAllNames(It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
-        _trackCircuitRepositoryMock.Setup(r => r.GetAllIdsForName(It.IsAny<CancellationToken>()))
+        _trackCircuitRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Dictionary<string, ulong>());
         _stationRepositoryMock.Setup(r => r.GetWhereIsStation()).ReturnsAsync([]);
         _directionRouteRepositoryMock.Setup(r => r.GetIdsByNameAsync(It.IsAny<CancellationToken>()))
@@ -255,7 +255,7 @@ public class SignalDbInitializerTest
 
         _signalRouteRepositoryMock.Setup(r => r.GetAllWithRoutesAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(signalRoutes);
-        _routeRepositoryMock.Setup(r => r.GetIdsByName(It.IsAny<CancellationToken>())).ReturnsAsync(routeIdByName);
+        _routeRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>())).ReturnsAsync(routeIdByName);
 
         var initializer = new SignalDbInitializer(
             _loggerMock.Object,
@@ -314,7 +314,7 @@ public class SignalDbInitializerTest
 
         _signalRouteRepositoryMock.Setup(r => r.GetAllWithRoutesAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(signalRoutes);
-        _routeRepositoryMock.Setup(r => r.GetIdsByName(It.IsAny<CancellationToken>())).ReturnsAsync(routeIdByName);
+        _routeRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>())).ReturnsAsync(routeIdByName);
 
         var initializer = new SignalDbInitializer(
             _loggerMock.Object,
@@ -387,7 +387,7 @@ public class SignalDbInitializerTest
 
         _signalRepositoryMock.Setup(r => r.GetAllNames(It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
-        _trackCircuitRepositoryMock.Setup(r => r.GetAllIdsForName(It.IsAny<CancellationToken>()))
+        _trackCircuitRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>()))
             .ReturnsAsync(trackCircuits);
         _stationRepositoryMock.Setup(r => r.GetWhereIsStation()).ReturnsAsync([]);
         _directionRouteRepositoryMock.Setup(r => r.GetIdsByNameAsync(It.IsAny<CancellationToken>()))

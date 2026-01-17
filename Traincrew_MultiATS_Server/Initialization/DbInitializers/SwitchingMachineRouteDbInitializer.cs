@@ -30,7 +30,7 @@ public class SwitchingMachineRouteDbInitializer(
         var routeIds = await routeRepository.GetIdsForAll();
         var switchingMachineIds = await switchingMachineRepository.GetAllIdsAsync(cancellationToken);
         var trackCircuitIds = await trackCircuitRepository.GetAllNames(cancellationToken);
-        var trackCircuitIdByName = await trackCircuitRepository.GetAllIdsForName(cancellationToken);
+        var trackCircuitIdByName = await trackCircuitRepository.GetAllIdForName(cancellationToken);
         var trackCircuitIdsSet = trackCircuitIdByName.Values.ToHashSet();
 
         var directLockConditionsByRouteIds = await lockConditionRepository

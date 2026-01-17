@@ -35,7 +35,7 @@ public interface ITrackCircuitRepository
     /// </summary>
     /// <param name="cancellationToken">キャンセルトークン</param>
     /// <returns>軌道回路名をキー、軌道回路IDを値とする辞書</returns>
-    Task<Dictionary<string, ulong>> GetAllIdsForName(CancellationToken cancellationToken = default);
+    Task<Dictionary<string, ulong>> GetAllIdForName(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// TrackCircuit名からエンティティへのマッピングを取得する（指定された名前のリストのみ）

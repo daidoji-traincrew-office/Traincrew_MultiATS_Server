@@ -29,7 +29,7 @@ public class TtcDbInitializer(
     {
 
         var existingWindows = (await ttcWindowRepository.GetAllWindowNamesAsync(cancellationToken)).ToHashSet();
-        var trackCircuitIdByName = await trackCircuitRepository.GetAllIdsForName(cancellationToken);
+        var trackCircuitIdByName = await trackCircuitRepository.GetAllIdForName(cancellationToken);
 
         var ttcWindowsToAdd = new List<TtcWindow>();
         var displayStationsToAdd = new List<TtcWindowDisplayStation>();
@@ -84,7 +84,7 @@ public class TtcDbInitializer(
     public async Task InitializeTtcWindowLinksAsync(IEnumerable<TtcWindowLinkCsv> records, CancellationToken cancellationToken = default)
     {
         var existingLinks = await ttcWindowLinkRepository.GetAllLinkPairsAsync(cancellationToken);
-        var trackCircuitIdByName = await trackCircuitRepository.GetAllIdsForName(cancellationToken);
+        var trackCircuitIdByName = await trackCircuitRepository.GetAllIdForName(cancellationToken);
 
         var ttcWindowLinksToAdd = new List<TtcWindowLink>();
 
@@ -122,8 +122,7 @@ public class TtcDbInitializer(
             link => (link.SourceTtcWindowName, link.TargetTtcWindowName),
             link => link
         );
-        // Todo: メソッド名変更(AllIdForNameにする)
-        var routeIdByName = await routeRepository.GetIdsByName(cancellationToken);
+        var routeIdByName = await routeRepository.GetAllIdForName(cancellationToken);
 
         var existingConditions = await ttcWindowLinkRepository.GetAllTtcWindowLinkRouteConditions();
         var existingPairs = existingConditions

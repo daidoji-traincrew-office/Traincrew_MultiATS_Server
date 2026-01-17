@@ -221,7 +221,7 @@ public class RouteRepository(ApplicationDbContext context) : IRouteRepository
     /// </summary>
     /// <param name="cancellationToken">キャンセルトークン</param>
     /// <returns>進路名をキー、進路IDを値とする辞書</returns>
-    public async Task<Dictionary<string, ulong>> GetIdsByName(CancellationToken cancellationToken = default)
+    public async Task<Dictionary<string, ulong>> GetAllIdForName(CancellationToken cancellationToken = default)
     {
         return await context.Routes
             .Select(r => new { r.Name, r.Id })

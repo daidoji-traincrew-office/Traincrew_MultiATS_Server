@@ -60,7 +60,7 @@ public class TtcDbInitializerTest
 
         _ttcWindowRepositoryMock.Setup(r => r.GetAllWindowNamesAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
-        _trackCircuitRepositoryMock.Setup(r => r.GetAllIdsForName(It.IsAny<CancellationToken>()))
+        _trackCircuitRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>()))
             .ReturnsAsync(trackCircuitIdByName);
 
         var initializer = new TtcDbInitializer(
@@ -122,7 +122,7 @@ public class TtcDbInitializerTest
 
         _ttcWindowRepositoryMock.Setup(r => r.GetAllWindowNamesAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(["Window1"]);
-        _trackCircuitRepositoryMock.Setup(r => r.GetAllIdsForName(It.IsAny<CancellationToken>()))
+        _trackCircuitRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Dictionary<string, ulong>());
 
         var initializer = new TtcDbInitializer(
@@ -171,7 +171,7 @@ public class TtcDbInitializerTest
 
         _ttcWindowLinkRepositoryMock.Setup(r => r.GetAllLinkPairsAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(new HashSet<(string, string)>());
-        _trackCircuitRepositoryMock.Setup(r => r.GetAllIdsForName(It.IsAny<CancellationToken>()))
+        _trackCircuitRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>()))
             .ReturnsAsync(trackCircuitIdByName);
 
         var initializer = new TtcDbInitializer(
@@ -222,7 +222,7 @@ public class TtcDbInitializerTest
 
         _ttcWindowLinkRepositoryMock.Setup(r => r.GetAllLinkPairsAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(existingLinks);
-        _trackCircuitRepositoryMock.Setup(r => r.GetAllIdsForName(It.IsAny<CancellationToken>()))
+        _trackCircuitRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Dictionary<string, ulong>());
 
         var initializer = new TtcDbInitializer(
@@ -281,7 +281,7 @@ public class TtcDbInitializerTest
             .ReturnsAsync([existingLink]);
         _ttcWindowLinkRepositoryMock.Setup(r => r.GetAllTtcWindowLinkRouteConditions())
             .ReturnsAsync([]);
-        _routeRepositoryMock.Setup(r => r.GetIdsByName(It.IsAny<CancellationToken>()))
+        _routeRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>()))
             .ReturnsAsync(routeIdByName);
 
         var initializer = new TtcDbInitializer(
@@ -351,7 +351,7 @@ public class TtcDbInitializerTest
             .ReturnsAsync([existingLink]);
         _ttcWindowLinkRepositoryMock.Setup(r => r.GetAllTtcWindowLinkRouteConditions())
             .ReturnsAsync([existingCondition]);
-        _routeRepositoryMock.Setup(r => r.GetIdsByName(It.IsAny<CancellationToken>()))
+        _routeRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>()))
             .ReturnsAsync(routeIdByName);
 
         var initializer = new TtcDbInitializer(
@@ -400,7 +400,7 @@ public class TtcDbInitializerTest
             .ReturnsAsync([]);
         _ttcWindowLinkRepositoryMock.Setup(r => r.GetAllTtcWindowLinkRouteConditions())
             .ReturnsAsync([]);
-        _routeRepositoryMock.Setup(r => r.GetIdsByName(It.IsAny<CancellationToken>()))
+        _routeRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>()))
             .ReturnsAsync(routeIdByName);
 
         var initializer = new TtcDbInitializer(
@@ -458,7 +458,7 @@ public class TtcDbInitializerTest
             .ReturnsAsync([existingLink]);
         _ttcWindowLinkRepositoryMock.Setup(r => r.GetAllTtcWindowLinkRouteConditions())
             .ReturnsAsync([]);
-        _routeRepositoryMock.Setup(r => r.GetIdsByName(It.IsAny<CancellationToken>()))
+        _routeRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>()))
             .ReturnsAsync(routeIdByName);
 
         var initializer = new TtcDbInitializer(
@@ -495,9 +495,9 @@ public class TtcDbInitializerTest
             .ReturnsAsync([]);
         _ttcWindowLinkRepositoryMock.Setup(r => r.GetAllTtcWindowLinkRouteConditions())
             .ReturnsAsync([]);
-        _trackCircuitRepositoryMock.Setup(r => r.GetAllIdsForName(It.IsAny<CancellationToken>()))
+        _trackCircuitRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Dictionary<string, ulong>());
-        _routeRepositoryMock.Setup(r => r.GetIdsByName(It.IsAny<CancellationToken>()))
+        _routeRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Dictionary<string, ulong>());
 
         var initializer = new TtcDbInitializer(

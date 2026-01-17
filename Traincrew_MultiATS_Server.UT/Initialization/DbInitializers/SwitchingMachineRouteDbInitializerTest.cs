@@ -59,7 +59,7 @@ public class SwitchingMachineRouteDbInitializerTest
             .ReturnsAsync(switchingMachineIds);
         _trackCircuitRepositoryMock.Setup(r => r.GetAllNames(It.IsAny<CancellationToken>()))
             .ReturnsAsync(trackCircuitNames);
-        _trackCircuitRepositoryMock.Setup(r => r.GetAllIdsForName(It.IsAny<CancellationToken>()))
+        _trackCircuitRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>()))
             .ReturnsAsync(trackCircuitIdByName);
         _switchingMachineRouteRepositoryMock.Setup(r => r.GetAllPairsAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(existingPairs);
@@ -119,7 +119,7 @@ public class SwitchingMachineRouteDbInitializerTest
             .ReturnsAsync(switchingMachineIds);
         _trackCircuitRepositoryMock.Setup(r => r.GetAllNames(It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
-        _trackCircuitRepositoryMock.Setup(r => r.GetAllIdsForName(It.IsAny<CancellationToken>()))
+        _trackCircuitRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>()))
             .ReturnsAsync(trackCircuitIdByName);
         _switchingMachineRouteRepositoryMock.Setup(r => r.GetAllPairsAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(existingPairs);
@@ -161,7 +161,7 @@ public class SwitchingMachineRouteDbInitializerTest
             .ReturnsAsync([]);
         _trackCircuitRepositoryMock.Setup(r => r.GetAllNames(It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
-        _trackCircuitRepositoryMock.Setup(r => r.GetAllIdsForName(It.IsAny<CancellationToken>()))
+        _trackCircuitRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Dictionary<string, ulong>());
         _switchingMachineRouteRepositoryMock.Setup(r => r.GetAllPairsAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(new HashSet<(ulong, ulong)>());

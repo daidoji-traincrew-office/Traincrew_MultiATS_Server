@@ -25,8 +25,8 @@ public class RouteLockTrackCircuitDbInitializer(
     public override async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
         var records = await csvLoader.LoadAsync(cancellationToken);
-        var routes = await routeRepository.GetIdsByName(cancellationToken);
-        var trackCircuits = await trackCircuitRepository.GetAllIdsForName(cancellationToken);
+        var routes = await routeRepository.GetAllIdForName(cancellationToken);
+        var trackCircuits = await trackCircuitRepository.GetAllIdForName(cancellationToken);
         var routeLockTrackCircuits = (await routeLockTrackCircuitRepository
             .GetAll(cancellationToken))
             .Select(x => (x.RouteId, x.TrackCircuitId))
