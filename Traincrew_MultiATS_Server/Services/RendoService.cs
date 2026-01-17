@@ -316,7 +316,7 @@ public class RendoService(
     /// <param name="routesByLeverId">てこID→進路リストの辞書</param>
     /// <param name="allSourceThrowOutControls">全進路ID→総括制御リストの辞書</param>
     /// <returns>計算されたリレー状態</returns>
-    private LeverRelayState CalculateLeverRelayState(
+    public LeverRelayState CalculateLeverRelayState(
         Route route,
         RouteLeverDestinationButton routeLeverDestinationButton,
         Lever? lever,
