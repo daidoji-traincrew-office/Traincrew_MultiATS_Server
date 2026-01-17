@@ -237,74 +237,27 @@ public class RendoService(
             .ToDictionary(obj => obj.Id);
         foreach (var routeLeverDestinationButton in routeLeverDestinationButtonList)
         {
-            // 対象進路 
+            // 対象進路
             var route = routeById[routeLeverDestinationButton.RouteId];
             var routeState = route.RouteState!;
             var sourceThrowOutControl = sourceThrowOutControls.GetValueOrDefault(route.Id, []);
-            // この進路に対して「てこあり」な総括制御
-            var sourceThrowOutControlWithLever = sourceThrowOutControl
-                .Where(toc => toc.ControlType == ThrowOutControlType.WithLever)
-                .ToList();
-            // この進路に対して「てこナシ」な総括制御
-            var sourceThrowOutControlWithoutLever = sourceThrowOutControl
-                .Where(toc => toc.ControlType == ThrowOutControlType.WithoutLever)
-                .ToList();
-            // この進路に対して総括制御「される」進路
-            var targetThrowOutRoutes = targetThrowOutControls.GetValueOrDefault(route.Id, [])
-                .SelectMany(toc =>
-                {
-                    // 進路IDから進路を取得
-                    var targetRoute = routeById.GetValueOrDefault(toc.TargetId);
-                    // 進路が存在する場合は返す
-                    return targetRoute != null ? new[] { targetRoute } : [];
-                })
-                .ToList();
-            // targetThrowOutRoutes の TargetId をキーとする辞書を生成
-            var targetSourceThrowOutRoutes = targetThrowOutRoutes
-                .ToDictionary(
-                    targetRoute => targetRoute.Id, // TargetId をキーに
-                    targetRoute => sourceThrowOutControls.GetValueOrDefault(targetRoute.Id, []) // SourceId のリストを取得
-                        .Select(toc => routeById[toc.SourceId])
-                        .Distinct()
-                        .Where(r => r.Id != route.Id)
-                        .ToList()
-                );
-
-            // 対象てこ
-            var lever = leverById[routeLeverDestinationButton.LeverId];
-            // 対象ボタン
-            DestinationButton button;
-            if (routeLeverDestinationButton.DestinationButtonName != null)
-            {
-                button = buttonsByName[routeLeverDestinationButton.DestinationButtonName];
-            }
-            else
-            {
-                button = new()
-                {
-                    Name = "TH99_DummyP",
-                    StationId = "TH99",
-                    DestinationButtonState = new() { IsRaised = RaiseDrop.Raise }
-                };
-            }
 
             // 鎖錠条件 
             var lockCondition = lockConditions.GetValueOrDefault(route.Id, []);
 
-            // 同一のレバーを持つ自分以外の進路を取得
-            var otherRoutes = routesByLeverId[routeLeverDestinationButton.LeverId]
-                .Where(r => r.Id != route.Id)
-                .ToList();
-
             RaiseDrop isLeverRelayRaised;
-            var isXRelayRaised = RaiseDrop.Drop; 
-            var isThrowOutXRRelayRaised = RaiseDrop.Drop; 
+            var isXRelayRaised = RaiseDrop.Drop;
+            var isThrowOutXRRelayRaised = RaiseDrop.Drop;
             var isThrowOutYSRelayRaised = RaiseDrop.Drop;
 
             // 駅扱いてこ
             var routeCentralControlLever = routeCentralControlLeverByRouteIds.GetValueOrDefault(route.Id);
 
-            // てこなし総括がある場合、Xリレーの計算をして、その結果によりてこ反応リレーを扛上させる
+            // この進路に対して「てこナシ」な総括制御
+            var sourceThrowOutControlWithoutLever = sourceThrowOutControl
+                .Where(toc => toc.ControlType == ThrowOutControlType.WithoutLever)
+                .ToList();
+            // てこナシ総括がある場合、Xリレーの計算をして、その結果によりてこ反応リレーを扛上させる
             if (sourceThrowOutControlWithoutLever.Count > 0)
             {
                 // この進路に対して総括制御「する」進路
@@ -342,8 +295,56 @@ public class RendoService(
             // 駅扱の場合、てことボタンで判断をする
             else
             {
+                // 対象てこ
+                var lever = leverById[routeLeverDestinationButton.LeverId];
+                // 対象ボタン
+                DestinationButton button;
+                if (routeLeverDestinationButton.DestinationButtonName != null)
+                {
+                    button = buttonsByName[routeLeverDestinationButton.DestinationButtonName];
+                }
+                else
+                {
+                    button = new()
+                    {
+                        Name = "TH99_DummyP",
+                        StationId = "TH99",
+                        DestinationButtonState = new() { IsRaised = RaiseDrop.Raise }
+                    };
+                }
+
                 // てこ状態を取得
                 var leverState = lever.LeverState.IsReversed;
+
+                // 同一のレバーを持つ自分以外の進路を取得
+                var otherRoutes = routesByLeverId[routeLeverDestinationButton.LeverId]
+                    .Where(r => r.Id != route.Id)
+                    .ToList();
+                
+                // この進路に対して「てこあり」な総括制御
+                var sourceThrowOutControlWithLever = sourceThrowOutControl
+                    .Where(toc => toc.ControlType == ThrowOutControlType.WithLever)
+                    .ToList();
+                // この進路に対して総括制御「される」進路
+                var targetThrowOutRoutes = targetThrowOutControls.GetValueOrDefault(route.Id, [])
+                    .SelectMany(toc =>
+                    {
+                        // 進路IDから進路を取得
+                        var targetRoute = routeById.GetValueOrDefault(toc.TargetId);
+                        // 進路が存在する場合は返す
+                        return targetRoute != null ? new[] { targetRoute } : [];
+                    })
+                    .ToList();
+                // targetThrowOutRoutes の TargetId をキーとする辞書を生成
+                var targetSourceThrowOutRoutes = targetThrowOutRoutes
+                    .ToDictionary(
+                        targetRoute => targetRoute.Id, // TargetId をキーに
+                        targetRoute => sourceThrowOutControls.GetValueOrDefault(targetRoute.Id, []) // SourceId のリストを取得
+                            .Select(toc => routeById[toc.SourceId])
+                            .Distinct()
+                            .Where(r => r.Id != route.Id)
+                            .ToList()
+                    );
 
                 // Refactor: それぞれの条件をメソッド化した方が良い
                 if (sourceThrowOutControlWithLever.Count > 0)
