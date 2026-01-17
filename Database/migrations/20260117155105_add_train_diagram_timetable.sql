@@ -1,0 +1,4 @@
+-- Create "train_diagram_timetable" table
+CREATE TABLE "train_diagram_timetable" ("id" serial NOT NULL, "train_number" character varying(100) NOT NULL, "index" integer NOT NULL, "station_id" character varying(10) NOT NULL, "track_number" character varying(50) NOT NULL, "arrival_time" interval NULL, "departure_time" interval NULL, PRIMARY KEY ("id"), CONSTRAINT "train_diagram_timetable_station_id_fkey" FOREIGN KEY ("station_id") REFERENCES "station" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION, CONSTRAINT "train_diagram_timetable_train_number_fkey" FOREIGN KEY ("train_number") REFERENCES "train_diagram" ("train_number") ON UPDATE NO ACTION ON DELETE NO ACTION);
+-- Create index "idx_train_diagram_timetable_train_number_index" to table: "train_diagram_timetable"
+CREATE UNIQUE INDEX "idx_train_diagram_timetable_train_number_index" ON "train_diagram_timetable" ("train_number", "index");

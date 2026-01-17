@@ -427,6 +427,21 @@ CREATE TABLE train_diagram
     dia_id          INT         NOT NULL                             -- ダイヤID
 );
 
+-- 列車ダイヤグラム時刻表（各駅の時刻情報）
+CREATE TABLE train_diagram_timetable
+(
+    id             SERIAL PRIMARY KEY,                                                     -- ID
+    train_number   VARCHAR(100) NOT NULL REFERENCES train_diagram (train_number),          -- 列車番号
+    index          INT          NOT NULL,                                                  -- インデックス（駅の順番）
+    station_id     VARCHAR(10)  NOT NULL REFERENCES station (id),                          -- 駅ID
+    track_number   VARCHAR(50)  NOT NULL,                                                  -- 番線
+    arrival_time   INTERVAL     NULL,                                                      -- 到着時刻
+    departure_time INTERVAL     NULL                                                       -- 出発時刻
+);
+
+-- インデックス作成
+CREATE UNIQUE INDEX idx_train_diagram_timetable_train_number_index ON train_diagram_timetable (train_number, index);
+
 -- ここから状態系
 -- 駅時素状態
 CREATE TABLE station_timer_state

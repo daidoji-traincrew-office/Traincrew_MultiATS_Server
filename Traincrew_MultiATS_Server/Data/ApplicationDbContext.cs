@@ -43,6 +43,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<TrainCarState> TrainCarStates { get; set; }
     public DbSet<TrainType> TrainTypes { get; set; }
     public DbSet<TrainDiagram> TrainDiagrams { get; set; }
+    public DbSet<TrainDiagramTimetable> TrainDiagramTimetables { get; set; }
     public DbSet<OperationInformationState> OperationInformationStates { get; set; }
     public DbSet<ServerState> ServerStates { get; set; }
     public DbSet<RouteCentralControlLever> RouteCentralControlLevers { get; set; }
@@ -234,6 +235,22 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
         modelBuilder.Entity<TrainSignalState>()
             .HasIndex(tss => tss.SignalName);
+
+        modelBuilder.Entity<TrainDiagramTimetable>()
+            .HasOne(tdt => tdt.TrainDiagram)
+            .WithMany()
+            .HasForeignKey(tdt => tdt.TrainNumber)
+            .HasPrincipalKey(td => td.TrainNumber);
+
+        modelBuilder.Entity<TrainDiagramTimetable>()
+            .HasOne(tdt => tdt.Station)
+            .WithMany()
+            .HasForeignKey(tdt => tdt.StationId)
+            .HasPrincipalKey(s => s.Id);
+
+        modelBuilder.Entity<TrainDiagramTimetable>()
+            .HasIndex(tdt => new { tdt.TrainNumber, tdt.Index })
+            .IsUnique();
 
         // Convert all column names to snake_case
         foreach (var entity in modelBuilder.Model.GetEntityTypes())
