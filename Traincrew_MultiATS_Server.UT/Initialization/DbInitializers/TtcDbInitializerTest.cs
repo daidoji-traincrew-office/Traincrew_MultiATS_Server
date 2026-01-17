@@ -374,8 +374,8 @@ public class TtcDbInitializerTest
     }
 
     [Fact]
-    [DisplayName("リンクが存在しない場合、ルート条件がスキップされること")]
-    public async Task InitializeTtcWindowLinkRouteConditionsAsync_ShouldSkipConditions_WhenLinkDoesNotExist()
+    [DisplayName("リンクが存在しない場合、例外がスローされること")]
+    public async Task InitializeTtcWindowLinkRouteConditionsAsync_ShouldThrowException_WhenLinkDoesNotExist()
     {
         // Arrange
         var csvRecords = new List<TtcWindowLinkCsv>
@@ -413,18 +413,18 @@ public class TtcDbInitializerTest
             _routeRepositoryMock.Object,
             _generalRepositoryMock.Object);
 
-        // Act
-        await initializer.InitializeTtcWindowLinkRouteConditionsAsync(csvRecords, TestContext.Current.CancellationToken);
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => initializer.InitializeTtcWindowLinkRouteConditionsAsync(csvRecords, TestContext.Current.CancellationToken));
 
-        // Assert
-        _generalRepositoryMock.Verify(
-            r => r.AddAll(It.Is<List<TtcWindowLinkRouteCondition>>(list => list.Count == 0), It.IsAny<CancellationToken>()),
-            Times.Once);
+        Assert.Contains("Window1", exception.Message);
+        Assert.Contains("Window2", exception.Message);
+        Assert.Contains("TTC窓リンク", exception.Message);
     }
 
     [Fact]
-    [DisplayName("ルートが存在しない場合、そのルート条件がスキップされること")]
-    public async Task InitializeTtcWindowLinkRouteConditionsAsync_ShouldSkipConditions_WhenRouteDoesNotExist()
+    [DisplayName("ルートが存在しない場合、例外がスローされること")]
+    public async Task InitializeTtcWindowLinkRouteConditionsAsync_ShouldThrowException_WhenRouteDoesNotExist()
     {
         // Arrange
         var csvRecords = new List<TtcWindowLinkCsv>
@@ -471,16 +471,12 @@ public class TtcDbInitializerTest
             _routeRepositoryMock.Object,
             _generalRepositoryMock.Object);
 
-        // Act
-        await initializer.InitializeTtcWindowLinkRouteConditionsAsync(csvRecords, TestContext.Current.CancellationToken);
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => initializer.InitializeTtcWindowLinkRouteConditionsAsync(csvRecords, TestContext.Current.CancellationToken));
 
-        // Assert
-        _generalRepositoryMock.Verify(
-            r => r.AddAll(It.Is<List<TtcWindowLinkRouteCondition>>(list =>
-                list.Count == 1 &&
-                list[0].RouteId == 100
-            ), It.IsAny<CancellationToken>()),
-            Times.Once);
+        Assert.Contains("NonExistentRoute", exception.Message);
+        Assert.Contains("進路", exception.Message);
     }
 
     [Fact]

@@ -140,8 +140,8 @@ public class OperationNotificationDisplayDbInitializerTest
     }
 
     [Fact]
-    [DisplayName("存在しない軌道回路が含まれる場合、スキップされること")]
-    public async Task InitializeAsync_ShouldSkipNonExistentTrackCircuits()
+    [DisplayName("存在しない軌道回路が含まれる場合、例外がスローされること")]
+    public async Task InitializeAsync_ShouldThrowException_WhenTrackCircuitNotFound()
     {
         // Arrange
         var now = DateTime.Now;
@@ -180,15 +180,12 @@ public class OperationNotificationDisplayDbInitializerTest
             _csvLoaderMock.Object,
             _generalRepositoryMock.Object);
 
-        // Act
-        await initializer.InitializeAsync(TestContext.Current.CancellationToken);
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => initializer.InitializeAsync(TestContext.Current.CancellationToken));
 
-        // Assert
-        _generalRepositoryMock.Verify(
-            r => r.SaveAll(It.Is<List<TrackCircuit>>(list =>
-                list.Count == 2 // Only valid track circuits
-            ), It.IsAny<CancellationToken>()),
-            Times.Once);
+        Assert.Contains("NonExistent", exception.Message);
+        Assert.Contains("軌道回路", exception.Message);
     }
 
     [Fact]

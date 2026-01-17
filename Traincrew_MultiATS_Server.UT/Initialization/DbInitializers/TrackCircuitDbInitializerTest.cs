@@ -259,8 +259,8 @@ public class TrackCircuitDbInitializerTest
     }
 
     [Fact]
-    [DisplayName("存在しない軌道回路が含まれる場合、スキップされること")]
-    public async Task InitializeTrackCircuitSignalsAsync_ShouldSkipNonExistentTrackCircuits()
+    [DisplayName("存在しない軌道回路が含まれる場合、例外がスローされること")]
+    public async Task InitializeTrackCircuitSignalsAsync_ShouldThrowException_WhenTrackCircuitNotFound()
     {
         // Arrange
         var trackCircuitCsvList = new List<TrackCircuitCsv>
@@ -297,19 +297,17 @@ public class TrackCircuitDbInitializerTest
             _trackCircuitSignalRepositoryMock.Object,
             _generalRepositoryMock.Object);
 
-        // Act
-        await initializer.InitializeTrackCircuitSignalsAsync(trackCircuitCsvList, TestContext.Current.CancellationToken);
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => initializer.InitializeTrackCircuitSignalsAsync(trackCircuitCsvList, TestContext.Current.CancellationToken));
 
-        // Assert
-        _generalRepositoryMock.Verify(
-            r => r.AddAll(It.Is<List<TrackCircuitSignal>>(list => list.Count == 0),
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        Assert.Contains("NonExistent", exception.Message);
+        Assert.Contains("軌道回路", exception.Message);
     }
 
     [Fact]
-    [DisplayName("存在しない信号機が含まれる場合、スキップされること")]
-    public async Task InitializeTrackCircuitSignalsAsync_ShouldSkipNonExistentSignals()
+    [DisplayName("存在しない信号機が含まれる場合、例外がスローされること")]
+    public async Task InitializeTrackCircuitSignalsAsync_ShouldThrowException_WhenSignalNotFound()
     {
         // Arrange
         var trackCircuitCsvList = new List<TrackCircuitCsv>
@@ -347,14 +345,12 @@ public class TrackCircuitDbInitializerTest
             _trackCircuitSignalRepositoryMock.Object,
             _generalRepositoryMock.Object);
 
-        // Act
-        await initializer.InitializeTrackCircuitSignalsAsync(trackCircuitCsvList, TestContext.Current.CancellationToken);
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => initializer.InitializeTrackCircuitSignalsAsync(trackCircuitCsvList, TestContext.Current.CancellationToken));
 
-        // Assert
-        _generalRepositoryMock.Verify(
-            r => r.AddAll(It.Is<List<TrackCircuitSignal>>(list => list.Count == 0),
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        Assert.Contains("NonExistentSignal", exception.Message);
+        Assert.Contains("信号機", exception.Message);
     }
 
     [Fact]

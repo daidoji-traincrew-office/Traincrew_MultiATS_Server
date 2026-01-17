@@ -78,8 +78,8 @@ public class RouteDbInitializerTest
     }
 
     [Fact]
-    [DisplayName("進路が見つからない場合、スキップされること")]
-    public async Task InitializeAsync_ShouldSkipWhenRouteNotFound()
+    [DisplayName("進路が見つからない場合、例外がスローされること")]
+    public async Task InitializeAsync_ShouldThrowException_WhenRouteNotFound()
     {
         // Arrange
         var csvRecords = new List<RouteLockTrackCircuitCsv>
@@ -109,19 +109,17 @@ public class RouteDbInitializerTest
             _routeLockTrackCircuitRepositoryMock.Object,
             _generalRepositoryMock.Object);
 
-        // Act
-        await initializer.InitializeAsync(TestContext.Current.CancellationToken);
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => initializer.InitializeAsync(TestContext.Current.CancellationToken));
 
-        // Assert
-        _generalRepositoryMock.Verify(
-            r => r.AddAll(It.Is<List<RouteLockTrackCircuit>>(list => list.Count == 0),
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        Assert.Contains("NonExistentRoute", exception.Message);
+        Assert.Contains("進路", exception.Message);
     }
 
     [Fact]
-    [DisplayName("軌道回路が見つからない場合、スキップされること")]
-    public async Task InitializeAsync_ShouldSkipWhenTrackCircuitNotFound()
+    [DisplayName("軌道回路が見つからない場合、例外がスローされること")]
+    public async Task InitializeAsync_ShouldThrowException_WhenTrackCircuitNotFound()
     {
         // Arrange
         var csvRecords = new List<RouteLockTrackCircuitCsv>
@@ -151,16 +149,12 @@ public class RouteDbInitializerTest
             _routeLockTrackCircuitRepositoryMock.Object,
             _generalRepositoryMock.Object);
 
-        // Act
-        await initializer.InitializeAsync(TestContext.Current.CancellationToken);
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => initializer.InitializeAsync(TestContext.Current.CancellationToken));
 
-        // Assert
-        _generalRepositoryMock.Verify(
-            r => r.AddAll(It.Is<List<RouteLockTrackCircuit>>(list =>
-                list.Count == 1 &&
-                list[0].TrackCircuitId == 100
-            ), It.IsAny<CancellationToken>()),
-            Times.Once);
+        Assert.Contains("NonExistentTC", exception.Message);
+        Assert.Contains("軌道回路", exception.Message);
     }
 
     [Fact]
