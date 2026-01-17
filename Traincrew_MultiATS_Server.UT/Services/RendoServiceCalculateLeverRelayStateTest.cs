@@ -603,7 +603,7 @@ public class RendoServiceCalculateLeverRelayStateTest
 
         var route2 = CreateRoute(route2Id);
         var lever2 = CreateLever(lever2Id, leverState2);
-        var button2 = CreateButton(button2Name, RaiseDrop.Raise);
+        CreateButton(button2Name, RaiseDrop.Raise);
 
         var interlockingObjectById = new Dictionary<ulong, InterlockingObject>
         {
@@ -693,7 +693,7 @@ public class RendoServiceCalculateLeverRelayStateTest
 
         var route2 = CreateRoute(route2Id, routeState2);
         var lever2 = CreateLever(lever2Id, LCR.Left); // 制御先のてこも倒れている
-        var button2 = CreateButton("P2", RaiseDrop.Raise);
+        CreateButton("P2", RaiseDrop.Drop);
         var routeLeverDestinationButton2 = CreateRouteLeverDestinationButton(route2Id, lever2Id, LR.Left, "P2");
 
         // 総括制御: route1 -> route2
@@ -707,16 +707,7 @@ public class RendoServiceCalculateLeverRelayStateTest
             }
         };
 
-        var interlockingObjectById = new Dictionary<ulong, InterlockingObject>
-        {
-            { route1Id, route1 },
-            { lever1Id, lever1 },
-            { route2Id, route2 },
-            { lever2Id, lever2 }
-        };
-
         var routeById = new Dictionary<ulong, Route> { { route1Id, route1 }, { route2Id, route2 } };
-        var leverByRouteId = new Dictionary<ulong, Lever> { { route1Id, lever1 }, { route2Id, lever2 } };
         var routesByLeverId = new Dictionary<ulong, List<Route>>
         {
             { lever1Id, [route1] },
@@ -785,10 +776,11 @@ public class RendoServiceCalculateLeverRelayStateTest
             allSourceThrowOutControls
         );
 
-        // Assert: 制御先を戻しても制御先だけ落下、制御元に影響なし
-        Assert.Equal(RaiseDrop.Drop, result2.IsLeverRelayRaised);
-        Assert.Equal(RaiseDrop.Drop, result2.IsThrowOutXRRelayRaised);
-        Assert.Equal(RaiseDrop.Drop, result2.IsThrowOutYSRelayRaised);
+        // Assert: 制御先のてこを戻してもYSが扛上しているため、てこ反も扛上のまま
+        // てこが中立でも、YS扛上の条件でてこ反が扛上
+        Assert.Equal(RaiseDrop.Raise, result2.IsLeverRelayRaised);
+        Assert.Equal(RaiseDrop.Raise, result2.IsThrowOutXRRelayRaised); // 自己保持
+        Assert.Equal(RaiseDrop.Raise, result2.IsThrowOutYSRelayRaised); // 接近鎖錠条件を満たすのでYSも扛上
         // 制御元は変わらず落下のまま
         Assert.Equal(RaiseDrop.Drop, routeState1.IsLeverRelayRaised);
 
@@ -799,103 +791,11 @@ public class RendoServiceCalculateLeverRelayStateTest
         Assert.Equal(RaiseDrop.Raise, routeState2.IsThrowOutYSRelayRaised);
     }
 
-    [Fact(DisplayName = "てこアリ総括_制御元のてこ反応リレーが扛上時_XRリレーが扛上")]
-    public void XRRelayRaises_WhenSourceLeverRelayRaised()
+    [Fact(DisplayName = "てこアリ総括_制御元のてこを倒すと制御先のXR,YSを扛上させる")]
+    public void XRAndYSRelayIsRaised_WhenSourceLeverReversed()
     {
         // Arrange: route1が制御元、route2が制御先
-        var route1Id = 1ul;
-        var lever1Id = 10ul;
-        var route2Id = 2ul;
-        var lever2Id = 20ul;
-
-        var routeState1 = new RouteState
-        {
-            Id = route1Id,
-            IsLeverRelayRaised = RaiseDrop.Raise, // 制御元が扛上
-            IsCtcRelayRaised = RaiseDrop.Drop,
-            IsThrowOutXRelayRaised = RaiseDrop.Drop,
-            IsThrowOutXRRelayRaised = RaiseDrop.Drop,
-            IsThrowOutYSRelayRaised = RaiseDrop.Drop,
-            IsRouteLockRaised = RaiseDrop.Drop,
-            IsSignalControlRaised = RaiseDrop.Drop,
-            IsRouteRelayWithoutSwitchingMachineRaised = RaiseDrop.Drop
-        };
-
-        var routeState2 = new RouteState
-        {
-            Id = route2Id,
-            IsLeverRelayRaised = RaiseDrop.Drop,
-            IsCtcRelayRaised = RaiseDrop.Drop,
-            IsThrowOutXRelayRaised = RaiseDrop.Drop,
-            IsThrowOutXRRelayRaised = RaiseDrop.Drop,
-            IsThrowOutYSRelayRaised = RaiseDrop.Drop,
-            IsRouteLockRaised = RaiseDrop.Drop,
-            IsSignalControlRaised = RaiseDrop.Drop,
-            IsRouteRelayWithoutSwitchingMachineRaised = RaiseDrop.Drop
-        };
-
-        var route1 = CreateRoute(route1Id, routeState1);
-        var lever1 = CreateLever(lever1Id, LCR.Left);
-
-        var route2 = CreateRoute(route2Id, routeState2);
-        var lever2 = CreateLever(lever2Id, LCR.Center); // 制御先のてこは中立
-        var button2 = CreateButton("P2", RaiseDrop.Drop);
-        var routeLeverDestinationButton2 = CreateRouteLeverDestinationButton(route2Id, lever2Id, LR.Left, "P2");
-
-        // 総括制御: route1 -> route2
-        var sourceThrowOutControls = new List<ThrowOutControl>
-        {
-            new()
-            {
-                SourceId = route1Id,
-                TargetId = route2Id,
-                ControlType = ThrowOutControlType.WithLever
-            }
-        };
-
-        var interlockingObjectById = new Dictionary<ulong, InterlockingObject>
-        {
-            { route1Id, route1 },
-            { lever1Id, lever1 },
-            { route2Id, route2 },
-            { lever2Id, lever2 }
-        };
-
-        var routeById = new Dictionary<ulong, Route> { { route1Id, route1 }, { route2Id, route2 } };
-        var leverByRouteId = new Dictionary<ulong, Lever> { { route1Id, lever1 }, { route2Id, lever2 } };
-        var routesByLeverId = new Dictionary<ulong, List<Route>>
-        {
-            { lever1Id, [route1] },
-            { lever2Id, [route2] }
-        };
-
-        // Act
-        var result2 = CallCalculateLeverRelayState(
-            route2,
-            routeLeverDestinationButton2,
-            lever2,
-            button2,
-            null,
-            sourceThrowOutControls,
-            [],
-            [],
-            [],
-            interlockingObjectById,
-            routeById,
-            leverByRouteId,
-            routesByLeverId,
-            new()
-        );
-
-        // Assert: XRリレーが扛上
-        Assert.Equal(RaiseDrop.Raise, result2.IsThrowOutXRRelayRaised);
-    }
-
-    [Fact(DisplayName = "てこアリ総括_制御元のてこを倒した場合、制御先のXR, YSが両方扛上する")]
-    public void XRAndYSRelayRaise_WhenSourceLeverReversed()
-    {
-        // Arrange: route1が制御元、route2が制御先
-        // 制御元のてこを倒してボタンを押すことで、制御先のXR, YSリレーが両方扛上する
+        // 制御元のてこのみを倒すと、XR/YSが扛上
         var route1Id = 1ul;
         var lever1Id = 10ul;
         var route2Id = 2ul;
@@ -932,7 +832,7 @@ public class RendoServiceCalculateLeverRelayStateTest
 
         var route1 = CreateRoute(route1Id, routeState1);
         var lever1 = CreateLever(lever1Id, LCR.Left); // 制御元のてこを倒す
-        var button1 = CreateButton("P1", RaiseDrop.Raise); // 制御元のボタンを押す
+        var button1 = CreateButton("P1", RaiseDrop.Drop);
         var routeLeverDestinationButton1 = CreateRouteLeverDestinationButton(route1Id, lever1Id, LR.Left, "P1");
 
         var route2 = CreateRoute(route2Id, routeState2, tcId); // 接近鎖錠条件を設定
@@ -1011,9 +911,6 @@ public class RendoServiceCalculateLeverRelayStateTest
             allSourceThrowOutControls
         );
 
-        // Assert: 制御元のてこ反応リレーが扛上
-        Assert.Equal(RaiseDrop.Raise, result1.IsLeverRelayRaised);
-
         // Assert: 制御先のXRとYSリレーが両方扛上
         Assert.Equal(RaiseDrop.Raise, result2.IsThrowOutXRRelayRaised);
         Assert.Equal(RaiseDrop.Raise, result2.IsThrowOutYSRelayRaised);
@@ -1059,7 +956,7 @@ public class RendoServiceCalculateLeverRelayStateTest
 
         var route1 = CreateRoute(route1Id, routeState1);
         var lever1 = CreateLever(lever1Id, LCR.Left); // 制御元のてこを倒す
-        var button1 = CreateButton("P1", RaiseDrop.Raise); // 制御元のボタンを押す
+        var button1 = CreateButton("P1", RaiseDrop.Drop); // 制御元のボタンは押さない
         var routeLeverDestinationButton1 = CreateRouteLeverDestinationButton(route1Id, lever1Id, LR.Left, "P1");
 
         var route2 = CreateRoute(route2Id, routeState2, tcId); // 接近鎖錠条件を設定
@@ -1099,6 +996,33 @@ public class RendoServiceCalculateLeverRelayStateTest
             { route2Id, sourceThrowOutControls }
         };
 
+        // Act: 制御先の計算
+        var result2 = CallCalculateLeverRelayState(
+            route2,
+            routeLeverDestinationButton2,
+            lever2,
+            button2,
+            null,
+            sourceThrowOutControls,
+            [],
+            [],
+            [],
+            interlockingObjectById,
+            routeById,
+            leverByRouteId,
+            routesByLeverId,
+            allSourceThrowOutControls
+        );
+
+        // Assert: 制御先のてこ反応リレー、XR/YSが扛上する
+        Assert.Equal(RaiseDrop.Raise, result2.IsLeverRelayRaised);
+        Assert.Equal(RaiseDrop.Raise, result2.IsThrowOutXRRelayRaised);
+        Assert.Equal(RaiseDrop.Raise, result2.IsThrowOutYSRelayRaised);
+        // 制御先のリレー状態を更新して制御元の計算に使用
+        routeState2.IsLeverRelayRaised = result2.IsLeverRelayRaised;
+        routeState2.IsThrowOutXRRelayRaised = result2.IsThrowOutXRRelayRaised;
+        routeState2.IsThrowOutYSRelayRaised = result2.IsThrowOutYSRelayRaised;
+
         // Act: 制御元の計算
         var result1 = CallCalculateLeverRelayState(
             route1,
@@ -1120,31 +1044,8 @@ public class RendoServiceCalculateLeverRelayStateTest
         // 制御元のリレー状態を更新して制御先の計算に使用
         routeState1.IsLeverRelayRaised = result1.IsLeverRelayRaised;
 
-        // Act: 制御先の計算
-        var result2 = CallCalculateLeverRelayState(
-            route2,
-            routeLeverDestinationButton2,
-            lever2,
-            button2,
-            null,
-            sourceThrowOutControls,
-            [],
-            [],
-            [],
-            interlockingObjectById,
-            routeById,
-            leverByRouteId,
-            routesByLeverId,
-            allSourceThrowOutControls
-        );
-
         // Assert: 制御元のてこ反応リレーが扛上
         Assert.Equal(RaiseDrop.Raise, result1.IsLeverRelayRaised);
-
-        // Assert: 制御先のてこ反応リレーが扛上、XR, YSリレーも扛上
-        Assert.Equal(RaiseDrop.Raise, result2.IsLeverRelayRaised);
-        Assert.Equal(RaiseDrop.Raise, result2.IsThrowOutXRRelayRaised);
-        Assert.Equal(RaiseDrop.Raise, result2.IsThrowOutYSRelayRaised);
     }
 
     #endregion
@@ -1341,7 +1242,7 @@ public class RendoServiceCalculateLeverRelayStateTest
             IsThrowOutXRelayRaised = RaiseDrop.Drop,
             IsThrowOutXRRelayRaised = RaiseDrop.Drop,
             IsThrowOutYSRelayRaised = RaiseDrop.Drop,
-            IsRouteLockRaised = RaiseDrop.Raise,
+            IsRouteLockRaised = RaiseDrop.Drop,
             IsSignalControlRaised = RaiseDrop.Drop, // 信号制御は落下している(軌道回路内方に進入した状態)
             IsRouteRelayWithoutSwitchingMachineRaised = RaiseDrop.Drop
         };
