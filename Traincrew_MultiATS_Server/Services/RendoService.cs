@@ -464,7 +464,7 @@ public class RendoService(
                             r.RouteState.IsSignalControlRaised == RaiseDrop.Drop
                         )
                         ||
-                        routeState.IsThrowOutXRRelayRaised == RaiseDrop.Raise
+                        isThrowOutXRRelayRaised == RaiseDrop.Raise
                     )
                     &&
                     (
@@ -520,8 +520,8 @@ public class RendoService(
                     &&
                     (
                         (
-                            routeState is
-                                { IsThrowOutYSRelayRaised: RaiseDrop.Drop, IsThrowOutXRRelayRaised: RaiseDrop.Drop }
+                            isThrowOutXRRelayRaised == RaiseDrop.Drop
+                            && isThrowOutYSRelayRaised == RaiseDrop.Drop
                             &&
                             (
                                 routeLeverDestinationButton.Direction == LR.Left && leverState == LCR.Left
@@ -530,9 +530,9 @@ public class RendoService(
                             )
                         )
                         ||
-                        routeState.IsThrowOutYSRelayRaised == RaiseDrop.Raise
+                        isThrowOutYSRelayRaised == RaiseDrop.Raise
                         ||
-                        routeState.IsThrowOutXRelayRaised == RaiseDrop.Raise
+                        isThrowOutXRRelayRaised == RaiseDrop.Raise
                     )
                     &&
                     (
@@ -553,7 +553,7 @@ public class RendoService(
                             )
                         )
                         ||
-                        routeState.IsThrowOutXRelayRaised == RaiseDrop.Raise
+                        isThrowOutXRRelayRaised == RaiseDrop.Raise
                     )
                         ? RaiseDrop.Raise
                         : RaiseDrop.Drop;
