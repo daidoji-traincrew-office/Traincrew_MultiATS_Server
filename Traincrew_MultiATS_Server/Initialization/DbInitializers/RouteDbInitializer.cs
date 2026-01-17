@@ -35,18 +35,16 @@ public class RouteLockTrackCircuitDbInitializer(
         var routeLockTrackCircuitList = new List<RouteLockTrackCircuit>();
         foreach (var record in records)
         {
-            // Todo: 該当進路が登録されていない場合エラー
             if (!routes.TryGetValue(record.RouteName, out var routeId))
             {
-                continue;
+                throw new InvalidOperationException($"進路 '{record.RouteName}' が見つかりません。進路鎖錠軌道回路の初期化に失敗しました。");
             }
 
             foreach (var trackCircuitName in record.TrackCircuitNames)
             {
-                // Todo: 該当軌道回路が登録されていない場合エラー
                 if (!trackCircuits.TryGetValue(trackCircuitName, out var trackCircuitId))
                 {
-                    continue;
+                    throw new InvalidOperationException($"軌道回路 '{trackCircuitName}' が見つかりません。進路 '{record.RouteName}' の進路鎖錠軌道回路の初期化に失敗しました。");
                 }
 
                 // 既に登録済みの場合、スキップ

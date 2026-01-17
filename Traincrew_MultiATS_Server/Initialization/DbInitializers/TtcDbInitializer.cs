@@ -134,18 +134,16 @@ public class TtcDbInitializer(
 
         foreach (var record in records)
         {
-            // Todo: 存在しない場合エラー 
             if (!linksByPair.TryGetValue((record.Source, record.Target), out var ttcWindowLink))
             {
-                continue;
+                throw new InvalidOperationException($"TTC窓リンク (送信元: '{record.Source}', 送信先: '{record.Target}') が見つかりません。TTC窓リンク進路条件の初期化に失敗しました。");
             }
 
             foreach (var routeCondition in record.RouteConditions)
             {
-                // Todo: 存在しない場合エラー 
                 if (!routeIdByName.TryGetValue(routeCondition, out var routeId))
                 {
-                    continue;
+                    throw new InvalidOperationException($"進路 '{routeCondition}' が見つかりません。TTC窓リンク進路条件 (送信元: '{record.Source}', 送信先: '{record.Target}') の初期化に失敗しました。");
                 }
 
                 if (existingPairs.Contains((ttcWindowLink.Id, routeId)))

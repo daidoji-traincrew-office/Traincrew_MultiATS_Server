@@ -61,10 +61,9 @@ public class OperationNotificationDisplayDbInitializer(
 
             foreach (var trackCircuitName in record.TrackCircuitNames)
             {
-                // Todo: 該当軌道回路がない場合、エラーを出す
                 if (!trackCircuits.TryGetValue(trackCircuitName, out var trackCircuit))
                 {
-                    continue;
+                    throw new InvalidOperationException($"軌道回路 '{trackCircuitName}' が見つかりません。運転告知器 '{name}' の初期化に失敗しました。");
                 }
 
                 trackCircuit.OperationNotificationDisplayName = name;

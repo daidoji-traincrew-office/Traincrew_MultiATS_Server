@@ -56,10 +56,9 @@ public class ThrowOutControlDbInitializer(
                 case ThrowOutControlType.WithLever:
                 case ThrowOutControlType.WithoutLever:
                     // てこあり/てこナシの場合、総括制御先は通常の進路
-                    // Todo: 該当するてこがない場合エラーを出す
                     if (!routesByName.TryGetValue(record.TargetLever, out var targetRoute))
                     {
-                        continue;
+                        throw new InvalidOperationException($"総括制御先の進路 '{record.TargetLever}' が見つかりません。総括制御元 '{record.SourceLever}' の初期化に失敗しました。");
                     }
 
                     target = targetRoute;
@@ -67,18 +66,16 @@ public class ThrowOutControlDbInitializer(
 
                 case ThrowOutControlType.Direction:
                     // 方向の場合、方向進路を探す
-                    // Todo: てこ条件がない場合、エラーを出す
                     if (string.IsNullOrEmpty(record.LeverCondition))
                     {
-                        continue;
+                        throw new InvalidOperationException($"総括制御元 '{record.SourceLever}' のてこ条件が設定されていません。方向総括制御の初期化に失敗しました。");
                     }
 
                     // record.LeverConditionから方向進路名を取得（末尾を除いてFに置換）
                     var directionRouteName = record.TargetLever[..^1] + "F";
-                    // Todo: 該当する方向進路がない場合、エラーを出す
                     if (!directionRoutesByName.TryGetValue(directionRouteName, out var directionRoute))
                     {
-                        continue;
+                        throw new InvalidOperationException($"方向進路 '{directionRouteName}' が見つかりません。総括制御元 '{record.SourceLever}' の初期化に失敗しました。");
                     }
 
                     target = directionRoute;

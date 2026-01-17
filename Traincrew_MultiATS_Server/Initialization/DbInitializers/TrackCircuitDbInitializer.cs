@@ -80,18 +80,16 @@ public class TrackCircuitDbInitializer(
         var trackCircuitSignals = new List<TrackCircuitSignal>();
         foreach (var trackCircuit in trackCircuitList)
         {
-            // Todo: エラーを出す
             if (!trackCircuitEntities.TryGetValue(trackCircuit.Name, out var trackCircuitEntity))
             {
-                continue;
+                throw new InvalidOperationException($"軌道回路 '{trackCircuit.Name}' が見つかりません。軌道回路信号の初期化に失敗しました。");
             }
 
             foreach (var signalName in trackCircuit.NextSignalNamesUp)
             {
-                // Todo: エラーを出す   
                 if (!signals.TryGetValue(signalName, out var signal))
                 {
-                    continue;
+                    throw new InvalidOperationException($"信号機 '{signalName}' が見つかりません。軌道回路 '{trackCircuit.Name}' の上り信号の初期化に失敗しました。");
                 }
 
                 if (existingRelationsSet.Contains((trackCircuitEntity.Id, signal.Name)))
@@ -109,10 +107,9 @@ public class TrackCircuitDbInitializer(
 
             foreach (var signalName in trackCircuit.NextSignalNamesDown)
             {
-                // Todo: エラーを出す
                 if (!signals.TryGetValue(signalName, out var signal))
                 {
-                    continue;
+                    throw new InvalidOperationException($"信号機 '{signalName}' が見つかりません。軌道回路 '{trackCircuit.Name}' の下り信号の初期化に失敗しました。");
                 }
 
                 if (existingRelationsSet.Contains((trackCircuitEntity.Id, signal.Name)))
