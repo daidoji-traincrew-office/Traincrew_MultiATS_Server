@@ -24,4 +24,18 @@ public class TrainDiagramRepository(ApplicationDbContext context) : ITrainDiagra
             .Select(td => td.TrainNumber)
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<Dictionary<string, Models.TrainDiagram>> GetForTrainNumberByDiaId(int diaId, CancellationToken cancellationToken = default)
+    {
+        return await context.TrainDiagrams
+            .Where(td => td.DiaId == diaId)
+            .ToDictionaryAsync(td => td.TrainNumber, cancellationToken);
+    }
+
+    public async Task DeleteTimetablesByDiaId(int diaId, CancellationToken cancellationToken = default)
+    {
+        await context.TrainDiagramTimetables
+            .Where(t => t.TrainDiagram!.DiaId == diaId)
+            .ExecuteDeleteAsync(cancellationToken);
+    }
 }
