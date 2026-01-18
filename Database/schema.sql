@@ -138,8 +138,8 @@ CREATE TABLE track_circuit_department_time
 (
     id               SERIAL PRIMARY KEY,
     track_circuit_id BIGINT NOT NULL REFERENCES track_circuit (id), -- 軌道回路ID
-    car_count        INT    NOT NULL,                                -- 両数（編成両数、0なら通過とみなす）
-    time_element     INT    NOT NULL                                 -- 時素
+    car_count        INT    NOT NULL,                               -- 両数（編成両数、0なら通過とみなす）
+    time_element     INT    NOT NULL                                -- 時素
 );
 CREATE UNIQUE INDEX track_circuit_department_time_track_circuit_id_car_count_index ON track_circuit_department_time (track_circuit_id, car_count);
 
@@ -254,9 +254,9 @@ CREATE TABLE route_central_control_lever
 -- 進路と集中てこの鎖錠条件
 CREATE TABLE lock_condition_by_route_central_control_lever
 (
-    id                              BIGSERIAL PRIMARY KEY,
-    route_id                        BIGINT REFERENCES route (id) NOT NULL,                        -- 進路のID
-    route_central_control_lever_id  BIGINT REFERENCES route_central_control_lever (id) NOT NULL,  -- 集中てこのID
+    id                             BIGSERIAL PRIMARY KEY,
+    route_id                       BIGINT REFERENCES route (id)                       NOT NULL, -- 進路のID
+    route_central_control_lever_id BIGINT REFERENCES route_central_control_lever (id) NOT NULL, -- 集中てこのID
     UNIQUE (route_id, route_central_control_lever_id)
 );
 CREATE INDEX lock_condition_by_route_central_control_lever_route_id_index ON lock_condition_by_route_central_control_lever (route_id);
@@ -387,7 +387,7 @@ CREATE TYPE throw_out_control_type AS ENUM ('with_lever', 'without_lever', 'dire
 CREATE TABLE throw_out_control
 (
     id                 BIGSERIAL PRIMARY KEY,
-    control_type       throw_out_control_type NOT NULL,                     -- 総括の種類
+    control_type       throw_out_control_type                     NOT NULL, -- 総括の種類
     source_id          BIGINT REFERENCES interlocking_object (id) NOT NULL, -- 統括元オブジェクトID
     source_lr          lr,                                                  -- 統括元が方向てこの場合、方向てこの向き
     target_id          BIGINT REFERENCES interlocking_object (id) NOT NULL, -- 統括先オブジェクトID
@@ -430,12 +430,12 @@ CREATE TABLE train_type
 -- 列車(ダイヤグラム内の1列車)情報
 CREATE TABLE train_diagram
 (
-    id              BIGSERIAL PRIMARY KEY,                           -- ID
-    train_number    VARCHAR(100) NOT NULL,                           -- 列車番号
-    train_type_id   BIGINT      NOT NULL REFERENCES train_type (id), -- 列車種別ID
-    from_station_id VARCHAR(10) NOT NULL REFERENCES station (id),    -- 出発駅ID
-    to_station_id   VARCHAR(10) NOT NULL REFERENCES station (id),    -- 到着駅ID
-    dia_id          INT         NOT NULL                             -- ダイヤID
+    id              BIGSERIAL PRIMARY KEY,                            -- ID
+    dia_id          INT          NOT NULL,                            -- ダイヤID
+    train_number    VARCHAR(100) NOT NULL,                            -- 列車番号
+    train_type_id   BIGINT       NOT NULL REFERENCES train_type (id), -- 列車種別ID
+    from_station_id VARCHAR(10)  NOT NULL REFERENCES station (id),    -- 出発駅ID
+    to_station_id   VARCHAR(10)  NOT NULL REFERENCES station (id)     -- 到着駅ID
 );
 
 -- ユニークインデックス作成
@@ -444,13 +444,13 @@ CREATE UNIQUE INDEX idx_train_diagram_dia_id_train_number ON train_diagram (dia_
 -- 列車ダイヤグラム時刻表（各駅の時刻情報）
 CREATE TABLE train_diagram_timetable
 (
-    id                BIGSERIAL PRIMARY KEY,                                  -- ID
-    train_diagram_id  BIGINT      NOT NULL REFERENCES train_diagram (id),     -- 列車ダイヤグラムID
-    index             INT         NOT NULL,                                   -- インデックス（駅の順番）
-    station_id        VARCHAR(10) NOT NULL REFERENCES station (id),           -- 駅ID
-    track_number      VARCHAR(50) NOT NULL,                                   -- 番線
-    arrival_time      INTERVAL    NULL,                                       -- 到着時刻
-    departure_time    INTERVAL    NULL                                        -- 出発時刻
+    id               BIGSERIAL PRIMARY KEY,                              -- ID
+    train_diagram_id BIGINT      NOT NULL REFERENCES train_diagram (id), -- 列車ダイヤグラムID
+    index            INT         NOT NULL,                               -- インデックス（駅の順番）
+    station_id       VARCHAR(10) NOT NULL REFERENCES station (id),       -- 駅ID
+    track_number     VARCHAR(50) NOT NULL,                               -- 番線
+    arrival_time     INTERVAL    NULL,                                   -- 到着時刻
+    departure_time   INTERVAL    NULL                                    -- 出発時刻
 );
 
 -- インデックス作成
@@ -623,9 +623,9 @@ CREATE index train_state_dia_number_index ON train_state USING hash (dia_number)
 -- 列車信号状態
 CREATE TABLE train_signal_state
 (
-    id           BIGSERIAL PRIMARY KEY,                             -- ID
-    train_number VARCHAR(100) NOT NULL,                             -- 列車番号
-    signal_name  VARCHAR(100) NOT NULL REFERENCES signal (name),    -- 信号名
+    id           BIGSERIAL PRIMARY KEY,                          -- ID
+    train_number VARCHAR(100) NOT NULL,                          -- 列車番号
+    signal_name  VARCHAR(100) NOT NULL REFERENCES signal (name), -- 信号名
     UNIQUE (train_number, signal_name)
 );
 CREATE INDEX train_signal_state_train_number_index ON train_signal_state (train_number);
@@ -675,10 +675,11 @@ CREATE TABLE server_state
 (
     id          SERIAL PRIMARY KEY,
     mode        server_mode NOT NULL,
-    time_offset INTEGER NOT NULL DEFAULT 0
+    time_offset INTEGER     NOT NULL DEFAULT 0
 );
 
 -- ユーザー接続拒否状態テーブル
-CREATE TABLE user_disconnection_state (
+CREATE TABLE user_disconnection_state
+(
     user_id BIGINT PRIMARY KEY -- ユーザーID(Discord ID)
 );
