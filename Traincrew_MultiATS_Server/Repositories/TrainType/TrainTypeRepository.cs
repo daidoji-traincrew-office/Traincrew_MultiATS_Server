@@ -11,4 +11,10 @@ public class TrainTypeRepository(ApplicationDbContext context) : ITrainTypeRepos
             .Select(t => t.Id)
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<Dictionary<string, long>> GetAllIdForName(CancellationToken cancellationToken = default)
+    {
+        return await context.TrainTypes
+            .ToDictionaryAsync(t => t.Name, t => t.Id, cancellationToken);
+    }
 }

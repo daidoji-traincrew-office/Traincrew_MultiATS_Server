@@ -72,6 +72,75 @@ public class TrainDbInitializer(
         logger.LogInformation("Initialized {Count} train diagrams", trainDiagrams.Count);
     }
 
+    /// <summary>
+    ///     Initialize train diagrams and timetables from TTC_Data
+    /// </summary>
+    public async Task InitializeFromTtcDataAsync(TTC_Data ttcData, int diaId = 1, CancellationToken cancellationToken = default)
+    {
+        var existingNumbers = await trainDiagramRepository.GetTrainNumbersForAll(cancellationToken);
+        var trainTypeIdByName = await trainTypeRepository.GetAllIdForName(cancellationToken);
+
+        var trainDiagrams = new List<TrainDiagram>();
+        var trainTimetables = new List<TrainDiagramTimetable>();
+
+        foreach (var ttcTrain in ttcData.trainList)
+        {
+            if (string.IsNullOrWhiteSpace(ttcTrain.trainNumber))
+            {
+                logger.LogWarning("列車番号が空です。{operationNumber} スキップします。", ttcTrain.operationNumber);
+                continue;
+            }
+            // Skip if train diagram already exists
+            if (existingNumbers.Contains(ttcTrain.trainNumber))
+            {
+                continue;
+            }
+
+            // Get train type ID from train class name, default to 1 if not found
+            var trainTypeId = trainTypeIdByName.GetValueOrDefault(ttcTrain.trainClass, 1);
+
+            // Create TrainDiagram for each TTC_Train
+            trainDiagrams.Add(new()
+            {
+                TrainNumber = ttcTrain.trainNumber,
+                TrainTypeId = trainTypeId,
+                FromStationId = ttcTrain.originStationID,
+                ToStationId = ttcTrain.destinationStationID,
+                DiaId = diaId
+            });
+
+            // Create TrainDiagramTimetable for each TTC_StationData
+            trainTimetables.AddRange(ttcTrain.staList.Select((stationData, i) => new TrainDiagramTimetable()
+            {
+                TrainNumber = ttcTrain.trainNumber,
+                Index = i + 1,
+                StationId = stationData.stationID,
+                TrackNumber = stationData.stopPosName ?? "",
+                ArrivalTime = ConvertToTimeSpan(stationData.arrivalTime),
+                DepartureTime = ConvertToTimeSpan(stationData.departureTime)
+            }));
+        }
+
+        await generalRepository.AddAll(trainDiagrams, cancellationToken);
+        await generalRepository.AddAll(trainTimetables, cancellationToken);
+
+        logger.LogInformation("Initialized {TrainCount} train diagrams and {TimetableCount} timetables from TTC_Data",
+            trainDiagrams.Count, trainTimetables.Count);
+    }
+
+    /// <summary>
+    ///     Convert TimeOfDay to TimeSpan
+    /// </summary>
+    private TimeSpan? ConvertToTimeSpan(TimeOfDay? timeOfDay)
+    {
+        if (timeOfDay == null)
+        {
+            return null;
+        }
+
+        return new TimeSpan(timeOfDay.h, timeOfDay.m, timeOfDay.s);
+    }
+
     public override async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
         // This method is not used for TrainDbInitializer as it requires CSV data
