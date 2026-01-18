@@ -8,11 +8,12 @@ public class TrainDiagramTimetable
 {
     [Key]
     [Column("id")]
-    public int Id { get; set; }
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public ulong Id { get; set; }
 
     [Required]
-    [Column("train_number")]
-    public string TrainNumber { get; set; } = string.Empty;
+    [Column("train_diagram_id")]
+    public ulong TrainDiagramId { get; set; }
 
     [Required]
     [Column("index")]
@@ -33,7 +34,7 @@ public class TrainDiagramTimetable
     public TimeSpan? DepartureTime { get; set; }
 
     // ナビゲーションプロパティ
-    [ForeignKey(nameof(TrainNumber))]
+    [ForeignKey(nameof(TrainDiagramId))]
     public TrainDiagram? TrainDiagram { get; set; }
 
     [ForeignKey(nameof(StationId))]

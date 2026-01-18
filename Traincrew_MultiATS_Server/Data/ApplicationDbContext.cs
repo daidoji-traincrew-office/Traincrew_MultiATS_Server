@@ -237,11 +237,15 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<TrainSignalState>()
             .HasIndex(tss => tss.SignalName);
 
+        modelBuilder.Entity<TrainDiagram>()
+            .HasIndex(td => new { td.DiaId, td.TrainNumber })
+            .IsUnique();
+
         modelBuilder.Entity<TrainDiagramTimetable>()
             .HasOne(tdt => tdt.TrainDiagram)
             .WithMany()
-            .HasForeignKey(tdt => tdt.TrainNumber)
-            .HasPrincipalKey(td => td.TrainNumber);
+            .HasForeignKey(tdt => tdt.TrainDiagramId)
+            .HasPrincipalKey(td => td.Id);
 
         modelBuilder.Entity<TrainDiagramTimetable>()
             .HasOne(tdt => tdt.Station)
@@ -250,7 +254,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasPrincipalKey(s => s.Id);
 
         modelBuilder.Entity<TrainDiagramTimetable>()
-            .HasIndex(tdt => new { tdt.TrainNumber, tdt.Index })
+            .HasIndex(tdt => new { tdt.TrainDiagramId, tdt.Index })
             .IsUnique();
 
         modelBuilder.Entity<TrackCircuitDepartmentTime>()

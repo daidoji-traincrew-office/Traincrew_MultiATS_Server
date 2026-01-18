@@ -7,6 +7,11 @@ namespace Traincrew_MultiATS_Server.Models;
 public class TrainDiagram
 {
     [Key]
+    [Column("id")]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public ulong Id { get; set; }
+
+    [Required]
     [Column("train_number")]
     public string TrainNumber { get; set; }
 

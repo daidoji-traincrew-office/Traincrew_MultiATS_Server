@@ -430,27 +430,31 @@ CREATE TABLE train_type
 -- 列車(ダイヤグラム内の1列車)情報
 CREATE TABLE train_diagram
 (
-    train_number    VARCHAR(100) PRIMARY KEY,                        -- 列車番号
+    id              BIGSERIAL PRIMARY KEY,                           -- ID
+    train_number    VARCHAR(100) NOT NULL,                           -- 列車番号
     train_type_id   BIGINT      NOT NULL REFERENCES train_type (id), -- 列車種別ID
     from_station_id VARCHAR(10) NOT NULL REFERENCES station (id),    -- 出発駅ID
     to_station_id   VARCHAR(10) NOT NULL REFERENCES station (id),    -- 到着駅ID
     dia_id          INT         NOT NULL                             -- ダイヤID
 );
 
+-- ユニークインデックス作成
+CREATE UNIQUE INDEX idx_train_diagram_dia_id_train_number ON train_diagram (dia_id, train_number);
+
 -- 列車ダイヤグラム時刻表（各駅の時刻情報）
 CREATE TABLE train_diagram_timetable
 (
-    id             SERIAL PRIMARY KEY,                                                     -- ID
-    train_number   VARCHAR(100) NOT NULL REFERENCES train_diagram (train_number),          -- 列車番号
-    index          INT          NOT NULL,                                                  -- インデックス（駅の順番）
-    station_id     VARCHAR(10)  NOT NULL REFERENCES station (id),                          -- 駅ID
-    track_number   VARCHAR(50)  NOT NULL,                                                  -- 番線
-    arrival_time   INTERVAL     NULL,                                                      -- 到着時刻
-    departure_time INTERVAL     NULL                                                       -- 出発時刻
+    id                BIGSERIAL PRIMARY KEY,                                  -- ID
+    train_diagram_id  BIGINT      NOT NULL REFERENCES train_diagram (id),     -- 列車ダイヤグラムID
+    index             INT         NOT NULL,                                   -- インデックス（駅の順番）
+    station_id        VARCHAR(10) NOT NULL REFERENCES station (id),           -- 駅ID
+    track_number      VARCHAR(50) NOT NULL,                                   -- 番線
+    arrival_time      INTERVAL    NULL,                                       -- 到着時刻
+    departure_time    INTERVAL    NULL                                        -- 出発時刻
 );
 
 -- インデックス作成
-CREATE UNIQUE INDEX idx_train_diagram_timetable_train_number_index ON train_diagram_timetable (train_number, index);
+CREATE UNIQUE INDEX idx_train_diagram_timetable_train_diagram_id_index ON train_diagram_timetable (train_diagram_id, index);
 
 -- ここから状態系
 -- 駅時素状態

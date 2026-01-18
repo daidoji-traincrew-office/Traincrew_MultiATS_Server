@@ -87,7 +87,7 @@ public class TrainDbInitializer(
 
         var trainDiagramsToAdd = new List<TrainDiagram>();
         var trainDiagramsToUpdate = new List<TrainDiagram>();
-        var trainTimetables = new List<TrainDiagramTimetable>();
+        var trainTimetablesByTrainNumber = new Dictionary<string, List<TrainDiagramTimetable>>();
 
         foreach (var ttcTrain in ttcData.trainList)
         {
@@ -130,16 +130,17 @@ public class TrainDbInitializer(
                 trainDiagramsToAdd.Add(newDiagram);
             }
 
-            // Create TrainDiagramTimetable for each TTC_StationData
-            trainTimetables.AddRange(ttcTrain.staList.Select((stationData, i) => new TrainDiagramTimetable()
+            // Create TrainDiagramTimetable for each TTC_StationData (IDは後で設定)
+            var timetables = ttcTrain.staList.Select((stationData, i) => new TrainDiagramTimetable()
             {
-                TrainNumber = ttcTrain.trainNumber,
                 Index = i + 1,
                 StationId = stationData.stationID,
                 TrackNumber = stationData.stopPosName ?? "",
                 ArrivalTime = ConvertToTimeSpan(stationData.arrivalTime),
                 DepartureTime = ConvertToTimeSpan(stationData.departureTime)
-            }));
+            }).ToList();
+
+            trainTimetablesByTrainNumber[ttcTrain.trainNumber] = timetables;
         }
 
         // TrainDiagramの追加・更新
@@ -153,6 +154,23 @@ public class TrainDbInitializer(
         {
             await generalRepository.SaveAll(trainDiagramsToUpdate, cancellationToken);
             logger.LogInformation("Updated {Count} train diagrams", trainDiagramsToUpdate.Count);
+        }
+
+        // 全TrainDiagram(追加+更新)のIDを取得して、TrainDiagramIdを設定
+        var allDiagrams = await trainDiagramRepository.GetForTrainNumberByDiaId(diaId, cancellationToken);
+        var trainTimetables = new List<TrainDiagramTimetable>();
+
+        foreach (var (trainNumber, timetables) in trainTimetablesByTrainNumber)
+        {
+            if (!allDiagrams.TryGetValue(trainNumber, out var diagram))
+            {
+                continue;
+            }
+            foreach (var timetable in timetables)
+            {
+                timetable.TrainDiagramId = diagram.Id;
+                trainTimetables.Add(timetable);
+            }
         }
 
         // Timetablesを再追加
