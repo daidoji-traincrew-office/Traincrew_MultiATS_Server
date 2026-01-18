@@ -51,6 +51,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<LockConditionByRouteCentralControlLever> LockConditionByRouteCentralControlLevers { get; set; }
     public DbSet<UserDisconnectionState> UserDisconnectionStates { get; set; }
     public DbSet<TrainSignalState> TrainSignalStates { get; set; }
+    public DbSet<TrackCircuitDepartmentTime> TrackCircuitDepartmentTimes { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -250,6 +251,16 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
         modelBuilder.Entity<TrainDiagramTimetable>()
             .HasIndex(tdt => new { tdt.TrainNumber, tdt.Index })
+            .IsUnique();
+
+        modelBuilder.Entity<TrackCircuitDepartmentTime>()
+            .HasOne(tcdt => tcdt.TrackCircuit)
+            .WithMany()
+            .HasForeignKey(tcdt => tcdt.TrackCircuitId)
+            .HasPrincipalKey(tc => tc.Id);
+
+        modelBuilder.Entity<TrackCircuitDepartmentTime>()
+            .HasIndex(tcdt => new { tcdt.TrackCircuitId, tcdt.CarCount })
             .IsUnique();
 
         // Convert all column names to snake_case

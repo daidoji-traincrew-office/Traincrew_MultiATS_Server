@@ -133,6 +133,16 @@ CREATE TABLE track_circuit
 );
 CREATE INDEX track_circuit_operation_notification_display_name_index ON track_circuit (operation_notification_display_name);
 
+-- 軌道回路出発時素
+CREATE TABLE track_circuit_department_time
+(
+    id               SERIAL PRIMARY KEY,
+    track_circuit_id BIGINT NOT NULL REFERENCES track_circuit (id), -- 軌道回路ID
+    car_count        INT    NOT NULL,                                -- 両数（編成両数、0なら通過とみなす）
+    time_element     INT    NOT NULL                                 -- 時素
+);
+CREATE UNIQUE INDEX track_circuit_department_time_track_circuit_id_car_count_index ON track_circuit_department_time (track_circuit_id, car_count);
+
 -- 進路
 -- 場内信号機、出発信号機、誘導信号機、入換信号機、入換標識
 CREATE TYPE route_type AS ENUM ('arriving', 'departure', 'guide', 'switch_signal', 'switch_route');
