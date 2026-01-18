@@ -128,8 +128,11 @@ CREATE TABLE operation_notification_display
 CREATE TABLE track_circuit
 (
     id                                  BIGINT PRIMARY KEY REFERENCES interlocking_object (id),
-    protection_zone                     INT NOT NULL,                                                 -- 防護無線区間
-    operation_notification_display_name VARCHAR(100) REFERENCES operation_notification_display (name) -- 運転告知機の名前
+    protection_zone                     INT     NOT NULL,                                              -- 防護無線区間
+    operation_notification_display_name VARCHAR(100) REFERENCES operation_notification_display (name), -- 運転告知機の名前
+    is_station                          BOOLEAN NOT NULL,                                              -- 駅構内かどうか
+    up_station_id                       VARCHAR(10) REFERENCES station (id),                           -- 上り方駅ID
+    down_station_id                     VARCHAR(10) REFERENCES station (id)                            -- 下り方駅ID
 );
 CREATE INDEX track_circuit_operation_notification_display_name_index ON track_circuit (operation_notification_display_name);
 
