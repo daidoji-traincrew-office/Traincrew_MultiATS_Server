@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Traincrew_MultiATS_Server.Data;
+using Traincrew_MultiATS_Server.Models;
 
 namespace Traincrew_MultiATS_Server.Repositories.TrainDiagram;
 
@@ -9,6 +10,14 @@ public class TrainDiagramRepository(ApplicationDbContext context) : ITrainDiagra
     {
         return await context.TrainDiagrams
             .FirstOrDefaultAsync(td => td.TrainNumber == trainNumber);
+    }
+
+    public async Task<TrainDiagramTimetable?> GetTimetableByTrainNumberStationIdAndDiaId(int diaId, string trainNumber, string stationId)
+    {
+        return await context.TrainDiagramTimetables
+            .Include(tdt => tdt.TrainDiagram)
+            .Where(tdt => tdt.TrainDiagram!.DiaId == diaId && tdt.TrainDiagram.TrainNumber == trainNumber && tdt.StationId == stationId)
+            .FirstOrDefaultAsync();
     }
 
     public async Task<List<Models.TrainDiagram>> GetByTrainNumbers(ICollection<string> trainNumbers)

@@ -55,4 +55,12 @@ public class TrainRepository(ApplicationDbContext context) : ITrainRepository
         return await context.TrainStates
             .FirstOrDefaultAsync(ts => ts.Id == id);
     }
+
+
+    public async Task SetDelayByTrainNumber(string trainNumber, int delay)
+    {
+        await context.TrainStates
+            .Where(ts => ts.TrainNumber == trainNumber)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(ts => ts.Delay, delay));
+    }
 }

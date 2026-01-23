@@ -2,6 +2,8 @@ using System.Data;
 using System.Text.RegularExpressions;
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Models;
+using Traincrew_MultiATS_Server.Repositories;
+using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.General;
 using Traincrew_MultiATS_Server.Repositories.NextSignal;
 using Traincrew_MultiATS_Server.Repositories.Train;
@@ -27,6 +29,8 @@ public partial class TrainService(
     ServerService serverService,
     INextSignalRepository nextSignalRepository,
     ITrainSignalStateRepository trainSignalStateRepository,
+    ITrackCircuitDepartmentTimeRepository trackCircuitDepartmentTimeRepository,
+    IDateTimeRepository dateTimeRepository,
     ILogger<TrainService> logger
 )
 {
@@ -60,7 +64,7 @@ public partial class TrainService(
         var oldTrackCircuitDataList = oldTrackCircuitList.Select(TrackCircuitService.ToTrackCircuitData).ToList();
         // 新規登録軌道回路
         var incrementalTrackCircuitDataList = clientData.OnTrackList.Except(oldTrackCircuitDataList).ToList();
-        // 在線終了軌道回路    
+        // 在線終了軌道回路
         var decrementalTrackCircuitDataList = oldTrackCircuitDataList.Except(clientData.OnTrackList).ToList();
 
         // 軌道回路を取得しようとする
@@ -71,6 +75,8 @@ public partial class TrainService(
         if (trackCircuitList.Count != clientData.OnTrackList.Count)
         {
             trackCircuitList = oldTrackCircuitList;
+            incrementalTrackCircuitDataList.Clear();
+            decrementalTrackCircuitDataList.Clear();
         }
 
         // ☆情報は割と常に送るため共通で演算する
@@ -124,6 +130,18 @@ public partial class TrainService(
         serverData.NextSignalNames = await GetNextSignalNames(clientTrainNumber, clientData.VisibleSignalNames);
 
         await transaction.CommitAsync();
+
+        // 遅延計算
+        if (decrementalTrackCircuitDataList.Count > 0 && trainState != null)
+        {
+            const int diaId = 1; // 現在は固定値、将来的に複数ダイヤ対応
+            await CalculateAndUpdateDelays(
+                diaId,
+                clientTrainNumber,
+                clientData.CarStates.Count,
+                decrementalTrackCircuitDataList);
+        }
+
         return serverData;
     }
 
@@ -461,7 +479,7 @@ public partial class TrainService(
 
     /// <summary>
     /// TrainCarState更新
-    /// </summary> 
+    /// </summary>
     private async Task UpdateTrainCarStates(long trainStateId, List<CarState> carStates)
     {
         var trainCarStates = carStates.Select(cs => new TrainCarState
@@ -621,5 +639,69 @@ public partial class TrainService(
             .Concat(nextSignals.Select(ns => ns.TargetSignalName))
             .Distinct()
             .ToList();
+    }
+
+
+    /// <summary>
+    /// 遅延を計算して更新する
+    /// </summary>
+    /// <param name="diaId">ダイヤID</param>
+    /// <param name="trainNumber">列車番号</param>
+    /// <param name="carCount">車両両数</param>
+    /// <param name="decrementalTrackCircuitDataList">在線終了軌道回路リスト</param>
+    private async Task CalculateAndUpdateDelays(
+        int diaId,
+        string trainNumber,
+        int carCount,
+        List<TrackCircuitData> decrementalTrackCircuitDataList)
+    {
+        // 軌道回路名から軌道回路を取得
+        var trackCircuitNames = decrementalTrackCircuitDataList.Select(tc => tc.Name).ToList();
+        var trackCircuits = await trackCircuitService.GetTrackCircuitsByNames(trackCircuitNames);
+
+        // 駅軌道回路のみフィルタ
+        var stationTrackCircuits = trackCircuits.Where(tc => tc.IsStation).ToList();
+
+        // 各駅軌道回路に対して遅延を計算
+        foreach (var trackCircuit in stationTrackCircuits)
+        {
+            // 時刻表を取得
+            var timetable = await trainDiagramRepository.GetTimetableByTrainNumberStationIdAndDiaId(
+                diaId, trainNumber, trackCircuit.UpStationId);
+
+            if (timetable?.DepartureTime == null)
+            {
+                continue;
+            }
+
+            // 両数を決定: 到着時刻と出発時刻が同じなら0（通過扱い）
+            var carCountToUse = (timetable.ArrivalTime == timetable.DepartureTime) ? 0 : carCount;
+
+            // 出発時素を取得
+            var departmentTime = await trackCircuitDepartmentTimeRepository
+                .GetByTrackCircuitIdAndMaxCarCount(trackCircuit.Id, carCountToUse);
+
+            var timeElement = 0;
+            if (departmentTime == null)
+            {
+                logger.LogWarning(
+                    "出発時素が見つかりませんでした。TrackCircuit: {TrackCircuitId}, CarCount: {CarCount}",
+                    trackCircuit.Id, carCountToUse);
+            }
+            else
+            {
+                timeElement = departmentTime.TimeElement;
+            }
+
+            // 遅延を計算
+            var currentTime = dateTimeRepository.GetNow().TimeOfDay;
+            var timeOffset = await serverService.GetTimeOffsetAsync();
+            var departureTimeSeconds = timetable.DepartureTime.Value.TotalSeconds % 86400;
+            var delaySeconds = currentTime.TotalSeconds + timeOffset - departureTimeSeconds + timeElement;
+            var delayMinutes = (int)Math.Round(delaySeconds / 60.0, MidpointRounding.ToZero);
+
+            // 遅延を更新
+            await trainRepository.SetDelayByTrainNumber(trainNumber, delayMinutes);
+        }
     }
 }

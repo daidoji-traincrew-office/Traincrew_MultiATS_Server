@@ -55,4 +55,12 @@ public interface ITrainRepository
     /// </summary>
     /// <param name="trainState">列車状態</param>
     Task Update(TrainState trainState);
+
+
+    /// <summary>
+    /// 列車番号を指定して遅延時間を設定する
+    /// </summary>
+    /// <param name="trainNumber">列車番号</param>
+    /// <param name="delay">遅延時間(分)</param>
+    Task SetDelayByTrainNumber(string trainNumber, int delay);
 }
