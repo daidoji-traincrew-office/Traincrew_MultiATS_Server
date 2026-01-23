@@ -50,6 +50,7 @@ using Traincrew_MultiATS_Server.Repositories.SwitchingMachine;
 using Traincrew_MultiATS_Server.Repositories.SwitchingMachineRoute;
 using Traincrew_MultiATS_Server.Repositories.ThrowOutControl;
 using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
+using Traincrew_MultiATS_Server.Repositories.TrackCircuitDepartmentTime;
 using Traincrew_MultiATS_Server.Repositories.TrackCircuitSignal;
 using Traincrew_MultiATS_Server.Repositories.Train;
 using Traincrew_MultiATS_Server.Repositories.TrainCar;
@@ -535,6 +536,7 @@ public class Program
             .AddScoped<ISwitchingMachineRouteRepository, SwitchingMachineRouteRepository>()
             .AddScoped<IThrowOutControlRepository, ThrowOutControlRepository>()
             .AddScoped<ITrackCircuitRepository, TrackCircuitRepository>()
+            .AddScoped<ITrackCircuitDepartmentTimeRepository, TrackCircuitDepartmentTimeRepository>()
             .AddScoped<ITrackCircuitSignalRepository, TrackCircuitSignalRepository>()
             .AddScoped<ITrainRepository, TrainRepository>()
             .AddScoped<ITrainCarRepository, TrainCarRepository>()
