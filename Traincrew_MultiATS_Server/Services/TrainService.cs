@@ -48,6 +48,7 @@ public partial class TrainService(
                 StatusFlags = ServerStatusFlags.IsServerStopped
             };
         }
+
         // 接続拒否チェック
         var isBanned = await bannedUserService.IsUserBannedAsync(clientDriverId);
         if (isBanned)
@@ -114,6 +115,7 @@ public partial class TrainService(
                 string.Join(", ", incrementalTrackCircuitDataList.Select(tc => tc.Name)),
                 string.Join(", ", decrementalTrackCircuitDataList.Select(tc => tc.Name)));
         }
+
         await trackCircuitService.SetTrackCircuitDataList(incrementalTrackCircuitDataList, clientTrainNumber);
         await trackCircuitService.ClearTrackCircuitDataList(decrementalTrackCircuitDataList);
 
@@ -314,7 +316,8 @@ public partial class TrainService(
             if (existingTrainStateByMe != null)
             {
                 // 同一運番の旧列番で在線を取得しなおす
-                var oldTrackCircuitList = await trackCircuitService.GetTrackCircuitsByTrainNumber(existingTrainStateByMe.TrainNumber);
+                var oldTrackCircuitList =
+                    await trackCircuitService.GetTrackCircuitsByTrainNumber(existingTrainStateByMe.TrainNumber);
                 var oldTrackCircuitNames = oldTrackCircuitList.Select(tc => tc.Name).ToHashSet();
                 // ワープのおそれがある場合「ワープ？」を返す
                 if (
@@ -674,8 +677,10 @@ public partial class TrainService(
                 continue;
             }
 
-            // 両数を決定: 到着時刻と出発時刻が同じなら0（通過扱い）
-            var carCountToUse = (timetable.ArrivalTime == timetable.DepartureTime) ? 0 : carCount;
+            // 両数を決定: 到着時刻と出発時刻が同じで始発駅でないなら0（通過扱い）
+            var carCountToUse = (timetable.ArrivalTime == timetable.DepartureTime && timetable.Index != 1)
+                ? 0
+                : carCount;
 
             // 出発時素を取得
             var departmentTime = await trackCircuitDepartmentTimeRepository
