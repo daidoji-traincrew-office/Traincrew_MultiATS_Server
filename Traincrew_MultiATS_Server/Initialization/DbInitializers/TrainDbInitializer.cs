@@ -89,7 +89,7 @@ public class TrainDbInitializer(
         var trainDiagramsToUpdate = new List<TrainDiagram>();
         var trainTimetablesByTrainNumber = new Dictionary<string, List<TrainDiagramTimetable>>();
 
-        foreach (var ttcTrain in ttcData.trainList)
+        foreach (var ttcTrain in ttcData.TrainList)
         {
             if (string.IsNullOrWhiteSpace(ttcTrain.trainNumber))
             {
