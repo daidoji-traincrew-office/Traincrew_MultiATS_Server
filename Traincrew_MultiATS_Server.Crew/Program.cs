@@ -20,6 +20,7 @@ using Traincrew_MultiATS_Server.Hubs;
 using Traincrew_MultiATS_Server.Initialization;
 using Traincrew_MultiATS_Server.Initialization.CsvLoaders;
 using Traincrew_MultiATS_Server.Initialization.DbInitializers;
+using Traincrew_MultiATS_Server.Initialization.JsonLoaders;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.DestinationButton;
 using Traincrew_MultiATS_Server.Repositories.DirectionRoute;
@@ -492,6 +493,8 @@ public class Program
             .AddScoped<TtcWindowLinkCsvLoader>()
             .AddScoped<ThrowOutControlCsvLoader>()
             .AddScoped<SignalCsvLoader>()
+            // JSON Loaders
+            .AddScoped<TtcDataJsonLoader>()
             // DB Initializers
             .AddScoped<StationDbInitializer>()
             .AddScoped<TrackCircuitDbInitializer>()
