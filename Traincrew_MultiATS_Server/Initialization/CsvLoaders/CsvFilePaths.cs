@@ -69,4 +69,9 @@ public static class CsvFilePaths
     ///     RendoTable directory
     /// </summary>
     public const string RendoTableDirectory = $"{DataDirectory}/RendoTable";
+
+    /// <summary>
+    ///     ttc_data_train.json
+    /// </summary>
+    public const string TtcDataTrain = $"{DataDirectory}/ttc_data_train.json";
 }
