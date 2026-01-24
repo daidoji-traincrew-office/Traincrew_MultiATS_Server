@@ -139,9 +139,10 @@ CREATE INDEX track_circuit_operation_notification_display_name_index ON track_ci
 CREATE TABLE track_circuit_department_time
 (
     id               SERIAL PRIMARY KEY,
-    track_circuit_id BIGINT NOT NULL REFERENCES track_circuit (id), -- 軌道回路ID
-    car_count        INT    NOT NULL,                               -- 両数（編成両数、0なら通過とみなす）
-    time_element     INT    NOT NULL                                -- 時素
+    track_circuit_id BIGINT  NOT NULL REFERENCES track_circuit (id), -- 軌道回路ID
+    car_count        INT     NOT NULL,                               -- 両数（編成両数、0なら通過とみなす）
+    time_element     INT     NOT NULL,                               -- 時素
+    is_up            BOOLEAN NOT NULL                                -- 上りか下りか
 );
 CREATE UNIQUE INDEX track_circuit_department_time_track_circuit_id_car_count_index ON track_circuit_department_time (track_circuit_id, car_count);
 

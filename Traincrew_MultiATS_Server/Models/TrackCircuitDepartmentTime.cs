@@ -20,6 +20,9 @@ public class TrackCircuitDepartmentTime
     [Column("time_element")]
     public int TimeElement { get; set; }
 
+    [Column("is_up")]
+    public bool IsUp { get; set; }
+
     // ナビゲーションプロパティ
     [ForeignKey(nameof(TrackCircuitId))]
     public TrackCircuit? TrackCircuit { get; set; }
