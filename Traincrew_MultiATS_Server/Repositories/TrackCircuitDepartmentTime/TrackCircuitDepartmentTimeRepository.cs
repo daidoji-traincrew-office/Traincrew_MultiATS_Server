@@ -6,11 +6,15 @@ namespace Traincrew_MultiATS_Server.Repositories.TrackCircuitDepartmentTime;
 public class TrackCircuitDepartmentTimeRepository(ApplicationDbContext context)
     : ITrackCircuitDepartmentTimeRepository
 {
-    public async Task<Models.TrackCircuitDepartmentTime?> GetByTrackCircuitIdAndMaxCarCount(ulong trackCircuitId,
+    public async Task<Models.TrackCircuitDepartmentTime?> GetByTrackCircuitIdAndIsUpAndMaxCarCount(
+        ulong trackCircuitId,
+        bool isUp,
         int maxCarCount)
     {
         return await context.TrackCircuitDepartmentTimes
-            .Where(tcdt => tcdt.TrackCircuitId == trackCircuitId && tcdt.CarCount <= maxCarCount)
+            .Where(tcdt => tcdt.TrackCircuitId == trackCircuitId
+                        && tcdt.IsUp == isUp
+                        && tcdt.CarCount <= maxCarCount)
             .OrderByDescending(tcdt => tcdt.CarCount)
             .FirstOrDefaultAsync();
     }
