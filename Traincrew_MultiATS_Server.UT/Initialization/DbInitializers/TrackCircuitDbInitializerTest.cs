@@ -7,6 +7,7 @@ using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.General;
 using Traincrew_MultiATS_Server.Repositories.Signal;
 using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
+using Traincrew_MultiATS_Server.Repositories.TrackCircuitDepartmentTime;
 using Traincrew_MultiATS_Server.Repositories.TrackCircuitSignal;
 
 namespace Traincrew_MultiATS_Server.UT.Initialization.DbInitializers;
@@ -18,6 +19,7 @@ public class TrackCircuitDbInitializerTest
     private readonly Mock<ISignalRepository> _signalRepositoryMock = new();
     private readonly Mock<ITrackCircuitSignalRepository> _trackCircuitSignalRepositoryMock = new();
     private readonly Mock<IGeneralRepository> _generalRepositoryMock = new();
+    private readonly Mock<ITrackCircuitDepartmentTimeRepository> _trackCircuitDepartmentTimeRepositoryMock = new();
 
     [Fact]
     [DisplayName("データが有効な場合、軌道回路が正常に追加されること")]
@@ -50,7 +52,8 @@ public class TrackCircuitDbInitializerTest
             _trackCircuitRepositoryMock.Object,
             _signalRepositoryMock.Object,
             _trackCircuitSignalRepositoryMock.Object,
-            _generalRepositoryMock.Object);
+            _generalRepositoryMock.Object,
+            _trackCircuitDepartmentTimeRepositoryMock.Object);
 
         // Act
         await initializer.InitializeTrackCircuitsAsync(trackCircuitCsvList, TestContext.Current.CancellationToken);
@@ -97,7 +100,8 @@ public class TrackCircuitDbInitializerTest
             _trackCircuitRepositoryMock.Object,
             _signalRepositoryMock.Object,
             _trackCircuitSignalRepositoryMock.Object,
-            _generalRepositoryMock.Object);
+            _generalRepositoryMock.Object,
+            _trackCircuitDepartmentTimeRepositoryMock.Object);
 
         // Act
         await initializer.InitializeTrackCircuitsAsync(trackCircuitCsvList, TestContext.Current.CancellationToken);
@@ -132,7 +136,8 @@ public class TrackCircuitDbInitializerTest
             _trackCircuitRepositoryMock.Object,
             _signalRepositoryMock.Object,
             _trackCircuitSignalRepositoryMock.Object,
-            _generalRepositoryMock.Object);
+            _generalRepositoryMock.Object,
+            _trackCircuitDepartmentTimeRepositoryMock.Object);
 
         // Act
         await initializer.InitializeTrackCircuitsAsync(trackCircuitCsvList, TestContext.Current.CancellationToken);
@@ -188,7 +193,8 @@ public class TrackCircuitDbInitializerTest
             _trackCircuitRepositoryMock.Object,
             _signalRepositoryMock.Object,
             _trackCircuitSignalRepositoryMock.Object,
-            _generalRepositoryMock.Object);
+            _generalRepositoryMock.Object,
+            _trackCircuitDepartmentTimeRepositoryMock.Object);
 
         // Act
         await initializer.InitializeTrackCircuitSignalsAsync(trackCircuitCsvList, TestContext.Current.CancellationToken);
@@ -246,7 +252,8 @@ public class TrackCircuitDbInitializerTest
             _trackCircuitRepositoryMock.Object,
             _signalRepositoryMock.Object,
             _trackCircuitSignalRepositoryMock.Object,
-            _generalRepositoryMock.Object);
+            _generalRepositoryMock.Object,
+            _trackCircuitDepartmentTimeRepositoryMock.Object);
 
         // Act
         await initializer.InitializeTrackCircuitSignalsAsync(trackCircuitCsvList, TestContext.Current.CancellationToken);
@@ -295,7 +302,8 @@ public class TrackCircuitDbInitializerTest
             _trackCircuitRepositoryMock.Object,
             _signalRepositoryMock.Object,
             _trackCircuitSignalRepositoryMock.Object,
-            _generalRepositoryMock.Object);
+            _generalRepositoryMock.Object,
+            _trackCircuitDepartmentTimeRepositoryMock.Object);
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(
@@ -343,7 +351,8 @@ public class TrackCircuitDbInitializerTest
             _trackCircuitRepositoryMock.Object,
             _signalRepositoryMock.Object,
             _trackCircuitSignalRepositoryMock.Object,
-            _generalRepositoryMock.Object);
+            _generalRepositoryMock.Object,
+            _trackCircuitDepartmentTimeRepositoryMock.Object);
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(
@@ -363,7 +372,8 @@ public class TrackCircuitDbInitializerTest
             _trackCircuitRepositoryMock.Object,
             _signalRepositoryMock.Object,
             _trackCircuitSignalRepositoryMock.Object,
-            _generalRepositoryMock.Object);
+            _generalRepositoryMock.Object,
+            _trackCircuitDepartmentTimeRepositoryMock.Object);
 
         // Act
         await initializer.InitializeAsync(TestContext.Current.CancellationToken);
@@ -401,7 +411,8 @@ public class TrackCircuitDbInitializerTest
             _trackCircuitRepositoryMock.Object,
             _signalRepositoryMock.Object,
             _trackCircuitSignalRepositoryMock.Object,
-            _generalRepositoryMock.Object);
+            _generalRepositoryMock.Object,
+            _trackCircuitDepartmentTimeRepositoryMock.Object);
 
         // Act
         await initializer.InitializeTrackCircuitsAsync(trackCircuitCsvList, TestContext.Current.CancellationToken);
