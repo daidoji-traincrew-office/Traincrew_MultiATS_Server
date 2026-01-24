@@ -17,16 +17,10 @@ public class TrackCircuit : InterlockingObject
     [Column("is_station")]
     public bool IsStation { get; set; }
 
-    [Column("up_station_id")]
-    public string? UpStationId { get; set; }
-
-    [Column("down_station_id")]
-    public string? DownStationId { get; set; }
+    [Column("station_id_for_delay")]
+    public string? StationIdForDelay { get; set; }
 
     // ナビゲーションプロパティ
-    [ForeignKey(nameof(UpStationId))]
-    public virtual Station? UpStation { get; set; }
-
-    [ForeignKey(nameof(DownStationId))]
-    public virtual Station? DownStation { get; set; }
+    [ForeignKey(nameof(StationIdForDelay))]
+    public virtual Station? StationForDelay { get; set; }
 }
