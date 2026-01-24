@@ -662,8 +662,8 @@ public partial class TrainService(
         var trackCircuitNames = decrementalTrackCircuitDataList.Select(tc => tc.Name).ToList();
         var trackCircuits = await trackCircuitService.GetTrackCircuitsByNames(trackCircuitNames);
 
-        // 駅軌道回路のみフィルタ
-        var stationTrackCircuits = trackCircuits.Where(tc => tc.IsStation).ToList();
+        // 駅軌道回路のみフィルタ（StationIdForDelayが設定されている軌道回路）
+        var stationTrackCircuits = trackCircuits.Where(tc => tc.StationIdForDelay != null).ToList();
 
         // 上り下り判定
         var isUp = IsTrainUpOrDown(trainNumber);
