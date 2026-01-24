@@ -95,7 +95,7 @@ jobs:
           gh pr create \
             --title "マスター更新 $(date +'%Y%m%d')" \
             --reviewer Kesigomon,${{ github.actor }} \
-            --base ${{ github.base_ref }} \
+            --base ${{ github.ref_name }} \
             --body "$(cat <<'EOF'
           ## 概要
           Googleスプレッドシートからマスターデータを更新しました。
