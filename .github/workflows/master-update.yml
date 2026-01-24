@@ -34,7 +34,7 @@ jobs:
         run: |
           BRANCH_NAME="master_update/$(date +'%Y%m%d')"
           echo "name=$BRANCH_NAME" >> $GITHUB_OUTPUT
-      
+
       - name: Configure Git
         run: |
           git config user.name "github-actions[bot]"
@@ -95,6 +95,7 @@ jobs:
           gh pr create \
             --title "マスター更新 $(date +'%Y%m%d')" \
             --reviewer Kesigomon,${{ github.actor }} \
+            --base ${{ github.base_ref }} \
             --body "$(cat <<'EOF'
           ## 概要
           Googleスプレッドシートからマスターデータを更新しました。
