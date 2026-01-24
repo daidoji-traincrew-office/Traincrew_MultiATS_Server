@@ -114,6 +114,9 @@ public class DatabaseInitializationOrchestrator(
         // Phase 23: TrackCircuitDbInitializer - 軌道回路信号の初期化
         await trackCircuitDbInitializer.InitializeTrackCircuitSignalsAsync(trackCircuitList, cancellationToken);
 
+        // Phase 23.5: TrackCircuitDbInitializer - 軌道回路出発時素の初期化
+        await trackCircuitDbInitializer.InitializeTrackCircuitDepartmentTimesAsync(trackCircuitList, cancellationToken);
+
         DetachUnchangedEntities();
 
         // 常に最新化するため、既存のデータを削除する
