@@ -18,4 +18,13 @@ public class TrackCircuitDepartmentTimeRepository(ApplicationDbContext context)
             .OrderByDescending(tcdt => tcdt.CarCount)
             .FirstOrDefaultAsync();
     }
+
+    public async Task<List<Models.TrackCircuitDepartmentTime>> GetByTrackCircuitIds(
+        List<ulong> trackCircuitIds,
+        CancellationToken cancellationToken = default)
+    {
+        return await context.TrackCircuitDepartmentTimes
+            .Where(tcdt => trackCircuitIds.Contains(tcdt.TrackCircuitId))
+            .ToListAsync(cancellationToken);
+    }
 }
