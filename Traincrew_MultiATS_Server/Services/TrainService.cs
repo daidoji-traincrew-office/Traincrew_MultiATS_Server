@@ -665,6 +665,9 @@ public partial class TrainService(
         // 駅軌道回路のみフィルタ
         var stationTrackCircuits = trackCircuits.Where(tc => tc.IsStation).ToList();
 
+        // 上り下り判定
+        var isUp = IsTrainUpOrDown(trainNumber);
+
         // 各駅軌道回路に対して遅延を計算
         foreach (var trackCircuit in stationTrackCircuits)
         {
@@ -684,14 +687,14 @@ public partial class TrainService(
 
             // 出発時素を取得
             var departmentTime = await trackCircuitDepartmentTimeRepository
-                .GetByTrackCircuitIdAndMaxCarCount(trackCircuit.Id, carCountToUse);
+                .GetByTrackCircuitIdAndIsUpAndMaxCarCount(trackCircuit.Id, isUp, carCountToUse);
 
             var timeElement = 0;
             if (departmentTime == null)
             {
                 logger.LogWarning(
-                    "出発時素が見つかりませんでした。TrackCircuit: {TrackCircuitId}, CarCount: {CarCount}",
-                    trackCircuit.Id, carCountToUse);
+                    "出発時素が見つかりませんでした。TrackCircuit: {TrackCircuitId}, IsUp: {IsUp}, CarCount: {CarCount}",
+                    trackCircuit.Id, isUp, carCountToUse);
             }
             else
             {
