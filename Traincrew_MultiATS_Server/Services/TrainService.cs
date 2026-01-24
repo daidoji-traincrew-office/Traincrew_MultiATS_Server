@@ -670,7 +670,7 @@ public partial class TrainService(
         {
             // 時刻表を取得
             var timetable = await trainDiagramRepository.GetTimetableByTrainNumberStationIdAndDiaId(
-                diaId, trainNumber, trackCircuit.UpStationId);
+                diaId, trainNumber, trackCircuit.StationIdForDelay);
 
             if (timetable?.DepartureTime == null)
             {

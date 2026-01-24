@@ -131,8 +131,7 @@ CREATE TABLE track_circuit
     protection_zone                     INT     NOT NULL,                                              -- 防護無線区間
     operation_notification_display_name VARCHAR(100) REFERENCES operation_notification_display (name), -- 運転告知機の名前
     is_station                          BOOLEAN NOT NULL,                                              -- 駅構内かどうか
-    up_station_id                       VARCHAR(10) REFERENCES station (id),                           -- 上り方駅ID
-    down_station_id                     VARCHAR(10) REFERENCES station (id)                            -- 下り方駅ID
+    station_id_for_delay                VARCHAR(10) REFERENCES station (id)                            -- 遅延計算用駅ID
 );
 CREATE INDEX track_circuit_operation_notification_display_name_index ON track_circuit (operation_notification_display_name);
 
