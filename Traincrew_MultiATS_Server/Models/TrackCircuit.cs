@@ -14,9 +14,6 @@ public class TrackCircuit : InterlockingObject
 
     public virtual OperationNotificationDisplay? OperationNotificationDisplay { get; set; } // 告知器との関連
 
-    [Column("is_station")]
-    public bool IsStation { get; set; }
-
     [Column("station_id_for_delay")]
     public string? StationIdForDelay { get; set; }
 
