@@ -52,7 +52,7 @@ public class ServerService(
         }
     }
 
-    public async Task<int> GetTimeOffsetAsync()
+    public virtual async Task<int> GetTimeOffsetAsync()
     {
         return await serverRepository.GetTimeOffset();
     }

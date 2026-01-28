@@ -18,7 +18,7 @@ public class TrackCircuitService(
         return trackCircuitDataList;
     }
 
-    public async Task<List<TrackCircuit>> GetTrackCircuitsByNames(List<string> trackCircuitNames)
+    public virtual async Task<List<TrackCircuit>> GetTrackCircuitsByNames(List<string> trackCircuitNames)
     {
         return await trackCircuitRepository.GetTrackCircuitByName(trackCircuitNames);
     }
