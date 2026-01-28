@@ -722,11 +722,13 @@ public class TrainServiceTest
         await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList);
 
         // Assert
-        // NOTE: 現在の実装では日付をまたぐケースが正しく処理されていません
+        // 営業日境界を考慮した正しい計算
         // 期待値: 3分遅れ (00:02 - 23:59 = 3分)
-        // 実際の計算: 122秒 - 86340秒 = -86218秒 = -1437分
-        // TODO: TrainService.CalculateAndUpdateDelaysで日付をまたぐケースの処理を修正する必要があります
-        mockTrainRepository.Verify(x => x.SetDelayByTrainNumber(trainNumber, -1437), Times.Once);
+        // 営業日開始時刻(4:00)を基準に正規化:
+        //   - 23:59は4:00以降なので: 86340秒
+        //   - 00:02は4:00より前なので: 120 + 86400 = 86520秒
+        //   - 遅延 = 86520 - 86340 = 180秒 = 3分
+        mockTrainRepository.Verify(x => x.SetDelayByTrainNumber(trainNumber, 3), Times.Once);
     }
 
     [Fact]
@@ -777,11 +779,13 @@ public class TrainServiceTest
         await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList);
 
         // Assert
-        // NOTE: 現在の実装では日付をまたぐケースが正しく処理されていません
+        // 営業日境界を考慮した正しい計算
         // 期待値: -7分早い (23:58 - 00:05 = -7分)
-        // 実際の計算: 86280秒 - 300秒 = 85980秒 = 1433分
-        // TODO: TrainService.CalculateAndUpdateDelaysで日付をまたぐケースの処理を修正する必要があります
-        mockTrainRepository.Verify(x => x.SetDelayByTrainNumber(trainNumber, 1433), Times.Once);
+        // 営業日開始時刻(4:00)を基準に正規化:
+        //   - 23:58は4:00以降なので: 86280秒
+        //   - 00:05は4:00より前なので: 300 + 86400 = 86700秒
+        //   - 遅延 = 86280 - 86700 = -420秒 = -7分
+        mockTrainRepository.Verify(x => x.SetDelayByTrainNumber(trainNumber, -7), Times.Once);
     }
 
     [Fact]
