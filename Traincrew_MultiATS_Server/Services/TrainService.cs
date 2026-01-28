@@ -652,7 +652,7 @@ public partial class TrainService(
     /// <param name="trainNumber">列車番号</param>
     /// <param name="carCount">車両両数</param>
     /// <param name="decrementalTrackCircuitDataList">在線終了軌道回路リスト</param>
-    private async Task CalculateAndUpdateDelays(
+    public async Task CalculateAndUpdateDelays(
         int diaId,
         string trainNumber,
         int carCount,
