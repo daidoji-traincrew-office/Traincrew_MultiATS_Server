@@ -264,7 +264,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasPrincipalKey(tc => tc.Id);
 
         modelBuilder.Entity<TrackCircuitDepartmentTime>()
-            .HasIndex(tcdt => new { tcdt.TrackCircuitId, tcdt.CarCount })
+            .HasIndex(tcdt => new { tcdt.TrackCircuitId, tcdt.CarCount, tcdt.IsUp })
             .IsUnique();
 
         // Convert all column names to snake_case
