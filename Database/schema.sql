@@ -143,7 +143,7 @@ CREATE TABLE track_circuit_department_time
     time_element     INT     NOT NULL,                               -- 時素
     is_up            BOOLEAN NOT NULL                                -- 上りか下りか
 );
-CREATE UNIQUE INDEX track_circuit_department_time_track_circuit_id_car_count_index ON track_circuit_department_time (track_circuit_id, car_count);
+CREATE UNIQUE INDEX track_circuit_department_time_track_circuit_id_car_count_is_up_index ON track_circuit_department_time (track_circuit_id, car_count, is_up);
 
 -- 進路
 -- 場内信号機、出発信号機、誘導信号機、入換信号機、入換標識
