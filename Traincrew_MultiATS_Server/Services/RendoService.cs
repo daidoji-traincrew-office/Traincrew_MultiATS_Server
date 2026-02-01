@@ -531,8 +531,6 @@ public class RendoService(
                         )
                         ||
                         isThrowOutYSRelayRaised == RaiseDrop.Raise
-                        ||
-                        isThrowOutXRRelayRaised == RaiseDrop.Raise
                     )
                     &&
                     (
@@ -552,8 +550,6 @@ public class RendoService(
                                 sr.RouteState.IsLeverRelayRaised == RaiseDrop.Drop
                             )
                         )
-                        ||
-                        isThrowOutXRRelayRaised == RaiseDrop.Raise
                     )
                         ? RaiseDrop.Raise
                         : RaiseDrop.Drop;
