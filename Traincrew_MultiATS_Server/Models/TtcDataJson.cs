@@ -1,11 +1,8 @@
-using Newtonsoft.Json;
-
 namespace Traincrew_MultiATS_Server.Models;
 
 [Serializable]
 public class TTC_Data
 {
-    [JsonProperty("trainList")]
     public List<TTC_Train> TrainList = [];
     // public List<TTC_Station> stationList = new List<TTC_Station>();
 

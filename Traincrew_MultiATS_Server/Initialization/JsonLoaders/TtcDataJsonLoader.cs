@@ -16,6 +16,7 @@ public class TtcDataJsonLoader(ILogger<TtcDataJsonLoader> logger) : BaseJsonLoad
         {
             PropertyNameCaseInsensitive = true,
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            IncludeFields = true, // Enable field deserialization for TTC_Train and TTC_StationData
             Converters =
             {
                 new TtcStationDataJsonConverter()
