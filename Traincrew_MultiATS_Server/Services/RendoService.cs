@@ -79,7 +79,7 @@ public class RendoService(
         var routes = await routeRepository.GetByIdsWithState(routeIds);
         var routeById = routes.ToDictionary(r => r.Id);
 
-        // 駅扱いてこごとにループし、 
+        // 駅扱いてこごとにループし、
         // 鎖錠欄に記載されている進路のてこ反応リレーがすべて落下している場合のみ、ChrRelayを扛上させる
         var lockConditionsByLeverId = lockConditions
             .GroupBy(lc => lc.RouteCentralControlLeverId)
@@ -249,7 +249,7 @@ public class RendoService(
             var lockCondition = lockConditions.GetValueOrDefault(route.Id, []);
 
             // 信号制御条件
-            var signalControlCondition = signalControlConditions[route.Id];
+            var signalControlCondition = signalControlConditions.GetValueOrDefault(route.Id, []);
 
             // てこ・ボタン情報の取得
             var routeCentralControlLever = routeCentralControlLeverByRouteIds.GetValueOrDefault(route.Id);
@@ -320,7 +320,7 @@ public class RendoService(
         Route route,
         RouteLeverDestinationButton routeLeverDestinationButton,
         Lever? lever,
-        DestinationButton? button,
+        DestinationButton button,
         RouteCentralControlLever? routeCentralControlLever,
         List<ThrowOutControl> sourceThrowOutControls,
         List<ThrowOutControl> targetThrowOutControls,
@@ -536,7 +536,7 @@ public class RendoService(
                     )
                     &&
                     (
-                        button!.DestinationButtonState.IsRaised == RaiseDrop.Raise
+                        button.DestinationButtonState.IsRaised == RaiseDrop.Raise
                         ||
                         (
                             routeState.IsLeverRelayRaised == RaiseDrop.Raise
@@ -582,7 +582,7 @@ public class RendoService(
     /// <strong>転てつ器無し進路照査リレー回路</strong><br/>
     /// 現在の状態から、転てつ器以外の進路が確保され、TCに進路指示を出していいか決定する。
     /// </summary>
-    /// <returns></returns> 
+    /// <returns></returns>
     public async Task RouteRelayWithoutSwitchingMachine()
     {
         // まず、てこ反応リレーが落下しているすべての進路の進路リレーをすべて落下させる
@@ -629,7 +629,7 @@ public class RendoService(
     /// <strong>進路照査リレー回路</strong><br/>
     /// 現在の状態から、進路が確保されているか決定する。
     /// </summary>
-    /// <returns></returns>   
+    /// <returns></returns>
     public async Task RouteRelay()
     {
         // まず、転てつ器無し進路照査リレーが落下しているすべての進路の進路リレーをすべて落下させる
@@ -742,7 +742,7 @@ public class RendoService(
             return RaiseDrop.Drop;
         }
 
-        // 進路の信号制御欄の条件を満たしているか確認  
+        // 進路の信号制御欄の条件を満たしているか確認
         if (!IsEnsuredRouteBySignalControlConditions(signalControlConditions, interlockingObjects))
         {
             return RaiseDrop.Drop;
@@ -996,7 +996,7 @@ public class RendoService(
             var directionSelfControlLever =
                 directionSelfControlLevers[directionRoute.DirectionSelfControlLeverId.Value];
 
-            // 運転方向鎖錠リレー    
+            // 運転方向鎖錠リレー
             // 対応する鎖錠軌道回路を取得
             var lockTrackCircuits = lockConditionDict[directionRouteId]
                 .OfType<LockConditionObject>()
@@ -1028,7 +1028,7 @@ public class RendoService(
                 ? RaiseDrop.Raise
                 : RaiseDrop.Drop;
 
-            // 総括リレー      
+            // 総括リレー
             // thisLeftThrowOutControlsのSourceの進路のてこ反応リレー扛上と、ConditionLeverの状態を確認する
             bool PredicateIsYsRelayRaised(ThrowOutControl t) =>
                 (interlockingObjects[t.SourceId] as Route).RouteState.IsLeverRelayRaised == RaiseDrop.Raise
@@ -1292,7 +1292,7 @@ public class RendoService(
     }
 
 
-    // Todo: 接近鎖錠リレー回路     
+    // Todo: 接近鎖錠リレー回路
 
     public async Task ApproachLockRelay()
     {
@@ -1305,7 +1305,7 @@ public class RendoService(
         // 進路鎖錠するべき軌道回路IDを取得
         var routeLockTrackCircuitList = await routeLockTrackCircuitRepository.GetByRouteIds(routeIds);
 
-        // 関わる全てのObjectを取得 
+        // 関わる全てのObjectを取得
         var objectIds = routeIds
             .Union(approachLockConditions.Values.SelectMany(ExtractObjectIdsFromLockCondtions))
             .Union(routeLockTrackCircuitList.Select(rltc => rltc.TrackCircuitId))
@@ -1416,7 +1416,7 @@ public class RendoService(
                     ? RaiseDrop.Raise
                     : RaiseDrop.Drop;
 
-            //　それぞれ現在と異なる場合、更新       
+            //　それぞれ現在と異なる場合、更新
             if (route.RouteState.IsApproachLockMSRaised == isApproachLockMSRaised
                 && route.RouteState.IsApproachLockMRRaised == isApproachLockMRRaised)
             {
@@ -1514,8 +1514,8 @@ public class RendoService(
                 route.RouteState.IsApproachLockMRRaised == RaiseDrop.Raise
                 && route.RouteState.IsRouteLockRaised == RaiseDrop.Drop)
             {
-                // 各進路鎖錠区切りごとに、前の軌道回路が鎖錠されていない && 自軌道回路全てが短絡されていない → 当該軌道回路を解錠する 
-                // 区切りに対して時間条件が存在する場合、前の軌道回路が解錠された瞬間+既定秒数をUnlockedAtに記録し、UnlockedAtを過ぎたら解錠、解錠されたらUnlockedAtをnullにする    
+                // 各進路鎖錠区切りごとに、前の軌道回路が鎖錠されていない && 自軌道回路全てが短絡されていない → 当該軌道回路を解錠する
+                // 区切りに対して時間条件が存在する場合、前の軌道回路が解錠された瞬間+既定秒数をUnlockedAtに記録し、UnlockedAtを過ぎたら解錠、解錠されたらUnlockedAtをnullにする
 
                 foreach (var routeLockGroup in routeLocks.GroupBy(l => l.RouteLockGroup).OrderBy(g => g.Key))
                 {
