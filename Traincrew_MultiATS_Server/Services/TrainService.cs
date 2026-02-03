@@ -35,7 +35,7 @@ public partial class TrainService(
 
     public async Task<ServerToATSData> CreateAtsData(ulong clientDriverId, AtsToServerData clientData)
     {
-        var serverMode = await serverService.GetServerModeAsync();
+        var serverMode = await serverService.GetServerModeAsyncWithoutLock();
         // 定時処理が停止している場合、その旨だけ返す
         if (serverMode == ServerMode.Off)
         {

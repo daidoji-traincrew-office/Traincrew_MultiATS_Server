@@ -16,7 +16,7 @@ public class ServerService(
         return await GetServerModeAsyncWithoutLock();
     }
 
-    private async Task<ServerMode> GetServerModeAsyncWithoutLock()
+    internal async Task<ServerMode> GetServerModeAsyncWithoutLock()
     {
         var state = await serverRepository.GetServerStateAsync();
         if (state == null)
