@@ -85,6 +85,19 @@ public class TrainDbInitializer(
         await trainDiagramRepository.DeleteTimetablesByDiaId(diaId, cancellationToken);
         logger.LogInformation("Deleted existing timetables for diaId {DiaId}", diaId);
 
+        // 同じData内に重複する列番を事前に検出し、すべてスキップ対象とする
+        var duplicateTrainNumbers = new HashSet<string>(
+            ttcData.TrainList
+                .Where(t => !string.IsNullOrWhiteSpace(t.trainNumber))
+                .GroupBy(t => t.trainNumber)
+                .Where(g => g.Count() > 1)
+                .Select(g => g.Key)
+        );
+        foreach (var duplicateTrainNumber in duplicateTrainNumbers)
+        {
+            logger.LogWarning("列車番号 {TrainNumber} が重複しています。すべてのデータをスキップします。", duplicateTrainNumber);
+        }
+
         var trainDiagramsToAdd = new List<TrainDiagram>();
         var trainDiagramsToUpdate = new List<TrainDiagram>();
         var trainTimetablesByTrainNumber = new Dictionary<string, List<TrainDiagramTimetable>>();
@@ -94,6 +107,11 @@ public class TrainDbInitializer(
             if (string.IsNullOrWhiteSpace(ttcTrain.trainNumber))
             {
                 logger.LogWarning("列車番号が空です。{operationNumber} スキップします。", ttcTrain.operationNumber);
+                continue;
+            }
+
+            if (duplicateTrainNumbers.Contains(ttcTrain.trainNumber))
+            {
                 continue;
             }
 
@@ -180,8 +198,8 @@ public class TrainDbInitializer(
             logger.LogInformation("Added {Count} timetables", trainTimetables.Count);
         }
 
-        logger.LogInformation("Completed initialization from TTC_Data: {AddCount} added, {UpdateCount} updated train diagrams, {TimetableCount} timetables",
-            trainDiagramsToAdd.Count, trainDiagramsToUpdate.Count, trainTimetables.Count);
+        logger.LogInformation("Completed initialization from TTC_Data: {AddCount} added, {UpdateCount} updated train diagrams, {TimetableCount} timetables, {DuplicateCount} duplicate train numbers skipped",
+            trainDiagramsToAdd.Count, trainDiagramsToUpdate.Count, trainTimetables.Count, duplicateTrainNumbers.Count);
     }
 
     /// <summary>
