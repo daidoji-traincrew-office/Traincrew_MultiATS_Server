@@ -27,7 +27,7 @@ public class InitDbHostedService(
         await orchestrator.InitializeAsync(cancellationToken);
 
         // Start server mode scheduler
-        var serverService = scope.ServiceProvider.GetRequiredService<ServerService>();
+        var serverService = scope.ServiceProvider.GetRequiredService<IServerService>();
         var schedulerManager = scope.ServiceProvider.GetRequiredService<SchedulerManager>();
 
         schedulerManager.StartServerModeScheduler();
