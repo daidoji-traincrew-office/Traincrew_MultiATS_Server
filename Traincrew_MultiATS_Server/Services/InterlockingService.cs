@@ -15,9 +15,21 @@ namespace Traincrew_MultiATS_Server.Services;
 /// <summary>
 /// 連動装置装置卓
 /// </summary>
+public interface IInterlockingService
+{
+    Task<DataToInterlocking> SendData_Interlocking();
+    Task<InterlockingLeverData> SetPhysicalLeverData(InterlockingLeverData leverData);
+    Task<InterlockingKeyLeverData> SetPhysicalKeyLeverData(InterlockingKeyLeverData keyLeverData, ulong? memberId);
+    Task<DestinationButtonData> SetDestinationButtonState(DestinationButtonData buttonData);
+    Task ResetRaisedButtonsAsync();
+    Task<List<InterlockingObject>> GetInterlockingObjects();
+    Task<List<InterlockingObject>> GetObjectsByStationIds(List<string> stationIds);
+    Task<List<DestinationButton>> GetDestinationButtonsByStationIds(List<string> stationNames);
+}
+
 public class InterlockingService(
     IDateTimeRepository dateTimeRepository,
-    DiscordService discordService,
+    IDiscordService discordService,
     IInterlockingObjectRepository interlockingObjectRepository,
     IDestinationButtonRepository destinationButtonRepository,
     IGeneralRepository generalRepository,
@@ -25,14 +37,14 @@ public class InterlockingService(
     ILeverRepository leverRepository,
     IDirectionSelfControlLeverRepository directionSelfControlLeverRepository,
     IRouteCentralControlLeverRepository routeCentralControlLeverRepository,
-    TrackCircuitService trackCircuitService,
-    TtcStationControlService ttcStationControlService,
-    SwitchingMachineService switchingMachineService,
-    DirectionRouteService directionRouteService,
-    SignalService signalService,
+    ITrackCircuitService trackCircuitService,
+    ITtcStationControlService ttcStationControlService,
+    ISwitchingMachineService switchingMachineService,
+    IDirectionRouteService directionRouteService,
+    ISignalService signalService,
     IMutexRepository mutexRepository,
-    ServerService serverService,
-    ILogger<InterlockingService> logger)
+    IServerService serverService,
+    ILogger<InterlockingService> logger) : IInterlockingService
 {
 
     public async Task<DataToInterlocking> SendData_Interlocking()
@@ -167,7 +179,7 @@ public class InterlockingService(
     /// <param name="keyLeverData"></param>
     /// <param name="memberId">DiscordのメンバーID</param>
     /// <returns></returns>
-    internal async Task<InterlockingKeyLeverData> SetPhysicalKeyLeverData(InterlockingKeyLeverData keyLeverData, ulong? memberId)
+    public async Task<InterlockingKeyLeverData> SetPhysicalKeyLeverData(InterlockingKeyLeverData keyLeverData, ulong? memberId)
     {
         await using var mutex = await mutexRepository.AcquireAsync(nameof(InterlockingService));
         // 開放てこの判定を先に入れる

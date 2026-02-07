@@ -2,7 +2,15 @@ using Traincrew_MultiATS_Server.Repositories.UserDisconnection;
 
 namespace Traincrew_MultiATS_Server.Services;
 
-public class BannedUserService(IUserDisconnectionRepository userDisconnectionRepository)
+public interface IBannedUserService
+{
+    Task<List<ulong>> GetBannedUserIdsAsync();
+    Task<bool> IsUserBannedAsync(ulong userId);
+    Task BanUserAsync(ulong userId);
+    Task UnbanUserAsync(ulong userId);
+}
+
+public class BannedUserService(IUserDisconnectionRepository userDisconnectionRepository) : IBannedUserService
 {
     public async Task<List<ulong>> GetBannedUserIdsAsync()
     {

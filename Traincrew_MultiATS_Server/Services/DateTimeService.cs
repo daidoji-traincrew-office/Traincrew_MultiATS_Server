@@ -3,9 +3,14 @@ using Traincrew_MultiATS_Server.Repositories.Server;
 
 namespace Traincrew_MultiATS_Server.Services;
 
+public interface IDateTimeService
+{
+    Task<DateTime> GetTstNow();
+}
+
 public class DateTimeService(
     IDateTimeRepository dateTimeRepository,
-    IServerRepository serverRepository)
+    IServerRepository serverRepository) : IDateTimeService
 {
     public async Task<DateTime> GetTstNow()
     {

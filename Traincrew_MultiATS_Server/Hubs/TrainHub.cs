@@ -16,7 +16,7 @@ namespace Traincrew_MultiATS_Server.Hubs;
     Policy = "TrainPolicy"
 )]
 public class TrainHub(
-    TrainService trainService,
+    ITrainService trainService,
     EnableAuthorizationStore enableAuthorizationStore
 ) : Hub<ITrainClientContract>, ITrainHubContract
 {
@@ -33,7 +33,7 @@ public class TrainHub(
         await trainService.DriverGetsOff(memberId, trainNumber);
         return;
     }
-    
+
     private ulong GetMemberId()
     {
         var enableAuthorization = enableAuthorizationStore.EnableAuthorization;

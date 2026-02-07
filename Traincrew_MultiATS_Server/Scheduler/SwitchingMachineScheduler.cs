@@ -8,7 +8,7 @@ public class SwitchingMachineScheduler(IServiceScopeFactory serviceScopeFactory)
 
     protected override async Task ExecuteTaskAsync(IServiceScope scope, System.Diagnostics.Activity? activity)
     {
-        var service = scope.ServiceProvider.GetRequiredService<SwitchingMachineService>();
+        var service = scope.ServiceProvider.GetRequiredService<ISwitchingMachineService>();
         await service.SwitchingMachineControl();
     }
 }

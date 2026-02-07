@@ -2,12 +2,17 @@ using Traincrew_MultiATS_Server.Common.Models;
 
 namespace Traincrew_MultiATS_Server.Services;
 
+public interface ITIDService
+{
+    Task<ConstantDataToTID> CreateTidData();
+}
+
 public class TIDService(
-    TrackCircuitService trackCircuitService,
-    SwitchingMachineService switchingMachineService,
-    DirectionRouteService directionRouteService,
-    TrainService trainService,
-    ServerService serverService)
+    ITrackCircuitService trackCircuitService,
+    ISwitchingMachineService switchingMachineService,
+    IDirectionRouteService directionRouteService,
+    ITrainService trainService,
+    IServerService serverService) : ITIDService
 {
     public async Task<ConstantDataToTID> CreateTidData()
     {

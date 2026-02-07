@@ -13,15 +13,15 @@ namespace Traincrew_MultiATS_Server.Hubs;
     Policy = "CommanderTablePolicy"
 )]
 public class CommanderTableHub(
-    TrackCircuitService trackCircuitService,
-    OperationNotificationService operationNotificationService,
-    TtcStationControlService ttcStationControlService,
-    TrainService trainService,
-    OperationInformationService operationInformationService,
-    ProtectionService protectionService,
-    ServerService serverService,
-    CommanderTableService commanderTableService,
-    BannedUserService bannedUserService
+    ITrackCircuitService trackCircuitService,
+    IOperationNotificationService operationNotificationService,
+    ITtcStationControlService ttcStationControlService,
+    ITrainService trainService,
+    IOperationInformationService operationInformationService,
+    IProtectionService protectionService,
+    IServerService serverService,
+    ICommanderTableService commanderTableService,
+    IBannedUserService bannedUserService
 ) : Hub<ICommanderTableClientContract>, ICommanderTableHubContract
 {
     public async Task<DataToCommanderTable> SendData_CommanderTable()

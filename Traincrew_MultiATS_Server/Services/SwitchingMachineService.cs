@@ -13,6 +13,12 @@ using Route = Traincrew_MultiATS_Server.Models.Route;
 
 namespace Traincrew_MultiATS_Server.Services;
 
+public interface ISwitchingMachineService
+{
+    Task SwitchingMachineControl();
+    Task<List<SwitchData>> GetAllSwitchData();
+}
+
 public class SwitchingMachineService(
     IDateTimeRepository dateTimeRepository,
     ISwitchingMachineRepository switchingMachineRepository,
@@ -23,7 +29,7 @@ public class SwitchingMachineService(
     ILockConditionByRouteCentralControlLeverRepository lockConditionByRouteCentralControlLeverRepository,
     IServerRepository serverRepository,
     IGeneralRepository generalRepository
-)
+) : ISwitchingMachineService
 {
     /// <summary>
     /// <strong>転てつ器制御回路・転てつ器表示リレー回路</strong><br/>

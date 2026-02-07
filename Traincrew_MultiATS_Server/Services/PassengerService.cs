@@ -2,12 +2,17 @@ using Traincrew_MultiATS_Server.Common.Models;
 
 namespace Traincrew_MultiATS_Server.Services;
 
+public interface IPassengerService
+{
+    Task<ServerToPassengerData> GetServerToPassengerData();
+}
+
 public class PassengerService(
-    ServerService serverService,
-    TrackCircuitService trackCircuitService,
-    TrainService trainService,
-    OperationInformationService operationInformationService
-)
+    IServerService serverService,
+    ITrackCircuitService trackCircuitService,
+    ITrainService trainService,
+    IOperationInformationService operationInformationService
+) : IPassengerService
 {
     public async Task<ServerToPassengerData> GetServerToPassengerData()
     {

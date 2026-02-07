@@ -12,23 +12,35 @@ using Traincrew_MultiATS_Server.Repositories.Transaction;
 
 namespace Traincrew_MultiATS_Server.Services;
 
+public interface ITrainService
+{
+    Task<ServerToATSData> CreateAtsData(ulong clientDriverId, AtsToServerData clientData);
+    Task DriverGetsOff(ulong clientDriverId, string trainNumber);
+    Task<ServerToATSDataBySchedule> CreateDataBySchedule();
+    Task<Dictionary<string, TrainInfo>> GetTrainInfoGroupByTrainNumber();
+    Task<List<TrainStateData>> GetAllTrainState();
+    Task<TrainStateData> UpdateTrainStateData(TrainStateData trainStateData);
+    Task DeleteTrainState(string trainNumber);
+    Task DeleteTrainStateById(long id);
+}
+
 public partial class TrainService(
-    TrackCircuitService trackCircuitService,
-    SignalService signalService,
-    OperationNotificationService operationNotificationService,
-    ProtectionService protectionService,
-    RouteService routeService,
+    ITrackCircuitService trackCircuitService,
+    ISignalService signalService,
+    IOperationNotificationService operationNotificationService,
+    IProtectionService protectionService,
+    IRouteService routeService,
     ITrainRepository trainRepository,
     ITrainCarRepository trainCarRepository,
     ITrainDiagramRepository trainDiagramRepository,
     ITransactionRepository transactionRepository,
-    BannedUserService bannedUserService,
+    IBannedUserService bannedUserService,
     IGeneralRepository generalRepository,
-    ServerService serverService,
+    IServerService serverService,
     INextSignalRepository nextSignalRepository,
     ITrainSignalStateRepository trainSignalStateRepository,
     ILogger<TrainService> logger
-)
+) : ITrainService
 {
     [GeneratedRegex(@"\d+")]
     private static partial Regex RegexIsDigits();

@@ -28,6 +28,20 @@ namespace Traincrew_MultiATS_Server.Services;
 // やってみて処理が重い場合は、駅ごとに処理するか、必要な対象物のみ取得するように工夫する
 // Hope: クエリ自体が重すぎて時間計算量的に死ぬってことはないと信じたい
 
+public interface IRendoService
+{
+    Task CHRRelay();
+    Task LeverToRouteState();
+    Task RouteRelayWithoutSwitchingMachine();
+    Task RouteRelay();
+    Task SRelay();
+    Task TimerRelay();
+    Task DirectionRelay();
+    Task ApproachLockRelay();
+    Task RouteLockRelay();
+    Task SignalControl();
+}
+
 /// <summary>
 /// 連動装置
 /// </summary>
@@ -52,7 +66,7 @@ public class RendoService(
     ILockConditionByRouteCentralControlLeverRepository lockConditionByRouteCentralControlLeverRepository,
     IGeneralRepository generalRepository,
     IServerRepository serverRepository,
-    ILogger<RendoService> logger)
+    ILogger<RendoService> logger) : IRendoService
 {
     /// <summary>
     /// <strong>駅／ＣＴＣ扱い条件</strong><br/>
