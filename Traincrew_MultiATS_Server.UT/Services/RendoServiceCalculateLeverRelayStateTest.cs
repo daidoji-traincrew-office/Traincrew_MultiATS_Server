@@ -1,16 +1,27 @@
+using Microsoft.Extensions.DependencyInjection;
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Services;
+using Traincrew_MultiATS_Server.UT.TestHelpers;
 
 namespace Traincrew_MultiATS_Server.UT.Services;
 
 /// <summary>
 /// RendoService.CalculateLeverRelayState メソッドのユニットテスト
 /// </summary>
-public class RendoServiceCalculateLeverRelayStateTest
+public class RendoServiceCalculateLeverRelayStateTest : ServiceTestBase
 {
+    protected override void ConfigureTestServices(ServiceCollection services)
+    {
+        // 全Repository/ServiceをMock化
+        services.AddAllMocks();
+
+        // テスト対象のRendoServiceは実装クラスを使用
+        services.UseRealService<IRendoService, RendoService>();
+    }
+
     // テストヘルパーメソッド: CalculateLeverRelayStateを呼び出すためのラッパー
-    private static LeverRelayState CallCalculateLeverRelayState(
+    private LeverRelayState CallCalculateLeverRelayState(
         Route route,
         RouteLeverDestinationButton routeLeverDestinationButton,
         Lever? lever,
@@ -26,12 +37,10 @@ public class RendoServiceCalculateLeverRelayStateTest
         Dictionary<ulong, List<Route>> routesByLeverId,
         Dictionary<ulong, List<ThrowOutControl>> allSourceThrowOutControls)
     {
-        // publicメソッドを直接呼び出す
-        var rendoService = new RendoService(
-            null!, null!, null!, null!, null!, null!, null!, null!, null!, null!,
-            null!, null!, null!, null!, null!, null!, null!, null!, null!, null!, null!);
+        // DIコンテナからRendoServiceを取得
+        var rendoService = GetService<IRendoService>() as RendoService;
 
-        return rendoService.CalculateLeverRelayState(
+        return rendoService!.CalculateLeverRelayState(
             route,
             routeLeverDestinationButton,
             lever,
