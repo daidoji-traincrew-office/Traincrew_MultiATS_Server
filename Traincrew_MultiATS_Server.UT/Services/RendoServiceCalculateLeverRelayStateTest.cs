@@ -29,7 +29,7 @@ public class RendoServiceCalculateLeverRelayStateTest
         // publicメソッドを直接呼び出す
         var rendoService = new RendoService(
             null!, null!, null!, null!, null!, null!, null!, null!, null!, null!,
-            null!, null!, null!, null!, null!, null!, null!, null!, null!, null!);
+            null!, null!, null!, null!, null!, null!, null!, null!, null!, null!, null!);
 
         return rendoService.CalculateLeverRelayState(
             route,
