@@ -17,8 +17,8 @@ using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
 using Traincrew_MultiATS_Server.Repositories.Train;
 using Traincrew_MultiATS_Server.Repositories.TrainCar;
 using Traincrew_MultiATS_Server.Repositories.TrainDiagram;
-using Traincrew_MultiATS_Server.Repositories.TrainType;
 using Traincrew_MultiATS_Server.Repositories.TrainSignalState;
+using Traincrew_MultiATS_Server.Repositories.TrainType;
 using Traincrew_MultiATS_Server.Repositories.Transaction;
 using Traincrew_MultiATS_Server.Repositories.UserDisconnection;
 using Traincrew_MultiATS_Server.Scheduler;
@@ -95,16 +95,16 @@ public class Program
             .AddScoped<ITransactionRepository, TransactionRepository>()
             .AddScoped<IUserDisconnectionRepository, UserDisconnectionRepository>()
             // Service (ABC順)
-            .AddScoped<BannedUserService>()
-            .AddScoped<OperationInformationService>()
-            .AddScoped<OperationNotificationService>()
-            .AddScoped<PassengerService>()
-            .AddScoped<ProtectionService>()
-            .AddScoped<RouteService>()
-            .AddScoped<ServerService>()
-            .AddScoped<SignalService>()
-            .AddScoped<TrackCircuitService>()
-            .AddScoped<TrainService>()
+            .AddScoped<IBannedUserService, BannedUserService>()
+            .AddScoped<IOperationInformationService, OperationInformationService>()
+            .AddScoped<IOperationNotificationService, OperationNotificationService>()
+            .AddScoped<IPassengerService, PassengerService>()
+            .AddScoped<IProtectionService, ProtectionService>()
+            .AddScoped<IRouteService, RouteService>()
+            .AddScoped<IServerService, ServerService>()
+            .AddScoped<ISignalService, SignalService>()
+            .AddScoped<ITrackCircuitService, TrackCircuitService>()
+            .AddScoped<ITrainService, TrainService>()
             .AddScoped<SchedulerManager>();
     }
 
