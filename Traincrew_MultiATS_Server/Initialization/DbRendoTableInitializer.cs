@@ -78,6 +78,10 @@ public partial class DbRendoTableInitializer
     [GeneratedRegex(@"^(\d+)(R|L)(Z?)$")]
     private static partial Regex RegexLeverParseFullMatch();
 
+    // 転てつ器名(数字のみ)を検証するための正規表現
+    [GeneratedRegex(@"^\d+$")]
+    private static partial Regex RegexNumericOnly();
+
     // 軌道回路名を抽出するための正規表現
     [GeneratedRegex(@"[A-Z\dｲﾛ]+T")]
     private static partial Regex RegexTrackCircuitParse();
@@ -570,6 +574,18 @@ public partial class DbRendoTableInitializer
         });
         var searchOtherObjects = new Func<LockItem, Task<List<InterlockingObject>>>(async item =>
         {
+            // 転てつ器(数字のみの名前)の場合はこちら
+            var numericOnlyMatch = RegexNumericOnly().Match(item.Name);
+            if (numericOnlyMatch.Success)
+            {
+                var switchingMachine = switchingMachines.GetValueOrDefault(
+                    CalcSwitchingMachineName(item.Name, item.StationId));
+                if (switchingMachine != null)
+                {
+                    return [switchingMachine];
+                }
+            }
+
             // 進路(単一) or 軌道回路の場合はこちら
             var key = ConvertHalfWidthToFullWidth(CalcRouteName(item.Name, "", item.StationId));
             var value = otherObjects.GetValueOrDefault(key);
@@ -720,7 +736,6 @@ public partial class DbRendoTableInitializer
         }
 
         // 方向進路用の処理
-        // 通常進路用の処理
         foreach (var rendoTableCsv in rendoTableCsvs)
         {
             var routeName = CalcDirectionLeverName(rendoTableCsv.Start, stationId);
