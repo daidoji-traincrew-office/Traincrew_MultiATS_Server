@@ -975,7 +975,7 @@ public class RendoService(
         var idsWhereThrowOutControlRaised = await directionRouteRepository.GetIdsWhereThrowOutControlRaised();
         var idsWhereBothLAndRRelaysRaised = await directionRouteRepository.GetIdsWhereBothLAndRRelaysRaised();
 
-        // 2つの条件のIDをマージ(重複排除)
+        // 3つの条件のIDをマージ(重複排除)
         var directionRouteIds = idsWhereLeverPositionMismatch
             .Union(idsWhereThrowOutControlRaised)
             .Union(idsWhereBothLAndRRelaysRaised)
