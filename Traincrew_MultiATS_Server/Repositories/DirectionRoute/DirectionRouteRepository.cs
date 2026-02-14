@@ -88,7 +88,7 @@ public class DirectionRouteRepository(ApplicationDbContext context) : IDirection
     }
 
     /// <summary>
-    /// 条件2: 総括制御元の進路のてこ反リレーが扛上しているDirectionRouteIdを取得
+    /// 条件2: 総括制御元の進路のてこ反リレーが扛上していて、向きが違うDirectionRouteIdを取得
     /// </summary>
     /// <returns>DirectionRouteIdリスト</returns>
     public async Task<List<ulong>> GetIdsWhereThrowOutControlRaised()
@@ -104,7 +104,12 @@ public class DirectionRouteRepository(ApplicationDbContext context) : IDirection
                 (x, r) => new { x.dr, x.toc, r })
             .Where(x =>
                 x.toc.ControlType == ThrowOutControlType.Direction &&
-                x.r.RouteState!.IsLeverRelayRaised == RaiseDrop.Raise
+                x.r.RouteState!.IsLeverRelayRaised == RaiseDrop.Raise &&
+                (
+                    (x.toc.TargetLr == LR.Left && x.dr.DirectionRouteState.IsLRelayRaised == RaiseDrop.Drop) ||
+                    (x.toc.TargetLr == LR.Right && x.dr.DirectionRouteState.IsRRelayRaised == RaiseDrop.Drop) ||
+                    x.toc.TargetLr != x.dr.DirectionRouteState.isLr
+                )
             )
             .Select(x => x.dr.Id)
             .ToListAsync();
