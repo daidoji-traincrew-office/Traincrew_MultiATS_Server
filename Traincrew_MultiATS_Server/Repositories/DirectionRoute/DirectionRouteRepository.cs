@@ -123,6 +123,7 @@ public class DirectionRouteRepository(ApplicationDbContext context) : IDirection
     public async Task<List<Models.DirectionRoute>> GetByIds(List<ulong> ids)
     {
         return await context.DirectionRoutes
+            .Include(dr => dr.DirectionRouteState)
             .Where(dr => ids.Contains(dr.Id))
             .ToListAsync();
     }
