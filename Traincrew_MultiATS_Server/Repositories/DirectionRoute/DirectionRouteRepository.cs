@@ -120,4 +120,11 @@ public class DirectionRouteRepository(ApplicationDbContext context) : IDirection
             .ToListAsync();
     }
 
+    public async Task<List<Models.DirectionRoute>> GetByIds(List<ulong> ids)
+    {
+        return await context.DirectionRoutes
+            .Where(dr => ids.Contains(dr.Id))
+            .ToListAsync();
+    }
+
 }

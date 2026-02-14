@@ -51,4 +51,11 @@ public interface IDirectionRouteRepository
     /// </summary>
     /// <returns>DirectionRouteIdリスト</returns>
     Task<List<ulong>> GetIdsWhereThrowOutControlMismatch();
+
+    /// <summary>
+    /// 指定されたIDのDirectionRouteを取得する
+    /// </summary>
+    /// <param name="ids">DirectionRouteのIDリスト</param>
+    /// <returns>DirectionRouteのリスト</returns>
+    Task<List<Models.DirectionRoute>> GetByIds(List<ulong> ids);
 }
