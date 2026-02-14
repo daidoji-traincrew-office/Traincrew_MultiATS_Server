@@ -972,11 +972,11 @@ public class RendoService(
     {
         // 処理対象の条件を満たすDirectionRouteのIDを取得
         var idsWhereLeverPositionMismatch = await directionRouteRepository.GetIdsWhereLeverPositionMismatch();
-        var idsWhereThrowOutControlMismatch = await directionRouteRepository.GetIdsWhereThrowOutControlMismatch();
+        var idsWhereThrowOutControlRaised = await directionRouteRepository.GetIdsWhereThrowOutControlRaised();
 
         // 2つの条件のIDをマージ(重複排除)
         var directionRouteIds = idsWhereLeverPositionMismatch
-            .Union(idsWhereThrowOutControlMismatch)
+            .Union(idsWhereThrowOutControlRaised)
             .Distinct()
             .ToList();
 

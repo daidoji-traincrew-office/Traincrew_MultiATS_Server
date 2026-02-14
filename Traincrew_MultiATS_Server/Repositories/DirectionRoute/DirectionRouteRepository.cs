@@ -68,7 +68,6 @@ public class DirectionRouteRepository(ApplicationDbContext context) : IDirection
     public async Task<List<ulong>> GetIdsWhereLeverPositionMismatch()
     {
         return await context.DirectionRoutes
-            .Include(dr => dr.DirectionRouteState)
             .Join(context.DirectionSelfControlLevers.Include(dscl => dscl.DirectionSelfControlLeverState),
                 dr => dr.DirectionSelfControlLeverId,
                 dscl => dscl.Id,
@@ -85,38 +84,29 @@ public class DirectionRouteRepository(ApplicationDbContext context) : IDirection
                 )
             )
             .Select(x => x.dr.Id)
-            .Distinct()
             .ToListAsync();
     }
 
     /// <summary>
-    /// 条件2: DirectionSelfControlLeverがNormal && 総括リレーがRaise && 方向がtargetLrと不一致のDirectionRouteIdを取得
+    /// 条件2: 総括制御元の進路のてこ反リレーが扛上しているDirectionRouteIdを取得
     /// </summary>
     /// <returns>DirectionRouteIdリスト</returns>
-    public async Task<List<ulong>> GetIdsWhereThrowOutControlMismatch()
+    public async Task<List<ulong>> GetIdsWhereThrowOutControlRaised()
     {
         return await context.DirectionRoutes
-            .Include(dr => dr.DirectionRouteState)
-            .Join(context.DirectionSelfControlLevers.Include(dscl => dscl.DirectionSelfControlLeverState),
-                dr => dr.DirectionSelfControlLeverId,
-                dscl => dscl.Id,
-                (dr, dscl) => new { dr, dscl })
             .Join(context.ThrowOutControls,
-                x => x.dr.Id,
+                dr => dr.Id,
                 toc => toc.TargetId,
-                (x, toc) => new { x.dr, x.dscl, toc })
+                (dr, toc) => new { dr, toc })
             .Join(context.Routes.Include(r => r.RouteState),
                 x => x.toc.SourceId,
                 r => r.Id,
-                (x, r) => new { x.dr, x.dscl, x.toc, r })
+                (x, r) => new { x.dr, x.toc, r })
             .Where(x =>
-                x.dscl.DirectionSelfControlLeverState!.IsReversed == NR.Normal &&
-                x.r.RouteState!.IsLeverRelayRaised == RaiseDrop.Raise &&
-                x.dr.DirectionRouteState!.isLr != x.toc.TargetLr &&
-                x.toc.ControlType == ThrowOutControlType.Direction
+                x.toc.ControlType == ThrowOutControlType.Direction &&
+                x.r.RouteState!.IsLeverRelayRaised == RaiseDrop.Raise
             )
             .Select(x => x.dr.Id)
-            .Distinct()
             .ToListAsync();
     }
 

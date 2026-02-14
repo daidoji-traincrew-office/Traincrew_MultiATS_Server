@@ -47,10 +47,10 @@ public interface IDirectionRouteRepository
     Task<List<ulong>> GetIdsWhereLeverPositionMismatch();
 
     /// <summary>
-    /// 条件2: 開放てこが駅扱 && 総括制御元の進路のてこ反リレーが扛上 && 方向がtargetLrと不一致のDirectionRouteIdを取得
+    /// 条件2: 総括制御元の進路のてこ反リレーが扛上しているDirectionRouteIdを取得
     /// </summary>
     /// <returns>DirectionRouteIdリスト</returns>
-    Task<List<ulong>> GetIdsWhereThrowOutControlMismatch();
+    Task<List<ulong>> GetIdsWhereThrowOutControlRaised();
 
     /// <summary>
     /// 指定されたIDのDirectionRouteを取得する
