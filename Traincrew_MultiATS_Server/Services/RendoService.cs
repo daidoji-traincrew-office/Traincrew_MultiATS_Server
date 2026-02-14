@@ -970,8 +970,18 @@ public class RendoService(
     /// <returns></returns>
     public async Task DirectionRelay()
     {
-        // 方向進路の全取得
-        var directionRouteIds = await directionRouteRepository.GetAllIds();
+        // 処理対象の条件を満たすDirectionRouteのIDを取得
+        var condition1Ids = await directionRouteRepository.GetIdsWhereLeverPositionMismatch();
+        var condition2Ids = await directionRouteRepository.GetIdsWhereThrowOutControlMismatch();
+
+        // 2つの条件のIDをマージ(重複排除)
+        var directionRouteIds = condition1Ids.Union(condition2Ids).Distinct().ToList();
+
+        // 処理対象がない場合は早期リターン
+        if (directionRouteIds.Count == 0)
+        {
+            return;
+        }
         // 方向てこの全取得
         var directionLeverIds = await leverRepository.GetAllIds();
         // 直接鎖錠条件を全取得

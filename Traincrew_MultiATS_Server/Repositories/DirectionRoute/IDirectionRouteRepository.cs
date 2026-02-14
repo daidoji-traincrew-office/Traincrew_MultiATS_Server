@@ -39,4 +39,16 @@ public interface IDirectionRouteRepository
     /// </summary>
     /// <param name="cancellationToken">キャンセルトークン</param>
     Task SaveChangesAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 条件1: 開放てこが駅扱 && 方向てこ位置と実際の方向が不一致のDirectionRouteIdを取得
+    /// </summary>
+    /// <returns>DirectionRouteIdリスト</returns>
+    Task<List<ulong>> GetIdsWhereLeverPositionMismatch();
+
+    /// <summary>
+    /// 条件2: 開放てこが駅扱 && 総括制御元の進路のてこ反リレーが扛上 && 方向がtargetLrと不一致のDirectionRouteIdを取得
+    /// </summary>
+    /// <returns>DirectionRouteIdリスト</returns>
+    Task<List<ulong>> GetIdsWhereThrowOutControlMismatch();
 }
