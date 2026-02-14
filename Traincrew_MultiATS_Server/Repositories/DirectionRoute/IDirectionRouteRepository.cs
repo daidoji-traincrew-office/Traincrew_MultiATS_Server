@@ -53,6 +53,12 @@ public interface IDirectionRouteRepository
     Task<List<ulong>> GetIdsWhereThrowOutControlRaised();
 
     /// <summary>
+    /// 条件3: L方向てこリレーとR方向てこリレーの両方が扛上しているDirectionRouteIdを取得
+    /// </summary>
+    /// <returns>DirectionRouteIdリスト</returns>
+    Task<List<ulong>> GetIdsWhereBothLAndRRelaysRaised();
+
+    /// <summary>
     /// 指定されたIDのDirectionRouteを取得する
     /// </summary>
     /// <param name="ids">DirectionRouteのIDリスト</param>

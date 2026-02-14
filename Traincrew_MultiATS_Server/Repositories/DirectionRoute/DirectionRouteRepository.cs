@@ -115,6 +115,20 @@ public class DirectionRouteRepository(ApplicationDbContext context) : IDirection
             .ToListAsync();
     }
 
+    /// <summary>
+    /// 条件3: L方向てこリレーとR方向てこリレーの両方が扛上しているDirectionRouteIdを取得
+    /// </summary>
+    /// <returns>DirectionRouteIdリスト</returns>
+    public async Task<List<ulong>> GetIdsWhereBothLAndRRelaysRaised()
+    {
+        return await context.DirectionRoutes
+            .Where(dr =>
+                dr.DirectionRouteState!.IsLRelayRaised == RaiseDrop.Raise &&
+                dr.DirectionRouteState.IsRRelayRaised == RaiseDrop.Raise)
+            .Select(dr => dr.Id)
+            .ToListAsync();
+    }
+
     public async Task<List<Models.DirectionRoute>> GetByIds(List<ulong> ids)
     {
         return await context.DirectionRoutes
