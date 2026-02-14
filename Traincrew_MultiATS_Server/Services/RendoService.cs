@@ -1034,8 +1034,10 @@ public class RendoService(
             .Union(throwOutControls.Select(toc => toc.SourceId))
             .Union(throwOutControls.Select(toc => toc.ConditionLeverId).OfType<ulong>())
             .Union(lockConditionDict.Values.SelectMany(ExtractObjectIdsFromLockCondtions))
+            .Except(directionRouteIds)
             .ToList();
         var interlockingObjects = (await interlockingObjectRepository.GetObjectByIdsWithState(objectIds))
+            .Concat(directionRoutes)
             .ToDictionary(obj => obj.Id);
         var directionSelfControlLevers = interlockingObjects
             .Where(kvp => kvp.Value is DirectionSelfControlLever)
