@@ -26,5 +26,6 @@ public static class EnumTypeMapper
         typeMapper.MapEnum<OperationInformationType>();
         typeMapper.MapEnum<ServerMode>();
         typeMapper.MapEnum<ThrowOutControlType>();
+        typeMapper.MapEnum<PhoneCallStatus>();
     }
 }

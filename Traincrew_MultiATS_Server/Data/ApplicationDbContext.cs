@@ -53,6 +53,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<UserDisconnectionState> UserDisconnectionStates { get; set; }
     public DbSet<TrainSignalState> TrainSignalStates { get; set; }
     public DbSet<TrackCircuitDepartmentTime> TrackCircuitDepartmentTimes { get; set; }
+    public DbSet<PhoneCallSession> PhoneCallSessions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
