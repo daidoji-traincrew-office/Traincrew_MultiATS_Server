@@ -269,7 +269,7 @@ public class Program
     private static List<IEndpointConventionBuilder> ConfigureEndpoints(WebApplication app)
     {
         // gRPC エンドポイント（認証不要なので AllowAnonymous は適用されない）
-        app.MapGrpcService<VoiceService>();
+        app.MapGrpcService<VoiceRelayController>();
 
         // SignalR エンドポイントの設定
         return

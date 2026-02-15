@@ -13,7 +13,7 @@ namespace Traincrew_MultiATS_Server.Crew.Controllers;
     AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme,
     Policy = "PhonePolicy"
 )]
-public class VoiceService(ILogger<VoiceService> logger) : VoiceRelay.VoiceRelayBase
+public class VoiceRelayController(ILogger<VoiceRelayController> logger) : VoiceRelay.VoiceRelayBase
 {
     // 接続中のクライアントの「出口（書き込みストリーム）」をIDで管理する辞書
     private static readonly ConcurrentDictionary<string, IServerStreamWriter<VoiceData>> _users = new();
