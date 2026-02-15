@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using OpenIddict.Abstractions;
@@ -14,6 +15,7 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 using Traincrew_MultiATS_Server.Activity;
 using Traincrew_MultiATS_Server.Authentication;
+using Traincrew_MultiATS_Server.Crew.Controllers;
 using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.HostedService;
 using Traincrew_MultiATS_Server.Hubs;
@@ -36,6 +38,7 @@ using Traincrew_MultiATS_Server.Repositories.NextSignal;
 using Traincrew_MultiATS_Server.Repositories.OperationInformation;
 using Traincrew_MultiATS_Server.Repositories.OperationNotification;
 using Traincrew_MultiATS_Server.Repositories.OperationNotificationDisplay;
+using Traincrew_MultiATS_Server.Repositories.PhoneSession;
 using Traincrew_MultiATS_Server.Repositories.Protection;
 using Traincrew_MultiATS_Server.Repositories.Route;
 using Traincrew_MultiATS_Server.Repositories.RouteCentralControlLever;
@@ -105,6 +108,7 @@ public class Program
 
         ConfigureDatabaseService(builder);
         ConfigureSignalRService(builder);
+        ConfigureGrpcService(builder);
         ConfigureAuthenticationService(builder);
         var openiddictBuilder = ConfigureOpeniddictService(builder, isDevelopment);
         if (enableAuthorization)
@@ -246,9 +250,28 @@ public class Program
         });
     }
 
+    private static void ConfigureGrpcService(WebApplicationBuilder builder)
+    {
+        // gRPCの設定
+        builder.Services.AddGrpc();
+
+        // gRPCポート設定
+        var grpcPort = builder.Configuration.GetValue<int?>("GrpcPort") ?? 8081;
+        builder.WebHost.ConfigureKestrel(options =>
+        {
+            options.Listen(IPAddress.Any, grpcPort, listenOptions =>
+            {
+                listenOptions.Protocols = HttpProtocols.Http2;
+            });
+        });
+    }
+
     private static List<IEndpointConventionBuilder> ConfigureEndpoints(WebApplication app)
     {
-        // エンドポイントの設定
+        // gRPC エンドポイント（認証不要なので AllowAnonymous は適用されない）
+        app.MapGrpcService<VoiceService>();
+
+        // SignalR エンドポイントの設定
         return
         [
             app.MapControllers(),
@@ -257,6 +280,7 @@ public class Program
             app.MapHub<CTCPHub>("/hub/CTCP"),
             app.MapHub<InterlockingHub>("/hub/interlocking"),
             app.MapHub<CommanderTableHub>("/hub/commander_table"),
+            app.MapHub<PhoneHub>("/hub/phone"),
         ];
     }
 
@@ -431,6 +455,11 @@ public class Program
                 {
                     Condition = role => role.IsCommander
                 });
+            })
+            .AddPolicy("PhonePolicy", policy =>
+            {
+                policy.RequireAuthenticatedUser();
+                // ロール指定は後で調整
             });
     }
 
@@ -547,6 +576,7 @@ public class Program
             .AddScoped<ITtcWindowLinkRouteConditionRepository, TtcWindowLinkRouteConditionRepository>()
             .AddScoped<ITransactionRepository, TransactionRepository>()
             .AddScoped<IUserDisconnectionRepository, UserDisconnectionRepository>()
+            .AddScoped<IPhoneSessionRepository, PhoneSessionRepository>()
             .AddScoped<IBannedUserService, BannedUserService>()
             .AddScoped<ICommanderTableService, CommanderTableService>()
             .AddScoped<ICTCPService, CTCPService>()
@@ -566,6 +596,8 @@ public class Program
             .AddScoped<ITrainService, TrainService>()
             .AddScoped<ITIDService, TIDService>()
             .AddScoped<ITtcStationControlService, TtcStationControlService>()
+            .AddScoped<IPhoneService, PhoneService>()
+            .AddSingleton<PhoneSessionStore>()
             .AddSingleton<EnableAuthorizationStore>(_ => new(enableAuthorization))
             .AddSingleton<IDiscordService, DiscordService>()
             .AddSingleton<SchedulerManager>()

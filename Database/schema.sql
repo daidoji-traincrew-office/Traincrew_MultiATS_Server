@@ -656,3 +656,18 @@ CREATE TABLE server_state
 CREATE TABLE user_disconnection_state (
     user_id BIGINT PRIMARY KEY -- ユーザーID(Discord ID)
 );
+
+-- 電話通話ステータス
+CREATE TYPE phone_call_status AS ENUM ('calling', 'answered', 'rejected', 'busy', 'held', 'ended');
+
+-- 電話通話セッション
+CREATE TABLE phone_call_session (
+    id                  BIGSERIAL PRIMARY KEY,
+    caller_number       VARCHAR(20)  NOT NULL,
+    caller_connection_id VARCHAR(256) NOT NULL,
+    target_number       VARCHAR(20)  NOT NULL,
+    target_connection_id VARCHAR(256),
+    status              phone_call_status NOT NULL DEFAULT 'calling',
+    created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    ended_at            TIMESTAMP
+);
