@@ -108,6 +108,7 @@ public class Program
 
         ConfigureDatabaseService(builder);
         ConfigureSignalRService(builder);
+        ConfigureKestrel(builder);
         ConfigureGrpcService(builder);
         ConfigureAuthenticationService(builder);
         var openiddictBuilder = ConfigureOpeniddictService(builder, isDevelopment);
@@ -250,20 +251,44 @@ public class Program
         });
     }
 
-    private static void ConfigureGrpcService(WebApplicationBuilder builder)
+    private static void ConfigureKestrel(WebApplicationBuilder builder)
     {
-        // gRPCの設定
-        builder.Services.AddGrpc();
-
-        // gRPCポート設定
-        var grpcPort = builder.Configuration.GetValue<int?>("GrpcPort") ?? 8081;
-        builder.WebHost.ConfigureKestrel(options =>
+        builder.WebHost.ConfigureKestrel((context, options) =>
         {
+            // 1. applicationUrl から既存のポート設定を読み取る（ASPNETCORE_URLS 環境変数）
+            var urls = context.Configuration["ASPNETCORE_URLS"];
+            if (!string.IsNullOrEmpty(urls))
+            {
+                foreach (var url in urls.Split(';'))
+                {
+                    var uri = new Uri(url);
+                    var port = uri.Port;
+                    var isHttps = uri.Scheme == "https";
+
+                    options.Listen(IPAddress.Any, port, listenOptions =>
+                    {
+                        listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
+                        if (isHttps)
+                        {
+                            listenOptions.UseHttps(); // ASP.NET Core のデフォルト証明書を使用
+                        }
+                    });
+                }
+            }
+
+            // 2. gRPC ポートを追加（HTTP/2 専用）
+            var grpcPort = context.Configuration.GetValue("GrpcPort", 8081);
             options.Listen(IPAddress.Any, grpcPort, listenOptions =>
             {
                 listenOptions.Protocols = HttpProtocols.Http2;
             });
         });
+    }
+
+    private static void ConfigureGrpcService(WebApplicationBuilder builder)
+    {
+        // gRPCサービスの登録のみ
+        builder.Services.AddGrpc();
     }
 
     private static List<IEndpointConventionBuilder> ConfigureEndpoints(WebApplication app)
