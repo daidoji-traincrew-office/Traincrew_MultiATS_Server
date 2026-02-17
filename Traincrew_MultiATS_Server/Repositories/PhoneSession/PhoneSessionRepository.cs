@@ -39,6 +39,22 @@ public class PhoneSessionRepository(ApplicationDbContext context) : IPhoneSessio
             .FirstOrDefaultAsync();
     }
 
+    public async Task<PhoneCallSession?> GetActiveSessionByCallerNumberAndTargetNumberAsync(string callerNumber, string targetNumber)
+    {
+        return await context.PhoneCallSessions
+            .Where(s => s.CallerNumber == callerNumber && s.TargetNumber == targetNumber && s.EndedAt == null)
+            .OrderByDescending(s => s.CreatedAt)
+            .FirstOrDefaultAsync();
+    }
+
+    public async Task<PhoneCallSession?> GetActiveSessionByTargetNumberAsync(string targetNumber)
+    {
+        return await context.PhoneCallSessions
+            .Where(s => s.TargetNumber == targetNumber && s.EndedAt == null)
+            .OrderByDescending(s => s.CreatedAt)
+            .FirstOrDefaultAsync();
+    }
+
     public async Task UpdateStatusAsync(long sessionId, PhoneCallStatus status)
     {
         await context.PhoneCallSessions

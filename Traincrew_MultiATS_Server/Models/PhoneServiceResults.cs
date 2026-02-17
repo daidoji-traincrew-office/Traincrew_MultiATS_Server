@@ -1,18 +1,19 @@
 namespace Traincrew_MultiATS_Server.Models;
 
-public record LoginResult(string ConnectionId);
-
 public abstract record CallResult
 {
     public record Incoming(string CallerNumber, string CallerConnectionId, List<string> MemberConnectionIds) : CallResult;
-    public record TargetBusy(string ConnectionId) : CallResult;
+    public record TargetBusy() : CallResult;
     public record CallerNotRegistered() : CallResult;
 }
 
 public abstract record AnswerResult
 {
     public record Answered(string CallerConnectionId, string AnswererConnectionId, List<string> OtherMemberConnectionIds) : AnswerResult;
-    public record SessionNotFound(string ConnectionId) : AnswerResult;
+    public record SessionNotFound() : AnswerResult;
 }
 
-public record SingleNotifyResult(string? TargetConnectionId, string FromConnectionId);
+/// <summary>
+/// 相手への通知情報。TargetConnectionIdsは同じ電話番号に所属する全メンバーのConnectionId。
+/// </summary>
+public record SingleNotifyResult(List<string> TargetConnectionIds);

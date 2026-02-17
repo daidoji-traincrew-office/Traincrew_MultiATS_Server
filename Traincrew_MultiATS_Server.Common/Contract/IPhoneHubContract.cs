@@ -1,3 +1,5 @@
+using Traincrew_MultiATS_Server.Common.Models;
+
 namespace Traincrew_MultiATS_Server.Common.Contract;
 
 /// <summary>
@@ -15,43 +17,32 @@ public interface IPhoneHubContract
     /// 指定した電話番号に発信する。
     /// </summary>
     /// <param name="targetNumber">発信先の電話番号</param>
-    Task Call(string targetNumber);
+    Task<CallResponse> Call(string targetNumber);
 
     /// <summary>
-    /// 着信に応答する。
+    /// 着信に応答する。サーバーが着信元セッションを管理するため引数不要。
     /// </summary>
-    /// <param name="callerConnectionId">発信者のConnectionId</param>
-    Task Answer(string callerConnectionId);
+    Task<AnswerResponse> Answer();
 
     /// <summary>
-    /// 着信を拒否する。
+    /// 着信を拒否する。サーバーが着信元セッションを管理するため引数不要。
     /// </summary>
-    /// <param name="callerConnectionId">発信者のConnectionId</param>
-    Task Reject(string callerConnectionId);
+    Task Reject();
 
     /// <summary>
-    /// 通話を切断する。
+    /// 通話を切断する。サーバーがセッションを管理するため引数不要。
     /// </summary>
-    /// <param name="targetConnectionId">切断対象のConnectionId</param>
-    Task Hangup(string targetConnectionId);
+    Task Hangup();
 
     /// <summary>
-    /// 話中応答を返す。
+    /// 通話を保留にする。サーバーがセッションを管理するため引数不要。
     /// </summary>
-    /// <param name="callerConnectionId">発信者のConnectionId</param>
-    Task Busy(string callerConnectionId);
+    Task Hold();
 
     /// <summary>
-    /// 通話を保留にする。
+    /// 保留中の通話を再開する。サーバーがセッションを管理するため引数不要。
     /// </summary>
-    /// <param name="targetId">保留対象のConnectionId</param>
-    Task Hold(string targetId);
-
-    /// <summary>
-    /// 保留中の通話を再開する。
-    /// </summary>
-    /// <param name="targetId">再開対象のConnectionId</param>
-    Task Resume(string targetId);
+    Task Resume();
 }
 
 /// <summary>
@@ -60,57 +51,39 @@ public interface IPhoneHubContract
 public interface IPhoneClientContract
 {
     /// <summary>
-    /// ログイン成功を通知する。
-    /// </summary>
-    /// <param name="myConnectionId">自身のConnectionId</param>
-    Task ReceiveLoginSuccess(string myConnectionId);
-
-    /// <summary>
     /// 着信を通知する。
     /// </summary>
     /// <param name="fromNumber">発信元の電話番号</param>
-    /// <param name="callerConnectionId">発信者のConnectionId</param>
-    Task ReceiveIncoming(string fromNumber, string callerConnectionId);
+    Task ReceiveIncoming(string fromNumber);
 
     /// <summary>
     /// 相手が応答したことを通知する。
     /// </summary>
-    /// <param name="responderId">応答者のConnectionId</param>
-    Task ReceiveAnswered(string responderId);
+    /// <param name="responderConnectionId">応答者のConnectionId（WebRTCシグナリング用）</param>
+    Task ReceiveAnswered(string responderConnectionId);
 
     /// <summary>
     /// 着信がキャンセルされたことを通知する（他のメンバーが応答済み）。
     /// </summary>
-    /// <param name="callerConnectionId">発信者のConnectionId</param>
-    Task ReceiveCancel(string callerConnectionId);
+    Task ReceiveCancel();
 
     /// <summary>
     /// 相手が着信を拒否したことを通知する。
     /// </summary>
-    /// <param name="fromId">拒否した相手のConnectionId</param>
-    Task ReceiveReject(string fromId);
-
-    /// <summary>
-    /// 相手が話中であることを通知する。
-    /// </summary>
-    /// <param name="fromId">話中の相手のConnectionId</param>
-    Task ReceiveBusy(string fromId);
+    Task ReceiveReject();
 
     /// <summary>
     /// 相手が通話を切断したことを通知する。
     /// </summary>
-    /// <param name="fromId">切断した相手のConnectionId</param>
-    Task ReceiveHangup(string fromId);
+    Task ReceiveHangup();
 
     /// <summary>
     /// 保留要求を通知する。
     /// </summary>
-    /// <param name="fromId">保留を要求した相手のConnectionId</param>
-    Task ReceiveHoldRequest(string fromId);
+    Task ReceiveHoldRequest();
 
     /// <summary>
     /// 保留解除（再開）要求を通知する。
     /// </summary>
-    /// <param name="fromId">再開を要求した相手のConnectionId</param>
-    Task ReceiveResumeRequest(string fromId);
+    Task ReceiveResumeRequest();
 }
