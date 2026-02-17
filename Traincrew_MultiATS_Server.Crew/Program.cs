@@ -111,7 +111,7 @@ public class Program
 
         ConfigureDatabaseService(builder);
         ConfigureSignalRService(builder);
-        ConfigureKestrel(builder);
+        ConfigureKestrel(builder, isDevelopment);
         ConfigureGrpcService(builder);
         ConfigureAuthenticationService(builder);
         var openiddictBuilder = ConfigureOpeniddictService(builder, isDevelopment);
@@ -254,7 +254,7 @@ public class Program
         });
     }
 
-    private static void ConfigureKestrel(WebApplicationBuilder builder)
+    private static void ConfigureKestrel(WebApplicationBuilder builder, bool isDevelopment)
     {
         builder.WebHost.ConfigureKestrel((context, options) =>
         {
@@ -284,6 +284,10 @@ public class Program
             options.Listen(IPAddress.Any, grpcPort, listenOptions =>
             {
                 listenOptions.Protocols = HttpProtocols.Http2;
+                if (isDevelopment)
+                {
+                    listenOptions.UseHttps();
+                }
             });
         });
     }
@@ -296,10 +300,7 @@ public class Program
 
     private static List<IEndpointConventionBuilder> ConfigureEndpoints(WebApplication app)
     {
-        // gRPC エンドポイント（認証不要なので AllowAnonymous は適用されない）
-        app.MapGrpcService<VoiceRelayController>();
-
-        // SignalR エンドポイントの設定
+        // SignalR, Grpc エンドポイントの設定
         return
         [
             app.MapControllers(),
@@ -309,6 +310,7 @@ public class Program
             app.MapHub<InterlockingHub>("/hub/interlocking"),
             app.MapHub<CommanderTableHub>("/hub/commander_table"),
             app.MapHub<PhoneHub>("/hub/phone"),
+            app.MapGrpcService<VoiceRelayController>()
         ];
     }
 
