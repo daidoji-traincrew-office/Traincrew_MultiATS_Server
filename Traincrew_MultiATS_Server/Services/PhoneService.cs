@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.SignalR;
 using Traincrew_MultiATS_Server.Common.Contract;
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Hubs;
+using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.PhoneSession;
 
 namespace Traincrew_MultiATS_Server.Services;
@@ -22,7 +23,8 @@ public interface IPhoneService
 public class PhoneService(
     PhoneSessionStore sessionStore,
     IPhoneSessionRepository sessionRepository,
-    IHubContext<PhoneHub, IPhoneClientContract> hubContext
+    IHubContext<PhoneHub, IPhoneClientContract> hubContext,
+    IDateTimeRepository dateTimeRepository
 ) : IPhoneService
 {
     public async Task LoginAsync(string connectionId, string myNumber)
@@ -48,7 +50,8 @@ public class PhoneService(
         }
 
         // セッション生成
-        var session = await sessionRepository.CreateSessionAsync(callerNumber, connectionId, targetNumber);
+        var now = dateTimeRepository.GetNow();
+        await sessionRepository.CreateSessionAsync(callerNumber, connectionId, targetNumber, now);
 
         // 着信通知（グループ全員に）
         foreach (var memberConnectionId in members)

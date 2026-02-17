@@ -7,7 +7,7 @@ namespace Traincrew_MultiATS_Server.Repositories.PhoneSession;
 
 public class PhoneSessionRepository(ApplicationDbContext context) : IPhoneSessionRepository
 {
-    public async Task<PhoneCallSession> CreateSessionAsync(string callerNumber, string callerConnectionId, string targetNumber)
+    public async Task<PhoneCallSession> CreateSessionAsync(string callerNumber, string callerConnectionId, string targetNumber, DateTime now)
     {
         var session = new PhoneCallSession
         {
@@ -15,7 +15,7 @@ public class PhoneSessionRepository(ApplicationDbContext context) : IPhoneSessio
             CallerConnectionId = callerConnectionId,
             TargetNumber = targetNumber,
             Status = PhoneCallStatus.Calling,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = now
         };
 
         context.PhoneCallSessions.Add(session);
