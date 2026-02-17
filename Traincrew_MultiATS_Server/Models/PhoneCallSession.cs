@@ -37,7 +37,7 @@ public class PhoneCallSession
 
     [Column("created_at", TypeName = "timestamp without time zone")]
     [Required]
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; }
 
     [Column("ended_at", TypeName = "timestamp without time zone")]
     public DateTime? EndedAt { get; set; }
