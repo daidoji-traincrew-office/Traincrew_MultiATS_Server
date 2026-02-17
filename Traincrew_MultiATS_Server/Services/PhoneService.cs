@@ -109,10 +109,11 @@ public class PhoneService(
 
     public async Task<SingleNotifyResult?> HangupAsync(string connectionId)
     {
+        var now = dateTimeRepository.GetNow();
         var sessionAsCaller = await sessionRepository.GetActiveSessionByCallerConnectionIdAsync(connectionId);
         if (sessionAsCaller != null)
         {
-            await sessionRepository.EndSessionAsync(sessionAsCaller.Id);
+            await sessionRepository.EndSessionAsync(sessionAsCaller.Id, now);
             if (sessionAsCaller.TargetConnectionId != null)
             {
                 return new SingleNotifyResult([sessionAsCaller.TargetConnectionId]);
@@ -125,7 +126,7 @@ public class PhoneService(
         var sessionAsTarget = await sessionRepository.GetActiveSessionByTargetConnectionIdAsync(connectionId);
         if (sessionAsTarget != null)
         {
-            await sessionRepository.EndSessionAsync(sessionAsTarget.Id);
+            await sessionRepository.EndSessionAsync(sessionAsTarget.Id, now);
             return new SingleNotifyResult([sessionAsTarget.CallerConnectionId]);
         }
 
@@ -166,10 +167,11 @@ public class PhoneService(
     {
         sessionStore.Unregister(connectionId);
 
+        var now = dateTimeRepository.GetNow();
         var sessionAsCaller = await sessionRepository.GetActiveSessionByCallerConnectionIdAsync(connectionId);
         if (sessionAsCaller != null)
         {
-            await sessionRepository.EndSessionAsync(sessionAsCaller.Id);
+            await sessionRepository.EndSessionAsync(sessionAsCaller.Id, now);
             if (sessionAsCaller.TargetConnectionId != null)
             {
                 return new SingleNotifyResult([sessionAsCaller.TargetConnectionId]);
@@ -181,7 +183,7 @@ public class PhoneService(
         var sessionAsTarget = await sessionRepository.GetActiveSessionByTargetConnectionIdAsync(connectionId);
         if (sessionAsTarget != null)
         {
-            await sessionRepository.EndSessionAsync(sessionAsTarget.Id);
+            await sessionRepository.EndSessionAsync(sessionAsTarget.Id, now);
             return new SingleNotifyResult([sessionAsTarget.CallerConnectionId]);
         }
 
