@@ -71,7 +71,7 @@ public class PhoneSessionRepository(ApplicationDbContext context) : IPhoneSessio
                 .SetProperty(s => s.Status, PhoneCallStatus.Answered));
     }
 
-    public async Task EndSessionAsync(long sessionId)
+    public async Task EndSessionAsync(long sessionId, DateTime now)
     {
         await context.PhoneCallSessions
             .Where(s => s.Id == sessionId)

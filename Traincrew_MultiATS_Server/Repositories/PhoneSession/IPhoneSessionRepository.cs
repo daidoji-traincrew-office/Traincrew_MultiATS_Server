@@ -12,5 +12,5 @@ public interface IPhoneSessionRepository
     Task<PhoneCallSession?> GetActiveSessionByTargetNumberAsync(string targetNumber);
     Task UpdateStatusAsync(long sessionId, PhoneCallStatus status);
     Task SetAnsweredAsync(long sessionId, string targetConnectionId);
-    Task EndSessionAsync(long sessionId);
+    Task EndSessionAsync(long sessionId, DateTime now);
 }
