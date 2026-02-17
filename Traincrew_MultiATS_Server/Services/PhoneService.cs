@@ -1,7 +1,5 @@
-using Microsoft.AspNetCore.SignalR;
-using Traincrew_MultiATS_Server.Common.Contract;
 using Traincrew_MultiATS_Server.Common.Models;
-using Traincrew_MultiATS_Server.Hubs;
+using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.PhoneSession;
 
@@ -9,202 +7,176 @@ namespace Traincrew_MultiATS_Server.Services;
 
 public interface IPhoneService
 {
-    Task LoginAsync(string connectionId, string myNumber);
-    Task CallAsync(string connectionId, string targetNumber);
-    Task AnswerAsync(string connectionId, string callerConnectionId);
-    Task RejectAsync(string connectionId, string callerConnectionId);
-    Task HangupAsync(string connectionId, string targetConnectionId);
-    Task BusyAsync(string connectionId, string callerConnectionId);
-    Task HoldAsync(string connectionId, string targetId);
-    Task ResumeAsync(string connectionId, string targetId);
-    Task OnDisconnectedAsync(string connectionId);
+    Task<LoginResult> LoginAsync(string connectionId, string myNumber);
+    Task<CallResult> CallAsync(string connectionId, string targetNumber);
+    Task<AnswerResult> AnswerAsync(string connectionId, string callerConnectionId);
+    Task<SingleNotifyResult?> RejectAsync(string connectionId, string callerConnectionId);
+    Task<SingleNotifyResult?> HangupAsync(string connectionId, string targetConnectionId);
+    Task<SingleNotifyResult?> BusyAsync(string connectionId, string callerConnectionId);
+    Task<SingleNotifyResult?> HoldAsync(string connectionId, string targetId);
+    Task<SingleNotifyResult?> ResumeAsync(string connectionId, string targetId);
+    Task<SingleNotifyResult?> OnDisconnectedAsync(string connectionId);
 }
 
 public class PhoneService(
     PhoneSessionStore sessionStore,
     IPhoneSessionRepository sessionRepository,
-    IHubContext<PhoneHub, IPhoneClientContract> hubContext,
     IDateTimeRepository dateTimeRepository
 ) : IPhoneService
 {
-    public async Task LoginAsync(string connectionId, string myNumber)
+    public Task<LoginResult> LoginAsync(string connectionId, string myNumber)
     {
         sessionStore.Register(connectionId, myNumber);
-        await hubContext.Clients.Client(connectionId).ReceiveLoginSuccess(connectionId);
+        return Task.FromResult(new LoginResult(connectionId));
     }
 
-    public async Task CallAsync(string connectionId, string targetNumber)
+    public async Task<CallResult> CallAsync(string connectionId, string targetNumber)
     {
         var callerNumber = sessionStore.GetNumberByConnectionId(connectionId);
         if (callerNumber == null)
         {
-            return;
+            return new CallResult.CallerNotRegistered();
         }
 
-        // グループメンバー確認
         var members = sessionStore.GetMembersByNumber(targetNumber);
         if (members == null || members.Count == 0)
         {
-            await hubContext.Clients.Client(connectionId).ReceiveBusy(connectionId);
-            return;
+            return new CallResult.TargetBusy(connectionId);
         }
 
-        // セッション生成
         var now = dateTimeRepository.GetNow();
         await sessionRepository.CreateSessionAsync(callerNumber, connectionId, targetNumber, now);
 
-        // 着信通知（グループ全員に）
-        foreach (var memberConnectionId in members)
-        {
-            await hubContext.Clients.Client(memberConnectionId).ReceiveIncoming(callerNumber, connectionId);
-        }
+        return new CallResult.Incoming(callerNumber, connectionId, members.ToList());
     }
 
-    public async Task AnswerAsync(string connectionId, string callerConnectionId)
+    public async Task<AnswerResult> AnswerAsync(string connectionId, string callerConnectionId)
     {
-        // セッション取得
         var session = await sessionRepository.GetActiveSessionByCallerConnectionIdAsync(callerConnectionId);
         if (session == null)
         {
-            await hubContext.Clients.Client(connectionId).ReceiveHangup(callerConnectionId);
-            return;
+            return new AnswerResult.SessionNotFound(connectionId);
         }
 
-        // セッション更新（answered + target_connection_id設定）
         await sessionRepository.SetAnsweredAsync(session.Id, connectionId);
 
-        // 発信側に応答通知
-        await hubContext.Clients.Client(callerConnectionId).ReceiveAnswered(connectionId);
-
-        // 他のグループメンバーにキャンセル通知
+        var otherMembers = new List<string>();
         var targetNumber = sessionStore.GetNumberByConnectionId(connectionId);
         if (targetNumber != null)
         {
             var members = sessionStore.GetMembersByNumber(targetNumber);
             if (members != null)
             {
-                foreach (var memberConnectionId in members)
-                {
-                    if (memberConnectionId != connectionId)
-                    {
-                        await hubContext.Clients.Client(memberConnectionId).ReceiveCancel(callerConnectionId);
-                    }
-                }
+                otherMembers = members.Where(id => id != connectionId).ToList();
             }
         }
+
+        return new AnswerResult.Answered(callerConnectionId, connectionId, otherMembers);
     }
 
-    public async Task RejectAsync(string connectionId, string callerConnectionId)
+    public async Task<SingleNotifyResult?> RejectAsync(string connectionId, string callerConnectionId)
     {
         var session = await sessionRepository.GetActiveSessionByCallerConnectionIdAsync(callerConnectionId);
         if (session == null)
         {
-            return;
+            return null;
         }
 
-        // 全員拒否かどうかチェック（簡略化: 1人でも拒否したらreject扱い）
         await sessionRepository.UpdateStatusAsync(session.Id, PhoneCallStatus.Rejected);
-        await hubContext.Clients.Client(callerConnectionId).ReceiveReject(connectionId);
+        return new SingleNotifyResult(callerConnectionId, connectionId);
     }
 
-    public async Task HangupAsync(string connectionId, string targetConnectionId)
+    public async Task<SingleNotifyResult?> HangupAsync(string connectionId, string targetConnectionId)
     {
-        // 発信側として切断する場合
         var sessionAsCaller = await sessionRepository.GetActiveSessionByCallerConnectionIdAsync(connectionId);
         if (sessionAsCaller != null)
         {
             await sessionRepository.EndSessionAsync(sessionAsCaller.Id);
-            if (sessionAsCaller.TargetConnectionId != null)
-            {
-                await hubContext.Clients.Client(sessionAsCaller.TargetConnectionId).ReceiveHangup(connectionId);
-            }
-            return;
+            return sessionAsCaller.TargetConnectionId != null
+                ? new SingleNotifyResult(sessionAsCaller.TargetConnectionId, connectionId)
+                : null;
         }
 
-        // 着信側として切断する場合
         var sessionAsTarget = await sessionRepository.GetActiveSessionByTargetConnectionIdAsync(connectionId);
         if (sessionAsTarget != null)
         {
             await sessionRepository.EndSessionAsync(sessionAsTarget.Id);
-            await hubContext.Clients.Client(sessionAsTarget.CallerConnectionId).ReceiveHangup(connectionId);
+            return new SingleNotifyResult(sessionAsTarget.CallerConnectionId, connectionId);
         }
+
+        return null;
     }
 
-    public async Task BusyAsync(string connectionId, string callerConnectionId)
+    public async Task<SingleNotifyResult?> BusyAsync(string connectionId, string callerConnectionId)
     {
         var session = await sessionRepository.GetActiveSessionByCallerConnectionIdAsync(callerConnectionId);
         if (session == null)
         {
-            return;
+            return null;
         }
 
-        // 全員ビジャーかどうかチェック（簡略化: 1人でもビジャーならbusy扱い）
         await sessionRepository.UpdateStatusAsync(session.Id, PhoneCallStatus.Busy);
-        await hubContext.Clients.Client(callerConnectionId).ReceiveBusy(connectionId);
+        return new SingleNotifyResult(callerConnectionId, connectionId);
     }
 
-    public async Task HoldAsync(string connectionId, string targetId)
+    public async Task<SingleNotifyResult?> HoldAsync(string connectionId, string targetId)
     {
-        // 発信側としてホールド
         var sessionAsCaller = await sessionRepository.GetActiveSessionByCallerConnectionIdAsync(connectionId);
         if (sessionAsCaller != null && sessionAsCaller.TargetConnectionId == targetId)
         {
             await sessionRepository.UpdateStatusAsync(sessionAsCaller.Id, PhoneCallStatus.Held);
-            await hubContext.Clients.Client(targetId).ReceiveHoldRequest(connectionId);
-            return;
+            return new SingleNotifyResult(targetId, connectionId);
         }
 
-        // 着信側としてホールド
         var sessionAsTarget = await sessionRepository.GetActiveSessionByTargetConnectionIdAsync(connectionId);
         if (sessionAsTarget != null && sessionAsTarget.CallerConnectionId == targetId)
         {
             await sessionRepository.UpdateStatusAsync(sessionAsTarget.Id, PhoneCallStatus.Held);
-            await hubContext.Clients.Client(targetId).ReceiveHoldRequest(connectionId);
+            return new SingleNotifyResult(targetId, connectionId);
         }
+
+        return null;
     }
 
-    public async Task ResumeAsync(string connectionId, string targetId)
+    public async Task<SingleNotifyResult?> ResumeAsync(string connectionId, string targetId)
     {
-        // 発信側として再開
         var sessionAsCaller = await sessionRepository.GetActiveSessionByCallerConnectionIdAsync(connectionId);
         if (sessionAsCaller != null && sessionAsCaller.TargetConnectionId == targetId)
         {
             await sessionRepository.UpdateStatusAsync(sessionAsCaller.Id, PhoneCallStatus.Answered);
-            await hubContext.Clients.Client(targetId).ReceiveResumeRequest(connectionId);
-            return;
+            return new SingleNotifyResult(targetId, connectionId);
         }
 
-        // 着信側として再開
         var sessionAsTarget = await sessionRepository.GetActiveSessionByTargetConnectionIdAsync(connectionId);
         if (sessionAsTarget != null && sessionAsTarget.CallerConnectionId == targetId)
         {
             await sessionRepository.UpdateStatusAsync(sessionAsTarget.Id, PhoneCallStatus.Answered);
-            await hubContext.Clients.Client(targetId).ReceiveResumeRequest(connectionId);
+            return new SingleNotifyResult(targetId, connectionId);
         }
+
+        return null;
     }
 
-    public async Task OnDisconnectedAsync(string connectionId)
+    public async Task<SingleNotifyResult?> OnDisconnectedAsync(string connectionId)
     {
-        // PhoneSessionStore から削除
         sessionStore.Unregister(connectionId);
 
-        // アクティブセッションがあれば Hangup と同等の処理
         var sessionAsCaller = await sessionRepository.GetActiveSessionByCallerConnectionIdAsync(connectionId);
         if (sessionAsCaller != null)
         {
             await sessionRepository.EndSessionAsync(sessionAsCaller.Id);
-            if (sessionAsCaller.TargetConnectionId != null)
-            {
-                await hubContext.Clients.Client(sessionAsCaller.TargetConnectionId).ReceiveHangup(connectionId);
-            }
-            return;
+            return sessionAsCaller.TargetConnectionId != null
+                ? new SingleNotifyResult(sessionAsCaller.TargetConnectionId, connectionId)
+                : null;
         }
 
         var sessionAsTarget = await sessionRepository.GetActiveSessionByTargetConnectionIdAsync(connectionId);
         if (sessionAsTarget != null)
         {
             await sessionRepository.EndSessionAsync(sessionAsTarget.Id);
-            await hubContext.Clients.Client(sessionAsTarget.CallerConnectionId).ReceiveHangup(connectionId);
+            return new SingleNotifyResult(sessionAsTarget.CallerConnectionId, connectionId);
         }
+
+        return null;
     }
 }
