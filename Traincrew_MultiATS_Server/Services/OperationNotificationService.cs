@@ -6,10 +6,18 @@ using Traincrew_MultiATS_Server.Repositories.OperationNotification;
 
 namespace Traincrew_MultiATS_Server.Services;
 
+public interface IOperationNotificationService
+{
+    Task<List<OperationNotificationData>> GetOperationNotificationData();
+    Task<OperationNotificationData?> GetOperationNotificationDataByTrackCircuitIds(List<ulong> trackCircuitIds);
+    Task SetOperationNotificationData(OperationNotificationData operationNotificationData);
+    Task SetNoneWhereKaijoOrTorikeshiAndSpendMuchTime();
+}
+
 public class OperationNotificationService(
     IOperationNotificationRepository operationNotificationRepository,
     IGeneralRepository generalRepository,
-    IDateTimeRepository dateTimeRepository)
+    IDateTimeRepository dateTimeRepository) : IOperationNotificationService
 {
     static readonly int kaijoTime = 20;
     public async Task<List<OperationNotificationData>> GetOperationNotificationData()

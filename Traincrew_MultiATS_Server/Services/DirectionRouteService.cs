@@ -7,7 +7,15 @@ namespace Traincrew_MultiATS_Server.Services;
 /// <summary>
 /// DirectionRouteに関するサービスクラス
 /// </summary>
-public class DirectionRouteService(IDirectionRouteRepository directionRouteRepository)
+public interface IDirectionRouteService
+{
+    Task<List<DirectionData>> GetAllDirectionData();
+}
+
+/// <summary>
+/// DirectionRouteに関するサービスクラス
+/// </summary>
+public class DirectionRouteService(IDirectionRouteRepository directionRouteRepository) : IDirectionRouteService
 {
     /// <summary>
     /// DirectionRouteをDirectionDataに変換する

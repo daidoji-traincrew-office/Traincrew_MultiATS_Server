@@ -12,7 +12,7 @@ public class CTCPHubScheduler(IServiceScopeFactory serviceScopeFactory) : Schedu
     protected override async Task ExecuteTaskAsync(IServiceScope scope, System.Diagnostics.Activity? activity)
     {
         var hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<CTCPHub, ICTCPClientContract>>();
-        var ctcpService = scope.ServiceProvider.GetRequiredService<CTCPService>();
+        var ctcpService = scope.ServiceProvider.GetRequiredService<ICTCPService>();
 
         var data = await ctcpService.SendData_CTCP();
 

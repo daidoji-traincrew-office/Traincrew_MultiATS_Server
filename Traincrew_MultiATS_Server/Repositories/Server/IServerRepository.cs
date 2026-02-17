@@ -10,5 +10,7 @@ public interface IServerRepository
     Task<int> GetTimeOffset();
     Task SetTimeOffsetAsync(int timeOffset);
     Task AddServerStateAsync(ServerState serverState, CancellationToken cancellationToken = default);
+    Task SetSwitchMoveTimeAsync(int switchMoveTime);
+    Task SetUseOneSecondRelayAsync(bool useOneSecondRelay);
 }
 

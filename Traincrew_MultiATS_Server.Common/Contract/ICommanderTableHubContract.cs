@@ -23,6 +23,8 @@ public interface ICommanderTableHubContract
     Task<ServerMode> GetServerMode();
     Task SetServerMode(ServerMode mode);
     Task SetTimeOffset(int timeOffset);
+    Task SetSwitchMoveTime(int switchMoveTime);
+    Task SetUseOneSecondRelay(bool useOneSecondRelay);
     Task BanUser(ulong userId);
     Task UnbanUser(ulong userId);
 }

@@ -5,9 +5,19 @@ using Traincrew_MultiATS_Server.Repositories.Protection;
 
 namespace Traincrew_MultiATS_Server.Services;
 
+public interface IProtectionService
+{
+    Task<bool> IsProtectionEnabledForTrackCircuits(List<TrackCircuit> trackCircuits);
+    Task UpdateBougoState(string trainNumber, List<TrackCircuit> trackCircuits, bool clientBougoState);
+    Task<List<ProtectionRadioData>> GetProtectionRadioStates();
+    Task AddProtectionZoneState(ProtectionRadioData data);
+    Task UpdateProtectionZoneState(ProtectionRadioData data);
+    Task DeleteProtectionZoneState(ulong id);
+}
+
 public class ProtectionService(
     IProtectionRepository protectionRepository,
-    IGeneralRepository generalRepository)
+    IGeneralRepository generalRepository) : IProtectionService
 {
     public async Task<bool> IsProtectionEnabledForTrackCircuits(List<TrackCircuit> trackCircuits)
     {

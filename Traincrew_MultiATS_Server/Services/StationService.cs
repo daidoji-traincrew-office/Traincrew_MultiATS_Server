@@ -3,7 +3,15 @@ using Traincrew_MultiATS_Server.Repositories.Station;
 
 namespace Traincrew_MultiATS_Server.Services;
 
-public class StationService(IStationRepository stationRepository)
+public interface IStationService
+{
+    Task<Station?> GetStationById(string id);
+    Task<Station?> GetStationByName(string name);
+    Task<string?> GetStationNameById(string id);
+    Task<List<string>> GetStationNamesByIds(List<string> ids);
+}
+
+public class StationService(IStationRepository stationRepository) : IStationService
 {
     public Task<Station?> GetStationById(string id)
     {

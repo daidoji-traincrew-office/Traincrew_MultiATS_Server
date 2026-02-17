@@ -11,7 +11,7 @@ public class InterlockingHubScheduler(IServiceScopeFactory serviceScopeFactory) 
     protected override async Task ExecuteTaskAsync(IServiceScope scope, System.Diagnostics.Activity? activity)
     {
         var hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<InterlockingHub, IInterlockingClientContract>>();
-        var interlockingService = scope.ServiceProvider.GetRequiredService<InterlockingService>();
+        var interlockingService = scope.ServiceProvider.GetRequiredService<IInterlockingService>();
         var data = await interlockingService.SendData_Interlocking();
         await hubContext.Clients.All.ReceiveData(data);
     }

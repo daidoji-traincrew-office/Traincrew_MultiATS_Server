@@ -7,7 +7,7 @@ public class RendoScheduler(IServiceScopeFactory serviceScopeFactory) : Schedule
     protected override int Interval => 250;
     protected override async Task ExecuteTaskAsync(IServiceScope scope, System.Diagnostics.Activity? activity)
     {
-        var service = scope.ServiceProvider.GetRequiredService<RendoService>();
+        var service = scope.ServiceProvider.GetRequiredService<IRendoService>();
         using (activity?.Source.StartActivity($"{GetType().Name}.CHRRelay"))
         {
             await service.CHRRelay();

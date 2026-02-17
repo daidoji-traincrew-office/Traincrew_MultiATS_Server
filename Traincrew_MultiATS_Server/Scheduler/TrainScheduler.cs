@@ -12,7 +12,7 @@ public class TrainScheduler(IServiceScopeFactory serviceScopeFactory) : Schedule
     protected override async Task ExecuteTaskAsync(IServiceScope scope, System.Diagnostics.Activity? activity)
     {
         var trainHubContext = scope.ServiceProvider.GetRequiredService<IHubContext<TrainHub, ITrainClientContract>>();
-        var trainService = scope.ServiceProvider.GetRequiredService<TrainService>();
+        var trainService = scope.ServiceProvider.GetRequiredService<ITrainService>();
 
         var data = await trainService.CreateDataBySchedule();
 
