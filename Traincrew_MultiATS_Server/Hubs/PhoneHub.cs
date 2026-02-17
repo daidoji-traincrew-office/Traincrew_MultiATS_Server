@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using OpenIddict.Validation.AspNetCore;
 using Traincrew_MultiATS_Server.Common.Contract;
+using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Services;
 
@@ -15,11 +16,10 @@ public class PhoneHub(IPhoneService phoneService) : Hub<IPhoneClientContract>, I
 {
     public async Task Login(string myNumber)
     {
-        var result = await phoneService.LoginAsync(Context.ConnectionId, myNumber);
-        await Clients.Client(result.ConnectionId).ReceiveLoginSuccess(result.ConnectionId);
+        await phoneService.LoginAsync(Context.ConnectionId, myNumber);
     }
 
-    public async Task Call(string targetNumber)
+    public async Task<CallResponse> Call(string targetNumber)
     {
         var result = await phoneService.CallAsync(Context.ConnectionId, targetNumber);
         switch (result)
@@ -27,84 +27,88 @@ public class PhoneHub(IPhoneService phoneService) : Hub<IPhoneClientContract>, I
             case CallResult.Incoming incoming:
                 foreach (var id in incoming.MemberConnectionIds)
                 {
-                    await Clients.Client(id).ReceiveIncoming(incoming.CallerNumber, incoming.CallerConnectionId);
+                    await Clients.Client(id).ReceiveIncoming(incoming.CallerNumber);
                 }
-                break;
-            case CallResult.TargetBusy busy:
-                await Clients.Client(busy.ConnectionId).ReceiveBusy(busy.ConnectionId);
-                break;
+                return new CallResponse(true);
+            default:
+                return new CallResponse(false);
         }
     }
 
-    public async Task Answer(string callerConnectionId)
+    public async Task<AnswerResponse> Answer()
     {
-        var result = await phoneService.AnswerAsync(Context.ConnectionId, callerConnectionId);
+        var result = await phoneService.AnswerAsync(Context.ConnectionId);
         switch (result)
         {
             case AnswerResult.Answered answered:
                 await Clients.Client(answered.CallerConnectionId).ReceiveAnswered(answered.AnswererConnectionId);
                 foreach (var id in answered.OtherMemberConnectionIds)
                 {
-                    await Clients.Client(id).ReceiveCancel(answered.CallerConnectionId);
+                    await Clients.Client(id).ReceiveCancel();
                 }
-                break;
-            case AnswerResult.SessionNotFound notFound:
-                await Clients.Client(notFound.ConnectionId).ReceiveHangup(callerConnectionId);
-                break;
+                return new AnswerResponse(answered.AnswererConnectionId, answered.CallerConnectionId);
+            default:
+                throw new HubException("No active incoming call found.");
         }
     }
 
-    public async Task Reject(string callerConnectionId)
+    public async Task Reject()
     {
-        var result = await phoneService.RejectAsync(Context.ConnectionId, callerConnectionId);
-        if (result?.TargetConnectionId != null)
+        var result = await phoneService.RejectAsync(Context.ConnectionId);
+        if (result != null)
         {
-            await Clients.Client(result.TargetConnectionId).ReceiveReject(result.FromConnectionId);
+            foreach (var id in result.TargetConnectionIds)
+            {
+                await Clients.Client(id).ReceiveReject();
+            }
         }
     }
 
-    public async Task Hangup(string targetConnectionId)
+    public async Task Hangup()
     {
-        var result = await phoneService.HangupAsync(Context.ConnectionId, targetConnectionId);
-        if (result?.TargetConnectionId != null)
+        var result = await phoneService.HangupAsync(Context.ConnectionId);
+        if (result != null)
         {
-            await Clients.Client(result.TargetConnectionId).ReceiveHangup(result.FromConnectionId);
+            foreach (var id in result.TargetConnectionIds)
+            {
+                await Clients.Client(id).ReceiveHangup();
+            }
         }
     }
 
-    public async Task Busy(string callerConnectionId)
+    public async Task Hold()
     {
-        var result = await phoneService.BusyAsync(Context.ConnectionId, callerConnectionId);
-        if (result?.TargetConnectionId != null)
+        var result = await phoneService.HoldAsync(Context.ConnectionId);
+        if (result != null)
         {
-            await Clients.Client(result.TargetConnectionId).ReceiveBusy(result.FromConnectionId);
+            foreach (var id in result.TargetConnectionIds)
+            {
+                await Clients.Client(id).ReceiveHoldRequest();
+            }
         }
     }
 
-    public async Task Hold(string targetId)
+    public async Task Resume()
     {
-        var result = await phoneService.HoldAsync(Context.ConnectionId, targetId);
-        if (result?.TargetConnectionId != null)
+        var result = await phoneService.ResumeAsync(Context.ConnectionId);
+        if (result != null)
         {
-            await Clients.Client(result.TargetConnectionId).ReceiveHoldRequest(result.FromConnectionId);
-        }
-    }
-
-    public async Task Resume(string targetId)
-    {
-        var result = await phoneService.ResumeAsync(Context.ConnectionId, targetId);
-        if (result?.TargetConnectionId != null)
-        {
-            await Clients.Client(result.TargetConnectionId).ReceiveResumeRequest(result.FromConnectionId);
+            foreach (var id in result.TargetConnectionIds)
+            {
+                await Clients.Client(id).ReceiveResumeRequest();
+            }
         }
     }
 
     public override async Task OnDisconnectedAsync(System.Exception? exception)
     {
         var result = await phoneService.OnDisconnectedAsync(Context.ConnectionId);
-        if (result?.TargetConnectionId != null)
+        if (result != null)
         {
-            await Clients.Client(result.TargetConnectionId).ReceiveHangup(result.FromConnectionId);
+            foreach (var id in result.TargetConnectionIds)
+            {
+                await Clients.Client(id).ReceiveHangup();
+            }
         }
         await base.OnDisconnectedAsync(exception);
     }
