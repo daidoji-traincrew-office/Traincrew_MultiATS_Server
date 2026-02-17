@@ -77,6 +77,6 @@ public class PhoneSessionRepository(ApplicationDbContext context) : IPhoneSessio
             .Where(s => s.Id == sessionId)
             .ExecuteUpdateAsync(setters => setters
                 .SetProperty(s => s.Status, PhoneCallStatus.Ended)
-                .SetProperty(s => s.EndedAt, DateTime.UtcNow));
+                .SetProperty(s => s.EndedAt, now));
     }
 }
