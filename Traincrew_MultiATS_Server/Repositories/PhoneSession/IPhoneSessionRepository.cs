@@ -5,7 +5,7 @@ namespace Traincrew_MultiATS_Server.Repositories.PhoneSession;
 
 public interface IPhoneSessionRepository
 {
-    Task<PhoneCallSession> CreateSessionAsync(string callerNumber, string callerConnectionId, string targetNumber);
+    Task<PhoneCallSession> CreateSessionAsync(string callerNumber, string callerConnectionId, string targetNumber, DateTime now);
     Task<PhoneCallSession?> GetActiveSessionByCallerConnectionIdAsync(string callerConnectionId);
     Task<PhoneCallSession?> GetActiveSessionByTargetConnectionIdAsync(string targetConnectionId);
     Task UpdateStatusAsync(long sessionId, PhoneCallStatus status);
