@@ -95,7 +95,7 @@ public class PhoneService(
             otherMembers = members.Where(id => id != connectionId).ToList();
         }
 
-        return new AnswerResult.Answered(session.CallerConnectionId, connectionId, callerUserId, answererUserId, otherMembers);
+        return new AnswerResult.Answered(session.CallerConnectionId, otherMembers);
     }
 
     public async Task<SingleNotifyResult?> RejectAsync(string connectionId)
