@@ -8,4 +8,6 @@ public record CallResponse(bool IsConnected);
 /// <summary>
 /// Answerの戻り値。応答時にWebRTCシグナリング用のConnectionIdを交換する。
 /// </summary>
-public record AnswerResponse(string MyConnectionId, string CallerConnectionId);
+public record AnswerResponse(
+    string MyConnectionId, string CallerConnectionId,
+    string? MyUserId, string? CallerUserId);
