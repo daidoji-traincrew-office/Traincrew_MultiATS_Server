@@ -13,6 +13,12 @@ public class PhoneSessionStore
     // 電話番号 → 接続中の ConnectionId セット
     private readonly ConcurrentDictionary<string, HashSet<string>> _groupMembers = new();
 
+    // ConnectionId → UserID
+    private readonly ConcurrentDictionary<string, string> _connectionToUserId = new();
+
+    // UserID → 通話相手の UserID（Answer 後に双方向で設定）
+    private readonly ConcurrentDictionary<string, string> _activeCallPartner = new();
+
     // グループメンバーへのアクセス用ロック
     private readonly object _groupLock = new();
 
@@ -38,11 +44,48 @@ public class PhoneSessionStore
     }
 
     /// <summary>
-    /// ConnectionId と電話番号を登録
+    /// ConnectionId から UserID を取得
     /// </summary>
-    public void Register(string connectionId, string number)
+    public string? GetUserIdByConnectionId(string connectionId)
+    {
+        return _connectionToUserId.TryGetValue(connectionId, out var userId) ? userId : null;
+    }
+
+    /// <summary>
+    /// 通話相手の UserID を取得
+    /// </summary>
+    public string? GetCallPartnerUserId(string userId)
+    {
+        return _activeCallPartner.TryGetValue(userId, out var partnerId) ? partnerId : null;
+    }
+
+    /// <summary>
+    /// 双方向に通話ペアを登録
+    /// </summary>
+    public void SetCallPartner(string userIdA, string userIdB)
+    {
+        _activeCallPartner[userIdA] = userIdB;
+        _activeCallPartner[userIdB] = userIdA;
+    }
+
+    /// <summary>
+    /// 自分と相手の両方の通話ペアを解除
+    /// </summary>
+    public void ClearCallPartner(string userId)
+    {
+        if (_activeCallPartner.TryRemove(userId, out var partnerId))
+        {
+            _activeCallPartner.TryRemove(partnerId, out _);
+        }
+    }
+
+    /// <summary>
+    /// ConnectionId、UserID、電話番号を登録
+    /// </summary>
+    public void Register(string connectionId, string userId, string number)
     {
         _connectionToNumber[connectionId] = number;
+        _connectionToUserId[connectionId] = userId;
 
         lock (_groupLock)
         {
@@ -59,6 +102,8 @@ public class PhoneSessionStore
     /// </summary>
     public void Unregister(string connectionId)
     {
+        _connectionToUserId.TryRemove(connectionId, out _);
+
         if (!_connectionToNumber.TryRemove(connectionId, out var number))
         {
             return;

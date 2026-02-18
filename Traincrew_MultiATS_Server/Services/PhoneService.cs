@@ -7,7 +7,7 @@ namespace Traincrew_MultiATS_Server.Services;
 
 public interface IPhoneService
 {
-    Task LoginAsync(string connectionId, string myNumber);
+    Task LoginAsync(string connectionId, string userId, string myNumber);
     Task<CallResult> CallAsync(string connectionId, string targetNumber);
     Task<AnswerResult> AnswerAsync(string connectionId);
     Task<SingleNotifyResult?> RejectAsync(string connectionId);
@@ -23,9 +23,9 @@ public class PhoneService(
     IDateTimeRepository dateTimeRepository
 ) : IPhoneService
 {
-    public Task LoginAsync(string connectionId, string myNumber)
+    public Task LoginAsync(string connectionId, string userId, string myNumber)
     {
-        sessionStore.Register(connectionId, myNumber);
+        sessionStore.Register(connectionId, userId, myNumber);
         return Task.CompletedTask;
     }
 
@@ -79,6 +79,15 @@ public class PhoneService(
 
         await sessionRepository.SetAnsweredAsync(session.Id, connectionId);
 
+        var callerUserId = sessionStore.GetUserIdByConnectionId(session.CallerConnectionId);
+        var answererUserId = sessionStore.GetUserIdByConnectionId(connectionId);
+
+        // 通話ペアを登録
+        if (callerUserId != null && answererUserId != null)
+        {
+            sessionStore.SetCallPartner(callerUserId, answererUserId);
+        }
+
         var otherMembers = new List<string>();
         var members = sessionStore.GetMembersByNumber(targetNumber);
         if (members != null)
@@ -86,7 +95,7 @@ public class PhoneService(
             otherMembers = members.Where(id => id != connectionId).ToList();
         }
 
-        return new AnswerResult.Answered(session.CallerConnectionId, connectionId, otherMembers);
+        return new AnswerResult.Answered(session.CallerConnectionId, connectionId, callerUserId, answererUserId, otherMembers);
     }
 
     public async Task<SingleNotifyResult?> RejectAsync(string connectionId)
@@ -109,11 +118,13 @@ public class PhoneService(
 
     public async Task<SingleNotifyResult?> HangupAsync(string connectionId)
     {
+        var userId = sessionStore.GetUserIdByConnectionId(connectionId);
         var now = dateTimeRepository.GetNow();
         var sessionAsCaller = await sessionRepository.GetActiveSessionByCallerConnectionIdAsync(connectionId);
         if (sessionAsCaller != null)
         {
             await sessionRepository.EndSessionAsync(sessionAsCaller.Id, now);
+            if (userId != null) sessionStore.ClearCallPartner(userId);
             if (sessionAsCaller.TargetConnectionId != null)
             {
                 return new SingleNotifyResult([sessionAsCaller.TargetConnectionId]);
@@ -127,6 +138,7 @@ public class PhoneService(
         if (sessionAsTarget != null)
         {
             await sessionRepository.EndSessionAsync(sessionAsTarget.Id, now);
+            if (userId != null) sessionStore.ClearCallPartner(userId);
             return new SingleNotifyResult([sessionAsTarget.CallerConnectionId]);
         }
 
@@ -165,7 +177,9 @@ public class PhoneService(
 
     public async Task<SingleNotifyResult?> OnDisconnectedAsync(string connectionId)
     {
+        var userId = sessionStore.GetUserIdByConnectionId(connectionId);
         sessionStore.Unregister(connectionId);
+        if (userId != null) sessionStore.ClearCallPartner(userId);
 
         var now = dateTimeRepository.GetNow();
         var sessionAsCaller = await sessionRepository.GetActiveSessionByCallerConnectionIdAsync(connectionId);

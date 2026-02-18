@@ -1,8 +1,10 @@
 using System.Collections.Concurrent;
 using Grpc.Core;
 using Microsoft.AspNetCore.Authorization;
+using OpenIddict.Abstractions;
 using OpenIddict.Validation.AspNetCore;
 using RailwayPhone.Protos;
+using Traincrew_MultiATS_Server.Services;
 
 namespace Traincrew_MultiATS_Server.Crew.Controllers;
 
@@ -13,9 +15,12 @@ namespace Traincrew_MultiATS_Server.Crew.Controllers;
     AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme,
     Policy = "PhonePolicy"
 )]
-public class VoiceRelayController(ILogger<VoiceRelayController> logger) : VoiceRelay.VoiceRelayBase
+public class VoiceRelayController(
+    ILogger<VoiceRelayController> logger,
+    PhoneSessionStore sessionStore
+) : VoiceRelay.VoiceRelayBase
 {
-    // 接続中のクライアントの「出口（書き込みストリーム）」をIDで管理する辞書
+    // 接続中のクライアントの「出口（書き込みストリーム）」をUserIDで管理する辞書
     private static readonly ConcurrentDictionary<string, IServerStreamWriter<VoiceData>> _users = new();
 
     public override async Task JoinSession(
@@ -23,40 +28,36 @@ public class VoiceRelayController(ILogger<VoiceRelayController> logger) : VoiceR
         IServerStreamWriter<VoiceData> responseStream,
         ServerCallContext context)
     {
-        var myId = "";
+        var myUserId = context.GetHttpContext()?.User
+            .FindFirst(OpenIddictConstants.Claims.Subject)?.Value;
+        if (string.IsNullOrEmpty(myUserId))
+        {
+            throw new RpcException(new Status(StatusCode.Unauthenticated, "User not authenticated"));
+        }
+
+        _users[myUserId] = responseStream;
+        logger.LogInformation("[Voice] Client Joined: {UserId}", myUserId);
 
         try
         {
-            // クライアントからの最初のパケットを待つ（ここでID登録する）
             await foreach (var data in requestStream.ReadAllAsync())
             {
-                // 初回接続時の処理
-                if (string.IsNullOrEmpty(myId))
-                {
-                    myId = data.ClientId;
-                    _users[myId] = responseStream;
-                    logger.LogInformation("[Voice] Client Joined: {ClientId}", myId);
-                }
-
-                // 送信処理: ターゲットが辞書にいれば、その人のストリームに書き込む
-                if (string.IsNullOrEmpty(data.TargetId) || !_users.TryGetValue(data.TargetId, out var targetStream))
+                var partnerId = sessionStore.GetCallPartnerUserId(myUserId);
+                if (partnerId == null || !_users.TryGetValue(partnerId, out var targetStream))
                 {
                     continue;
                 }
 
                 try
                 {
-                    // 相手に転送
                     await targetStream.WriteAsync(new VoiceData
                     {
-                        ClientId = data.ClientId, // 誰から来たか
                         AudioContent = data.AudioContent
                     });
                 }
                 catch (System.Exception ex)
                 {
-                    // 送信失敗（相手が切断など）
-                    logger.LogWarning("[Voice] Failed to send to {TargetId}: {Message}", data.TargetId, ex.Message);
+                    logger.LogWarning("[Voice] Failed to send to {PartnerId}: {Message}", partnerId, ex.Message);
                 }
             }
         }
@@ -66,12 +67,8 @@ public class VoiceRelayController(ILogger<VoiceRelayController> logger) : VoiceR
         }
         finally
         {
-            // 切断時の後始末
-            if (!string.IsNullOrEmpty(myId))
-            {
-                _users.TryRemove(myId, out _);
-                logger.LogInformation("[Voice] Client Left: {ClientId}", myId);
-            }
+            _users.TryRemove(myUserId, out _);
+            logger.LogInformation("[Voice] Client Left: {UserId}", myUserId);
         }
     }
 }

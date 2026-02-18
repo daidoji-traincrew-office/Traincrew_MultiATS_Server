@@ -9,7 +9,10 @@ public abstract record CallResult
 
 public abstract record AnswerResult
 {
-    public record Answered(string CallerConnectionId, string AnswererConnectionId, List<string> OtherMemberConnectionIds) : AnswerResult;
+    public record Answered(
+        string CallerConnectionId, string AnswererConnectionId,
+        string? CallerUserId, string? AnswererUserId,
+        List<string> OtherMemberConnectionIds) : AnswerResult;
     public record SessionNotFound() : AnswerResult;
 }
 

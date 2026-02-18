@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using OpenIddict.Abstractions;
 using OpenIddict.Validation.AspNetCore;
 using Traincrew_MultiATS_Server.Common.Contract;
 using Traincrew_MultiATS_Server.Common.Models;
@@ -16,7 +17,9 @@ public class PhoneHub(IPhoneService phoneService) : Hub<IPhoneClientContract>, I
 {
     public async Task Login(string myNumber)
     {
-        await phoneService.LoginAsync(Context.ConnectionId, myNumber);
+        var userId = Context.User?.FindFirst(OpenIddictConstants.Claims.Subject)?.Value
+            ?? throw new HubException("User not authenticated");
+        await phoneService.LoginAsync(Context.ConnectionId, userId, myNumber);
     }
 
     public async Task<CallResponse> Call(string targetNumber)
@@ -46,7 +49,9 @@ public class PhoneHub(IPhoneService phoneService) : Hub<IPhoneClientContract>, I
                 {
                     await Clients.Client(id).ReceiveCancel();
                 }
-                return new AnswerResponse(answered.AnswererConnectionId, answered.CallerConnectionId);
+                return new AnswerResponse(
+                    answered.AnswererConnectionId, answered.CallerConnectionId,
+                    answered.AnswererUserId, answered.CallerUserId);
             default:
                 throw new HubException("No active incoming call found.");
         }
