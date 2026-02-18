@@ -38,20 +38,18 @@ public class PhoneHub(IPhoneService phoneService) : Hub<IPhoneClientContract>, I
         }
     }
 
-    public async Task<AnswerResponse> Answer()
+    public async Task Answer()
     {
         var result = await phoneService.AnswerAsync(Context.ConnectionId);
         switch (result)
         {
             case AnswerResult.Answered answered:
-                await Clients.Client(answered.CallerConnectionId).ReceiveAnswered(answered.AnswererConnectionId);
+                await Clients.Client(answered.CallerConnectionId).ReceiveAnswered();
                 foreach (var id in answered.OtherMemberConnectionIds)
                 {
                     await Clients.Client(id).ReceiveCancel();
                 }
-                return new AnswerResponse(
-                    answered.AnswererConnectionId, answered.CallerConnectionId,
-                    answered.AnswererUserId, answered.CallerUserId);
+                return;
             default:
                 throw new HubException("No active incoming call found.");
         }

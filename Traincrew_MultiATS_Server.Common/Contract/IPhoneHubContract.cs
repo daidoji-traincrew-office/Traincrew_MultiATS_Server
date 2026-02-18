@@ -22,7 +22,7 @@ public interface IPhoneHubContract
     /// <summary>
     /// 着信に応答する。サーバーが着信元セッションを管理するため引数不要。
     /// </summary>
-    Task<AnswerResponse> Answer();
+    Task Answer();
 
     /// <summary>
     /// 着信を拒否する。サーバーが着信元セッションを管理するため引数不要。
@@ -59,8 +59,7 @@ public interface IPhoneClientContract
     /// <summary>
     /// 相手が応答したことを通知する。
     /// </summary>
-    /// <param name="responderConnectionId">応答者のConnectionId（WebRTCシグナリング用）</param>
-    Task ReceiveAnswered(string responderConnectionId);
+    Task ReceiveAnswered();
 
     /// <summary>
     /// 着信がキャンセルされたことを通知する（他のメンバーが応答済み）。
