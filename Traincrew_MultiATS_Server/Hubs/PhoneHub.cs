@@ -1,11 +1,12 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
-using OpenIddict.Abstractions;
 using OpenIddict.Validation.AspNetCore;
+using Traincrew_MultiATS_Server.Authentication;
 using Traincrew_MultiATS_Server.Common.Contract;
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Services;
+using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace Traincrew_MultiATS_Server.Hubs;
 
@@ -13,12 +14,14 @@ namespace Traincrew_MultiATS_Server.Hubs;
     AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme,
     Policy = "PhonePolicy"
 )]
-public class PhoneHub(IPhoneService phoneService) : Hub<IPhoneClientContract>, IPhoneHubContract
+public class PhoneHub(
+    IPhoneService phoneService,
+    EnableAuthorizationStore enableAuthorizationStore
+) : Hub<IPhoneClientContract>, IPhoneHubContract
 {
     public async Task Login(string myNumber)
     {
-        var userId = Context.User?.FindFirst(OpenIddictConstants.Claims.Subject)?.Value
-            ?? throw new HubException("User not authenticated");
+        var userId = GetUserId(myNumber);
         await phoneService.LoginAsync(Context.ConnectionId, userId, myNumber);
     }
 
@@ -101,6 +104,24 @@ public class PhoneHub(IPhoneService phoneService) : Hub<IPhoneClientContract>, I
                 await Clients.Client(id).ReceiveResumeRequest();
             }
         }
+    }
+
+    private string GetUserId(string myNumber)
+    {
+        var enableAuthorization = enableAuthorizationStore.EnableAuthorization;
+        var userId = Context.User?.FindFirst(Claims.Subject)?.Value;
+        if (userId != null)
+        {
+            return userId;
+        }
+
+        if (enableAuthorization)
+        {
+            throw new HubException("User not authenticated");
+        }
+
+        // Authorizationが無効な場合は、userIdをmyNumberと同じとみなす（ローカル開発用）
+        return myNumber;
     }
 
     public override async Task OnDisconnectedAsync(System.Exception? exception)
