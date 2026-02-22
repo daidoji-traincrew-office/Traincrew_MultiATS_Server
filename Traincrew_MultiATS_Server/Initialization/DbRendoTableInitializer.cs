@@ -95,7 +95,7 @@ public partial class DbRendoTableInitializer
     private static partial Regex RegexSignalControl();
 
     // 連動図表の鎖錠欄の諸々のトークンを抽出するための正規表現
-    [GeneratedRegex(@"\[\[|\]\]|\(\(|\)\)|\[|\]|\{|\}|\(|\)|｢|｣|但\s+\d+秒|但|又は|[A-Z\dｲﾛ]+")]
+    [GeneratedRegex(@"\[\[|\]\]|\(\(|\)\)|\[|\]|\{|\}|\(|\)|｢|｣|但\s+\d+秒|但|又は|列番奇数:TLS代用|列番偶数:TRS代用|[A-Z\dｲﾛ]+")]
     private static partial Regex TokenRegex();
 
     internal async Task InitializeObjects()
