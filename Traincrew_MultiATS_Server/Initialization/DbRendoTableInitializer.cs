@@ -14,6 +14,8 @@ public partial class DbRendoTableInitializer
     private const string NameClosure = "閉そく";
     private const string PrefixTrackCircuitDown = "下り";
     private const string PrefixTrackCircuitUp = "上り";
+    private const string NameTrainNumberOdd = "列番奇数:TLS代用";
+    private const string NameTrainNumberEven = "列番偶数:TRS代用";
     private const string NameAnd = "and";
     private const string NameOr = "or";
     private const string NameNot = "not";
@@ -95,7 +97,9 @@ public partial class DbRendoTableInitializer
     private static partial Regex RegexSignalControl();
 
     // 連動図表の鎖錠欄の諸々のトークンを抽出するための正規表現
-    [GeneratedRegex(@"\[\[|\]\]|\(\(|\)\)|\[|\]|\{|\}|\(|\)|｢|｣|但\s+\d+秒|但|又は|列番奇数:TLS代用|列番偶数:TRS代用|[A-Z\dｲﾛ]+")]
+    [GeneratedRegex(
+        @"\[\[|\]\]|\(\(|\)\)|\[|\]|\{|\}|\(|\)|｢|｣|但\s+\d+秒|但|又は|"
+        + NameTrainNumberEven + "|" + NameTrainNumberOdd + @"|[A-Z\dｲﾛ]+")]
     private static partial Regex TokenRegex();
 
     internal async Task InitializeObjects()
@@ -932,6 +936,7 @@ public partial class DbRendoTableInitializer
                 TimerSeconds = item.TimerSeconds,
                 IsReverse = item.IsReverse,
                 IsLR = isLr,
+                TrainNumberCondition = item.TrainNumberCondition,
                 Type = LockConditionType.Object
             });
 
@@ -962,6 +967,7 @@ public partial class DbRendoTableInitializer
                 TimerSeconds = item.TimerSeconds,
                 IsReverse = item.IsReverse,
                 IsLR = isLr,
+                TrainNumberCondition = item.TrainNumberCondition,
                 Type = LockConditionType.Object
             });
             if (routeIdForSwitchingMachineRoute == null || targetObjects[0] is not SwitchingMachine switchingMachine)
@@ -1226,6 +1232,12 @@ public partial class DbRendoTableInitializer
                     .Value);
                 enumerator.MoveNext();
             }
+            else if (token is NameTrainNumberEven or NameTrainNumberOdd)
+            {
+                // 列番条件
+                result[^1].TrainNumberCondition = token == NameTrainNumberOdd ? BothOddEven.Odd : BothOddEven.Even;
+                enumerator.MoveNext();
+            }
             else if (token == "但")
             {
                 // 但条件(左辺 or not右辺)
@@ -1378,6 +1390,7 @@ public partial class DbRendoTableInitializer
         public bool isLocked { get; set; }
         public int? TimerSeconds { get; set; }
         public NR IsReverse { get; set; }
+        public BothOddEven TrainNumberCondition { get; set; } = BothOddEven.Both;
         public List<LockItem> Children { get; set; } = [];
     }
 

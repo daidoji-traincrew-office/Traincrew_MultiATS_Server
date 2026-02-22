@@ -227,6 +227,7 @@ CREATE TABLE lever
 );
 
 CREATE TYPE lr as ENUM ('left', 'right');
+CREATE TYPE both_odd_even AS ENUM ('both', 'odd', 'even');
 
 -- 開放てこ(方向てこ用)
 CREATE TYPE nr AS ENUM ('reversed', 'normal');
@@ -370,7 +371,8 @@ CREATE TABLE lock_condition_object
     timer_seconds  INT,                                                 -- タイマーの秒数
     is_reverse     nr                                         NOT NULL, -- 定反
     is_single_lock BOOLEAN                                    NOT NULL, -- 片鎖状がどうか    
-    is_lr          lr                                                   -- 方向てこの方向
+    is_lr                    lr,                                                  -- 方向てこの方向
+    train_number_condition   both_odd_even NOT NULL DEFAULT 'both'                -- 列番奇偶条件
 );
 -- 統括制御テーブル
 CREATE TYPE throw_out_control_type AS ENUM ('with_lever', 'without_lever', 'direction');
