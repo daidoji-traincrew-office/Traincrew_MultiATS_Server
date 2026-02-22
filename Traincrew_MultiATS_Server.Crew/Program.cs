@@ -261,7 +261,7 @@ public class Program
         {
             options.ConfigureEndpointDefaults(listenOptions =>
             {
-                listenOptions.Protocols = HttpProtocols.Http2;
+                listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
             });
         });
     }
