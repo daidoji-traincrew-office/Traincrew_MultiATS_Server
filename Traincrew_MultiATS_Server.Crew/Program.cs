@@ -253,38 +253,12 @@ public class Program
 
     private static void ConfigureKestrel(WebApplicationBuilder builder, bool isDevelopment)
     {
-        builder.WebHost.ConfigureKestrel((context, options) =>
+        // 全エンドポイントをHTTP/2専用に設定（gRPC対応）
+        builder.WebHost.ConfigureKestrel(options =>
         {
-            // 1. applicationUrl から既存のポート設定を読み取る（ASPNETCORE_URLS 環境変数）
-            var urls = context.Configuration["ASPNETCORE_URLS"];
-            if (!string.IsNullOrEmpty(urls))
-            {
-                foreach (var url in urls.Split(';'))
-                {
-                    var uri = new Uri(url);
-                    var port = uri.Port;
-                    var isHttps = uri.Scheme == "https";
-
-                    options.Listen(IPAddress.Any, port, listenOptions =>
-                    {
-                        listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
-                        if (isHttps)
-                        {
-                            listenOptions.UseHttps(); // ASP.NET Core のデフォルト証明書を使用
-                        }
-                    });
-                }
-            }
-
-            // 2. gRPC ポートを追加（HTTP/2 専用）
-            var grpcPort = context.Configuration.GetValue("GrpcPort", 8081);
-            options.Listen(IPAddress.Any, grpcPort, listenOptions =>
+            options.ConfigureEndpointDefaults(listenOptions =>
             {
                 listenOptions.Protocols = HttpProtocols.Http2;
-                if (isDevelopment)
-                {
-                    listenOptions.UseHttps();
-                }
             });
         });
     }
