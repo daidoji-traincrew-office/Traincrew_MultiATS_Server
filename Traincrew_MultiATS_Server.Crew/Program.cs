@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using OpenIddict.Abstractions;
@@ -108,7 +107,6 @@ public class Program
 
         ConfigureDatabaseService(builder);
         ConfigureSignalRService(builder);
-        ConfigureKestrel(builder, isDevelopment);
         ConfigureGrpcService(builder);
         ConfigureAuthenticationService(builder);
         var openiddictBuilder = ConfigureOpeniddictService(builder, isDevelopment);
@@ -248,18 +246,6 @@ public class Program
         builder.Services.AddSignalR(options =>
         {
             options.ClientTimeoutInterval = TimeSpan.FromMinutes(3);
-        });
-    }
-
-    private static void ConfigureKestrel(WebApplicationBuilder builder, bool isDevelopment)
-    {
-        // 全エンドポイントをHTTP/2専用に設定（gRPC対応）
-        builder.WebHost.ConfigureKestrel(options =>
-        {
-            options.ConfigureEndpointDefaults(listenOptions =>
-            {
-                listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
-            });
         });
     }
 
