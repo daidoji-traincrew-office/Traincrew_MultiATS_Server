@@ -141,7 +141,8 @@ public class ApproachAlertConditionDbInitializer(
                 {
                     StationId = stationId,
                     IsUp = isUp,
-                    TrackCircuitId = trackCircuitId
+                    TrackCircuitId = trackCircuitId,
+                    TrainNumberCondition = tcItem.TrainNumberCondition
                 },
                 cancellationToken);
 
@@ -201,8 +202,7 @@ public class ApproachAlertConditionDbInitializer(
                     Type = LockConditionType.Object,
                     ObjectId = objects[0].Id,
                     IsReverse = item.IsReverse,
-                    IsSingleLock = item.isLocked,
-                    TrainNumberCondition = item.TrainNumberCondition
+                    IsSingleLock = item.isLocked
                 },
                 cancellationToken);
         }

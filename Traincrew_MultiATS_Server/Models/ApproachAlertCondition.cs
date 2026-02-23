@@ -14,4 +14,7 @@ public class ApproachAlertCondition
     public required bool IsUp { get; set; }
     public required ulong TrackCircuitId { get; set; }
     public TrackCircuit? TrackCircuit { get; set; }
+
+    [Column("train_number_condition")]
+    public BothOddEven TrainNumberCondition { get; set; } = BothOddEven.Both;
 }

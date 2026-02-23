@@ -769,7 +769,6 @@ public partial class DbRendoTableInitializer
                 TimerSeconds = item.TimerSeconds,
                 IsReverse = item.IsReverse,
                 IsLR = isLr,
-                TrainNumberCondition = item.TrainNumberCondition,
                 Type = LockConditionType.Object
             });
 
@@ -800,7 +799,6 @@ public partial class DbRendoTableInitializer
                 TimerSeconds = item.TimerSeconds,
                 IsReverse = item.IsReverse,
                 IsLR = isLr,
-                TrainNumberCondition = item.TrainNumberCondition,
                 Type = LockConditionType.Object
             });
             if (routeIdForSwitchingMachineRoute == null || targetObjects[0] is not SwitchingMachine switchingMachine)

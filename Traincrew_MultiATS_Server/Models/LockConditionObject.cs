@@ -16,7 +16,4 @@ public class LockConditionObject: LockCondition
     /// </summary>
     [Column("is_lr")]
     public LR? IsLR { get; set; }
-
-    [Column("train_number_condition")]
-    public BothOddEven TrainNumberCondition { get; set; }
 }
