@@ -150,9 +150,13 @@ public class ApproachAlertConditionDbInitializer(
                 continue;
             }
 
-            var conditionItem = entry.Children[1];
+            var butCondition = entry.Children[1];
+            if (butCondition.Name != "not")
+            {
+                throw new ArgumentException("butCondition must be 'not' node");
+            }
             await RegisterLockConditionTreeAsync(
-                conditionItem,
+                butCondition.Children[0],
                 approachAlertCondition.Id,
                 null,
                 searcher,
