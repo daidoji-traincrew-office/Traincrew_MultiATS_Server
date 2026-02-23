@@ -1234,18 +1234,27 @@ public partial class DbRendoTableInitializer
                     .Value);
                 enumerator.MoveNext();
             }
-            else if (token is NameTrainNumberEven or NameTrainNumberOdd)
-            {
-                // 列番条件
-                result[^1].TrainNumberCondition = token == NameTrainNumberOdd ? BothOddEven.Odd : BothOddEven.Even;
-                enumerator.MoveNext();
-            }
             else if (token == "但")
             {
                 // 但条件(左辺 or not右辺)
                 var left = result;
                 enumerator.MoveNext();
                 var right = ParseToken(ref enumerator, stationId, isRouteLock, isReverse, isTotalControl, isLocked);
+                var trainNumberConditionItem = right
+                    .FirstOrDefault(rightItem => rightItem.Name is NameTrainNumberEven or NameTrainNumberOdd);
+                if (trainNumberConditionItem is not null)
+                {
+                    left.ForEach(leftLockItem =>
+                    {
+                        leftLockItem.TrainNumberCondition = trainNumberConditionItem.Name == NameTrainNumberEven
+                            ? BothOddEven.Even
+                            : BothOddEven.Odd;
+                    });
+                }
+                right = right
+                    .Where(rightItem => rightItem.Name is not NameTrainNumberEven and not NameTrainNumberOdd)
+                    .ToList();
+
                 List<LockItem> child =
                 [
                     // 左辺
