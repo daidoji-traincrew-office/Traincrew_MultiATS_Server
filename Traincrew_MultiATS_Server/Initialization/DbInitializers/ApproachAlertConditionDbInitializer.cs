@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.ApproachAlertCondition;
@@ -8,7 +9,7 @@ using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
 
 namespace Traincrew_MultiATS_Server.Initialization.DbInitializers;
 
-public class ApproachAlertConditionDbInitializer(
+public partial class ApproachAlertConditionDbInitializer(
     ILogger<ApproachAlertConditionDbInitializer> logger,
     ApplicationDbContext context,
     IDateTimeRepository dateTimeRepository,
@@ -21,19 +22,19 @@ public class ApproachAlertConditionDbInitializer(
     // 駅名 → 駅ID（CSVの備考欄から導出）
     private static readonly Dictionary<string, string> StationNameToId = new()
     {
-        { "館浜駅",       "TH76" },
-        { "駒野駅",       "TH75" },
-        { "津崎駅",       "TH71" },
-        { "浜園駅",       "TH70" },
-        { "新野崎駅",     "TH67" },
+        { "館浜駅", "TH76" },
+        { "駒野駅", "TH75" },
+        { "津崎駅", "TH71" },
+        { "浜園駅", "TH70" },
+        { "新野崎駅", "TH67" },
         { "江ノ原検車区", "TH66S" },
-        { "大道寺駅",     "TH65" },
-        { "藤江駅",       "TH64" },
-        { "水越駅",       "TH63" },
-        { "高見沢駅",     "TH62" },
-        { "日野森駅",     "TH61" },
-        { "西赤山駅",     "TH59" },
-        { "赤山町駅",     "TH58" },
+        { "大道寺駅", "TH65" },
+        { "藤江駅", "TH64" },
+        { "水越駅", "TH63" },
+        { "高見沢駅", "TH62" },
+        { "日野森駅", "TH61" },
+        { "西赤山駅", "TH59" },
+        { "赤山町駅", "TH58" },
     };
 
     // 接近警報用隣接駅マップ（連動図表のStationIdMapとは異なる）
@@ -131,27 +132,44 @@ public class ApproachAlertConditionDbInitializer(
     {
         // "or"ノード = 但条件あり: Children[0]=TC、Children[1]=not条件
         var isButCondition = entry.Name == "or";
-        var tcItem = isButCondition ? entry.Children[0] : entry;
-
-        // 半角→全角変換を適用してTC名を解決
-        var tcFullName = ConvertHalfWidthToFullWidth($"{tcItem.StationId}_{tcItem.Name}");
-        if (!trackCircuitIdByName.TryGetValue(tcFullName, out var trackCircuitId))
+        var leftCondition = isButCondition ? entry.Children[0] : entry;
+        var tcItems = leftCondition.Name == "and" ? leftCondition.Children : [leftCondition];
+        foreach (var tcItem in tcItems)
         {
-            logger.LogWarning("軌道回路が見つかりません: {FullName}", tcFullName);
-            return;
-        }
-
-        var approachAlertCondition = await approachAlertConditionRepository.AddAndSaveAsync(
-            new ApproachAlertCondition
+            // 半角→全角変換を適用してTC名を解決
+            var trackCircuitName = ConvertHalfWidthToFullWidth($"{tcItem.StationId}_{tcItem.Name}");
+            if (!trackCircuitIdByName.TryGetValue(trackCircuitName, out var trackCircuitId))
             {
-                StationId = stationId,
-                IsUp = isUp,
-                TrackCircuitId = trackCircuitId
-            },
-            cancellationToken);
+                // searchClosureTrackCircuit と同様のロジックでTC名を解決
+                var match = RegexClosureTrackCircuitParse().Match(tcItem.Name);
+                if (match.Success)
+                {
+                    var number = int.Parse(match.Groups[1].Value);
+                    var prefix = number % 2 == 0 ? "上り" : "下り";
+                    trackCircuitName = $"{prefix}{number}T";
+                }
 
-        if (isButCondition)
-        {
+                if (!match.Success || !trackCircuitIdByName.TryGetValue(trackCircuitName, out trackCircuitId))
+                {
+                    logger.LogWarning("軌道回路が見つかりません: {Name}", trackCircuitName);
+                    return;
+                }
+            }
+
+            var approachAlertCondition = await approachAlertConditionRepository.AddAndSaveAsync(
+                new()
+                {
+                    StationId = stationId,
+                    IsUp = isUp,
+                    TrackCircuitId = trackCircuitId
+                },
+                cancellationToken);
+
+            if (!isButCondition)
+            {
+                continue;
+            }
+
             var conditionItem = entry.Children[1];
             await RegisterLockConditionTreeAsync(
                 conditionItem,
@@ -176,16 +194,16 @@ public class ApproachAlertConditionDbInitializer(
         var conditionType = item.Name switch
         {
             "and" => LockConditionType.And,
-            "or"  => LockConditionType.Or,
+            "or" => LockConditionType.Or,
             "not" => LockConditionType.Not,
-            _     => LockConditionType.Object
+            _ => LockConditionType.Object
         };
 
         if (conditionType == LockConditionType.Object)
         {
-            // 連動オブジェクト名を正規化（半角→全角変換、R/L除去）してルックアップ
+            // 連動オブジェクト名ルックアップ
             var objFullName = ConvertHalfWidthToFullWidth(
-                $"{item.StationId}_{NormalizeLeverName(item.Name)}");
+                $"{item.StationId}_{item.Name}");
             if (!interlockingObjectIdByName.TryGetValue(objFullName, out var objectId))
             {
                 logger.LogWarning("連動オブジェクトが見つかりません: {FullName}", objFullName);
@@ -193,7 +211,7 @@ public class ApproachAlertConditionDbInitializer(
             }
 
             await lockConditionRepository.AddObjectAndSaveAsync(
-                new LockConditionObject
+                new()
                 {
                     LockId = null,
                     ApproachAlertConditionId = approachAlertConditionId,
@@ -209,7 +227,7 @@ public class ApproachAlertConditionDbInitializer(
         else
         {
             var node = await lockConditionRepository.AddAndSaveAsync(
-                new LockCondition
+                new()
                 {
                     LockId = null,
                     ApproachAlertConditionId = approachAlertConditionId,
@@ -227,14 +245,11 @@ public class ApproachAlertConditionDbInitializer(
         }
     }
 
+    // 閉塞軌道回路名を判定するための正規表現（DbRendoTableInitializer.RegexClosureTrackCircuitParseと同一）
+    [GeneratedRegex(@"^(\d+)T$")]
+    private static partial Regex RegexClosureTrackCircuitParse();
+
     /// <summary>半角カタカナ ｲ/ﾛ を全角 イ/ロ に変換する</summary>
     private static string ConvertHalfWidthToFullWidth(string input)
         => input.Replace('ｲ', 'イ').Replace('ﾛ', 'ロ');
-
-    /// <summary>
-    /// てこ名の R/L 除去（CalcLeverName と同じ変換）。
-    /// 例: "7R" → "7"、"9LC" → "9C"、"1RB" → "1B"
-    /// </summary>
-    private static string NormalizeLeverName(string name)
-        => name.Replace("R", "").Replace("L", "");
 }
