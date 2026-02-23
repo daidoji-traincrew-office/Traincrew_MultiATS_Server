@@ -45,6 +45,11 @@ const MASTER_RANGES_NO_REMOVE_FIRST_EMPTY = [
     ['信号何灯式リスト', '信号何灯式リスト', ['A1:F17']]
 ];
 
+// 連動図表内の接近警報鳴動条件の設定
+const RENDO_ALERT_RANGES = [
+    ['接近警報鳴動条件一覧', '接近警報鳴動条件', ['C5:K57']]
+];
+
 /**
  * Google Sheets APIクライアントを初期化
  */
@@ -203,6 +208,17 @@ async function main() {
             false,
             false,
             false,
+            DATA_DIR
+        );
+
+        console.log('接近警報鳴動条件のエクスポートを開始します...');
+        await exportOneDataToCSV(
+            sheets,
+            RENDO_SPREADSHEET_ID,
+            RENDO_ALERT_RANGES,
+            false,
+            false,
+            true,
             DATA_DIR
         );
 
