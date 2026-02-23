@@ -52,7 +52,7 @@ public partial class ApproachAlertConditionDbInitializer(
         { "TH62", ["TH63", "TH61"] },
         { "TH61", ["TH62", "TH59"] },
         { "TH59", ["TH61", "TH58"] },
-        { "TH58", ["TH59"] },
+        { "TH58", ["TH59", "TH57"] },
     };
 
     public async Task InitializeAsync(
@@ -148,8 +148,12 @@ public partial class ApproachAlertConditionDbInitializer(
                     var prefix = number % 2 == 0 ? "上り" : "下り";
                     trackCircuitName = $"{prefix}{number}T";
                 }
+                else
+                {
+                    trackCircuitName = tcItem.Name;
+                }
 
-                if (!match.Success || !trackCircuitIdByName.TryGetValue(trackCircuitName, out trackCircuitId))
+                if (!trackCircuitIdByName.TryGetValue(trackCircuitName, out trackCircuitId))
                 {
                     logger.LogWarning("軌道回路が見つかりません: {Name}", trackCircuitName);
                     return;

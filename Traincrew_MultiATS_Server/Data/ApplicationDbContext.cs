@@ -250,7 +250,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasPrincipalKey(tc => tc.Id);
 
         modelBuilder.Entity<ApproachAlertCondition>()
-            .HasOne<Station>()
+            .HasOne(aac => aac.Station)
             .WithMany()
             .HasForeignKey(aac => aac.StationId)
             .HasPrincipalKey(s => s.Id);
