@@ -76,15 +76,15 @@ public partial class DbRendoTableInitializer
 
     // てこ名を抽出するための正規表現
     [GeneratedRegex(@"(\d+)(R|L)(Z?)")]
-    private static partial Regex RegexLeverParse();
+    internal static partial Regex RegexLeverParse();
 
     // てこ名を抽出するための正規表現(Full Version)
     [GeneratedRegex(@"^(\d+)(R|L)(Z?)$")]
-    private static partial Regex RegexLeverParseFullMatch();
+    internal static partial Regex RegexLeverParseFullMatch();
 
     // 転てつ器名(数字のみ)を検証するための正規表現
     [GeneratedRegex(@"^\d+$")]
-    private static partial Regex RegexNumericOnly();
+    internal static partial Regex RegexNumericOnly();
 
     // 軌道回路名を抽出するための正規表現
     [GeneratedRegex(@"[A-Z\dｲﾛ]+T")]
@@ -92,7 +92,7 @@ public partial class DbRendoTableInitializer
 
     // 閉塞軌道回路名を抽出するための正規表現
     [GeneratedRegex(@"^(\d+)T$")]
-    private static partial Regex RegexClosureTrackCircuitParse();
+    internal static partial Regex RegexClosureTrackCircuitParse();
 
     // 信号制御欄から統括制御とそれ以外の部位に分けるための正規表現
     [GeneratedRegex(@"^(.*?)(?:\(\(([^\)\s]+)\)\)\s*)*$")]
@@ -494,12 +494,6 @@ public partial class DbRendoTableInitializer
                 .ToListAsync(cancellationToken)
             )
             .ToHashSet();
-        var throwOutControl = await context.ThrowOutControls
-            .ToListAsync(cancellationToken);
-        var leverNamesById = await context.Levers
-            .ToDictionaryAsync(l => l.Id, l => l.Name, cancellationToken);
-        var routeLeverDestinationButtons = await context.RouteLeverDestinationButtons
-            .ToListAsync(cancellationToken);
 
         // 進路のDict
         var routes = interlockingObjects
@@ -507,8 +501,6 @@ public partial class DbRendoTableInitializer
             .ToList();
         var routesByName = routes
             .ToDictionary(r => r.Name, r => r);
-        var routesById = routes
-            .ToDictionary(r => r.Id, r => r);
         // 方向進路のDict
         var directionRoutes = interlockingObjects
             .OfType<DirectionRoute>()
@@ -521,183 +513,22 @@ public partial class DbRendoTableInitializer
             .ToList();
         var routeCentralControlLeversByName = routeCentralControlLevers
             .ToDictionary(l => l.Name, l => l);
-        // 転てつ器のDict
-        var switchingMachines = interlockingObjects
-            .OfType<SwitchingMachine>()
-            .ToDictionary(sm => sm.Name, sm => sm);
-        // その他のオブジェクトのDict
-        var otherObjects = interlockingObjects
-            .Where(io => io is not SwitchingMachine)
-            .ToDictionary(io => io.Name, io => io);
-        // てこ->進路へのDict
-        var routeIdsByLeverName = routeLeverDestinationButtons
-            .GroupBy(x => x.LeverId)
-            .ToDictionary(
-                g => leverNamesById[g.Key],
-                g => g.Select(x => x.RouteId).ToList()
-            );
-        var routeIdsByButtonName = routeLeverDestinationButtons
-            .Where(x => x.DestinationButtonName != null)
-            .GroupBy(x => x.DestinationButtonName!)
-            .ToDictionary(
-                g => g.Key,
-                g => g.Select(x => x.RouteId).ToList()
-            );
-        // 統括制御のDict
-        var throwOutControlBySourceId = throwOutControl
-            .GroupBy(toc => toc.SourceId)
-            .ToDictionary(
-                g => g.Key,
-                g => g.ToList()
-            );
-        var searchSwitchingMachine = new Func<LockItem, Task<List<InterlockingObject>>>(item =>
-        {
-            // Todo: もっときれいに書けるはず
-            var targetObject =
-                switchingMachines.GetValueOrDefault(CalcSwitchingMachineName(item.Name, item.StationId));
-            List<InterlockingObject> result;
-            if (targetObject != null)
-            {
-                result = [targetObject];
-            }
-            else
-            {
-                result = [];
-            }
 
-            return Task.FromResult(result);
-        });
-        var searchDirectionRoutes = new Func<LockItem, Task<InterlockingObject?>>(async item =>
+        var searcher = new InterlockingObjectSearcher(stationId, otherStations, context, cancellationToken);
+        await searcher.InitializeAsync();
+        var searchDirectionRoutes = new Func<LockItem, Task<InterlockingObject?>>(item =>
         {
             // 方向進路
             if (!(item.Name.EndsWith('L') || item.Name.EndsWith('R')))
             {
-                return null;
+                return Task.FromResult<InterlockingObject?>(null);
             }
 
+            // otherObjects経由でなくsearcher.SearchOtherObjectsAsync を使う代わりに
+            // directionRoutesByName から直接引く（directionRoutes は既にメモリ上にある）
             var key = CalcDirectionLeverName(item.Name[..^1], item.StationId);
-            return otherObjects.GetValueOrDefault(key);
-        });
-        var searchOtherObjects = new Func<LockItem, Task<List<InterlockingObject>>>(async item =>
-        {
-            // 転てつ器(数字のみの名前)の場合はこちら
-            var numericOnlyMatch = RegexNumericOnly().Match(item.Name);
-            if (numericOnlyMatch.Success)
-            {
-                var switchingMachine = switchingMachines.GetValueOrDefault(
-                    CalcSwitchingMachineName(item.Name, item.StationId));
-                if (switchingMachine != null)
-                {
-                    return [switchingMachine];
-                }
-            }
-
-            // 進路(単一) or 軌道回路の場合はこちら
-            var key = ConvertHalfWidthToFullWidth(CalcRouteName(item.Name, "", item.StationId));
-            var value = otherObjects.GetValueOrDefault(key);
-            if (value != null)
-            {
-                return [value];
-            }
-
-            // 方向進路の場合はこちら
-            var directionRoute = await searchDirectionRoutes(item);
-            if (directionRoute != null)
-            {
-                return [directionRoute];
-            }
-
-
-            // てこ名指定の場合はこちら=>そのてこを始点としたすべての進路を取得
-            var leverFullMatch = RegexLeverParseFullMatch().Match(item.Name);
-            if (leverFullMatch.Success)
-            {
-                var leverName = CalcLeverName(
-                    leverFullMatch.Groups[1].Value + leverFullMatch.Groups[3].Value, item.StationId);
-                var routeIds = routeIdsByLeverName.GetValueOrDefault(leverName);
-                if (routeIds != null)
-                {
-                    return routeIds.Select(InterlockingObject (r) => routesById[r]).ToList();
-                }
-            }
-
-            // 統括進路はこちら
-            var leverMatch = RegexLeverParse().Match(item.Name);
-            if (leverMatch.Success)
-            {
-                // てこ
-                var leverName = CalcLeverName(
-                    leverMatch.Groups[1].Value + leverMatch.Groups[3].Value, item.StationId);
-                // 着点ボタン
-                var buttonName = CalcButtonName(
-                    item.Name[(leverMatch.Index + leverMatch.Length)..],
-                    item.StationId);
-
-                // 統括制御から、該当する進路を導き出す
-                // てこに該当する進路すべて
-                var startRouteIds = routeIdsByLeverName.GetValueOrDefault(leverName, []);
-                // 該当する統括制御を選ぶ(てこに該当する進路=>統括制御=>着点てこに該当する進路)
-                var targetThrowOutControls = startRouteIds
-                    .SelectMany(r => throwOutControlBySourceId.GetValueOrDefault(r, []))
-                    .Where(toc => routeIdsByButtonName[buttonName].Contains(toc.TargetId))
-                    .ToList();
-                var targetThrowOutControl = targetThrowOutControls.FirstOrDefault();
-                if (targetThrowOutControls.Count >= 2)
-                {
-                    throw new InvalidOperationException($"統括制御が2つ以上見つかりました: {item.Name}");
-                }
-
-                if (targetThrowOutControl != null)
-                {
-                    var startRoute = routesById[targetThrowOutControl.SourceId];
-                    var endRoute = routesById[targetThrowOutControl.TargetId];
-                    return [startRoute, endRoute];
-                }
-            }
-
-            return [];
-        });
-        var searchClosureTrackCircuit = new Func<LockItem, Task<List<InterlockingObject>>>(async item =>
-        {
-            var match = RegexClosureTrackCircuitParse().Match(item.Name);
-            string trackCircuitName;
-            // 閉塞軌道回路
-            if (match.Success)
-            {
-                var trackCircuitNumber = int.Parse(match.Groups[1].Value);
-                var prefix = trackCircuitNumber % 2 == 0 ? PrefixTrackCircuitUp : PrefixTrackCircuitDown;
-                trackCircuitName = $"{prefix}{trackCircuitNumber}T";
-            }
-            // 単線の諸々軌道回路
-            else
-            {
-                trackCircuitName = item.Name;
-            }
-
-            var trackCircuit = await context.TrackCircuits
-                .FirstOrDefaultAsync(tc => tc.Name == trackCircuitName, cancellationToken);
-            if (trackCircuit == null)
-            {
-                return [];
-            }
-
-            return [trackCircuit];
-        });
-        var searchObjectsForApproachLock = new Func<LockItem, Task<List<InterlockingObject>>>(async item =>
-        {
-            if (item.StationId == NameClosure)
-            {
-                return await searchClosureTrackCircuit(item);
-            }
-
-            var result = await searchOtherObjects(item);
-            if (result.Count > 0)
-            {
-                return result;
-            }
-
-            // 接近鎖錠の場合、閉塞軌道回路も探す
-            return await searchClosureTrackCircuit(item);
+            var result = directionRoutesByName.GetValueOrDefault(key) as InterlockingObject;
+            return Task.FromResult(result);
         });
 
         int? approachLockTime = null;
@@ -721,24 +552,24 @@ public partial class DbRendoTableInitializer
 
             // 鎖錠欄(転てつ器)
             await RegisterLocks(
-                rendoTableCsv.LockToSwitchingMachine, route.Id, searchSwitchingMachine, LockType.Lock, true);
+                rendoTableCsv.LockToSwitchingMachine, route.Id, searcher.SearchSwitchingMachineAsync, LockType.Lock, true);
             // 鎖錠欄(そのほか)
-            await RegisterLocks(rendoTableCsv.LockToRoute, route.Id, searchOtherObjects, LockType.Lock);
+            await RegisterLocks(rendoTableCsv.LockToRoute, route.Id, searcher.SearchOtherObjectsAsync, LockType.Lock);
 
             // 信号制御欄
             var matchSignalControl = RegexSignalControl().Match(rendoTableCsv.SignalControl);
-            await RegisterLocks(matchSignalControl.Groups[1].Value, route.Id, searchOtherObjects,
+            await RegisterLocks(matchSignalControl.Groups[1].Value, route.Id, searcher.SearchOtherObjectsAsync,
                 LockType.SignalControl);
             // 統括制御は、サーバーマスタから読み込む
             // 進路鎖錠
-            await RegisterLocks(rendoTableCsv.RouteLock, route.Id, searchOtherObjects,
+            await RegisterLocks(rendoTableCsv.RouteLock, route.Id, searcher.SearchOtherObjectsAsync,
                 LockType.Route, isRouteLock: true);
 
             // 接近鎖錠
-            await RegisterLocks(rendoTableCsv.ApproachLock, route.Id, searchObjectsForApproachLock,
+            await RegisterLocks(rendoTableCsv.ApproachLock, route.Id, searcher.SearchObjectsForApproachLockAsync,
                 LockType.Approach);
             await RegisterFinalTrackCircuitId(
-                rendoTableCsv.ApproachLock, route, searchObjectsForApproachLock);
+                rendoTableCsv.ApproachLock, route, searcher.SearchObjectsForApproachLockAsync);
         }
 
         // 方向進路用の処理
@@ -755,7 +586,7 @@ public partial class DbRendoTableInitializer
             // 鎖錠欄(軌道回路)
             if (!locks.Contains(route.Id))
             {
-                await RegisterLocks(rendoTableCsv.LockToRoute, route.Id, searchObjectsForApproachLock, LockType.Lock);
+                await RegisterLocks(rendoTableCsv.LockToRoute, route.Id, searcher.SearchObjectsForApproachLockAsync, LockType.Lock);
             }
 
             // 鎖錠欄(鎖錠 または 被片鎖錠)
@@ -778,7 +609,7 @@ public partial class DbRendoTableInitializer
             var lockItems = CalcLockItems(rendoTableCsv.LockToSwitchingMachine, false)
                 .SelectMany(lockItem => lockItem.Children)
                 .ToList();
-            var targetRoutes = (await Task.WhenAll(lockItems.Select(searchOtherObjects)))
+            var targetRoutes = (await Task.WhenAll(lockItems.Select(searcher.SearchOtherObjectsAsync)))
                 .SelectMany(x => x.OfType<Route>())
                 .ToList();
             var entities = targetRoutes
@@ -805,7 +636,7 @@ public partial class DbRendoTableInitializer
                 break;
             }
 
-            var targetSwitchingMachines = await searchSwitchingMachine(new()
+            var targetSwitchingMachines = await searcher.SearchSwitchingMachineAsync(new()
             {
                 Name = rendoTableCsv.Start,
                 StationId = stationId
@@ -824,7 +655,7 @@ public partial class DbRendoTableInitializer
                 continue;
             }
 
-            await RegisterLocks(rendoTableCsv.SignalControl, switchingMachine.Id, searchOtherObjects,
+            await RegisterLocks(rendoTableCsv.SignalControl, switchingMachine.Id, searcher.SearchOtherObjectsAsync,
                 LockType.Detector);
         }
 
@@ -1343,53 +1174,33 @@ public partial class DbRendoTableInitializer
         };
     }
 
-    private string CalcSwitchingMachineName(string start, string stationId)
+    internal static string CalcSwitchingMachineName(string start, string stationId)
     {
         return $"{stationId}_W{start}";
     }
 
-    private string CalcLeverName(string start, string stationId)
+    internal static string CalcLeverName(string start, string stationId)
     {
-        if (stationId == "")
-        {
-            stationId = this.stationId;
-        }
-
         return $"{stationId}_{start.Replace("R", "").Replace("L", "")}";
     }
 
-    private string CalcDirectionLeverName(string start, string stationId)
+    internal static string CalcDirectionLeverName(string start, string stationId)
     {
-        if (stationId == "")
-        {
-            stationId = this.stationId;
-        }
-
         return $"{stationId}_{start}F";
     }
 
-    private string CalcButtonName(string end, string stationId)
+    internal static string CalcButtonName(string end, string stationId)
     {
-        if (stationId == "")
-        {
-            stationId = this.stationId;
-        }
-
         return $"{stationId}_{end.Replace("(", "").Replace(")", "")}P";
     }
 
-    private string ConvertHalfWidthToFullWidth(string halfWidth)
+    internal static string ConvertHalfWidthToFullWidth(string halfWidth)
     {
         return halfWidth.Replace('ｲ', 'イ').Replace('ﾛ', 'ロ');
     }
 
-    private string CalcRouteName(string start, string end, string stationId)
+    internal static string CalcRouteName(string start, string end, string stationId)
     {
-        if (stationId == "")
-        {
-            stationId = this.stationId;
-        }
-
         return $"{stationId}_{start}{(end.StartsWith('(') ? "" : end)}";
     }
 

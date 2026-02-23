@@ -1,21 +1,16 @@
-using System.Text.RegularExpressions;
 using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.ApproachAlertCondition;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
-using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
 using Traincrew_MultiATS_Server.Repositories.LockCondition;
-using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
 
 namespace Traincrew_MultiATS_Server.Initialization.DbInitializers;
 
-public partial class ApproachAlertConditionDbInitializer(
+public class ApproachAlertConditionDbInitializer(
     ILogger<ApproachAlertConditionDbInitializer> logger,
     ApplicationDbContext context,
     IDateTimeRepository dateTimeRepository,
     ILoggerFactory loggerFactory,
-    ITrackCircuitRepository trackCircuitRepository,
-    IInterlockingObjectRepository interlockingObjectRepository,
     IApproachAlertConditionRepository approachAlertConditionRepository,
     ILockConditionRepository lockConditionRepository)
 {
@@ -61,10 +56,6 @@ public partial class ApproachAlertConditionDbInitializer(
     {
         logger.LogInformation("接近警報鳴動条件の初期化を開始します");
 
-        var trackCircuitIdByName = await trackCircuitRepository.GetAllIdForName(cancellationToken);
-        var interlockingObjectIdByName =
-            await interlockingObjectRepository.GetAllIdByNameAsync(cancellationToken);
-
         foreach (var row in csvData)
         {
             if (!StationNameToId.TryGetValue(row.StationName, out var stationId))
@@ -78,16 +69,14 @@ public partial class ApproachAlertConditionDbInitializer(
                 && !row.UpCondition.TrimStart().StartsWith("メモ"))
             {
                 await ProcessConditionStringAsync(
-                    stationId, true, row.UpCondition,
-                    trackCircuitIdByName, interlockingObjectIdByName, cancellationToken);
+                    stationId, true, row.UpCondition, cancellationToken);
             }
 
             // 下り条件
             if (!string.IsNullOrWhiteSpace(row.DownCondition))
             {
                 await ProcessConditionStringAsync(
-                    stationId, false, row.DownCondition,
-                    trackCircuitIdByName, interlockingObjectIdByName, cancellationToken);
+                    stationId, false, row.DownCondition, cancellationToken);
             }
         }
 
@@ -96,8 +85,6 @@ public partial class ApproachAlertConditionDbInitializer(
 
     private async Task ProcessConditionStringAsync(
         string stationId, bool isUp, string conditionStr,
-        Dictionary<string, ulong> trackCircuitIdByName,
-        Dictionary<string, ulong> interlockingObjectIdByName,
         CancellationToken cancellationToken)
     {
         var parser = new DbRendoTableInitializer(
@@ -110,6 +97,13 @@ public partial class ApproachAlertConditionDbInitializer(
         var lockItems = parser.CalcLockItems(conditionStr, false);
         if (lockItems.Count == 0) return;
 
+        var otherStations = (ApproachAlertStationIdMap.GetValueOrDefault(stationId) ?? [])
+            .Where(s => s != "閉そく")
+            .ToList();
+
+        var searcher = new InterlockingObjectSearcher(stationId, otherStations, context, cancellationToken);
+        await searcher.InitializeAsync();
+
         // 複数エントリは "and" ノードのChildrenに格納される
         List<DbRendoTableInitializer.LockItem> entries;
         var root = lockItems[0];
@@ -117,17 +111,14 @@ public partial class ApproachAlertConditionDbInitializer(
 
         foreach (var entry in entries)
         {
-            await RegisterEntryAsync(
-                stationId, isUp, entry,
-                trackCircuitIdByName, interlockingObjectIdByName, cancellationToken);
+            await RegisterEntryAsync(stationId, isUp, entry, searcher, cancellationToken);
         }
     }
 
     private async Task RegisterEntryAsync(
         string stationId, bool isUp,
         DbRendoTableInitializer.LockItem entry,
-        Dictionary<string, ulong> trackCircuitIdByName,
-        Dictionary<string, ulong> interlockingObjectIdByName,
+        InterlockingObjectSearcher searcher,
         CancellationToken cancellationToken)
     {
         // "or"ノード = 但条件あり: Children[0]=TC、Children[1]=not条件
@@ -136,29 +127,14 @@ public partial class ApproachAlertConditionDbInitializer(
         var tcItems = leftCondition.Name == "and" ? leftCondition.Children : [leftCondition];
         foreach (var tcItem in tcItems)
         {
-            // 半角→全角変換を適用してTC名を解決
-            var trackCircuitName = ConvertHalfWidthToFullWidth($"{tcItem.StationId}_{tcItem.Name}");
-            if (!trackCircuitIdByName.TryGetValue(trackCircuitName, out var trackCircuitId))
+            var tcObjects = await searcher.SearchClosureTrackCircuitAsync(tcItem);
+            if (tcObjects.Count == 0)
             {
-                // searchClosureTrackCircuit と同様のロジックでTC名を解決
-                var match = RegexClosureTrackCircuitParse().Match(tcItem.Name);
-                if (match.Success)
-                {
-                    var number = int.Parse(match.Groups[1].Value);
-                    var prefix = number % 2 == 0 ? "上り" : "下り";
-                    trackCircuitName = $"{prefix}{number}T";
-                }
-                else
-                {
-                    trackCircuitName = tcItem.Name;
-                }
-
-                if (!trackCircuitIdByName.TryGetValue(trackCircuitName, out trackCircuitId))
-                {
-                    logger.LogWarning("軌道回路が見つかりません: {Name}", trackCircuitName);
-                    return;
-                }
+                logger.LogWarning("軌道回路が見つかりません: {StationId} {Name}", tcItem.StationId, tcItem.Name);
+                return;
             }
+
+            var trackCircuitId = tcObjects[0].Id;
 
             var approachAlertCondition = await approachAlertConditionRepository.AddAndSaveAsync(
                 new()
@@ -179,7 +155,7 @@ public partial class ApproachAlertConditionDbInitializer(
                 conditionItem,
                 approachAlertCondition.Id,
                 null,
-                interlockingObjectIdByName,
+                searcher,
                 cancellationToken);
         }
     }
@@ -192,7 +168,7 @@ public partial class ApproachAlertConditionDbInitializer(
         DbRendoTableInitializer.LockItem item,
         ulong approachAlertConditionId,
         ulong? parentId,
-        Dictionary<string, ulong> interlockingObjectIdByName,
+        InterlockingObjectSearcher searcher,
         CancellationToken cancellationToken)
     {
         var conditionType = item.Name switch
@@ -205,12 +181,10 @@ public partial class ApproachAlertConditionDbInitializer(
 
         if (conditionType == LockConditionType.Object)
         {
-            // 連動オブジェクト名ルックアップ
-            var objFullName = ConvertHalfWidthToFullWidth(
-                $"{item.StationId}_{item.Name}");
-            if (!interlockingObjectIdByName.TryGetValue(objFullName, out var objectId))
+            var objects = await searcher.SearchOtherObjectsAsync(item);
+            if (objects.Count == 0)
             {
-                logger.LogWarning("連動オブジェクトが見つかりません: {FullName}", objFullName);
+                logger.LogWarning("連動オブジェクトが見つかりません: {StationId} {Name}", item.StationId, item.Name);
                 return;
             }
 
@@ -221,7 +195,7 @@ public partial class ApproachAlertConditionDbInitializer(
                     ApproachAlertConditionId = approachAlertConditionId,
                     ParentId = parentId,
                     Type = LockConditionType.Object,
-                    ObjectId = objectId,
+                    ObjectId = objects[0].Id,
                     IsReverse = item.IsReverse,
                     IsSingleLock = item.isLocked,
                     TrainNumberCondition = item.TrainNumberCondition
@@ -244,16 +218,8 @@ public partial class ApproachAlertConditionDbInitializer(
             {
                 await RegisterLockConditionTreeAsync(
                     child, approachAlertConditionId, node.Id,
-                    interlockingObjectIdByName, cancellationToken);
+                    searcher, cancellationToken);
             }
         }
     }
-
-    // 閉塞軌道回路名を判定するための正規表現（DbRendoTableInitializer.RegexClosureTrackCircuitParseと同一）
-    [GeneratedRegex(@"^(\d+)T$")]
-    private static partial Regex RegexClosureTrackCircuitParse();
-
-    /// <summary>半角カタカナ ｲ/ﾛ を全角 イ/ロ に変換する</summary>
-    private static string ConvertHalfWidthToFullWidth(string input)
-        => input.Replace('ｲ', 'イ').Replace('ﾛ', 'ロ');
 }
