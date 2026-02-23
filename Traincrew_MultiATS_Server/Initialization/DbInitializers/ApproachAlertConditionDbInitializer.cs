@@ -156,6 +156,11 @@ public class ApproachAlertConditionDbInitializer(
             {
                 throw new ArgumentException("butCondition must be 'not' node");
             }
+
+            if (butCondition.Children[0].Children.Count == 0)
+            {
+                continue;
+            }
             await RegisterLockConditionTreeAsync(
                 butCondition.Children[0],
                 approachAlertCondition.Id,
