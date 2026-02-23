@@ -222,7 +222,7 @@ CREATE TYPE lever_type AS ENUM ('route', 'switching_machine', 'direction');
 CREATE TABLE lever
 (
     id                   BIGINT PRIMARY KEY REFERENCES interlocking_object (id),
-    lever_type           lever_type NOT NULL,                     -- てこの種類 
+    lever_type           lever_type NOT NULL,                     -- てこの種類
     switching_machine_id BIGINT REFERENCES switching_machine (ID) --転てつ機のID
 );
 
@@ -245,9 +245,9 @@ CREATE TABLE route_central_control_lever
 -- 進路と集中てこの鎖錠条件
 CREATE TABLE lock_condition_by_route_central_control_lever
 (
-    id                              BIGSERIAL PRIMARY KEY,
-    route_id                        BIGINT REFERENCES route (id) NOT NULL,                        -- 進路のID
-    route_central_control_lever_id  BIGINT REFERENCES route_central_control_lever (id) NOT NULL,  -- 集中てこのID
+    id                             BIGSERIAL PRIMARY KEY,
+    route_id                       BIGINT REFERENCES route (id)                       NOT NULL, -- 進路のID
+    route_central_control_lever_id BIGINT REFERENCES route_central_control_lever (id) NOT NULL, -- 集中てこのID
     UNIQUE (route_id, route_central_control_lever_id)
 );
 CREATE INDEX lock_condition_by_route_central_control_lever_route_id_index ON lock_condition_by_route_central_control_lever (route_id);
@@ -357,10 +357,11 @@ CREATE TYPE lcr as ENUM ('left', 'center', 'right');
 -- 接近警報鳴動条件
 CREATE TABLE approach_alert_condition
 (
-    id               BIGSERIAL PRIMARY KEY,
-    station_id       VARCHAR(10) REFERENCES station (id)      NOT NULL, -- 所属する停車場
-    is_up            BOOLEAN                                  NOT NULL, -- 上り
-    track_circuit_id BIGINT REFERENCES track_circuit (id)     NOT NULL  -- 検知する軌道回路のID
+    id                     BIGSERIAL PRIMARY KEY,
+    station_id             VARCHAR(10) REFERENCES station (id)  NOT NULL,               -- 所属する停車場
+    is_up                  BOOLEAN                              NOT NULL,               -- 上り
+    track_circuit_id       BIGINT REFERENCES track_circuit (id) NOT NULL,               -- 検知する軌道回路のID
+    train_number_condition both_odd_even                        NOT NULL DEFAULT 'both' -- 列番奇偶条件
 );
 CREATE INDEX approach_alert_condition_station_id_is_up_index
     ON approach_alert_condition (station_id, is_up);
@@ -369,10 +370,10 @@ CREATE INDEX approach_alert_condition_station_id_is_up_index
 CREATE TABLE lock_condition
 (
     id                          BIGSERIAL PRIMARY KEY,
-    lock_id                     BIGINT REFERENCES lock (ID),                       -- 鎖状のID(グラフの根、鎖状条件の一番上の階層) nullable
-    approach_alert_condition_id BIGINT REFERENCES approach_alert_condition (id),   -- 接近警報鳴動条件のID nullable
-    parent_id                   BIGINT REFERENCES lock_condition (ID),             -- 親のID(いれば)
-    type                        lock_condition_type                     NOT NULL   -- 鎖状条件の種類(and, or, not, object)
+    lock_id                     BIGINT REFERENCES lock (ID),                     -- 鎖状のID(グラフの根、鎖状条件の一番上の階層) nullable
+    approach_alert_condition_id BIGINT REFERENCES approach_alert_condition (id), -- 接近警報鳴動条件のID nullable
+    parent_id                   BIGINT REFERENCES lock_condition (ID),           -- 親のID(いれば)
+    type                        lock_condition_type NOT NULL                     -- 鎖状条件の種類(and, or, not, object)
 );
 CREATE INDEX lock_condition_lock_id_index ON lock_condition (lock_id);
 CREATE INDEX lock_condition_approach_alert_condition_id_index
@@ -380,20 +381,19 @@ CREATE INDEX lock_condition_approach_alert_condition_id_index
 -- 鎖状条件のobjectの詳細
 CREATE TABLE lock_condition_object
 (
-    id             BIGINT PRIMARY KEY REFERENCES lock_condition (ID),   -- 鎖状条件のID
-    object_id      BIGINT REFERENCES interlocking_object (id) NOT NULL, -- 進路、転てつ機、軌道回路、てこのID
-    timer_seconds  INT,                                                 -- タイマーの秒数
-    is_reverse     nr                                         NOT NULL, -- 定反
-    is_single_lock BOOLEAN                                    NOT NULL, -- 片鎖状がどうか    
-    is_lr                    lr,                                                  -- 方向てこの方向
-    train_number_condition   both_odd_even NOT NULL DEFAULT 'both'                -- 列番奇偶条件
+    id                     BIGINT PRIMARY KEY REFERENCES lock_condition (ID),                 -- 鎖状条件のID
+    object_id              BIGINT REFERENCES interlocking_object (id) NOT NULL,               -- 進路、転てつ機、軌道回路、てこのID
+    timer_seconds          INT,                                                               -- タイマーの秒数
+    is_reverse             nr                                         NOT NULL,               -- 定反
+    is_single_lock         BOOLEAN                                    NOT NULL,               -- 片鎖状がどうか
+    is_lr                  lr                                                                 -- 方向てこの方向
 );
 -- 統括制御テーブル
 CREATE TYPE throw_out_control_type AS ENUM ('with_lever', 'without_lever', 'direction');
 CREATE TABLE throw_out_control
 (
     id                 BIGSERIAL PRIMARY KEY,
-    control_type       throw_out_control_type NOT NULL,                     -- 総括の種類
+    control_type       throw_out_control_type                     NOT NULL, -- 総括の種類
     source_id          BIGINT REFERENCES interlocking_object (id) NOT NULL, -- 統括元オブジェクトID
     source_lr          lr,                                                  -- 統括元が方向てこの場合、方向てこの向き
     target_id          BIGINT REFERENCES interlocking_object (id) NOT NULL, -- 統括先オブジェクトID
@@ -453,7 +453,7 @@ CREATE TABLE station_timer_state
     is_teu_relay_raised raise_drop  NOT NULL DEFAULT 'drop',
     is_ten_relay_raised raise_drop  NOT NULL DEFAULT 'drop',
     is_ter_relay_raised raise_drop  NOT NULL DEFAULT 'raise',
-    teu_relay_raised_at TIMESTAMP   NULL     DEFAULT NULL,
+    teu_relay_raised_at TIMESTAMP NULL     DEFAULT NULL,
     UNIQUE (station_id, seconds)
 );
 
@@ -582,7 +582,7 @@ CREATE TYPE operation_notification_type AS ENUM (
 CREATE TABLE operation_notification_state
 (
     display_name VARCHAR(100) REFERENCES operation_notification_display (name) PRIMARY KEY, -- 告知機の名前
-    type         operation_notification_type NOT NULL,                                      -- 告知種類 
+    type         operation_notification_type NOT NULL,                                      -- 告知種類
     content      TEXT                        NOT NULL,                                      -- 表示データ
     operated_at  TIMESTAMP                   NOT NULL                                       -- 操作時刻
 );
@@ -610,9 +610,9 @@ CREATE index train_state_dia_number_index ON train_state USING hash (dia_number)
 -- 列車信号状態
 CREATE TABLE train_signal_state
 (
-    id           BIGSERIAL PRIMARY KEY,                             -- ID
-    train_number VARCHAR(100) NOT NULL,                             -- 列車番号
-    signal_name  VARCHAR(100) NOT NULL REFERENCES signal (name),    -- 信号名
+    id           BIGSERIAL PRIMARY KEY,                          -- ID
+    train_number VARCHAR(100) NOT NULL,                          -- 列車番号
+    signal_name  VARCHAR(100) NOT NULL REFERENCES signal (name), -- 信号名
     UNIQUE (train_number, signal_name)
 );
 CREATE INDEX train_signal_state_train_number_index ON train_signal_state (train_number);
@@ -660,15 +660,16 @@ CREATE TYPE server_mode AS ENUM ('off', 'private', 'public');
 -- サーバー状態テーブル(基本Entityは1つの想定)
 CREATE TABLE server_state
 (
-    id                  SERIAL PRIMARY KEY,
-    mode                server_mode NOT NULL,
-    time_offset         INTEGER NOT NULL DEFAULT 0,
-    switch_move_time    INTEGER NOT NULL DEFAULT 5000,  -- 転轍機の転換にかかる時間(ms)
-    switch_return_time  INTEGER NOT NULL DEFAULT 500,   -- 転轍器が転換中に転換方向を変えるのにかかる時間(ms)
-    use_one_second_relay BOOLEAN NOT NULL DEFAULT false -- 接近鎖錠の時素に1秒リレーを使うかどうか
+    id                   SERIAL PRIMARY KEY,
+    mode                 server_mode NOT NULL,
+    time_offset          INTEGER     NOT NULL DEFAULT 0,
+    switch_move_time     INTEGER     NOT NULL DEFAULT 5000, -- 転轍機の転換にかかる時間(ms)
+    switch_return_time   INTEGER     NOT NULL DEFAULT 500,  -- 転轍器が転換中に転換方向を変えるのにかかる時間(ms)
+    use_one_second_relay BOOLEAN     NOT NULL DEFAULT false -- 接近鎖錠の時素に1秒リレーを使うかどうか
 );
 
 -- ユーザー接続拒否状態テーブル
-CREATE TABLE user_disconnection_state (
+CREATE TABLE user_disconnection_state
+(
     user_id BIGINT PRIMARY KEY -- ユーザーID(Discord ID)
 );

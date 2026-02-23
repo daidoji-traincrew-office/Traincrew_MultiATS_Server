@@ -1,9 +1,12 @@
+-- Create enum type "both_odd_even"
+CREATE TYPE "both_odd_even" AS ENUM ('both', 'odd', 'even');
 -- Create "approach_alert_condition" table
 CREATE TABLE "approach_alert_condition" (
   "id" bigserial NOT NULL,
   "station_id" character varying(10) NOT NULL,
   "is_up" boolean NOT NULL,
   "track_circuit_id" bigint NOT NULL,
+  "train_number_condition" "both_odd_even" NOT NULL DEFAULT 'both',
   PRIMARY KEY ("id"),
   CONSTRAINT "approach_alert_condition_station_id_fkey" FOREIGN KEY ("station_id") REFERENCES "station" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION,
   CONSTRAINT "approach_alert_condition_track_circuit_id_fkey" FOREIGN KEY ("track_circuit_id") REFERENCES "track_circuit" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION
