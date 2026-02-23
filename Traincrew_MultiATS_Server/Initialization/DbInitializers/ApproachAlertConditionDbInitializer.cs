@@ -127,7 +127,7 @@ public class ApproachAlertConditionDbInitializer(
         var tcItems = leftCondition.Name == "and" ? leftCondition.Children : [leftCondition];
         foreach (var tcItem in tcItems)
         {
-            var tcObjects = await searcher.SearchClosureTrackCircuitAsync(tcItem);
+            var tcObjects = await searcher.SearchObjectsForApproachLockAsync(tcItem);
             if (tcObjects.Count == 0)
             {
                 logger.LogWarning("軌道回路が見つかりません: {StationId} {Name}", tcItem.StationId, tcItem.Name);
