@@ -69,4 +69,9 @@ public static class CsvFilePaths
     ///     RendoTable directory
     /// </summary>
     public const string RendoTableDirectory = $"{DataDirectory}/RendoTable";
+
+    /// <summary>
+    ///     接近警報鳴動条件.csv
+    /// </summary>
+    public const string ApproachAlertCondition = $"{DataDirectory}/接近警報鳴動条件.csv";
 }

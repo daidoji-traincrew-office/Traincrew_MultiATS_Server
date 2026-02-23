@@ -68,4 +68,11 @@ public class InterlockingObjectRepository(ApplicationDbContext context) : IInter
     {
         context.InterlockingObjects.Update(interlockingObject);
     }
+
+    public async Task<Dictionary<string, ulong>> GetAllIdByNameAsync(CancellationToken cancellationToken = default)
+    {
+        return await context.InterlockingObjects
+            .Select(io => new { io.Name, io.Id })
+            .ToDictionaryAsync(io => io.Name, io => io.Id, cancellationToken);
+    }
 }

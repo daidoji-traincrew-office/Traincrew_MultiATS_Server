@@ -10,7 +10,9 @@ public class LockCondition
     [Key]
     public ulong Id { get; init; }
     public Lock? Lock { get; set; }
-    public ulong LockId { get; set; }
+    public ulong? LockId { get; set; }
+    public ApproachAlertCondition? ApproachAlertCondition { get; set; }
+    public ulong? ApproachAlertConditionId { get; set; }
     public LockCondition? Parent { get; set; }
     public ulong? ParentId { get; set; }
     public LockConditionType Type { get; set; }

@@ -33,4 +33,9 @@ public interface IInterlockingObjectRepository
     /// <param name="interlockingObject">更新する連動オブジェクト</param>
     public void Update(Models.InterlockingObject interlockingObject);
 
+    /// <summary>
+    /// 全連動オブジェクトの名前→IDのDictionaryを取得する
+    /// </summary>
+    Task<Dictionary<string, ulong>> GetAllIdByNameAsync(CancellationToken cancellationToken = default);
+
 }

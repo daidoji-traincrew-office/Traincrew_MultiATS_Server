@@ -44,4 +44,21 @@ public class LockConditionRepository(ApplicationDbContext context) : ILockCondit
         await context.Database.ExecuteSqlRawAsync("DELETE FROM lock_condition_object");
         await context.Database.ExecuteSqlRawAsync("DELETE FROM lock_condition");
     }
+
+    public async Task<Models.LockCondition> AddAndSaveAsync(
+        Models.LockCondition entity,
+        CancellationToken cancellationToken = default)
+    {
+        context.LockConditions.Add(entity);
+        await context.SaveChangesAsync(cancellationToken);
+        return entity;
+    }
+
+    public async Task AddObjectAndSaveAsync(
+        LockConditionObject entity,
+        CancellationToken cancellationToken = default)
+    {
+        context.LockConditionObjects.Add(entity);
+        await context.SaveChangesAsync(cancellationToken);
+    }
 }

@@ -354,15 +354,29 @@ CREATE TYPE raise_drop AS ENUM ('raise', 'drop');
 CREATE TYPE lock_condition_type AS ENUM ('and', 'or', 'not', 'object');
 CREATE TYPE lcr as ENUM ('left', 'center', 'right');
 
+-- 接近警報鳴動条件
+CREATE TABLE approach_alert_condition
+(
+    id               BIGSERIAL PRIMARY KEY,
+    station_id       VARCHAR(10) REFERENCES station (id)      NOT NULL, -- 所属する停車場
+    is_up            BOOLEAN                                  NOT NULL, -- 上り
+    track_circuit_id BIGINT REFERENCES track_circuit (id)     NOT NULL  -- 検知する軌道回路のID
+);
+CREATE INDEX approach_alert_condition_station_id_is_up_index
+    ON approach_alert_condition (station_id, is_up);
+
 -- 鎖状条件詳細(and, or, object)
 CREATE TABLE lock_condition
 (
-    id        BIGSERIAL PRIMARY KEY,
-    lock_id   BIGINT REFERENCES lock (ID) NOT NULL,  -- 鎖状のID(グラフの根、鎖状条件の一番上の階層)
-    parent_id BIGINT REFERENCES lock_condition (ID), -- 親のID(いれば)
-    type      lock_condition_type         NOT NULL   -- 鎖状条件の種類(and, or, not, object)
+    id                          BIGSERIAL PRIMARY KEY,
+    lock_id                     BIGINT REFERENCES lock (ID),                       -- 鎖状のID(グラフの根、鎖状条件の一番上の階層) nullable
+    approach_alert_condition_id BIGINT REFERENCES approach_alert_condition (id),   -- 接近警報鳴動条件のID nullable
+    parent_id                   BIGINT REFERENCES lock_condition (ID),             -- 親のID(いれば)
+    type                        lock_condition_type                     NOT NULL   -- 鎖状条件の種類(and, or, not, object)
 );
 CREATE INDEX lock_condition_lock_id_index ON lock_condition (lock_id);
+CREATE INDEX lock_condition_approach_alert_condition_id_index
+    ON lock_condition (approach_alert_condition_id);
 -- 鎖状条件のobjectの詳細
 CREATE TABLE lock_condition_object
 (

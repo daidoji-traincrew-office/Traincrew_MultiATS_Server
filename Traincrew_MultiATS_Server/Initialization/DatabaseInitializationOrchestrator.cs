@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.Initialization.CsvLoaders;
 using Traincrew_MultiATS_Server.Initialization.DbInitializers;
+using Traincrew_MultiATS_Server.Repositories.ApproachAlertCondition;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.Lock;
 using Traincrew_MultiATS_Server.Repositories.LockCondition;
@@ -44,6 +45,9 @@ public class DatabaseInitializationOrchestrator(
     TtcDbInitializer ttcDbInitializer,
     ThrowOutControlDbInitializer throwOutControlDbInitializer,
     SignalDbInitializer signalDbInitializer,
+    IApproachAlertConditionRepository approachAlertConditionRepository,
+    ApproachAlertConditionCsvLoader approachAlertConditionCsvLoader,
+    ApproachAlertConditionDbInitializer approachAlertConditionDbInitializer,
     ILogger<DatabaseInitializationOrchestrator> logger)
 {
     /// <summary>
@@ -122,8 +126,9 @@ public class DatabaseInitializationOrchestrator(
         // 常に最新化するため、既存のデータを削除する
         logger.LogInformation("Deleting existing lock-related data");
         await switchingMachineRouteRepository.DeleteAll();
-        await lockConditionRepository.DeleteAll();
+        await lockConditionRepository.DeleteAll();   // approach_alert_condition 参照の lock_condition も削除される
         await lockRepository.DeleteAll();
+        await approachAlertConditionRepository.DeleteAll(cancellationToken);   // lock_condition が参照しなくなってから削除
         await lockConditionByRouteCentralControlLeverRepository.DeleteAll();
         logger.LogInformation("Existing lock-related data deleted");
 
@@ -133,7 +138,12 @@ public class DatabaseInitializationOrchestrator(
             await initializer.InitializeLocks();
         }
 
-        // Phase 25: Finalize - 初期化の完了処理
+        // Phase 25: 接近警報鳴動条件の初期化
+        logger.LogInformation("Phase 25: 接近警報鳴動条件の初期化");
+        var approachAlertCsvData = await approachAlertConditionCsvLoader.LoadAsync(cancellationToken);
+        await approachAlertConditionDbInitializer.InitializeAsync(approachAlertCsvData, cancellationToken);
+
+        // Phase 26: Finalize（旧 Phase 25）- 初期化の完了処理
         DetachUnchangedEntities();
         await FinalizeInitializationAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);

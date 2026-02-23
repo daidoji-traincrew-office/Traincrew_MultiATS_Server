@@ -56,7 +56,8 @@ public partial class DbRendoTableInitializer
         ApplicationDbContext context,
         IDateTimeRepository dateTimeRepository,
         ILogger<DbRendoTableInitializer> logger,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        Dictionary<string, List<string>>? customStationIdMap = null)
     {
         this.stationId = stationId;
         this.rendoTableCsvs = rendoTableCsvs;
@@ -64,7 +65,8 @@ public partial class DbRendoTableInitializer
         this.dateTimeRepository = dateTimeRepository;
         this.logger = logger;
         this.cancellationToken = cancellationToken;
-        otherStations = (StationIdMap.GetValueOrDefault(stationId) ?? [])
+        _stationIdMap = customStationIdMap ?? StationIdMap;
+        otherStations = (_stationIdMap.GetValueOrDefault(stationId) ?? [])
             .Where(s => s != NameClosure)
             .ToList();
     }
@@ -1160,7 +1162,7 @@ public partial class DbRendoTableInitializer
             {
                 // 別駅所属のObject
                 var count = token.Length;
-                var targetStationId = StationIdMap[this.stationId][count - 1];
+                var targetStationId = _stationIdMap[this.stationId][count - 1];
                 enumerator.MoveNext();
                 var child = ParseToken(ref enumerator, targetStationId, isRouteLock, isReverse, isTotalControl,
                     isLocked);
@@ -1401,6 +1403,7 @@ public partial class DbRendoTableInitializer
     private readonly IDateTimeRepository dateTimeRepository;
     private readonly CancellationToken cancellationToken;
     private readonly List<string> otherStations;
+    private readonly Dictionary<string, List<string>> _stationIdMap;
 
     private readonly ILogger<DbRendoTableInitializer> logger;
     // ReSharper restore InconsistentNaming

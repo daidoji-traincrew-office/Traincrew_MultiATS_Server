@@ -20,6 +20,7 @@ using Traincrew_MultiATS_Server.Hubs;
 using Traincrew_MultiATS_Server.Initialization;
 using Traincrew_MultiATS_Server.Initialization.CsvLoaders;
 using Traincrew_MultiATS_Server.Initialization.DbInitializers;
+using Traincrew_MultiATS_Server.Repositories.ApproachAlertCondition;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.DestinationButton;
 using Traincrew_MultiATS_Server.Repositories.DirectionRoute;
@@ -491,6 +492,7 @@ public class Program
             .AddScoped<TtcWindowLinkCsvLoader>()
             .AddScoped<ThrowOutControlCsvLoader>()
             .AddScoped<SignalCsvLoader>()
+            .AddScoped<ApproachAlertConditionCsvLoader>()
             // DB Initializers
             .AddScoped<StationDbInitializer>()
             .AddScoped<TrackCircuitDbInitializer>()
@@ -504,8 +506,10 @@ public class Program
             .AddScoped<SignalDbInitializer>()
             .AddScoped<InterlockingObjectDbInitializer>()
             .AddScoped<SwitchingMachineRouteDbInitializer>()
+            .AddScoped<ApproachAlertConditionDbInitializer>()
             // Orchestrator
             .AddScoped<DatabaseInitializationOrchestrator>()
+            .AddScoped<IApproachAlertConditionRepository, ApproachAlertConditionRepository>()
             .AddScoped<IDateTimeRepository, DateTimeRepository>()
             .AddScoped<IDestinationButtonRepository, DestinationButtonRepository>()
             .AddScoped<IDirectionRouteRepository, DirectionRouteRepository>()

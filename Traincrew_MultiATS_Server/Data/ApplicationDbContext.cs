@@ -50,6 +50,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<LockConditionByRouteCentralControlLever> LockConditionByRouteCentralControlLevers { get; set; }
     public DbSet<UserDisconnectionState> UserDisconnectionStates { get; set; }
     public DbSet<TrainSignalState> TrainSignalStates { get; set; }
+    public DbSet<ApproachAlertCondition> ApproachAlertConditions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -99,7 +100,14 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasOne(lc => lc.Lock)
             .WithMany(l => l.LockConditions)
             .HasForeignKey(l => l.LockId)
-            .HasPrincipalKey(l => l.Id);
+            .HasPrincipalKey(l => l.Id)
+            .IsRequired(false);
+        modelBuilder.Entity<LockCondition>()
+            .HasOne(lc => lc.ApproachAlertCondition)
+            .WithMany()
+            .HasForeignKey(lc => lc.ApproachAlertConditionId)
+            .HasPrincipalKey(aac => aac.Id)
+            .IsRequired(false);
         modelBuilder.Entity<LockCondition>()
             .HasOne(lc => lc.Parent)
             .WithMany()
@@ -234,6 +242,18 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
         modelBuilder.Entity<TrainSignalState>()
             .HasIndex(tss => tss.SignalName);
+
+        modelBuilder.Entity<ApproachAlertCondition>()
+            .HasOne(aac => aac.TrackCircuit)
+            .WithMany()
+            .HasForeignKey(aac => aac.TrackCircuitId)
+            .HasPrincipalKey(tc => tc.Id);
+
+        modelBuilder.Entity<ApproachAlertCondition>()
+            .HasOne<Station>()
+            .WithMany()
+            .HasForeignKey(aac => aac.StationId)
+            .HasPrincipalKey(s => s.Id);
 
         // Convert all column names to snake_case
         foreach (var entity in modelBuilder.Model.GetEntityTypes())
