@@ -1,4 +1,3 @@
-#define IS_ENABLED_PRECOMPILED_MODEL
 using System.Net;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
