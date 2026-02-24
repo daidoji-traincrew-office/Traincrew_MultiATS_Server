@@ -2,6 +2,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
+using Traincrew_MultiATS_Server.Repositories.ApproachAlertCondition;
+using Traincrew_MultiATS_Server.Repositories.ApproachAlertState;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.DestinationButton;
 using Traincrew_MultiATS_Server.Repositories.DirectionRoute;
@@ -63,6 +65,8 @@ public static class MockDependencyProvider
     public static void AddAllMocks(this IServiceCollection services)
     {
         // Register all Repository mocks (41 repositories)
+        services.AddScoped(_ => new Mock<IApproachAlertConditionRepository>().Object);
+        services.AddScoped(_ => new Mock<IApproachAlertStateRepository>().Object);
         services.AddScoped(_ => new Mock<IDateTimeRepository>().Object);
         services.AddScoped(_ => new Mock<IDestinationButtonRepository>().Object);
         services.AddScoped(_ => new Mock<IDirectionRouteRepository>().Object);
