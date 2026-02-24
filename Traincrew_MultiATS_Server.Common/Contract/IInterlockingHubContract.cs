@@ -8,6 +8,7 @@ public interface IInterlockingHubContract
     Task<InterlockingLeverData> SetPhysicalLeverData(InterlockingLeverData leverData);
     Task<InterlockingKeyLeverData> SetPhysicalKeyLeverData(InterlockingKeyLeverData keyLeverData);
     Task<DestinationButtonData> SetDestinationButtonState(DestinationButtonData buttonData);
+    Task StopApproachAlertRinging(ApproachAlertStopRingRequest request);
 }
 
 public interface IInterlockingClientContract

@@ -1,5 +1,6 @@
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Models;
+using Traincrew_MultiATS_Server.Repositories.ApproachAlertState;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.DestinationButton;
 using Traincrew_MultiATS_Server.Repositories.DirectionSelfControlLever;
@@ -25,6 +26,7 @@ public interface IInterlockingService
     Task<List<InterlockingObject>> GetInterlockingObjects();
     Task<List<InterlockingObject>> GetObjectsByStationIds(List<string> stationIds);
     Task<List<DestinationButton>> GetDestinationButtonsByStationIds(List<string> stationNames);
+    Task StopApproachAlertRinging(string stationId, bool isUp);
 }
 
 public class InterlockingService(
@@ -44,6 +46,7 @@ public class InterlockingService(
     ISignalService signalService,
     IMutexRepository mutexRepository,
     IServerService serverService,
+    IApproachAlertStateRepository approachAlertStateRepository,
     ILogger<InterlockingService> logger) : IInterlockingService
 {
 
@@ -65,6 +68,8 @@ public class InterlockingService(
         var lamps = await GetLamps(stationIds, directionSelfControlLevers, routeCentralControlLevers);
         // 列番窓を取得
         var ttcWindows = await ttcStationControlService.GetTtcWindowsByStationIdsWithState(stationIds);
+
+        var ringingStates = await approachAlertStateRepository.GetWhereIsRinging();
 
         var response = new DataToInterlocking
         {
@@ -95,7 +100,11 @@ public class InterlockingService(
             // 各ランプの状態
             Lamps = lamps,
 
-            TimeOffset = timeOffset
+            TimeOffset = timeOffset,
+
+            RingingApproachAlerts = ringingStates
+                .Select(s => new ApproachAlertRingingState { StationId = s.StationId, IsUp = s.IsUp })
+                .ToList()
         };
 
         return response;
@@ -371,6 +380,11 @@ public class InterlockingService(
     public async Task<List<DestinationButton>> GetDestinationButtonsByStationIds(List<string> stationNames)
     {
         return await destinationButtonRepository.GetButtonsByStationIds(stationNames);
+    }
+
+    public async Task StopApproachAlertRinging(string stationId, bool isUp)
+    {
+        await approachAlertStateRepository.SetIsRingingFalseByStationIdAndIsUp(stationId, isUp);
     }
 
     public static DestinationButtonData ToDestinationButtonData(DestinationButtonState buttonState)

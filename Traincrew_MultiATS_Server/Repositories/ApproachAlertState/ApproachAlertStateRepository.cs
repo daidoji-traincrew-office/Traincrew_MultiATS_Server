@@ -30,4 +30,18 @@ public class ApproachAlertStateRepository(ApplicationDbContext context) : IAppro
             .Where(s => ids.Contains(s.Id))
             .ToListAsync();
     }
+
+    public async Task SetIsRingingFalseByStationIdAndIsUp(string stationId, bool isUp)
+    {
+        await context.ApproachAlertStates
+            .Where(s => s.StationId == stationId && s.IsUp == isUp)
+            .ExecuteUpdateAsync(s => s.SetProperty(x => x.IsRinging, false));
+    }
+
+    public async Task<List<Models.ApproachAlertState>> GetWhereIsRinging()
+    {
+        return await context.ApproachAlertStates
+            .Where(s => s.IsRinging)
+            .ToListAsync();
+    }
 }

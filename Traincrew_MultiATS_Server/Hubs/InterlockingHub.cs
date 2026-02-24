@@ -37,4 +37,9 @@ public class InterlockingHub(IInterlockingService interlockingService) : Hub<IIn
     {
         return await interlockingService.SetDestinationButtonState(buttonData);
     }
+
+    public async Task StopApproachAlertRinging(ApproachAlertStopRingRequest request)
+    {
+        await interlockingService.StopApproachAlertRinging(request.StationId, request.IsUp);
+    }
 }
