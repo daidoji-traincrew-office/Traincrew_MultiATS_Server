@@ -2010,9 +2010,10 @@ public class RendoService(
             ? await lockConditionRepository.GetConditionsByApproachAlertConditionIds(conditionIds)
             : new();
 
-        // 5. lock_condition内のobjectIdを取得し、state付きオブジェクトを取得
+        // 5. lock_condition内のobjectIdと各条件の軌道回路IDを取得し、state付きオブジェクトを取得
         var objectIds = lockConditionsByConditionId.Values
             .SelectMany(ExtractObjectIdsFromLockCondtions)
+            .Concat(conditions.Select(c => c.TrackCircuitId))
             .Distinct()
             .ToList();
         var interlockingObjects = objectIds.Count > 0
@@ -2054,8 +2055,8 @@ public class RendoService(
         Dictionary<ulong, List<LockCondition>> lockConditionsByConditionId,
         Dictionary<ulong, InterlockingObject> interlockingObjects)
     {
-        var trackCircuit = condition.TrackCircuit;
-        if (trackCircuit == null)
+        if (!interlockingObjects.TryGetValue(condition.TrackCircuitId, out var interlockingObject)
+            || interlockingObject is not TrackCircuit trackCircuit)
         {
             return false;
         }
