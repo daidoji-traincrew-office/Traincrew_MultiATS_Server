@@ -61,4 +61,15 @@ public class LockConditionRepository(ApplicationDbContext context) : ILockCondit
         context.LockConditionObjects.Add(entity);
         await context.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task<Dictionary<ulong, List<Models.LockCondition>>> GetConditionsByApproachAlertConditionIds(
+        List<ulong> ids)
+    {
+        return await context.LockConditions
+            .Where(lc => lc.ApproachAlertConditionId != null && ids.Contains(lc.ApproachAlertConditionId.Value))
+            .GroupBy(lc => lc.ApproachAlertConditionId!.Value)
+            .ToDictionaryAsync(
+                g => g.Key,
+                g => g.OrderBy(lc => lc.Id).ToList());
+    }
 }

@@ -1,5 +1,7 @@
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Models;
+using Traincrew_MultiATS_Server.Repositories.ApproachAlertCondition;
+using Traincrew_MultiATS_Server.Repositories.ApproachAlertState;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.DestinationButton;
 using Traincrew_MultiATS_Server.Repositories.DirectionRoute;
@@ -40,6 +42,7 @@ public interface IRendoService
     Task ApproachLockRelay();
     Task RouteLockRelay();
     Task SignalControl();
+    Task ApproachAlertRelay();
 }
 
 /// <summary>
@@ -64,6 +67,8 @@ public class RendoService(
     ILeverRepository leverRepository,
     IRouteCentralControlLeverRepository routeCentralControlLeverRepository,
     ILockConditionByRouteCentralControlLeverRepository lockConditionByRouteCentralControlLeverRepository,
+    IApproachAlertStateRepository approachAlertStateRepository,
+    IApproachAlertConditionRepository approachAlertConditionRepository,
     IGeneralRepository generalRepository,
     IServerRepository serverRepository,
     ILogger<RendoService> logger) : IRendoService
@@ -1970,6 +1975,143 @@ public class RendoService(
                 && switchingMachine.SwitchingMachineState.IsReverse == o.IsReverse,
             // それ以外はTrueを返す
             _ => true
+        };
+    }
+
+    /// <summary>
+    /// 接近警報鳴動判定
+    /// </summary>
+    public async Task ApproachAlertRelay()
+    {
+        // 1. 処理対象のstateを特定
+        var shouldRingIds = await approachAlertStateRepository.GetIdsWhereShouldRing();
+        var shortCircuitedIds = await approachAlertStateRepository.GetIdsWhereHasShortCircuitedCondition();
+
+        var allTargetIds = shouldRingIds.Concat(shortCircuitedIds).Distinct().ToList();
+
+        if (allTargetIds.Count == 0)
+        {
+            return;
+        }
+
+        // 2. 対象stateを一括取得
+        var targetStates = await approachAlertStateRepository.GetByIds(allTargetIds);
+
+        // 3. 対象の(station_id, is_up)ペアに紐づく条件を取得
+        var pairs = targetStates
+            .Select(s => (s.StationId, s.IsUp))
+            .Distinct()
+            .ToList();
+        var conditions = await approachAlertConditionRepository.GetByStationIdAndIsUpPairs(pairs);
+
+        // 4. lock_conditionを取得
+        var conditionIds = conditions.Select(c => c.Id).ToList();
+        var lockConditionsByConditionId = conditionIds.Count > 0
+            ? await lockConditionRepository.GetConditionsByApproachAlertConditionIds(conditionIds)
+            : new();
+
+        // 5. lock_condition内のobjectIdを取得し、state付きオブジェクトを取得
+        var objectIds = lockConditionsByConditionId.Values
+            .SelectMany(ExtractObjectIdsFromLockCondtions)
+            .Distinct()
+            .ToList();
+        var interlockingObjects = objectIds.Count > 0
+            ? (await interlockingObjectRepository.GetObjectByIdsWithState(objectIds))
+                .ToDictionary(obj => obj.Id)
+            : new();
+
+        // 6. (station_id, is_up) ごとに条件を判定
+        var conditionsByPair = conditions
+            .GroupBy(c => (c.StationId, c.IsUp))
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        foreach (var state in targetStates)
+        {
+            var pair = (state.StationId, state.IsUp);
+            var pairConditions = conditionsByPair.GetValueOrDefault(pair, []);
+
+            // いずれかの条件が成立すればshouldRing=true（OR判定）
+            var shouldRing = pairConditions.Any(condition =>
+                EvaluateApproachAlertCondition(condition, lockConditionsByConditionId, interlockingObjects));
+
+            // should_ringがfalse→trueに変化した場合、is_ringing=trueもセット
+            var isRinging = state.IsRinging || shouldRing != state.ShouldRing && shouldRing;
+
+            if (isRinging == state.IsRinging
+                && shouldRing == state.ShouldRing)
+            {
+                continue;
+            }
+
+            state.IsRinging = isRinging;
+            state.ShouldRing = shouldRing;
+            await generalRepository.Save(state);
+        }
+    }
+
+    private static bool EvaluateApproachAlertCondition(
+        ApproachAlertCondition condition,
+        Dictionary<ulong, List<LockCondition>> lockConditionsByConditionId,
+        Dictionary<ulong, InterlockingObject> interlockingObjects)
+    {
+        var trackCircuit = condition.TrackCircuit;
+        if (trackCircuit == null)
+        {
+            return false;
+        }
+
+        // 軌道回路が在線していること
+        if (!trackCircuit.TrackCircuitState.IsShortCircuit)
+        {
+            return false;
+        }
+
+        // 列番条件チェック
+        if (condition.TrainNumberCondition != BothOddEven.Both)
+        {
+            var trainNumber = trackCircuit.TrackCircuitState.TrainNumber;
+            bool isUp;
+            try
+            {
+                isUp = TrainService.IsTrainUpOrDown(trainNumber);
+            }
+            catch (InvalidOperationException)
+            {
+                return false;
+            }
+            switch (condition.TrainNumberCondition)
+            {
+                case BothOddEven.Odd when isUp:
+                case BothOddEven.Even when !isUp:
+                    return false;
+                case BothOddEven.Both:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        // lock_conditionの評価
+        var lockConditions = lockConditionsByConditionId.GetValueOrDefault(condition.Id, []);
+        if (lockConditions.Count == 0)
+        {
+            // lock_conditionがなければ在線+列番条件のみで判定成功
+            return true;
+        }
+
+        return EvaluateLockConditions(lockConditions, interlockingObjects, ApproachAlertPredicate);
+    }
+
+    private static bool ApproachAlertPredicate(
+        LockConditionObject o, InterlockingObject interlockingObject)
+    {
+        return interlockingObject switch
+        {
+            DirectionRoute directionRoute => directionRoute.DirectionRouteState.isLr == o.IsLR,
+            Route route => route.RouteState.IsSignalControlRaised == RaiseDrop.Raise,
+            SwitchingMachine switchingMachine => !switchingMachine.SwitchingMachineState.IsSwitching &&
+                                                 switchingMachine.SwitchingMachineState.IsReverse == o.IsReverse,
+            _ => false
         };
     }
 

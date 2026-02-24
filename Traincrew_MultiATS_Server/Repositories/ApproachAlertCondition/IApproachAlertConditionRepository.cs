@@ -9,4 +9,7 @@ public interface IApproachAlertConditionRepository
 
     /// <summary>全件削除</summary>
     Task DeleteAll(CancellationToken cancellationToken = default);
+
+    Task<List<Models.ApproachAlertCondition>> GetByStationIdAndIsUpPairs(
+        List<(string StationId, bool IsUp)> pairs);
 }

@@ -21,6 +21,7 @@ using Traincrew_MultiATS_Server.Initialization;
 using Traincrew_MultiATS_Server.Initialization.CsvLoaders;
 using Traincrew_MultiATS_Server.Initialization.DbInitializers;
 using Traincrew_MultiATS_Server.Repositories.ApproachAlertCondition;
+using Traincrew_MultiATS_Server.Repositories.ApproachAlertState;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.DestinationButton;
 using Traincrew_MultiATS_Server.Repositories.DirectionRoute;
@@ -510,6 +511,7 @@ public class Program
             // Orchestrator
             .AddScoped<DatabaseInitializationOrchestrator>()
             .AddScoped<IApproachAlertConditionRepository, ApproachAlertConditionRepository>()
+            .AddScoped<IApproachAlertStateRepository, ApproachAlertStateRepository>()
             .AddScoped<IDateTimeRepository, DateTimeRepository>()
             .AddScoped<IDestinationButtonRepository, DestinationButtonRepository>()
             .AddScoped<IDirectionRouteRepository, DirectionRouteRepository>()

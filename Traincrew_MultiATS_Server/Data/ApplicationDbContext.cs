@@ -51,6 +51,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<UserDisconnectionState> UserDisconnectionStates { get; set; }
     public DbSet<TrainSignalState> TrainSignalStates { get; set; }
     public DbSet<ApproachAlertCondition> ApproachAlertConditions { get; set; }
+    public DbSet<ApproachAlertState> ApproachAlertStates { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

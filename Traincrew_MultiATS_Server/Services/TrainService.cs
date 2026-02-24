@@ -72,7 +72,7 @@ public partial class TrainService(
         var oldTrackCircuitDataList = oldTrackCircuitList.Select(TrackCircuitService.ToTrackCircuitData).ToList();
         // 新規登録軌道回路
         var incrementalTrackCircuitDataList = clientData.OnTrackList.Except(oldTrackCircuitDataList).ToList();
-        // 在線終了軌道回路    
+        // 在線終了軌道回路
         var decrementalTrackCircuitDataList = oldTrackCircuitDataList.Except(clientData.OnTrackList).ToList();
 
         // 軌道回路を取得しようとする
@@ -473,7 +473,7 @@ public partial class TrainService(
 
     /// <summary>
     /// TrainCarState更新
-    /// </summary> 
+    /// </summary>
     private async Task UpdateTrainCarStates(long trainStateId, List<CarState> carStates)
     {
         var trainCarStates = carStates.Select(cs => new TrainCarState
@@ -589,7 +589,7 @@ public partial class TrainService(
         };
     }
 
-    private static bool IsTrainUpOrDown(string trainNumber)
+    internal static bool IsTrainUpOrDown(string trainNumber)
     {
         // 上りか下りか判断(偶数なら上り、奇数なら下り)
         var lastDiaNumber = trainNumber.Last(char.IsDigit) - '0';

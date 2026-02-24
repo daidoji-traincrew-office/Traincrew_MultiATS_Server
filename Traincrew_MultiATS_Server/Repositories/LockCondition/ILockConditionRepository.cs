@@ -18,4 +18,7 @@ public interface ILockConditionRepository
    Task AddObjectAndSaveAsync(
        LockConditionObject entity,
        CancellationToken cancellationToken = default);
+
+   Task<Dictionary<ulong, List<Models.LockCondition>>> GetConditionsByApproachAlertConditionIds(
+       List<ulong> ids);
 }

@@ -19,4 +19,18 @@ public class ApproachAlertConditionRepository(ApplicationDbContext context)
     {
         await context.ApproachAlertConditions.ExecuteDeleteAsync(cancellationToken);
     }
+
+    public async Task<List<Models.ApproachAlertCondition>> GetByStationIdAndIsUpPairs(
+        List<(string StationId, bool IsUp)> pairs)
+    {
+        var stationIds = pairs.Select(p => p.StationId).Distinct().ToList();
+        var conditions = await context.ApproachAlertConditions
+            .Include(c => c.TrackCircuit)
+            .ThenInclude(tc => tc!.TrackCircuitState)
+            .Where(c => stationIds.Contains(c.StationId))
+            .ToListAsync();
+        return conditions
+            .Where(c => pairs.Any(p => p.StationId == c.StationId && p.IsUp == c.IsUp))
+            .ToList();
+    }
 }

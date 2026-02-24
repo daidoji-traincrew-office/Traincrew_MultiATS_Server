@@ -366,6 +366,17 @@ CREATE TABLE approach_alert_condition
 CREATE INDEX approach_alert_condition_station_id_is_up_index
     ON approach_alert_condition (station_id, is_up);
 
+-- 接近警報状態
+CREATE TABLE approach_alert_state
+(
+    id           BIGSERIAL PRIMARY KEY,
+    station_id   VARCHAR(10) REFERENCES station (id) NOT NULL,
+    is_up        BOOLEAN NOT NULL,
+    should_ring  BOOLEAN NOT NULL DEFAULT FALSE,
+    is_ringing   BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (station_id, is_up)
+);
+
 -- 鎖状条件詳細(and, or, object)
 CREATE TABLE lock_condition
 (
