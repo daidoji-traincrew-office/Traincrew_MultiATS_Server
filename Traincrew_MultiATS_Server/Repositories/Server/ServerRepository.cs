@@ -61,4 +61,16 @@ public class ServerRepository(ApplicationDbContext context) : IServerRepository
                 .SetProperty(serverState => serverState.UseOneSecondRelay, useOneSecondRelay)
             );
     }
+
+    public async Task SetIsAllSignalRelayRaisedAsync(RaiseDropWithForce raiseDropWithForce)
+    {
+        var state = await context.ServerStates.FirstOrDefaultAsync();
+        if (state == null)
+        {
+            return;
+        }
+        state.IsAllSignalRelayRaised = raiseDropWithForce;
+        context.ServerStates.Update(state);
+        await context.SaveChangesAsync();
+    }
 }

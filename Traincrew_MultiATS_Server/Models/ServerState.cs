@@ -16,4 +16,6 @@ public class ServerState
     public int SwitchReturnTime { get; set; } = 0;
     [Column("use_one_second_relay")]
     public bool UseOneSecondRelay { get; set; } = false;
+    [Column("is_all_signal_relay_raised")]
+    public RaiseDropWithForce IsAllSignalRelayRaised { get; set; }
 }
