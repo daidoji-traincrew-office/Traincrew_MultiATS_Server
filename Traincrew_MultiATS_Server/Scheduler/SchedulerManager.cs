@@ -26,7 +26,8 @@ public class SchedulerManager(
             new DestinationButtonScheduler(serviceScopeFactory),
             new TrainScheduler(serviceScopeFactory),
             new SignalScheduler(serviceScopeFactory),
-            new ApproachAlertScheduler(serviceScopeFactory)
+            new ApproachAlertScheduler(serviceScopeFactory),
+            new MetricsCollectorScheduler(serviceScopeFactory)
         ];
     }
 
