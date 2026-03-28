@@ -2123,11 +2123,16 @@ public class RendoService(
             }
             switch (condition.TrainNumberCondition)
             {
+                // 条件と一致しない場合、判定失敗とする
                 case BothOddEven.Odd when isUp:
                 case BothOddEven.Even when !isUp:
                     return false;
+                // 条件に一致した場合はスルー
                 case BothOddEven.Both:
+                case BothOddEven.Odd when !isUp:
+                case BothOddEven.Even when isUp:
                     break;
+                // ここには到達しないはず
                 default:
                     throw new ArgumentOutOfRangeException();
             }
