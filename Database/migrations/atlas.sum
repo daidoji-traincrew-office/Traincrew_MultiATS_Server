@@ -1,4 +1,4 @@
-h1:Pz09U0NqU2K5FLBVCC2Jg5tLdzs7DkJRoAd68Sf/0sA=
+h1:fA3zqcMdNMOj4YHb36rkF95+MYXe/2C+mvxulXDc0ho=
 20241105144637_create_openiddict.sql h1:qcDpUCHesR/PCFM59NjokVPWG43p3ctGxtw1KjbZt8k=
 20241221070718_create_interlocking_tables.sql h1:hV/YSE2jUe7gBKmmESvH7ibzXhZMZkAFHL6yeQ3PF1k=
 20241221081310_switching_machine_reversed.sql h1:7qBQB/GAMlbdCmQBNSR4tgZx2pw+rsWCnLqT+wreh3c=
@@ -83,3 +83,4 @@ h1:Pz09U0NqU2K5FLBVCC2Jg5tLdzs7DkJRoAd68Sf/0sA=
 20260131152521_rename_track_circuit_department_time_index.sql h1:GYSCWXOsl/HNiKO7zCnJq2CdEzk8mxaZ3sq49EyseUc=
 20260209163651_add_server_state_switching_one_second.sql h1:IP8tL0ryk6bYDIo0azR+kYjRkf5NCQjVe5o/raauOTA=
 20260417151839_add_diagram_and_rename_train_diagram.sql h1:kItEM/CVykxaaiU8h+OfmPQQ0bwywM86h3qToFTPt/I=
+20260417155024_add_unique_to_diagram.sql h1:POGzCRJt/m2ivFd+JDxPUZIOi83r/ELHJBVMpr/o/04=
