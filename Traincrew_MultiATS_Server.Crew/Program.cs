@@ -23,6 +23,7 @@ using Traincrew_MultiATS_Server.Initialization.DbInitializers;
 using Traincrew_MultiATS_Server.Initialization.JsonLoaders;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.DestinationButton;
+using Traincrew_MultiATS_Server.Repositories.DiagramTrain;
 using Traincrew_MultiATS_Server.Repositories.DirectionRoute;
 using Traincrew_MultiATS_Server.Repositories.DirectionSelfControlLever;
 using Traincrew_MultiATS_Server.Repositories.Discord;
@@ -55,7 +56,6 @@ using Traincrew_MultiATS_Server.Repositories.TrackCircuitDepartmentTime;
 using Traincrew_MultiATS_Server.Repositories.TrackCircuitSignal;
 using Traincrew_MultiATS_Server.Repositories.Train;
 using Traincrew_MultiATS_Server.Repositories.TrainCar;
-using Traincrew_MultiATS_Server.Repositories.TrainDiagram;
 using Traincrew_MultiATS_Server.Repositories.TrainSignalState;
 using Traincrew_MultiATS_Server.Repositories.TrainType;
 using Traincrew_MultiATS_Server.Repositories.Transaction;
@@ -485,7 +485,7 @@ public class Program
             .AddScoped<TrackCircuitCsvLoader>()
             .AddScoped<SignalTypeCsvLoader>()
             .AddScoped<TrainTypeCsvLoader>()
-            .AddScoped<TrainDiagramCsvLoader>()
+            .AddScoped<DiagramTrainCsvLoader>()
             .AddScoped<RendoTableCsvLoader>()
             .AddScoped<OperationNotificationDisplayCsvLoader>()
             .AddScoped<RouteLockTrackCircuitCsvLoader>()
@@ -543,7 +543,7 @@ public class Program
             .AddScoped<ITrackCircuitSignalRepository, TrackCircuitSignalRepository>()
             .AddScoped<ITrainRepository, TrainRepository>()
             .AddScoped<ITrainCarRepository, TrainCarRepository>()
-            .AddScoped<ITrainDiagramRepository, TrainDiagramRepository>()
+            .AddScoped<IDiagramTrainRepository, DiagramTrainRepository>()
             .AddScoped<ITrainTypeRepository, TrainTypeRepository>()
             .AddScoped<ITrainSignalStateRepository, TrainSignalStateRepository>()
             .AddScoped<ITtcWindowRepository, TtcWindowRepository>()

@@ -3,8 +3,8 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Traincrew_MultiATS_Server.Initialization.DbInitializers;
 using Traincrew_MultiATS_Server.Models;
+using Traincrew_MultiATS_Server.Repositories.DiagramTrain;
 using Traincrew_MultiATS_Server.Repositories.General;
-using Traincrew_MultiATS_Server.Repositories.TrainDiagram;
 using Traincrew_MultiATS_Server.Repositories.TrainType;
 
 namespace Traincrew_MultiATS_Server.UT.Initialization.DbInitializers;
@@ -13,7 +13,7 @@ public class TrainDbInitializerTest
 {
     private readonly Mock<ILogger<TrainDbInitializer>> _loggerMock = new();
     private readonly Mock<ITrainTypeRepository> _trainTypeRepositoryMock = new();
-    private readonly Mock<ITrainDiagramRepository> _trainDiagramRepositoryMock = new();
+    private readonly Mock<IDiagramTrainRepository> _trainDiagramRepositoryMock = new();
     private readonly Mock<IGeneralRepository> _generalRepositoryMock = new();
 
     [Fact]
@@ -114,7 +114,7 @@ public class TrainDbInitializerTest
     public async Task InitializeTrainDiagramsAsync_ShouldAddTrainDiagrams_WhenDataIsValid()
     {
         // Arrange
-        var trainDiagramCsvList = new List<TrainDiagramCsv>
+        var trainDiagramCsvList = new List<DiagramTrainCsv>
         {
             new()
             {
@@ -140,7 +140,7 @@ public class TrainDbInitializerTest
 
         // Assert
         _generalRepositoryMock.Verify(
-            r => r.AddAll(It.Is<List<TrainDiagram>>(list =>
+            r => r.AddAll(It.Is<List<DiagramTrain>>(list =>
                 list.Count == 1 &&
                 list[0].TrainNumber == "101" &&
                 list[0].TrainTypeId == 1 &&
@@ -156,7 +156,7 @@ public class TrainDbInitializerTest
     public async Task InitializeTrainDiagramsAsync_ShouldSkipExistingTrainNumbers()
     {
         // Arrange
-        var trainDiagramCsvList = new List<TrainDiagramCsv>
+        var trainDiagramCsvList = new List<DiagramTrainCsv>
         {
             new()
             {
@@ -190,7 +190,7 @@ public class TrainDbInitializerTest
 
         // Assert
         _generalRepositoryMock.Verify(
-            r => r.AddAll(It.Is<List<TrainDiagram>>(list =>
+            r => r.AddAll(It.Is<List<DiagramTrain>>(list =>
                 list.Count == 1 &&
                 list[0].TrainNumber == "102"
             ), It.IsAny<CancellationToken>()),
@@ -202,7 +202,7 @@ public class TrainDbInitializerTest
     public async Task InitializeTrainDiagramsAsync_ShouldHandleEmptyList()
     {
         // Arrange
-        var trainDiagramCsvList = new List<TrainDiagramCsv>();
+        var trainDiagramCsvList = new List<DiagramTrainCsv>();
 
         _trainDiagramRepositoryMock.Setup(r => r.GetTrainNumbersForAll(It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
@@ -218,7 +218,7 @@ public class TrainDbInitializerTest
 
         // Assert
         _generalRepositoryMock.Verify(
-            r => r.AddAll(It.Is<List<TrainDiagram>>(list => list.Count == 0), It.IsAny<CancellationToken>()),
+            r => r.AddAll(It.Is<List<DiagramTrain>>(list => list.Count == 0), It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -240,7 +240,7 @@ public class TrainDbInitializerTest
             r => r.AddAll(It.IsAny<List<TrainType>>(), It.IsAny<CancellationToken>()),
             Times.Never);
         _generalRepositoryMock.Verify(
-            r => r.AddAll(It.IsAny<List<TrainDiagram>>(), It.IsAny<CancellationToken>()),
+            r => r.AddAll(It.IsAny<List<DiagramTrain>>(), It.IsAny<CancellationToken>()),
             Times.Never);
     }
 }

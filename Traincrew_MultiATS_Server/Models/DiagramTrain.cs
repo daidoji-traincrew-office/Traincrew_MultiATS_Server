@@ -3,8 +3,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Traincrew_MultiATS_Server.Models;
 
-[Table("train_diagram")]
-public class TrainDiagram
+[Table("diagram_train")]
+public class DiagramTrain
 {
     [Key]
     [Column("id")]
@@ -13,7 +13,7 @@ public class TrainDiagram
 
     [Required]
     [Column("train_number")]
-    public string TrainNumber { get; set; }
+    public string TrainNumber { get; set; } = string.Empty;
 
     [Required]
     [Column("train_type_id")]
@@ -24,13 +24,16 @@ public class TrainDiagram
 
     [Required]
     [Column("from_station_id")]
-    public string FromStationId { get; set; }
+    public string FromStationId { get; set; } = string.Empty;
 
     [Required]
     [Column("to_station_id")]
-    public string ToStationId { get; set; }
+    public string ToStationId { get; set; } = string.Empty;
 
     [Required]
     [Column("dia_id")]
-    public int DiaId { get; set; }
+    public ulong DiaId { get; set; }
+
+    [ForeignKey(nameof(DiaId))]
+    public Diagram? Diagram { get; set; }
 }

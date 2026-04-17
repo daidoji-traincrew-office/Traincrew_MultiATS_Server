@@ -3,8 +3,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Traincrew_MultiATS_Server.Models;
 
-[Table("train_diagram_timetable")]
-public class TrainDiagramTimetable
+[Table("diagram_train_timetable")]
+public class DiagramTrainTimetable
 {
     [Key]
     [Column("id")]
@@ -35,7 +35,7 @@ public class TrainDiagramTimetable
 
     // ナビゲーションプロパティ
     [ForeignKey(nameof(TrainDiagramId))]
-    public TrainDiagram? TrainDiagram { get; set; }
+    public DiagramTrain? TrainDiagram { get; set; }
 
     [ForeignKey(nameof(StationId))]
     public Station? Station { get; set; }

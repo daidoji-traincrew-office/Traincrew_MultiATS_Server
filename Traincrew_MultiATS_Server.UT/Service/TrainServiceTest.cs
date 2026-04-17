@@ -3,9 +3,9 @@ using Moq;
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
+using Traincrew_MultiATS_Server.Repositories.DiagramTrain;
 using Traincrew_MultiATS_Server.Repositories.TrackCircuitDepartmentTime;
 using Traincrew_MultiATS_Server.Repositories.Train;
-using Traincrew_MultiATS_Server.Repositories.TrainDiagram;
 using Traincrew_MultiATS_Server.Services;
 using Traincrew_MultiATS_Server.UT.Service.TestHelpers;
 
@@ -20,7 +20,7 @@ public class TrainServiceTest
     private static TrainService CreateTrainService(
         TestTrackCircuitService? testTrackCircuitService = null,
         Mock<ITrainRepository>? mockTrainRepository = null,
-        Mock<ITrainDiagramRepository>? mockTrainDiagramRepository = null,
+        Mock<IDiagramTrainRepository>? mockTrainDiagramRepository = null,
         Mock<ITrackCircuitDepartmentTimeRepository>? mockTrackCircuitDepartmentTimeRepository = null,
         Mock<IDateTimeRepository>? mockDateTimeRepository = null,
         TestServerService? testServerService = null,
@@ -29,7 +29,7 @@ public class TrainServiceTest
         // nullの場合はデフォルトのインスタンスを使用
         testTrackCircuitService ??= new TestTrackCircuitService();
         mockTrainRepository ??= new Mock<ITrainRepository>();
-        mockTrainDiagramRepository ??= new Mock<ITrainDiagramRepository>();
+        mockTrainDiagramRepository ??= new Mock<IDiagramTrainRepository>();
         mockTrackCircuitDepartmentTimeRepository ??= new Mock<ITrackCircuitDepartmentTimeRepository>();
         mockDateTimeRepository ??= new Mock<IDateTimeRepository>();
         testServerService ??= new TestServerService();
@@ -61,7 +61,7 @@ public class TrainServiceTest
     public async Task CalculateAndUpdateDelays_SingleStationWithDelay_UpdatesDelayCorrectly()
     {
         // Arrange
-        var diaId = 1;
+        var diaId = 1UL;
         var trainNumber = "1002"; // 偶数 = 上り
         var carCount = 10;
         var trackCircuitDataList = new List<TrackCircuitData>
@@ -77,7 +77,7 @@ public class TrainServiceTest
             StationIdForDelay = "ST01"
         };
 
-        var timetable = new TrainDiagramTimetable
+        var timetable = new DiagramTrainTimetable
         {
             Id = 1,
             Index = 2,
@@ -103,7 +103,7 @@ public class TrainServiceTest
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
 
-        var mockTrainDiagramRepository = new Mock<ITrainDiagramRepository>();
+        var mockTrainDiagramRepository = new Mock<IDiagramTrainRepository>();
         mockTrainDiagramRepository
             .Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01"))
             .ReturnsAsync(timetable);
@@ -149,7 +149,7 @@ public class TrainServiceTest
     public async Task CalculateAndUpdateDelays_MultipleStations_UpdatesDelayForEachStation()
     {
         // Arrange
-        var diaId = 1;
+        var diaId = 1UL;
         var trainNumber = "2001"; // 奇数 = 下り
         var carCount = 8;
         var trackCircuitDataList = new List<TrackCircuitData>
@@ -161,12 +161,12 @@ public class TrainServiceTest
         var trackCircuit1 = new TrackCircuit { Id = 100, Name = "TC1", StationId = "ST01", StationIdForDelay = "ST01" };
         var trackCircuit2 = new TrackCircuit { Id = 200, Name = "TC2", StationId = "ST02", StationIdForDelay = "ST02" };
 
-        var timetable1 = new TrainDiagramTimetable
+        var timetable1 = new DiagramTrainTimetable
         {
             Id = 1, Index = 1, StationId = "ST01",
             ArrivalTime = TimeSpan.FromHours(9), DepartureTime = TimeSpan.FromHours(9)
         };
-        var timetable2 = new TrainDiagramTimetable
+        var timetable2 = new DiagramTrainTimetable
         {
             Id = 2, Index = 2, StationId = "ST02",
             ArrivalTime = TimeSpan.FromHours(9).Add(TimeSpan.FromMinutes(30)),
@@ -181,7 +181,7 @@ public class TrainServiceTest
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit1, trackCircuit2 }));
 
-        var mockTrainDiagramRepository = new Mock<ITrainDiagramRepository>();
+        var mockTrainDiagramRepository = new Mock<IDiagramTrainRepository>();
         mockTrainDiagramRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable1);
         mockTrainDiagramRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST02")).ReturnsAsync(timetable2);
 
@@ -212,7 +212,7 @@ public class TrainServiceTest
     public async Task CalculateAndUpdateDelays_EarlyTrain_UpdatesWithNegativeDelay()
     {
         // Arrange
-        var diaId = 1;
+        var diaId = 1UL;
         var trainNumber = "1004"; // 偶数 = 上り
         var carCount = 6;
         var trackCircuitDataList = new List<TrackCircuitData>
@@ -221,7 +221,7 @@ public class TrainServiceTest
         };
 
         var trackCircuit = new TrackCircuit { Id = 100, Name = "TC1", StationId = "ST01", StationIdForDelay = "ST01" };
-        var timetable = new TrainDiagramTimetable
+        var timetable = new DiagramTrainTimetable
         {
             Id = 1, Index = 2, StationId = "ST01",
             ArrivalTime = TimeSpan.FromHours(10),
@@ -234,7 +234,7 @@ public class TrainServiceTest
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
 
-        var mockTrainDiagramRepository = new Mock<ITrainDiagramRepository>();
+        var mockTrainDiagramRepository = new Mock<IDiagramTrainRepository>();
         mockTrainDiagramRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
 
         var mockTrackCircuitDepartmentTimeRepository = new Mock<ITrackCircuitDepartmentTimeRepository>();
@@ -263,7 +263,7 @@ public class TrainServiceTest
     public async Task CalculateAndUpdateDelays_PassingThroughStation_UsesZeroCarCount()
     {
         // Arrange
-        var diaId = 1;
+        var diaId = 1UL;
         var trainNumber = "3002"; // 偶数 = 上り
         var carCount = 10;
         var trackCircuitDataList = new List<TrackCircuitData>
@@ -272,7 +272,7 @@ public class TrainServiceTest
         };
 
         var trackCircuit = new TrackCircuit { Id = 100, Name = "TC1", StationId = "ST01", StationIdForDelay = "ST01" };
-        var timetable = new TrainDiagramTimetable
+        var timetable = new DiagramTrainTimetable
         {
             Id = 1, Index = 3, StationId = "ST01", // 始発駅でない
             ArrivalTime = TimeSpan.FromHours(11), // 到着時刻 = 出発時刻 (通過)
@@ -285,7 +285,7 @@ public class TrainServiceTest
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
 
-        var mockTrainDiagramRepository = new Mock<ITrainDiagramRepository>();
+        var mockTrainDiagramRepository = new Mock<IDiagramTrainRepository>();
         mockTrainDiagramRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
 
         var mockTrackCircuitDepartmentTimeRepository = new Mock<ITrackCircuitDepartmentTimeRepository>();
@@ -315,7 +315,7 @@ public class TrainServiceTest
     public async Task CalculateAndUpdateDelays_FirstStation_UsesActualCarCount()
     {
         // Arrange
-        var diaId = 1;
+        var diaId = 1UL;
         var trainNumber = "4001"; // 奇数 = 下り
         var carCount = 12;
         var trackCircuitDataList = new List<TrackCircuitData>
@@ -324,7 +324,7 @@ public class TrainServiceTest
         };
 
         var trackCircuit = new TrackCircuit { Id = 100, Name = "TC1", StationId = "ST01", StationIdForDelay = "ST01" };
-        var timetable = new TrainDiagramTimetable
+        var timetable = new DiagramTrainTimetable
         {
             Id = 1, Index = 1, StationId = "ST01", // 始発駅
             ArrivalTime = TimeSpan.FromHours(8),
@@ -337,7 +337,7 @@ public class TrainServiceTest
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
 
-        var mockTrainDiagramRepository = new Mock<ITrainDiagramRepository>();
+        var mockTrainDiagramRepository = new Mock<IDiagramTrainRepository>();
         mockTrainDiagramRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
 
         var mockTrackCircuitDepartmentTimeRepository = new Mock<ITrackCircuitDepartmentTimeRepository>();
@@ -366,7 +366,7 @@ public class TrainServiceTest
     public async Task CalculateAndUpdateDelays_NoTimetableData_SkipsStation()
     {
         // Arrange
-        var diaId = 1;
+        var diaId = 1UL;
         var trainNumber = "5002"; // 偶数 = 上り
         var carCount = 8;
         var trackCircuitDataList = new List<TrackCircuitData>
@@ -379,9 +379,9 @@ public class TrainServiceTest
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
 
-        var mockTrainDiagramRepository = new Mock<ITrainDiagramRepository>();
+        var mockTrainDiagramRepository = new Mock<IDiagramTrainRepository>();
         mockTrainDiagramRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01"))
-            .ReturnsAsync((TrainDiagramTimetable?)null); // 時刻表なし
+            .ReturnsAsync((DiagramTrainTimetable?)null); // 時刻表なし
 
         var mockTrainRepository = new Mock<ITrainRepository>();
 
@@ -398,7 +398,7 @@ public class TrainServiceTest
     public async Task CalculateAndUpdateDelays_NoDepartureTime_SkipsStation()
     {
         // Arrange
-        var diaId = 1;
+        var diaId = 1UL;
         var trainNumber = "6001"; // 奇数 = 下り
         var carCount = 6;
         var trackCircuitDataList = new List<TrackCircuitData>
@@ -407,7 +407,7 @@ public class TrainServiceTest
         };
 
         var trackCircuit = new TrackCircuit { Id = 100, Name = "TC1", StationId = "ST01", StationIdForDelay = "ST01" };
-        var timetable = new TrainDiagramTimetable
+        var timetable = new DiagramTrainTimetable
         {
             Id = 1, Index = 2, StationId = "ST01",
             ArrivalTime = TimeSpan.FromHours(12),
@@ -417,7 +417,7 @@ public class TrainServiceTest
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
 
-        var mockTrainDiagramRepository = new Mock<ITrainDiagramRepository>();
+        var mockTrainDiagramRepository = new Mock<IDiagramTrainRepository>();
         mockTrainDiagramRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
 
         var mockTrainRepository = new Mock<ITrainRepository>();
@@ -435,7 +435,7 @@ public class TrainServiceTest
     public async Task CalculateAndUpdateDelays_NoDepartmentTime_LogsWarningAndUsesZeroTimeElement()
     {
         // Arrange
-        var diaId = 1;
+        var diaId = 1UL;
         var trainNumber = "7002"; // 偶数 = 上り
         var carCount = 10;
         var trackCircuitDataList = new List<TrackCircuitData>
@@ -444,7 +444,7 @@ public class TrainServiceTest
         };
 
         var trackCircuit = new TrackCircuit { Id = 100, Name = "TC1", StationId = "ST01", StationIdForDelay = "ST01" };
-        var timetable = new TrainDiagramTimetable
+        var timetable = new DiagramTrainTimetable
         {
             Id = 1, Index = 2, StationId = "ST01",
             ArrivalTime = TimeSpan.FromHours(14),
@@ -456,7 +456,7 @@ public class TrainServiceTest
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
 
-        var mockTrainDiagramRepository = new Mock<ITrainDiagramRepository>();
+        var mockTrainDiagramRepository = new Mock<IDiagramTrainRepository>();
         mockTrainDiagramRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
 
         var mockTrackCircuitDepartmentTimeRepository = new Mock<ITrackCircuitDepartmentTimeRepository>();
@@ -498,7 +498,7 @@ public class TrainServiceTest
     public async Task CalculateAndUpdateDelays_NonStationTrackCircuits_FiltersOutCorrectly()
     {
         // Arrange
-        var diaId = 1;
+        var diaId = 1UL;
         var trainNumber = "8001"; // 奇数 = 下り
         var carCount = 8;
         var trackCircuitDataList = new List<TrackCircuitData>
@@ -510,7 +510,7 @@ public class TrainServiceTest
         var trackCircuit1 = new TrackCircuit { Id = 100, Name = "TC1", StationId = "ST01", StationIdForDelay = null }; // 駅軌道回路でない
         var trackCircuit2 = new TrackCircuit { Id = 200, Name = "TC2", StationId = "ST02", StationIdForDelay = "ST02" }; // 駅軌道回路
 
-        var timetable = new TrainDiagramTimetable
+        var timetable = new DiagramTrainTimetable
         {
             Id = 1, Index = 2, StationId = "ST02",
             ArrivalTime = TimeSpan.FromHours(15),
@@ -523,7 +523,7 @@ public class TrainServiceTest
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit1, trackCircuit2 }));
 
-        var mockTrainDiagramRepository = new Mock<ITrainDiagramRepository>();
+        var mockTrainDiagramRepository = new Mock<IDiagramTrainRepository>();
         mockTrainDiagramRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST02")).ReturnsAsync(timetable);
 
         var mockTrackCircuitDepartmentTimeRepository = new Mock<ITrackCircuitDepartmentTimeRepository>();
@@ -553,7 +553,7 @@ public class TrainServiceTest
     public async Task CalculateAndUpdateDelays_UpTrain_PassesCorrectIsUpParameter()
     {
         // Arrange
-        var diaId = 1;
+        var diaId = 1UL;
         var trainNumber = "9002"; // 偶数 = 上り
         var carCount = 6;
         var trackCircuitDataList = new List<TrackCircuitData>
@@ -562,7 +562,7 @@ public class TrainServiceTest
         };
 
         var trackCircuit = new TrackCircuit { Id = 100, Name = "TC1", StationId = "ST01", StationIdForDelay = "ST01" };
-        var timetable = new TrainDiagramTimetable
+        var timetable = new DiagramTrainTimetable
         {
             Id = 1, Index = 2, StationId = "ST01",
             ArrivalTime = TimeSpan.FromHours(16),
@@ -575,7 +575,7 @@ public class TrainServiceTest
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
 
-        var mockTrainDiagramRepository = new Mock<ITrainDiagramRepository>();
+        var mockTrainDiagramRepository = new Mock<IDiagramTrainRepository>();
         mockTrainDiagramRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
 
         var mockTrackCircuitDepartmentTimeRepository = new Mock<ITrackCircuitDepartmentTimeRepository>();
@@ -604,7 +604,7 @@ public class TrainServiceTest
     public async Task CalculateAndUpdateDelays_DownTrain_PassesCorrectIsUpParameter()
     {
         // Arrange
-        var diaId = 1;
+        var diaId = 1UL;
         var trainNumber = "9003"; // 奇数 = 下り
         var carCount = 6;
         var trackCircuitDataList = new List<TrackCircuitData>
@@ -613,7 +613,7 @@ public class TrainServiceTest
         };
 
         var trackCircuit = new TrackCircuit { Id = 100, Name = "TC1", StationId = "ST01", StationIdForDelay = "ST01" };
-        var timetable = new TrainDiagramTimetable
+        var timetable = new DiagramTrainTimetable
         {
             Id = 1, Index = 2, StationId = "ST01",
             ArrivalTime = TimeSpan.FromHours(16),
@@ -626,7 +626,7 @@ public class TrainServiceTest
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
 
-        var mockTrainDiagramRepository = new Mock<ITrainDiagramRepository>();
+        var mockTrainDiagramRepository = new Mock<IDiagramTrainRepository>();
         mockTrainDiagramRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
 
         var mockTrackCircuitDepartmentTimeRepository = new Mock<ITrackCircuitDepartmentTimeRepository>();
@@ -655,7 +655,7 @@ public class TrainServiceTest
     public async Task CalculateAndUpdateDelays_EmptyTrackCircuitList_CompletesWithoutError()
     {
         // Arrange
-        var diaId = 1;
+        var diaId = 1UL;
         var trainNumber = "1001";
         var carCount = 8;
         var trackCircuitDataList = new List<TrackCircuitData>(); // 空リスト
@@ -678,7 +678,7 @@ public class TrainServiceTest
     public async Task CalculateAndUpdateDelays_MidnightCrossingCurrentAfter_CalculatesDelayCorrectly()
     {
         // Arrange
-        var diaId = 1;
+        var diaId = 1UL;
         var trainNumber = "1102"; // 偶数 = 上り
         var carCount = 8;
         var trackCircuitDataList = new List<TrackCircuitData>
@@ -687,7 +687,7 @@ public class TrainServiceTest
         };
 
         var trackCircuit = new TrackCircuit { Id = 100, Name = "TC1", StationId = "ST01", StationIdForDelay = "ST01" };
-        var timetable = new TrainDiagramTimetable
+        var timetable = new DiagramTrainTimetable
         {
             Id = 1, Index = 2, StationId = "ST01",
             ArrivalTime = TimeSpan.FromHours(23).Add(TimeSpan.FromMinutes(58)),
@@ -700,7 +700,7 @@ public class TrainServiceTest
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
 
-        var mockTrainDiagramRepository = new Mock<ITrainDiagramRepository>();
+        var mockTrainDiagramRepository = new Mock<IDiagramTrainRepository>();
         mockTrainDiagramRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
 
         var mockTrackCircuitDepartmentTimeRepository = new Mock<ITrackCircuitDepartmentTimeRepository>();
@@ -735,7 +735,7 @@ public class TrainServiceTest
     public async Task CalculateAndUpdateDelays_MidnightCrossingCurrentBefore_CalculatesDelayCorrectly()
     {
         // Arrange
-        var diaId = 1;
+        var diaId = 1UL;
         var trainNumber = "1204"; // 偶数 = 上り
         var carCount = 8;
         var trackCircuitDataList = new List<TrackCircuitData>
@@ -744,7 +744,7 @@ public class TrainServiceTest
         };
 
         var trackCircuit = new TrackCircuit { Id = 100, Name = "TC1", StationId = "ST01", StationIdForDelay = "ST01" };
-        var timetable = new TrainDiagramTimetable
+        var timetable = new DiagramTrainTimetable
         {
             Id = 1, Index = 2, StationId = "ST01",
             ArrivalTime = TimeSpan.FromMinutes(2),
@@ -757,7 +757,7 @@ public class TrainServiceTest
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
 
-        var mockTrainDiagramRepository = new Mock<ITrainDiagramRepository>();
+        var mockTrainDiagramRepository = new Mock<IDiagramTrainRepository>();
         mockTrainDiagramRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
 
         var mockTrackCircuitDepartmentTimeRepository = new Mock<ITrackCircuitDepartmentTimeRepository>();
@@ -792,7 +792,7 @@ public class TrainServiceTest
     public async Task CalculateAndUpdateDelays_WithPositiveTimeOffset_CalculatesDelayCorrectly()
     {
         // Arrange
-        var diaId = 1;
+        var diaId = 1UL;
         var trainNumber = "1302"; // 偶数 = 上り
         var carCount = 10;
         var trackCircuitDataList = new List<TrackCircuitData>
@@ -801,7 +801,7 @@ public class TrainServiceTest
         };
 
         var trackCircuit = new TrackCircuit { Id = 100, Name = "TC1", StationId = "ST01", StationIdForDelay = "ST01" };
-        var timetable = new TrainDiagramTimetable
+        var timetable = new DiagramTrainTimetable
         {
             Id = 1, Index = 2, StationId = "ST01",
             ArrivalTime = TimeSpan.FromHours(10),
@@ -815,7 +815,7 @@ public class TrainServiceTest
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
 
-        var mockTrainDiagramRepository = new Mock<ITrainDiagramRepository>();
+        var mockTrainDiagramRepository = new Mock<IDiagramTrainRepository>();
         mockTrainDiagramRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
 
         var mockTrackCircuitDepartmentTimeRepository = new Mock<ITrackCircuitDepartmentTimeRepository>();
@@ -844,7 +844,7 @@ public class TrainServiceTest
     public async Task CalculateAndUpdateDelays_WithNegativeTimeOffset_CalculatesDelayCorrectly()
     {
         // Arrange
-        var diaId = 1;
+        var diaId = 1UL;
         var trainNumber = "1404"; // 偶数 = 上り
         var carCount = 10;
         var trackCircuitDataList = new List<TrackCircuitData>
@@ -853,7 +853,7 @@ public class TrainServiceTest
         };
 
         var trackCircuit = new TrackCircuit { Id = 100, Name = "TC1", StationId = "ST01", StationIdForDelay = "ST01" };
-        var timetable = new TrainDiagramTimetable
+        var timetable = new DiagramTrainTimetable
         {
             Id = 1, Index = 2, StationId = "ST01",
             ArrivalTime = TimeSpan.FromHours(10),
@@ -867,7 +867,7 @@ public class TrainServiceTest
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
 
-        var mockTrainDiagramRepository = new Mock<ITrainDiagramRepository>();
+        var mockTrainDiagramRepository = new Mock<IDiagramTrainRepository>();
         mockTrainDiagramRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
 
         var mockTrackCircuitDepartmentTimeRepository = new Mock<ITrackCircuitDepartmentTimeRepository>();
@@ -896,7 +896,7 @@ public class TrainServiceTest
     public async Task CalculateAndUpdateDelays_PositiveDelayRounding_RoundsTowardZero()
     {
         // Arrange
-        var diaId = 1;
+        var diaId = 1UL;
         var trainNumber = "1502"; // 偶数 = 上り
         var carCount = 8;
         var trackCircuitDataList = new List<TrackCircuitData>
@@ -905,7 +905,7 @@ public class TrainServiceTest
         };
 
         var trackCircuit = new TrackCircuit { Id = 100, Name = "TC1", StationId = "ST01", StationIdForDelay = "ST01" };
-        var timetable = new TrainDiagramTimetable
+        var timetable = new DiagramTrainTimetable
         {
             Id = 1, Index = 2, StationId = "ST01",
             ArrivalTime = TimeSpan.FromHours(10),
@@ -919,7 +919,7 @@ public class TrainServiceTest
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
 
-        var mockTrainDiagramRepository = new Mock<ITrainDiagramRepository>();
+        var mockTrainDiagramRepository = new Mock<IDiagramTrainRepository>();
         mockTrainDiagramRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
 
         var mockTrackCircuitDepartmentTimeRepository = new Mock<ITrackCircuitDepartmentTimeRepository>();
@@ -948,7 +948,7 @@ public class TrainServiceTest
     public async Task CalculateAndUpdateDelays_NegativeDelayRounding_RoundsTowardZero()
     {
         // Arrange
-        var diaId = 1;
+        var diaId = 1UL;
         var trainNumber = "1604"; // 偶数 = 上り
         var carCount = 8;
         var trackCircuitDataList = new List<TrackCircuitData>
@@ -957,7 +957,7 @@ public class TrainServiceTest
         };
 
         var trackCircuit = new TrackCircuit { Id = 100, Name = "TC1", StationId = "ST01", StationIdForDelay = "ST01" };
-        var timetable = new TrainDiagramTimetable
+        var timetable = new DiagramTrainTimetable
         {
             Id = 1, Index = 2, StationId = "ST01",
             ArrivalTime = TimeSpan.FromHours(10),
@@ -971,7 +971,7 @@ public class TrainServiceTest
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
 
-        var mockTrainDiagramRepository = new Mock<ITrainDiagramRepository>();
+        var mockTrainDiagramRepository = new Mock<IDiagramTrainRepository>();
         mockTrainDiagramRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
 
         var mockTrackCircuitDepartmentTimeRepository = new Mock<ITrackCircuitDepartmentTimeRepository>();
@@ -1000,7 +1000,7 @@ public class TrainServiceTest
     public async Task CalculateAndUpdateDelays_PositiveDelayRoundingAlmostThreeMinutes_RoundsToTwo()
     {
         // Arrange
-        var diaId = 1;
+        var diaId = 1UL;
         var trainNumber = "1702"; // 偶数 = 上り
         var carCount = 8;
         var trackCircuitDataList = new List<TrackCircuitData>
@@ -1009,7 +1009,7 @@ public class TrainServiceTest
         };
 
         var trackCircuit = new TrackCircuit { Id = 100, Name = "TC1", StationId = "ST01", StationIdForDelay = "ST01" };
-        var timetable = new TrainDiagramTimetable
+        var timetable = new DiagramTrainTimetable
         {
             Id = 1, Index = 2, StationId = "ST01",
             ArrivalTime = TimeSpan.FromHours(10),
@@ -1023,7 +1023,7 @@ public class TrainServiceTest
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
 
-        var mockTrainDiagramRepository = new Mock<ITrainDiagramRepository>();
+        var mockTrainDiagramRepository = new Mock<IDiagramTrainRepository>();
         mockTrainDiagramRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
 
         var mockTrackCircuitDepartmentTimeRepository = new Mock<ITrackCircuitDepartmentTimeRepository>();
@@ -1052,7 +1052,7 @@ public class TrainServiceTest
     public async Task CalculateAndUpdateDelays_NegativeDelayRoundingAlmostThreeMinutes_RoundsToMinusTwo()
     {
         // Arrange
-        var diaId = 1;
+        var diaId = 1UL;
         var trainNumber = "1804"; // 偶数 = 上り
         var carCount = 8;
         var trackCircuitDataList = new List<TrackCircuitData>
@@ -1061,7 +1061,7 @@ public class TrainServiceTest
         };
 
         var trackCircuit = new TrackCircuit { Id = 100, Name = "TC1", StationId = "ST01", StationIdForDelay = "ST01" };
-        var timetable = new TrainDiagramTimetable
+        var timetable = new DiagramTrainTimetable
         {
             Id = 1, Index = 2, StationId = "ST01",
             ArrivalTime = TimeSpan.FromHours(10),
@@ -1075,7 +1075,7 @@ public class TrainServiceTest
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
 
-        var mockTrainDiagramRepository = new Mock<ITrainDiagramRepository>();
+        var mockTrainDiagramRepository = new Mock<IDiagramTrainRepository>();
         mockTrainDiagramRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
 
         var mockTrackCircuitDepartmentTimeRepository = new Mock<ITrackCircuitDepartmentTimeRepository>();

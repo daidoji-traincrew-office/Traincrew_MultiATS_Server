@@ -3,12 +3,12 @@ using System.Text.RegularExpressions;
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
+using Traincrew_MultiATS_Server.Repositories.DiagramTrain;
 using Traincrew_MultiATS_Server.Repositories.General;
 using Traincrew_MultiATS_Server.Repositories.NextSignal;
 using Traincrew_MultiATS_Server.Repositories.TrackCircuitDepartmentTime;
 using Traincrew_MultiATS_Server.Repositories.Train;
 using Traincrew_MultiATS_Server.Repositories.TrainCar;
-using Traincrew_MultiATS_Server.Repositories.TrainDiagram;
 using Traincrew_MultiATS_Server.Repositories.TrainSignalState;
 using Traincrew_MultiATS_Server.Repositories.Transaction;
 
@@ -34,7 +34,7 @@ public partial class TrainService(
     IRouteService routeService,
     ITrainRepository trainRepository,
     ITrainCarRepository trainCarRepository,
-    ITrainDiagramRepository trainDiagramRepository,
+    IDiagramTrainRepository trainDiagramRepository,
     ITransactionRepository transactionRepository,
     IBannedUserService bannedUserService,
     IGeneralRepository generalRepository,
@@ -153,7 +153,7 @@ public partial class TrainService(
         // 遅延計算
         if (decrementalTrackCircuitDataList.Count > 0 && trainState != null)
         {
-            const int diaId = 1; // 現在は固定値、将来的に複数ダイヤ対応
+            const ulong diaId = 1; // 現在は固定値、将来的に複数ダイヤ対応
             await CalculateAndUpdateDelays(
                 diaId,
                 clientTrainNumber,
@@ -388,12 +388,12 @@ public partial class TrainService(
             .GroupBy(carState => carState.TrainStateId)
             .ToDictionary(group => group.Key, group => group.ToList());
         // 列車のダイアグラムを取得
-        var trainDiagrams = await trainDiagramRepository.GetByTrainNumbers(
+        var diagramTrains = await trainDiagramRepository.GetByTrainNumbers(
             trainStates
                 .Select(carState => carState.TrainNumber)
                 .ToHashSet());
         // 列車番号ごとのダイアグラム
-        var trainDiagramsByTrainNumber = trainDiagrams.ToDictionary(td => td.TrainNumber, td => td);
+        var trainDiagramsByTrainNumber = diagramTrains.ToDictionary(dt => dt.TrainNumber, dt => dt);
 
         // 列車情報と車両情報を結合
         return trainStates
@@ -405,8 +405,8 @@ public partial class TrainService(
                         .GetValueOrDefault(trainState.Id, [])
                         .Select(ToCarState)
                         .ToList();
-                    var trainDiagram = trainDiagramsByTrainNumber.GetValueOrDefault(trainState.TrainNumber);
-                    return ToTrainInfo(trainState, carStates, trainDiagram);
+                    var diagramTrain = trainDiagramsByTrainNumber.GetValueOrDefault(trainState.TrainNumber);
+                    return ToTrainInfo(trainState, carStates, diagramTrain);
                 });
     }
 
@@ -468,14 +468,14 @@ public partial class TrainService(
     // TrainState新規書き込み
     private async Task<TrainState> CreateTrainState(AtsToServerData clientData, ulong driverId)
     {
-        var trainDiagram = await trainDiagramRepository.GetByTrainNumber(clientData.DiaName);
+        var diagramTrain = await trainDiagramRepository.GetByTrainNumber(clientData.DiaName);
 
         var trainState = new TrainState
         {
             TrainNumber = clientData.DiaName,
             DiaNumber = GetDiaNumberFromTrainNumber(clientData.DiaName),
-            FromStationId = trainDiagram?.FromStationId ?? "TH00",
-            ToStationId = trainDiagram?.ToStationId ?? "TH00",
+            FromStationId = diagramTrain?.FromStationId ?? "TH00",
+            ToStationId = diagramTrain?.ToStationId ?? "TH00",
             Delay = 0, // 必要に応じて設定
             DriverId = driverId
         };
@@ -489,10 +489,10 @@ public partial class TrainService(
     /// </summary>
     private async Task UpdateTrainState(TrainState trainState)
     {
-        var trainDiagram = await trainDiagramRepository.GetByTrainNumber(trainState.TrainNumber);
+        var diagramTrain = await trainDiagramRepository.GetByTrainNumber(trainState.TrainNumber);
         // 列車のダイアグラム情報を更新
-        trainState.FromStationId = trainDiagram?.FromStationId ?? "TH00";
-        trainState.ToStationId = trainDiagram?.ToStationId ?? "TH00";
+        trainState.FromStationId = diagramTrain?.FromStationId ?? "TH00";
+        trainState.ToStationId = diagramTrain?.ToStationId ?? "TH00";
         // 列車情報を更新
         await trainRepository.Update(trainState);
     }
@@ -573,15 +573,15 @@ public partial class TrainService(
         return evenNumBody / 3000 * 100 + evenNumBody % 100;
     }
 
-    private static TrainInfo ToTrainInfo(TrainState trainState, List<CarState> carStates, TrainDiagram? trainDiagram)
+    private static TrainInfo ToTrainInfo(TrainState trainState, List<CarState> carStates, DiagramTrain? diagramTrain)
     {
         return new()
         {
             Name = trainState.TrainNumber,
             CarStates = carStates,
-            TrainClass = (int)(trainDiagram?.TrainTypeId ?? 0),
-            FromStation = trainDiagram?.FromStationId ?? "TH00",
-            DestinationStation = trainDiagram?.ToStationId ?? "TH00",
+            TrainClass = (int)(diagramTrain?.TrainTypeId ?? 0),
+            FromStation = diagramTrain?.FromStationId ?? "TH00",
+            DestinationStation = diagramTrain?.ToStationId ?? "TH00",
             Delay = trainState.Delay
         };
     }
@@ -688,7 +688,7 @@ public partial class TrainService(
     /// <param name="carCount">車両両数</param>
     /// <param name="decrementalTrackCircuitDataList">在線終了軌道回路リスト</param>
     public async Task CalculateAndUpdateDelays(
-        int diaId,
+        ulong diaId,
         string trainNumber,
         int carCount,
         List<TrackCircuitData> decrementalTrackCircuitDataList)
