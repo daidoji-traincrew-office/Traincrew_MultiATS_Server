@@ -150,7 +150,7 @@ public partial class TrainService(
 
         await transaction.CommitAsync();
 
-        if (decrementalTrackCircuitDataList.Count > 0 && trainState != null)
+        if (decrementalTrackCircuitDataList.Count > 0)
         {
             var diaId = await serverService.GetSelectedDiagramIdAsync();
             if (diaId.HasValue)
@@ -700,7 +700,10 @@ public partial class TrainService(
         var trackCircuits = await trackCircuitService.GetTrackCircuitsByNames(trackCircuitNames);
 
         // 駅軌道回路のみフィルタ（StationIdForDelayが設定されている軌道回路）
-        var stationTrackCircuits = trackCircuits.Where(tc => tc.StationIdForDelay != null).ToList();
+        var stationTrackCircuits = trackCircuits
+            .Where(tc => tc.StationIdForDelay != null)
+            .Select(tc => (TrackCircuit: tc, StationId: tc.StationIdForDelay!))
+            .ToList();
 
         // 上り下り判定
         var isUp = IsTrainUpOrDown(trainNumber);
@@ -712,11 +715,11 @@ public partial class TrainService(
         var timeOffset = await serverService.GetTimeOffsetAsync();
 
         // 各駅軌道回路に対して遅延を計算
-        foreach (var trackCircuit in stationTrackCircuits)
+        foreach (var (trackCircuit, stationId) in stationTrackCircuits)
         {
             // 時刻表を取得
             var timetable = await trainDiagramRepository.GetTimetableByTrainNumberStationIdAndDiaId(
-                diaId, trainNumber, trackCircuit.StationIdForDelay);
+                diaId, trainNumber, stationId);
 
             if (timetable?.DepartureTime == null)
             {
