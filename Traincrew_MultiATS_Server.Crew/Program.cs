@@ -568,6 +568,7 @@ public class Program
             .AddScoped<IRendoService, RendoService>()
             .AddScoped<IRouteService, RouteService>()
             .AddScoped<IServerService, ServerService>()
+            .AddScoped<IDiagramService, DiagramService>()
             .AddScoped<ISignalService, SignalService>()
             .AddScoped<IStationService, StationService>()
             .AddScoped<ISwitchingMachineService, SwitchingMachineService>()
