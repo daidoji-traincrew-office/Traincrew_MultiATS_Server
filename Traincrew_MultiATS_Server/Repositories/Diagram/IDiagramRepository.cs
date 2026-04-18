@@ -4,4 +4,5 @@ public interface IDiagramRepository
 {
     Task<Dictionary<(string Name, string TimeRange), Models.Diagram>> GetAllForNameAndTimeRange(
         CancellationToken cancellationToken = default);
+    Task<List<Models.Diagram>> GetAllAsync(CancellationToken cancellationToken = default);
 }

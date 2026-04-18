@@ -11,4 +11,9 @@ public class DiagramRepository(ApplicationDbContext context) : IDiagramRepositor
         return await context.Diagrams
             .ToDictionaryAsync(d => (d.Name, d.TimeRange), cancellationToken);
     }
+
+    public async Task<List<Models.Diagram>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        return await context.Diagrams.ToListAsync(cancellationToken);
+    }
 }
