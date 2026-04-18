@@ -23,6 +23,7 @@ using Traincrew_MultiATS_Server.Initialization.DbInitializers;
 using Traincrew_MultiATS_Server.Initialization.JsonLoaders;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.DestinationButton;
+using Traincrew_MultiATS_Server.Repositories.Diagram;
 using Traincrew_MultiATS_Server.Repositories.DiagramTrain;
 using Traincrew_MultiATS_Server.Repositories.DirectionRoute;
 using Traincrew_MultiATS_Server.Repositories.DirectionSelfControlLever;
@@ -495,6 +496,7 @@ public class Program
             .AddScoped<SignalCsvLoader>()
             // JSON Loaders
             .AddScoped<TtcDataJsonLoader>()
+            .AddScoped<DiagramJsonLoader>()
             // DB Initializers
             .AddScoped<StationDbInitializer>()
             .AddScoped<TrackCircuitDbInitializer>()
@@ -508,6 +510,7 @@ public class Program
             .AddScoped<SignalDbInitializer>()
             .AddScoped<InterlockingObjectDbInitializer>()
             .AddScoped<SwitchingMachineRouteDbInitializer>()
+            .AddScoped<DiagramDbInitializer>()
             // Orchestrator
             .AddScoped<DatabaseInitializationOrchestrator>()
             .AddScoped<IDateTimeRepository, DateTimeRepository>()
@@ -543,6 +546,7 @@ public class Program
             .AddScoped<ITrackCircuitSignalRepository, TrackCircuitSignalRepository>()
             .AddScoped<ITrainRepository, TrainRepository>()
             .AddScoped<ITrainCarRepository, TrainCarRepository>()
+            .AddScoped<IDiagramRepository, DiagramRepository>()
             .AddScoped<IDiagramTrainRepository, DiagramTrainRepository>()
             .AddScoped<ITrainTypeRepository, TrainTypeRepository>()
             .AddScoped<ITrainSignalStateRepository, TrainSignalStateRepository>()
