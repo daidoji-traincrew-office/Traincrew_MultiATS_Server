@@ -690,7 +690,8 @@ CREATE TABLE server_state
     time_offset         INTEGER     NOT NULL DEFAULT 0,
     switch_move_time    INTEGER NOT NULL DEFAULT 5000,  -- 転轍機の転換にかかる時間(ms)
     switch_return_time  INTEGER NOT NULL DEFAULT 500,   -- 転轍器が転換中に転換方向を変えるのにかかる時間(ms)
-    use_one_second_relay BOOLEAN NOT NULL DEFAULT false -- 接近鎖錠の時素に1秒リレーを使うかどうか
+    use_one_second_relay BOOLEAN NOT NULL DEFAULT false, -- 接近鎖錠の時素に1秒リレーを使うかどうか
+    selected_diagram_id BIGINT NULL REFERENCES diagram(id) ON DELETE SET NULL
 );
 
 -- ユーザー接続拒否状態テーブル
