@@ -20,6 +20,9 @@ ALTER INDEX "idx_train_diagram_timetable_train_diagram_id_index" RENAME TO "idx_
 -- Change dia_id column type from INT to BIGINT
 ALTER TABLE "diagram_train" ALTER COLUMN "dia_id" TYPE BIGINT;
 
+-- 既存データは新しいdiagramテーブルを参照できないためクリアする（サーバー起動時にJSONから再投入される）
+TRUNCATE TABLE "diagram_train" CASCADE;
+
 -- Add FK from diagram_train.dia_id to diagram.id
 ALTER TABLE "diagram_train" ADD CONSTRAINT "diagram_train_dia_id_fkey" FOREIGN KEY ("dia_id") REFERENCES "diagram" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
 
