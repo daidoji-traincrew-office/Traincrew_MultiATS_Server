@@ -274,6 +274,13 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasIndex(tcdt => new { tcdt.TrackCircuitId, tcdt.CarCount, tcdt.IsUp })
             .IsUnique();
 
+        modelBuilder.Entity<ServerState>()
+            .HasOne(ss => ss.SelectedDiagram)
+            .WithMany()
+            .HasForeignKey(ss => ss.SelectedDiagramId)
+            .HasPrincipalKey(d => d.Id)
+            .IsRequired(false);
+
         // Convert all column names to snake_case
         foreach (var entity in modelBuilder.Model.GetEntityTypes())
         {
