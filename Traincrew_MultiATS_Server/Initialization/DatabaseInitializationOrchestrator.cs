@@ -33,11 +33,13 @@ public class DatabaseInitializationOrchestrator(
     SignalTypeCsvLoader signalTypeCsvLoader,
     RendoTableCsvLoader rendoTableCsvLoader,
     SignalCsvLoader signalCsvLoader,
+    TrainTypeCsvLoader trainTypeCsvLoader,
     DiagramJsonLoader diagramJsonLoader,
     DiagramDbInitializer diagramDbInitializer,
     StationDbInitializer stationDbInitializer,
     TrackCircuitDbInitializer trackCircuitDbInitializer,
     SignalTypeDbInitializer signalTypeDbInitializer,
+    TrainDbInitializer trainDbInitializer,
     OperationNotificationDisplayDbInitializer operationNotificationDisplayDbInitializer,
     RouteLockTrackCircuitDbInitializer routeLockTrackCircuitDbInitializer,
     ServerStatusDbInitializer serverStatusDbInitializer,
@@ -71,6 +73,10 @@ public class DatabaseInitializationOrchestrator(
 
         // Phase 6: SignalTypeDbInitializer - 信号タイプの初期化
         await signalTypeDbInitializer.InitializeSignalTypesAsync(signalTypeList, cancellationToken);
+
+        // Phase 7: TrainTypeCsvLoader - 列車種別データの読み込みと初期化
+        var trainTypeList = await trainTypeCsvLoader.LoadAsync(cancellationToken);
+        await trainDbInitializer.InitializeTrainTypesAsync(trainTypeList, cancellationToken);
 
         // Phase 9: DiagramJSON形式のダイヤ初期化
         var diagramJsonList = await diagramJsonLoader.LoadAllAsync(cancellationToken);
