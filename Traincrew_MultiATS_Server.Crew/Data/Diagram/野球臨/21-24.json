@@ -9,10 +9,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "準急",
-      "originStationID": "TH67",
-      "originStationName": "新野崎",
-      "destinationStationID": "TH76",
-      "destinationStationName": "館浜",
+      "originStationID": "TH76",
+      "originStationName": "館浜",
+      "destinationStationID": "TH67",
+      "destinationStationName": "新野崎",
       "staList": [
         {
           "stationID": "TH67",
@@ -110,10 +110,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時回送",
-      "originStationID": "TH75",
-      "originStationName": "駒野",
-      "destinationStationID": "TH76",
-      "destinationStationName": "館浜",
+      "originStationID": "TH76",
+      "originStationName": "館浜",
+      "destinationStationID": "TH75",
+      "destinationStationName": "駒野",
       "staList": [
         {
           "stationID": "TH75",
@@ -146,10 +146,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "普通",
-      "originStationID": "TH67",
-      "originStationName": "新野崎",
-      "destinationStationID": "TH71",
-      "destinationStationName": "津崎",
+      "originStationID": "TH71",
+      "originStationName": "津崎",
+      "destinationStationID": "TH67",
+      "destinationStationName": "新野崎",
       "staList": [
         {
           "stationID": "TH67",
@@ -227,10 +227,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "準急",
-      "originStationID": "TH65",
-      "originStationName": "大道寺",
-      "destinationStationID": "TH76",
-      "destinationStationName": "館浜",
+      "originStationID": "TH76",
+      "originStationName": "館浜",
+      "destinationStationID": "TH65",
+      "destinationStationName": "大道寺",
       "staList": [
         {
           "stationID": "TH65",
@@ -368,10 +368,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "普通",
-      "originStationID": "TH71",
-      "originStationName": "津崎",
-      "destinationStationID": "TH76",
-      "destinationStationName": "館浜",
+      "originStationID": "TH76",
+      "originStationName": "館浜",
+      "destinationStationID": "TH71",
+      "destinationStationName": "津崎",
       "staList": [
         {
           "stationID": "TH71",
@@ -464,10 +464,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時準急",
-      "originStationID": "TH66S",
-      "originStationName": "江ノ原信号場",
-      "destinationStationID": "TH76",
-      "destinationStationName": "館浜",
+      "originStationID": "TH76",
+      "originStationName": "館浜",
+      "destinationStationID": "TH66S",
+      "destinationStationName": "江ノ原信号場",
       "staList": [
         {
           "stationID": "TH66S",
@@ -605,10 +605,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "急行",
-      "originStationID": "TH61",
-      "originStationName": "日野森",
-      "destinationStationID": "TH67",
-      "destinationStationName": "新野崎",
+      "originStationID": "TH67",
+      "originStationName": "新野崎",
+      "destinationStationID": "TH61",
+      "destinationStationName": "日野森",
       "staList": [
         {
           "stationID": "TH61",
@@ -726,10 +726,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "特急",
-      "originStationID": "TH58",
-      "originStationName": "赤山町",
-      "destinationStationID": "TH76",
-      "destinationStationName": "館浜",
+      "originStationID": "TH76",
+      "originStationName": "館浜",
+      "destinationStationID": "TH58",
+      "destinationStationName": "赤山町",
       "staList": [
         {
           "stationID": "TH58",
@@ -912,10 +912,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "急行",
-      "originStationID": "TH67",
-      "originStationName": "新野崎",
-      "destinationStationID": "TH76",
-      "destinationStationName": "館浜",
+      "originStationID": "TH76",
+      "originStationName": "館浜",
+      "destinationStationID": "TH67",
+      "destinationStationName": "新野崎",
       "staList": [
         {
           "stationID": "TH67",
@@ -1003,10 +1003,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "準急",
-      "originStationID": "TH65",
-      "originStationName": "大道寺",
-      "destinationStationID": "TH76",
-      "destinationStationName": "館浜",
+      "originStationID": "TH76",
+      "originStationName": "館浜",
+      "destinationStationID": "TH65",
+      "destinationStationName": "大道寺",
       "staList": [
         {
           "stationID": "TH65",
@@ -1144,10 +1144,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時回送",
-      "originStationID": "TH75",
-      "originStationName": "駒野",
-      "destinationStationID": "TH76",
-      "destinationStationName": "館浜",
+      "originStationID": "TH76",
+      "originStationName": "館浜",
+      "destinationStationID": "TH75",
+      "destinationStationName": "駒野",
       "staList": [
         {
           "stationID": "TH75",
@@ -1180,10 +1180,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "普通",
-      "originStationID": "TH67",
-      "originStationName": "新野崎",
-      "destinationStationID": "TH76",
-      "destinationStationName": "館浜",
+      "originStationID": "TH76",
+      "originStationName": "館浜",
+      "destinationStationID": "TH67",
+      "destinationStationName": "新野崎",
       "staList": [
         {
           "stationID": "TH67",
@@ -1336,10 +1336,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時普通",
-      "originStationID": "TH66S",
-      "originStationName": "江ノ原信号場",
-      "destinationStationID": "TH71",
-      "destinationStationName": "津崎",
+      "originStationID": "TH71",
+      "originStationName": "津崎",
+      "destinationStationID": "TH66S",
+      "destinationStationName": "江ノ原信号場",
       "staList": [
         {
           "stationID": "TH66S",
@@ -1447,10 +1447,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時準急",
-      "originStationID": "TH66S",
-      "originStationName": "江ノ原信号場",
-      "destinationStationID": "TH76",
-      "destinationStationName": "館浜",
+      "originStationID": "TH76",
+      "originStationName": "館浜",
+      "destinationStationID": "TH66S",
+      "destinationStationName": "江ノ原信号場",
       "staList": [
         {
           "stationID": "TH66S",
@@ -1588,10 +1588,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時普通",
-      "originStationID": "TH71",
-      "originStationName": "津崎",
-      "destinationStationID": "TH76",
-      "destinationStationName": "館浜",
+      "originStationID": "TH76",
+      "originStationName": "館浜",
+      "destinationStationID": "TH71",
+      "destinationStationName": "津崎",
       "staList": [
         {
           "stationID": "TH71",
@@ -1684,10 +1684,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "普通",
-      "originStationID": "TH67",
-      "originStationName": "新野崎",
-      "destinationStationID": "TH71",
-      "destinationStationName": "津崎",
+      "originStationID": "TH71",
+      "originStationName": "津崎",
+      "destinationStationID": "TH67",
+      "destinationStationName": "新野崎",
       "staList": [
         {
           "stationID": "TH67",
@@ -1765,10 +1765,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時普通",
-      "originStationID": "TH66S",
-      "originStationName": "江ノ原信号場",
-      "destinationStationID": "TH67",
-      "destinationStationName": "新野崎",
+      "originStationID": "TH67",
+      "originStationName": "新野崎",
+      "destinationStationID": "TH66S",
+      "destinationStationName": "江ノ原信号場",
       "staList": [
         {
           "stationID": "TH66S",
@@ -1816,10 +1816,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "普通",
-      "originStationID": "TH58",
-      "originStationName": "赤山町",
-      "destinationStationID": "TH65",
-      "destinationStationName": "大道寺",
+      "originStationID": "TH65",
+      "originStationName": "大道寺",
+      "destinationStationID": "TH58",
+      "destinationStationName": "赤山町",
       "staList": [
         {
           "stationID": "TH58",
@@ -1942,10 +1942,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "準急",
-      "originStationID": "TH65",
-      "originStationName": "大道寺",
-      "destinationStationID": "TH76",
-      "destinationStationName": "館浜",
+      "originStationID": "TH76",
+      "originStationName": "館浜",
+      "destinationStationID": "TH65",
+      "destinationStationName": "大道寺",
       "staList": [
         {
           "stationID": "TH65",
@@ -2083,10 +2083,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "普通",
-      "originStationID": "TH71",
-      "originStationName": "津崎",
-      "destinationStationID": "TH76",
-      "destinationStationName": "館浜",
+      "originStationID": "TH76",
+      "originStationName": "館浜",
+      "destinationStationID": "TH71",
+      "destinationStationName": "津崎",
       "staList": [
         {
           "stationID": "TH71",
@@ -2179,10 +2179,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時普通",
-      "originStationID": "TH67",
-      "originStationName": "新野崎",
-      "destinationStationID": "TH71",
-      "destinationStationName": "津崎",
+      "originStationID": "TH71",
+      "originStationName": "津崎",
+      "destinationStationID": "TH67",
+      "destinationStationName": "新野崎",
       "staList": [
         {
           "stationID": "TH67",
@@ -2260,10 +2260,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "普通",
-      "originStationID": "TH65",
-      "originStationName": "大道寺",
-      "destinationStationID": "TH66S",
-      "destinationStationName": "江ノ原信号場",
+      "originStationID": "TH66S",
+      "originStationName": "江ノ原信号場",
+      "destinationStationID": "TH65",
+      "destinationStationName": "大道寺",
       "staList": [
         {
           "stationID": "TH65",
@@ -2296,10 +2296,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "普通",
-      "originStationID": "TH61",
-      "originStationName": "日野森",
-      "destinationStationID": "TH65",
-      "destinationStationName": "大道寺",
+      "originStationID": "TH65",
+      "originStationName": "大道寺",
+      "destinationStationID": "TH61",
+      "destinationStationName": "日野森",
       "staList": [
         {
           "stationID": "TH61",
@@ -2377,10 +2377,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "特急",
-      "originStationID": "TH58",
-      "originStationName": "赤山町",
-      "destinationStationID": "TH76",
-      "destinationStationName": "館浜",
+      "originStationID": "TH76",
+      "originStationName": "館浜",
+      "destinationStationID": "TH58",
+      "destinationStationName": "赤山町",
       "staList": [
         {
           "stationID": "TH58",
@@ -2563,10 +2563,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時普通",
-      "originStationID": "TH71",
-      "originStationName": "津崎",
-      "destinationStationID": "TH76",
-      "destinationStationName": "館浜",
+      "originStationID": "TH76",
+      "originStationName": "館浜",
+      "destinationStationID": "TH71",
+      "destinationStationName": "津崎",
       "staList": [
         {
           "stationID": "TH71",
@@ -2659,10 +2659,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "普通",
-      "originStationID": "TH65",
-      "originStationName": "大道寺",
-      "destinationStationID": "TH76",
-      "destinationStationName": "館浜",
+      "originStationID": "TH76",
+      "originStationName": "館浜",
+      "destinationStationID": "TH65",
+      "destinationStationName": "大道寺",
       "staList": [
         {
           "stationID": "TH65",
@@ -2855,10 +2855,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時普通",
-      "originStationID": "TH66S",
-      "originStationName": "江ノ原信号場",
-      "destinationStationID": "TH71",
-      "destinationStationName": "津崎",
+      "originStationID": "TH71",
+      "originStationName": "津崎",
+      "destinationStationID": "TH66S",
+      "destinationStationName": "江ノ原信号場",
       "staList": [
         {
           "stationID": "TH66S",
@@ -2966,10 +2966,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時準急",
-      "originStationID": "TH66S",
-      "originStationName": "江ノ原信号場",
-      "destinationStationID": "TH67",
-      "destinationStationName": "新野崎",
+      "originStationID": "TH67",
+      "originStationName": "新野崎",
+      "destinationStationID": "TH66S",
+      "destinationStationName": "江ノ原信号場",
       "staList": [
         {
           "stationID": "TH66S",
@@ -3017,10 +3017,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "準急",
-      "originStationID": "TH65",
-      "originStationName": "大道寺",
-      "destinationStationID": "TH76",
-      "destinationStationName": "館浜",
+      "originStationID": "TH76",
+      "originStationName": "館浜",
+      "destinationStationID": "TH65",
+      "destinationStationName": "大道寺",
       "staList": [
         {
           "stationID": "TH65",
@@ -3158,10 +3158,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時回送",
-      "originStationID": "TH75",
-      "originStationName": "駒野",
-      "destinationStationID": "TH76",
-      "destinationStationName": "館浜",
+      "originStationID": "TH76",
+      "originStationName": "館浜",
+      "destinationStationID": "TH75",
+      "destinationStationName": "駒野",
       "staList": [
         {
           "stationID": "TH75",
@@ -3194,10 +3194,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時普通",
-      "originStationID": "TH71",
-      "originStationName": "津崎",
-      "destinationStationID": "TH76",
-      "destinationStationName": "館浜",
+      "originStationID": "TH76",
+      "originStationName": "館浜",
+      "destinationStationID": "TH71",
+      "destinationStationName": "津崎",
       "staList": [
         {
           "stationID": "TH71",
@@ -3290,10 +3290,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時準急",
-      "originStationID": "TH67",
-      "originStationName": "新野崎",
-      "destinationStationID": "TH76",
-      "destinationStationName": "館浜",
+      "originStationID": "TH76",
+      "originStationName": "館浜",
+      "destinationStationID": "TH67",
+      "destinationStationName": "新野崎",
       "staList": [
         {
           "stationID": "TH67",
@@ -3401,10 +3401,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "普通",
-      "originStationID": "TH67",
-      "originStationName": "新野崎",
-      "destinationStationID": "TH71",
-      "destinationStationName": "津崎",
+      "originStationID": "TH71",
+      "originStationName": "津崎",
+      "destinationStationID": "TH67",
+      "destinationStationName": "新野崎",
       "staList": [
         {
           "stationID": "TH67",
@@ -3482,10 +3482,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時普通",
-      "originStationID": "TH66S",
-      "originStationName": "江ノ原信号場",
-      "destinationStationID": "TH67",
-      "destinationStationName": "新野崎",
+      "originStationID": "TH67",
+      "originStationName": "新野崎",
+      "destinationStationID": "TH66S",
+      "destinationStationName": "江ノ原信号場",
       "staList": [
         {
           "stationID": "TH66S",
@@ -3533,10 +3533,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "普通",
-      "originStationID": "TH58",
-      "originStationName": "赤山町",
-      "destinationStationID": "TH66S",
-      "destinationStationName": "江ノ原信号場",
+      "originStationID": "TH66S",
+      "originStationName": "江ノ原信号場",
+      "destinationStationID": "TH58",
+      "destinationStationName": "赤山町",
       "staList": [
         {
           "stationID": "TH58",
@@ -3674,10 +3674,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "特急",
-      "originStationID": "TH58",
-      "originStationName": "赤山町",
-      "destinationStationID": "TH76",
-      "destinationStationName": "館浜",
+      "originStationID": "TH76",
+      "originStationName": "館浜",
+      "destinationStationID": "TH58",
+      "destinationStationName": "赤山町",
       "staList": [
         {
           "stationID": "TH58",
@@ -3860,10 +3860,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "普通",
-      "originStationID": "TH71",
-      "originStationName": "津崎",
-      "destinationStationID": "TH76",
-      "destinationStationName": "館浜",
+      "originStationID": "TH76",
+      "originStationName": "館浜",
+      "destinationStationID": "TH71",
+      "destinationStationName": "津崎",
       "staList": [
         {
           "stationID": "TH71",
@@ -3956,10 +3956,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時普通",
-      "originStationID": "TH67",
-      "originStationName": "新野崎",
-      "destinationStationID": "TH71",
-      "destinationStationName": "津崎",
+      "originStationID": "TH71",
+      "originStationName": "津崎",
+      "destinationStationID": "TH67",
+      "destinationStationName": "新野崎",
       "staList": [
         {
           "stationID": "TH67",
@@ -4037,10 +4037,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "準急",
-      "originStationID": "TH65",
-      "originStationName": "大道寺",
-      "destinationStationID": "TH76",
-      "destinationStationName": "館浜",
+      "originStationID": "TH76",
+      "originStationName": "館浜",
+      "destinationStationID": "TH65",
+      "destinationStationName": "大道寺",
       "staList": [
         {
           "stationID": "TH65",
@@ -4178,10 +4178,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時回送",
-      "originStationID": "TH75",
-      "originStationName": "駒野",
-      "destinationStationID": "TH76",
-      "destinationStationName": "館浜",
+      "originStationID": "TH76",
+      "originStationName": "館浜",
+      "destinationStationID": "TH75",
+      "destinationStationName": "駒野",
       "staList": [
         {
           "stationID": "TH75",
@@ -4214,10 +4214,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時普通",
-      "originStationID": "TH71",
-      "originStationName": "津崎",
-      "destinationStationID": "TH76",
-      "destinationStationName": "館浜",
+      "originStationID": "TH76",
+      "originStationName": "館浜",
+      "destinationStationID": "TH71",
+      "destinationStationName": "津崎",
       "staList": [
         {
           "stationID": "TH71",
@@ -4310,10 +4310,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時準急",
-      "originStationID": "TH66S",
-      "originStationName": "江ノ原信号場",
-      "destinationStationID": "TH76",
-      "destinationStationName": "館浜",
+      "originStationID": "TH76",
+      "originStationName": "館浜",
+      "destinationStationID": "TH66S",
+      "destinationStationName": "江ノ原信号場",
       "staList": [
         {
           "stationID": "TH66S",
@@ -4451,10 +4451,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "普通",
-      "originStationID": "TH67",
-      "originStationName": "新野崎",
-      "destinationStationID": "TH71",
-      "destinationStationName": "津崎",
+      "originStationID": "TH71",
+      "originStationName": "津崎",
+      "destinationStationID": "TH67",
+      "destinationStationName": "新野崎",
       "staList": [
         {
           "stationID": "TH67",
@@ -4532,10 +4532,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時準急",
-      "originStationID": "TH66S",
-      "originStationName": "江ノ原信号場",
-      "destinationStationID": "TH67",
-      "destinationStationName": "新野崎",
+      "originStationID": "TH67",
+      "originStationName": "新野崎",
+      "destinationStationID": "TH66S",
+      "destinationStationName": "江ノ原信号場",
       "staList": [
         {
           "stationID": "TH66S",
@@ -4583,10 +4583,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "準急",
-      "originStationID": "TH58",
-      "originStationName": "赤山町",
-      "destinationStationID": "TH76",
-      "destinationStationName": "館浜",
+      "originStationID": "TH76",
+      "originStationName": "館浜",
+      "destinationStationID": "TH58",
+      "destinationStationName": "赤山町",
       "staList": [
         {
           "stationID": "TH58",
@@ -4829,10 +4829,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "普通",
-      "originStationID": "TH71",
-      "originStationName": "津崎",
-      "destinationStationID": "TH76",
-      "destinationStationName": "館浜",
+      "originStationID": "TH76",
+      "originStationName": "館浜",
+      "destinationStationID": "TH71",
+      "destinationStationName": "津崎",
       "staList": [
         {
           "stationID": "TH71",
@@ -4925,10 +4925,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時準急",
-      "originStationID": "TH67",
-      "originStationName": "新野崎",
-      "destinationStationID": "TH76",
-      "destinationStationName": "館浜",
+      "originStationID": "TH76",
+      "originStationName": "館浜",
+      "destinationStationID": "TH67",
+      "destinationStationName": "新野崎",
       "staList": [
         {
           "stationID": "TH67",
@@ -5036,10 +5036,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "回送",
-      "originStationID": "TH65",
-      "originStationName": "大道寺",
-      "destinationStationID": "TH66S",
-      "destinationStationName": "江ノ原信号場",
+      "originStationID": "TH66S",
+      "originStationName": "江ノ原信号場",
+      "destinationStationID": "TH65",
+      "destinationStationName": "大道寺",
       "staList": [
         {
           "stationID": "TH65",
@@ -5072,10 +5072,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時普通",
-      "originStationID": "TH66S",
-      "originStationName": "江ノ原信号場",
-      "destinationStationID": "TH71",
-      "destinationStationName": "津崎",
+      "originStationID": "TH71",
+      "originStationName": "津崎",
+      "destinationStationID": "TH66S",
+      "destinationStationName": "江ノ原信号場",
       "staList": [
         {
           "stationID": "TH66S",
@@ -5183,10 +5183,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時準急",
-      "originStationID": "TH66S",
-      "originStationName": "江ノ原信号場",
-      "destinationStationID": "TH67",
-      "destinationStationName": "新野崎",
+      "originStationID": "TH67",
+      "originStationName": "新野崎",
+      "destinationStationID": "TH66S",
+      "destinationStationName": "江ノ原信号場",
       "staList": [
         {
           "stationID": "TH66S",
@@ -5234,10 +5234,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "急行",
-      "originStationID": "TH58",
-      "originStationName": "赤山町",
-      "destinationStationID": "TH62",
-      "destinationStationName": "高見沢",
+      "originStationID": "TH62",
+      "originStationName": "高見沢",
+      "destinationStationID": "TH58",
+      "destinationStationName": "赤山町",
       "staList": [
         {
           "stationID": "TH58",
@@ -5315,10 +5315,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "特急",
-      "originStationID": "TH58",
-      "originStationName": "赤山町",
-      "destinationStationID": "TH76",
-      "destinationStationName": "館浜",
+      "originStationID": "TH76",
+      "originStationName": "館浜",
+      "destinationStationID": "TH58",
+      "destinationStationName": "赤山町",
       "staList": [
         {
           "stationID": "TH58",
@@ -5501,10 +5501,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時普通",
-      "originStationID": "TH71",
-      "originStationName": "津崎",
-      "destinationStationID": "TH76",
-      "destinationStationName": "館浜",
+      "originStationID": "TH76",
+      "originStationName": "館浜",
+      "destinationStationID": "TH71",
+      "destinationStationName": "津崎",
       "staList": [
         {
           "stationID": "TH71",
@@ -5597,10 +5597,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時準急",
-      "originStationID": "TH67",
-      "originStationName": "新野崎",
-      "destinationStationID": "TH76",
-      "destinationStationName": "館浜",
+      "originStationID": "TH76",
+      "originStationName": "館浜",
+      "destinationStationID": "TH67",
+      "destinationStationName": "新野崎",
       "staList": [
         {
           "stationID": "TH67",
@@ -5708,10 +5708,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "急行",
-      "originStationID": "TH62",
-      "originStationName": "高見沢",
-      "destinationStationID": "TH67",
-      "destinationStationName": "新野崎",
+      "originStationID": "TH67",
+      "originStationName": "新野崎",
+      "destinationStationID": "TH62",
+      "destinationStationName": "高見沢",
       "staList": [
         {
           "stationID": "TH62",
@@ -5814,10 +5814,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "普通",
-      "originStationID": "TH67",
-      "originStationName": "新野崎",
-      "destinationStationID": "TH76",
-      "destinationStationName": "館浜",
+      "originStationID": "TH76",
+      "originStationName": "館浜",
+      "destinationStationID": "TH67",
+      "destinationStationName": "新野崎",
       "staList": [
         {
           "stationID": "TH67",
@@ -5970,10 +5970,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時準急",
-      "originStationID": "TH66S",
-      "originStationName": "江ノ原信号場",
-      "destinationStationID": "TH76",
-      "destinationStationName": "館浜",
+      "originStationID": "TH76",
+      "originStationName": "館浜",
+      "destinationStationID": "TH66S",
+      "destinationStationName": "江ノ原信号場",
       "staList": [
         {
           "stationID": "TH66S",
@@ -6111,10 +6111,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "回送",
-      "originStationID": "TH65",
-      "originStationName": "大道寺",
-      "destinationStationID": "TH66S",
-      "destinationStationName": "江ノ原信号場",
+      "originStationID": "TH66S",
+      "originStationName": "江ノ原信号場",
+      "destinationStationID": "TH65",
+      "destinationStationName": "大道寺",
       "staList": [
         {
           "stationID": "TH65",
@@ -6147,10 +6147,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時普通",
-      "originStationID": "TH66S",
-      "originStationName": "江ノ原信号場",
-      "destinationStationID": "TH71",
-      "destinationStationName": "津崎",
+      "originStationID": "TH71",
+      "originStationName": "津崎",
+      "destinationStationID": "TH66S",
+      "destinationStationName": "江ノ原信号場",
       "staList": [
         {
           "stationID": "TH66S",
@@ -6258,10 +6258,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "普通",
-      "originStationID": "TH58",
-      "originStationName": "赤山町",
-      "destinationStationID": "TH65",
-      "destinationStationName": "大道寺",
+      "originStationID": "TH65",
+      "originStationName": "大道寺",
+      "destinationStationID": "TH58",
+      "destinationStationName": "赤山町",
       "staList": [
         {
           "stationID": "TH58",
@@ -6384,10 +6384,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時回送",
-      "originStationID": "TH66S",
-      "originStationName": "江ノ原信号場",
-      "destinationStationID": "TH67",
-      "destinationStationName": "新野崎",
+      "originStationID": "TH67",
+      "originStationName": "新野崎",
+      "destinationStationID": "TH66S",
+      "destinationStationName": "江ノ原信号場",
       "staList": [
         {
           "stationID": "TH66S",
@@ -6425,10 +6425,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "特急",
-      "originStationID": "TH58",
-      "originStationName": "赤山町",
-      "destinationStationID": "TH76",
-      "destinationStationName": "館浜",
+      "originStationID": "TH76",
+      "originStationName": "館浜",
+      "destinationStationID": "TH58",
+      "destinationStationName": "赤山町",
       "staList": [
         {
           "stationID": "TH58",
@@ -6611,10 +6611,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時普通",
-      "originStationID": "TH71",
-      "originStationName": "津崎",
-      "destinationStationID": "TH76",
-      "destinationStationName": "館浜",
+      "originStationID": "TH76",
+      "originStationName": "館浜",
+      "destinationStationID": "TH71",
+      "destinationStationName": "津崎",
       "staList": [
         {
           "stationID": "TH71",
@@ -6707,10 +6707,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "普通",
-      "originStationID": "TH67",
-      "originStationName": "新野崎",
-      "destinationStationID": "TH71",
-      "destinationStationName": "津崎",
+      "originStationID": "TH71",
+      "originStationName": "津崎",
+      "destinationStationID": "TH67",
+      "destinationStationName": "新野崎",
       "staList": [
         {
           "stationID": "TH67",
@@ -6788,10 +6788,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "普通",
-      "originStationID": "TH65",
-      "originStationName": "大道寺",
-      "destinationStationID": "TH66S",
-      "destinationStationName": "江ノ原信号場",
+      "originStationID": "TH66S",
+      "originStationName": "江ノ原信号場",
+      "destinationStationID": "TH65",
+      "destinationStationName": "大道寺",
       "staList": [
         {
           "stationID": "TH65",
@@ -6824,10 +6824,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "準急",
-      "originStationID": "TH65",
-      "originStationName": "大道寺",
-      "destinationStationID": "TH76",
-      "destinationStationName": "館浜",
+      "originStationID": "TH76",
+      "originStationName": "館浜",
+      "destinationStationID": "TH65",
+      "destinationStationName": "大道寺",
       "staList": [
         {
           "stationID": "TH65",
@@ -6965,10 +6965,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "普通",
-      "originStationID": "TH71",
-      "originStationName": "津崎",
-      "destinationStationID": "TH75",
-      "destinationStationName": "駒野",
+      "originStationID": "TH75",
+      "originStationName": "駒野",
+      "destinationStationID": "TH71",
+      "destinationStationName": "津崎",
       "staList": [
         {
           "stationID": "TH71",
@@ -7046,10 +7046,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "普通",
-      "originStationID": "TH58",
-      "originStationName": "赤山町",
-      "destinationStationID": "TH67",
-      "destinationStationName": "新野崎",
+      "originStationID": "TH67",
+      "originStationName": "新野崎",
+      "destinationStationID": "TH58",
+      "destinationStationName": "赤山町",
       "staList": [
         {
           "stationID": "TH58",
@@ -7212,10 +7212,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "準急",
-      "originStationID": "TH67",
-      "originStationName": "新野崎",
-      "destinationStationID": "TH76",
-      "destinationStationName": "館浜",
+      "originStationID": "TH76",
+      "originStationName": "館浜",
+      "destinationStationID": "TH67",
+      "destinationStationName": "新野崎",
       "staList": [
         {
           "stationID": "TH67",
@@ -7313,10 +7313,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "普通",
-      "originStationID": "TH67",
-      "originStationName": "新野崎",
-      "destinationStationID": "TH76",
-      "destinationStationName": "館浜",
+      "originStationID": "TH76",
+      "originStationName": "館浜",
+      "destinationStationID": "TH67",
+      "destinationStationName": "新野崎",
       "staList": [
         {
           "stationID": "TH67",
@@ -7469,10 +7469,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "特急",
-      "originStationID": "TH58",
-      "originStationName": "赤山町",
-      "destinationStationID": "TH76",
-      "destinationStationName": "館浜",
+      "originStationID": "TH76",
+      "originStationName": "館浜",
+      "destinationStationID": "TH58",
+      "destinationStationName": "赤山町",
       "staList": [
         {
           "stationID": "TH58",
@@ -7655,10 +7655,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "普通",
-      "originStationID": "TH65",
-      "originStationName": "大道寺",
-      "destinationStationID": "TH75",
-      "destinationStationName": "駒野",
+      "originStationID": "TH75",
+      "originStationName": "駒野",
+      "destinationStationID": "TH65",
+      "destinationStationName": "大道寺",
       "staList": [
         {
           "stationID": "TH65",
@@ -7836,10 +7836,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "普通",
-      "originStationID": "TH61",
-      "originStationName": "日野森",
-      "destinationStationID": "TH65",
-      "destinationStationName": "大道寺",
+      "originStationID": "TH65",
+      "originStationName": "大道寺",
+      "destinationStationID": "TH61",
+      "destinationStationName": "日野森",
       "staList": [
         {
           "stationID": "TH61",
@@ -7917,10 +7917,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時普通",
-      "originStationID": "TH65",
-      "originStationName": "大道寺",
-      "destinationStationID": "TH66S",
-      "destinationStationName": "江ノ原信号場",
+      "originStationID": "TH66S",
+      "originStationName": "江ノ原信号場",
+      "destinationStationID": "TH65",
+      "destinationStationName": "大道寺",
       "staList": [
         {
           "stationID": "TH65",
@@ -7953,10 +7953,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "準急",
-      "originStationID": "TH69",
-      "originStationName": "羽衣橋",
-      "destinationStationID": "TH68",
-      "destinationStationName": "新井川",
+      "originStationID": "TH65",
+      "originStationName": "大道寺",
+      "destinationStationID": "TH66S",
+      "destinationStationName": "江ノ原信号場",
       "staList": [
         {
           "stationID": "TH69",
@@ -7989,10 +7989,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "普通",
-      "originStationID": "TH76",
-      "originStationName": "館浜",
-      "destinationStationID": "TH68",
-      "destinationStationName": "新井川",
+      "originStationID": "TH58",
+      "originStationName": "赤山町",
+      "destinationStationID": "TH66S",
+      "destinationStationName": "江ノ原信号場",
       "staList": [
         {
           "stationID": "TH76",
@@ -8130,10 +8130,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "準急",
-      "originStationID": "TH73",
-      "originStationName": "海岸公園",
-      "destinationStationID": "TH58",
-      "destinationStationName": "赤山町",
+      "originStationID": "TH61",
+      "originStationName": "日野森",
+      "destinationStationID": "TH76",
+      "destinationStationName": "館浜",
       "staList": [
         {
           "stationID": "TH73",
@@ -8331,10 +8331,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "普通",
-      "originStationID": "TH66",
-      "originStationName": "江ノ原",
-      "destinationStationID": "TH58",
-      "destinationStationName": "赤山町",
+      "originStationID": "TH67",
+      "originStationName": "新野崎",
+      "destinationStationID": "TH76",
+      "destinationStationName": "館浜",
       "staList": [
         {
           "stationID": "TH66",
@@ -8487,10 +8487,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "特急",
-      "originStationID": "TH76",
-      "originStationName": "館浜",
-      "destinationStationID": "TH58",
-      "destinationStationName": "赤山町",
+      "originStationID": "TH58",
+      "originStationName": "赤山町",
+      "destinationStationID": "TH76",
+      "destinationStationName": "館浜",
       "staList": [
         {
           "stationID": "TH76",
@@ -8668,10 +8668,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "準急",
-      "originStationID": "TH69",
-      "originStationName": "羽衣橋",
-      "destinationStationID": "TH58",
-      "destinationStationName": "赤山町",
+      "originStationID": "TH65",
+      "originStationName": "大道寺",
+      "destinationStationID": "TH76",
+      "destinationStationName": "館浜",
       "staList": [
         {
           "stationID": "TH69",
@@ -8809,10 +8809,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "急行",
-      "originStationID": "TH76",
-      "originStationName": "館浜",
-      "destinationStationID": "TH58",
-      "destinationStationName": "赤山町",
+      "originStationID": "TH58",
+      "originStationName": "赤山町",
+      "destinationStationID": "TH76",
+      "destinationStationName": "館浜",
       "staList": [
         {
           "stationID": "TH76",
@@ -9045,10 +9045,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時快急",
-      "originStationID": "TH76",
-      "originStationName": "館浜",
-      "destinationStationID": "TH58",
-      "destinationStationName": "赤山町",
+      "originStationID": "TH58",
+      "originStationName": "赤山町",
+      "destinationStationID": "TH76",
+      "destinationStationName": "館浜",
       "staList": [
         {
           "stationID": "TH76",
@@ -9261,10 +9261,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "普通",
-      "originStationID": "TH66",
-      "originStationName": "江ノ原",
-      "destinationStationID": "TH58",
-      "destinationStationName": "赤山町",
+      "originStationID": "TH67",
+      "originStationName": "新野崎",
+      "destinationStationID": "TH76",
+      "destinationStationName": "館浜",
       "staList": [
         {
           "stationID": "TH66",
@@ -9417,10 +9417,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "準急",
-      "originStationID": "TH69",
-      "originStationName": "羽衣橋",
-      "destinationStationID": "TH58",
-      "destinationStationName": "赤山町",
+      "originStationID": "TH65",
+      "originStationName": "大道寺",
+      "destinationStationID": "TH76",
+      "destinationStationName": "館浜",
       "staList": [
         {
           "stationID": "TH69",
@@ -9558,10 +9558,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時回送",
-      "originStationID": "TH68",
-      "originStationName": "新井川",
-      "destinationStationID": "TH58",
-      "destinationStationName": "赤山町",
+      "originStationID": "TH66S",
+      "originStationName": "江ノ原信号場",
+      "destinationStationID": "TH76",
+      "destinationStationName": "館浜",
       "staList": [
         {
           "stationID": "TH68",
@@ -9664,10 +9664,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "普通",
-      "originStationID": "TH63",
-      "originStationName": "水越",
-      "destinationStationID": "TH58",
-      "destinationStationName": "赤山町",
+      "originStationID": "TH71",
+      "originStationName": "津崎",
+      "destinationStationID": "TH76",
+      "destinationStationName": "館浜",
       "staList": [
         {
           "stationID": "TH63",
@@ -9760,10 +9760,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "回送",
-      "originStationID": "TH59",
-      "originStationName": "西赤山",
-      "destinationStationID": "TH58",
-      "destinationStationName": "赤山町",
+      "originStationID": "TH75",
+      "originStationName": "駒野",
+      "destinationStationID": "TH76",
+      "destinationStationName": "館浜",
       "staList": [
         {
           "stationID": "TH59",
@@ -9796,10 +9796,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "特急",
-      "originStationID": "TH76",
-      "originStationName": "館浜",
-      "destinationStationID": "TH58",
-      "destinationStationName": "赤山町",
+      "originStationID": "TH58",
+      "originStationName": "赤山町",
+      "destinationStationID": "TH76",
+      "destinationStationName": "館浜",
       "staList": [
         {
           "stationID": "TH76",
@@ -9982,10 +9982,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "急行",
-      "originStationID": "TH76",
-      "originStationName": "館浜",
-      "destinationStationID": "TH68",
-      "destinationStationName": "新井川",
+      "originStationID": "TH58",
+      "originStationName": "赤山町",
+      "destinationStationID": "TH66S",
+      "destinationStationName": "江ノ原信号場",
       "staList": [
         {
           "stationID": "TH76",
@@ -10123,10 +10123,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "普通",
-      "originStationID": "TH69",
-      "originStationName": "羽衣橋",
-      "destinationStationID": "TH63",
-      "destinationStationName": "水越",
+      "originStationID": "TH65",
+      "originStationName": "大道寺",
+      "destinationStationID": "TH71",
+      "destinationStationName": "津崎",
       "staList": [
         {
           "stationID": "TH69",
@@ -10244,10 +10244,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時快急",
-      "originStationID": "TH76",
-      "originStationName": "館浜",
-      "destinationStationID": "TH58",
-      "destinationStationName": "赤山町",
+      "originStationID": "TH58",
+      "originStationName": "赤山町",
+      "destinationStationID": "TH76",
+      "destinationStationName": "館浜",
       "staList": [
         {
           "stationID": "TH76",
@@ -10460,10 +10460,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "準急",
-      "originStationID": "TH69",
-      "originStationName": "羽衣橋",
-      "destinationStationID": "TH58",
-      "destinationStationName": "赤山町",
+      "originStationID": "TH65",
+      "originStationName": "大道寺",
+      "destinationStationID": "TH76",
+      "destinationStationName": "館浜",
       "staList": [
         {
           "stationID": "TH69",
@@ -10601,10 +10601,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時回送",
-      "originStationID": "TH68",
-      "originStationName": "新井川",
-      "destinationStationID": "TH58",
-      "destinationStationName": "赤山町",
+      "originStationID": "TH66S",
+      "originStationName": "江ノ原信号場",
+      "destinationStationID": "TH76",
+      "destinationStationName": "館浜",
       "staList": [
         {
           "stationID": "TH68",
@@ -10707,10 +10707,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "普通",
-      "originStationID": "TH66",
-      "originStationName": "江ノ原",
-      "destinationStationID": "TH58",
-      "destinationStationName": "赤山町",
+      "originStationID": "TH67",
+      "originStationName": "新野崎",
+      "destinationStationID": "TH76",
+      "destinationStationName": "館浜",
       "staList": [
         {
           "stationID": "TH66",
@@ -10863,10 +10863,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時回送",
-      "originStationID": "TH63",
-      "originStationName": "水越",
-      "destinationStationID": "TH58",
-      "destinationStationName": "赤山町",
+      "originStationID": "TH71",
+      "originStationName": "津崎",
+      "destinationStationID": "TH76",
+      "destinationStationName": "館浜",
       "staList": [
         {
           "stationID": "TH63",
@@ -10924,10 +10924,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "準急",
-      "originStationID": "TH66",
-      "originStationName": "江ノ原",
-      "destinationStationID": "TH58",
-      "destinationStationName": "赤山町",
+      "originStationID": "TH67",
+      "originStationName": "新野崎",
+      "destinationStationID": "TH76",
+      "destinationStationName": "館浜",
       "staList": [
         {
           "stationID": "TH66",
@@ -11025,10 +11025,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "特急",
-      "originStationID": "TH76",
-      "originStationName": "館浜",
-      "destinationStationID": "TH58",
-      "destinationStationName": "赤山町",
+      "originStationID": "TH58",
+      "originStationName": "赤山町",
+      "destinationStationID": "TH76",
+      "destinationStationName": "館浜",
       "staList": [
         {
           "stationID": "TH76",
@@ -11211,10 +11211,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "準急",
-      "originStationID": "TH69",
-      "originStationName": "羽衣橋",
-      "destinationStationID": "TH66",
-      "destinationStationName": "江ノ原",
+      "originStationID": "TH65",
+      "originStationName": "大道寺",
+      "destinationStationID": "TH67",
+      "destinationStationName": "新野崎",
       "staList": [
         {
           "stationID": "TH69",
@@ -11272,10 +11272,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "普通",
-      "originStationID": "TH76",
-      "originStationName": "館浜",
-      "destinationStationID": "TH68",
-      "destinationStationName": "新井川",
+      "originStationID": "TH58",
+      "originStationName": "赤山町",
+      "destinationStationID": "TH66S",
+      "destinationStationName": "江ノ原信号場",
       "staList": [
         {
           "stationID": "TH76",
@@ -11413,10 +11413,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時回送",
-      "originStationID": "TH68",
-      "originStationName": "新井川",
-      "destinationStationID": "TH63",
-      "destinationStationName": "水越",
+      "originStationID": "TH66S",
+      "originStationName": "江ノ原信号場",
+      "destinationStationID": "TH71",
+      "destinationStationName": "津崎",
       "staList": [
         {
           "stationID": "TH68",
@@ -11484,10 +11484,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時回送",
-      "originStationID": "TH63",
-      "originStationName": "水越",
-      "destinationStationID": "TH58",
-      "destinationStationName": "赤山町",
+      "originStationID": "TH71",
+      "originStationName": "津崎",
+      "destinationStationID": "TH76",
+      "destinationStationName": "館浜",
       "staList": [
         {
           "stationID": "TH63",
@@ -11545,10 +11545,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時快急",
-      "originStationID": "TH76",
-      "originStationName": "館浜",
-      "destinationStationID": "TH58",
-      "destinationStationName": "赤山町",
+      "originStationID": "TH58",
+      "originStationName": "赤山町",
+      "destinationStationID": "TH76",
+      "destinationStationName": "館浜",
       "staList": [
         {
           "stationID": "TH76",
@@ -11761,10 +11761,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時回送",
-      "originStationID": "TH68",
-      "originStationName": "新井川",
-      "destinationStationID": "TH63",
-      "destinationStationName": "水越",
+      "originStationID": "TH66S",
+      "originStationName": "江ノ原信号場",
+      "destinationStationID": "TH71",
+      "destinationStationName": "津崎",
       "staList": [
         {
           "stationID": "TH68",
@@ -11832,10 +11832,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時回送",
-      "originStationID": "TH63",
-      "originStationName": "水越",
-      "destinationStationID": "TH58",
-      "destinationStationName": "赤山町",
+      "originStationID": "TH71",
+      "originStationName": "津崎",
+      "destinationStationID": "TH76",
+      "destinationStationName": "館浜",
       "staList": [
         {
           "stationID": "TH63",
@@ -11893,10 +11893,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "準急",
-      "originStationID": "TH69",
-      "originStationName": "羽衣橋",
-      "destinationStationID": "TH58",
-      "destinationStationName": "赤山町",
+      "originStationID": "TH65",
+      "originStationName": "大道寺",
+      "destinationStationID": "TH76",
+      "destinationStationName": "館浜",
       "staList": [
         {
           "stationID": "TH69",
@@ -12034,10 +12034,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時回送",
-      "originStationID": "TH68",
-      "originStationName": "新井川",
-      "destinationStationID": "TH63",
-      "destinationStationName": "水越",
+      "originStationID": "TH66S",
+      "originStationName": "江ノ原信号場",
+      "destinationStationID": "TH71",
+      "destinationStationName": "津崎",
       "staList": [
         {
           "stationID": "TH68",
@@ -12105,10 +12105,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "普通",
-      "originStationID": "TH66",
-      "originStationName": "江ノ原",
-      "destinationStationID": "TH58",
-      "destinationStationName": "赤山町",
+      "originStationID": "TH67",
+      "originStationName": "新野崎",
+      "destinationStationID": "TH76",
+      "destinationStationName": "館浜",
       "staList": [
         {
           "stationID": "TH66",
@@ -12261,10 +12261,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時回送",
-      "originStationID": "TH63",
-      "originStationName": "水越",
-      "destinationStationID": "TH58",
-      "destinationStationName": "赤山町",
+      "originStationID": "TH71",
+      "originStationName": "津崎",
+      "destinationStationID": "TH76",
+      "destinationStationName": "館浜",
       "staList": [
         {
           "stationID": "TH63",
@@ -12322,10 +12322,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "回送",
-      "originStationID": "TH68",
-      "originStationName": "新井川",
-      "destinationStationID": "TH58",
-      "destinationStationName": "赤山町",
+      "originStationID": "TH66S",
+      "originStationName": "江ノ原信号場",
+      "destinationStationID": "TH76",
+      "destinationStationName": "館浜",
       "staList": [
         {
           "stationID": "TH68",
@@ -12428,10 +12428,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時回送",
-      "originStationID": "TH68",
-      "originStationName": "新井川",
-      "destinationStationID": "TH66",
-      "destinationStationName": "江ノ原",
+      "originStationID": "TH66S",
+      "originStationName": "江ノ原信号場",
+      "destinationStationID": "TH67",
+      "destinationStationName": "新野崎",
       "staList": [
         {
           "stationID": "TH68",
@@ -12469,10 +12469,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時回送",
-      "originStationID": "TH59",
-      "originStationName": "西赤山",
-      "destinationStationID": "TH58",
-      "destinationStationName": "赤山町",
+      "originStationID": "TH75",
+      "originStationName": "駒野",
+      "destinationStationID": "TH76",
+      "destinationStationName": "館浜",
       "staList": [
         {
           "stationID": "TH59",
@@ -12505,10 +12505,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時快急",
-      "originStationID": "TH76",
-      "originStationName": "館浜",
-      "destinationStationID": "TH58",
-      "destinationStationName": "赤山町",
+      "originStationID": "TH58",
+      "originStationName": "赤山町",
+      "destinationStationID": "TH76",
+      "destinationStationName": "館浜",
       "staList": [
         {
           "stationID": "TH76",
@@ -12721,10 +12721,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "準急",
-      "originStationID": "TH69",
-      "originStationName": "羽衣橋",
-      "destinationStationID": "TH58",
-      "destinationStationName": "赤山町",
+      "originStationID": "TH65",
+      "originStationName": "大道寺",
+      "destinationStationID": "TH76",
+      "destinationStationName": "館浜",
       "staList": [
         {
           "stationID": "TH69",
@@ -12862,10 +12862,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "普通",
-      "originStationID": "TH76",
-      "originStationName": "館浜",
-      "destinationStationID": "TH66",
-      "destinationStationName": "江ノ原",
+      "originStationID": "TH58",
+      "originStationName": "赤山町",
+      "destinationStationID": "TH67",
+      "destinationStationName": "新野崎",
       "staList": [
         {
           "stationID": "TH76",
@@ -13028,10 +13028,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時回送",
-      "originStationID": "TH68",
-      "originStationName": "新井川",
-      "destinationStationID": "TH63",
-      "destinationStationName": "水越",
+      "originStationID": "TH66S",
+      "originStationName": "江ノ原信号場",
+      "destinationStationID": "TH71",
+      "destinationStationName": "津崎",
       "staList": [
         {
           "stationID": "TH68",
@@ -13099,10 +13099,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時回送",
-      "originStationID": "TH68",
-      "originStationName": "新井川",
-      "destinationStationID": "TH59",
-      "destinationStationName": "西赤山",
+      "originStationID": "TH66S",
+      "originStationName": "江ノ原信号場",
+      "destinationStationID": "TH75",
+      "destinationStationName": "駒野",
       "staList": [
         {
           "stationID": "TH68",
@@ -13195,10 +13195,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "普通",
-      "originStationID": "TH66",
-      "originStationName": "江ノ原",
-      "destinationStationID": "TH58",
-      "destinationStationName": "赤山町",
+      "originStationID": "TH67",
+      "originStationName": "新野崎",
+      "destinationStationID": "TH76",
+      "destinationStationName": "館浜",
       "staList": [
         {
           "stationID": "TH66",
@@ -13351,10 +13351,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時回送",
-      "originStationID": "TH68",
-      "originStationName": "新井川",
-      "destinationStationID": "TH58",
-      "destinationStationName": "赤山町",
+      "originStationID": "TH66S",
+      "originStationName": "江ノ原信号場",
+      "destinationStationID": "TH76",
+      "destinationStationName": "館浜",
       "staList": [
         {
           "stationID": "TH68",
@@ -13457,10 +13457,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時回送",
-      "originStationID": "TH68",
-      "originStationName": "新井川",
-      "destinationStationID": "TH58",
-      "destinationStationName": "赤山町",
+      "originStationID": "TH66S",
+      "originStationName": "江ノ原信号場",
+      "destinationStationID": "TH76",
+      "destinationStationName": "館浜",
       "staList": [
         {
           "stationID": "TH68",
@@ -13563,10 +13563,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "回送",
-      "originStationID": "TH59",
-      "originStationName": "西赤山",
-      "destinationStationID": "TH58",
-      "destinationStationName": "赤山町",
+      "originStationID": "TH75",
+      "originStationName": "駒野",
+      "destinationStationID": "TH76",
+      "destinationStationName": "館浜",
       "staList": [
         {
           "stationID": "TH59",
@@ -13599,10 +13599,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "普通",
-      "originStationID": "TH69",
-      "originStationName": "羽衣橋",
-      "destinationStationID": "TH58",
-      "destinationStationName": "赤山町",
+      "originStationID": "TH65",
+      "originStationName": "大道寺",
+      "destinationStationID": "TH76",
+      "destinationStationName": "館浜",
       "staList": [
         {
           "stationID": "TH69",
@@ -13795,10 +13795,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時回送",
-      "originStationID": "TH76",
-      "originStationName": "館浜",
-      "destinationStationID": "TH68",
-      "destinationStationName": "新井川",
+      "originStationID": "TH58",
+      "originStationName": "赤山町",
+      "destinationStationID": "TH66S",
+      "destinationStationName": "江ノ原信号場",
       "staList": [
         {
           "stationID": "TH76",
@@ -13901,10 +13901,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時回送",
-      "originStationID": "TH68",
-      "originStationName": "新井川",
-      "destinationStationID": "TH58",
-      "destinationStationName": "赤山町",
+      "originStationID": "TH66S",
+      "originStationName": "江ノ原信号場",
+      "destinationStationID": "TH76",
+      "destinationStationName": "館浜",
       "staList": [
         {
           "stationID": "TH68",
@@ -14007,10 +14007,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時回送",
-      "originStationID": "TH68",
-      "originStationName": "新井川",
-      "destinationStationID": "TH58",
-      "destinationStationName": "赤山町",
+      "originStationID": "TH66S",
+      "originStationName": "江ノ原信号場",
+      "destinationStationID": "TH76",
+      "destinationStationName": "館浜",
       "staList": [
         {
           "stationID": "TH68",
@@ -14113,10 +14113,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "普通",
-      "originStationID": "TH73",
-      "originStationName": "海岸公園",
-      "destinationStationID": "TH58",
-      "destinationStationName": "赤山町",
+      "originStationID": "TH61",
+      "originStationName": "日野森",
+      "destinationStationID": "TH76",
+      "destinationStationName": "館浜",
       "staList": [
         {
           "stationID": "TH73",
@@ -14369,10 +14369,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "回送",
-      "originStationID": "TH59",
-      "originStationName": "西赤山",
-      "destinationStationID": "TH58",
-      "destinationStationName": "赤山町",
+      "originStationID": "TH75",
+      "originStationName": "駒野",
+      "destinationStationID": "TH76",
+      "destinationStationName": "館浜",
       "staList": [
         {
           "stationID": "TH59",
@@ -14405,10 +14405,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時回送",
-      "originStationID": "TH68",
-      "originStationName": "新井川",
-      "destinationStationID": "TH58",
-      "destinationStationName": "赤山町",
+      "originStationID": "TH66S",
+      "originStationName": "江ノ原信号場",
+      "destinationStationID": "TH76",
+      "destinationStationName": "館浜",
       "staList": [
         {
           "stationID": "TH68",
@@ -14511,10 +14511,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "回送",
-      "originStationID": "TH68",
-      "originStationName": "新井川",
-      "destinationStationID": "TH58",
-      "destinationStationName": "赤山町",
+      "originStationID": "TH66S",
+      "originStationName": "江ノ原信号場",
+      "destinationStationID": "TH76",
+      "destinationStationName": "館浜",
       "staList": [
         {
           "stationID": "TH68",
@@ -14617,10 +14617,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時回送",
-      "originStationID": "TH68",
-      "originStationName": "新井川",
-      "destinationStationID": "TH58",
-      "destinationStationName": "赤山町",
+      "originStationID": "TH66S",
+      "originStationName": "江ノ原信号場",
+      "destinationStationID": "TH76",
+      "destinationStationName": "館浜",
       "staList": [
         {
           "stationID": "TH68",
@@ -14723,10 +14723,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時回送",
-      "originStationID": "TH76",
-      "originStationName": "館浜",
-      "destinationStationID": "TH68",
-      "destinationStationName": "新井川",
+      "originStationID": "TH58",
+      "originStationName": "赤山町",
+      "destinationStationID": "TH66S",
+      "destinationStationName": "江ノ原信号場",
       "staList": [
         {
           "stationID": "TH76",
@@ -14829,10 +14829,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "臨時回送",
-      "originStationID": "TH69",
-      "originStationName": "羽衣橋",
-      "destinationStationID": "TH68",
-      "destinationStationName": "新井川",
+      "originStationID": "TH65",
+      "originStationName": "大道寺",
+      "destinationStationID": "TH66S",
+      "destinationStationName": "江ノ原信号場",
       "staList": [
         {
           "stationID": "TH69",
@@ -14865,10 +14865,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "普通",
-      "originStationID": "TH68",
-      "originStationName": "新井川",
-      "destinationStationID": "TH58",
-      "destinationStationName": "赤山町",
+      "originStationID": "TH66S",
+      "originStationName": "江ノ原信号場",
+      "destinationStationID": "TH76",
+      "destinationStationName": "館浜",
       "staList": [
         {
           "stationID": "TH68",
@@ -15051,10 +15051,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "準急",
-      "originStationID": "TH69",
-      "originStationName": "羽衣橋",
-      "destinationStationID": "TH58",
-      "destinationStationName": "赤山町",
+      "originStationID": "TH65",
+      "originStationName": "大道寺",
+      "destinationStationID": "TH76",
+      "destinationStationName": "館浜",
       "staList": [
         {
           "stationID": "TH69",
@@ -15192,10 +15192,10 @@
       "previousTrainNumber": "",
       "nextTrainNumber": "",
       "trainClass": "回送",
-      "originStationID": "TH59",
-      "originStationName": "西赤山",
-      "destinationStationID": "TH58",
-      "destinationStationName": "赤山町",
+      "originStationID": "TH75",
+      "originStationName": "駒野",
+      "destinationStationID": "TH76",
+      "destinationStationName": "館浜",
       "staList": [
         {
           "stationID": "TH59",

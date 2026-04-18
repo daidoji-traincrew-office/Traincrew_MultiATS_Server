@@ -459,6 +459,9 @@ public class Oud2ToTtcConverter
 
         if (staList.Count == 0) return null;
 
+        var (originName, originId) = GetOperationStation(ressya, 'A', isKudari, trainNumber);
+        var (destName, destId) = GetOperationStation(ressya, 'B', isKudari, trainNumber);
+
         var train = new TTC_Train
         {
             OperationNumber = operationNumber,
@@ -466,10 +469,10 @@ public class Oud2ToTtcConverter
             PreviousTrainNumber = "",
             NextTrainNumber = "",
             TrainClass = trainClass,
-            OriginStationID = staList.First().StationID,
-            OriginStationName = staList.First().StationName,
-            DestinationStationID = staList.Last().StationID,
-            DestinationStationName = staList.Last().StationName,
+            OriginStationID = originId,
+            OriginStationName = originName,
+            DestinationStationID = destId,
+            DestinationStationName = destName,
             StaList = staList,
             TemporaryStopStations = [],
             IsRegularService = true,
@@ -672,6 +675,34 @@ public class Oud2ToTtcConverter
         }
 
         return new TimeOfDay { H = h, M = m, S = s };
+    }
+
+    private static readonly Regex OperationKeyRegex = new(@"^Operation(\d+)([AB])$", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Operation(\d+)A/B キーから始発/終着駅の名前とIDを取得する
+    /// </summary>
+    private (string stationName, string stationId) GetOperationStation(
+        Dictionary<string, object> ressya, char suffix, bool isKudari, string trainNumber)
+    {
+        foreach (var key in ressya.Keys)
+        {
+            var m = OperationKeyRegex.Match(key);
+            if (!m.Success || m.Groups[2].Value[0] != suffix) continue;
+
+            var rawIdx = int.Parse(m.Groups[1].Value);
+            var ekiIdx = isKudari ? rawIdx : _ekiOrder.Count - 1 - rawIdx;
+
+            if (ekiIdx < 0 || ekiIdx >= _ekiOrder.Count)
+                throw new InvalidOperationException(
+                    $"列車 {trainNumber}: キー {key} の駅インデックス {rawIdx} が範囲外です (駅数={_ekiOrder.Count})");
+
+            var stationName = _ekiOrder[ekiIdx];
+            return (stationName, GetStationId(stationName));
+        }
+
+        throw new InvalidOperationException(
+            $"列車 {trainNumber}: Operation*{suffix} キーが見つかりません");
     }
 
     #region Helper methods
