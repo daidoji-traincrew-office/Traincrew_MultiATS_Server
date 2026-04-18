@@ -12,7 +12,7 @@ public class DiagramRepository(ApplicationDbContext context) : IDiagramRepositor
             .ToDictionaryAsync(d => (d.Name, d.TimeRange), cancellationToken);
     }
 
-    public async Task<List<Models.Diagram>> GetAllAsync(CancellationToken cancellationToken = default)
+    public async Task<List<Models.Diagram>> GetAll(CancellationToken cancellationToken = default)
     {
         return await context.Diagrams.ToListAsync(cancellationToken);
     }
