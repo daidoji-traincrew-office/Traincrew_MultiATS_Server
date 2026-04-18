@@ -748,7 +748,7 @@ public partial class TrainService(
             }
 
             // 遅延を計算（営業日境界を考慮）
-            var adjustedCurrentTime = TimeSpan.FromSeconds(currentTime.TotalSeconds + timeOffset);
+            var adjustedCurrentTime = TimeSpan.FromSeconds(currentTime.TotalSeconds + 3600 * timeOffset);
 
             // 営業日開始時刻（4:00）を基準に正規化
             var currentTimeSeconds = NormalizeTimeToServiceDay(adjustedCurrentTime);
