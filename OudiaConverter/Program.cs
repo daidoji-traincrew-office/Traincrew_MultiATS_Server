@@ -451,16 +451,20 @@ public class Oud2ToTtcConverter
         int.TryParse(syubetsuStr, out var syubetsuIndex);
         var trainClass = GetTrainClass(syubetsuIndex);
 
+        // B=始発・A=終着（上下共通）。上りは rawIdx を逆変換して _ekiOrder インデックスに変換
+        var (originName, originId, originEkiIdx, _) = GetOperationStation(ressya, 'B', isKudari, trainNumber);
+        var (destName, destId, destEkiIdx, _) = GetOperationStation(ressya, 'A', isKudari, trainNumber);
+
+        var startEkiIdx = Math.Min(originEkiIdx, destEkiIdx);
+        var endEkiIdx = Math.Max(originEkiIdx, destEkiIdx);
+
         var ekiJikokuRaw = GetProp(ressya, "EkiJikoku");
         var ekiJikokuList = ParseEkiJikokuList(ekiJikokuRaw);
 
-        // 駅リストを構築
-        var staList = BuildStaList(ekiJikokuList, isKudari);
+        // 始発/終着の範囲内の駅リストを構築
+        var staList = BuildStaList(ekiJikokuList, isKudari, startEkiIdx, endEkiIdx);
 
         if (staList.Count == 0) return null;
-
-        var (originName, originId) = GetOperationStation(ressya, 'A', isKudari, trainNumber);
-        var (destName, destId) = GetOperationStation(ressya, 'B', isKudari, trainNumber);
 
         var train = new TTC_Train
         {
@@ -513,12 +517,12 @@ public class Oud2ToTtcConverter
         return [];
     }
 
-    private List<TTC_StationData> BuildStaList(List<string> ekiJikokuList, bool isKudari)
+    private List<TTC_StationData> BuildStaList(List<string> ekiJikokuList, bool isKudari, int startEkiIdx, int endEkiIdx)
     {
         var result = new List<TTC_StationData>();
 
-        // 下りは順方向、上りは逆方向で駅を辿る
-        var ekiIndices = Enumerable.Range(0, Math.Min(_ekiOrder.Count, ekiJikokuList.Count));
+        // 下りは順方向、上りは逆方向で _ekiOrder を辿る
+        var ekiIndices = Enumerable.Range(0, _ekiOrder.Count);
         if (!isKudari)
         {
             ekiIndices = ekiIndices.Reverse();
@@ -526,9 +530,13 @@ public class Oud2ToTtcConverter
 
         foreach (var i in ekiIndices)
         {
-            if (i >= ekiJikokuList.Count) continue;
+            if (i < startEkiIdx || i > endEkiIdx) continue;
 
-            var jikokuStr = ekiJikokuList[i];
+            // 上り列車の EkiJikoku は「上り方向のインデックス(逆順)」で格納されている
+            var jikokuIdx = isKudari ? i : _ekiOrder.Count - 1 - i;
+            if (jikokuIdx >= ekiJikokuList.Count) continue;
+
+            var jikokuStr = ekiJikokuList[jikokuIdx];
             if (string.IsNullOrEmpty(jikokuStr)) continue;
 
             var ekimei = _ekiOrder[i];
@@ -682,7 +690,7 @@ public class Oud2ToTtcConverter
     /// <summary>
     /// Operation(\d+)A/B キーから始発/終着駅の名前とIDを取得する
     /// </summary>
-    private (string stationName, string stationId) GetOperationStation(
+    private (string stationName, string stationId, int ekiIdx, int rawIdx) GetOperationStation(
         Dictionary<string, object> ressya, char suffix, bool isKudari, string trainNumber)
     {
         foreach (var key in ressya.Keys)
@@ -698,7 +706,7 @@ public class Oud2ToTtcConverter
                     $"列車 {trainNumber}: キー {key} の駅インデックス {rawIdx} が範囲外です (駅数={_ekiOrder.Count})");
 
             var stationName = _ekiOrder[ekiIdx];
-            return (stationName, GetStationId(stationName));
+            return (stationName, GetStationId(stationName), ekiIdx, rawIdx);
         }
 
         throw new InvalidOperationException(
