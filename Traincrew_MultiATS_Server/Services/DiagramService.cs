@@ -13,11 +13,11 @@ public class DiagramService(IDiagramRepository diagramRepository) : IDiagramServ
     public async Task<List<DiagramData>> GetAllDiagramsAsync()
     {
         var diagrams = await diagramRepository.GetAll();
-        return diagrams.Select(d => new DiagramData
+        return [..diagrams.Select(d => new DiagramData
         {
             Id = d.Id,
             Name = d.Name,
             TimeRange = d.TimeRange
-        }).ToList();
+        })];
     }
 }
