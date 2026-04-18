@@ -150,15 +150,17 @@ public partial class TrainService(
 
         await transaction.CommitAsync();
 
-        // 遅延計算
         if (decrementalTrackCircuitDataList.Count > 0 && trainState != null)
         {
-            const ulong diaId = 1; // 現在は固定値、将来的に複数ダイヤ対応
-            await CalculateAndUpdateDelays(
-                diaId,
-                clientTrainNumber,
-                clientData.CarStates.Count,
-                decrementalTrackCircuitDataList);
+            var diaId = await serverService.GetSelectedDiagramIdAsync();
+            if (diaId.HasValue)
+            {
+                await CalculateAndUpdateDelays(
+                    diaId.Value,
+                    clientTrainNumber,
+                    clientData.CarStates.Count,
+                    decrementalTrackCircuitDataList);
+            }
         }
 
         return serverData;
