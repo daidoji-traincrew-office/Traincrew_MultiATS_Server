@@ -140,4 +140,14 @@ public class CommanderTableHub(
     {
         await bannedUserService.UnbanUserAsync(userId);
     }
+
+    public Task<List<DiagramData>> GetDiagrams()
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task SetSelectedDiagramId(ulong? diaId)
+    {
+        throw new NotImplementedException();
+    }
 }
