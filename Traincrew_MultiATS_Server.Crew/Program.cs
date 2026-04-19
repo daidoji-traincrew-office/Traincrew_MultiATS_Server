@@ -495,7 +495,6 @@ public class Program
             .AddScoped<ThrowOutControlCsvLoader>()
             .AddScoped<SignalCsvLoader>()
             // JSON Loaders
-            .AddScoped<TtcDataJsonLoader>()
             .AddScoped<DiagramJsonLoader>()
             // DB Initializers
             .AddScoped<StationDbInitializer>()
