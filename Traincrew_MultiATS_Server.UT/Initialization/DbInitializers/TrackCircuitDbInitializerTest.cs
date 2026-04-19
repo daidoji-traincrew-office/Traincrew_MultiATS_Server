@@ -44,7 +44,8 @@ public class TrackCircuitDbInitializerTest
             }
         };
 
-        _trackCircuitRepositoryMock.Setup(r => r.GetAllNames(It.IsAny<CancellationToken>()))
+        _trackCircuitRepositoryMock
+            .Setup(r => r.GetAllTrackCircuitList(It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
 
         var initializer = new TrackCircuitDbInitializer(
@@ -77,8 +78,8 @@ public class TrackCircuitDbInitializerTest
     }
 
     [Fact]
-    [DisplayName("既存の軌道回路が存在する場合、スキップされること")]
-    public async Task InitializeTrackCircuitsAsync_ShouldSkipExistingTrackCircuits()
+    [DisplayName("既存の軌道回路と同一データの場合、更新されないこと")]
+    public async Task InitializeTrackCircuitsAsync_ShouldSkipExistingTrackCircuitsWithSameData()
     {
         // Arrange
         var trackCircuitCsvList = new List<TrackCircuitCsv>
@@ -92,8 +93,9 @@ public class TrackCircuitDbInitializerTest
             }
         };
 
-        _trackCircuitRepositoryMock.Setup(r => r.GetAllNames(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(["TC1"]);
+        _trackCircuitRepositoryMock
+            .Setup(r => r.GetAllTrackCircuitList(It.IsAny<CancellationToken>()))
+            .ReturnsAsync([new() { Name = "TC1", ProtectionZone = 10, StationIdForDelay = null }]);
 
         var initializer = new TrackCircuitDbInitializer(
             _loggerMock.Object,
@@ -109,6 +111,55 @@ public class TrackCircuitDbInitializerTest
         // Assert
         _generalRepositoryMock.Verify(
             r => r.AddAll(It.Is<List<TrackCircuit>>(list => list.Count == 0), It.IsAny<CancellationToken>()),
+            Times.Once);
+        _generalRepositoryMock.Verify(
+            r => r.SaveAll(It.IsAny<IEnumerable<TrackCircuit>>(), It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    [Fact]
+    [DisplayName("既存の軌道回路に差分がある場合、更新されること")]
+    public async Task InitializeTrackCircuitsAsync_ShouldUpdateExistingTrackCircuits_WhenDataDiffers()
+    {
+        // Arrange
+        var trackCircuitCsvList = new List<TrackCircuitCsv>
+        {
+            new()
+            {
+                Name = "TC1",
+                ProtectionZone = 20,
+                TargetStation = "ST01",
+                NextSignalNamesUp = [],
+                NextSignalNamesDown = []
+            }
+        };
+
+        var existingEntity = new TrackCircuit { Name = "TC1", ProtectionZone = 10, StationIdForDelay = null };
+        _trackCircuitRepositoryMock
+            .Setup(r => r.GetAllTrackCircuitList(It.IsAny<CancellationToken>()))
+            .ReturnsAsync([existingEntity]);
+
+        var initializer = new TrackCircuitDbInitializer(
+            _loggerMock.Object,
+            _trackCircuitRepositoryMock.Object,
+            _signalRepositoryMock.Object,
+            _trackCircuitSignalRepositoryMock.Object,
+            _generalRepositoryMock.Object,
+            _trackCircuitDepartmentTimeRepositoryMock.Object);
+
+        // Act
+        await initializer.InitializeTrackCircuitsAsync(trackCircuitCsvList, TestContext.Current.CancellationToken);
+
+        // Assert
+        _generalRepositoryMock.Verify(
+            r => r.AddAll(It.Is<List<TrackCircuit>>(list => list.Count == 0), It.IsAny<CancellationToken>()),
+            Times.Once);
+        _generalRepositoryMock.Verify(
+            r => r.SaveAll(It.Is<List<TrackCircuit>>(list =>
+                list.Count == 1 &&
+                list[0].ProtectionZone == 20 &&
+                list[0].StationIdForDelay == "ST01"
+            ), It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -128,7 +179,8 @@ public class TrackCircuitDbInitializerTest
             }
         };
 
-        _trackCircuitRepositoryMock.Setup(r => r.GetAllNames(It.IsAny<CancellationToken>()))
+        _trackCircuitRepositoryMock
+            .Setup(r => r.GetAllTrackCircuitList(It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
 
         var initializer = new TrackCircuitDbInitializer(
@@ -399,7 +451,8 @@ public class TrackCircuitDbInitializerTest
             }
         };
 
-        _trackCircuitRepositoryMock.Setup(r => r.GetAllNames(It.IsAny<CancellationToken>()))
+        _trackCircuitRepositoryMock
+            .Setup(r => r.GetAllTrackCircuitList(It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
 
         TrackCircuit? capturedTrackCircuit = null;
