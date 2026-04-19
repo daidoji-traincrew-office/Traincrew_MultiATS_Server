@@ -16,8 +16,7 @@ public class DiagramService(IDiagramRepository diagramRepository) : IDiagramServ
         return [..diagrams.Select(d => new DiagramData
         {
             Id = d.Id,
-            Name = d.Name,
-            TimeRange = d.TimeRange
+            Name = d.Name
         })];
     }
 }

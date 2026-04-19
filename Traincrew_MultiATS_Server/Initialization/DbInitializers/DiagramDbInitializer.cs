@@ -12,22 +12,20 @@ public class DiagramDbInitializer(
 {
     public async Task InitializeAsync(List<DiagramJson> diagramJsonList, CancellationToken cancellationToken = default)
     {
-        var existingDiagrams = await diagramRepository.GetAllForNameAndTimeRange(cancellationToken);
+        var existingDiagrams = await diagramRepository.GetAllForName(cancellationToken);
 
         foreach (var diagramJson in diagramJsonList)
         {
-            var key = (diagramJson.Name, diagramJson.TimeRange);
             ulong diaId;
 
-            if (existingDiagrams.TryGetValue(key, out var existing))
+            if (existingDiagrams.TryGetValue(diagramJson.Name, out var existing))
             {
-                if (existing.Version != diagramJson.Version || existing.Index != diagramJson.Index)
+                if (existing.Version != diagramJson.Version)
                 {
                     existing.Version = diagramJson.Version;
-                    existing.Index = diagramJson.Index;
                     await generalRepository.Save(existing, cancellationToken);
-                    logger.LogInformation("Updated diagram version: {Name} {TimeRange} → {Version}",
-                        diagramJson.Name, diagramJson.TimeRange, diagramJson.Version);
+                    logger.LogInformation("Updated diagram version: {Name} → {Version}",
+                        diagramJson.Name, diagramJson.Version);
                 }
 
                 diaId = existing.Id;
@@ -37,13 +35,11 @@ public class DiagramDbInitializer(
                 var newDiagram = new Diagram
                 {
                     Name = diagramJson.Name,
-                    TimeRange = diagramJson.TimeRange,
-                    Version = diagramJson.Version,
-                    Index = diagramJson.Index
+                    Version = diagramJson.Version
                 };
                 await generalRepository.Add(newDiagram, cancellationToken);
                 diaId = newDiagram.Id;
-                logger.LogInformation("Added new diagram: {Name} {TimeRange}", diagramJson.Name, diagramJson.TimeRange);
+                logger.LogInformation("Added new diagram: {Name}", diagramJson.Name);
             }
 
             var ttcData = new TTC_Data { TrainList = diagramJson.TrainList };

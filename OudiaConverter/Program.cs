@@ -173,9 +173,6 @@ public class TTC_Data
     [JsonPropertyName("name")]
     public string Name { get; set; } = "";
 
-    [JsonPropertyName("time_range")]
-    public string TimeRange { get; set; } = "";
-
     [JsonPropertyName("TrainList")]
     public List<TTC_Train> TrainList { get; set; } = [];
 }
@@ -336,39 +333,146 @@ public class Oud2ToTtcConverter
     }
 
     /// <summary>
-    /// oud2ファイルを解析し、ダイヤごとにTTC_Dataを生成
+    /// oud2ファイルを解析し、全ダイヤをマージした単一の TTC_Data を生成
     /// </summary>
-    public Dictionary<string, TTC_Data> Convert(string oud2Path)
+    public TTC_Data Convert(string oud2Path)
     {
         var jsonObj = OudiaSecondParser.ParseToJsonCompatibleObject(oud2Path) as Dictionary<string, object>;
-        if (jsonObj == null) return new Dictionary<string, TTC_Data>();
+        if (jsonObj == null) return new TTC_Data();
 
         var rosen = GetSingleChild(jsonObj, "Rosen") as Dictionary<string, object>;
-        if (rosen == null) return new Dictionary<string, TTC_Data>();
+        if (rosen == null) return new TTC_Data();
 
-        // 駅リストを取得（順番が重要）
         LoadEkiOrder(rosen);
-
-        // 列車種別を取得
         LoadRessyasyubetsu(rosen);
 
-        // ダイヤを変換
-        var result = new Dictionary<string, TTC_Data>();
+        var allTrains = new List<TTC_Train>();
         var diaList = GetChildList(rosen, "Dia");
 
         foreach (var diaObj in diaList)
         {
             if (diaObj is not Dictionary<string, object> dia) continue;
-
-            var diaName = GetStringProp(dia, "DiaName");
-            if (string.IsNullOrEmpty(diaName)) continue;
-
             var ttcData = ConvertDia(dia);
-            result[diaName] = ttcData;
+            allTrains.AddRange(ttcData.TrainList);
+        }
+
+        return MergeAllTrains(allTrains);
+    }
+
+    /// <summary>
+    /// 全列車を列番でグループ化してマージし、単一の TTC_Data にまとめる
+    /// </summary>
+    private TTC_Data MergeAllTrains(List<TTC_Train> allTrains)
+    {
+        var result = new TTC_Data();
+        int operationNumber = 1;
+
+        var groups = allTrains
+            .Where(t => !string.IsNullOrWhiteSpace(t.TrainNumber))
+            .GroupBy(t => t.TrainNumber);
+
+        foreach (var group in groups)
+        {
+            var merged = MergeTrains(group.Key, group.ToList());
+            merged.OperationNumber = operationNumber++;
+            result.TrainList.Add(merged);
         }
 
         return result;
     }
+
+    /// <summary>
+    /// 同一列番の列車リストを staList の union でマージする
+    /// </summary>
+    private TTC_Train MergeTrains(string trainNumber, List<TTC_Train> trains)
+    {
+        if (trains.Count == 1) return trains[0];
+
+        // 最初の有効な列車から進行方向を判定
+        var refTrain = trains.First(t => t.StaList.Count > 0);
+        var firstIdx = _ekiOrder.IndexOf(refTrain.StaList.First().StationName);
+        var lastIdx = _ekiOrder.IndexOf(refTrain.StaList.Last().StationName);
+        bool isKudari = firstIdx <= lastIdx;
+
+        // 駅ごとの情報をマージ（stationID or stationName をキーに union）
+        var stationMap = new Dictionary<string, TTC_StationData>(StringComparer.Ordinal);
+
+        foreach (var train in trains)
+        {
+            foreach (var sta in train.StaList)
+            {
+                var key = !string.IsNullOrEmpty(sta.StationID) ? sta.StationID : sta.StationName;
+                if (!stationMap.TryGetValue(key, out var existing))
+                {
+                    stationMap[key] = new TTC_StationData
+                    {
+                        StationID = sta.StationID,
+                        StationName = sta.StationName,
+                        StopPosName = sta.StopPosName,
+                        ArrivalTime = sta.ArrivalTime,
+                        DepartureTime = sta.DepartureTime
+                    };
+                }
+                else
+                {
+                    // 情報補完: null の場合は新しい値を採用、競合は先勝ちで警告
+                    if (existing.ArrivalTime == null && sta.ArrivalTime != null)
+                        existing.ArrivalTime = sta.ArrivalTime;
+                    else if (existing.ArrivalTime != null && sta.ArrivalTime != null
+                             && !TimesEqual(existing.ArrivalTime, sta.ArrivalTime))
+                        Console.Error.WriteLine(
+                            $"[WARN] {trainNumber}: {sta.StationName} 到着時刻競合 "
+                            + $"{FormatTime(existing.ArrivalTime)} vs {FormatTime(sta.ArrivalTime)} → 先勝ち");
+
+                    if (existing.DepartureTime == null && sta.DepartureTime != null)
+                        existing.DepartureTime = sta.DepartureTime;
+                    else if (existing.DepartureTime != null && sta.DepartureTime != null
+                             && !TimesEqual(existing.DepartureTime, sta.DepartureTime))
+                        Console.Error.WriteLine(
+                            $"[WARN] {trainNumber}: {sta.StationName} 出発時刻競合 "
+                            + $"{FormatTime(existing.DepartureTime)} vs {FormatTime(sta.DepartureTime)} → 先勝ち");
+
+                    if (string.IsNullOrEmpty(existing.StopPosName) && !string.IsNullOrEmpty(sta.StopPosName))
+                        existing.StopPosName = sta.StopPosName;
+                }
+            }
+        }
+
+        // 駅を進行方向順にソート
+        var sortedStaList = stationMap.Values
+            .OrderBy(s =>
+            {
+                var idx = _ekiOrder.IndexOf(s.StationName);
+                return isKudari ? idx : -idx;
+            })
+            .ToList();
+
+        var origin = sortedStaList.First();
+        var dest = sortedStaList.Last();
+
+        return new TTC_Train
+        {
+            OperationNumber = 0,
+            TrainNumber = trainNumber,
+            PreviousTrainNumber = "",
+            NextTrainNumber = "",
+            TrainClass = trains.Select(t => t.TrainClass).FirstOrDefault(tc => !string.IsNullOrEmpty(tc)) ?? "",
+            OriginStationID = origin.StationID,
+            OriginStationName = origin.StationName,
+            DestinationStationID = dest.StationID,
+            DestinationStationName = dest.StationName,
+            StaList = sortedStaList,
+            TemporaryStopStations = [],
+            IsRegularService = trains.All(t => t.IsRegularService),
+            CarCount = trains.First().CarCount
+        };
+    }
+
+    private static bool TimesEqual(TimeOfDay a, TimeOfDay b)
+        => a.H == b.H && a.M == b.M && a.S == b.S;
+
+    private static string FormatTime(TimeOfDay t)
+        => $"{t.H:00}:{t.M:00}:{t.S:00}";
 
     private void LoadEkiOrder(Dictionary<string, object> rosen)
     {
@@ -813,31 +917,29 @@ public static class Program
         {
             var category = match.Groups[1].Value;   // $1 e.g. "運転会"
             var version = match.Groups[2].Value;    // $2 e.g. "0414"
-            var outputDir = Path.Combine(outputBaseDir, category);
-            Directory.CreateDirectory(outputDir);
+            var legacyDir = Path.Combine(outputBaseDir, category);
 
             Console.WriteLine();
             Console.WriteLine($"Input:  {oud2Path}");
-            Console.WriteLine($"Output: {outputDir}");
+
+            // 旧形式のサブディレクトリ（時間帯別JSONファイル群）を削除
+            if (Directory.Exists(legacyDir))
+            {
+                Directory.Delete(legacyDir, recursive: true);
+                Console.WriteLine($"Removed legacy directory: {legacyDir}");
+            }
 
             Console.WriteLine("Converting oud2 to TTC_Data...");
-            var diaDataMap = converter.Convert(oud2Path);
+            var ttcData = converter.Convert(oud2Path);
+            ttcData.Version = version;
+            ttcData.Name = category;
 
-            Console.WriteLine($"Found {diaDataMap.Count} diagrams:");
+            var outputPath = Path.Combine(outputBaseDir, $"{category}.json");
+            var json = JsonSerializer.Serialize(ttcData, jsonOptions);
+            File.WriteAllText(outputPath, json);
 
-            foreach (var (timeRange, ttcData) in diaDataMap)
-            {
-                ttcData.Version = version;
-                ttcData.Name = category;
-                ttcData.TimeRange = timeRange;
-                var safeName = MakeSafeFileName(timeRange);
-                var outputPath = Path.Combine(outputDir, $"{safeName}.json");
-
-                var json = JsonSerializer.Serialize(ttcData, jsonOptions);
-                File.WriteAllText(outputPath, json);
-
-                Console.WriteLine($"  - {timeRange}: {ttcData.TrainList.Count} trains → {category}/{safeName}.json");
-            }
+            Console.WriteLine($"Output: {outputPath}");
+            Console.WriteLine($"  {ttcData.TrainList.Count} trains merged → {category}.json");
         }
 
         Console.WriteLine();

@@ -5,11 +5,11 @@ namespace Traincrew_MultiATS_Server.Repositories.Diagram;
 
 public class DiagramRepository(ApplicationDbContext context) : IDiagramRepository
 {
-    public async Task<Dictionary<(string Name, string TimeRange), Models.Diagram>> GetAllForNameAndTimeRange(
+    public async Task<Dictionary<string, Models.Diagram>> GetAllForName(
         CancellationToken cancellationToken = default)
     {
         return await context.Diagrams
-            .ToDictionaryAsync(d => (d.Name, d.TimeRange), cancellationToken);
+            .ToDictionaryAsync(d => d.Name, cancellationToken);
     }
 
     public async Task<List<Models.Diagram>> GetAll(CancellationToken cancellationToken = default)

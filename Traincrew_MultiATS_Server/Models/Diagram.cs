@@ -16,14 +16,6 @@ public class Diagram
     public string Name { get; set; } = string.Empty;
 
     [Required]
-    [Column("time_range")]
-    public string TimeRange { get; set; } = string.Empty;
-
-    [Required]
     [Column("version")]
     public string Version { get; set; } = string.Empty;
-
-    [Required]
-    [Column("index")]
-    public int Index { get; set; }
 }

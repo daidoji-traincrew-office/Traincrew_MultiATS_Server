@@ -434,10 +434,8 @@ CREATE TABLE diagram
 (
     id         BIGSERIAL PRIMARY KEY, -- ID
     name       TEXT NOT NULL,         -- 名前
-    time_range TEXT NOT NULL,         -- 時間帯
     version    TEXT NOT NULL,         -- バージョン
-    index      INT  NOT NULL,         -- oudiaファイル内の順序（1始まり）
-    UNIQUE (name, time_range)
+    UNIQUE (name)
 );
 
 -- 列車(ダイヤグラム内の1列車)情報
