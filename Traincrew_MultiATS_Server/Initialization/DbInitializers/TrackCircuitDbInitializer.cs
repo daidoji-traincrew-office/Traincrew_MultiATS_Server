@@ -26,39 +26,58 @@ public class TrackCircuitDbInitializer(
     public async Task InitializeTrackCircuitsAsync(List<TrackCircuitCsv> trackCircuitList,
         CancellationToken cancellationToken = default)
     {
-        var trackCircuitNames = (await trackCircuitRepository.GetAllNames(cancellationToken)).ToHashSet();
+        var existingEntities = (await trackCircuitRepository.GetAllTrackCircuitList(cancellationToken))
+            .ToDictionary(tc => tc.Name);
 
-        var trackCircuits = new List<TrackCircuit>();
+        var trackCircuitsToAdd = new List<TrackCircuit>();
+        var trackCircuitsToUpdate = new List<TrackCircuit>();
+
         foreach (var item in trackCircuitList)
         {
-            if (trackCircuitNames.Contains(item.Name))
-            {
-                continue;
-            }
+            // Todo: ProtectionZoneの未定義部分がなくなったら、ProtectionZoneのデフォルト値の設定を解除
+            var protectionZone = item.ProtectionZone ?? 99;
+            // TH00は遅延計算から除外
+            var stationIdForDelay = item.TargetStation == "TH00" ? null : item.TargetStation;
 
-            trackCircuits.Add(new()
+            if (existingEntities.TryGetValue(item.Name, out var existing))
             {
-                // Todo: ProtectionZoneの未定義部分がなくなったら、ProtectionZoneのデフォルト値の設定を解除
-                ProtectionZone = item.ProtectionZone ?? 99,
-                Name = item.Name,
-                Type = ObjectType.TrackCircuit,
-                // TH00は遅延計算から除外
-                StationIdForDelay = item.TargetStation == "TH00" ? null : item.TargetStation,
-                TrackCircuitState = new()
+                if (existing.ProtectionZone != protectionZone || existing.StationIdForDelay != stationIdForDelay)
                 {
-                    IsShortCircuit = false,
-                    IsLocked = false,
-                    TrainNumber = "",
-                    IsCorrectionDropRelayRaised = RaiseDrop.Drop,
-                    IsCorrectionRaiseRelayRaised = RaiseDrop.Drop,
-                    DroppedAt = null,
-                    RaisedAt = null
+                    existing.ProtectionZone = protectionZone;
+                    existing.StationIdForDelay = stationIdForDelay;
+                    trackCircuitsToUpdate.Add(existing);
                 }
-            });
+            }
+            else
+            {
+                trackCircuitsToAdd.Add(new()
+                {
+                    ProtectionZone = protectionZone,
+                    Name = item.Name,
+                    Type = ObjectType.TrackCircuit,
+                    StationIdForDelay = stationIdForDelay,
+                    TrackCircuitState = new()
+                    {
+                        IsShortCircuit = false,
+                        IsLocked = false,
+                        TrainNumber = "",
+                        IsCorrectionDropRelayRaised = RaiseDrop.Drop,
+                        IsCorrectionRaiseRelayRaised = RaiseDrop.Drop,
+                        DroppedAt = null,
+                        RaisedAt = null
+                    }
+                });
+            }
         }
 
-        await generalRepository.AddAll(trackCircuits, cancellationToken);
-        logger.LogInformation("Initialized {Count} track circuits", trackCircuits.Count);
+        await generalRepository.AddAll(trackCircuitsToAdd, cancellationToken);
+        logger.LogInformation("Initialized {Count} track circuits", trackCircuitsToAdd.Count);
+
+        if (trackCircuitsToUpdate.Count > 0)
+        {
+            await generalRepository.SaveAll(trackCircuitsToUpdate, cancellationToken);
+            logger.LogInformation("Updated {Count} track circuits", trackCircuitsToUpdate.Count);
+        }
     }
 
     /// <summary>
