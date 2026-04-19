@@ -2,6 +2,7 @@
   "version": "0414",
   "name": "運転会",
   "time_range": "11-13",
+  "index": 3,
   "TrainList": [
     {
       "operationNumber": 1,

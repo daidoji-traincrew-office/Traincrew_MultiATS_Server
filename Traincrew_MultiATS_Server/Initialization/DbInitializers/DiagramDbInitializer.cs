@@ -21,9 +21,10 @@ public class DiagramDbInitializer(
 
             if (existingDiagrams.TryGetValue(key, out var existing))
             {
-                if (existing.Version != diagramJson.Version)
+                if (existing.Version != diagramJson.Version || existing.Index != diagramJson.Index)
                 {
                     existing.Version = diagramJson.Version;
+                    existing.Index = diagramJson.Index;
                     await generalRepository.Save(existing, cancellationToken);
                     logger.LogInformation("Updated diagram version: {Name} {TimeRange} → {Version}",
                         diagramJson.Name, diagramJson.TimeRange, diagramJson.Version);
@@ -37,7 +38,8 @@ public class DiagramDbInitializer(
                 {
                     Name = diagramJson.Name,
                     TimeRange = diagramJson.TimeRange,
-                    Version = diagramJson.Version
+                    Version = diagramJson.Version,
+                    Index = diagramJson.Index
                 };
                 await generalRepository.Add(newDiagram, cancellationToken);
                 diaId = newDiagram.Id;

@@ -22,4 +22,8 @@ public class Diagram
     [Required]
     [Column("version")]
     public string Version { get; set; } = string.Empty;
+
+    [Required]
+    [Column("index")]
+    public int Index { get; set; }
 }

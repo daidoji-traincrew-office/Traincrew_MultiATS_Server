@@ -2,6 +2,7 @@
   "version": "0413",
   "name": "野球臨",
   "time_range": "21-24",
+  "index": 1,
   "TrainList": [
     {
       "operationNumber": 1,

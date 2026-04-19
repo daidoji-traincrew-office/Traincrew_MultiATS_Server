@@ -10,5 +10,7 @@ public class DiagramJson
     [JsonPropertyName("time_range")]
     public string TimeRange { get; set; } = string.Empty;
 
+    public int Index { get; set; }
+
     public List<TTC_Train> TrainList { get; set; } = [];
 }
