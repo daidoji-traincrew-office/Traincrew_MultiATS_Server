@@ -809,8 +809,8 @@ public class TrainServiceTest
         };
         var departmentTime = new TrackCircuitDepartmentTime { Id = 1, TrackCircuitId = 100, CarCount = 10, IsUp = true, TimeElement = 0 };
 
-        var currentTime = new DateTime(2024, 1, 1, 10, 3, 0); // 現在時刻: 10:03:00、timeOffset: +120秒
-        var timeOffset = 120; // 実際の時刻: 10:03:00 + 120秒 = 10:05:00、遅延: 10:05:00 - 10:02:00 = 3分
+        var currentTime = new DateTime(2024, 1, 1, 8, 5, 0); // 現在時刻: 08:05:00、timeOffset: +2時間
+        var timeOffset = 2; // 実際の時刻: 08:05:00 + 2時間 = 10:05:00、遅延: 10:05:00 - 10:02:00 = 3分
 
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
@@ -861,8 +861,8 @@ public class TrainServiceTest
         };
         var departmentTime = new TrackCircuitDepartmentTime { Id = 1, TrackCircuitId = 100, CarCount = 10, IsUp = true, TimeElement = 0 };
 
-        var currentTime = new DateTime(2024, 1, 1, 10, 7, 0); // 現在時刻: 10:07:00、timeOffset: -120秒
-        var timeOffset = -120; // 実際の時刻: 10:07:00 - 120秒 = 10:05:00、遅延: 10:05:00 - 10:02:00 = 3分
+        var currentTime = new DateTime(2024, 1, 1, 12, 5, 0); // 現在時刻: 12:05:00、timeOffset: -2時間
+        var timeOffset = -2; // 実際の時刻: 12:05:00 - 2時間 = 10:05:00、遅延: 10:05:00 - 10:02:00 = 3分
 
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
