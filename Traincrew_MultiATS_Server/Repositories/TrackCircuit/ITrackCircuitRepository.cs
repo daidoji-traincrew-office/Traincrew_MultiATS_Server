@@ -2,7 +2,7 @@ namespace Traincrew_MultiATS_Server.Repositories.TrackCircuit;
 
 public interface ITrackCircuitRepository
 {
-    Task<List<Models.TrackCircuit>> GetAllTrackCircuitList();
+    Task<List<Models.TrackCircuit>> GetAllTrackCircuitList(CancellationToken cancellationToken = default);
     Task<List<Models.TrackCircuit>> GetTrackCircuitListByTrainNumber(string trainNumber);
     Task<List<Models.TrackCircuit>> GetTrackCircuitByName(List<string> trackCircuitNames);
     Task<List<Models.TrackCircuit>> GetTrackCircuitsById(List<ulong> Ids);

@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.Initialization.CsvLoaders;
 using Traincrew_MultiATS_Server.Initialization.DbInitializers;
+using Traincrew_MultiATS_Server.Initialization.JsonLoaders;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.ApproachAlertCondition;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
@@ -33,10 +34,11 @@ public class DatabaseInitializationOrchestrator(
     StationCsvLoader stationCsvLoader,
     TrackCircuitCsvLoader trackCircuitCsvLoader,
     SignalTypeCsvLoader signalTypeCsvLoader,
-    TrainTypeCsvLoader trainTypeCsvLoader,
-    TrainDiagramCsvLoader trainDiagramCsvLoader,
     RendoTableCsvLoader rendoTableCsvLoader,
     SignalCsvLoader signalCsvLoader,
+    TrainTypeCsvLoader trainTypeCsvLoader,
+    DiagramJsonLoader diagramJsonLoader,
+    DiagramDbInitializer diagramDbInitializer,
     StationDbInitializer stationDbInitializer,
     TrackCircuitDbInitializer trackCircuitDbInitializer,
     SignalTypeDbInitializer signalTypeDbInitializer,
@@ -79,15 +81,13 @@ public class DatabaseInitializationOrchestrator(
         // Phase 6: SignalTypeDbInitializer - 信号タイプの初期化
         await signalTypeDbInitializer.InitializeSignalTypesAsync(signalTypeList, cancellationToken);
 
-        // Phase 7: TrainTypeCsvLoader - 列車タイプデータの読み込み
+        // Phase 7: TrainTypeCsvLoader - 列車種別データの読み込みと初期化
         var trainTypeList = await trainTypeCsvLoader.LoadAsync(cancellationToken);
-
-        // Phase 8: TrainDiagramCsvLoader - 列車ダイヤデータの読み込み
-        var trainDiagramList = await trainDiagramCsvLoader.LoadAsync(cancellationToken);
-
-        // Phase 9: TrainDbInitializer - 列車データの初期化
         await trainDbInitializer.InitializeTrainTypesAsync(trainTypeList, cancellationToken);
-        await trainDbInitializer.InitializeTrainDiagramsAsync(trainDiagramList, cancellationToken);
+
+        // Phase 9: DiagramJSON形式のダイヤ初期化
+        var diagramJsonList = await diagramJsonLoader.LoadAllAsync(cancellationToken);
+        await diagramDbInitializer.InitializeAsync(diagramJsonList, cancellationToken);
 
         // Phase 10: DbRendoTableInitializer - 連動表オブジェクトの初期化（駅ごと）
         var rendoTableInitializers = await CreateRendoTableInitializersAsync(cancellationToken);
@@ -123,6 +123,9 @@ public class DatabaseInitializationOrchestrator(
 
         // Phase 23: TrackCircuitDbInitializer - 軌道回路信号の初期化
         await trackCircuitDbInitializer.InitializeTrackCircuitSignalsAsync(trackCircuitList, cancellationToken);
+
+        // Phase 23.5: TrackCircuitDbInitializer - 軌道回路出発時素の初期化
+        await trackCircuitDbInitializer.InitializeTrackCircuitDepartmentTimesAsync(trackCircuitList, cancellationToken);
 
         DetachUnchangedEntities();
 

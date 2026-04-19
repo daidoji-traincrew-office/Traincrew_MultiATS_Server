@@ -22,10 +22,13 @@ using Traincrew_MultiATS_Server.Hubs;
 using Traincrew_MultiATS_Server.Initialization;
 using Traincrew_MultiATS_Server.Initialization.CsvLoaders;
 using Traincrew_MultiATS_Server.Initialization.DbInitializers;
+using Traincrew_MultiATS_Server.Initialization.JsonLoaders;
 using Traincrew_MultiATS_Server.Repositories.ApproachAlertCondition;
 using Traincrew_MultiATS_Server.Repositories.ApproachAlertState;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.DestinationButton;
+using Traincrew_MultiATS_Server.Repositories.Diagram;
+using Traincrew_MultiATS_Server.Repositories.DiagramTrain;
 using Traincrew_MultiATS_Server.Repositories.DirectionRoute;
 using Traincrew_MultiATS_Server.Repositories.DirectionSelfControlLever;
 using Traincrew_MultiATS_Server.Repositories.Discord;
@@ -54,10 +57,10 @@ using Traincrew_MultiATS_Server.Repositories.SwitchingMachine;
 using Traincrew_MultiATS_Server.Repositories.SwitchingMachineRoute;
 using Traincrew_MultiATS_Server.Repositories.ThrowOutControl;
 using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
+using Traincrew_MultiATS_Server.Repositories.TrackCircuitDepartmentTime;
 using Traincrew_MultiATS_Server.Repositories.TrackCircuitSignal;
 using Traincrew_MultiATS_Server.Repositories.Train;
 using Traincrew_MultiATS_Server.Repositories.TrainCar;
-using Traincrew_MultiATS_Server.Repositories.TrainDiagram;
 using Traincrew_MultiATS_Server.Repositories.TrainSignalState;
 using Traincrew_MultiATS_Server.Repositories.TrainType;
 using Traincrew_MultiATS_Server.Repositories.Transaction;
@@ -488,7 +491,7 @@ public class Program
             .AddScoped<TrackCircuitCsvLoader>()
             .AddScoped<SignalTypeCsvLoader>()
             .AddScoped<TrainTypeCsvLoader>()
-            .AddScoped<TrainDiagramCsvLoader>()
+            .AddScoped<DiagramTrainCsvLoader>()
             .AddScoped<RendoTableCsvLoader>()
             .AddScoped<OperationNotificationDisplayCsvLoader>()
             .AddScoped<RouteLockTrackCircuitCsvLoader>()
@@ -497,6 +500,8 @@ public class Program
             .AddScoped<ThrowOutControlCsvLoader>()
             .AddScoped<SignalCsvLoader>()
             .AddScoped<ApproachAlertConditionCsvLoader>()
+            // JSON Loaders
+            .AddScoped<DiagramJsonLoader>()
             // DB Initializers
             .AddScoped<StationDbInitializer>()
             .AddScoped<TrackCircuitDbInitializer>()
@@ -511,6 +516,7 @@ public class Program
             .AddScoped<InterlockingObjectDbInitializer>()
             .AddScoped<SwitchingMachineRouteDbInitializer>()
             .AddScoped<ApproachAlertConditionDbInitializer>()
+            .AddScoped<DiagramDbInitializer>()
             // Orchestrator
             .AddScoped<DatabaseInitializationOrchestrator>()
             .AddScoped<IApproachAlertConditionRepository, ApproachAlertConditionRepository>()
@@ -544,10 +550,12 @@ public class Program
             .AddScoped<ISwitchingMachineRouteRepository, SwitchingMachineRouteRepository>()
             .AddScoped<IThrowOutControlRepository, ThrowOutControlRepository>()
             .AddScoped<ITrackCircuitRepository, TrackCircuitRepository>()
+            .AddScoped<ITrackCircuitDepartmentTimeRepository, TrackCircuitDepartmentTimeRepository>()
             .AddScoped<ITrackCircuitSignalRepository, TrackCircuitSignalRepository>()
             .AddScoped<ITrainRepository, TrainRepository>()
             .AddScoped<ITrainCarRepository, TrainCarRepository>()
-            .AddScoped<ITrainDiagramRepository, TrainDiagramRepository>()
+            .AddScoped<IDiagramRepository, DiagramRepository>()
+            .AddScoped<IDiagramTrainRepository, DiagramTrainRepository>()
             .AddScoped<ITrainTypeRepository, TrainTypeRepository>()
             .AddScoped<ITrainSignalStateRepository, TrainSignalStateRepository>()
             .AddScoped<ITtcWindowRepository, TtcWindowRepository>()
@@ -568,6 +576,7 @@ public class Program
             .AddScoped<IRendoService, RendoService>()
             .AddScoped<IRouteService, RouteService>()
             .AddScoped<IServerService, ServerService>()
+            .AddScoped<IDiagramService, DiagramService>()
             .AddScoped<ISignalService, SignalService>()
             .AddScoped<IStationService, StationService>()
             .AddScoped<ISwitchingMachineService, SwitchingMachineService>()

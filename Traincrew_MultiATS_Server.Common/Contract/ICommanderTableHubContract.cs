@@ -27,6 +27,8 @@ public interface ICommanderTableHubContract
     Task SetUseOneSecondRelay(bool useOneSecondRelay);
     Task BanUser(ulong userId);
     Task UnbanUser(ulong userId);
+    Task<List<DiagramData>> GetDiagrams();
+    Task SetSelectedDiagramId(ulong? diaId);
 }
 
 public interface ICommanderTableClientContract

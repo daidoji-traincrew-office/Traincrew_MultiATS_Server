@@ -74,4 +74,9 @@ public static class CsvFilePaths
     ///     接近警報鳴動条件.csv
     /// </summary>
     public const string ApproachAlertCondition = $"{DataDirectory}/接近警報鳴動条件.csv";
+
+    /// <summary>
+    ///     ttc_data_train.json
+    /// </summary>
+    public const string TtcDataTrain = $"{DataDirectory}/ttc_data_train.json";
 }

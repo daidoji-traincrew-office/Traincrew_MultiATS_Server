@@ -73,4 +73,19 @@ public class ServerRepository(ApplicationDbContext context) : IServerRepository
         context.ServerStates.Update(state);
         await context.SaveChangesAsync();
     }
+
+    public async Task<ulong?> GetSelectedDiagramIdAsync()
+    {
+        return await context.ServerStates
+            .Select(state => (ulong?)state.SelectedDiagramId)
+            .FirstOrDefaultAsync();
+    }
+
+    public async Task SetSelectedDiagramIdAsync(ulong? diaId)
+    {
+        await context.ServerStates
+            .ExecuteUpdateAsync(property => property
+                .SetProperty(serverState => serverState.SelectedDiagramId, diaId)
+            );
+    }
 }
