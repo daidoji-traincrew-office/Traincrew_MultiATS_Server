@@ -754,7 +754,7 @@ public partial class TrainService(
             var currentTimeSeconds = NormalizeTimeToServiceDay(adjustedCurrentTime);
             var departureTimeSeconds = NormalizeTimeToServiceDay(timetable.DepartureTime.Value);
 
-            var delaySeconds = currentTimeSeconds - departureTimeSeconds + timeElement;
+            var delaySeconds = currentTimeSeconds - departureTimeSeconds - timeElement;
             var delayMinutes = (int)Math.Round(delaySeconds / 60.0, MidpointRounding.ToZero);
 
             // 遅延を更新
