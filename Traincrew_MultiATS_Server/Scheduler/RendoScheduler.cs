@@ -56,7 +56,7 @@ public class RendoScheduler(IServiceScopeFactory serviceScopeFactory) : Schedule
                 await service.TimerRelay();
             }
 
-            // 成功時: DropからRaiseに変更(それ以外なら変更しない)
+            // 成功時: DropからRaiseに変更(ForceDrop時は強制的に落としっぱにするため変更しない)
             if (serverState?.IsAllSignalRelayRaised == RaiseDropWithForce.Drop)
             {
                 await serverRepository.SetIsAllSignalRelayRaisedAsync(RaiseDropWithForce.Raise);
