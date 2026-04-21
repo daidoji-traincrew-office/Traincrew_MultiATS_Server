@@ -7,6 +7,10 @@ namespace Traincrew_MultiATS_Server.Repositories.DirectionRoute;
 
 public class DirectionRouteRepository(ApplicationDbContext context) : IDirectionRouteRepository
 {
+    /// <summary>
+    /// 全ての方向てこのIDを取得する。
+    /// </summary>
+    /// <returns>方向てこのIDのリスト。</returns>
     public async Task<List<ulong>> GetAllIds()
     {
         return await context.DirectionRoutes
@@ -25,6 +29,11 @@ public class DirectionRouteRepository(ApplicationDbContext context) : IDirection
             .ToListAsync();
     }
 
+    /// <summary>
+    /// DirectionRoute名からIDへのマッピングを取得する
+    /// </summary>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    /// <returns>DirectionRoute名をキー、IDを値とする辞書</returns>
     public async Task<Dictionary<string, ulong>> GetIdsByNameAsync(CancellationToken cancellationToken = default)
     {
         return await context.DirectionRoutes
@@ -62,7 +71,7 @@ public class DirectionRouteRepository(ApplicationDbContext context) : IDirection
     }
 
     /// <summary>
-    /// 条件1: DirectionSelfControlLeverがReversed && てこ位置と方向が不一致のDirectionRouteIdを取得
+    /// 条件1: 開放てこが駅扱 && 方向てこ位置と実際の方向が不一致のDirectionRouteIdを取得
     /// </summary>
     /// <returns>DirectionRouteIdリスト</returns>
     public async Task<List<ulong>> GetIdsWhereLeverPositionMismatch()
@@ -88,7 +97,7 @@ public class DirectionRouteRepository(ApplicationDbContext context) : IDirection
     }
 
     /// <summary>
-    /// 条件2: 総括制御元の進路のてこ反リレーが扛上していて、向きが違うDirectionRouteIdを取得
+    /// 条件2: 総括制御元の進路のてこ反リレーが扛上しているDirectionRouteIdを取得
     /// </summary>
     /// <returns>DirectionRouteIdリスト</returns>
     public async Task<List<ulong>> GetIdsWhereThrowOutControlRaised()
@@ -129,6 +138,11 @@ public class DirectionRouteRepository(ApplicationDbContext context) : IDirection
             .ToListAsync();
     }
 
+    /// <summary>
+    /// 指定されたIDのDirectionRouteを取得する
+    /// </summary>
+    /// <param name="ids">DirectionRouteのIDリスト</param>
+    /// <returns>DirectionRouteのリスト</returns>
     public async Task<List<Models.DirectionRoute>> GetByIds(List<ulong> ids)
     {
         return await context.DirectionRoutes
