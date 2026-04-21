@@ -979,7 +979,6 @@ public class RendoService(
         var directionRouteIds = idsWhereLeverPositionMismatch
             .Union(idsWhereThrowOutControlRaised)
             .Union(idsWhereBothLAndRRelaysRaised)
-            .Distinct()
             .ToList();
 
         // 処理対象がない場合は早期リターン
