@@ -45,7 +45,7 @@ public class SignalService(
         if (serverState?.IsAllSignalRelayRaised != RaiseDropWithForce.Raise)
         {
             // すべての信号を停止現示として返す
-            return signalName 
+            return signalName
                 .Select(name => ToSignalData(name, Phase.R))
                 .ToList();
         }
@@ -66,6 +66,16 @@ public class SignalService(
     /// <returns>信号機の現示データのリスト</returns>
     public async Task<List<SignalData>> CalcAllSignalIndication()
     {
+        // フェイルセーフチェック: isAllSignalRelayRaisedがRaiseでない場合、すべての信号を停止として返す
+        var serverState = await serverRepository.GetServerStateAsync();
+        if (serverState?.IsAllSignalRelayRaised != RaiseDropWithForce.Raise)
+        {
+            // すべての信号を停止現示として返す
+            var signalNames = await signalRepository.GetAllNames();
+            return signalNames
+                .Select(name => ToSignalData(name, Phase.R))
+                .ToList();
+        }
         // 1. 全信号の詳細情報を取得
         var allSignals = await signalRepository.GetSignalsForCalcIndication();
         var signals = allSignals.ToDictionary(x => x.Name);
@@ -114,7 +124,7 @@ public class SignalService(
     {
         // まず、先の信号機名を取得
         var nextSignals = getDetailedIndication
-            ? await nextSignalRepository.GetNextSignalByNamesOrderByDepthDesc(signalNames) 
+            ? await nextSignalRepository.GetNextSignalByNamesOrderByDepthDesc(signalNames)
             : [];
         // その上で、必要な信号と情報をすべて取得する
         var signalList = await signalRepository.GetSignalsByNamesForCalcIndication(
