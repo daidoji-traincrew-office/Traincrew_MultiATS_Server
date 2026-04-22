@@ -12,5 +12,6 @@ public interface IServerRepository
     Task AddServerStateAsync(ServerState serverState, CancellationToken cancellationToken = default);
     Task SetSwitchMoveTimeAsync(int switchMoveTime);
     Task SetUseOneSecondRelayAsync(bool useOneSecondRelay);
+    Task SetIsAllSignalRelayRaisedAsync(RaiseDropWithForce raiseDropWithForce);
 }
 

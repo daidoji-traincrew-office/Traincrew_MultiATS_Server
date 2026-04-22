@@ -29,7 +29,8 @@ public class ServerStatusDbInitializer(
         await generalRepository.Add(new ServerState
         {
             Mode = ServerMode.Off,
-            TimeOffset = 0
+            TimeOffset = 0,
+            IsAllSignalRelayRaised = RaiseDropWithForce.Drop
         }, cancellationToken);
         logger.LogInformation("Initialized server status");
     }
