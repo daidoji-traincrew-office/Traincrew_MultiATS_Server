@@ -71,6 +71,9 @@ jobs:
           RENDO_SPREADSHEET_ID: ${{ secrets.RENDO_SPREADSHEET_ID }}
           MASTER_SPREADSHEET_ID: ${{ secrets.MASTER_SPREADSHEET_ID }}
 
+      - name: Run OudiaConverter
+        run: dotnet run --project OudiaConverter/OudiaConverter.csproj
+
       - name: Commit and push
         run: |
           git add ${{ env.DATA_DIR }}
