@@ -952,6 +952,7 @@
       ],
       "temporaryStopStations": [],
       "isRegularService": true,
+      "trainName": "Ｂ特",
       "carCount": 4
     },
     {
@@ -2678,6 +2679,7 @@
       ],
       "temporaryStopStations": [],
       "isRegularService": true,
+      "trainName": "Ｃ特２",
       "carCount": 4
     },
     {
@@ -3851,6 +3853,7 @@
       ],
       "temporaryStopStations": [],
       "isRegularService": true,
+      "trainName": "Ｂ特",
       "carCount": 4
     },
     {
@@ -5352,6 +5355,7 @@
       ],
       "temporaryStopStations": [],
       "isRegularService": true,
+      "trainName": "Ｃ特１",
       "carCount": 4
     },
     {
@@ -6239,6 +6243,7 @@
       ],
       "temporaryStopStations": [],
       "isRegularService": true,
+      "trainName": "Ｂ特",
       "carCount": 4
     },
     {
@@ -7109,6 +7114,7 @@
       ],
       "temporaryStopStations": [],
       "isRegularService": true,
+      "trainName": "Ｃ特２",
       "carCount": 4
     },
     {
@@ -8101,6 +8107,7 @@
       ],
       "temporaryStopStations": [],
       "isRegularService": true,
+      "trainName": "Ｃ特４",
       "carCount": 4
     },
     {
@@ -9515,6 +9522,7 @@
       ],
       "temporaryStopStations": [],
       "isRegularService": true,
+      "trainName": "Ｂ特",
       "carCount": 4
     },
     {
@@ -10713,6 +10721,7 @@
       ],
       "temporaryStopStations": [],
       "isRegularService": true,
+      "trainName": "Ｃ特２",
       "carCount": 4
     },
     {

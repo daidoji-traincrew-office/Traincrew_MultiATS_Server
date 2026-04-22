@@ -218,6 +218,9 @@ public class TTC_Train
     [JsonPropertyName("isRegularService")]
     public bool IsRegularService { get; set; } = true;
 
+    [JsonPropertyName("trainName")]
+    public string? TrainName { get; set; }
+
     [JsonPropertyName("carCount")]
     public int CarCount { get; set; } = 4;
 }
@@ -456,6 +459,7 @@ public class Oud2ToTtcConverter
             TrainNumber = trainNumber,
             PreviousTrainNumber = "",
             NextTrainNumber = "",
+            TrainName = trains.Select(t => t.TrainName).FirstOrDefault(n => !string.IsNullOrEmpty(n)),
             TrainClass = trains.Select(t => t.TrainClass).FirstOrDefault(tc => !string.IsNullOrEmpty(tc)) ?? "",
             OriginStationID = origin.StationID,
             OriginStationName = origin.StationName,
@@ -551,6 +555,8 @@ public class Oud2ToTtcConverter
         var trainNumber = GetStringProp(ressya, "Ressyabangou");
         if (string.IsNullOrEmpty(trainNumber)) return null;
 
+        var ressyamei = GetStringProp(ressya, "Ressyamei");
+
         var syubetsuStr = GetStringProp(ressya, "Syubetsu");
         int.TryParse(syubetsuStr, out var syubetsuIndex);
         var trainClass = GetTrainClass(syubetsuIndex);
@@ -576,6 +582,7 @@ public class Oud2ToTtcConverter
             TrainNumber = trainNumber,
             PreviousTrainNumber = "",
             NextTrainNumber = "",
+            TrainName = string.IsNullOrEmpty(ressyamei) ? null : ressyamei,
             TrainClass = trainClass,
             OriginStationID = originId,
             OriginStationName = originName,
