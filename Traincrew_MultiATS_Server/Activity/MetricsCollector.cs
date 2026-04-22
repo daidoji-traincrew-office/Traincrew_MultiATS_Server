@@ -5,8 +5,9 @@ namespace Traincrew_MultiATS_Server.Activity;
 public class MetricsCollector
 {
     private int _cachedTrainCount;
-    private int _cachedServerMode = -1;
+    private int _cachedServerMode;
 
+// ObservableGaugeはGCされるとコールバックが停止するため参照を保持する
 #pragma warning disable IDE0052
     private readonly ObservableGauge<int> _trainCountGauge;
     private readonly ObservableGauge<int> _serverModeGauge;
