@@ -95,7 +95,7 @@ public class TrainServiceTest
             TimeElement = 30 // 30秒の時素
         };
 
-        // 現在時刻: 10:05:00 (発車予定 10:02:00 より 3分遅れ + 時素30秒 = 3.5分 → 3分)
+        // 現在時刻: 10:05:00 (発車予定 10:02:00 より 3分遅れ - 時素30秒 = 2.5分 → 2分)
         var currentTime = new DateTime(2024, 1, 1, 10, 5, 0);
         var timeOffset = 0;
 
@@ -140,7 +140,7 @@ public class TrainServiceTest
 
         // Assert
         mockTrainRepository.Verify(
-            x => x.SetDelayByTrainNumber(trainNumber, 3),
+            x => x.SetDelayByTrainNumber(trainNumber, 2),
             Times.Once
         );
     }
