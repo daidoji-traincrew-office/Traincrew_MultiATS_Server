@@ -19,6 +19,7 @@ public class TTC_Train
     public string previousTrainNumber; //前列番
     public string nextTrainNumber; //後列番
     public string trainClass; //列車種別
+    public string? trainName; //列車名（特急種別）
     public string originStationID; //始発駅
     public string originStationName; //始発駅
     public string destinationStationID; //終着駅

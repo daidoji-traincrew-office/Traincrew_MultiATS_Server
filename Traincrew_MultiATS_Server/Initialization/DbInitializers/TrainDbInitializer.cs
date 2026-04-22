@@ -116,7 +116,7 @@ public class TrainDbInitializer(
             }
 
             // Get train type ID from train class name, default to 1 if not found
-            var trainTypeId = trainTypeIdByName.GetValueOrDefault(ttcTrain.trainClass, 1);
+            var trainTypeId = ResolveTrainTypeId(trainTypeIdByName, ttcTrain.trainClass, ttcTrain.trainName);
 
             var newDiagram = new DiagramTrain
             {
@@ -201,6 +201,29 @@ public class TrainDbInitializer(
         logger.LogInformation("Completed initialization from TTC_Data: {AddCount} added, {UpdateCount} updated train diagrams, {TimetableCount} timetables, {DuplicateCount} duplicate train numbers skipped",
             trainDiagramsToAdd.Count, trainDiagramsToUpdate.Count, trainTimetables.Count, duplicateTrainNumbers.Count);
     }
+
+    private static long ResolveTrainTypeId(Dictionary<string, long> trainTypeIdByName, string trainClass, string? trainName)
+    {
+        if (trainTypeIdByName.TryGetValue(trainClass, out var id))
+        {
+            return id;
+        }
+
+        if (trainClass == "特急" && !string.IsNullOrEmpty(trainName))
+        {
+            var halfWidth = ToHalfWidth(trainName);
+            if (trainTypeIdByName.TryGetValue(halfWidth, out var id2))
+            {
+                return id2;
+            }
+        }
+
+        return 1;
+    }
+
+    // 全角ASCII変換(U+FF01-U+FF5E → U+0021-U+007E)
+    private static string ToHalfWidth(string input) =>
+        new(input.Select(c => c is >= '！' and <= '～' ? (char)(c - 0xFEE0) : c).ToArray());
 
     /// <summary>
     ///     Convert TimeOfDay to TimeSpan
