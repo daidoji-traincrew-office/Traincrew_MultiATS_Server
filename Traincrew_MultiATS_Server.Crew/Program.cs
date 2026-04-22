@@ -568,6 +568,7 @@ public class Program
             .AddScoped<ITtcStationControlService, TtcStationControlService>()
             .AddSingleton<EnableAuthorizationStore>(_ => new(enableAuthorization))
             .AddSingleton<IDiscordService, DiscordService>()
+            .AddSingleton<MetricsCollector>()
             .AddSingleton<SchedulerManager>()
             .AddSingleton<DiscordRepository>()
             .AddSingleton<IDiscordRepository>(provider => provider.GetRequiredService<DiscordRepository>())
