@@ -577,6 +577,7 @@ public class Program
             .AddScoped<ITtcStationControlService, TtcStationControlService>()
             .AddSingleton<EnableAuthorizationStore>(_ => new(enableAuthorization))
             .AddSingleton<IDiscordService, DiscordService>()
+            .AddSingleton<MetricsCollector>()
             .AddSingleton<SchedulerManager>()
             .AddSingleton<DiscordRepository>()
             .AddSingleton<IDiscordRepository>(provider => provider.GetRequiredService<DiscordRepository>())
@@ -635,6 +636,8 @@ public class Program
             metrics.AddMeter("Microsoft.AspNetCore.Hosting");
             metrics.AddMeter("Microsoft.AspNetCore.Http.Connections");
             metrics.AddMeter("Microsoft.AspNetCore.Server.Kestrel");
+            // Custom application metrics
+            metrics.AddMeter(ApplicationMetrics.Meter.Name);
         });
 
         // Add Tracing for ASP.NET Core and our custom ActivitySource and export via OTLP

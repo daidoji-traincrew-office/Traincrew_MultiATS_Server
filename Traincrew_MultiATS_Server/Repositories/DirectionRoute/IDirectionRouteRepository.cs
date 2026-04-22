@@ -39,4 +39,29 @@ public interface IDirectionRouteRepository
     /// </summary>
     /// <param name="cancellationToken">キャンセルトークン</param>
     Task SaveChangesAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 条件1: 開放てこが駅扱 && 方向てこ位置と実際の方向が不一致のDirectionRouteIdを取得
+    /// </summary>
+    /// <returns>DirectionRouteIdリスト</returns>
+    Task<List<ulong>> GetIdsWhereLeverPositionMismatch();
+
+    /// <summary>
+    /// 条件2: 総括制御元の進路のてこ反リレーが扛上しているDirectionRouteIdを取得
+    /// </summary>
+    /// <returns>DirectionRouteIdリスト</returns>
+    Task<List<ulong>> GetIdsWhereThrowOutControlRaised();
+
+    /// <summary>
+    /// 条件3: L方向てこリレーとR方向てこリレーの両方が扛上しているDirectionRouteIdを取得
+    /// </summary>
+    /// <returns>DirectionRouteIdリスト</returns>
+    Task<List<ulong>> GetIdsWhereBothLAndRRelaysRaised();
+
+    /// <summary>
+    /// 指定されたIDのDirectionRouteを取得する
+    /// </summary>
+    /// <param name="ids">DirectionRouteのIDリスト</param>
+    /// <returns>DirectionRouteのリスト</returns>
+    Task<List<Models.DirectionRoute>> GetByIds(List<ulong> ids);
 }

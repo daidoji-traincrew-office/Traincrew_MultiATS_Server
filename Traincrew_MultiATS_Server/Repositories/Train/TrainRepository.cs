@@ -56,6 +56,11 @@ public class TrainRepository(ApplicationDbContext context) : ITrainRepository
             .FirstOrDefaultAsync(ts => ts.Id == id);
     }
 
+    public async Task<int> GetCount()
+    {
+        return await context.TrainStates.CountAsync();
+    }
+
 
     public async Task SetDelayByTrainNumber(string trainNumber, int delay)
     {

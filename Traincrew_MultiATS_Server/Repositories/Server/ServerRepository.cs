@@ -62,6 +62,14 @@ public class ServerRepository(ApplicationDbContext context) : IServerRepository
             );
     }
 
+    public async Task SetIsAllSignalRelayRaisedAsync(RaiseDropWithForce raiseDropWithForce)
+    {
+        await context.ServerStates
+            .ExecuteUpdateAsync(property => property
+                .SetProperty(serverState => serverState.IsAllSignalRelayRaised, raiseDropWithForce)
+            );
+    }
+
     public async Task<ulong?> GetSelectedDiagramIdAsync()
     {
         return await context.ServerStates

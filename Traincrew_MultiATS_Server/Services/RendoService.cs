@@ -970,19 +970,58 @@ public class RendoService(
     /// <returns></returns>
     public async Task DirectionRelay()
     {
-        // 方向進路の全取得
-        var directionRouteIds = await directionRouteRepository.GetAllIds();
-        // 方向てこの全取得
-        var directionLeverIds = await leverRepository.GetAllIds();
-        // 直接鎖錠条件を全取得
+        // 処理対象の条件を満たすDirectionRouteのIDを取得
+        var idsWhereLeverPositionMismatch = await directionRouteRepository.GetIdsWhereLeverPositionMismatch();
+        var idsWhereThrowOutControlRaised = await directionRouteRepository.GetIdsWhereThrowOutControlRaised();
+        var idsWhereBothLAndRRelaysRaised = await directionRouteRepository.GetIdsWhereBothLAndRRelaysRaised();
+
+        // 3つの条件のIDをマージ(重複排除)
+        var directionRouteIds = idsWhereLeverPositionMismatch
+            .Union(idsWhereThrowOutControlRaised)
+            .Union(idsWhereBothLAndRRelaysRaised)
+            .ToList();
+
+        // 処理対象がない場合は早期リターン
+        if (directionRouteIds.Count == 0)
+        {
+            return;
+        }
+
+        // 処理対象のDirectionRouteを取得してIDを抽出
+        var directionRoutes = await directionRouteRepository.GetByIds(directionRouteIds);
+
+        // 関連するLever IDを抽出
+        var directionLeverIds = directionRoutes
+            .Select(dr => dr.LeverId)
+            .Distinct()
+            .ToList();
+
+        // 関連するDirectionSelfControlLever IDを抽出（nullを除外）
+        var directionSelfControlLeverIds = directionRoutes
+            .Select(dr => dr.DirectionSelfControlLeverId)
+            .OfType<ulong>()
+            .Distinct()
+            .ToList();
+
+        // 隣駅鎖錠てこのIDを抽出（全方向分、nullを除外）
+        var neighborLockLeverIds = directionRoutes
+            .SelectMany(dr => new[] {
+                dr.LLockLeverId,
+                dr.LSingleLockedLeverId,
+                dr.RLockLeverId,
+                dr.RSingleLockedLeverId
+            })
+            .OfType<ulong>()
+            .Distinct()
+            .ToList();
+
+        // 直接鎖錠条件を取得
         var lockConditionDict =
             await lockConditionRepository.GetConditionsByObjectIdsAndType(directionRouteIds, LockType.Lock);
-        // 開放てこの全ID取得
-        var directionSelfControlLeverIds = await directionSelfControlLeverRepository.GetAllIds();
 
-        // 方向進路関連の総括制御を全取得
+        // 方向進路に関連する総括制御のみを取得
         var throwOutControls = await throwOutControlRepository
-            .GetByControlTypes([ThrowOutControlType.Direction]);
+            .GetByTargetIdsAndTypes(directionRouteIds, [ThrowOutControlType.Direction]);
 
         // 総括されるオブジェクトをキーとして総括制御をグループ化
         var targetThrowOutControls = throwOutControls
@@ -990,24 +1029,25 @@ public class RendoService(
             .ToDictionary(g => g.Key, g => g.ToList());
 
         // 関わる全てのObjectを取得
-        var objectIds = directionRouteIds
-            .Union(directionLeverIds)
+        var objectIds = directionLeverIds
             .Union(directionSelfControlLeverIds)
+            .Union(neighborLockLeverIds)
             .Union(throwOutControls.Select(toc => toc.SourceId))
             .Union(throwOutControls.Select(toc => toc.ConditionLeverId).OfType<ulong>())
             .Union(lockConditionDict.Values.SelectMany(ExtractObjectIdsFromLockCondtions))
+            .Except(directionRouteIds)
             .ToList();
         var interlockingObjects = (await interlockingObjectRepository.GetObjectByIdsWithState(objectIds))
+            .Concat(directionRoutes)
             .ToDictionary(obj => obj.Id);
         var directionSelfControlLevers = interlockingObjects
             .Where(kvp => kvp.Value is DirectionSelfControlLever)
             .ToDictionary(kvp => kvp.Key, kvp => (kvp.Value as DirectionSelfControlLever)!);
 
         // 方向てこごとにループ
-        foreach (var directionRouteId in directionRouteIds)
+        foreach (var directionRoute in directionRoutes)
         {
             // DB制約的にDirectionRouteになるはず
-            var directionRoute = (interlockingObjects[directionRouteId] as DirectionRoute)!;
             var directionRouteState = directionRoute.DirectionRouteState;
 
             var physicalLever = (interlockingObjects[directionRoute.LeverId] as Lever)!;
@@ -1016,7 +1056,7 @@ public class RendoService(
 
             // 運転方向鎖錠リレー
             // 対応する鎖錠軌道回路を取得
-            var lockTrackCircuits = lockConditionDict[directionRouteId]
+            var lockTrackCircuits = lockConditionDict[directionRoute.Id]
                 .OfType<LockConditionObject>()
                 .Select(lco => interlockingObjects[lco.ObjectId])
                 .OfType<TrackCircuit>();

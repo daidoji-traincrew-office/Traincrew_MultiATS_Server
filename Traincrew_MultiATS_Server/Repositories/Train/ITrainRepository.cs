@@ -56,6 +56,12 @@ public interface ITrainRepository
     /// <param name="trainState">列車状態</param>
     Task Update(TrainState trainState);
 
+    /// <summary>
+    /// 現在の列車数を取得する
+    /// </summary>
+    /// <returns>列車数</returns>
+    Task<int> GetCount();
+
 
     /// <summary>
     /// 列車番号を指定して遅延時間を設定する

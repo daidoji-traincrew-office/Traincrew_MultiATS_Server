@@ -16,6 +16,8 @@ public class ServerState
     public int SwitchReturnTime { get; set; } = 0;
     [Column("use_one_second_relay")]
     public bool UseOneSecondRelay { get; set; } = false;
+    [Column("is_all_signal_relay_raised")]
+    public RaiseDropWithForce IsAllSignalRelayRaised { get; set; }
     [Column("selected_diagram_id")]
     public ulong? SelectedDiagramId { get; set; }
     public Diagram? SelectedDiagram { get; set; }
