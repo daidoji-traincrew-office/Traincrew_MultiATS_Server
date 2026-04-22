@@ -243,4 +243,146 @@ public class TrainDbInitializerTest
             r => r.AddAll(It.IsAny<List<DiagramTrain>>(), It.IsAny<CancellationToken>()),
             Times.Never);
     }
+
+    private TrainDbInitializer CreateInitializer() =>
+        new(_loggerMock.Object, _trainTypeRepositoryMock.Object, _trainDiagramRepositoryMock.Object, _generalRepositoryMock.Object);
+
+    private TTC_Data CreateTtcData(string trainClass, string? trainName) => new()
+    {
+        TrainList =
+        [
+            new TTC_Train
+            {
+                trainNumber = "1",
+                trainClass = trainClass,
+                trainName = trainName,
+                originStationID = "S1",
+                destinationStationID = "S2",
+                staList = []
+            }
+        ]
+    };
+
+    [Fact]
+    [DisplayName("trainClassが辞書に存在する場合、対応するIDを使う")]
+    public async Task InitializeFromTtcDataAsync_trainClassが辞書に存在する場合_対応するIDを使う()
+    {
+        // Arrange
+        _trainTypeRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Dictionary<string, long> { ["普通"] = 5 });
+        _trainDiagramRepositoryMock.Setup(r => r.GetForTrainNumberByDiaId(It.IsAny<ulong>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Dictionary<string, DiagramTrain>());
+        _trainDiagramRepositoryMock.Setup(r => r.DeleteTimetablesByDiaId(It.IsAny<ulong>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+        var initializer = CreateInitializer();
+
+        // Act
+        await initializer.InitializeFromTtcDataAsync(CreateTtcData("普通", null), cancellationToken: TestContext.Current.CancellationToken);
+
+        // Assert
+        _generalRepositoryMock.Verify(
+            r => r.AddAll(It.Is<List<DiagramTrain>>(list => list.Count == 1 && list[0].TrainTypeId == 5),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Fact]
+    [DisplayName("trainClassが辞書にない場合、デフォルト1を使う")]
+    public async Task InitializeFromTtcDataAsync_trainClassが辞書にない場合_デフォルト1を使う()
+    {
+        // Arrange
+        _trainTypeRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Dictionary<string, long>());
+        _trainDiagramRepositoryMock.Setup(r => r.GetForTrainNumberByDiaId(It.IsAny<ulong>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Dictionary<string, DiagramTrain>());
+        _trainDiagramRepositoryMock.Setup(r => r.DeleteTimetablesByDiaId(It.IsAny<ulong>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+        var initializer = CreateInitializer();
+
+        // Act
+        await initializer.InitializeFromTtcDataAsync(CreateTtcData("不明", null), cancellationToken: TestContext.Current.CancellationToken);
+
+        // Assert
+        _generalRepositoryMock.Verify(
+            r => r.AddAll(It.Is<List<DiagramTrain>>(list => list.Count == 1 && list[0].TrainTypeId == 1),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Fact]
+    [DisplayName("trainClassが特急でtrainNameがnullの場合、デフォルト1を使う")]
+    public async Task InitializeFromTtcDataAsync_trainClassが特急でtrainNameがnullの場合_デフォルト1を使う()
+    {
+        // Arrange
+        _trainTypeRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Dictionary<string, long> { ["B特"] = 16 });
+        _trainDiagramRepositoryMock.Setup(r => r.GetForTrainNumberByDiaId(It.IsAny<ulong>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Dictionary<string, DiagramTrain>());
+        _trainDiagramRepositoryMock.Setup(r => r.DeleteTimetablesByDiaId(It.IsAny<ulong>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+        var initializer = CreateInitializer();
+
+        // Act
+        await initializer.InitializeFromTtcDataAsync(CreateTtcData("特急", null), cancellationToken: TestContext.Current.CancellationToken);
+
+        // Assert
+        _generalRepositoryMock.Verify(
+            r => r.AddAll(It.Is<List<DiagramTrain>>(list => list.Count == 1 && list[0].TrainTypeId == 1),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Fact]
+    [DisplayName("trainClassが特急でtrainNameが辞書にない場合、デフォルト1を使う")]
+    public async Task InitializeFromTtcDataAsync_trainClassが特急でtrainNameが辞書にない場合_デフォルト1を使う()
+    {
+        // Arrange
+        _trainTypeRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Dictionary<string, long> { ["B特"] = 16 });
+        _trainDiagramRepositoryMock.Setup(r => r.GetForTrainNumberByDiaId(It.IsAny<ulong>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Dictionary<string, DiagramTrain>());
+        _trainDiagramRepositoryMock.Setup(r => r.DeleteTimetablesByDiaId(It.IsAny<ulong>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+        var initializer = CreateInitializer();
+
+        // Act
+        await initializer.InitializeFromTtcDataAsync(CreateTtcData("特急", "Ｚ特"), cancellationToken: TestContext.Current.CancellationToken);
+
+        // Assert
+        _generalRepositoryMock.Verify(
+            r => r.AddAll(It.Is<List<DiagramTrain>>(list => list.Count == 1 && list[0].TrainTypeId == 1),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Theory]
+    [DisplayName("trainClassが特急でtrainNameが全角の場合、半角変換したIDを使う")]
+    [InlineData("Ａ特", "A特", 17)]
+    [InlineData("Ｂ特", "B特", 16)]
+    [InlineData("Ｃ特１", "C特1", 11)]
+    [InlineData("Ｃ特２", "C特2", 12)]
+    [InlineData("Ｃ特３", "C特3", 13)]
+    [InlineData("Ｃ特４", "C特4", 14)]
+    [InlineData("Ｃ特５", "C特5", 15)]
+    public async Task InitializeFromTtcDataAsync_trainClassが特急でtrainNameが全角の場合_半角変換したIDを使う(
+        string trainName, string halfWidthName, long expectedId)
+    {
+        // Arrange
+        _trainTypeRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Dictionary<string, long> { [halfWidthName] = expectedId });
+        _trainDiagramRepositoryMock.Setup(r => r.GetForTrainNumberByDiaId(It.IsAny<ulong>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Dictionary<string, DiagramTrain>());
+        _trainDiagramRepositoryMock.Setup(r => r.DeleteTimetablesByDiaId(It.IsAny<ulong>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+        var initializer = CreateInitializer();
+
+        // Act
+        await initializer.InitializeFromTtcDataAsync(CreateTtcData("特急", trainName), cancellationToken: TestContext.Current.CancellationToken);
+
+        // Assert
+        _generalRepositoryMock.Verify(
+            r => r.AddAll(It.Is<List<DiagramTrain>>(list => list.Count == 1 && list[0].TrainTypeId == expectedId),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
 }
