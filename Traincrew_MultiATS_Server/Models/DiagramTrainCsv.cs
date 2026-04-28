@@ -2,18 +2,18 @@ using CsvHelper.Configuration;
 
 namespace Traincrew_MultiATS_Server.Models;
 
-public class TrainDiagramCsv
+public class DiagramTrainCsv
 {
     public string TrainNumber { get; set; } = default!;
     public long TypeId { get; set; }
     public string FromStationId { get; set; } = default!;
     public string ToStationId { get; set; } = default!;
-    public int DiaId { get; set; }
+    public ulong DiaId { get; set; }
 }
 
-public sealed class TrainDiagramCsvMap : ClassMap<TrainDiagramCsv>
+public sealed class DiagramTrainCsvMap : ClassMap<DiagramTrainCsv>
 {
-    public TrainDiagramCsvMap()
+    public DiagramTrainCsvMap()
     {
         Map(m => m.TrainNumber).Name("列番");
         Map(m => m.TypeId).Name("種別id");

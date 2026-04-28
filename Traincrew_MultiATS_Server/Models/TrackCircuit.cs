@@ -13,4 +13,11 @@ public class TrackCircuit : InterlockingObject
     public string? OperationNotificationDisplayName { get; set; } // 告知器の名前 (Nullable)
 
     public virtual OperationNotificationDisplay? OperationNotificationDisplay { get; set; } // 告知器との関連
+
+    [Column("station_id_for_delay")]
+    public string? StationIdForDelay { get; set; }
+
+    // ナビゲーションプロパティ
+    [ForeignKey(nameof(StationIdForDelay))]
+    public virtual Station? StationForDelay { get; set; }
 }

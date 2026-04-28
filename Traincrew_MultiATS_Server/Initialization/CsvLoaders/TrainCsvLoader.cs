@@ -18,16 +18,16 @@ public class TrainTypeCsvLoader(ILogger<TrainTypeCsvLoader> logger) : BaseCsvLoa
 }
 
 /// <summary>
-///     Loader for train diagram CSV
+///     Loader for diagram train CSV
 /// </summary>
-public class TrainDiagramCsvLoader(ILogger<TrainDiagramCsvLoader> logger) : BaseCsvLoader<TrainDiagramCsv>(logger)
+public class DiagramTrainCsvLoader(ILogger<DiagramTrainCsvLoader> logger) : BaseCsvLoader<DiagramTrainCsv>(logger)
 {
-    public async Task<List<TrainDiagramCsv>> LoadAsync(CancellationToken cancellationToken = default)
+    public async Task<List<DiagramTrainCsv>> LoadAsync(CancellationToken cancellationToken = default)
     {
         return await LoadCsvAsync(
             CsvFilePaths.TrainDiagram,
             true,
-            new TrainDiagramCsvMap(),
+            new DiagramTrainCsvMap(),
             cancellationToken);
     }
 }

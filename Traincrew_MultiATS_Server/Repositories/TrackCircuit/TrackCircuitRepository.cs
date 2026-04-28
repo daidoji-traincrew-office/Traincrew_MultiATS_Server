@@ -5,11 +5,11 @@ namespace Traincrew_MultiATS_Server.Repositories.TrackCircuit;
 
 public class TrackCircuitRepository(ApplicationDbContext context) : ITrackCircuitRepository
 {
-    public async Task<List<Models.TrackCircuit>> GetAllTrackCircuitList()
+    public async Task<List<Models.TrackCircuit>> GetAllTrackCircuitList(CancellationToken cancellationToken = default)
     {
-        List<Models.TrackCircuit> trackcircuitlist_db = await context.TrackCircuits
-            .Include(obj => obj.TrackCircuitState).ToListAsync();
-        return trackcircuitlist_db;
+       return await context.TrackCircuits
+            .Include(obj => obj.TrackCircuitState)
+            .ToListAsync(cancellationToken);
     }
 
     public async Task<List<Models.TrackCircuit>> GetTrackCircuitByName(List<string> trackCircuitNames)

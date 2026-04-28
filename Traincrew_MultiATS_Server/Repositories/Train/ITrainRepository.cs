@@ -61,4 +61,12 @@ public interface ITrainRepository
     /// </summary>
     /// <returns>列車数</returns>
     Task<int> GetCount();
+
+
+    /// <summary>
+    /// 列車番号を指定して遅延時間を設定する
+    /// </summary>
+    /// <param name="trainNumber">列車番号</param>
+    /// <param name="delay">遅延時間(分)</param>
+    Task SetDelayByTrainNumber(string trainNumber, int delay);
 }

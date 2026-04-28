@@ -13,5 +13,7 @@ public interface IServerRepository
     Task SetSwitchMoveTimeAsync(int switchMoveTime);
     Task SetUseOneSecondRelayAsync(bool useOneSecondRelay);
     Task SetIsAllSignalRelayRaisedAsync(RaiseDropWithForce raiseDropWithForce);
+    Task<ulong?> GetSelectedDiagramIdAsync();
+    Task SetSelectedDiagramIdAsync(ulong? diaId);
 }
 

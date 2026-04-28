@@ -34,7 +34,7 @@ jobs:
         run: |
           BRANCH_NAME="master_update/$(date +'%Y%m%d')"
           echo "name=$BRANCH_NAME" >> $GITHUB_OUTPUT
-      
+
       - name: Configure Git
         run: |
           git config user.name "github-actions[bot]"
@@ -48,7 +48,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4.4.0
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Authenticate to Google Cloud
         id: auth
@@ -70,6 +70,9 @@ jobs:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ steps.auth.outputs.credentials_file_path }}
           RENDO_SPREADSHEET_ID: ${{ secrets.RENDO_SPREADSHEET_ID }}
           MASTER_SPREADSHEET_ID: ${{ secrets.MASTER_SPREADSHEET_ID }}
+
+      - name: Run OudiaConverter
+        run: dotnet run --project OudiaConverter/OudiaConverter.csproj
 
       - name: Commit and push
         run: |
@@ -108,6 +111,7 @@ jobs:
           gh pr create \
             --title "マスター更新 $(date +'%Y%m%d')" \
             --reviewer "$REVIEWERS" \
+            --base ${{ github.ref_name }} \
             --body "$(cat <<'EOF'
           ## 概要
           Googleスプレッドシートからマスターデータを更新しました。

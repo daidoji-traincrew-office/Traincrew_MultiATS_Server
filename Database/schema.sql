@@ -128,10 +128,22 @@ CREATE TABLE operation_notification_display
 CREATE TABLE track_circuit
 (
     id                                  BIGINT PRIMARY KEY REFERENCES interlocking_object (id),
-    protection_zone                     INT NOT NULL,                                                 -- 防護無線区間
-    operation_notification_display_name VARCHAR(100) REFERENCES operation_notification_display (name) -- 運転告知機の名前
+    protection_zone                     INT     NOT NULL,                                              -- 防護無線区間
+    operation_notification_display_name VARCHAR(100) REFERENCES operation_notification_display (name), -- 運転告知機の名前
+    station_id_for_delay                VARCHAR(10) REFERENCES station (id)                            -- 遅延計算用駅ID
 );
 CREATE INDEX track_circuit_operation_notification_display_name_index ON track_circuit (operation_notification_display_name);
+
+-- 軌道回路出発時素
+CREATE TABLE track_circuit_department_time
+(
+    id               SERIAL PRIMARY KEY,
+    track_circuit_id BIGINT  NOT NULL REFERENCES track_circuit (id), -- 軌道回路ID
+    car_count        INT     NOT NULL,                               -- 両数（編成両数、0なら通過とみなす）
+    time_element     INT     NOT NULL,                               -- 時素
+    is_up            BOOLEAN NOT NULL                                -- 上りか下りか
+);
+CREATE UNIQUE INDEX track_circuit_department_time_track_circuit_id_car_count_is_up_index ON track_circuit_department_time (track_circuit_id, car_count, is_up);
 
 -- 進路
 -- 場内信号機、出発信号機、誘導信号機、入換信号機、入換標識
@@ -244,9 +256,9 @@ CREATE TABLE route_central_control_lever
 -- 進路と集中てこの鎖錠条件
 CREATE TABLE lock_condition_by_route_central_control_lever
 (
-    id                              BIGSERIAL PRIMARY KEY,
-    route_id                        BIGINT REFERENCES route (id) NOT NULL,                        -- 進路のID
-    route_central_control_lever_id  BIGINT REFERENCES route_central_control_lever (id) NOT NULL,  -- 集中てこのID
+    id                             BIGSERIAL PRIMARY KEY,
+    route_id                       BIGINT REFERENCES route (id)                       NOT NULL, -- 進路のID
+    route_central_control_lever_id BIGINT REFERENCES route_central_control_lever (id) NOT NULL, -- 集中てこのID
     UNIQUE (route_id, route_central_control_lever_id)
 );
 CREATE INDEX lock_condition_by_route_central_control_lever_route_id_index ON lock_condition_by_route_central_control_lever (route_id);
@@ -377,7 +389,7 @@ CREATE TYPE throw_out_control_type AS ENUM ('with_lever', 'without_lever', 'dire
 CREATE TABLE throw_out_control
 (
     id                 BIGSERIAL PRIMARY KEY,
-    control_type       throw_out_control_type NOT NULL,                     -- 総括の種類
+    control_type       throw_out_control_type                     NOT NULL, -- 総括の種類
     source_id          BIGINT REFERENCES interlocking_object (id) NOT NULL, -- 統括元オブジェクトID
     source_lr          lr,                                                  -- 統括元が方向てこの場合、方向てこの向き
     target_id          BIGINT REFERENCES interlocking_object (id) NOT NULL, -- 統括先オブジェクトID
@@ -417,15 +429,43 @@ CREATE TABLE train_type
     name VARCHAR(100) NOT NULL UNIQUE -- 種別名
 );
 
--- 列車(ダイヤグラム内の1列車)情報
-CREATE TABLE train_diagram
+-- ダイヤ情報
+CREATE TABLE diagram
 (
-    train_number    VARCHAR(100) PRIMARY KEY,                        -- 列車番号
-    train_type_id   BIGINT      NOT NULL REFERENCES train_type (id), -- 列車種別ID
-    from_station_id VARCHAR(10) NOT NULL REFERENCES station (id),    -- 出発駅ID
-    to_station_id   VARCHAR(10) NOT NULL REFERENCES station (id),    -- 到着駅ID
-    dia_id          INT         NOT NULL                             -- ダイヤID
+    id         BIGSERIAL PRIMARY KEY, -- ID
+    name       TEXT NOT NULL,         -- 名前
+    version    TEXT NOT NULL,         -- バージョン
+    UNIQUE (name)
 );
+
+-- 列車(ダイヤグラム内の1列車)情報
+CREATE TABLE diagram_train
+(
+    id              BIGSERIAL PRIMARY KEY,                            -- ID
+    dia_id          BIGINT       NOT NULL REFERENCES diagram (id),    -- ダイヤID
+    train_number    VARCHAR(100) NOT NULL,                            -- 列車番号
+    train_type_id   BIGINT       NOT NULL REFERENCES train_type (id), -- 列車種別ID
+    from_station_id VARCHAR(10)  NOT NULL REFERENCES station (id),    -- 出発駅ID
+    to_station_id   VARCHAR(10)  NOT NULL REFERENCES station (id)     -- 到着駅ID
+);
+
+-- ユニークインデックス作成
+CREATE UNIQUE INDEX idx_diagram_train_dia_id_train_number ON diagram_train (dia_id, train_number);
+
+-- 列車ダイヤグラム時刻表（各駅の時刻情報）
+CREATE TABLE diagram_train_timetable
+(
+    id               BIGSERIAL PRIMARY KEY,                                 -- ID
+    train_diagram_id BIGINT      NOT NULL REFERENCES diagram_train (id),    -- 列車ダイヤグラムID
+    index            INT         NOT NULL,                                   -- インデックス（駅の順番）
+    station_id       VARCHAR(10) NOT NULL REFERENCES station (id),          -- 駅ID
+    track_number     VARCHAR(50) NOT NULL,                                   -- 番線
+    arrival_time     INTERVAL    NULL,                                       -- 到着時刻
+    departure_time   INTERVAL    NULL                                        -- 出発時刻
+);
+
+-- インデックス作成
+CREATE UNIQUE INDEX idx_diagram_train_timetable_train_diagram_id_index ON diagram_train_timetable (train_diagram_id, index);
 
 -- ここから状態系
 -- 駅時素状態
@@ -594,9 +634,9 @@ CREATE index train_state_dia_number_index ON train_state USING hash (dia_number)
 -- 列車信号状態
 CREATE TABLE train_signal_state
 (
-    id           BIGSERIAL PRIMARY KEY,                             -- ID
-    train_number VARCHAR(100) NOT NULL,                             -- 列車番号
-    signal_name  VARCHAR(100) NOT NULL REFERENCES signal (name),    -- 信号名
+    id           BIGSERIAL PRIMARY KEY,                          -- ID
+    train_number VARCHAR(100) NOT NULL,                          -- 列車番号
+    signal_name  VARCHAR(100) NOT NULL REFERENCES signal (name), -- 信号名
     UNIQUE (train_number, signal_name)
 );
 CREATE INDEX train_signal_state_train_number_index ON train_signal_state (train_number);
@@ -651,10 +691,12 @@ CREATE TABLE server_state
     switch_move_time            INTEGER               NOT NULL DEFAULT 5000,  -- 転轍機の転換にかかる時間(ms)
     switch_return_time          INTEGER               NOT NULL DEFAULT 500,   -- 転轍器が転換中に転換方向を変えるのにかかる時間(ms)
     use_one_second_relay        BOOLEAN               NOT NULL DEFAULT false, -- 接近鎖錠の時素に1秒リレーを使うかどうか
-    is_all_signal_relay_raised  raise_drop_with_force NOT NULL DEFAULT 'drop'
+    is_all_signal_relay_raised  raise_drop_with_force NOT NULL DEFAULT 'drop',
+    selected_diagram_id         BIGINT NULL REFERENCES diagram(id) ON DELETE SET NULL
 );
 
 -- ユーザー接続拒否状態テーブル
-CREATE TABLE user_disconnection_state (
+CREATE TABLE user_disconnection_state
+(
     user_id BIGINT PRIMARY KEY -- ユーザーID(Discord ID)
 );
