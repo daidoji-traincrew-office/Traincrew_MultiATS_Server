@@ -6,10 +6,10 @@ namespace Traincrew_MultiATS_Server.Repositories.DiagramTrain;
 
 public class DiagramTrainRepository(ApplicationDbContext context) : IDiagramTrainRepository
 {
-    public async Task<Models.DiagramTrain?> GetByTrainNumber(string trainNumber)
+    public async Task<Models.DiagramTrain?> GetByDiaIdAndTrainNumber(ulong diaId, string trainNumber)
     {
         return await context.DiagramTrains
-            .FirstOrDefaultAsync(dt => dt.TrainNumber == trainNumber);
+            .FirstOrDefaultAsync(dt => dt.DiaId == diaId && dt.TrainNumber == trainNumber);
     }
 
     public async Task<DiagramTrainTimetable?> GetTimetableByTrainNumberStationIdAndDiaId(ulong diaId, string trainNumber, string stationId)
@@ -20,10 +20,10 @@ public class DiagramTrainRepository(ApplicationDbContext context) : IDiagramTrai
             .FirstOrDefaultAsync();
     }
 
-    public async Task<List<Models.DiagramTrain>> GetByTrainNumbers(ICollection<string> trainNumbers)
+    public async Task<List<Models.DiagramTrain>> GetByDiaIdAndTrainNumbers(ulong diaId, ICollection<string> trainNumbers)
     {
         return await context.DiagramTrains
-            .Where(dt => trainNumbers.Contains(dt.TrainNumber))
+            .Where(dt => dt.DiaId == diaId && trainNumbers.Contains(dt.TrainNumber))
             .ToListAsync();
     }
 
