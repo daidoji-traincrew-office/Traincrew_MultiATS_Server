@@ -34,7 +34,7 @@ public partial class TrainService(
     IRouteService routeService,
     ITrainRepository trainRepository,
     ITrainCarRepository trainCarRepository,
-    IDiagramTrainRepository trainDiagramRepository,
+    IDiagramTrainRepository diagramTrainRepository,
     ITransactionRepository transactionRepository,
     IBannedUserService bannedUserService,
     IGeneralRepository generalRepository,
@@ -394,7 +394,7 @@ public partial class TrainService(
         // 列車のダイアグラムを取得
         var diaId = await serverService.GetSelectedDiagramIdAsync();
         var diagramTrains = diaId.HasValue
-            ? await trainDiagramRepository.GetByDiaIdAndTrainNumbers(
+            ? await diagramTrainRepository.GetByDiaIdAndTrainNumbers(
                 diaId.Value,
                 trainStates.Select(s => s.TrainNumber).ToHashSet())
             : [];
@@ -475,7 +475,7 @@ public partial class TrainService(
     private async Task<TrainState> CreateTrainState(AtsToServerData clientData, ulong driverId, ulong? diaId)
     {
         var diagramTrain = diaId.HasValue
-            ? await trainDiagramRepository.GetByDiaIdAndTrainNumber(diaId.Value, clientData.DiaName)
+            ? await diagramTrainRepository.GetByDiaIdAndTrainNumber(diaId.Value, clientData.DiaName)
             : null;
 
         var trainState = new TrainState
@@ -498,7 +498,7 @@ public partial class TrainService(
     private async Task UpdateTrainState(TrainState trainState, ulong? diaId)
     {
         var diagramTrain = diaId.HasValue
-            ? await trainDiagramRepository.GetByDiaIdAndTrainNumber(diaId.Value, trainState.TrainNumber)
+            ? await diagramTrainRepository.GetByDiaIdAndTrainNumber(diaId.Value, trainState.TrainNumber)
             : null;
         // 列車のダイアグラム情報を更新
         trainState.FromStationId = diagramTrain?.FromStationId ?? "TH00";
@@ -726,7 +726,7 @@ public partial class TrainService(
         foreach (var (trackCircuit, stationId) in stationTrackCircuits)
         {
             // 時刻表を取得
-            var timetable = await trainDiagramRepository.GetTimetableByTrainNumberStationIdAndDiaId(
+            var timetable = await diagramTrainRepository.GetTimetableByTrainNumberStationIdAndDiaId(
                 diaId, trainNumber, stationId);
 
             if (timetable?.DepartureTime == null)

@@ -29,8 +29,8 @@ public class TrackCircuitDbInitializer(
         var existingEntities = (await trackCircuitRepository.GetAllTrackCircuitList(cancellationToken))
             .ToDictionary(tc => tc.Name);
 
-        var trackCircuitsToAdd = new List<TrackCircuit>();
-        var trackCircuitsToUpdate = new List<TrackCircuit>();
+        List<TrackCircuit> trackCircuitsToAdd = [];
+        List<TrackCircuit> trackCircuitsToUpdate = [];
 
         foreach (var item in trackCircuitList)
         {
@@ -100,7 +100,7 @@ public class TrackCircuitDbInitializer(
         var existingRelationsSet = await trackCircuitSignalRepository.GetExistingRelations(
             trackCircuitIds, cancellationToken);
 
-        var trackCircuitSignals = new List<TrackCircuitSignal>();
+        List<TrackCircuitSignal> trackCircuitSignals = [];
         foreach (var trackCircuit in trackCircuitList)
         {
             if (!trackCircuitEntities.TryGetValue(trackCircuit.Name, out var trackCircuitEntity))
@@ -185,8 +185,8 @@ public class TrackCircuitDbInitializer(
         var existingDepartmentTimesByKey = existingDepartmentTimes
             .ToDictionary(dt => (dt.TrackCircuitId, dt.CarCount, dt.IsUp));
 
-        var departmentTimesToAdd = new List<TrackCircuitDepartmentTime>();
-        var departmentTimesToUpdate = new List<TrackCircuitDepartmentTime>();
+        List<TrackCircuitDepartmentTime> departmentTimesToAdd = [];
+        List<TrackCircuitDepartmentTime> departmentTimesToUpdate = [];
 
         foreach (var item in trackCircuitsNotTH00)
         {

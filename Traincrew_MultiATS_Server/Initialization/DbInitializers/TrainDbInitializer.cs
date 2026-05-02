@@ -11,7 +11,7 @@ namespace Traincrew_MultiATS_Server.Initialization.DbInitializers;
 public class TrainDbInitializer(
     ILogger<TrainDbInitializer> logger,
     ITrainTypeRepository trainTypeRepository,
-    IDiagramTrainRepository trainDiagramRepository,
+    IDiagramTrainRepository diagramTrainRepository,
     IGeneralRepository generalRepository)
     : BaseDbInitializer
 {
@@ -23,7 +23,7 @@ public class TrainDbInitializer(
     {
         var existingIds = await trainTypeRepository.GetIdsForAll(cancellationToken);
 
-        var trainTypes = new List<TrainType>();
+        List<TrainType> trainTypes = [];
         foreach (var record in trainTypeList)
         {
             if (existingIds.Contains(record.Id))
@@ -48,9 +48,9 @@ public class TrainDbInitializer(
     public async Task InitializeTrainDiagramsAsync(List<DiagramTrainCsv> trainDiagramList,
         CancellationToken cancellationToken = default)
     {
-        var existingNumbers = await trainDiagramRepository.GetTrainNumbersForAll(cancellationToken);
+        var existingNumbers = await diagramTrainRepository.GetTrainNumbersForAll(cancellationToken);
 
-        var diagramTrains = new List<DiagramTrain>();
+        List<DiagramTrain> diagramTrains = [];
         foreach (var record in trainDiagramList)
         {
             if (existingNumbers.Contains(record.TrainNumber))
@@ -78,29 +78,28 @@ public class TrainDbInitializer(
     public async Task InitializeFromTtcDataAsync(TTC_Data ttcData, ulong diaId = 1, CancellationToken cancellationToken = default)
     {
         // 既存のTrainDiagramをdiaIdで取得
-        var existingDiagrams = await trainDiagramRepository.GetForTrainNumberByDiaId(diaId, cancellationToken);
+        var existingDiagrams = await diagramTrainRepository.GetForTrainNumberByDiaId(diaId, cancellationToken);
         var trainTypeIdByName = await trainTypeRepository.GetAllIdForName(cancellationToken);
 
         // diaIdに紐づくTimetablesを全削除 (ExecuteDelete)
-        await trainDiagramRepository.DeleteTimetablesByDiaId(diaId, cancellationToken);
+        await diagramTrainRepository.DeleteTimetablesByDiaId(diaId, cancellationToken);
         logger.LogInformation("Deleted existing timetables for diaId {DiaId}", diaId);
 
         // 同じData内に重複する列番を事前に検出し、すべてスキップ対象とする
-        var duplicateTrainNumbers = new HashSet<string>(
-            ttcData.TrainList
-                .Where(t => !string.IsNullOrWhiteSpace(t.trainNumber))
-                .GroupBy(t => t.trainNumber)
-                .Where(g => g.Count() > 1)
-                .Select(g => g.Key)
-        );
+        var duplicateTrainNumbers = ttcData.TrainList
+            .Where(t => !string.IsNullOrWhiteSpace(t.trainNumber))
+            .GroupBy(t => t.trainNumber)
+            .Where(g => g.Count() > 1)
+            .Select(g => g.Key)
+            .ToHashSet();
         foreach (var duplicateTrainNumber in duplicateTrainNumbers)
         {
             logger.LogWarning("列車番号 {TrainNumber} が重複しています。すべてのデータをスキップします。", duplicateTrainNumber);
         }
 
-        var trainDiagramsToAdd = new List<DiagramTrain>();
-        var trainDiagramsToUpdate = new List<DiagramTrain>();
-        var trainTimetablesByTrainNumber = new Dictionary<string, List<DiagramTrainTimetable>>();
+        List<DiagramTrain> trainDiagramsToAdd = [];
+        List<DiagramTrain> trainDiagramsToUpdate = [];
+        Dictionary<string, List<DiagramTrainTimetable>> trainTimetablesByTrainNumber = [];
 
         foreach (var ttcTrain in ttcData.TrainList)
         {
@@ -175,8 +174,8 @@ public class TrainDbInitializer(
         }
 
         // 全TrainDiagram(追加+更新)のIDを取得して、TrainDiagramIdを設定
-        var allDiagrams = await trainDiagramRepository.GetForTrainNumberByDiaId(diaId, cancellationToken);
-        var trainTimetables = new List<DiagramTrainTimetable>();
+        var allDiagrams = await diagramTrainRepository.GetForTrainNumberByDiaId(diaId, cancellationToken);
+        List<DiagramTrainTimetable> trainTimetables = [];
 
         foreach (var (trainNumber, timetables) in trainTimetablesByTrainNumber)
         {
@@ -202,7 +201,7 @@ public class TrainDbInitializer(
             trainDiagramsToAdd.Count, trainDiagramsToUpdate.Count, trainTimetables.Count, duplicateTrainNumbers.Count);
     }
 
-    private static long ResolveTrainTypeId(Dictionary<string, long> trainTypeIdByName, string trainClass, string? trainName)
+    private long ResolveTrainTypeId(Dictionary<string, long> trainTypeIdByName, string trainClass, string? trainName)
     {
         if (trainTypeIdByName.TryGetValue(trainClass, out var id))
         {
@@ -218,6 +217,7 @@ public class TrainDbInitializer(
             }
         }
 
+        logger.LogWarning("列車種別 {TrainClass} が見つかりません。デフォルト値 1 を使用します。", trainClass);
         return 1;
     }
 

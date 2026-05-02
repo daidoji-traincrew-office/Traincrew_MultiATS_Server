@@ -20,7 +20,7 @@ public class TrainServiceTest
     private static TrainService CreateTrainService(
         TestTrackCircuitService? testTrackCircuitService = null,
         Mock<ITrainRepository>? mockTrainRepository = null,
-        Mock<IDiagramTrainRepository>? mockTrainDiagramRepository = null,
+        Mock<IDiagramTrainRepository>? mockDiagramTrainRepository = null,
         Mock<ITrackCircuitDepartmentTimeRepository>? mockTrackCircuitDepartmentTimeRepository = null,
         Mock<IDateTimeRepository>? mockDateTimeRepository = null,
         TestServerService? testServerService = null,
@@ -29,7 +29,7 @@ public class TrainServiceTest
         // nullの場合はデフォルトのインスタンスを使用
         testTrackCircuitService ??= new TestTrackCircuitService();
         mockTrainRepository ??= new Mock<ITrainRepository>();
-        mockTrainDiagramRepository ??= new Mock<IDiagramTrainRepository>();
+        mockDiagramTrainRepository ??= new Mock<IDiagramTrainRepository>();
         mockTrackCircuitDepartmentTimeRepository ??= new Mock<ITrackCircuitDepartmentTimeRepository>();
         mockDateTimeRepository ??= new Mock<IDateTimeRepository>();
         testServerService ??= new TestServerService();
@@ -44,7 +44,7 @@ public class TrainServiceTest
             null!, // RouteService
             mockTrainRepository.Object,
             null!, // ITrainCarRepository
-            mockTrainDiagramRepository.Object,
+            mockDiagramTrainRepository.Object,
             null!, // ITransactionRepository
             null!, // BannedUserService
             null!, // IGeneralRepository
@@ -103,8 +103,8 @@ public class TrainServiceTest
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
 
-        var mockTrainDiagramRepository = new Mock<IDiagramTrainRepository>();
-        mockTrainDiagramRepository
+        var mockDiagramTrainRepository = new Mock<IDiagramTrainRepository>();
+        mockDiagramTrainRepository
             .Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01"))
             .ReturnsAsync(timetable);
 
@@ -129,7 +129,7 @@ public class TrainServiceTest
         var trainService = CreateTrainService(
             testTrackCircuitService,
             mockTrainRepository,
-            mockTrainDiagramRepository,
+            mockDiagramTrainRepository,
             mockTrackCircuitDepartmentTimeRepository,
             mockDateTimeRepository,
             testServerService
@@ -181,9 +181,9 @@ public class TrainServiceTest
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit1, trackCircuit2 }));
 
-        var mockTrainDiagramRepository = new Mock<IDiagramTrainRepository>();
-        mockTrainDiagramRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable1);
-        mockTrainDiagramRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST02")).ReturnsAsync(timetable2);
+        var mockDiagramTrainRepository = new Mock<IDiagramTrainRepository>();
+        mockDiagramTrainRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable1);
+        mockDiagramTrainRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST02")).ReturnsAsync(timetable2);
 
         var mockTrackCircuitDepartmentTimeRepository = new Mock<ITrackCircuitDepartmentTimeRepository>();
         mockTrackCircuitDepartmentTimeRepository.Setup(x => x.GetByTrackCircuitIdAndIsUpAndMaxCarCount(100, false, 8)).ReturnsAsync(departmentTime1);
@@ -198,7 +198,7 @@ public class TrainServiceTest
         var mockTrainRepository = new Mock<ITrainRepository>();
         mockTrainRepository.Setup(x => x.SetDelayByTrainNumber(trainNumber, It.IsAny<int>())).Returns(Task.CompletedTask);
 
-        var trainService = CreateTrainService(testTrackCircuitService, mockTrainRepository, mockTrainDiagramRepository,
+        var trainService = CreateTrainService(testTrackCircuitService, mockTrainRepository, mockDiagramTrainRepository,
             mockTrackCircuitDepartmentTimeRepository, mockDateTimeRepository, testServerService);
 
         // Act
@@ -234,8 +234,8 @@ public class TrainServiceTest
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
 
-        var mockTrainDiagramRepository = new Mock<IDiagramTrainRepository>();
-        mockTrainDiagramRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
+        var mockDiagramTrainRepository = new Mock<IDiagramTrainRepository>();
+        mockDiagramTrainRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
 
         var mockTrackCircuitDepartmentTimeRepository = new Mock<ITrackCircuitDepartmentTimeRepository>();
         mockTrackCircuitDepartmentTimeRepository.Setup(x => x.GetByTrackCircuitIdAndIsUpAndMaxCarCount(100, true, 6)).ReturnsAsync(departmentTime);
@@ -249,7 +249,7 @@ public class TrainServiceTest
         var mockTrainRepository = new Mock<ITrainRepository>();
         mockTrainRepository.Setup(x => x.SetDelayByTrainNumber(trainNumber, It.IsAny<int>())).Returns(Task.CompletedTask);
 
-        var trainService = CreateTrainService(testTrackCircuitService, mockTrainRepository, mockTrainDiagramRepository,
+        var trainService = CreateTrainService(testTrackCircuitService, mockTrainRepository, mockDiagramTrainRepository,
             mockTrackCircuitDepartmentTimeRepository, mockDateTimeRepository, testServerService);
 
         // Act
@@ -285,8 +285,8 @@ public class TrainServiceTest
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
 
-        var mockTrainDiagramRepository = new Mock<IDiagramTrainRepository>();
-        mockTrainDiagramRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
+        var mockDiagramTrainRepository = new Mock<IDiagramTrainRepository>();
+        mockDiagramTrainRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
 
         var mockTrackCircuitDepartmentTimeRepository = new Mock<ITrackCircuitDepartmentTimeRepository>();
         mockTrackCircuitDepartmentTimeRepository.Setup(x => x.GetByTrackCircuitIdAndIsUpAndMaxCarCount(100, true, 0)).ReturnsAsync(departmentTime);
@@ -300,7 +300,7 @@ public class TrainServiceTest
         var mockTrainRepository = new Mock<ITrainRepository>();
         mockTrainRepository.Setup(x => x.SetDelayByTrainNumber(trainNumber, It.IsAny<int>())).Returns(Task.CompletedTask);
 
-        var trainService = CreateTrainService(testTrackCircuitService, mockTrainRepository, mockTrainDiagramRepository,
+        var trainService = CreateTrainService(testTrackCircuitService, mockTrainRepository, mockDiagramTrainRepository,
             mockTrackCircuitDepartmentTimeRepository, mockDateTimeRepository, testServerService);
 
         // Act
@@ -337,8 +337,8 @@ public class TrainServiceTest
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
 
-        var mockTrainDiagramRepository = new Mock<IDiagramTrainRepository>();
-        mockTrainDiagramRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
+        var mockDiagramTrainRepository = new Mock<IDiagramTrainRepository>();
+        mockDiagramTrainRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
 
         var mockTrackCircuitDepartmentTimeRepository = new Mock<ITrackCircuitDepartmentTimeRepository>();
         mockTrackCircuitDepartmentTimeRepository.Setup(x => x.GetByTrackCircuitIdAndIsUpAndMaxCarCount(100, false, 12)).ReturnsAsync(departmentTime);
@@ -352,7 +352,7 @@ public class TrainServiceTest
         var mockTrainRepository = new Mock<ITrainRepository>();
         mockTrainRepository.Setup(x => x.SetDelayByTrainNumber(trainNumber, It.IsAny<int>())).Returns(Task.CompletedTask);
 
-        var trainService = CreateTrainService(testTrackCircuitService, mockTrainRepository, mockTrainDiagramRepository,
+        var trainService = CreateTrainService(testTrackCircuitService, mockTrainRepository, mockDiagramTrainRepository,
             mockTrackCircuitDepartmentTimeRepository, mockDateTimeRepository, testServerService);
 
         // Act
@@ -379,13 +379,13 @@ public class TrainServiceTest
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
 
-        var mockTrainDiagramRepository = new Mock<IDiagramTrainRepository>();
-        mockTrainDiagramRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01"))
+        var mockDiagramTrainRepository = new Mock<IDiagramTrainRepository>();
+        mockDiagramTrainRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01"))
             .ReturnsAsync((DiagramTrainTimetable?)null); // 時刻表なし
 
         var mockTrainRepository = new Mock<ITrainRepository>();
 
-        var trainService = CreateTrainService(testTrackCircuitService, mockTrainRepository, mockTrainDiagramRepository);
+        var trainService = CreateTrainService(testTrackCircuitService, mockTrainRepository, mockDiagramTrainRepository);
 
         // Act
         await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList);
@@ -417,12 +417,12 @@ public class TrainServiceTest
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
 
-        var mockTrainDiagramRepository = new Mock<IDiagramTrainRepository>();
-        mockTrainDiagramRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
+        var mockDiagramTrainRepository = new Mock<IDiagramTrainRepository>();
+        mockDiagramTrainRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
 
         var mockTrainRepository = new Mock<ITrainRepository>();
 
-        var trainService = CreateTrainService(testTrackCircuitService, mockTrainRepository, mockTrainDiagramRepository);
+        var trainService = CreateTrainService(testTrackCircuitService, mockTrainRepository, mockDiagramTrainRepository);
 
         // Act
         await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList);
@@ -456,8 +456,8 @@ public class TrainServiceTest
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
 
-        var mockTrainDiagramRepository = new Mock<IDiagramTrainRepository>();
-        mockTrainDiagramRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
+        var mockDiagramTrainRepository = new Mock<IDiagramTrainRepository>();
+        mockDiagramTrainRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
 
         var mockTrackCircuitDepartmentTimeRepository = new Mock<ITrackCircuitDepartmentTimeRepository>();
         mockTrackCircuitDepartmentTimeRepository.Setup(x => x.GetByTrackCircuitIdAndIsUpAndMaxCarCount(100, true, 10))
@@ -474,7 +474,7 @@ public class TrainServiceTest
 
         var mockLogger = new Mock<ILogger<TrainService>>();
 
-        var trainService = CreateTrainService(testTrackCircuitService, mockTrainRepository, mockTrainDiagramRepository,
+        var trainService = CreateTrainService(testTrackCircuitService, mockTrainRepository, mockDiagramTrainRepository,
             mockTrackCircuitDepartmentTimeRepository, mockDateTimeRepository, testServerService, mockLogger);
 
         // Act
@@ -523,8 +523,8 @@ public class TrainServiceTest
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit1, trackCircuit2 }));
 
-        var mockTrainDiagramRepository = new Mock<IDiagramTrainRepository>();
-        mockTrainDiagramRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST02")).ReturnsAsync(timetable);
+        var mockDiagramTrainRepository = new Mock<IDiagramTrainRepository>();
+        mockDiagramTrainRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST02")).ReturnsAsync(timetable);
 
         var mockTrackCircuitDepartmentTimeRepository = new Mock<ITrackCircuitDepartmentTimeRepository>();
         mockTrackCircuitDepartmentTimeRepository.Setup(x => x.GetByTrackCircuitIdAndIsUpAndMaxCarCount(200, false, 8)).ReturnsAsync(departmentTime);
@@ -538,14 +538,14 @@ public class TrainServiceTest
         var mockTrainRepository = new Mock<ITrainRepository>();
         mockTrainRepository.Setup(x => x.SetDelayByTrainNumber(trainNumber, It.IsAny<int>())).Returns(Task.CompletedTask);
 
-        var trainService = CreateTrainService(testTrackCircuitService, mockTrainRepository, mockTrainDiagramRepository,
+        var trainService = CreateTrainService(testTrackCircuitService, mockTrainRepository, mockDiagramTrainRepository,
             mockTrackCircuitDepartmentTimeRepository, mockDateTimeRepository, testServerService);
 
         // Act
         await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList);
 
         // Assert - TC1は駅軌道回路でないのでスキップ、TC2のみ処理される
-        mockTrainDiagramRepository.Verify(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST02"), Times.Once);
+        mockDiagramTrainRepository.Verify(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST02"), Times.Once);
         mockTrainRepository.Verify(x => x.SetDelayByTrainNumber(trainNumber, It.IsAny<int>()), Times.Once);
     }
 
@@ -575,8 +575,8 @@ public class TrainServiceTest
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
 
-        var mockTrainDiagramRepository = new Mock<IDiagramTrainRepository>();
-        mockTrainDiagramRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
+        var mockDiagramTrainRepository = new Mock<IDiagramTrainRepository>();
+        mockDiagramTrainRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
 
         var mockTrackCircuitDepartmentTimeRepository = new Mock<ITrackCircuitDepartmentTimeRepository>();
         mockTrackCircuitDepartmentTimeRepository.Setup(x => x.GetByTrackCircuitIdAndIsUpAndMaxCarCount(100, true, 6)).ReturnsAsync(departmentTime);
@@ -590,7 +590,7 @@ public class TrainServiceTest
         var mockTrainRepository = new Mock<ITrainRepository>();
         mockTrainRepository.Setup(x => x.SetDelayByTrainNumber(trainNumber, It.IsAny<int>())).Returns(Task.CompletedTask);
 
-        var trainService = CreateTrainService(testTrackCircuitService, mockTrainRepository, mockTrainDiagramRepository,
+        var trainService = CreateTrainService(testTrackCircuitService, mockTrainRepository, mockDiagramTrainRepository,
             mockTrackCircuitDepartmentTimeRepository, mockDateTimeRepository, testServerService);
 
         // Act
@@ -626,8 +626,8 @@ public class TrainServiceTest
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
 
-        var mockTrainDiagramRepository = new Mock<IDiagramTrainRepository>();
-        mockTrainDiagramRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
+        var mockDiagramTrainRepository = new Mock<IDiagramTrainRepository>();
+        mockDiagramTrainRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
 
         var mockTrackCircuitDepartmentTimeRepository = new Mock<ITrackCircuitDepartmentTimeRepository>();
         mockTrackCircuitDepartmentTimeRepository.Setup(x => x.GetByTrackCircuitIdAndIsUpAndMaxCarCount(100, false, 6)).ReturnsAsync(departmentTime);
@@ -641,7 +641,7 @@ public class TrainServiceTest
         var mockTrainRepository = new Mock<ITrainRepository>();
         mockTrainRepository.Setup(x => x.SetDelayByTrainNumber(trainNumber, It.IsAny<int>())).Returns(Task.CompletedTask);
 
-        var trainService = CreateTrainService(testTrackCircuitService, mockTrainRepository, mockTrainDiagramRepository,
+        var trainService = CreateTrainService(testTrackCircuitService, mockTrainRepository, mockDiagramTrainRepository,
             mockTrackCircuitDepartmentTimeRepository, mockDateTimeRepository, testServerService);
 
         // Act
@@ -700,8 +700,8 @@ public class TrainServiceTest
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
 
-        var mockTrainDiagramRepository = new Mock<IDiagramTrainRepository>();
-        mockTrainDiagramRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
+        var mockDiagramTrainRepository = new Mock<IDiagramTrainRepository>();
+        mockDiagramTrainRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
 
         var mockTrackCircuitDepartmentTimeRepository = new Mock<ITrackCircuitDepartmentTimeRepository>();
         mockTrackCircuitDepartmentTimeRepository.Setup(x => x.GetByTrackCircuitIdAndIsUpAndMaxCarCount(100, true, 8)).ReturnsAsync(departmentTime);
@@ -715,7 +715,7 @@ public class TrainServiceTest
         var mockTrainRepository = new Mock<ITrainRepository>();
         mockTrainRepository.Setup(x => x.SetDelayByTrainNumber(trainNumber, It.IsAny<int>())).Returns(Task.CompletedTask);
 
-        var trainService = CreateTrainService(testTrackCircuitService, mockTrainRepository, mockTrainDiagramRepository,
+        var trainService = CreateTrainService(testTrackCircuitService, mockTrainRepository, mockDiagramTrainRepository,
             mockTrackCircuitDepartmentTimeRepository, mockDateTimeRepository, testServerService);
 
         // Act
@@ -757,8 +757,8 @@ public class TrainServiceTest
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
 
-        var mockTrainDiagramRepository = new Mock<IDiagramTrainRepository>();
-        mockTrainDiagramRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
+        var mockDiagramTrainRepository = new Mock<IDiagramTrainRepository>();
+        mockDiagramTrainRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
 
         var mockTrackCircuitDepartmentTimeRepository = new Mock<ITrackCircuitDepartmentTimeRepository>();
         mockTrackCircuitDepartmentTimeRepository.Setup(x => x.GetByTrackCircuitIdAndIsUpAndMaxCarCount(100, true, 8)).ReturnsAsync(departmentTime);
@@ -772,7 +772,7 @@ public class TrainServiceTest
         var mockTrainRepository = new Mock<ITrainRepository>();
         mockTrainRepository.Setup(x => x.SetDelayByTrainNumber(trainNumber, It.IsAny<int>())).Returns(Task.CompletedTask);
 
-        var trainService = CreateTrainService(testTrackCircuitService, mockTrainRepository, mockTrainDiagramRepository,
+        var trainService = CreateTrainService(testTrackCircuitService, mockTrainRepository, mockDiagramTrainRepository,
             mockTrackCircuitDepartmentTimeRepository, mockDateTimeRepository, testServerService);
 
         // Act
@@ -815,8 +815,8 @@ public class TrainServiceTest
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
 
-        var mockTrainDiagramRepository = new Mock<IDiagramTrainRepository>();
-        mockTrainDiagramRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
+        var mockDiagramTrainRepository = new Mock<IDiagramTrainRepository>();
+        mockDiagramTrainRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
 
         var mockTrackCircuitDepartmentTimeRepository = new Mock<ITrackCircuitDepartmentTimeRepository>();
         mockTrackCircuitDepartmentTimeRepository.Setup(x => x.GetByTrackCircuitIdAndIsUpAndMaxCarCount(100, true, 10)).ReturnsAsync(departmentTime);
@@ -830,7 +830,7 @@ public class TrainServiceTest
         var mockTrainRepository = new Mock<ITrainRepository>();
         mockTrainRepository.Setup(x => x.SetDelayByTrainNumber(trainNumber, It.IsAny<int>())).Returns(Task.CompletedTask);
 
-        var trainService = CreateTrainService(testTrackCircuitService, mockTrainRepository, mockTrainDiagramRepository,
+        var trainService = CreateTrainService(testTrackCircuitService, mockTrainRepository, mockDiagramTrainRepository,
             mockTrackCircuitDepartmentTimeRepository, mockDateTimeRepository, testServerService);
 
         // Act
@@ -867,8 +867,8 @@ public class TrainServiceTest
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
 
-        var mockTrainDiagramRepository = new Mock<IDiagramTrainRepository>();
-        mockTrainDiagramRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
+        var mockDiagramTrainRepository = new Mock<IDiagramTrainRepository>();
+        mockDiagramTrainRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
 
         var mockTrackCircuitDepartmentTimeRepository = new Mock<ITrackCircuitDepartmentTimeRepository>();
         mockTrackCircuitDepartmentTimeRepository.Setup(x => x.GetByTrackCircuitIdAndIsUpAndMaxCarCount(100, true, 10)).ReturnsAsync(departmentTime);
@@ -882,7 +882,7 @@ public class TrainServiceTest
         var mockTrainRepository = new Mock<ITrainRepository>();
         mockTrainRepository.Setup(x => x.SetDelayByTrainNumber(trainNumber, It.IsAny<int>())).Returns(Task.CompletedTask);
 
-        var trainService = CreateTrainService(testTrackCircuitService, mockTrainRepository, mockTrainDiagramRepository,
+        var trainService = CreateTrainService(testTrackCircuitService, mockTrainRepository, mockDiagramTrainRepository,
             mockTrackCircuitDepartmentTimeRepository, mockDateTimeRepository, testServerService);
 
         // Act
@@ -919,8 +919,8 @@ public class TrainServiceTest
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
 
-        var mockTrainDiagramRepository = new Mock<IDiagramTrainRepository>();
-        mockTrainDiagramRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
+        var mockDiagramTrainRepository = new Mock<IDiagramTrainRepository>();
+        mockDiagramTrainRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
 
         var mockTrackCircuitDepartmentTimeRepository = new Mock<ITrackCircuitDepartmentTimeRepository>();
         mockTrackCircuitDepartmentTimeRepository.Setup(x => x.GetByTrackCircuitIdAndIsUpAndMaxCarCount(100, true, 8)).ReturnsAsync(departmentTime);
@@ -934,7 +934,7 @@ public class TrainServiceTest
         var mockTrainRepository = new Mock<ITrainRepository>();
         mockTrainRepository.Setup(x => x.SetDelayByTrainNumber(trainNumber, It.IsAny<int>())).Returns(Task.CompletedTask);
 
-        var trainService = CreateTrainService(testTrackCircuitService, mockTrainRepository, mockTrainDiagramRepository,
+        var trainService = CreateTrainService(testTrackCircuitService, mockTrainRepository, mockDiagramTrainRepository,
             mockTrackCircuitDepartmentTimeRepository, mockDateTimeRepository, testServerService);
 
         // Act
@@ -971,8 +971,8 @@ public class TrainServiceTest
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
 
-        var mockTrainDiagramRepository = new Mock<IDiagramTrainRepository>();
-        mockTrainDiagramRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
+        var mockDiagramTrainRepository = new Mock<IDiagramTrainRepository>();
+        mockDiagramTrainRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
 
         var mockTrackCircuitDepartmentTimeRepository = new Mock<ITrackCircuitDepartmentTimeRepository>();
         mockTrackCircuitDepartmentTimeRepository.Setup(x => x.GetByTrackCircuitIdAndIsUpAndMaxCarCount(100, true, 8)).ReturnsAsync(departmentTime);
@@ -986,7 +986,7 @@ public class TrainServiceTest
         var mockTrainRepository = new Mock<ITrainRepository>();
         mockTrainRepository.Setup(x => x.SetDelayByTrainNumber(trainNumber, It.IsAny<int>())).Returns(Task.CompletedTask);
 
-        var trainService = CreateTrainService(testTrackCircuitService, mockTrainRepository, mockTrainDiagramRepository,
+        var trainService = CreateTrainService(testTrackCircuitService, mockTrainRepository, mockDiagramTrainRepository,
             mockTrackCircuitDepartmentTimeRepository, mockDateTimeRepository, testServerService);
 
         // Act
@@ -1023,8 +1023,8 @@ public class TrainServiceTest
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
 
-        var mockTrainDiagramRepository = new Mock<IDiagramTrainRepository>();
-        mockTrainDiagramRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
+        var mockDiagramTrainRepository = new Mock<IDiagramTrainRepository>();
+        mockDiagramTrainRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
 
         var mockTrackCircuitDepartmentTimeRepository = new Mock<ITrackCircuitDepartmentTimeRepository>();
         mockTrackCircuitDepartmentTimeRepository.Setup(x => x.GetByTrackCircuitIdAndIsUpAndMaxCarCount(100, true, 8)).ReturnsAsync(departmentTime);
@@ -1038,7 +1038,7 @@ public class TrainServiceTest
         var mockTrainRepository = new Mock<ITrainRepository>();
         mockTrainRepository.Setup(x => x.SetDelayByTrainNumber(trainNumber, It.IsAny<int>())).Returns(Task.CompletedTask);
 
-        var trainService = CreateTrainService(testTrackCircuitService, mockTrainRepository, mockTrainDiagramRepository,
+        var trainService = CreateTrainService(testTrackCircuitService, mockTrainRepository, mockDiagramTrainRepository,
             mockTrackCircuitDepartmentTimeRepository, mockDateTimeRepository, testServerService);
 
         // Act
@@ -1075,8 +1075,8 @@ public class TrainServiceTest
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
 
-        var mockTrainDiagramRepository = new Mock<IDiagramTrainRepository>();
-        mockTrainDiagramRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
+        var mockDiagramTrainRepository = new Mock<IDiagramTrainRepository>();
+        mockDiagramTrainRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
 
         var mockTrackCircuitDepartmentTimeRepository = new Mock<ITrackCircuitDepartmentTimeRepository>();
         mockTrackCircuitDepartmentTimeRepository.Setup(x => x.GetByTrackCircuitIdAndIsUpAndMaxCarCount(100, true, 8)).ReturnsAsync(departmentTime);
@@ -1090,7 +1090,7 @@ public class TrainServiceTest
         var mockTrainRepository = new Mock<ITrainRepository>();
         mockTrainRepository.Setup(x => x.SetDelayByTrainNumber(trainNumber, It.IsAny<int>())).Returns(Task.CompletedTask);
 
-        var trainService = CreateTrainService(testTrackCircuitService, mockTrainRepository, mockTrainDiagramRepository,
+        var trainService = CreateTrainService(testTrackCircuitService, mockTrainRepository, mockDiagramTrainRepository,
             mockTrackCircuitDepartmentTimeRepository, mockDateTimeRepository, testServerService);
 
         // Act
