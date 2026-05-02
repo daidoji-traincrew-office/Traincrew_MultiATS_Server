@@ -137,7 +137,7 @@ CREATE INDEX track_circuit_operation_notification_display_name_index ON track_ci
 -- 軌道回路出発時素
 CREATE TABLE track_circuit_department_time
 (
-    id               SERIAL PRIMARY KEY,
+    id               BIGSERIAL PRIMARY KEY,
     track_circuit_id BIGINT  NOT NULL REFERENCES track_circuit (id), -- 軌道回路ID
     car_count        INT     NOT NULL,                               -- 両数（編成両数、0なら通過とみなす）
     time_element     INT     NOT NULL,                               -- 時素

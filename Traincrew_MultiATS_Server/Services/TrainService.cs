@@ -34,7 +34,7 @@ public partial class TrainService(
     IRouteService routeService,
     ITrainRepository trainRepository,
     ITrainCarRepository trainCarRepository,
-    IDiagramTrainRepository trainDiagramRepository,
+    IDiagramTrainRepository diagramTrainRepository,
     ITransactionRepository transactionRepository,
     IBannedUserService bannedUserService,
     IGeneralRepository generalRepository,
@@ -168,6 +168,7 @@ public partial class TrainService(
 
     public async Task DriverGetsOff(ulong clientDriverId, string trainNumber)
     {
+        var diaId = await serverService.GetSelectedDiagramIdAsync();
         var clientDiaNumber = GetDiaNumberFromTrainNumber(trainNumber);
         var trainStates = await GetTrainStatesByDiaNumber(clientDiaNumber);
         foreach (var trainState in trainStates)
@@ -178,7 +179,7 @@ public partial class TrainService(
             }
 
             trainState.DriverId = null;
-            await UpdateTrainState(trainState);
+            await UpdateTrainState(trainState, diaId);
         }
     }
 
@@ -215,6 +216,7 @@ public partial class TrainService(
         ServerToATSData serverData)
     {
         // Todo: もうすこし機能的凝集レベルでメソッド分解したい
+        var diaId = await serverService.GetSelectedDiagramIdAsync();
         var clientTrainNumber = clientData.DiaName;
         var clientDiaNumber = GetDiaNumberFromTrainNumber(clientTrainNumber);
         var existingTrainStates = await GetTrainStatesByDiaNumber(clientDiaNumber);
@@ -265,7 +267,7 @@ public partial class TrainService(
 
 
             //1.完全新規登録
-            return await CreateTrainState(clientData, clientDriverId);
+            return await CreateTrainState(clientData, clientDriverId, diaId);
         }
 
         // 同一運番列車が登録済
@@ -325,7 +327,7 @@ public partial class TrainService(
                 existingTrainStateByMe.TrainNumber = clientTrainNumber;
                 existingTrainStateByMe.DiaNumber = clientDiaNumber;
                 existingTrainStateByMe.DriverId = clientDriverId;
-                await UpdateTrainState(existingTrainStateByMe);
+                await UpdateTrainState(existingTrainStateByMe, diaId);
                 return existingTrainStateByMe;
             }
 
@@ -354,14 +356,14 @@ public partial class TrainService(
                 existingTrainStateByMe.TrainNumber = clientTrainNumber;
                 existingTrainStateByMe.DiaNumber = clientDiaNumber;
                 existingTrainStateByMe.DriverId = clientDriverId;
-                await UpdateTrainState(existingTrainStateByMe);
+                await UpdateTrainState(existingTrainStateByMe, diaId);
                 return existingTrainStateByMe;
             }
 
             // 3. 在線軌道回路に他の列車が在線していない場合、新規登録
             if (trackCircuits.All(tc => !tc.TrackCircuitState.IsShortCircuit))
             {
-                return await CreateTrainState(clientData, clientDriverId);
+                return await CreateTrainState(clientData, clientDriverId, diaId);
             }
 
             // ここには来ないはず
@@ -373,7 +375,7 @@ public partial class TrainService(
         {
             // 5.列番だけ書き換える
             existingTrainStateByMe.TrainNumber = clientTrainNumber;
-            await UpdateTrainState(existingTrainStateByMe);
+            await UpdateTrainState(existingTrainStateByMe, diaId);
         }
 
         return existingTrainStateByMe;
@@ -390,10 +392,12 @@ public partial class TrainService(
             .GroupBy(carState => carState.TrainStateId)
             .ToDictionary(group => group.Key, group => group.ToList());
         // 列車のダイアグラムを取得
-        var diagramTrains = await trainDiagramRepository.GetByTrainNumbers(
-            trainStates
-                .Select(carState => carState.TrainNumber)
-                .ToHashSet());
+        var diaId = await serverService.GetSelectedDiagramIdAsync();
+        var diagramTrains = diaId.HasValue
+            ? await diagramTrainRepository.GetByDiaIdAndTrainNumbers(
+                diaId.Value,
+                trainStates.Select(s => s.TrainNumber).ToHashSet())
+            : [];
         // 列車番号ごとのダイアグラム
         var trainDiagramsByTrainNumber = diagramTrains.ToDictionary(dt => dt.TrainNumber, dt => dt);
 
@@ -468,9 +472,11 @@ public partial class TrainService(
     }
 
     // TrainState新規書き込み
-    private async Task<TrainState> CreateTrainState(AtsToServerData clientData, ulong driverId)
+    private async Task<TrainState> CreateTrainState(AtsToServerData clientData, ulong driverId, ulong? diaId)
     {
-        var diagramTrain = await trainDiagramRepository.GetByTrainNumber(clientData.DiaName);
+        var diagramTrain = diaId.HasValue
+            ? await diagramTrainRepository.GetByDiaIdAndTrainNumber(diaId.Value, clientData.DiaName)
+            : null;
 
         var trainState = new TrainState
         {
@@ -489,9 +495,11 @@ public partial class TrainService(
     /// <summary>
     /// TrainState更新
     /// </summary>
-    private async Task UpdateTrainState(TrainState trainState)
+    private async Task UpdateTrainState(TrainState trainState, ulong? diaId)
     {
-        var diagramTrain = await trainDiagramRepository.GetByTrainNumber(trainState.TrainNumber);
+        var diagramTrain = diaId.HasValue
+            ? await diagramTrainRepository.GetByDiaIdAndTrainNumber(diaId.Value, trainState.TrainNumber)
+            : null;
         // 列車のダイアグラム情報を更新
         trainState.FromStationId = diagramTrain?.FromStationId ?? "TH00";
         trainState.ToStationId = diagramTrain?.ToStationId ?? "TH00";
@@ -718,7 +726,7 @@ public partial class TrainService(
         foreach (var (trackCircuit, stationId) in stationTrackCircuits)
         {
             // 時刻表を取得
-            var timetable = await trainDiagramRepository.GetTimetableByTrainNumberStationIdAndDiaId(
+            var timetable = await diagramTrainRepository.GetTimetableByTrainNumberStationIdAndDiaId(
                 diaId, trainNumber, stationId);
 
             if (timetable?.DepartureTime == null)

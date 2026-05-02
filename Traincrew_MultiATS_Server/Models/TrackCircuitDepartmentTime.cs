@@ -9,7 +9,7 @@ public class TrackCircuitDepartmentTime
     [Key]
     [Column("id")]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int Id { get; set; }
+    public ulong Id { get; set; }
 
     [Column("track_circuit_id")]
     public ulong TrackCircuitId { get; set; }

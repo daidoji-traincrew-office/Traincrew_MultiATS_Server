@@ -13,7 +13,7 @@ public class TrainDbInitializerTest
 {
     private readonly Mock<ILogger<TrainDbInitializer>> _loggerMock = new();
     private readonly Mock<ITrainTypeRepository> _trainTypeRepositoryMock = new();
-    private readonly Mock<IDiagramTrainRepository> _trainDiagramRepositoryMock = new();
+    private readonly Mock<IDiagramTrainRepository> _diagramTrainRepositoryMock = new();
     private readonly Mock<IGeneralRepository> _generalRepositoryMock = new();
 
     [Fact]
@@ -33,7 +33,7 @@ public class TrainDbInitializerTest
         var initializer = new TrainDbInitializer(
             _loggerMock.Object,
             _trainTypeRepositoryMock.Object,
-            _trainDiagramRepositoryMock.Object,
+            _diagramTrainRepositoryMock.Object,
             _generalRepositoryMock.Object);
 
         // Act
@@ -68,7 +68,7 @@ public class TrainDbInitializerTest
         var initializer = new TrainDbInitializer(
             _loggerMock.Object,
             _trainTypeRepositoryMock.Object,
-            _trainDiagramRepositoryMock.Object,
+            _diagramTrainRepositoryMock.Object,
             _generalRepositoryMock.Object);
 
         // Act
@@ -97,7 +97,7 @@ public class TrainDbInitializerTest
         var initializer = new TrainDbInitializer(
             _loggerMock.Object,
             _trainTypeRepositoryMock.Object,
-            _trainDiagramRepositoryMock.Object,
+            _diagramTrainRepositoryMock.Object,
             _generalRepositoryMock.Object);
 
         // Act
@@ -126,13 +126,13 @@ public class TrainDbInitializerTest
             }
         };
 
-        _trainDiagramRepositoryMock.Setup(r => r.GetTrainNumbersForAll(It.IsAny<CancellationToken>()))
+        _diagramTrainRepositoryMock.Setup(r => r.GetTrainNumbersForAll(It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
 
         var initializer = new TrainDbInitializer(
             _loggerMock.Object,
             _trainTypeRepositoryMock.Object,
-            _trainDiagramRepositoryMock.Object,
+            _diagramTrainRepositoryMock.Object,
             _generalRepositoryMock.Object);
 
         // Act
@@ -176,13 +176,13 @@ public class TrainDbInitializerTest
             }
         };
 
-        _trainDiagramRepositoryMock.Setup(r => r.GetTrainNumbersForAll(It.IsAny<CancellationToken>()))
+        _diagramTrainRepositoryMock.Setup(r => r.GetTrainNumbersForAll(It.IsAny<CancellationToken>()))
             .ReturnsAsync(["101"]);
 
         var initializer = new TrainDbInitializer(
             _loggerMock.Object,
             _trainTypeRepositoryMock.Object,
-            _trainDiagramRepositoryMock.Object,
+            _diagramTrainRepositoryMock.Object,
             _generalRepositoryMock.Object);
 
         // Act
@@ -204,13 +204,13 @@ public class TrainDbInitializerTest
         // Arrange
         var trainDiagramCsvList = new List<DiagramTrainCsv>();
 
-        _trainDiagramRepositoryMock.Setup(r => r.GetTrainNumbersForAll(It.IsAny<CancellationToken>()))
+        _diagramTrainRepositoryMock.Setup(r => r.GetTrainNumbersForAll(It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
 
         var initializer = new TrainDbInitializer(
             _loggerMock.Object,
             _trainTypeRepositoryMock.Object,
-            _trainDiagramRepositoryMock.Object,
+            _diagramTrainRepositoryMock.Object,
             _generalRepositoryMock.Object);
 
         // Act
@@ -229,7 +229,7 @@ public class TrainDbInitializerTest
         var initializer = new TrainDbInitializer(
             _loggerMock.Object,
             _trainTypeRepositoryMock.Object,
-            _trainDiagramRepositoryMock.Object,
+            _diagramTrainRepositoryMock.Object,
             _generalRepositoryMock.Object);
 
         // Act
@@ -245,7 +245,7 @@ public class TrainDbInitializerTest
     }
 
     private TrainDbInitializer CreateInitializer() =>
-        new(_loggerMock.Object, _trainTypeRepositoryMock.Object, _trainDiagramRepositoryMock.Object, _generalRepositoryMock.Object);
+        new(_loggerMock.Object, _trainTypeRepositoryMock.Object, _diagramTrainRepositoryMock.Object, _generalRepositoryMock.Object);
 
     private TTC_Data CreateTtcData(string trainClass, string? trainName) => new()
     {
@@ -270,9 +270,9 @@ public class TrainDbInitializerTest
         // Arrange
         _trainTypeRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Dictionary<string, long> { ["普通"] = 5 });
-        _trainDiagramRepositoryMock.Setup(r => r.GetForTrainNumberByDiaId(It.IsAny<ulong>(), It.IsAny<CancellationToken>()))
+        _diagramTrainRepositoryMock.Setup(r => r.GetForTrainNumberByDiaId(It.IsAny<ulong>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Dictionary<string, DiagramTrain>());
-        _trainDiagramRepositoryMock.Setup(r => r.DeleteTimetablesByDiaId(It.IsAny<ulong>(), It.IsAny<CancellationToken>()))
+        _diagramTrainRepositoryMock.Setup(r => r.DeleteTimetablesByDiaId(It.IsAny<ulong>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
         var initializer = CreateInitializer();
 
@@ -293,9 +293,9 @@ public class TrainDbInitializerTest
         // Arrange
         _trainTypeRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Dictionary<string, long>());
-        _trainDiagramRepositoryMock.Setup(r => r.GetForTrainNumberByDiaId(It.IsAny<ulong>(), It.IsAny<CancellationToken>()))
+        _diagramTrainRepositoryMock.Setup(r => r.GetForTrainNumberByDiaId(It.IsAny<ulong>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Dictionary<string, DiagramTrain>());
-        _trainDiagramRepositoryMock.Setup(r => r.DeleteTimetablesByDiaId(It.IsAny<ulong>(), It.IsAny<CancellationToken>()))
+        _diagramTrainRepositoryMock.Setup(r => r.DeleteTimetablesByDiaId(It.IsAny<ulong>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
         var initializer = CreateInitializer();
 
@@ -316,9 +316,9 @@ public class TrainDbInitializerTest
         // Arrange
         _trainTypeRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Dictionary<string, long> { ["B特"] = 16 });
-        _trainDiagramRepositoryMock.Setup(r => r.GetForTrainNumberByDiaId(It.IsAny<ulong>(), It.IsAny<CancellationToken>()))
+        _diagramTrainRepositoryMock.Setup(r => r.GetForTrainNumberByDiaId(It.IsAny<ulong>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Dictionary<string, DiagramTrain>());
-        _trainDiagramRepositoryMock.Setup(r => r.DeleteTimetablesByDiaId(It.IsAny<ulong>(), It.IsAny<CancellationToken>()))
+        _diagramTrainRepositoryMock.Setup(r => r.DeleteTimetablesByDiaId(It.IsAny<ulong>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
         var initializer = CreateInitializer();
 
@@ -339,9 +339,9 @@ public class TrainDbInitializerTest
         // Arrange
         _trainTypeRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Dictionary<string, long> { ["B特"] = 16 });
-        _trainDiagramRepositoryMock.Setup(r => r.GetForTrainNumberByDiaId(It.IsAny<ulong>(), It.IsAny<CancellationToken>()))
+        _diagramTrainRepositoryMock.Setup(r => r.GetForTrainNumberByDiaId(It.IsAny<ulong>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Dictionary<string, DiagramTrain>());
-        _trainDiagramRepositoryMock.Setup(r => r.DeleteTimetablesByDiaId(It.IsAny<ulong>(), It.IsAny<CancellationToken>()))
+        _diagramTrainRepositoryMock.Setup(r => r.DeleteTimetablesByDiaId(It.IsAny<ulong>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
         var initializer = CreateInitializer();
 
@@ -370,9 +370,9 @@ public class TrainDbInitializerTest
         // Arrange
         _trainTypeRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Dictionary<string, long> { [halfWidthName] = expectedId });
-        _trainDiagramRepositoryMock.Setup(r => r.GetForTrainNumberByDiaId(It.IsAny<ulong>(), It.IsAny<CancellationToken>()))
+        _diagramTrainRepositoryMock.Setup(r => r.GetForTrainNumberByDiaId(It.IsAny<ulong>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Dictionary<string, DiagramTrain>());
-        _trainDiagramRepositoryMock.Setup(r => r.DeleteTimetablesByDiaId(It.IsAny<ulong>(), It.IsAny<CancellationToken>()))
+        _diagramTrainRepositoryMock.Setup(r => r.DeleteTimetablesByDiaId(It.IsAny<ulong>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
         var initializer = CreateInitializer();
 
