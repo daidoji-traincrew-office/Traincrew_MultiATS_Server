@@ -7,7 +7,7 @@ namespace Traincrew_MultiATS_Server.Scheduler;
 
 public class MetricsCollectorScheduler(IServiceScopeFactory serviceScopeFactory) : Scheduler(serviceScopeFactory)
 {
-    protected override int Interval => 10000; // 10秒
+    protected override int Interval => 30000; // 30秒
 
     protected override async Task ExecuteTaskAsync(IServiceScope scope, System.Diagnostics.Activity? activity)
     {
