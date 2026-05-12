@@ -26,8 +26,7 @@ public class SchedulerManager(
             new CommanderTableHubScheduler(serviceScopeFactory),
             new DestinationButtonScheduler(serviceScopeFactory),
             new TrainScheduler(serviceScopeFactory),
-            new SignalScheduler(serviceScopeFactory),
-            new MetricsCollectorScheduler(serviceScopeFactory)
+            new SignalScheduler(serviceScopeFactory)
         ];
     }
 
