@@ -7,10 +7,18 @@ using Route = Traincrew_MultiATS_Server.Models.Route;
 
 namespace Traincrew_MultiATS_Server.Services;
 
+public interface ISignalService
+{
+    Task<List<SignalData>> GetSignalIndicationDataByTrackCircuits(List<TrackCircuit> trackCircuits, bool isUp);
+    Task<List<SignalData>> CalcAllSignalIndication();
+    Task<Dictionary<string, Phase>> CalcSignalIndication(List<string> signalNames, bool getDetailedIndication = true);
+    Task<List<string>> GetSignalNamesByStationIds(List<string> stationIds);
+}
+
 public class SignalService(
     ISignalRepository signalRepository,
     ISignalRouteRepository signalRouteRepository,
-    INextSignalRepository nextSignalRepository)
+    INextSignalRepository nextSignalRepository) : ISignalService
 {
     /// <summary>
     /// 指定した軌道回路から見える信号機の現示データを計算する

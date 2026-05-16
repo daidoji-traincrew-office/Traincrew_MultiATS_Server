@@ -17,7 +17,7 @@ using static OpenIddict.Client.WebIntegration.OpenIddictClientWebIntegrationCons
 namespace Traincrew_MultiATS_Server.Crew.Controllers;
 
 [Route("auth")]
-public class AuthenticationController(ILogger<AuthenticationController> logger, DiscordService discordService)
+public class AuthenticationController(ILogger<AuthenticationController> logger, IDiscordService discordService)
     : ControllerBase
 {
     private readonly ILogger _logger = logger;

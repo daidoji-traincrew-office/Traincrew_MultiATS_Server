@@ -7,6 +7,7 @@ using Traincrew_MultiATS_Server.Repositories.Mutex;
 using Traincrew_MultiATS_Server.Repositories.NextSignal;
 using Traincrew_MultiATS_Server.Repositories.OperationInformation;
 using Traincrew_MultiATS_Server.Repositories.OperationNotification;
+using Traincrew_MultiATS_Server.Repositories.OperationNotificationDisplay;
 using Traincrew_MultiATS_Server.Repositories.Protection;
 using Traincrew_MultiATS_Server.Repositories.Route;
 using Traincrew_MultiATS_Server.Repositories.Server;
@@ -17,6 +18,7 @@ using Traincrew_MultiATS_Server.Repositories.Train;
 using Traincrew_MultiATS_Server.Repositories.TrainCar;
 using Traincrew_MultiATS_Server.Repositories.TrainDiagram;
 using Traincrew_MultiATS_Server.Repositories.TrainSignalState;
+using Traincrew_MultiATS_Server.Repositories.TrainType;
 using Traincrew_MultiATS_Server.Repositories.Transaction;
 using Traincrew_MultiATS_Server.Repositories.UserDisconnection;
 using Traincrew_MultiATS_Server.Scheduler;
@@ -78,6 +80,7 @@ public class Program
             .AddScoped<INextSignalRepository, NextSignalRepository>()
             .AddScoped<IOperationInformationRepository, OperationInformationRepository>()
             .AddScoped<IOperationNotificationRepository, OperationNotificationRepository>()
+            .AddScoped<IOperationNotificationDisplayRepository, OperationNotificationDisplayRepository>()
             .AddScoped<IProtectionRepository, ProtectionRepository>()
             .AddScoped<IRouteRepository, RouteRepository>()
             .AddScoped<IServerRepository, ServerRepository>()
@@ -87,20 +90,21 @@ public class Program
             .AddScoped<ITrainCarRepository, TrainCarRepository>()
             .AddScoped<ITrainDiagramRepository, TrainDiagramRepository>()
             .AddScoped<ITrainRepository, TrainRepository>()
+            .AddScoped<ITrainTypeRepository, TrainTypeRepository>()
             .AddScoped<ITrainSignalStateRepository, TrainSignalStateRepository>()
             .AddScoped<ITransactionRepository, TransactionRepository>()
             .AddScoped<IUserDisconnectionRepository, UserDisconnectionRepository>()
             // Service (ABC順)
-            .AddScoped<BannedUserService>()
-            .AddScoped<OperationInformationService>()
-            .AddScoped<OperationNotificationService>()
-            .AddScoped<PassengerService>()
-            .AddScoped<ProtectionService>()
-            .AddScoped<RouteService>()
-            .AddScoped<ServerService>()
-            .AddScoped<SignalService>()
-            .AddScoped<TrackCircuitService>()
-            .AddScoped<TrainService>()
+            .AddScoped<IBannedUserService, BannedUserService>()
+            .AddScoped<IOperationInformationService, OperationInformationService>()
+            .AddScoped<IOperationNotificationService, OperationNotificationService>()
+            .AddScoped<IPassengerService, PassengerService>()
+            .AddScoped<IProtectionService, ProtectionService>()
+            .AddScoped<IRouteService, RouteService>()
+            .AddScoped<IServerService, ServerService>()
+            .AddScoped<ISignalService, SignalService>()
+            .AddScoped<ITrackCircuitService, TrackCircuitService>()
+            .AddScoped<ITrainService, TrainService>()
             .AddScoped<SchedulerManager>();
     }
 

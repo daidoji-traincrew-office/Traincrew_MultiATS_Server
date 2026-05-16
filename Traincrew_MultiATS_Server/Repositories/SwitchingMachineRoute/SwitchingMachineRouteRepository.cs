@@ -29,4 +29,22 @@ public class SwitchingMachineRouteRepository(ApplicationDbContext context) : ISw
                 g => g.FirstOrDefault()
             );
     }
+
+    public async Task DeleteAll()
+    {
+        await context.SwitchingMachineRoutes.ExecuteDeleteAsync();
+    }
+
+    public async Task<HashSet<(ulong RouteId, ulong SwitchingMachineId)>> GetAllPairsAsync(CancellationToken cancellationToken = default)
+    {
+        var pairs = await context.SwitchingMachineRoutes
+            .Select(smr => new { smr.RouteId, smr.SwitchingMachineId })
+            .ToListAsync(cancellationToken);
+        return pairs.Select(p => (p.RouteId, p.SwitchingMachineId)).ToHashSet();
+    }
+
+    public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        await context.SaveChangesAsync(cancellationToken);
+    }
 }

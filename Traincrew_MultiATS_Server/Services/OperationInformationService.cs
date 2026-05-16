@@ -5,10 +5,21 @@ using Traincrew_MultiATS_Server.Repositories.OperationInformation;
 
 namespace Traincrew_MultiATS_Server.Services;
 
+public interface IOperationInformationService
+{
+    Task<OperationInformationData> AddOperationInformation(OperationInformationData data);
+    Task<OperationInformationData> UpdateOperationInformation(OperationInformationData data);
+    Task<List<OperationInformationData>> GetOperationInformations();
+    Task<List<OperationInformationData>> GetAllOperationInformations();
+    Task<List<OperationInformationData>> GetOperationInformationsOrderByType();
+    Task<List<OperationInformationData>> GetAllOperationInformationsOrderByType();
+    Task DeleteOperationInformation(long id);
+}
+
 public class OperationInformationService(
     IOperationInformationRepository operationInformationRepository,
     IDateTimeRepository dateTimeRepository
-)
+) : IOperationInformationService
 {
     public async Task<OperationInformationData> AddOperationInformation(OperationInformationData data)
     {

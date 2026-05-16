@@ -4,7 +4,7 @@ using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace Traincrew_MultiATS_Server.Authentication;
 
-public class DiscordRoleHandler(DiscordService discordService) : AuthorizationHandler<DiscordRoleRequirement>
+public class DiscordRoleHandler(IDiscordService discordService) : AuthorizationHandler<DiscordRoleRequirement>
 {
     protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, DiscordRoleRequirement requirement)
     {

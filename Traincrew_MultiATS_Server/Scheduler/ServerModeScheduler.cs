@@ -13,7 +13,7 @@ public class ServerModeScheduler(IServiceScopeFactory serviceScopeFactory) : Sch
     protected override async Task ExecuteTaskAsync(IServiceScope scope, System.Diagnostics.Activity? activity)
     {
         var hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<CommanderTableHub, ICommanderTableClientContract>>();
-        var serverService = scope.ServiceProvider.GetRequiredService<ServerService>();
+        var serverService = scope.ServiceProvider.GetRequiredService<IServerService>();
 
         var serverMode = await serverService.GetServerModeAsync();
 

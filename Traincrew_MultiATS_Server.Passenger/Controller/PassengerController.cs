@@ -4,7 +4,7 @@ using Traincrew_MultiATS_Server.Services;
 namespace Traincrew_MultiATS_Server.Passenger.Controller;
 
 [ApiController]
-public class PassengerController(PassengerService passengerService): ControllerBase
+public class PassengerController(IPassengerService passengerService): ControllerBase
 {
     [HttpGet("api/train")] 
     public async Task<IActionResult> GetTrainInfoAsync()

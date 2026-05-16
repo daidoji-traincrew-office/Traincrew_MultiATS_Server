@@ -43,4 +43,24 @@ public interface IStationRepository
     /// <param name="stationIds">停車場のIDのリスト</param>
     /// <returns>該当するタイマー状態のリスト</returns>
     Task<List<StationTimerState>> GetTimerStatesByStationIds(IEnumerable<string> stationIds);
+
+    /// <summary>
+    /// すべての停車場の名前を取得する
+    /// </summary>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    /// <returns>停車場名のList</returns>
+    Task<List<string>> GetAllNames(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// IsStation=trueの停車場IDを取得する
+    /// </summary>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    /// <returns>停車場IDのList</returns>
+    Task<List<string>> GetIdsWhereIsStation(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Stationを追加する
+    /// </summary>
+    /// <param name="station">追加するStation</param>
+    void Add(Models.Station station);
 }

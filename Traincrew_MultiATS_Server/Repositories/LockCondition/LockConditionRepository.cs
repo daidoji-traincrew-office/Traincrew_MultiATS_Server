@@ -33,7 +33,15 @@ public class LockConditionRepository(ApplicationDbContext context) : ILockCondit
             .Join(context.LockConditions, l => l.Id, lc => lc.LockId, (l, lc) => new { l.ObjectId, lc })
             .GroupBy(x => x.ObjectId)
             .ToDictionaryAsync(
-                x => x.Key, 
+                x => x.Key,
                 x => x.Select(y => y.lc).OrderBy(lc => lc.Id).ToList());
+    }
+
+    public async Task DeleteAll()
+    {
+        // TPT (Table-Per-Type) inheritance requires manual deletion in correct order
+        // Delete from derived table first, then base table
+        await context.Database.ExecuteSqlRawAsync("DELETE FROM lock_condition_object");
+        await context.Database.ExecuteSqlRawAsync("DELETE FROM lock_condition");
     }
 }

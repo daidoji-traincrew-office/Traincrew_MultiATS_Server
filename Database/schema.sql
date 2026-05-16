@@ -193,7 +193,8 @@ CREATE TABLE ttc_window_link
     target_ttc_window_name  VARCHAR(100) REFERENCES ttc_window (name) NOT NULL, -- リンク先の列番窓の名前
     type                    ttc_window_link_type                      NOT NULL, -- リンクの種類
     is_empty_sending        BOOLEAN                                   NOT NULL, -- 空送りかどうか
-    track_circuit_condition BIGINT REFERENCES track_circuit (id)                -- 移行条件の軌道回路ID
+    track_circuit_condition BIGINT REFERENCES track_circuit (id),               -- 移行条件の軌道回路ID
+    UNIQUE (source_ttc_window_name, target_ttc_window_name)
 );
 
 -- 移行条件進路リスト
@@ -643,9 +644,12 @@ CREATE TYPE server_mode AS ENUM ('off', 'private', 'public');
 -- サーバー状態テーブル(基本Entityは1つの想定)
 CREATE TABLE server_state
 (
-    id          SERIAL PRIMARY KEY,
-    mode        server_mode NOT NULL,
-    time_offset INTEGER NOT NULL DEFAULT 0
+    id                  SERIAL PRIMARY KEY,
+    mode                server_mode NOT NULL,
+    time_offset         INTEGER NOT NULL DEFAULT 0,
+    switch_move_time    INTEGER NOT NULL DEFAULT 5000,  -- 転轍機の転換にかかる時間(ms)
+    switch_return_time  INTEGER NOT NULL DEFAULT 500,   -- 転轍器が転換中に転換方向を変えるのにかかる時間(ms)
+    use_one_second_relay BOOLEAN NOT NULL DEFAULT false -- 接近鎖錠の時素に1秒リレーを使うかどうか
 );
 
 -- ユーザー接続拒否状態テーブル

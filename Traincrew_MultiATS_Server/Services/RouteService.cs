@@ -7,7 +7,13 @@ namespace Traincrew_MultiATS_Server.Services;
 using Route = Route;
 using RouteData = RouteData;
 
-public class RouteService(IRouteRepository routeRepository)
+public interface IRouteService
+{
+    Task<List<RouteData>> GetActiveRoutes();
+    Task<List<RouteData>> GetAllRoutes();
+}
+
+public class RouteService(IRouteRepository routeRepository) : IRouteService
 {
     private static RouteData ToRouteData(Route route)
     {

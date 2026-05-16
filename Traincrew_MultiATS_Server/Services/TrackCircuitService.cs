@@ -5,9 +5,21 @@ using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
 
 namespace Traincrew_MultiATS_Server.Services;
 
+public interface ITrackCircuitService
+{
+    Task<List<TrackCircuitData>> GetAllTrackCircuitDataList();
+    Task<List<TrackCircuit>> GetTrackCircuitsByNames(List<string> trackCircuitNames);
+    Task<List<TrackCircuit>> GetTrackCircuitsByTrainNumber(string trainNumber);
+    Task SetTrackCircuitDataList(List<TrackCircuitData> trackCircuitData, string trainNumber);
+    Task SetTrackCircuitData(TrackCircuitData trackCircuitData);
+    Task ClearTrackCircuitDataList(List<TrackCircuitData> trackCircuitData);
+    Task ClearTrackCircuitByTrainNumber(string trainNumber);
+    Task<List<TrackCircuitData>> GetShortCircuitedTrackCircuitDataList();
+}
+
 public class TrackCircuitService(
     ITrackCircuitRepository trackCircuitRepository,
-    IGeneralRepository generalRepository)
+    IGeneralRepository generalRepository) : ITrackCircuitService
 {
     public async Task<List<TrackCircuitData>> GetAllTrackCircuitDataList()
     {

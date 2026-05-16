@@ -11,6 +11,13 @@ using Route = Traincrew_MultiATS_Server.Models.Route;
 
 namespace Traincrew_MultiATS_Server.Services;
 
+public interface ITtcStationControlService
+{
+    Task TrainTracking();
+    Task<List<TtcWindow>> GetTtcWindowsByStationIdsWithState(List<string> stationIds);
+    Task ClearTtcWindowByTrainNumber(string trainNumber);
+}
+
 public class TtcStationControlService(
     ITtcWindowRepository ttcWindowRepository,
     ITtcWindowLinkRepository ttcWindowLinkRepository,
@@ -20,7 +27,7 @@ public class TtcStationControlService(
     IRouteLockTrackCircuitRepository routeLockTrackCircuitRepository,
     IGeneralRepository generalRepository,
     ILogger<TtcStationControlService> logger
-)
+) : ITtcStationControlService
 {
     public async Task TrainTracking()
     {

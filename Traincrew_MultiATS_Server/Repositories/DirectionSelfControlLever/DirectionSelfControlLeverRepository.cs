@@ -38,4 +38,15 @@ public class DirectionSelfControlLeverRepository(ApplicationDbContext context) :
             .Include(lever => lever.DirectionSelfControlLeverState)
             .ToListAsync();
     }
+
+    /// <summary>
+    /// DirectionSelfControlLever名からDirectionSelfControlLeverエンティティへのマッピングを取得する
+    /// </summary>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    /// <returns>DirectionSelfControlLever名をキー、DirectionSelfControlLeverエンティティを値とする辞書</returns>
+    public async Task<Dictionary<string, Models.DirectionSelfControlLever>> GetByNamesAsDictionaryAsync(CancellationToken cancellationToken = default)
+    {
+        return await context.DirectionSelfControlLevers
+            .ToDictionaryAsync(dscl => dscl.Name, cancellationToken);
+    }
 }

@@ -6,10 +6,17 @@ using Traincrew_MultiATS_Server.Repositories.Discord;
 
 namespace Traincrew_MultiATS_Server.Services;
 
+public interface IDiscordService
+{
+    Task<RestGuildUser> DiscordAuthentication(string token);
+    Task<bool> IsUserCanAuthenticate(ulong userId);
+    Task<TraincrewRole> GetRoleByMemberId(ulong? memberId);
+}
+
 public class DiscordService(
     IConfiguration configuration,
     IDiscordRepository discordRepository,
-    EnableAuthorizationStore enableAuthorizationStore)
+    EnableAuthorizationStore enableAuthorizationStore) : IDiscordService
 {
     public async Task<RestGuildUser> DiscordAuthentication(string token)
     {

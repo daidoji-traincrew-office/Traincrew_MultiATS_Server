@@ -1,9 +1,5 @@
-using Traincrew_MultiATS_Server.HostedService;
-using Traincrew_MultiATS_Server.Models;
-
 namespace Traincrew_MultiATS_Server.UT.HostedService;
 
-using static DbRendoTableInitializer;
 
 public class InitDbHostedServiceTest
 {

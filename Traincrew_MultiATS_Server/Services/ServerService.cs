@@ -5,10 +5,22 @@ using Traincrew_MultiATS_Server.Scheduler;
 
 namespace Traincrew_MultiATS_Server.Services;
 
+public interface IServerService
+{
+    Task<ServerMode> GetServerModeAsync();
+    Task<ServerMode> GetServerModeAsyncWithoutLock();
+    Task SetServerModeAsync(ServerMode mode);
+    Task UpdateSchedulerAsync();
+    Task<int> GetTimeOffsetAsync();
+    Task SetTimeOffsetAsync(int timeOffset);
+    Task SetSwitchMoveTimeAsync(int switchMoveTime);
+    Task SetUseOneSecondRelayAsync(bool useOneSecondRelay);
+}
+
 public class ServerService(
     IServerRepository serverRepository, 
     SchedulerManager schedulerManager,
-    IMutexRepository mutexRepository)
+    IMutexRepository mutexRepository) : IServerService
 {
     public async Task<ServerMode> GetServerModeAsync()
     {
@@ -16,7 +28,7 @@ public class ServerService(
         return await GetServerModeAsyncWithoutLock();
     }
 
-    private async Task<ServerMode> GetServerModeAsyncWithoutLock()
+    public async Task<ServerMode> GetServerModeAsyncWithoutLock()
     {
         var state = await serverRepository.GetServerStateAsync();
         if (state == null)
@@ -60,5 +72,15 @@ public class ServerService(
     public async Task SetTimeOffsetAsync(int timeOffset)
     {
         await serverRepository.SetTimeOffsetAsync(timeOffset);
+    }
+
+    public async Task SetSwitchMoveTimeAsync(int switchMoveTime)
+    {
+        await serverRepository.SetSwitchMoveTimeAsync(switchMoveTime);
+    }
+
+    public async Task SetUseOneSecondRelayAsync(bool useOneSecondRelay)
+    {
+        await serverRepository.SetUseOneSecondRelayAsync(useOneSecondRelay);
     }
 }

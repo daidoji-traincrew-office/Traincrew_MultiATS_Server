@@ -12,4 +12,22 @@ public class RouteLockTrackCircuitRepository(ApplicationDbContext context): IRou
             .OrderBy(obj => obj.Id)
             .ToListAsync();
     }
+
+    public async Task<List<(ulong RouteId, ulong TrackCircuitId)>> GetAllPairs(CancellationToken cancellationToken = default)
+    {
+        return await context.RouteLockTrackCircuits
+            .Select(r => new ValueTuple<ulong, ulong>(r.RouteId, r.TrackCircuitId))
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<List<Models.RouteLockTrackCircuit>> GetAll(CancellationToken cancellationToken = default)
+    {
+        return await context.RouteLockTrackCircuits
+            .ToListAsync(cancellationToken);
+    }
+
+    public void Add(Models.RouteLockTrackCircuit routeLockTrackCircuit)
+    {
+        context.RouteLockTrackCircuits.Add(routeLockTrackCircuit);
+    }
 }

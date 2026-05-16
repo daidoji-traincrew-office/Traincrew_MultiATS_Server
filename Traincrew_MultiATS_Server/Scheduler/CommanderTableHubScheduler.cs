@@ -12,7 +12,7 @@ public class CommanderTableHubScheduler(IServiceScopeFactory serviceScopeFactory
     protected override async Task ExecuteTaskAsync(IServiceScope scope, System.Diagnostics.Activity? activity)
     {
         var hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<CommanderTableHub, ICommanderTableClientContract>>();
-        var commanderTableService = scope.ServiceProvider.GetRequiredService<CommanderTableService>();
+        var commanderTableService = scope.ServiceProvider.GetRequiredService<ICommanderTableService>();
 
         var data = await commanderTableService.SendData_CommanderTable();
 

@@ -1,0 +1,5 @@
+namespace Traincrew_MultiATS_Server.Repositories.TtcWindowLinkRouteCondition;
+
+public interface ITtcWindowLinkRouteConditionRepository
+{
+}

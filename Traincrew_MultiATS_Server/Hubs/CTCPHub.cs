@@ -13,7 +13,7 @@ namespace Traincrew_MultiATS_Server.Hubs;
     AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme,
     Policy = "InterlockingPolicy"
 )]
-public class CTCPHub(CTCPService ctcpService) : Hub<ICTCPClientContract>, ICTCPHubContract
+public class CTCPHub(ICTCPService ctcpService) : Hub<ICTCPClientContract>, ICTCPHubContract
 {
     public async Task<DataToCTCP> SendData_CTCP()
     {

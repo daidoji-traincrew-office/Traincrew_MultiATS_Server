@@ -12,6 +12,13 @@ public class GeneralRepository(ApplicationDbContext context) : IGeneralRepositor
         context.Entry(entity).State = EntityState.Detached;
     }
 
+    public async Task Add<T>(T entity, CancellationToken cancellationToken)
+    {
+        context.Add(entity);
+        await context.SaveChangesAsync(cancellationToken);
+        context.Entry(entity).State = EntityState.Detached;
+    }
+
     public async Task AddAll<T>(IEnumerable<T> entities)
     {
         foreach (var entity in entities)
@@ -25,10 +32,30 @@ public class GeneralRepository(ApplicationDbContext context) : IGeneralRepositor
         }
     }
 
+    public async Task AddAll<T>(IEnumerable<T> entities, CancellationToken cancellationToken)
+    {
+        foreach (var entity in entities)
+        {
+            context.Add(entity);
+        }
+        await context.SaveChangesAsync(cancellationToken);
+        foreach (var entity in entities)
+        {
+            context.Entry(entity).State = EntityState.Detached;
+        }
+    }
+
     public async Task Save<T>(T entity)
     {
         context.Update(entity);
         await context.SaveChangesAsync();
+        context.Entry(entity).State = EntityState.Detached;
+    }
+
+    public async Task Save<T>(T entity, CancellationToken cancellationToken)
+    {
+        context.Update(entity);
+        await context.SaveChangesAsync(cancellationToken);
         context.Entry(entity).State = EntityState.Detached;
     }
 
@@ -45,18 +72,46 @@ public class GeneralRepository(ApplicationDbContext context) : IGeneralRepositor
         }
     }
 
+    public async Task SaveAll<T>(IEnumerable<T> entities, CancellationToken cancellationToken)
+    {
+        foreach (var entity in entities)
+        {
+            context.Update(entity);
+        }
+        await context.SaveChangesAsync(cancellationToken);
+        foreach (var entity in entities)
+        {
+            context.Entry(entity).State = EntityState.Detached;
+        }
+    }
+
     public async Task Delete<T>(T entity)
     {
         context.Remove(entity);
         await context.SaveChangesAsync();
     }
 
+    public async Task Delete<T>(T entity, CancellationToken cancellationToken)
+    {
+        context.Remove(entity);
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
     public async Task DeleteAll<T>(IEnumerable<T> entities)
     {
         foreach (var entity in entities)
         {
-            context.Remove(entity); 
+            context.Remove(entity);
         }
         await context.SaveChangesAsync();
+    }
+
+    public async Task DeleteAll<T>(IEnumerable<T> entities, CancellationToken cancellationToken)
+    {
+        foreach (var entity in entities)
+        {
+            context.Remove(entity);
+        }
+        await context.SaveChangesAsync(cancellationToken);
     }
 }

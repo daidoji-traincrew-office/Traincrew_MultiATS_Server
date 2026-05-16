@@ -11,7 +11,7 @@ namespace Traincrew_MultiATS_Server.Hubs;
 	AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme,
 	Policy = "TIDPolicy"
 )]
-public class TIDHub(TIDService tidService) : Hub<ITIDClientContract>, ITIDHubContract
+public class TIDHub(ITIDService tidService) : Hub<ITIDClientContract>, ITIDHubContract
 {
     public async Task<ConstantDataToTID> SendData_TID()
     {

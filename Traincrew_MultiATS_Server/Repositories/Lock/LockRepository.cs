@@ -18,4 +18,9 @@ public class LockRepository(ApplicationDbContext dbContext) : ILockRepository
                     .ThenBy(lc => lc.Id)
                     .ToList());
     }
+
+    public async Task DeleteAll()
+    {
+        await dbContext.Locks.ExecuteDeleteAsync();
+    }
 }

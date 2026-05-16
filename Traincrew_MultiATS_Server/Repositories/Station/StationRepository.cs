@@ -43,4 +43,24 @@ public class StationRepository(ApplicationDbContext context) : IStationRepositor
             .Where(s => stationIds.Contains(s.StationId))
             .ToListAsync();
     }
+
+    public async Task<List<string>> GetAllNames(CancellationToken cancellationToken = default)
+    {
+        return await context.Stations
+            .Select(s => s.Name)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<List<string>> GetIdsWhereIsStation(CancellationToken cancellationToken = default)
+    {
+        return await context.Stations
+            .Where(s => s.IsStation)
+            .Select(s => s.Id)
+            .ToListAsync(cancellationToken);
+    }
+
+    public void Add(Models.Station station)
+    {
+        context.Stations.Add(station);
+    }
 }

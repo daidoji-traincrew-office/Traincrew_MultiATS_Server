@@ -22,7 +22,7 @@ public sealed class RouteLockTrackCircuitCsvMap : ClassMap<RouteLockTrackCircuit
     {
         return (row.Row.Parser.Record ?? [])
             .Skip(1)
-            .Where(s => s != "なし")
+            .Where(s => s != "なし" && !string.IsNullOrWhiteSpace(s))
             .ToList();
     }
 }

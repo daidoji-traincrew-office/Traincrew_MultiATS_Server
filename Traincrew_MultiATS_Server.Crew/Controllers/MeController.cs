@@ -7,7 +7,7 @@ using static OpenIddict.Abstractions.OpenIddictConstants;
 namespace Traincrew_MultiATS_Server.Crew.Controllers;
 
 [ApiController]
-public class MeController(DiscordService discordService) : ControllerBase
+public class MeController(IDiscordService discordService) : ControllerBase
 {
     [HttpGet("me")]
     [Authorize(AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]

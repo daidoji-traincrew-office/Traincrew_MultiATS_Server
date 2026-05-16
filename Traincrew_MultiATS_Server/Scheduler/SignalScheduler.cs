@@ -20,7 +20,7 @@ public class SignalScheduler(IServiceScopeFactory serviceScopeFactory) : Schedul
             .GetRequiredService<IHubContext<CommanderTableHub, ICommanderTableClientContract>>();
         var interlockingHubContext = scope.ServiceProvider
             .GetRequiredService<IHubContext<InterlockingHub, IInterlockingClientContract>>();
-        var signalService = scope.ServiceProvider.GetRequiredService<SignalService>();
+        var signalService = scope.ServiceProvider.GetRequiredService<ISignalService>();
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<SignalScheduler>>();
 
         var signalData = await signalService.CalcAllSignalIndication();

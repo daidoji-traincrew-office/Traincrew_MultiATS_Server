@@ -12,16 +12,25 @@ namespace Traincrew_MultiATS_Server.Services;
 /// <summary>
 /// CTCP装置卓
 /// </summary>
+public interface ICTCPService
+{
+    Task<DataToCTCP> SendData_CTCP();
+    Task<RouteData> SetCtcRelay(string TcName, RaiseDrop raiseDrop);
+}
+
+/// <summary>
+/// CTCP装置卓
+/// </summary>
 public class CTCPService(
     IRouteRepository routeRepository,
     IGeneralRepository generalRepository,
     IStationRepository stationRepository,
     IRouteCentralControlLeverRepository routeCentralControlLeverRepository,
-    TrackCircuitService trackCircuitService,
-    TtcStationControlService ttcStationControlService,
-    RouteService routeService,
+    ITrackCircuitService trackCircuitService,
+    ITtcStationControlService ttcStationControlService,
+    IRouteService routeService,
     IMutexRepository mutexRepository,
-    ServerService serverService)
+    IServerService serverService) : ICTCPService
 {
 
     public async Task<DataToCTCP> SendData_CTCP()

@@ -8,7 +8,7 @@ public class TtcStationControlScheduler(IServiceScopeFactory serviceScopeFactory
 
     protected override async Task ExecuteTaskAsync(IServiceScope scope, System.Diagnostics.Activity? activity)
     {
-        var service = scope.ServiceProvider.GetRequiredService<TtcStationControlService>();
+        var service = scope.ServiceProvider.GetRequiredService<ITtcStationControlService>();
         await service.TrainTracking();
     }
 }

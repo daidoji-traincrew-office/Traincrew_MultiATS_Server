@@ -89,12 +89,25 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Check RendoTable changes
+        id: check_rendo
+        run: |
+          if git diff --name-only origin/main..HEAD | grep -q "^${{ env.DATA_DIR }}/RendoTable/"; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Create Pull Request
         if: steps.check_pr.outputs.exists == '0'
         run: |
+          REVIEWERS="Kesigomon,${{ github.actor }}"
+          if [ "${{ steps.check_rendo.outputs.changed }}" = "true" ]; then
+            REVIEWERS="$REVIEWERS,Zumi0791"
+          fi
           gh pr create \
             --title "マスター更新 $(date +'%Y%m%d')" \
-            --reviewer Kesigomon,${{ github.actor }} \
+            --reviewer "$REVIEWERS" \
             --body "$(cat <<'EOF'
           ## 概要
           Googleスプレッドシートからマスターデータを更新しました。

@@ -12,7 +12,7 @@ public class TIDHubScheduler(IServiceScopeFactory serviceScopeFactory) : Schedul
     protected override async Task ExecuteTaskAsync(IServiceScope scope, System.Diagnostics.Activity? activity)
     {
         var hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<TIDHub, ITIDClientContract>>();
-        var tidService = scope.ServiceProvider.GetRequiredService<TIDService>();
+        var tidService = scope.ServiceProvider.GetRequiredService<ITIDService>();
 
         var data = await tidService.CreateTidData();
 

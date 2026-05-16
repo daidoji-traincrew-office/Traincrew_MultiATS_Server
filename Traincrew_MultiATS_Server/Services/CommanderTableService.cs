@@ -2,15 +2,20 @@ using Traincrew_MultiATS_Server.Common.Models;
 
 namespace Traincrew_MultiATS_Server.Services;
 
+public interface ICommanderTableService
+{
+    Task<DataToCommanderTable> SendData_CommanderTable();
+}
+
 public class CommanderTableService(
-    TrackCircuitService trackCircuitService,
-    OperationNotificationService operationNotificationService,
-    OperationInformationService operationInformationService,
-    ProtectionService protectionService,
-    TrainService trainService,
-    ServerService serverService,
-    BannedUserService bannedUserService
-)
+    ITrackCircuitService trackCircuitService,
+    IOperationNotificationService operationNotificationService,
+    IOperationInformationService operationInformationService,
+    IProtectionService protectionService,
+    ITrainService trainService,
+    IServerService serverService,
+    IBannedUserService bannedUserService
+) : ICommanderTableService
 {
     public async Task<DataToCommanderTable> SendData_CommanderTable()
     {
