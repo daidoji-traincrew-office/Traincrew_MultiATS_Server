@@ -18,6 +18,7 @@ public static class EnumTypeMapper
         typeMapper.MapEnum<LeverType>();
         typeMapper.MapEnum<RouteType>();
         typeMapper.MapEnum<RaiseDrop>();
+        typeMapper.MapEnum<RaiseDropWithForce>();
         typeMapper.MapEnum<OperationNotificationType>();
         typeMapper.MapEnum<LR>();
         typeMapper.MapEnum<TtcWindowType>();

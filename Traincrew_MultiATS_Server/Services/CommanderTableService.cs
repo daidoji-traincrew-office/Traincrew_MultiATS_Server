@@ -29,6 +29,7 @@ public class CommanderTableService(
             TrainStateDataList = await trainService.GetAllTrainState(),
             TimeOffset = await serverService.GetTimeOffsetAsync(),
             BannedUserIdList = await bannedUserService.GetBannedUserIdsAsync(),
+            SelectedDiagramId = await serverService.GetSelectedDiagramIdAsync(),
         };
     }
 }

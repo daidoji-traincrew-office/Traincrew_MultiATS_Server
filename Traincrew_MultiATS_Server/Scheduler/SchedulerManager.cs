@@ -10,6 +10,7 @@ public class SchedulerManager(
     private bool _isRunning;
     private List<Scheduler> _schedulers = [];
     private ServerModeScheduler? _serverModeScheduler;
+    private MetricsCollectorScheduler? _metricsCollectorScheduler;
 
     private void InitSchedulers()
     {
@@ -44,6 +45,7 @@ public class SchedulerManager(
     public void StartServerModeScheduler()
     {
         _serverModeScheduler ??= new(serviceScopeFactory);
+        _metricsCollectorScheduler ??= new(serviceScopeFactory);
     }
 
     public async Task Stop()
@@ -61,6 +63,11 @@ public class SchedulerManager(
 
     public async Task StopServerModeScheduler()
     {
+        if (_metricsCollectorScheduler != null)
+        {
+            await _metricsCollectorScheduler.Stop();
+            _metricsCollectorScheduler = null;
+        }
         if (_serverModeScheduler != null)
         {
             await _serverModeScheduler.Stop();

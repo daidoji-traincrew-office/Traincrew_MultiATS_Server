@@ -42,7 +42,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<TrainState> TrainStates { get; set; }
     public DbSet<TrainCarState> TrainCarStates { get; set; }
     public DbSet<TrainType> TrainTypes { get; set; }
-    public DbSet<TrainDiagram> TrainDiagrams { get; set; }
+    public DbSet<Diagram> Diagrams { get; set; }
+    public DbSet<DiagramTrain> DiagramTrains { get; set; }
+    public DbSet<DiagramTrainTimetable> DiagramTrainTimetables { get; set; }
     public DbSet<OperationInformationState> OperationInformationStates { get; set; }
     public DbSet<ServerState> ServerStates { get; set; }
     public DbSet<RouteCentralControlLever> RouteCentralControlLevers { get; set; }
@@ -50,6 +52,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<LockConditionByRouteCentralControlLever> LockConditionByRouteCentralControlLevers { get; set; }
     public DbSet<UserDisconnectionState> UserDisconnectionStates { get; set; }
     public DbSet<TrainSignalState> TrainSignalStates { get; set; }
+    public DbSet<TrackCircuitDepartmentTime> TrackCircuitDepartmentTimes { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -234,6 +237,49 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
         modelBuilder.Entity<TrainSignalState>()
             .HasIndex(tss => tss.SignalName);
+
+        modelBuilder.Entity<DiagramTrain>()
+            .HasOne(dt => dt.Diagram)
+            .WithMany()
+            .HasForeignKey(dt => dt.DiaId)
+            .HasPrincipalKey(d => d.Id);
+
+        modelBuilder.Entity<DiagramTrain>()
+            .HasIndex(dt => new { dt.DiaId, dt.TrainNumber })
+            .IsUnique();
+
+        modelBuilder.Entity<DiagramTrainTimetable>()
+            .HasOne(tdt => tdt.TrainDiagram)
+            .WithMany()
+            .HasForeignKey(tdt => tdt.TrainDiagramId)
+            .HasPrincipalKey(dt => dt.Id);
+
+        modelBuilder.Entity<DiagramTrainTimetable>()
+            .HasOne(tdt => tdt.Station)
+            .WithMany()
+            .HasForeignKey(tdt => tdt.StationId)
+            .HasPrincipalKey(s => s.Id);
+
+        modelBuilder.Entity<DiagramTrainTimetable>()
+            .HasIndex(tdt => new { tdt.TrainDiagramId, tdt.Index })
+            .IsUnique();
+
+        modelBuilder.Entity<TrackCircuitDepartmentTime>()
+            .HasOne(tcdt => tcdt.TrackCircuit)
+            .WithMany()
+            .HasForeignKey(tcdt => tcdt.TrackCircuitId)
+            .HasPrincipalKey(tc => tc.Id);
+
+        modelBuilder.Entity<TrackCircuitDepartmentTime>()
+            .HasIndex(tcdt => new { tcdt.TrackCircuitId, tcdt.CarCount, tcdt.IsUp })
+            .IsUnique();
+
+        modelBuilder.Entity<ServerState>()
+            .HasOne(ss => ss.SelectedDiagram)
+            .WithMany()
+            .HasForeignKey(ss => ss.SelectedDiagramId)
+            .HasPrincipalKey(d => d.Id)
+            .IsRequired(false);
 
         // Convert all column names to snake_case
         foreach (var entity in modelBuilder.Model.GetEntityTypes())

@@ -21,7 +21,8 @@ public class CommanderTableHub(
     IProtectionService protectionService,
     IServerService serverService,
     ICommanderTableService commanderTableService,
-    IBannedUserService bannedUserService
+    IBannedUserService bannedUserService,
+    IDiagramService diagramService
 ) : Hub<ICommanderTableClientContract>, ICommanderTableHubContract
 {
     public async Task<DataToCommanderTable> SendData_CommanderTable()
@@ -139,5 +140,15 @@ public class CommanderTableHub(
     public async Task UnbanUser(ulong userId)
     {
         await bannedUserService.UnbanUserAsync(userId);
+    }
+
+    public async Task<List<DiagramData>> GetDiagrams()
+    {
+        return await diagramService.GetAllDiagramsAsync();
+    }
+
+    public async Task SetSelectedDiagramId(ulong? diaId)
+    {
+        await serverService.SetSelectedDiagramIdAsync(diaId);
     }
 }

@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
+using Traincrew_MultiATS_Server.Repositories.DiagramTrain;
 using Traincrew_MultiATS_Server.Repositories.General;
 using Traincrew_MultiATS_Server.Repositories.Mutex;
 using Traincrew_MultiATS_Server.Repositories.NextSignal;
@@ -14,9 +15,9 @@ using Traincrew_MultiATS_Server.Repositories.Server;
 using Traincrew_MultiATS_Server.Repositories.Signal;
 using Traincrew_MultiATS_Server.Repositories.SignalRoute;
 using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
+using Traincrew_MultiATS_Server.Repositories.TrackCircuitDepartmentTime;
 using Traincrew_MultiATS_Server.Repositories.Train;
 using Traincrew_MultiATS_Server.Repositories.TrainCar;
-using Traincrew_MultiATS_Server.Repositories.TrainDiagram;
 using Traincrew_MultiATS_Server.Repositories.TrainSignalState;
 using Traincrew_MultiATS_Server.Repositories.TrainType;
 using Traincrew_MultiATS_Server.Repositories.Transaction;
@@ -87,8 +88,9 @@ public class Program
             .AddScoped<ISignalRepository, SignalRepository>()
             .AddScoped<ISignalRouteRepository, SignalRouteRepository>()
             .AddScoped<ITrackCircuitRepository, TrackCircuitRepository>()
+            .AddScoped<ITrackCircuitDepartmentTimeRepository, TrackCircuitDepartmentTimeRepository>()
             .AddScoped<ITrainCarRepository, TrainCarRepository>()
-            .AddScoped<ITrainDiagramRepository, TrainDiagramRepository>()
+            .AddScoped<IDiagramTrainRepository, DiagramTrainRepository>()
             .AddScoped<ITrainRepository, TrainRepository>()
             .AddScoped<ITrainTypeRepository, TrainTypeRepository>()
             .AddScoped<ITrainSignalStateRepository, TrainSignalStateRepository>()

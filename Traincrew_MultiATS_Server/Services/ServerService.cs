@@ -15,6 +15,8 @@ public interface IServerService
     Task SetTimeOffsetAsync(int timeOffset);
     Task SetSwitchMoveTimeAsync(int switchMoveTime);
     Task SetUseOneSecondRelayAsync(bool useOneSecondRelay);
+    Task<ulong?> GetSelectedDiagramIdAsync();
+    Task SetSelectedDiagramIdAsync(ulong? diaId);
 }
 
 public class ServerService(
@@ -64,7 +66,7 @@ public class ServerService(
         }
     }
 
-    public async Task<int> GetTimeOffsetAsync()
+    public virtual async Task<int> GetTimeOffsetAsync()
     {
         return await serverRepository.GetTimeOffset();
     }
@@ -82,5 +84,15 @@ public class ServerService(
     public async Task SetUseOneSecondRelayAsync(bool useOneSecondRelay)
     {
         await serverRepository.SetUseOneSecondRelayAsync(useOneSecondRelay);
+    }
+
+    public async Task<ulong?> GetSelectedDiagramIdAsync()
+    {
+        return await serverRepository.GetSelectedDiagramIdAsync();
+    }
+
+    public async Task SetSelectedDiagramIdAsync(ulong? diaId)
+    {
+        await serverRepository.SetSelectedDiagramIdAsync(diaId);
     }
 }
