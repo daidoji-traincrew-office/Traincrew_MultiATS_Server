@@ -101,7 +101,8 @@ public class TrainServiceTest
 
         // Setup test helpers
         var testTrackCircuitService = new TestTrackCircuitService();
-        testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
+        var trackCircuits = new List<TrackCircuit> { trackCircuit };
+        testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(trackCircuits));
 
         var mockDiagramTrainRepository = new Mock<IDiagramTrainRepository>();
         mockDiagramTrainRepository
@@ -136,7 +137,7 @@ public class TrainServiceTest
         );
 
         // Act
-        await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList);
+        await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList, trackCircuits);
 
         // Assert
         mockTrainRepository.Verify(
@@ -179,7 +180,8 @@ public class TrainServiceTest
         var currentTime = new DateTime(2024, 1, 1, 9, 35, 0);
 
         var testTrackCircuitService = new TestTrackCircuitService();
-        testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit1, trackCircuit2 }));
+        var trackCircuits = new List<TrackCircuit> { trackCircuit1, trackCircuit2 };
+        testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(trackCircuits));
 
         var mockDiagramTrainRepository = new Mock<IDiagramTrainRepository>();
         mockDiagramTrainRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable1);
@@ -202,7 +204,7 @@ public class TrainServiceTest
             mockTrackCircuitDepartmentTimeRepository, mockDateTimeRepository, testServerService);
 
         // Act
-        await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList);
+        await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList, trackCircuits);
 
         // Assert - 2つの駅で遅延計算されるので2回呼ばれる
         mockTrainRepository.Verify(x => x.SetDelayByTrainNumber(trainNumber, It.IsAny<int>()), Times.Exactly(2));
@@ -232,7 +234,8 @@ public class TrainServiceTest
         var currentTime = new DateTime(2024, 1, 1, 10, 2, 0); // 発車予定より3分早い
 
         var testTrackCircuitService = new TestTrackCircuitService();
-        testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
+        var trackCircuits = new List<TrackCircuit> { trackCircuit };
+        testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(trackCircuits));
 
         var mockDiagramTrainRepository = new Mock<IDiagramTrainRepository>();
         mockDiagramTrainRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
@@ -253,7 +256,7 @@ public class TrainServiceTest
             mockTrackCircuitDepartmentTimeRepository, mockDateTimeRepository, testServerService);
 
         // Act
-        await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList);
+        await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList, trackCircuits);
 
         // Assert
         mockTrainRepository.Verify(x => x.SetDelayByTrainNumber(trainNumber, -3), Times.Once);
@@ -283,7 +286,8 @@ public class TrainServiceTest
         var currentTime = new DateTime(2024, 1, 1, 11, 1, 0);
 
         var testTrackCircuitService = new TestTrackCircuitService();
-        testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
+        var trackCircuits = new List<TrackCircuit> { trackCircuit };
+        testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(trackCircuits));
 
         var mockDiagramTrainRepository = new Mock<IDiagramTrainRepository>();
         mockDiagramTrainRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
@@ -304,7 +308,7 @@ public class TrainServiceTest
             mockTrackCircuitDepartmentTimeRepository, mockDateTimeRepository, testServerService);
 
         // Act
-        await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList);
+        await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList, trackCircuits);
 
         // Assert - 両数0で問い合わせることを確認
         mockTrackCircuitDepartmentTimeRepository.Verify(x => x.GetByTrackCircuitIdAndIsUpAndMaxCarCount(100, true, 0), Times.Once);
@@ -335,7 +339,8 @@ public class TrainServiceTest
         var currentTime = new DateTime(2024, 1, 1, 8, 2, 0);
 
         var testTrackCircuitService = new TestTrackCircuitService();
-        testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
+        var trackCircuits = new List<TrackCircuit> { trackCircuit };
+        testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(trackCircuits));
 
         var mockDiagramTrainRepository = new Mock<IDiagramTrainRepository>();
         mockDiagramTrainRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
@@ -356,7 +361,7 @@ public class TrainServiceTest
             mockTrackCircuitDepartmentTimeRepository, mockDateTimeRepository, testServerService);
 
         // Act
-        await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList);
+        await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList, trackCircuits);
 
         // Assert - 実両数12で問い合わせることを確認
         mockTrackCircuitDepartmentTimeRepository.Verify(x => x.GetByTrackCircuitIdAndIsUpAndMaxCarCount(100, false, 12), Times.Once);
@@ -377,7 +382,8 @@ public class TrainServiceTest
         var trackCircuit = new TrackCircuit { Id = 100, Name = "TC1", StationId = "ST01", StationIdForDelay = "ST01" };
 
         var testTrackCircuitService = new TestTrackCircuitService();
-        testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
+        var trackCircuits = new List<TrackCircuit> { trackCircuit };
+        testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(trackCircuits));
 
         var mockDiagramTrainRepository = new Mock<IDiagramTrainRepository>();
         mockDiagramTrainRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01"))
@@ -388,7 +394,7 @@ public class TrainServiceTest
         var trainService = CreateTrainService(testTrackCircuitService, mockTrainRepository, mockDiagramTrainRepository);
 
         // Act
-        await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList);
+        await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList, trackCircuits);
 
         // Assert - 時刻表がないのでSetDelayByTrainNumberは呼ばれない
         mockTrainRepository.Verify(x => x.SetDelayByTrainNumber(It.IsAny<string>(), It.IsAny<int>()), Times.Never);
@@ -415,7 +421,8 @@ public class TrainServiceTest
         };
 
         var testTrackCircuitService = new TestTrackCircuitService();
-        testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
+        var trackCircuits = new List<TrackCircuit> { trackCircuit };
+        testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(trackCircuits));
 
         var mockDiagramTrainRepository = new Mock<IDiagramTrainRepository>();
         mockDiagramTrainRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
@@ -425,7 +432,7 @@ public class TrainServiceTest
         var trainService = CreateTrainService(testTrackCircuitService, mockTrainRepository, mockDiagramTrainRepository);
 
         // Act
-        await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList);
+        await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList, trackCircuits);
 
         // Assert - 出発時刻がないのでSetDelayByTrainNumberは呼ばれない
         mockTrainRepository.Verify(x => x.SetDelayByTrainNumber(It.IsAny<string>(), It.IsAny<int>()), Times.Never);
@@ -454,7 +461,8 @@ public class TrainServiceTest
         var currentTime = new DateTime(2024, 1, 1, 14, 5, 0);
 
         var testTrackCircuitService = new TestTrackCircuitService();
-        testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
+        var trackCircuits = new List<TrackCircuit> { trackCircuit };
+        testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(trackCircuits));
 
         var mockDiagramTrainRepository = new Mock<IDiagramTrainRepository>();
         mockDiagramTrainRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
@@ -478,7 +486,7 @@ public class TrainServiceTest
             mockTrackCircuitDepartmentTimeRepository, mockDateTimeRepository, testServerService, mockLogger);
 
         // Act
-        await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList);
+        await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList, trackCircuits);
 
         // Assert - 警告がログ出力されることを確認
         mockLogger.Verify(
@@ -521,7 +529,8 @@ public class TrainServiceTest
         var currentTime = new DateTime(2024, 1, 1, 15, 5, 0);
 
         var testTrackCircuitService = new TestTrackCircuitService();
-        testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit1, trackCircuit2 }));
+        var trackCircuits = new List<TrackCircuit> { trackCircuit1, trackCircuit2 };
+        testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(trackCircuits));
 
         var mockDiagramTrainRepository = new Mock<IDiagramTrainRepository>();
         mockDiagramTrainRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST02")).ReturnsAsync(timetable);
@@ -542,7 +551,7 @@ public class TrainServiceTest
             mockTrackCircuitDepartmentTimeRepository, mockDateTimeRepository, testServerService);
 
         // Act
-        await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList);
+        await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList, trackCircuits);
 
         // Assert - TC1は駅軌道回路でないのでスキップ、TC2のみ処理される
         mockDiagramTrainRepository.Verify(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST02"), Times.Once);
@@ -573,7 +582,8 @@ public class TrainServiceTest
         var currentTime = new DateTime(2024, 1, 1, 16, 2, 0);
 
         var testTrackCircuitService = new TestTrackCircuitService();
-        testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
+        var trackCircuits = new List<TrackCircuit> { trackCircuit };
+        testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(trackCircuits));
 
         var mockDiagramTrainRepository = new Mock<IDiagramTrainRepository>();
         mockDiagramTrainRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
@@ -594,7 +604,7 @@ public class TrainServiceTest
             mockTrackCircuitDepartmentTimeRepository, mockDateTimeRepository, testServerService);
 
         // Act
-        await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList);
+        await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList, trackCircuits);
 
         // Assert - isUp=trueで問い合わせることを確認
         mockTrackCircuitDepartmentTimeRepository.Verify(x => x.GetByTrackCircuitIdAndIsUpAndMaxCarCount(100, true, 6), Times.Once);
@@ -624,7 +634,8 @@ public class TrainServiceTest
         var currentTime = new DateTime(2024, 1, 1, 16, 2, 0);
 
         var testTrackCircuitService = new TestTrackCircuitService();
-        testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
+        var trackCircuits = new List<TrackCircuit> { trackCircuit };
+        testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(trackCircuits));
 
         var mockDiagramTrainRepository = new Mock<IDiagramTrainRepository>();
         mockDiagramTrainRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
@@ -645,7 +656,7 @@ public class TrainServiceTest
             mockTrackCircuitDepartmentTimeRepository, mockDateTimeRepository, testServerService);
 
         // Act
-        await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList);
+        await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList, trackCircuits);
 
         // Assert - isUp=falseで問い合わせることを確認
         mockTrackCircuitDepartmentTimeRepository.Verify(x => x.GetByTrackCircuitIdAndIsUpAndMaxCarCount(100, false, 6), Times.Once);
@@ -661,14 +672,15 @@ public class TrainServiceTest
         var trackCircuitDataList = new List<TrackCircuitData>(); // 空リスト
 
         var testTrackCircuitService = new TestTrackCircuitService();
-        testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit>()));
+        var trackCircuits = new List<TrackCircuit>();
+        testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(trackCircuits));
 
         var mockTrainRepository = new Mock<ITrainRepository>();
 
         var trainService = CreateTrainService(testTrackCircuitService, mockTrainRepository);
 
         // Act
-        await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList);
+        await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList, trackCircuits);
 
         // Assert - エラーなく完了し、何も処理されない
         mockTrainRepository.Verify(x => x.SetDelayByTrainNumber(It.IsAny<string>(), It.IsAny<int>()), Times.Never);
@@ -698,7 +710,8 @@ public class TrainServiceTest
         var currentTime = new DateTime(2024, 1, 2, 0, 2, 0); // 翌日 00:02:00 (23:59発より3分遅れ)
 
         var testTrackCircuitService = new TestTrackCircuitService();
-        testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
+        var trackCircuits = new List<TrackCircuit> { trackCircuit };
+        testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(trackCircuits));
 
         var mockDiagramTrainRepository = new Mock<IDiagramTrainRepository>();
         mockDiagramTrainRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
@@ -719,7 +732,7 @@ public class TrainServiceTest
             mockTrackCircuitDepartmentTimeRepository, mockDateTimeRepository, testServerService);
 
         // Act
-        await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList);
+        await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList, trackCircuits);
 
         // Assert
         // 営業日境界を考慮した正しい計算
@@ -755,7 +768,8 @@ public class TrainServiceTest
         var currentTime = new DateTime(2024, 1, 1, 23, 58, 0); // 前日 23:58:00 (00:05発より7分早い = -7分)
 
         var testTrackCircuitService = new TestTrackCircuitService();
-        testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
+        var trackCircuits = new List<TrackCircuit> { trackCircuit };
+        testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(trackCircuits));
 
         var mockDiagramTrainRepository = new Mock<IDiagramTrainRepository>();
         mockDiagramTrainRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
@@ -776,7 +790,7 @@ public class TrainServiceTest
             mockTrackCircuitDepartmentTimeRepository, mockDateTimeRepository, testServerService);
 
         // Act
-        await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList);
+        await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList, trackCircuits);
 
         // Assert
         // 営業日境界を考慮した正しい計算
@@ -813,7 +827,8 @@ public class TrainServiceTest
         var timeOffset = 2; // 実際の時刻: 08:05:00 + 2時間 = 10:05:00、遅延: 10:05:00 - 10:02:00 = 3分
 
         var testTrackCircuitService = new TestTrackCircuitService();
-        testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
+        var trackCircuits = new List<TrackCircuit> { trackCircuit };
+        testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(trackCircuits));
 
         var mockDiagramTrainRepository = new Mock<IDiagramTrainRepository>();
         mockDiagramTrainRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
@@ -834,7 +849,7 @@ public class TrainServiceTest
             mockTrackCircuitDepartmentTimeRepository, mockDateTimeRepository, testServerService);
 
         // Act
-        await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList);
+        await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList, trackCircuits);
 
         // Assert
         mockTrainRepository.Verify(x => x.SetDelayByTrainNumber(trainNumber, 3), Times.Once);
@@ -865,7 +880,8 @@ public class TrainServiceTest
         var timeOffset = -2; // 実際の時刻: 12:05:00 - 2時間 = 10:05:00、遅延: 10:05:00 - 10:02:00 = 3分
 
         var testTrackCircuitService = new TestTrackCircuitService();
-        testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
+        var trackCircuits = new List<TrackCircuit> { trackCircuit };
+        testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(trackCircuits));
 
         var mockDiagramTrainRepository = new Mock<IDiagramTrainRepository>();
         mockDiagramTrainRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
@@ -886,7 +902,7 @@ public class TrainServiceTest
             mockTrackCircuitDepartmentTimeRepository, mockDateTimeRepository, testServerService);
 
         // Act
-        await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList);
+        await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList, trackCircuits);
 
         // Assert
         mockTrainRepository.Verify(x => x.SetDelayByTrainNumber(trainNumber, 3), Times.Once);
@@ -917,7 +933,8 @@ public class TrainServiceTest
                                                                  // MidpointRounding.ToZero: 2.5分 → 2分
 
         var testTrackCircuitService = new TestTrackCircuitService();
-        testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
+        var trackCircuits = new List<TrackCircuit> { trackCircuit };
+        testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(trackCircuits));
 
         var mockDiagramTrainRepository = new Mock<IDiagramTrainRepository>();
         mockDiagramTrainRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
@@ -938,7 +955,7 @@ public class TrainServiceTest
             mockTrackCircuitDepartmentTimeRepository, mockDateTimeRepository, testServerService);
 
         // Act
-        await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList);
+        await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList, trackCircuits);
 
         // Assert - 2.5分 → ToZero丸めで2分
         mockTrainRepository.Verify(x => x.SetDelayByTrainNumber(trainNumber, 2), Times.Once);
@@ -969,7 +986,8 @@ public class TrainServiceTest
                                                                  // MidpointRounding.ToZero: -2.5分 → -2分
 
         var testTrackCircuitService = new TestTrackCircuitService();
-        testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
+        var trackCircuits = new List<TrackCircuit> { trackCircuit };
+        testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(trackCircuits));
 
         var mockDiagramTrainRepository = new Mock<IDiagramTrainRepository>();
         mockDiagramTrainRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
@@ -990,7 +1008,7 @@ public class TrainServiceTest
             mockTrackCircuitDepartmentTimeRepository, mockDateTimeRepository, testServerService);
 
         // Act
-        await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList);
+        await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList, trackCircuits);
 
         // Assert - -2.5分 → ToZero丸めで-2分
         mockTrainRepository.Verify(x => x.SetDelayByTrainNumber(trainNumber, -2), Times.Once);
@@ -1021,7 +1039,8 @@ public class TrainServiceTest
                                                                  // MidpointRounding.ToZero: 2.98分 → 2分
 
         var testTrackCircuitService = new TestTrackCircuitService();
-        testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
+        var trackCircuits = new List<TrackCircuit> { trackCircuit };
+        testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(trackCircuits));
 
         var mockDiagramTrainRepository = new Mock<IDiagramTrainRepository>();
         mockDiagramTrainRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
@@ -1042,7 +1061,7 @@ public class TrainServiceTest
             mockTrackCircuitDepartmentTimeRepository, mockDateTimeRepository, testServerService);
 
         // Act
-        await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList);
+        await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList, trackCircuits);
 
         // Assert - 179秒 / 60 = 2.98分 → ToZero丸めで2分
         mockTrainRepository.Verify(x => x.SetDelayByTrainNumber(trainNumber, 2), Times.Once);
@@ -1073,7 +1092,8 @@ public class TrainServiceTest
                                                                 // MidpointRounding.ToZero: -2.98分 → -2分
 
         var testTrackCircuitService = new TestTrackCircuitService();
-        testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
+        var trackCircuits = new List<TrackCircuit> { trackCircuit };
+        testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(trackCircuits));
 
         var mockDiagramTrainRepository = new Mock<IDiagramTrainRepository>();
         mockDiagramTrainRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
@@ -1094,7 +1114,7 @@ public class TrainServiceTest
             mockTrackCircuitDepartmentTimeRepository, mockDateTimeRepository, testServerService);
 
         // Act
-        await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList);
+        await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList, trackCircuits);
 
         // Assert - -179秒 / 60 = -2.98分 → ToZero丸めで-2分
         mockTrainRepository.Verify(x => x.SetDelayByTrainNumber(trainNumber, -2), Times.Once);

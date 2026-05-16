@@ -113,7 +113,7 @@ public partial class TrainService(
         // トランザクション開始
         await using var transaction = await transactionRepository.BeginTransactionAsync(IsolationLevel.RepeatableRead);
         // 運番が同じ列車の情報を取得する
-        var trainState = await RegisterOrUpdateTrainState(
+        var (trainState, diaId) = await RegisterOrUpdateTrainState(
             clientDriverId, clientData, trackCircuitList, incrementalTrackCircuitDataList,
             serverData);
 
@@ -150,17 +150,14 @@ public partial class TrainService(
 
         await transaction.CommitAsync();
 
-        if (decrementalTrackCircuitDataList.Count > 0)
+        if (decrementalTrackCircuitDataList.Count > 0 && diaId.HasValue)
         {
-            var diaId = await serverService.GetSelectedDiagramIdAsync();
-            if (diaId.HasValue)
-            {
-                await CalculateAndUpdateDelays(
-                    diaId.Value,
-                    clientTrainNumber,
-                    clientData.CarStates.Count,
-                    decrementalTrackCircuitDataList);
-            }
+            await CalculateAndUpdateDelays(
+                diaId.Value,
+                clientTrainNumber,
+                clientData.CarStates.Count,
+                decrementalTrackCircuitDataList,
+                trackCircuitList);
         }
 
         return serverData;
@@ -207,8 +204,8 @@ public partial class TrainService(
     /// <param name="trackCircuits">在線軌道回路リスト</param>
     /// <param name="incrementalTrackCircuitDataList">新規登録する軌道回路データリスト</param>
     /// <param name="serverData">サーバーからクライアントへのデータ</param>
-    /// <returns>列車状態。登録しない場合はnull。</returns>
-    private async Task<TrainState?> RegisterOrUpdateTrainState(
+    /// <returns>列車状態と選択中ダイヤID。登録しない場合は列車状態がnull。</returns>
+    private async Task<(TrainState? TrainState, ulong? DiaId)> RegisterOrUpdateTrainState(
         ulong clientDriverId,
         AtsToServerData clientData,
         List<TrackCircuit> trackCircuits,
@@ -247,7 +244,7 @@ public partial class TrainService(
             {
                 // 早着の列車情報は登録しない
                 serverData.StatusFlags |= ServerStatusFlags.IsOnPreviousTrain;
-                return null;
+                return (null, diaId);
             }
 
             //1-1-2.在線させる軌道回路が、１つでも鎖錠されていた場合、鎖錠として登録処理しない。
@@ -255,19 +252,19 @@ public partial class TrainService(
             {
                 // 鎖錠の列車情報は登録しない
                 serverData.StatusFlags |= ServerStatusFlags.IsLocked;
-                return null;
+                return (null, diaId);
             }
 
             //1-3.9999列番の場合は列車情報を登録しない。
             if (clientData.DiaName == "9999")
             {
                 await trackCircuitService.SetTrackCircuitDataList(incrementalTrackCircuitDataList, clientTrainNumber);
-                return null;
+                return (null, diaId);
             }
 
 
             //1.完全新規登録
-            return await CreateTrainState(clientData, clientDriverId, diaId);
+            return (await CreateTrainState(clientData, clientDriverId, diaId), diaId);
         }
 
         // 同一運番列車が登録済
@@ -286,7 +283,7 @@ public partial class TrainService(
                 // 2.交代前応答
                 // 送信してきたクライアントに対し交代前応答を行い、送信された情報は在線情報含めてすべて破棄する。
                 serverData.StatusFlags |= ServerStatusFlags.IsTherePreviousTrain;
-                return null;
+                return (null, diaId);
             }
 
             //2. 在線させる軌道回路に既に別運転士の列番が1つでも在線している場合、早着として登録処理しない。
@@ -296,7 +293,7 @@ public partial class TrainService(
             {
                 // 早着の列車情報は登録しない
                 serverData.StatusFlags |= ServerStatusFlags.IsOnPreviousTrain;
-                return null;
+                return (null, diaId);
             }
 
             //2-1. 在線させる軌道回路が、１つでも鎖錠されていた場合、鎖錠として登録処理しない。
@@ -304,7 +301,7 @@ public partial class TrainService(
             {
                 // 鎖錠の列車情報は登録しない
                 serverData.StatusFlags |= ServerStatusFlags.IsLocked;
-                return null;
+                return (null, diaId);
             }
 
             // 該当軌道回路すべてを見た時に、２列車以上の在線があった場合
@@ -315,7 +312,7 @@ public partial class TrainService(
             {
                 // 早着の列車情報は登録しない
                 serverData.StatusFlags |= ServerStatusFlags.IsOnPreviousTrain;
-                return null;
+                return (null, diaId);
             }
 
             // 交代先の列車を探す
@@ -328,7 +325,7 @@ public partial class TrainService(
                 existingTrainStateByMe.DiaNumber = clientDiaNumber;
                 existingTrainStateByMe.DriverId = clientDriverId;
                 await UpdateTrainState(existingTrainStateByMe, diaId);
-                return existingTrainStateByMe;
+                return (existingTrainStateByMe, diaId);
             }
 
             existingTrainStateByMe =
@@ -349,7 +346,7 @@ public partial class TrainService(
                 )
                 {
                     serverData.StatusFlags |= ServerStatusFlags.IsMaybeWarp;
-                    return null;
+                    return (null, diaId);
                 }
 
                 // 3.列車情報を更新
@@ -357,13 +354,13 @@ public partial class TrainService(
                 existingTrainStateByMe.DiaNumber = clientDiaNumber;
                 existingTrainStateByMe.DriverId = clientDriverId;
                 await UpdateTrainState(existingTrainStateByMe, diaId);
-                return existingTrainStateByMe;
+                return (existingTrainStateByMe, diaId);
             }
 
             // 3. 在線軌道回路に他の列車が在線していない場合、新規登録
             if (trackCircuits.All(tc => !tc.TrackCircuitState.IsShortCircuit))
             {
-                return await CreateTrainState(clientData, clientDriverId, diaId);
+                return (await CreateTrainState(clientData, clientDriverId, diaId), diaId);
             }
 
             // ここには来ないはず
@@ -378,7 +375,7 @@ public partial class TrainService(
             await UpdateTrainState(existingTrainStateByMe, diaId);
         }
 
-        return existingTrainStateByMe;
+        return (existingTrainStateByMe, diaId);
     }
 
     public async Task<Dictionary<string, TrainInfo>> GetTrainInfoGroupByTrainNumber()
@@ -697,15 +694,19 @@ public partial class TrainService(
     /// <param name="trainNumber">列車番号</param>
     /// <param name="carCount">車両両数</param>
     /// <param name="decrementalTrackCircuitDataList">在線終了軌道回路リスト</param>
+    /// <param name="trackCircuitList">CreateAtsDataで取得済の軌道回路リスト（decrementalのスーパーセット）</param>
     public async Task CalculateAndUpdateDelays(
         ulong diaId,
         string trainNumber,
         int carCount,
-        List<TrackCircuitData> decrementalTrackCircuitDataList)
+        List<TrackCircuitData> decrementalTrackCircuitDataList,
+        List<TrackCircuit> trackCircuitList)
     {
-        // 軌道回路名から軌道回路を取得
-        var trackCircuitNames = decrementalTrackCircuitDataList.Select(tc => tc.Name).ToList();
-        var trackCircuits = await trackCircuitService.GetTrackCircuitsByNames(trackCircuitNames);
+        // 軌道回路名から軌道回路を取得（DBアクセスせず既取得リストからフィルタ）
+        var decrementalNames = decrementalTrackCircuitDataList.Select(tc => tc.Name).ToHashSet();
+        var trackCircuits = trackCircuitList
+            .Where(tc => decrementalNames.Contains(tc.Name))
+            .ToList();
 
         // 駅軌道回路のみフィルタ（StationIdForDelayが設定されている軌道回路）
         var stationTrackCircuits = trackCircuits
