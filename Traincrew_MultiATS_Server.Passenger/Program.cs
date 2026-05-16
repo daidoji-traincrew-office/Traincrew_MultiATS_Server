@@ -73,6 +73,7 @@ public class Program
         // Todo: (優先度低)キャッシュ制御, Response Compression
 
         // DI
+        builder.Services.AddMemoryCache();
         builder.Services
             // Repository (ABC順)
             .AddScoped<IDateTimeRepository, DateTimeRepository>()

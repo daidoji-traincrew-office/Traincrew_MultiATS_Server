@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Caching.Memory;
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Repositories.Mutex;
 using Traincrew_MultiATS_Server.Repositories.Server;
@@ -20,10 +21,16 @@ public interface IServerService
 }
 
 public class ServerService(
-    IServerRepository serverRepository, 
+    IServerRepository serverRepository,
     SchedulerManager schedulerManager,
-    IMutexRepository mutexRepository) : IServerService
+    IMutexRepository mutexRepository,
+    IMemoryCache cache) : IServerService
 {
+    private const string CacheKeyServerMode = "servermode";
+    private const string CacheKeyTimeOffset = "timeoffset";
+    private const string CacheKeySelectedDiaId = "selectedDiaId";
+    private static readonly TimeSpan CacheTtl = TimeSpan.FromSeconds(10);
+
     public async Task<ServerMode> GetServerModeAsync()
     {
         await using var mutex = await mutexRepository.AcquireAsync(nameof(ServerService));
@@ -32,18 +39,23 @@ public class ServerService(
 
     public async Task<ServerMode> GetServerModeAsyncWithoutLock()
     {
-        var state = await serverRepository.GetServerStateAsync();
-        if (state == null)
+        return (await cache.GetOrCreateAsync(CacheKeyServerMode, async entry =>
         {
-            throw new InvalidOperationException("ServerStateが存在しません。");
-        }
-        return state.Mode;
+            entry.AbsoluteExpirationRelativeToNow = CacheTtl;
+            var state = await serverRepository.GetServerStateAsync();
+            if (state == null)
+            {
+                throw new InvalidOperationException("ServerStateが存在しません。");
+            }
+            return state.Mode;
+        }))!;
     }
 
     public async Task SetServerModeAsync(ServerMode mode)
     {
         await using var mutex = await mutexRepository.AcquireAsync(nameof(ServerService));
         await serverRepository.SetServerStateAsync(mode);
+        cache.Remove(CacheKeyServerMode);
         await UpdateSchedulerAsyncWithoutLock();
     }
 
@@ -68,12 +80,17 @@ public class ServerService(
 
     public virtual async Task<int> GetTimeOffsetAsync()
     {
-        return await serverRepository.GetTimeOffset();
+        return (await cache.GetOrCreateAsync(CacheKeyTimeOffset, async entry =>
+        {
+            entry.AbsoluteExpirationRelativeToNow = CacheTtl;
+            return await serverRepository.GetTimeOffset();
+        }))!;
     }
 
     public async Task SetTimeOffsetAsync(int timeOffset)
     {
         await serverRepository.SetTimeOffsetAsync(timeOffset);
+        cache.Remove(CacheKeyTimeOffset);
     }
 
     public async Task SetSwitchMoveTimeAsync(int switchMoveTime)
@@ -88,11 +105,16 @@ public class ServerService(
 
     public async Task<ulong?> GetSelectedDiagramIdAsync()
     {
-        return await serverRepository.GetSelectedDiagramIdAsync();
+        return await cache.GetOrCreateAsync(CacheKeySelectedDiaId, async entry =>
+        {
+            entry.AbsoluteExpirationRelativeToNow = CacheTtl;
+            return await serverRepository.GetSelectedDiagramIdAsync();
+        });
     }
 
     public async Task SetSelectedDiagramIdAsync(ulong? diaId)
     {
         await serverRepository.SetSelectedDiagramIdAsync(diaId);
+        cache.Remove(CacheKeySelectedDiaId);
     }
 }
