@@ -22,7 +22,7 @@ public class TrainHub(
 {
     public async Task<ServerToATSData> SendData_ATS(AtsToServerData clientData)
     {
-        using var activity = ActivitySources.Hubs.StartActivity("TrainHub.SendData_ATS");
+        using var activity = ActivitySources.Hubs.StartRootActivity("TrainHub.SendData_ATS");
         var memberId = GetMemberId();
         return await trainService.CreateAtsData(memberId, clientData);
     }
