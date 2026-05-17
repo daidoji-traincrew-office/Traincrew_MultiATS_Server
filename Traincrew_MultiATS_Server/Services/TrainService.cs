@@ -24,6 +24,11 @@ public interface ITrainService
     Task<TrainStateData> UpdateTrainStateData(TrainStateData trainStateData);
     Task DeleteTrainState(string trainNumber);
     Task DeleteTrainStateById(long id);
+    Task CalculateAndPrintDelays(
+        ulong diaId,
+        string trainNumber,
+        int carCount,
+        List<TrackCircuitData> decrementalTrackCircuitDataList);
 }
 
 public partial class TrainService(
@@ -561,7 +566,7 @@ public partial class TrainService(
     /// </summary>
     /// <param name="trainNumber">列車番号</param>
     /// <returns></returns>
-    private static int GetDiaNumberFromTrainNumber(string trainNumber)
+    public static int GetDiaNumberFromTrainNumber(string trainNumber)
     {
         if (trainNumber == "9999")
         {
@@ -767,6 +772,66 @@ public partial class TrainService(
 
             // 遅延を更新
             await trainRepository.SetDelayByTrainNumber(trainNumber, delayMinutes);
+        }
+    }
+
+    public async Task CalculateAndPrintDelays(
+        ulong diaId,
+        string trainNumber,
+        int carCount,
+        List<TrackCircuitData> decrementalTrackCircuitDataList)
+    {
+        var trackCircuitNames = decrementalTrackCircuitDataList.Select(tc => tc.Name).ToList();
+        var trackCircuits = await trackCircuitService.GetTrackCircuitsByNames(trackCircuitNames);
+
+        var stationTrackCircuits = trackCircuits
+            .Where(tc => tc.StationIdForDelay != null)
+            .Select(tc => (TrackCircuit: tc, StationId: tc.StationIdForDelay!))
+            .ToList();
+
+        var isUp = IsTrainUpOrDown(trainNumber);
+        var currentTime = dateTimeRepository.GetNow().TimeOfDay;
+        var timeOffset = await serverService.GetTimeOffsetAsync();
+
+        foreach (var (trackCircuit, stationId) in stationTrackCircuits)
+        {
+            var timetable = await diagramTrainRepository.GetTimetableByTrainNumberStationIdAndDiaId(
+                diaId, trainNumber, stationId);
+
+            if (timetable?.DepartureTime == null)
+            {
+                continue;
+            }
+
+            var carCountToUse = (timetable.ArrivalTime == timetable.DepartureTime && timetable.Index != 1)
+                ? 0
+                : carCount;
+
+            var departmentTime = await trackCircuitDepartmentTimeRepository
+                .GetByTrackCircuitIdAndIsUpAndMaxCarCount(trackCircuit.Id, isUp, carCountToUse);
+
+            var timeElement = 0;
+            if (departmentTime == null)
+            {
+                logger.LogWarning(
+                    "出発時素が見つかりませんでした。TrackCircuit: {TrackCircuitId}, IsUp: {IsUp}, CarCount: {CarCount}",
+                    trackCircuit.Id, isUp, carCountToUse);
+            }
+            else
+            {
+                timeElement = departmentTime.TimeElement;
+            }
+
+            var adjustedCurrentTime = TimeSpan.FromSeconds(currentTime.TotalSeconds + 3600 * timeOffset);
+            var currentTimeSeconds = NormalizeTimeToServiceDay(adjustedCurrentTime);
+            var departureTimeSeconds = NormalizeTimeToServiceDay(timetable.DepartureTime.Value);
+
+            var delaySeconds = currentTimeSeconds - departureTimeSeconds - timeElement;
+            var delayMinutes = (int)Math.Round(delaySeconds / 60.0, MidpointRounding.ToZero);
+
+            logger.LogInformation(
+                $"[遅延計算] {trainNumber} @ {trackCircuit.Name}: {delayMinutes}分" +
+                $" (現在={adjustedCurrentTime:hh\\:mm\\:ss}, 発車予定={timetable.DepartureTime.Value:hh\\:mm\\:ss}, 時素={timeElement}秒)");
         }
     }
 }
