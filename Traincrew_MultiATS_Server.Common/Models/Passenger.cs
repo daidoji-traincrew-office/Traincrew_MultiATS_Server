@@ -14,6 +14,7 @@ public class TrainInfo
 public class ServerToPassengerData
 {
     public bool ServerMode { get; init; } = false;
+    public int TimeOffset { get; init; } = 0;
     public List<TrackCircuitData> TrackCircuitData { get; init; }
     public Dictionary<string, TrainInfo> TrainInfos { get; init; } = [];
     public List<OperationInformationData> OperationInformations { get; init; } = [];
