@@ -393,13 +393,19 @@ public partial class TrainService(
             .ToDictionary(group => group.Key, group => group.ToList());
         // 列車のダイアグラムを取得
         var diaId = await serverService.GetSelectedDiagramIdAsync();
+        var trainNumbers = trainStates.Select(s => s.TrainNumber).ToHashSet();
         var diagramTrains = diaId.HasValue
-            ? await diagramTrainRepository.GetByDiaIdAndTrainNumbers(
-                diaId.Value,
-                trainStates.Select(s => s.TrainNumber).ToHashSet())
+            ? await diagramTrainRepository.GetByDiaIdAndTrainNumbers(diaId.Value, trainNumbers)
             : [];
         // 列車番号ごとのダイアグラム
         var trainDiagramsByTrainNumber = diagramTrains.ToDictionary(dt => dt.TrainNumber, dt => dt);
+        // 列車番号ごとの時刻表(index昇順)
+        var timetables = diaId.HasValue
+            ? await diagramTrainRepository.GetTimetablesByDiaIdAndTrainNumbers(diaId.Value, trainNumbers)
+            : [];
+        var timetablesByTrainNumber = timetables
+            .GroupBy(t => t.TrainDiagram!.TrainNumber)
+            .ToDictionary(g => g.Key, g => g.ToList());
 
         // 列車情報と車両情報を結合
         return trainStates
@@ -412,7 +418,8 @@ public partial class TrainService(
                         .Select(ToCarState)
                         .ToList();
                     var diagramTrain = trainDiagramsByTrainNumber.GetValueOrDefault(trainState.TrainNumber);
-                    return ToTrainInfo(trainState, carStates, diagramTrain);
+                    var trainTimetables = timetablesByTrainNumber.GetValueOrDefault(trainState.TrainNumber, []);
+                    return ToTrainInfo(trainState, carStates, diagramTrain, trainTimetables);
                 });
     }
 
@@ -583,7 +590,7 @@ public partial class TrainService(
         return evenNumBody / 3000 * 100 + evenNumBody % 100;
     }
 
-    private static TrainInfo ToTrainInfo(TrainState trainState, List<CarState> carStates, DiagramTrain? diagramTrain)
+    private static TrainInfo ToTrainInfo(TrainState trainState, List<CarState> carStates, DiagramTrain? diagramTrain, List<DiagramTrainTimetable> timetables)
     {
         return new()
         {
@@ -592,7 +599,14 @@ public partial class TrainService(
             TrainClass = (int)(diagramTrain?.TrainTypeId ?? 0),
             FromStation = diagramTrain?.FromStationId ?? "TH00",
             DestinationStation = diagramTrain?.ToStationId ?? "TH00",
-            Delay = trainState.Delay
+            Delay = trainState.Delay,
+            Timetable = timetables.Select(t => new TrainTimetableEntry
+            {
+                StationId = t.StationId,
+                TrackNumber = t.TrackNumber,
+                DepartureTime = t.DepartureTime,
+                ArrivalTime = t.ArrivalTime
+            }).ToList()
         };
     }
 

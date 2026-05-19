@@ -14,6 +14,7 @@ public interface IDiagramTrainRepository
     /// <returns>時刻表情報</returns>
     Task<DiagramTrainTimetable?> GetTimetableByTrainNumberStationIdAndDiaId(ulong diaId, string trainNumber, string stationId);
     Task<List<Models.DiagramTrain>> GetByDiaIdAndTrainNumbers(ulong diaId, ICollection<string> trainNumbers);
+    Task<List<DiagramTrainTimetable>> GetTimetablesByDiaIdAndTrainNumbers(ulong diaId, ICollection<string> trainNumbers);
     Task<List<string>> GetTrainNumbersForAll(CancellationToken cancellationToken = default);
     Task<Dictionary<string, Models.DiagramTrain>> GetForTrainNumberByDiaId(ulong diaId, CancellationToken cancellationToken = default);
     Task DeleteTimetablesByDiaId(ulong diaId, CancellationToken cancellationToken = default);
