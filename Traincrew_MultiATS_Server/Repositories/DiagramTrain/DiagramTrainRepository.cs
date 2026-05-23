@@ -27,6 +27,15 @@ public class DiagramTrainRepository(ApplicationDbContext context) : IDiagramTrai
             .ToListAsync();
     }
 
+    public async Task<List<DiagramTrainTimetable>> GetTimetablesByDiaIdAndTrainNumbers(ulong diaId, ICollection<string> trainNumbers)
+    {
+        return await context.DiagramTrainTimetables
+            .Include(t => t.TrainDiagram)
+            .Where(t => t.TrainDiagram!.DiaId == diaId && trainNumbers.Contains(t.TrainDiagram.TrainNumber))
+            .OrderBy(t => t.Index)
+            .ToListAsync();
+    }
+
     public async Task<List<string>> GetTrainNumbersForAll(CancellationToken cancellationToken = default)
     {
         return await context.DiagramTrains

@@ -17,6 +17,7 @@ public class PassengerService(
     public async Task<ServerToPassengerData> GetServerToPassengerData()
     {
         var serverMode = ServerMode.Public == await serverService.GetServerModeAsync();
+        var timeOffset = await serverService.GetTimeOffsetAsync();
         var trackCircuitData = await trackCircuitService.GetShortCircuitedTrackCircuitDataList();
         var trainInfoByTrainNumber = await trainService.GetTrainInfoGroupByTrainNumber();
         var operationInformations = await operationInformationService.GetOperationInformations();
@@ -24,6 +25,7 @@ public class PassengerService(
         return new()
         {
             ServerMode = serverMode,
+            TimeOffset = timeOffset,
             TrackCircuitData = trackCircuitData,
             TrainInfos = trainInfoByTrainNumber,
             OperationInformations = operationInformations

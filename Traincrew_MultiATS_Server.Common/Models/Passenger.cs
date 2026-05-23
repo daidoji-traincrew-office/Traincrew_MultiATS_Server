@@ -1,5 +1,13 @@
 namespace Traincrew_MultiATS_Server.Common.Models;
 
+public class TrainTimetableEntry
+{
+    public string StationId { get; init; } = string.Empty;
+    public string TrackNumber { get; init; } = string.Empty;
+    public TimeSpan? DepartureTime { get; init; }
+    public TimeSpan? ArrivalTime { get; init; }
+}
+
 public class TrainInfo
 {
     public string Name { get; init; }
@@ -8,12 +16,14 @@ public class TrainInfo
     public string FromStation { get; init; }
     public string DestinationStation { get; init; }
     public int Delay { get; init; }
+    public List<TrainTimetableEntry> Timetable { get; init; } = [];
 }
 
 
 public class ServerToPassengerData
 {
     public bool ServerMode { get; init; } = false;
+    public int TimeOffset { get; init; } = 0;
     public List<TrackCircuitData> TrackCircuitData { get; init; }
     public Dictionary<string, TrainInfo> TrainInfos { get; init; } = [];
     public List<OperationInformationData> OperationInformations { get; init; } = [];
@@ -44,4 +54,9 @@ root(object)
     2.2.4.FromStation(string)　始発ID
     2.2.5.DestinatonStation(string)　行先ID
     2.2.5.Delay(int)　遅延分
+    2.2.6.Timetable(List<TrainTimetableEntry>)　時刻表(index昇順)
+      2.2.6.1.StationId(string)　駅ID
+      2.2.6.2.TrackNumber(string)　番線
+      2.2.6.3.DepartureTime(TimeSpan?)　発車時刻
+      2.2.6.4.ArrivalTime(TimeSpan?)　到着時刻
 */
