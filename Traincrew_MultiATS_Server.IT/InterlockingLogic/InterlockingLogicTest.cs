@@ -156,8 +156,10 @@ public class InterlockingLogicTest(WebApplicationFixture factory) : IAsyncLifeti
                 Name = testCase.LeverName,
                 State = LCR.Center
             });
-            // クリーンアップ後、少し待機して状態を安定させる
-            await Task.Delay(TimeSpan.FromMilliseconds(500), TestContext.Current.CancellationToken);
+            // てこ復位後、信号が R/None に落下するまで待機（次テストとの競合防止）
+            var dropped = await WaitForSignalsDroppedAsync(testCase);
+            Assert.True(dropped,
+                $"てこを定位に戻した後、信号機 {testCase.SignalName} が落下しませんでした");
         }
     }
 
@@ -206,6 +208,36 @@ public class InterlockingLogicTest(WebApplicationFixture factory) : IAsyncLifeti
         }
 
         return false;
+    }
+
+    private async Task<bool> WaitForSignalsDroppedAsync(RouteTestCase testCase)
+    {
+        const int maxSeconds = 7;
+        foreach (var i in Enumerable.Range(0, maxSeconds + 1))
+        {
+            if (CheckSignalsDropped(testCase)) return true;
+            if (i < maxSeconds)
+                await Task.Delay(TimeSpan.FromSeconds(1), TestContext.Current.CancellationToken);
+        }
+        return false;
+    }
+
+    private bool CheckSignalsDropped(RouteTestCase testCase)
+    {
+        var currentSignalData = _latestSignalData;
+        var mainSignal = currentSignalData?.FirstOrDefault(s => s.Name == testCase.SignalName);
+        if (mainSignal == null) return false;
+        if (mainSignal.phase != Phase.None && mainSignal.phase != Phase.R) return false;
+
+        if (testCase.ThrowOutControlTargetSignals is not { Count: > 0 }) return true;
+
+        foreach (var targetSignalName in testCase.ThrowOutControlTargetSignals)
+        {
+            var targetSignal = currentSignalData?.FirstOrDefault(s => s.Name == targetSignalName);
+            if (targetSignal == null) return false;
+            if (targetSignal.phase != Phase.None && targetSignal.phase != Phase.R) return false;
+        }
+        return true;
     }
 
     /// <summary>
