@@ -529,6 +529,7 @@ public partial class TrainService(
             DoorClose = cs.DoorClose,
             BcPress = cs.BC_Press,
             Ampare = cs.Ampare,
+            OccupancyRate = cs.OccupancyRate,
         }).ToList();
         await trainCarRepository.UpdateAll(trainStateId, trainCarStates);
     }
@@ -621,7 +622,8 @@ public partial class TrainService(
             HasMotor = trainCarState.HasMotor,
             DoorClose = trainCarState.DoorClose,
             BC_Press = (float)trainCarState.BcPress,
-            Ampare = (float)trainCarState.Ampare
+            Ampare = (float)trainCarState.Ampare,
+            OccupancyRate = (float)trainCarState.OccupancyRate
         };
     }
 

@@ -50,6 +50,7 @@ root(object)
       2.2.2.6.DoorClose(bool)　戸閉(互換性保持)
       2.2.2.7.BC_Press(float)　BC圧力
       2.2.2.8.Ampare(float)　電流値
+      2.2.2.9.OccupancyRate(float)　乗車率
     2.2.3.TrainClass(int)　種別ID
     2.2.4.FromStation(string)　始発ID
     2.2.5.DestinatonStation(string)　行先ID

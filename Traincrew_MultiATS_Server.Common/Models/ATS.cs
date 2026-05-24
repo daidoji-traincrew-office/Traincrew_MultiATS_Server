@@ -50,6 +50,7 @@ public class CarState
     public bool HasDriverCab { get; init; }
     public bool HasMotor { get; init; }
     public bool HasPantograph { get; init; }
+    public float OccupancyRate { get; init; }
 }
 
 public class TrackCircuitData : IEquatable<TrackCircuitData>

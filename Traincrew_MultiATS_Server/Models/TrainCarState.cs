@@ -36,4 +36,7 @@ public class TrainCarState
 
     [Column("ampare")]
     public double Ampare { get; set; }
+
+    [Column("occupancy_rate")]
+    public double OccupancyRate { get; set; }
 }

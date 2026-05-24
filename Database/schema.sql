@@ -655,6 +655,7 @@ CREATE TABLE train_car_state
     door_close        BOOLEAN                            NOT NULL DEFAULT true,  -- 扉閉め状態
     bc_press          DOUBLE PRECISION                   NOT NULL DEFAULT 0,     -- ブレーキ圧力
     ampare            DOUBLE PRECISION                   NOT NULL DEFAULT 0,     -- 電流値
+    occupancy_rate    DOUBLE PRECISION                   NOT NULL DEFAULT 0,     -- 乗車率
     PRIMARY KEY (train_state_id, index)
 );
 
