@@ -10,6 +10,7 @@ public interface IServerService
 {
     Task<ServerMode> GetServerModeAsync();
     Task<ServerMode> GetServerModeAsyncWithoutLock();
+    Task<ServerMode> GetServerModeCachedAsync();
     Task SetServerModeAsync(ServerMode mode);
     Task UpdateSchedulerAsync();
     Task<int> GetTimeOffsetAsync();
@@ -39,16 +40,21 @@ public class ServerService(
 
     public async Task<ServerMode> GetServerModeAsyncWithoutLock()
     {
-        return (await cache.GetOrCreateAsync(CacheKeyServerMode, async entry =>
+        var state = await serverRepository.GetServerStateAsync();
+        if (state == null)
+        {
+            throw new InvalidOperationException("ServerStateが存在しません。");
+        }
+        return state.Mode;
+    }
+
+    public async Task<ServerMode> GetServerModeCachedAsync()
+    {
+        return await cache.GetOrCreateAsync(CacheKeyServerMode, async entry =>
         {
             entry.AbsoluteExpirationRelativeToNow = CacheTtl;
-            var state = await serverRepository.GetServerStateAsync();
-            if (state == null)
-            {
-                throw new InvalidOperationException("ServerStateが存在しません。");
-            }
-            return state.Mode;
-        }))!;
+            return await GetServerModeAsyncWithoutLock();
+        });
     }
 
     public async Task SetServerModeAsync(ServerMode mode)
