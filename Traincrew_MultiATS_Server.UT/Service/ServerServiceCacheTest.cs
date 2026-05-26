@@ -30,15 +30,15 @@ public class ServerServiceCacheTest
     }
 
     [Fact]
-    public async Task GetServerModeAsyncWithoutLock_CalledTwice_RepositoryCalledOnce()
+    public async Task GetServerModeCachedAsync_CalledTwice_RepositoryCalledOnce()
     {
         var (service, repoMock, _) = CreateService();
         repoMock
             .Setup(r => r.GetServerStateAsync())
             .ReturnsAsync(new ServerState { Mode = ServerMode.Private });
 
-        var first = await service.GetServerModeAsyncWithoutLock();
-        var second = await service.GetServerModeAsyncWithoutLock();
+        var first = await service.GetServerModeCachedAsync();
+        var second = await service.GetServerModeCachedAsync();
 
         Assert.Equal(ServerMode.Private, first);
         Assert.Equal(ServerMode.Private, second);
@@ -58,12 +58,12 @@ public class ServerServiceCacheTest
             .Callback<ServerMode>(m => currentMode = m)
             .Returns(Task.CompletedTask);
 
-        var initial = await service.GetServerModeAsyncWithoutLock();
+        var initial = await service.GetServerModeCachedAsync();
         Assert.Equal(ServerMode.Private, initial);
 
         await service.SetServerModeAsync(ServerMode.Off);
 
-        var afterSet = await service.GetServerModeAsyncWithoutLock();
+        var afterSet = await service.GetServerModeCachedAsync();
         Assert.Equal(ServerMode.Off, afterSet);
     }
 
