@@ -64,6 +64,8 @@ public partial class TrainService(
 
     private static string CacheKeyCarStates(long trainStateId) => $"train:carstates:{trainStateId}";
 
+    private static string CacheKeySignalStates(string trainNumber) => $"train:signalstates:{trainNumber}";
+
     /// <summary>
     /// 車両状態のうち、変化したら DB に反映したい項目。
     /// BC圧・電流値は DB に書き込まないため含めない。
@@ -185,7 +187,7 @@ public partial class TrainService(
         if (clientData.VisibleSignalNames is { Count: > 0 })
         {
             using (ActivitySources.TrainService.StartActivity("UpdateTrainSignalState"))
-                await trainSignalStateRepository.UpdateByTrainNumber(clientTrainNumber, clientData.VisibleSignalNames);
+                await UpdateTrainSignalState(clientTrainNumber, clientData.VisibleSignalNames);
         }
 
         // NextSignalNamesの設定
@@ -560,6 +562,24 @@ public partial class TrainService(
     }
 
     /// <summary>
+    /// TrainSignalState更新
+    ///
+    /// 可視信号機は数秒に 1 度しか変わらないので、前回書き込んだ内容と同じなら DB を触らない。
+    /// </summary>
+    private async Task UpdateTrainSignalState(string trainNumber, List<string> visibleSignalNames)
+    {
+        var signature = string.Join(',', visibleSignalNames.Order());
+        var cacheKey = CacheKeySignalStates(trainNumber);
+        if (cache.TryGetValue<string>(cacheKey, out var previous) && previous == signature)
+        {
+            return;
+        }
+
+        await trainSignalStateRepository.UpdateByTrainNumber(trainNumber, visibleSignalNames);
+        cache.Set(cacheKey, signature, TrainScopedCacheTtl);
+    }
+
+    /// <summary>
     /// TrainCarState更新
     ///
     /// ATSは10回/秒で送ってくるので、素直に書くと1列車あたり毎秒(両数 × 10)本のUPDATEが出て
@@ -642,6 +662,8 @@ public partial class TrainService(
         {
             cache.Remove(CacheKeyCarStates(trainState.Id));
         }
+
+        cache.Remove(CacheKeySignalStates(trainNumber));
     }
 
     /// <summary>
@@ -664,6 +686,7 @@ public partial class TrainService(
         await generalRepository.Delete(trainState);
 
         cache.Remove(CacheKeyCarStates(id));
+        cache.Remove(CacheKeySignalStates(trainState.TrainNumber));
     }
 
     /// <summary>
