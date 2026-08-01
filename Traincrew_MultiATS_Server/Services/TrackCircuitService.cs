@@ -42,6 +42,11 @@ public class TrackCircuitService(
 
     public async Task SetTrackCircuitDataList(List<TrackCircuitData> trackCircuitData, string trainNumber)
     {
+        if (trackCircuitData.Count == 0)
+        {
+            return;
+        }
+
         var names = trackCircuitData.Select(t => t.Name).ToList();
         await trackCircuitRepository.SetTrainNumberByNames(names, trainNumber);
     }
@@ -61,6 +66,11 @@ public class TrackCircuitService(
 
     public async Task ClearTrackCircuitDataList(List<TrackCircuitData> trackCircuitData)
     {
+        if (trackCircuitData.Count == 0)
+        {
+            return;
+        }
+
         var names = trackCircuitData.Select(t => t.Name).ToList();
         await trackCircuitRepository.ClearTrainNumberByNames(names);
     }
