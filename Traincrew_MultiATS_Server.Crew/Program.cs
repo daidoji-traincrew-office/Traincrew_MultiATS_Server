@@ -81,6 +81,15 @@ public class Program
 
         ConfigureServices(builder, isDevelopment, enableAuthorization, enableOtlp);
 
+        // In-process span timing collector (OTel Activity-based).
+        // Used by the /test/perf-stats endpoint to inspect per-phase latencies.
+        // 全スパンのサンプルを保持し続けるため、計測用途の Development でのみ有効にする。
+        if (isDevelopment)
+        {
+            Traincrew_MultiATS_Server.Activity.SpanTimingCollector.Register(
+                Traincrew_MultiATS_Server.Activity.ActivitySources.TrainService.Name);
+        }
+
         var app = builder.Build();
 
         await Configure(app, isDevelopment, enableAuthorization);
