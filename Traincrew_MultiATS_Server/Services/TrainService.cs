@@ -3,7 +3,6 @@ using System.Text.RegularExpressions;
 using Microsoft.Extensions.Caching.Memory;
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Models;
-using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.DiagramTrain;
 using Traincrew_MultiATS_Server.Repositories.General;
 using Traincrew_MultiATS_Server.Repositories.NextSignal;
@@ -43,7 +42,7 @@ public partial class TrainService(
     INextSignalRepository nextSignalRepository,
     ITrainSignalStateRepository trainSignalStateRepository,
     ITrackCircuitDepartmentTimeRepository trackCircuitDepartmentTimeRepository,
-    IDateTimeRepository dateTimeRepository,
+    IDateTimeService dateTimeService,
     IMemoryCache cache,
     ILogger<TrainService> logger
 ) : ITrainService
@@ -714,22 +713,22 @@ public partial class TrainService(
     }
 
     /// <summary>
-    /// 営業日開始時刻を基準に時刻を正規化する。
-    /// 営業日開始時刻より前の時刻（例: 02:00）は、前日の遅い時刻として扱うため86400秒を加算する。
+    /// 営業日開始時刻(4:00)を基準に、時刻を [4:00, 28:00) の区間へ正規化する。
+    /// 0:00〜4:00 は前営業日の 24:00〜28:00 として扱い、28:00 以上や負の値は 24 時間単位で折り返す。
+    /// これにより 25:30 のような 24 時超えダイヤと 24 時間未満の現在時刻を直接比較できる。
     /// </summary>
     /// <param name="time">正規化する時刻</param>
-    /// <returns>営業日開始時刻からの経過秒数</returns>
+    /// <returns>0:00 起点で [14400, 100800) 秒の範囲に写像された値</returns>
     private static double NormalizeTimeToServiceDay(TimeSpan time)
     {
-        var totalSeconds = time.TotalSeconds;
+        const double secondsPerDay = 86400.0;
+        var startSeconds = ServiceDayStartTime.TotalSeconds;
+        var offsetFromStart = time.TotalSeconds - startSeconds;
 
-        // 営業日開始時刻より前なら、前日の遅い時刻として扱う
-        if (time < ServiceDayStartTime)
-        {
-            totalSeconds += 86400; // 24時間を加算
-        }
+        // C# の % は負の被除数に対して負を返すため、二重剰余で常に非負へ寄せる
+        var normalized = (offsetFromStart % secondsPerDay + secondsPerDay) % secondsPerDay;
 
-        return totalSeconds;
+        return normalized + startSeconds;
     }
 
     /// <summary>
@@ -758,11 +757,12 @@ public partial class TrainService(
         // 上り下り判定
         var isUp = IsTrainUpOrDown(trainNumber);
 
-        // 現在時刻
-        var currentTime = dateTimeRepository.GetNow().TimeOfDay;
+        // TST現在時刻(時差適用済み)
+        var tstNow = await dateTimeService.GetTstNow();
+        var currentTime = tstNow.TimeOfDay;
 
-        // 現在のTST時差
-        var timeOffset = await serverService.GetTimeOffsetAsync();
+        // 現在時刻を営業日 [4:00, 28:00) を基準に正規化(全駅で共通のため事前に計算)
+        var currentTimeSeconds = NormalizeTimeToServiceDay(currentTime);
 
         // 各駅軌道回路に対して遅延を計算
         foreach (var (trackCircuit, stationId) in stationTrackCircuits)
@@ -797,11 +797,7 @@ public partial class TrainService(
                 timeElement = departmentTime.TimeElement;
             }
 
-            // 遅延を計算（営業日境界を考慮）
-            var adjustedCurrentTime = TimeSpan.FromSeconds(currentTime.TotalSeconds + 3600 * timeOffset);
-
-            // 営業日開始時刻（4:00）を基準に正規化
-            var currentTimeSeconds = NormalizeTimeToServiceDay(adjustedCurrentTime);
+            // 遅延を計算(営業日 [4:00, 28:00) を基準に正規化して比較)
             var departureTimeSeconds = NormalizeTimeToServiceDay(timetable.DepartureTime.Value);
 
             var delaySeconds = currentTimeSeconds - departureTimeSeconds - timeElement;
