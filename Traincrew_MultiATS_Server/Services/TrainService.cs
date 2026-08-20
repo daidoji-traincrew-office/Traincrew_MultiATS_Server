@@ -51,11 +51,6 @@ public partial class TrainService(
     private static partial Regex RegexIsDigits();
 
     /// <summary>
-    /// 営業日の開始時刻。鉄道の営業日は通常4:00から開始される。
-    /// </summary>
-    private static readonly TimeSpan ServiceDayStartTime = TimeSpan.FromHours(4);
-
-    /// <summary>
     /// 列車単位のキャッシュの保持期間。列車が消えた分は放っておいても期限切れで落ちる。
     /// </summary>
     private static readonly TimeSpan TrainScopedCacheTtl = TimeSpan.FromMinutes(10);
@@ -713,25 +708,6 @@ public partial class TrainService(
     }
 
     /// <summary>
-    /// 営業日開始時刻(4:00)を基準に、時刻を [4:00, 28:00) の区間へ正規化する。
-    /// 0:00〜4:00 は前営業日の 24:00〜28:00 として扱い、28:00 以上や負の値は 24 時間単位で折り返す。
-    /// これにより 25:30 のような 24 時超えダイヤと 24 時間未満の現在時刻を直接比較できる。
-    /// </summary>
-    /// <param name="time">正規化する時刻</param>
-    /// <returns>0:00 起点で [14400, 100800) 秒の範囲に写像された値</returns>
-    private static double NormalizeTimeToServiceDay(TimeSpan time)
-    {
-        const double secondsPerDay = 86400.0;
-        var startSeconds = ServiceDayStartTime.TotalSeconds;
-        var offsetFromStart = time.TotalSeconds - startSeconds;
-
-        // C# の % は負の被除数に対して負を返すため、二重剰余で常に非負へ寄せる
-        var normalized = (offsetFromStart % secondsPerDay + secondsPerDay) % secondsPerDay;
-
-        return normalized + startSeconds;
-    }
-
-    /// <summary>
     /// 遅延を計算して更新する
     /// </summary>
     /// <param name="diaId">ダイヤID</param>
@@ -757,12 +733,8 @@ public partial class TrainService(
         // 上り下り判定
         var isUp = IsTrainUpOrDown(trainNumber);
 
-        // TST現在時刻(時差適用済み)
-        var tstNow = await dateTimeService.GetTstNow();
-        var currentTime = tstNow.TimeOfDay;
-
-        // 現在時刻を営業日 [4:00, 28:00) を基準に正規化(全駅で共通のため事前に計算)
-        var currentTimeSeconds = NormalizeTimeToServiceDay(currentTime);
+        // TST現在時刻(営業日 [4:00, 28:00) 基準)
+        var currentTimeSeconds = (await dateTimeService.GetTstNow()).TotalSeconds;
 
         // 各駅軌道回路に対して遅延を計算
         foreach (var (trackCircuit, stationId) in stationTrackCircuits)
@@ -798,7 +770,7 @@ public partial class TrainService(
             }
 
             // 遅延を計算(営業日 [4:00, 28:00) を基準に正規化して比較)
-            var departureTimeSeconds = NormalizeTimeToServiceDay(timetable.DepartureTime.Value);
+            var departureTimeSeconds = DateTimeService.NormalizeToServiceDay(timetable.DepartureTime.Value).TotalSeconds;
 
             var delaySeconds = currentTimeSeconds - departureTimeSeconds - timeElement;
             var delayMinutes = (int)Math.Round(delaySeconds / 60.0, MidpointRounding.ToZero);

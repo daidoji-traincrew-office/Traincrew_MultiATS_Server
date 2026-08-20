@@ -20,8 +20,8 @@ public class TestDateTimeService : IDateTimeService
         this.timeOffset = timeOffset;
     }
 
-    public Task<DateTime> GetTstNow()
+    public Task<TimeSpan> GetTstNow()
     {
-        return Task.FromResult(jstNow.AddHours(timeOffset));
+        return Task.FromResult(DateTimeService.NormalizeToServiceDay(jstNow.AddHours(timeOffset).TimeOfDay));
     }
 }
