@@ -1177,9 +1177,8 @@ public class TrainServiceTest
         };
         var departmentTime = new TrackCircuitDepartmentTime { Id = 1, TrackCircuitId = 100, CarCount = 8, IsUp = true, TimeElement = 0 };
 
-        // JST 21:00、timeOffset +13 → TST は翌日 10:00 (日付繰り上がり)
-        var currentTime = new DateTime(2024, 1, 1, 21, 0, 0);
-        var timeOffset = 13;
+        var currentTime = new DateTime(2024, 1, 1, 21, 0, 0); // 現在時刻: JST 21:00、timeOffset: +13時間
+        var timeOffset = 13; // TST: 21:00 + 13時間 = 翌日10:00 (日付繰り上がり)
 
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
@@ -1203,8 +1202,12 @@ public class TrainServiceTest
         await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList);
 
         // Assert
-        // GetTstNow()が日付を繰り上げるためTimeOfDayは10:00(36000秒)に収まる。
-        // 修正前は TimeOfDay + 3600*offset で 34:00 のまま比較していたため +1440分になっていた
+        // 期待値: 0分 (TST 10:00 == ダイヤ10:00発)
+        // 営業日開始時刻(4:00)を基準に正規化:
+        //   - TST 10:00(21:00+13時間=翌日10:00)は4:00以降なので: 36000秒
+        //   - ダイヤ10:00も4:00以降なので: 36000秒
+        //   - 遅延 = 36000 - 36000 = 0秒 = 0分
+        // 修正前は TimeOfDay + 3600*offset で 34:00 のまま比較されていたため +1440分になっていた
         mockTrainRepository.Verify(x => x.SetDelayByTrainNumber(trainNumber, 0), Times.Once);
     }
 
@@ -1229,9 +1232,8 @@ public class TrainServiceTest
         };
         var departmentTime = new TrackCircuitDepartmentTime { Id = 1, TrackCircuitId = 100, CarCount = 8, IsUp = true, TimeElement = 0 };
 
-        // JST 21:00、timeOffset -11 → TST 10:00 (同じTSTを+13と別符号のoffsetで表現)
-        var currentTime = new DateTime(2024, 1, 1, 21, 0, 0);
-        var timeOffset = -11;
+        var currentTime = new DateTime(2024, 1, 1, 21, 0, 0); // 現在時刻: JST 21:00、timeOffset: -11時間
+        var timeOffset = -11; // TST: 21:00 - 11時間 = 同日10:00 (+13と同じTSTになる)
 
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
@@ -1255,7 +1257,12 @@ public class TrainServiceTest
         await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList);
 
         // Assert
-        // 同じTST 10:00を指すoffsetの符号(+13 / -11)によらず delay は 0 で一致する
+        // 期待値: 0分 (TST 10:00 == ダイヤ10:00発)
+        // 営業日開始時刻(4:00)を基準に正規化:
+        //   - TST 10:00(21:00-11時間=同日10:00)は4:00以降なので: 36000秒
+        //   - ダイヤ10:00も4:00以降なので: 36000秒
+        //   - 遅延 = 36000 - 36000 = 0秒 = 0分
+        // +13と-11は同じTST 10:00を指すので結果も一致する
         mockTrainRepository.Verify(x => x.SetDelayByTrainNumber(trainNumber, 0), Times.Once);
     }
 
@@ -1280,9 +1287,8 @@ public class TrainServiceTest
         };
         var departmentTime = new TrackCircuitDepartmentTime { Id = 1, TrackCircuitId = 100, CarCount = 8, IsUp = true, TimeElement = 0 };
 
-        // JST 21:03、timeOffset +13 → TST 10:03 (10:00発より3分遅れ)
-        var currentTime = new DateTime(2024, 1, 1, 21, 3, 0);
-        var timeOffset = 13;
+        var currentTime = new DateTime(2024, 1, 1, 21, 3, 0); // 現在時刻: JST 21:03、timeOffset: +13時間
+        var timeOffset = 13; // TST: 21:03 + 13時間 = 翌日10:03、遅延: 10:03 - 10:00 = 3分
 
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
@@ -1306,6 +1312,11 @@ public class TrainServiceTest
         await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList);
 
         // Assert
+        // 期待値: 3分遅れ (10:03 - 10:00 = 3分)
+        // 営業日開始時刻(4:00)を基準に正規化:
+        //   - TST 10:03は4:00以降なので: 36180秒
+        //   - ダイヤ10:00も4:00以降なので: 36000秒
+        //   - 遅延 = 36180 - 36000 = 180秒 = 3分
         mockTrainRepository.Verify(x => x.SetDelayByTrainNumber(trainNumber, 3), Times.Once);
     }
 
@@ -1330,9 +1341,8 @@ public class TrainServiceTest
         };
         var departmentTime = new TrackCircuitDepartmentTime { Id = 1, TrackCircuitId = 100, CarCount = 8, IsUp = true, TimeElement = 0 };
 
-        // JST 20:58、timeOffset +13 → TST 09:58 (10:00発より2分早い)
-        var currentTime = new DateTime(2024, 1, 1, 20, 58, 0);
-        var timeOffset = 13;
+        var currentTime = new DateTime(2024, 1, 1, 20, 58, 0); // 現在時刻: JST 20:58、timeOffset: +13時間
+        var timeOffset = 13; // TST: 20:58 + 13時間 = 翌日09:58、遅延: 09:58 - 10:00 = -2分
 
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
@@ -1356,6 +1366,11 @@ public class TrainServiceTest
         await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList);
 
         // Assert
+        // 期待値: 2分早着 (09:58 - 10:00 = -2分)
+        // 営業日開始時刻(4:00)を基準に正規化:
+        //   - TST 09:58は4:00以降なので: 35880秒
+        //   - ダイヤ10:00も4:00以降なので: 36000秒
+        //   - 遅延 = 35880 - 36000 = -120秒 = -2分
         mockTrainRepository.Verify(x => x.SetDelayByTrainNumber(trainNumber, -2), Times.Once);
     }
 
@@ -1380,9 +1395,8 @@ public class TrainServiceTest
         };
         var departmentTime = new TrackCircuitDepartmentTime { Id = 1, TrackCircuitId = 100, CarCount = 8, IsUp = true, TimeElement = 0 };
 
-        // JST 21:03、timeOffset -11 → TST 10:03 (10:00発より3分遅れ、+13と同じ結果になること)
-        var currentTime = new DateTime(2024, 1, 1, 21, 3, 0);
-        var timeOffset = -11;
+        var currentTime = new DateTime(2024, 1, 1, 21, 3, 0); // 現在時刻: JST 21:03、timeOffset: -11時間
+        var timeOffset = -11; // TST: 21:03 - 11時間 = 同日10:03、遅延: 10:03 - 10:00 = 3分
 
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
@@ -1406,6 +1420,11 @@ public class TrainServiceTest
         await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList);
 
         // Assert
+        // 期待値: 3分遅れ (10:03 - 10:00 = 3分)
+        // 営業日開始時刻(4:00)を基準に正規化:
+        //   - TST 10:03は4:00以降なので: 36180秒
+        //   - ダイヤ10:00も4:00以降なので: 36000秒
+        //   - 遅延 = 36180 - 36000 = 180秒 = 3分
         mockTrainRepository.Verify(x => x.SetDelayByTrainNumber(trainNumber, 3), Times.Once);
     }
 
@@ -1430,9 +1449,8 @@ public class TrainServiceTest
         };
         var departmentTime = new TrackCircuitDepartmentTime { Id = 1, TrackCircuitId = 100, CarCount = 8, IsUp = true, TimeElement = 0 };
 
-        // JST 11:00、timeOffset +23 → TST は翌日 10:00 (大きな時差でも日付繰り上がりで正しく収まる)
-        var currentTime = new DateTime(2024, 1, 1, 11, 0, 0);
-        var timeOffset = 23;
+        var currentTime = new DateTime(2024, 1, 1, 11, 0, 0); // 現在時刻: JST 11:00、timeOffset: +23時間
+        var timeOffset = 23; // TST: 11:00 + 23時間 = 翌日10:00 (大きな時差でも日付繰り上がりで正しく収まる)
 
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
@@ -1456,6 +1474,11 @@ public class TrainServiceTest
         await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList);
 
         // Assert
+        // 期待値: 0分 (TST 10:00 == ダイヤ10:00発)
+        // 営業日開始時刻(4:00)を基準に正規化:
+        //   - TST 10:00は4:00以降なので: 36000秒
+        //   - ダイヤ10:00も4:00以降なので: 36000秒
+        //   - 遅延 = 36000 - 36000 = 0秒 = 0分
         mockTrainRepository.Verify(x => x.SetDelayByTrainNumber(trainNumber, 0), Times.Once);
     }
 
@@ -1480,9 +1503,8 @@ public class TrainServiceTest
         };
         var departmentTime = new TrackCircuitDepartmentTime { Id = 1, TrackCircuitId = 100, CarCount = 8, IsUp = true, TimeElement = 0 };
 
-        // JST 12:30、timeOffset +13 → TST 1:30、25:30と同じ91800秒に正規化される
-        var currentTime = new DateTime(2024, 1, 1, 12, 30, 0);
-        var timeOffset = 13;
+        var currentTime = new DateTime(2024, 1, 1, 12, 30, 0); // 現在時刻: JST 12:30、timeOffset: +13時間
+        var timeOffset = 13; // TST: 12:30 + 13時間 = 翌日01:30 (ダイヤの25:30発と同じ営業日として扱われる)
 
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
@@ -1506,7 +1528,11 @@ public class TrainServiceTest
         await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList);
 
         // Assert
-        // TST 1:30 (25:30として正規化) とダイヤ25:30発が同値になるため delay = 0
+        // 期待値: 0分 (TST 01:30 と ダイヤ25:30発が同値に正規化される)
+        // 営業日開始時刻(4:00)を基準に正規化:
+        //   - TST 01:30は4:00より前なので: 5400 + 86400 = 91800秒
+        //   - ダイヤ25:30は4:00以降なので: 91800秒
+        //   - 遅延 = 91800 - 91800 = 0秒 = 0分
         mockTrainRepository.Verify(x => x.SetDelayByTrainNumber(trainNumber, 0), Times.Once);
     }
 
@@ -1531,9 +1557,8 @@ public class TrainServiceTest
         };
         var departmentTime = new TrackCircuitDepartmentTime { Id = 1, TrackCircuitId = 100, CarCount = 8, IsUp = true, TimeElement = 0 };
 
-        // JST 12:34、timeOffset +13 → TST 1:34、25:30発より4分遅れ
-        var currentTime = new DateTime(2024, 1, 1, 12, 34, 0);
-        var timeOffset = 13;
+        var currentTime = new DateTime(2024, 1, 1, 12, 34, 0); // 現在時刻: JST 12:34、timeOffset: +13時間
+        var timeOffset = 13; // TST: 12:34 + 13時間 = 翌日01:34、25:30発より4分遅れ
 
         var testTrackCircuitService = new TestTrackCircuitService();
         testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
@@ -1557,6 +1582,11 @@ public class TrainServiceTest
         await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList);
 
         // Assert
+        // 期待値: 4分遅れ (01:34 → 25:34相当 - 25:30発 = 4分)
+        // 営業日開始時刻(4:00)を基準に正規化:
+        //   - TST 01:34は4:00より前なので: 5640 + 86400 = 92040秒
+        //   - ダイヤ25:30は4:00以降なので: 91800秒
+        //   - 遅延 = 92040 - 91800 = 240秒 = 4分
         mockTrainRepository.Verify(x => x.SetDelayByTrainNumber(trainNumber, 4), Times.Once);
     }
 
@@ -1605,7 +1635,11 @@ public class TrainServiceTest
         await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList);
 
         // Assert
-        // 境界ちょうど、どちらも14400秒に正規化される
+        // 期待値: 0分 (境界ちょうど)
+        // 営業日開始時刻(4:00)を基準に正規化:
+        //   - 現在時刻4:00は4:00以降なので: 14400秒
+        //   - ダイヤ4:00も4:00以降なので: 14400秒
+        //   - 遅延 = 14400 - 14400 = 0秒 = 0分
         mockTrainRepository.Verify(x => x.SetDelayByTrainNumber(trainNumber, 0), Times.Once);
     }
 
@@ -1654,7 +1688,11 @@ public class TrainServiceTest
         await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList);
 
         // Assert
-        // どちらも 27:59 = 100740秒へ正規化されるため delay = 0
+        // 期待値: 0分 (現在時刻とダイヤがどちらも3:59)
+        // 営業日開始時刻(4:00)を基準に正規化:
+        //   - 現在時刻3:59は4:00より前なので: 14340 + 86400 = 100740秒
+        //   - ダイヤ3:59も4:00より前なので: 14340 + 86400 = 100740秒
+        //   - 遅延 = 100740 - 100740 = 0秒 = 0分
         mockTrainRepository.Verify(x => x.SetDelayByTrainNumber(trainNumber, 0), Times.Once);
     }
 
@@ -1703,7 +1741,11 @@ public class TrainServiceTest
         await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList);
 
         // Assert
-        // どちらも 24:00 = 86400秒へ正規化されるため delay = 0
+        // 期待値: 0分 (現在時刻とダイヤがどちらも0:00)
+        // 営業日開始時刻(4:00)を基準に正規化:
+        //   - 現在時刻0:00は4:00より前なので: 0 + 86400 = 86400秒
+        //   - ダイヤ0:00も4:00より前なので: 0 + 86400 = 86400秒
+        //   - 遅延 = 86400 - 86400 = 0秒 = 0分
         mockTrainRepository.Verify(x => x.SetDelayByTrainNumber(trainNumber, 0), Times.Once);
     }
 
@@ -1752,7 +1794,11 @@ public class TrainServiceTest
         await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList);
 
         // Assert
-        // 0:00 と 24:00 が同じ 86400秒に正規化されるため delay = 0
+        // 期待値: 0分 (現在時刻0:00 とダイヤ24:00表記が同値になる)
+        // 営業日開始時刻(4:00)を基準に正規化:
+        //   - 現在時刻0:00は4:00より前なので: 0 + 86400 = 86400秒
+        //   - ダイヤ24:00(86400秒)は24時間周期で折り返して: 86400秒
+        //   - 遅延 = 86400 - 86400 = 0秒 = 0分
         mockTrainRepository.Verify(x => x.SetDelayByTrainNumber(trainNumber, 0), Times.Once);
     }
 }
