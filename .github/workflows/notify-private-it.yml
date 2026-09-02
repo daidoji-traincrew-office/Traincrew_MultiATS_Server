@@ -53,25 +53,34 @@ jobs:
     steps:
       - name: Resolve target SHA
         id: sha
+        env:
+          IN_SHA: ${{ inputs.public_sha }}
+          EVENT_NAME: ${{ github.event_name }}
+          WR_SHA: ${{ github.event.workflow_run.head_sha }}
+          DEFAULT_SHA: ${{ github.sha }}
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.public_sha }}" ]; then
-            echo "sha=${{ inputs.public_sha }}" >> "$GITHUB_OUTPUT"
-          elif [ "${{ github.event_name }}" = "workflow_run" ]; then
-            echo "sha=${{ github.event.workflow_run.head_sha }}" >> "$GITHUB_OUTPUT"
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] && [ -n "$IN_SHA" ]; then
+            echo "sha=$IN_SHA" >> "$GITHUB_OUTPUT"
+          elif [ "$EVENT_NAME" = "workflow_run" ]; then
+            echo "sha=$WR_SHA" >> "$GITHUB_OUTPUT"
           else
-            echo "sha=${{ github.sha }}" >> "$GITHUB_OUTPUT"
+            echo "sha=$DEFAULT_SHA" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Determine mode
         id: mode
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          IN_STATIONS: ${{ inputs.stations }}
+          IN_PR_NUMBER: ${{ inputs.pr_number }}
         run: |
-          if [ "${{ github.event_name }}" = "push" ]; then
+          if [ "$EVENT_NAME" = "push" ]; then
             echo "mode=full" >> "$GITHUB_OUTPUT"
-          elif [ "${{ github.event_name }}" = "workflow_run" ]; then
+          elif [ "$EVENT_NAME" = "workflow_run" ]; then
             echo "mode=targeted" >> "$GITHUB_OUTPUT"
-          elif [ -n "${{ inputs.stations }}" ]; then
+          elif [ -n "$IN_STATIONS" ]; then
             echo "mode=manual" >> "$GITHUB_OUTPUT"
-          elif [ -n "${{ inputs.pr_number }}" ]; then
+          elif [ -n "$IN_PR_NUMBER" ]; then
             echo "mode=targeted" >> "$GITHUB_OUTPUT"
           else
             echo "mode=full" >> "$GITHUB_OUTPUT"
@@ -82,21 +91,23 @@ jobs:
         if: steps.mode.outputs.mode == 'targeted'
         env:
           GH_TOKEN: ${{ github.token }}
+          EVENT_NAME: ${{ github.event_name }}
+          IN_PR_NUMBER: ${{ inputs.pr_number }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ steps.sha.outputs.sha }}
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "number=${{ inputs.pr_number }}" >> "$GITHUB_OUTPUT"
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            echo "number=$IN_PR_NUMBER" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          SHA="${{ steps.sha.outputs.sha }}"
-
           # workflow_run.pull_requests は fork PR で空になる既知の問題があるため、
           # まず head_sha からコミット経由で逆引きする
-          PR_NUMBER=$(gh api "repos/${{ github.repository }}/commits/${SHA}/pulls" --jq '.[0].number // empty')
+          PR_NUMBER=$(gh api "repos/${REPO}/commits/${SHA}/pulls" --jq '.[0].number // empty')
 
           # 逆引きに失敗した場合、open PR一覧からhead.shaが一致するものを探すフォールバック
           if [ -z "$PR_NUMBER" ]; then
-            PR_NUMBER=$(gh api "repos/${{ github.repository }}/pulls" --jq \
+            PR_NUMBER=$(gh api "repos/${REPO}/pulls" --jq \
               ".[] | select(.head.sha == \"${SHA}\") | .number" | head -n1)
           fi
 
@@ -111,30 +122,37 @@ jobs:
         if: steps.mode.outputs.mode == 'targeted' && steps.pr.outputs.number != ''
         env:
           GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
         run: |
           # PRのコードは一切checkout/実行しない。APIのみで完結させる（pwn request対策）
-          gh api "repos/${{ github.repository }}/pulls/${{ steps.pr.outputs.number }}/files" \
+          gh api "repos/${REPO}/pulls/${PR_NUMBER}/files" \
             --paginate --jq '.[].filename' > changed_files.txt
           cat changed_files.txt
 
       - name: Extract target stations
         id: stations
+        env:
+          MODE: ${{ steps.mode.outputs.mode }}
+          IN_STATIONS: ${{ inputs.stations }}
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
         run: |
           set -e
-          MODE="${{ steps.mode.outputs.mode }}"
           KNOWN_LIST=$(printf '%s\n' $KNOWN_STATIONS)
+          # 正規表現の特殊文字（RENDO_TABLE_DIR中の "." など）をエスケープする
+          RENDO_DIR_RE=$(printf '%s' "$RENDO_TABLE_DIR" | sed 's/[.[\*^$/]/\\&/g')
 
           if [ "$MODE" = "full" ]; then
             STATIONS_RAW=$(printf '%s\n' $KNOWN_STATIONS)
           elif [ "$MODE" = "manual" ]; then
-            STATIONS_RAW=$(echo '${{ inputs.stations }}' | jq -r '.[]')
+            STATIONS_RAW=$(printf '%s' "$IN_STATIONS" | jq -r '.[]')
           elif [ "$MODE" = "targeted" ]; then
-            if [ "${{ steps.pr.outputs.number }}" = "" ] || [ ! -s changed_files.txt ]; then
+            if [ -z "$PR_NUMBER" ] || [ ! -s changed_files.txt ]; then
               echo "stations=[]" >> "$GITHUB_OUTPUT"
               exit 0
             fi
-            STATIONS_RAW=$(grep -E "^${RENDO_TABLE_DIR}/[^/]+\.csv$" changed_files.txt \
-              | sed -E "s#^${RENDO_TABLE_DIR}/##; s/\.csv$//" || true)
+            STATIONS_RAW=$(grep -E "^${RENDO_DIR_RE}/[^/]+\.csv$" changed_files.txt \
+              | sed -E "s#^${RENDO_DIR_RE}/##; s/\.csv$//" || true)
           else
             echo "stations=[]" >> "$GITHUB_OUTPUT"
             exit 0
@@ -170,22 +188,31 @@ jobs:
       - name: Dispatch to private IT
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          STATIONS: ${{ needs.determine-target.outputs.stations }}
+          SHA: ${{ needs.determine-target.outputs.public_sha }}
+          PR: ${{ needs.determine-target.outputs.pr_number }}
+          REPO: ${{ github.repository }}
         run: |
           jq -n \
-            --argjson stations '${{ needs.determine-target.outputs.stations }}' \
-            --arg sha '${{ needs.determine-target.outputs.public_sha }}' \
-            --arg pr  '${{ needs.determine-target.outputs.pr_number }}' \
-            --arg repo '${{ github.repository }}' \
+            --argjson stations "$STATIONS" \
+            --arg sha "$SHA" \
+            --arg pr  "$PR" \
+            --arg repo "$REPO" \
             '{event_type:"public-it-request", client_payload:{stations:$stations, public_sha:$sha, pr_number:$pr, check_repo:$repo}}' \
           | gh api repos/daidoji-traincrew-office/Traincrew_Rendo_Server/dispatches --input -
 
       - name: Summary
+        env:
+          MODE: ${{ needs.determine-target.outputs.mode }}
+          STATIONS: ${{ needs.determine-target.outputs.stations }}
+          SHA: ${{ needs.determine-target.outputs.public_sha }}
+          PR: ${{ needs.determine-target.outputs.pr_number }}
         run: |
           {
             echo "## Notify Private IT - dispatch結果"
             echo ""
-            echo "- mode: \`${{ needs.determine-target.outputs.mode }}\`"
-            echo "- stations: \`${{ needs.determine-target.outputs.stations }}\`"
-            echo "- public_sha: \`${{ needs.determine-target.outputs.public_sha }}\`"
-            echo "- pr_number: \`${{ needs.determine-target.outputs.pr_number }}\`"
+            echo "- mode: \`${MODE}\`"
+            echo "- stations: \`${STATIONS}\`"
+            echo "- public_sha: \`${SHA}\`"
+            echo "- pr_number: \`${PR}\`"
           } >> "$GITHUB_STEP_SUMMARY"
