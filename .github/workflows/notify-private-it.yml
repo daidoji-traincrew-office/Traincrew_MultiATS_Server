@@ -1,0 +1,191 @@
+# 準備工事: このワークフローはまだ本稼働しない。
+# Runner方式（GitHub-hosted課金 / self-hosted）が未決のため、
+# 自動トリガー（workflow_run / push）はコメントアウトしてあり、
+# workflow_dispatch による手動実行のみ有効。
+# `runs-on: ubuntu-latest` も仮置き。
+# Runner方式決定後に workflow_run / push トリガーを有効化すること。
+name: Notify Private IT
+
+on:
+  workflow_dispatch:
+    inputs:
+      stations:
+        description: 'JSON配列で対象駅を指定。空なら全13駅（例: ["TH58","TH62"]）'
+        required: false
+        default: ''
+      public_sha:
+        description: '対象コミットSHA。空なら github.sha'
+        required: false
+        default: ''
+      pr_number:
+        description: '対象PR番号。指定するとそのPRの変更ファイルから駅を判定する'
+        required: false
+        default: ''
+  # --- Runner方式決定後に有効化する ---
+  # workflow_run:
+  #   workflows: ["Unit Tests"]
+  #   types: [completed]
+  # push:
+  #   branches: [main]
+
+permissions:
+  contents: read
+  actions: read
+  pull-requests: read
+
+env:
+  # 連動図表CSVが存在する既知の駅一覧（唯一の記載箇所）
+  KNOWN_STATIONS: "TH58 TH59 TH61 TH62 TH63 TH64 TH65 TH66S TH67 TH70 TH71 TH75 TH76"
+  RENDO_TABLE_DIR: Traincrew_MultiATS_Server.Crew/Data/RendoTable
+
+jobs:
+  determine-target:
+    runs-on: ubuntu-latest
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'push' ||
+      github.event.workflow_run.conclusion == 'success'
+    outputs:
+      stations: ${{ steps.stations.outputs.stations }}
+      public_sha: ${{ steps.sha.outputs.sha }}
+      pr_number: ${{ steps.pr.outputs.number }}
+      mode: ${{ steps.mode.outputs.mode }}
+    steps:
+      - name: Resolve target SHA
+        id: sha
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.public_sha }}" ]; then
+            echo "sha=${{ inputs.public_sha }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event_name }}" = "workflow_run" ]; then
+            echo "sha=${{ github.event.workflow_run.head_sha }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "sha=${{ github.sha }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Determine mode
+        id: mode
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "mode=full" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event_name }}" = "workflow_run" ]; then
+            echo "mode=targeted" >> "$GITHUB_OUTPUT"
+          elif [ -n "${{ inputs.stations }}" ]; then
+            echo "mode=manual" >> "$GITHUB_OUTPUT"
+          elif [ -n "${{ inputs.pr_number }}" ]; then
+            echo "mode=targeted" >> "$GITHUB_OUTPUT"
+          else
+            echo "mode=full" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Resolve PR number
+        id: pr
+        if: steps.mode.outputs.mode == 'targeted'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "number=${{ inputs.pr_number }}" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          SHA="${{ steps.sha.outputs.sha }}"
+
+          # workflow_run.pull_requests は fork PR で空になる既知の問題があるため、
+          # まず head_sha からコミット経由で逆引きする
+          PR_NUMBER=$(gh api "repos/${{ github.repository }}/commits/${SHA}/pulls" --jq '.[0].number // empty')
+
+          # 逆引きに失敗した場合、open PR一覧からhead.shaが一致するものを探すフォールバック
+          if [ -z "$PR_NUMBER" ]; then
+            PR_NUMBER=$(gh api "repos/${{ github.repository }}/pulls" --jq \
+              ".[] | select(.head.sha == \"${SHA}\") | .number" | head -n1)
+          fi
+
+          if [ -z "$PR_NUMBER" ]; then
+            echo "::warning::PRに紐づかない実行のためスキップします (sha=${SHA})"
+          fi
+
+          echo "number=${PR_NUMBER}" >> "$GITHUB_OUTPUT"
+
+      - name: Get changed files
+        id: changed_files
+        if: steps.mode.outputs.mode == 'targeted' && steps.pr.outputs.number != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # PRのコードは一切checkout/実行しない。APIのみで完結させる（pwn request対策）
+          gh api "repos/${{ github.repository }}/pulls/${{ steps.pr.outputs.number }}/files" \
+            --paginate --jq '.[].filename' > changed_files.txt
+          cat changed_files.txt
+
+      - name: Extract target stations
+        id: stations
+        run: |
+          set -e
+          MODE="${{ steps.mode.outputs.mode }}"
+          KNOWN_LIST=$(printf '%s\n' $KNOWN_STATIONS)
+
+          if [ "$MODE" = "full" ]; then
+            STATIONS_RAW=$(printf '%s\n' $KNOWN_STATIONS)
+          elif [ "$MODE" = "manual" ]; then
+            STATIONS_RAW=$(echo '${{ inputs.stations }}' | jq -r '.[]')
+          elif [ "$MODE" = "targeted" ]; then
+            if [ "${{ steps.pr.outputs.number }}" = "" ] || [ ! -s changed_files.txt ]; then
+              echo "stations=[]" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            STATIONS_RAW=$(grep -E "^${RENDO_TABLE_DIR}/[^/]+\.csv$" changed_files.txt \
+              | sed -E "s#^${RENDO_TABLE_DIR}/##; s/\.csv$//" || true)
+          else
+            echo "stations=[]" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # 既知13駅リストと突き合わせ、未知のものは弾く
+          VALID_STATIONS=""
+          for s in $STATIONS_RAW; do
+            if printf '%s\n' $KNOWN_LIST | grep -qx "$s"; then
+              VALID_STATIONS="$VALID_STATIONS $s"
+            else
+              echo "::warning::未知の駅IDのため対象から除外します: $s"
+            fi
+          done
+
+          STATIONS_JSON=$(printf '%s\n' $VALID_STATIONS | grep -v '^$' | sort -u | jq -R . | jq -sc .)
+          echo "stations=${STATIONS_JSON}" >> "$GITHUB_OUTPUT"
+
+  dispatch:
+    needs: determine-target
+    if: needs.determine-target.outputs.stations != '' && needs.determine-target.outputs.stations != '[]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate GitHub App Token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          owner: daidoji-traincrew-office
+          repositories: Traincrew_Rendo_Server
+
+      - name: Dispatch to private IT
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          jq -n \
+            --argjson stations '${{ needs.determine-target.outputs.stations }}' \
+            --arg sha '${{ needs.determine-target.outputs.public_sha }}' \
+            --arg pr  '${{ needs.determine-target.outputs.pr_number }}' \
+            --arg repo '${{ github.repository }}' \
+            '{event_type:"public-it-request", client_payload:{stations:$stations, public_sha:$sha, pr_number:$pr, check_repo:$repo}}' \
+          | gh api repos/daidoji-traincrew-office/Traincrew_Rendo_Server/dispatches --input -
+
+      - name: Summary
+        run: |
+          {
+            echo "## Notify Private IT - dispatch結果"
+            echo ""
+            echo "- mode: \`${{ needs.determine-target.outputs.mode }}\`"
+            echo "- stations: \`${{ needs.determine-target.outputs.stations }}\`"
+            echo "- public_sha: \`${{ needs.determine-target.outputs.public_sha }}\`"
+            echo "- pr_number: \`${{ needs.determine-target.outputs.pr_number }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
