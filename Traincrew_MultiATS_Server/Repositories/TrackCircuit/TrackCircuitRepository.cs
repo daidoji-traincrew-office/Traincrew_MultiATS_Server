@@ -1,0 +1,209 @@
+using Microsoft.EntityFrameworkCore;
+using Traincrew_MultiATS_Server.Data;
+
+namespace Traincrew_MultiATS_Server.Repositories.TrackCircuit;
+
+public class TrackCircuitRepository(ApplicationDbContext context) : ITrackCircuitRepository
+{
+    public async Task<List<Models.TrackCircuit>> GetAllTrackCircuitList(CancellationToken cancellationToken = default)
+    {
+       return await context.TrackCircuits
+            .Include(obj => obj.TrackCircuitState)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<List<Models.TrackCircuit>> GetTrackCircuitByName(List<string> trackCircuitNames)
+    {
+        return await context.TrackCircuits
+            .Where(obj => trackCircuitNames.Contains(obj.Name))
+            .Include(obj => obj.TrackCircuitState)
+            .ToListAsync();
+    }
+
+    public async Task<List<Models.TrackCircuit>> GetTrackCircuitsById(List<ulong> Ids)
+    {
+        return await context.TrackCircuits
+            .Where(tc => Ids.Contains(tc.Id))
+            .Include(tc => tc.TrackCircuitState)
+            .ToListAsync();
+    }
+
+    public async Task<List<Models.TrackCircuit>> GetTrackCircuitListByTrainNumber(string trainNumber)
+    {
+        List<Models.TrackCircuit> trackcircuitlist_db = await context.TrackCircuits
+            .Where(odj => odj.TrackCircuitState.TrainNumber == trainNumber)
+            .Include(obj => obj.TrackCircuitState).ToListAsync();
+        return trackcircuitlist_db;
+    }
+
+    public async Task SetTrainNumberByNames(List<string> names, string trainNumber)
+    {
+        await context.TrackCircuits
+            .Where(trackCircuit => names.Contains(trackCircuit.Name))
+            .Select(tc => tc.TrackCircuitState)
+            .ExecuteUpdateAsync(item => item
+                .SetProperty(tcs => tcs.IsShortCircuit, true)
+                .SetProperty(tcs => tcs.TrainNumber, trainNumber));
+    }
+
+    public async Task ClearTrainNumberByNames(List<string> names)
+    {
+        await context.TrackCircuits
+            .Where(trackCircuit => names.Contains(trackCircuit.Name))
+            .Select(tc => tc.TrackCircuitState)
+            .ExecuteUpdateAsync(item => item
+                .SetProperty(tcs => tcs.IsShortCircuit, false)
+                .SetProperty(tcs => tcs.TrainNumber, ""));
+    }
+
+    /// <summary>
+    /// 名前で指定したTrackCircuitのTrainNumber/IsShortCircuitのみを更新する
+    /// (track_circuit_stateは2プロセスが別々の列を書くため、IsLocked/LockedBy/UnlockedAtとは分けて列限定更新にすること)
+    /// </summary>
+    /// <param name="name">TrackCircuit名</param>
+    /// <param name="trainNumber">列車番号</param>
+    /// <param name="isShortCircuit">短絡しているか</param>
+    public async Task SetTrainNumberAndShortCircuitByName(string name, string trainNumber, bool isShortCircuit)
+    {
+        await context.TrackCircuits
+            .Where(trackCircuit => trackCircuit.Name == name)
+            .Select(tc => tc.TrackCircuitState)
+            .ExecuteUpdateAsync(item => item
+                .SetProperty(tcs => tcs.TrainNumber, trainNumber)
+                .SetProperty(tcs => tcs.IsShortCircuit, isShortCircuit));
+    }
+
+    /// <summary>
+    /// 名前で指定したTrackCircuitのIsLockedのみを更新する
+    /// (track_circuit_stateは2プロセスが別々の列を書くため、TrainNumber/IsShortCircuitとは分けて列限定更新にすること)
+    /// </summary>
+    /// <param name="name">TrackCircuit名</param>
+    /// <param name="isLocked">鎖錠されているか</param>
+    public async Task SetLockedByName(string name, bool isLocked)
+    {
+        await context.TrackCircuits
+            .Where(trackCircuit => trackCircuit.Name == name)
+            .Select(tc => tc.TrackCircuitState)
+            .ExecuteUpdateAsync(item => item
+                .SetProperty(tcs => tcs.IsLocked, isLocked));
+    }
+
+    public async Task ClearTrackCircuitListByTrainNumber(string trainNumber)
+    {
+        await context.TrackCircuitStates
+            .Where(tcs => tcs.TrainNumber == trainNumber)
+            .ExecuteUpdateAsync(item => item
+                .SetProperty(tcs => tcs.IsShortCircuit, false)
+                .SetProperty(tcs => tcs.TrainNumber, "")
+            );
+    }
+
+    public async Task<List<Models.TrackCircuit>> GetWhereShortCircuited()
+    {
+        return await context.TrackCircuits
+            .Include(tc => tc.TrackCircuitState)
+            .Where(tc => tc.TrackCircuitState.IsShortCircuit)
+            .ToListAsync();
+    }
+
+    public async Task LockByIds(List<ulong> ids, ulong routeId)
+    {
+        await context.TrackCircuits
+            .Where(tc => ids.Contains(tc.Id))
+            .Select(tc => tc.TrackCircuitState)
+            .ExecuteUpdateAsync(item => item
+                .SetProperty(tcs => tcs.IsLocked, true)
+                .SetProperty(tcs => tcs.LockedBy, routeId));
+    }
+
+    public async Task StartUnlockTimerByIds(List<ulong> ids, DateTime unlockedAt)
+    {
+        await context.TrackCircuits
+            .Where(tc => ids.Contains(tc.Id))
+            .Select(tc => tc.TrackCircuitState)
+            .ExecuteUpdateAsync(item => item
+                .SetProperty(tcs => tcs.UnlockedAt, unlockedAt));
+    }
+
+    public async Task UnlockByIds(List<ulong> ids)
+    {
+        await context.TrackCircuits
+            .Where(tc => ids.Contains(tc.Id))
+            .Select(tc => tc.TrackCircuitState)
+            .ExecuteUpdateAsync(item => item
+                .SetProperty(tcs => tcs.IsLocked, false)
+                .SetProperty(tcs => tcs.LockedBy, (ulong?)null)
+                .SetProperty(tcs => tcs.UnlockedAt, (DateTime?)null));
+    }
+
+
+    public async Task<Dictionary<ulong, Models.TrackCircuit>> GetApproachLockFinalTrackCircuitsByRouteIds(
+        List<ulong> routeIds)
+    {
+        return await context.TrackCircuits
+            .Include(tc => tc.TrackCircuitState)
+            .Join(
+                context.Routes,
+                tc => tc.Id,
+                r => r.ApproachLockFinalTrackCircuitId,
+                (tc, r) => new { r.Id, tc }
+            )
+            .Where(x => routeIds.Contains(x.Id))
+            .GroupBy(x => x.Id)
+            .ToDictionaryAsync(
+                x => x.Key,
+                x => x.Select(y => y.tc).First()
+            );
+    }
+
+    public async Task<List<string>> GetAllNames(CancellationToken cancellationToken = default)
+    {
+        return await context.TrackCircuits
+            .Select(tc => tc.Name)
+            .ToListAsync(cancellationToken);
+    }
+
+    /// <summary>
+    /// すべての軌道回路のIDを取得する
+    /// </summary>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    /// <returns>軌道回路IDのリスト</returns>
+    public async Task<List<ulong>> GetAllIds(CancellationToken cancellationToken = default)
+    {
+        return await context.TrackCircuits
+            .Select(tc => tc.Id)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<Dictionary<string, Models.TrackCircuit>> GetTrackCircuitsByNamesAsync(
+        HashSet<string> trackCircuitNames, CancellationToken cancellationToken = default)
+    {
+        return await context.TrackCircuits
+            .Where(tc => trackCircuitNames.Contains(tc.Name))
+            .ToDictionaryAsync(tc => tc.Name, cancellationToken);
+    }
+
+    public async Task<Dictionary<string, ulong>> GetAllIdForName(CancellationToken cancellationToken = default)
+    {
+        return await context.TrackCircuits
+            .Select(tc => new { tc.Name, tc.Id })
+            .ToDictionaryAsync(tc => tc.Name, tc => tc.Id, cancellationToken);
+    }
+
+    public async Task<Dictionary<string, Models.TrackCircuit>> GetByNames(List<string> trackCircuitNames, CancellationToken cancellationToken = default)
+    {
+        return await context.TrackCircuits
+            .Where(tc => trackCircuitNames.Contains(tc.Name))
+            .ToDictionaryAsync(tc => tc.Name, cancellationToken);
+    }
+
+    public void Update(Models.TrackCircuit trackCircuit)
+    {
+        context.TrackCircuits.Update(trackCircuit);
+    }
+
+    public void Detach(Models.TrackCircuit trackCircuit)
+    {
+        context.Entry(trackCircuit).State = EntityState.Detached;
+    }
+}

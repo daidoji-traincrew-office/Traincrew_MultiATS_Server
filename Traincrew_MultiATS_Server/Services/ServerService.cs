@@ -1,0 +1,98 @@
+using Traincrew_MultiATS_Server.Common.Models;
+using Traincrew_MultiATS_Server.Repositories.Mutex;
+using Traincrew_MultiATS_Server.Repositories.Server;
+using Traincrew_MultiATS_Server.Scheduler;
+
+namespace Traincrew_MultiATS_Server.Services;
+
+public interface IServerService
+{
+    Task<ServerMode> GetServerModeAsync();
+    Task<ServerMode> GetServerModeAsyncWithoutLock();
+    Task SetServerModeAsync(ServerMode mode);
+    Task UpdateSchedulerAsync();
+    Task<int> GetTimeOffsetAsync();
+    Task SetTimeOffsetAsync(int timeOffset);
+    Task SetSwitchMoveTimeAsync(int switchMoveTime);
+    Task SetUseOneSecondRelayAsync(bool useOneSecondRelay);
+    Task<ulong?> GetSelectedDiagramIdAsync();
+    Task SetSelectedDiagramIdAsync(ulong? diaId);
+}
+
+public class ServerService(
+    IServerRepository serverRepository, 
+    SchedulerManagerForServer schedulerManagerForServer,
+    IMutexRepository mutexRepository) : IServerService
+{
+    public async Task<ServerMode> GetServerModeAsync()
+    {
+        await using var mutex = await mutexRepository.AcquireAsync(nameof(ServerService));
+        return await GetServerModeAsyncWithoutLock();
+    }
+
+    public async Task<ServerMode> GetServerModeAsyncWithoutLock()
+    {
+        var state = await serverRepository.GetServerStateAsync();
+        if (state == null)
+        {
+            throw new InvalidOperationException("ServerStateが存在しません。");
+        }
+        return state.Mode;
+    }
+
+    public async Task SetServerModeAsync(ServerMode mode)
+    {
+        await using var mutex = await mutexRepository.AcquireAsync(nameof(ServerService));
+        await serverRepository.SetServerStateAsync(mode);
+        await UpdateSchedulerAsyncWithoutLock();
+    }
+
+    public async Task UpdateSchedulerAsync()
+    {
+        await using var mutex = await mutexRepository.AcquireAsync(nameof(ServerService));
+        await UpdateSchedulerAsyncWithoutLock();
+    }
+
+    private async Task UpdateSchedulerAsyncWithoutLock()
+    {
+        var mode = await GetServerModeAsyncWithoutLock();
+        if (mode == ServerMode.Off)
+        {
+            await schedulerManagerForServer.Stop();
+        }
+        else
+        {
+            await schedulerManagerForServer.Start();
+        }
+    }
+
+    public virtual async Task<int> GetTimeOffsetAsync()
+    {
+        return await serverRepository.GetTimeOffset();
+    }
+
+    public async Task SetTimeOffsetAsync(int timeOffset)
+    {
+        await serverRepository.SetTimeOffsetAsync(timeOffset);
+    }
+
+    public async Task SetSwitchMoveTimeAsync(int switchMoveTime)
+    {
+        await serverRepository.SetSwitchMoveTimeAsync(switchMoveTime);
+    }
+
+    public async Task SetUseOneSecondRelayAsync(bool useOneSecondRelay)
+    {
+        await serverRepository.SetUseOneSecondRelayAsync(useOneSecondRelay);
+    }
+
+    public async Task<ulong?> GetSelectedDiagramIdAsync()
+    {
+        return await serverRepository.GetSelectedDiagramIdAsync();
+    }
+
+    public async Task SetSelectedDiagramIdAsync(ulong? diaId)
+    {
+        await serverRepository.SetSelectedDiagramIdAsync(diaId);
+    }
+}

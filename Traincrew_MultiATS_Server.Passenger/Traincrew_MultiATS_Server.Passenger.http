@@ -1,0 +1,6 @@
+@Traincrew_MultiATS_Server.Passenger_HostAddress = http://localhost:5125
+
+GET {{Traincrew_MultiATS_Server.Passenger_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

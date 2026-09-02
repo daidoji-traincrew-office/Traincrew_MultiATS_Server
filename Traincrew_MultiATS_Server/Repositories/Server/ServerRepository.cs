@@ -1,0 +1,100 @@
+using Microsoft.EntityFrameworkCore;
+using Traincrew_MultiATS_Server.Common.Models;
+using Traincrew_MultiATS_Server.Data;
+using Traincrew_MultiATS_Server.Models;
+
+namespace Traincrew_MultiATS_Server.Repositories.Server;
+
+public class ServerRepository(ApplicationDbContext context) : IServerRepository
+{
+    public async Task<ServerState?> GetServerStateAsync()
+    {
+        return await context.ServerStates.FirstOrDefaultAsync();
+    }
+
+    public async Task SetServerStateAsync(ServerMode mode)
+    {
+        var state = await context.ServerStates.FirstOrDefaultAsync();
+        if (state == null)
+        {
+            return;
+        }
+
+        state.Mode = mode;
+        context.ServerStates.Update(state);
+        await context.SaveChangesAsync();
+    }
+
+    public async Task<int> GetTimeOffset()
+    {
+        return await context.ServerStates
+            .Select(state => (int?)state.TimeOffset)
+            .FirstOrDefaultAsync() ?? 0;
+    }
+
+    public async Task SetTimeOffsetAsync(int timeOffset)
+    {
+        await context.ServerStates
+            .ExecuteUpdateAsync(property => property
+                .SetProperty(serverState => serverState.TimeOffset, timeOffset)
+            );
+    }
+
+    public async Task AddServerStateAsync(ServerState serverState, CancellationToken cancellationToken = default)
+    {
+        context.ServerStates.Add(serverState);
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task SetSwitchMoveTimeAsync(int switchMoveTime)
+    {
+        await context.ServerStates
+            .ExecuteUpdateAsync(property => property
+                .SetProperty(serverState => serverState.SwitchMoveTime, switchMoveTime)
+            );
+    }
+
+    public async Task SetUseOneSecondRelayAsync(bool useOneSecondRelay)
+    {
+        await context.ServerStates
+            .ExecuteUpdateAsync(property => property
+                .SetProperty(serverState => serverState.UseOneSecondRelay, useOneSecondRelay)
+            );
+    }
+
+    public async Task SetIsAllSignalRelayRaisedAsync(RaiseDropWithForce raiseDropWithForce)
+    {
+        await context.ServerStates
+            .ExecuteUpdateAsync(property => property
+                .SetProperty(serverState => serverState.IsAllSignalRelayRaised, raiseDropWithForce)
+            );
+    }
+
+    public async Task<ulong?> GetSelectedDiagramIdAsync()
+    {
+        return await context.ServerStates
+            .Select(state => (ulong?)state.SelectedDiagramId)
+            .FirstOrDefaultAsync();
+    }
+
+    public async Task SetSelectedDiagramIdAsync(ulong? diaId)
+    {
+        await context.ServerStates
+            .ExecuteUpdateAsync(property => property
+                .SetProperty(serverState => serverState.SelectedDiagramId, diaId)
+            );
+    }
+
+    /// <summary>
+    /// 連動サーバーの生存確認用ハートビートのみを更新する
+    /// (server_stateは2プロセスが別々の列を書くため、列限定更新にすること)
+    /// </summary>
+    /// <param name="heartbeatAt">ハートビート時刻</param>
+    public async Task SetInterlockingHeartbeatAtAsync(DateTime heartbeatAt)
+    {
+        await context.ServerStates
+            .ExecuteUpdateAsync(property => property
+                .SetProperty(serverState => serverState.InterlockingHeartbeatAt, heartbeatAt)
+            );
+    }
+}

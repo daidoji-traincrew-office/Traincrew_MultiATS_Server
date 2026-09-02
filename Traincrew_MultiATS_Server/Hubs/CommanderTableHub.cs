@@ -1,0 +1,154 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.SignalR;
+using OpenIddict.Validation.AspNetCore;
+using Traincrew_MultiATS_Server.Common.Contract;
+using Traincrew_MultiATS_Server.Common.Models;
+using Traincrew_MultiATS_Server.Services;
+
+namespace Traincrew_MultiATS_Server.Hubs;
+
+// 司令員操作可 
+[Authorize(
+    AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme,
+    Policy = "CommanderTablePolicy"
+)]
+public class CommanderTableHub(
+    ITrackCircuitService trackCircuitService,
+    IOperationNotificationService operationNotificationService,
+    ITtcStationControlService ttcStationControlService,
+    ITrainService trainService,
+    IOperationInformationService operationInformationService,
+    IProtectionService protectionService,
+    IServerService serverService,
+    ICommanderTableService commanderTableService,
+    IBannedUserService bannedUserService,
+    IDiagramService diagramService
+) : Hub<ICommanderTableClientContract>, ICommanderTableHubContract
+{
+    public async Task<DataToCommanderTable> SendData_CommanderTable()
+    {
+        return await commanderTableService.SendData_CommanderTable();
+    }
+
+    public async Task SendTroubleData(TroubleData troubleData)
+    {
+
+    }
+
+    public async Task SendOperationNotificationData(OperationNotificationData operationNotificationData)
+    {
+        await operationNotificationService.SetOperationNotificationData(operationNotificationData);
+    }
+
+    public async Task SendTrackCircuitData(TrackCircuitData trackCircuitData)
+    {
+        // 受け取ったtrackCircuitDataの値を設定する
+        await trackCircuitService.SetTrackCircuitData(trackCircuitData);
+    }
+
+    public async Task DeleteTrain(string trainName)
+    {
+        await trainService.DeleteTrainState(trainName);
+        await trackCircuitService.ClearTrackCircuitByTrainNumber(trainName);
+        await ttcStationControlService.ClearTtcWindowByTrainNumber(trainName);
+    }
+
+    public async Task<OperationInformationData> AddOperationInformation(OperationInformationData operationInformationData)
+    {
+        return await operationInformationService.AddOperationInformation(operationInformationData);
+    }
+    
+    public async Task<OperationInformationData> UpdateOperationInformation(OperationInformationData operationInformationData)
+    {
+        return await operationInformationService.UpdateOperationInformation(operationInformationData);
+    }
+
+    public async Task<List<OperationInformationData>> GetAllOperationInformations()
+    {
+        return await operationInformationService.GetAllOperationInformations();
+    }
+
+    public async Task DeleteOperationInformation(long id)
+    {
+        await operationInformationService.DeleteOperationInformation(id);
+    }
+
+    public async Task AddProtectionZoneState(ProtectionRadioData data)
+    {
+        await protectionService.AddProtectionZoneState(data);
+    }
+
+    public async Task UpdateProtectionZoneState(ProtectionRadioData data)
+    {
+        await protectionService.UpdateProtectionZoneState(data);
+    }
+
+    public async Task DeleteProtectionZoneState(ulong id)
+    {
+        await protectionService.DeleteProtectionZoneState(id);
+    }
+    public async Task<List<ProtectionRadioData>> GetProtectionZoneStates()
+    {
+        return await protectionService.GetProtectionRadioStates();
+    }
+
+    public async Task<List<TrainStateData>> GetAllTrainState()
+    {
+        return await trainService.GetAllTrainState();
+    }
+
+    public async Task<TrainStateData> UpdateTrainStateData(TrainStateData trainStateData)
+    {
+        return await trainService.UpdateTrainStateData(trainStateData);
+    }
+
+    public async Task DeleteTrainState(long id)
+    {
+        await trainService.DeleteTrainStateById(id);
+    }
+
+    public async Task<ServerMode> GetServerMode()
+    {
+        return await serverService.GetServerModeAsync();
+    }
+
+    public async Task SetServerMode(ServerMode mode)
+    {
+        await serverService.SetServerModeAsync(mode);
+    }
+
+    public async Task SetTimeOffset(int timeOffset)
+    {
+        await serverService.SetTimeOffsetAsync(timeOffset);
+    }
+
+    public async Task SetSwitchMoveTime(int switchMoveTime)
+    {
+        await serverService.SetSwitchMoveTimeAsync(switchMoveTime);
+    }
+
+    public async Task SetUseOneSecondRelay(bool useOneSecondRelay)
+    {
+        await serverService.SetUseOneSecondRelayAsync(useOneSecondRelay);
+    }
+
+    public async Task BanUser(ulong userId)
+    {
+        await bannedUserService.BanUserAsync(userId);
+    }
+
+    public async Task UnbanUser(ulong userId)
+    {
+        await bannedUserService.UnbanUserAsync(userId);
+    }
+
+    public async Task<List<DiagramData>> GetDiagrams()
+    {
+        return await diagramService.GetAllDiagramsAsync();
+    }
+
+    public async Task SetSelectedDiagramId(ulong? diaId)
+    {
+        await serverService.SetSelectedDiagramIdAsync(diaId);
+    }
+}

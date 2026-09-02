@@ -1,0 +1,58 @@
+using Microsoft.EntityFrameworkCore;
+using Traincrew_MultiATS_Server.Common.Models;
+using Traincrew_MultiATS_Server.Data;
+using Traincrew_MultiATS_Server.Models;
+
+namespace Traincrew_MultiATS_Server.Repositories.SwitchingMachine;
+
+public class SwitchingMachineRepository(ApplicationDbContext context) : ISwitchingMachineRepository
+{
+    public Task<List<Models.SwitchingMachine>> GetSwitchingMachinesWithState()
+    {
+        return context.SwitchingMachines.Include(sm => sm.SwitchingMachineState).ToListAsync();
+    }
+
+    public async Task<List<ulong>> GetIdsWhereMoving()
+    {
+        // 1. 転換中の転てつ器
+        return await context.SwitchingMachines
+            .Include(swm => swm.SwitchingMachineState)
+            .Where(swm => swm.SwitchingMachineState.IsSwitching)
+            .Select(swm => swm.Id)
+            .ToListAsync();
+    }
+
+    public async Task<List<ulong>> GetIdsWhereLeverReversed()
+    {
+        // 2. 転てつ器の単独てこが倒れている転てつ器
+        return await context.SwitchingMachines
+            .Join(context.Levers, swm => swm.Id, l => l.SwitchingMachineId, ( swm, l) => new { swm, l })
+            .Where(obj => obj.l.LeverState.IsReversed == LCR.Left && obj.swm.SwitchingMachineState.IsReverse != NR.Normal
+                || obj.l.LeverState.IsReversed == LCR.Right && obj.swm.SwitchingMachineState.IsReverse != NR.Reversed)
+            .Select(obj => obj.swm.Id)
+            .ToListAsync();
+    }
+
+    public Task<List<Models.SwitchingMachine>> GetByIdsWithState(List<ulong> ids)
+    {
+        return context.SwitchingMachines
+            .Include(sm => sm.SwitchingMachineState)
+            .Where(sm => ids.Contains(sm.Id))
+            .ToListAsync();
+    }
+
+    public async Task<HashSet<ulong>> GetAllIdsAsync(CancellationToken cancellationToken = default)
+    {
+        var ids = await context.SwitchingMachines
+            .Select(sm => sm.Id)
+            .ToListAsync(cancellationToken);
+        return ids.ToHashSet();
+    }
+
+    public async Task<Dictionary<string, ulong>> GetIdsByNameAsync(CancellationToken cancellationToken = default)
+    {
+        return await context.SwitchingMachines
+            .Select(sm => new { sm.Name, sm.Id })
+            .ToDictionaryAsync(sm => sm.Name, sm => sm.Id, cancellationToken);
+    }
+}
