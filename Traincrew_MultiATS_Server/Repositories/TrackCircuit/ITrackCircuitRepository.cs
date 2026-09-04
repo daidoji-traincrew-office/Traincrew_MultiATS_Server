@@ -10,21 +10,15 @@ public interface ITrackCircuitRepository
     Task ClearTrainNumberByNames(List<string> names);
 
     /// <summary>
-    /// 名前で指定したTrackCircuitのTrainNumber/IsShortCircuitのみを更新する
-    /// (track_circuit_stateは2プロセスが別々の列を書くため、IsLocked/LockedBy/UnlockedAtとは分けて列限定更新にすること)
+    /// 名前で指定したTrackCircuitのTrainNumber/IsShortCircuit/IsLockedのみを更新する
+    /// (track_circuit_stateは2プロセスが別々の列を書くため、LockedBy/UnlockedAtには触れず列限定更新にすること)
     /// </summary>
     /// <param name="name">TrackCircuit名</param>
     /// <param name="trainNumber">列車番号</param>
     /// <param name="isShortCircuit">短絡しているか</param>
-    Task SetTrainNumberAndShortCircuitByName(string name, string trainNumber, bool isShortCircuit);
-
-    /// <summary>
-    /// 名前で指定したTrackCircuitのIsLockedのみを更新する
-    /// (track_circuit_stateは2プロセスが別々の列を書くため、TrainNumber/IsShortCircuitとは分けて列限定更新にすること)
-    /// </summary>
-    /// <param name="name">TrackCircuit名</param>
     /// <param name="isLocked">鎖錠されているか</param>
-    Task SetLockedByName(string name, bool isLocked);
+    Task SetTrainNumberAndShortCircuitAndLockedByName(
+        string name, string trainNumber, bool isShortCircuit, bool isLocked);
     Task ClearTrackCircuitListByTrainNumber(string trainNumber);
     Task<List<Models.TrackCircuit>> GetWhereShortCircuited();
     Task LockByIds(List<ulong> ids, ulong routeId);

@@ -55,9 +55,8 @@ public class TrackCircuitService(
             // Todo: 例外を吐いたほうが良いとされている
             return;
         }
-        await trackCircuitRepository.SetTrainNumberAndShortCircuitByName(
-            trackCircuitData.Name, trackCircuitData.Last, trackCircuitData.On);
-        await trackCircuitRepository.SetLockedByName(trackCircuitData.Name, trackCircuitData.Lock);
+        await trackCircuitRepository.SetTrainNumberAndShortCircuitAndLockedByName(
+            trackCircuitData.Name, trackCircuitData.Last, trackCircuitData.On, trackCircuitData.Lock);
     }
 
     public async Task ClearTrackCircuitDataList(List<TrackCircuitData> trackCircuitData)

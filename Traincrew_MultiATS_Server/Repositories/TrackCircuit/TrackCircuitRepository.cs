@@ -57,34 +57,22 @@ public class TrackCircuitRepository(ApplicationDbContext context) : ITrackCircui
     }
 
     /// <summary>
-    /// 名前で指定したTrackCircuitのTrainNumber/IsShortCircuitのみを更新する
-    /// (track_circuit_stateは2プロセスが別々の列を書くため、IsLocked/LockedBy/UnlockedAtとは分けて列限定更新にすること)
+    /// 名前で指定したTrackCircuitのTrainNumber/IsShortCircuit/IsLockedのみを更新する
+    /// (track_circuit_stateは2プロセスが別々の列を書くため、LockedBy/UnlockedAtには触れず列限定更新にすること)
     /// </summary>
     /// <param name="name">TrackCircuit名</param>
     /// <param name="trainNumber">列車番号</param>
     /// <param name="isShortCircuit">短絡しているか</param>
-    public async Task SetTrainNumberAndShortCircuitByName(string name, string trainNumber, bool isShortCircuit)
+    /// <param name="isLocked">鎖錠されているか</param>
+    public async Task SetTrainNumberAndShortCircuitAndLockedByName(
+        string name, string trainNumber, bool isShortCircuit, bool isLocked)
     {
         await context.TrackCircuits
             .Where(trackCircuit => trackCircuit.Name == name)
             .Select(tc => tc.TrackCircuitState)
             .ExecuteUpdateAsync(item => item
                 .SetProperty(tcs => tcs.TrainNumber, trainNumber)
-                .SetProperty(tcs => tcs.IsShortCircuit, isShortCircuit));
-    }
-
-    /// <summary>
-    /// 名前で指定したTrackCircuitのIsLockedのみを更新する
-    /// (track_circuit_stateは2プロセスが別々の列を書くため、TrainNumber/IsShortCircuitとは分けて列限定更新にすること)
-    /// </summary>
-    /// <param name="name">TrackCircuit名</param>
-    /// <param name="isLocked">鎖錠されているか</param>
-    public async Task SetLockedByName(string name, bool isLocked)
-    {
-        await context.TrackCircuits
-            .Where(trackCircuit => trackCircuit.Name == name)
-            .Select(tc => tc.TrackCircuitState)
-            .ExecuteUpdateAsync(item => item
+                .SetProperty(tcs => tcs.IsShortCircuit, isShortCircuit)
                 .SetProperty(tcs => tcs.IsLocked, isLocked));
     }
 
