@@ -1,3 +1,5 @@
+using Traincrew_MultiATS_Server.Models;
+
 namespace Traincrew_MultiATS_Server.Repositories.RouteCentralControlLever;
 
 public interface IRouteCentralControlLeverRepository
@@ -35,4 +37,13 @@ public interface IRouteCentralControlLeverRepository
     /// <param name="ids">RouteCentralControlLeverのIDリスト</param>
     /// <param name="isCenterControlled">集中制御中か</param>
     Task SetIsCenterControlledByIds(List<ulong> ids, bool isCenterControlled);
+
+    /// <summary>
+    /// 指定したIDのRouteCentralControlLeverStateのIsInsertedKeyとIsReversedのみを更新する
+    /// (route_central_control_lever_stateは2プロセスが別々の列を書くため、列限定更新にすること)
+    /// </summary>
+    /// <param name="id">RouteCentralControlLeverのID</param>
+    /// <param name="isInsertedKey">鍵が挿入されているか</param>
+    /// <param name="isReversed">てこの位置</param>
+    Task SetIsInsertedKeyAndIsReversedById(ulong id, bool isInsertedKey, NR isReversed);
 }

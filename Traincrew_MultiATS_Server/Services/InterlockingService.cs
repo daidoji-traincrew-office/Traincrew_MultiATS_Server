@@ -267,7 +267,9 @@ public class InterlockingService(
         {
             routeCentralControlLever.RouteCentralControlLeverState.IsInsertedKey = isInsertedKey;
             routeCentralControlLever.RouteCentralControlLeverState.IsReversed = isReversed;
-            await generalRepository.Save(routeCentralControlLever);
+            // route_central_control_lever_stateは連動サーバーがis_center_controlledを書くため、列限定更新にすること
+            await routeCentralControlLeverRepository.SetIsInsertedKeyAndIsReversedById(
+                routeCentralControlLever.Id, isInsertedKey, isReversed);
         }
 
         return new()

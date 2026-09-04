@@ -172,4 +172,9 @@ public class ServerToATSDataBySchedule
     /// TST時差
     /// </summary>
     public int TimeOffset { get; set; }
+
+    /// <summary>
+    /// 進路情報
+    /// </summary>
+    public List<RouteData> RouteData { get; set; } = [];
 }

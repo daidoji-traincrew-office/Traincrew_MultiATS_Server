@@ -57,6 +57,7 @@ public class TrackCircuitService(
         }
         await trackCircuitRepository.SetTrainNumberAndShortCircuitByName(
             trackCircuitData.Name, trackCircuitData.Last, trackCircuitData.On);
+        await trackCircuitRepository.SetLockedByName(trackCircuitData.Name, trackCircuitData.Lock);
     }
 
     public async Task ClearTrackCircuitDataList(List<TrackCircuitData> trackCircuitData)

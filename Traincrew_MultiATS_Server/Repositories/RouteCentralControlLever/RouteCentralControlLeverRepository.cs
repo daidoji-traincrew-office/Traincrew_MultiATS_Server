@@ -67,4 +67,20 @@ public class RouteCentralControlLeverRepository(ApplicationDbContext context) : 
             .ExecuteUpdateAsync(setters => setters
                 .SetProperty(state => state.IsCenterControlled, isCenterControlled));
     }
+
+    /// <summary>
+    /// 指定したIDのRouteCentralControlLeverStateのIsInsertedKeyとIsReversedのみを更新する
+    /// (route_central_control_lever_stateは2プロセスが別々の列を書くため、列限定更新にすること)
+    /// </summary>
+    /// <param name="id">RouteCentralControlLeverのID</param>
+    /// <param name="isInsertedKey">鍵が挿入されているか</param>
+    /// <param name="isReversed">てこの位置</param>
+    public async Task SetIsInsertedKeyAndIsReversedById(ulong id, bool isInsertedKey, NR isReversed)
+    {
+        await context.RouteCentralControlLeverStates
+            .Where(state => state.Id == id)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(state => state.IsInsertedKey, isInsertedKey)
+                .SetProperty(state => state.IsReversed, isReversed));
+    }
 }

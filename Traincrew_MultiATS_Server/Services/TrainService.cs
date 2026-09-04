@@ -190,10 +190,12 @@ public partial class TrainService(
     public async Task<ServerToATSDataBySchedule> CreateDataBySchedule()
     {
         var timeOffset = await serverService.GetTimeOffsetAsync();
+        var routeData = await routeService.GetActiveRoutes();
 
         return new()
         {
-            TimeOffset = timeOffset
+            TimeOffset = timeOffset,
+            RouteData = routeData
         };
     }
 
