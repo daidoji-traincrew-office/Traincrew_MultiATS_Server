@@ -1,0 +1,31 @@
+# 一時的な診断用ワークフロー。
+# secrets.APP_ID / APP_PRIVATE_KEY がどの GitHub App のものかを特定するために置いた。
+# 原因が判明したら削除すること。
+name: Diagnose App Token
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate token for the org (repositories を指定しない)
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          owner: daidoji-traincrew-office
+
+      - name: Show which app this is
+        env:
+          APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          echo "app-slug = ${APP_SLUG}"
+          echo "--- このインストールがアクセスできるリポジトリ一覧 ---"
+          gh api /installation/repositories --jq '.repositories[].full_name' || true
