@@ -909,7 +909,7 @@ public static class Program
         }
 
         // 正規表現で対象ファイルを列挙
-        var filePattern = new Regex(@"^館浜(.+)信号v(\d{4})\.oud2$");
+        var filePattern = new Regex(@"^館浜(.+)信号v(\d{4}|\d{6})\.oud2$");
         var oud2Files = Directory.GetFiles(inputDir, "*.oud2")
             .Select(f => (Path: f, Match: filePattern.Match(Path.GetFileName(f))))
             .Where(x => x.Match.Success)
