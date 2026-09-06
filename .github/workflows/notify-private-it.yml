@@ -1,9 +1,8 @@
-# 準備工事: このワークフローはまだ本稼働しない。
-# Runner方式（GitHub-hosted課金 / self-hosted）が未決のため、
-# 自動トリガー（workflow_run / push）はコメントアウトしてあり、
-# workflow_dispatch による手動実行のみ有効。
-# `runs-on: ubuntu-latest` も仮置き。
-# Runner方式決定後に workflow_run / push トリガーを有効化すること。
+# Public側でUnit Testsが通ったら、Private側の連動ITを起動する。
+# fork PRでは pull_request に secrets が渡らないため、baseリポジトリの
+# コンテキストで走る workflow_run を経由している。
+# このリポジトリはPUBLICなのでActionsは無料。runs-onはGitHub-hostedのままでよい
+# (self-hostedはPrivate側の課金回避が目的なので、こちらに載せる理由がない)。
 name: Notify Private IT
 
 on:
@@ -21,12 +20,11 @@ on:
         description: '対象PR番号。指定するとそのPRの変更ファイルから駅を判定する'
         required: false
         default: ''
-  # --- Runner方式決定後に有効化する ---
-  # workflow_run:
-  #   workflows: ["Unit Tests"]
-  #   types: [completed]
-  # push:
-  #   branches: [main]
+  workflow_run:
+    workflows: ["Unit Tests"]
+    types: [completed]
+  push:
+    branches: [main]
 
 permissions:
   contents: read
