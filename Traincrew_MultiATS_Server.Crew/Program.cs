@@ -20,6 +20,7 @@ using Traincrew_MultiATS_Server.Initialization;
 using Traincrew_MultiATS_Server.Initialization.CsvLoaders;
 using Traincrew_MultiATS_Server.Initialization.DbInitializers;
 using Traincrew_MultiATS_Server.Initialization.JsonLoaders;
+using Traincrew_MultiATS_Server.Repositories.ClosedCircuitLockTrackCircuit;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.DestinationButton;
 using Traincrew_MultiATS_Server.Repositories.Diagram;
@@ -509,6 +510,7 @@ public class Program
             .AddScoped<TrainDbInitializer>()
             .AddScoped<OperationNotificationDisplayDbInitializer>()
             .AddScoped<RouteLockTrackCircuitDbInitializer>()
+            .AddScoped<ClosedCircuitLockTrackCircuitDbInitializer>()
             .AddScoped<ServerStatusDbInitializer>()
             .AddScoped<TtcDbInitializer>()
             .AddScoped<ThrowOutControlDbInitializer>()
@@ -539,6 +541,7 @@ public class Program
             .AddScoped<IRouteCentralControlLeverRepository, RouteCentralControlLeverRepository>()
             .AddScoped<IRouteLeverDestinationRepository, RouteLeverDestinationRepository>()
             .AddScoped<IRouteLockTrackCircuitRepository, RouteLockTrackCircuitRepository>()
+            .AddScoped<IClosedCircuitLockTrackCircuitRepository, ClosedCircuitLockTrackCircuitRepository>()
             .AddScoped<IServerRepository, ServerRepository>()
             .AddScoped<ISignalRepository, SignalRepository>()
             .AddScoped<ISignalRouteRepository, SignalRouteRepository>()

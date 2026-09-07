@@ -42,6 +42,7 @@ public class DatabaseInitializationOrchestrator(
     TrainDbInitializer trainDbInitializer,
     OperationNotificationDisplayDbInitializer operationNotificationDisplayDbInitializer,
     RouteLockTrackCircuitDbInitializer routeLockTrackCircuitDbInitializer,
+    ClosedCircuitLockTrackCircuitDbInitializer closedCircuitLockTrackCircuitDbInitializer,
     ServerStatusDbInitializer serverStatusDbInitializer,
     TtcDbInitializer ttcDbInitializer,
     ThrowOutControlDbInitializer throwOutControlDbInitializer,
@@ -136,9 +137,13 @@ public class DatabaseInitializationOrchestrator(
             await initializer.InitializeLocks();
         }
 
-        // Phase 20: (連動装置専有リレー状態の初期化は Traincrew_Rendo_Server 側で実施する)
+        // Phase 20: ClosedCircuitLockTrackCircuitDbInitializer - 閉路鎖錠対象軌道回路の初期化
+        // 鎖錠データ(進路鎖錠欄・鎖錠欄・信号制御欄)が揃った後でないと導出できないため、Phase 19の直後に実行する
+        await closedCircuitLockTrackCircuitDbInitializer.InitializeAsync(cancellationToken);
 
-        // Phase 21: Finalize - 初期化の完了処理
+        // Phase 21: (連動装置専有リレー状態の初期化は Traincrew_Rendo_Server 側で実施する)
+
+        // Phase 22: Finalize - 初期化の完了処理
         DetachUnchangedEntities();
         await FinalizeInitializationAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
