@@ -1,0 +1,55 @@
+# main が更新されたことを Private 側 (daidoji-traincrew-office/Traincrew_Rendo_Server) へ通知し、
+# 向こうの public submodule の pin を最新 main へ追従させる。
+# 受け手は Private 側の .github/workflows/sync-public-submodule.yml。
+#
+# なお Private 側は self-hosted runner の自動トリガーを一時停止中のため、当面
+# repository_dispatch の受け口はコメントアウトされており、この通知は無害に捨てられる。
+# 向こうでコメントを外せば、そのまま自動追従が有効になる。
+#
+# このリポジトリはPUBLICなのでActionsは無料。runs-onはGitHub-hostedでよい。
+name: Notify Private submodule pin
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: notify-private-submodule
+  cancel-in-progress: false
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Generate GitHub App Token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          owner: daidoji-traincrew-office
+          repositories: Traincrew_Rendo_Server
+
+      - name: Dispatch to private
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          SHA: ${{ github.sha }}
+        run: |
+          jq -n --arg sha "$SHA" \
+            '{event_type:"public-main-updated", client_payload:{public_sha:$sha}}' \
+          | gh api repos/daidoji-traincrew-office/Traincrew_Rendo_Server/dispatches --input -
+
+      - name: Summary
+        env:
+          SHA: ${{ github.sha }}
+        run: |
+          {
+            echo "## Notify Private submodule pin"
+            echo ""
+            echo "- public_sha: \`${SHA}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
