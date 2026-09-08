@@ -12,7 +12,6 @@ namespace Traincrew_MultiATS_Server.Services;
 /// </summary>
 public interface ICTCPService
 {
-    Task<DataToCTCP> SendData_CTCP();
     Task<DataToCTCP> BuildCtcpDataAsync(CommonReads commonReads);
     Task<RouteData> SetCtcRelay(string TcName, RaiseDrop raiseDrop);
 }
@@ -24,16 +23,8 @@ public class CTCPService(
     IRouteRepository routeRepository,
     IGeneralRepository generalRepository,
     IRouteService routeService,
-    IMutexRepository mutexRepository,
-    ICommonReadsBuilder commonReadsBuilder) : ICTCPService
+    IMutexRepository mutexRepository) : ICTCPService
 {
-
-    public async Task<DataToCTCP> SendData_CTCP()
-    {
-        var commonReads = await commonReadsBuilder.BuildAsync();
-        return await BuildCtcpDataAsync(commonReads);
-    }
-
     /// <summary>
     /// <see cref="CommonReads"/> からCTCP配信用データを組み立てる。
     /// mutexもトランザクションも張らない(呼び出し元が既に管理している前提)。

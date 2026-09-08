@@ -20,16 +20,10 @@ public class CommanderTableHub(
     IOperationInformationService operationInformationService,
     IProtectionService protectionService,
     IServerService serverService,
-    ICommanderTableService commanderTableService,
     IBannedUserService bannedUserService,
     IDiagramService diagramService
 ) : Hub<ICommanderTableClientContract>, ICommanderTableHubContract
 {
-    public async Task<DataToCommanderTable> SendData_CommanderTable()
-    {
-        return await commanderTableService.SendData_CommanderTable();
-    }
-
     public async Task SendTroubleData(TroubleData troubleData)
     {
 

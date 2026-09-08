@@ -16,7 +16,6 @@ namespace Traincrew_MultiATS_Server.Services;
 /// </summary>
 public interface IInterlockingService
 {
-    Task<DataToInterlocking> SendData_Interlocking();
     Task<DataToInterlocking> BuildInterlockingDataAsync(CommonReads commonReads);
     Task<InterlockingLeverData> SetPhysicalLeverData(InterlockingLeverData leverData);
     Task<InterlockingKeyLeverData> SetPhysicalKeyLeverData(InterlockingKeyLeverData keyLeverData, ulong? memberId);
@@ -38,18 +37,8 @@ public class InterlockingService(
     IRouteCentralControlLeverRepository routeCentralControlLeverRepository,
     ISignalService signalService,
     IMutexRepository mutexRepository,
-    ICommonReadsBuilder commonReadsBuilder,
     ILogger<InterlockingService> logger) : IInterlockingService
 {
-
-    public async Task<DataToInterlocking> SendData_Interlocking()
-    {
-        // 読み取り経路ではmutexを取らない。整合性はRepeatableReadスナップショットが担保する。
-        // (書き込み経路のmutexは従来どおり残している)
-        var commonReads = await commonReadsBuilder.BuildAsync();
-        return await BuildInterlockingDataAsync(commonReads);
-    }
-
     /// <summary>
     /// <see cref="CommonReads"/> から連動盤配信用データを組み立てる。
     /// mutexもトランザクションも張らない(呼び出し元が既に管理している前提)。
