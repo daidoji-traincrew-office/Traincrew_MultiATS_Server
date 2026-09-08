@@ -4,7 +4,6 @@ namespace Traincrew_MultiATS_Server.Services;
 
 public interface ICommanderTableService
 {
-    Task<DataToCommanderTable> SendData_CommanderTable();
     Task<DataToCommanderTable> BuildCommanderTableDataAsync(CommonReads commonReads);
 }
 
@@ -13,16 +12,9 @@ public class CommanderTableService(
     IOperationInformationService operationInformationService,
     IProtectionService protectionService,
     IServerService serverService,
-    IBannedUserService bannedUserService,
-    ICommonReadsBuilder commonReadsBuilder
+    IBannedUserService bannedUserService
 ) : ICommanderTableService
 {
-    public async Task<DataToCommanderTable> SendData_CommanderTable()
-    {
-        var commonReads = await commonReadsBuilder.BuildAsync();
-        return await BuildCommanderTableDataAsync(commonReads);
-    }
-
     /// <summary>
     /// <see cref="CommonReads"/> から司令卓配信用データを組み立てる。
     /// mutexもトランザクションも張らない(呼び出し元が既に管理している前提)。
