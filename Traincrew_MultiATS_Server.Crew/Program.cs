@@ -134,7 +134,6 @@ public class Program
         bool isDevelopment,
         bool enableAuthorization)
     {
-        ConfigureHttpLogging(app);
         if (isDevelopment)
         {
             ConfigureSwagger(app);
@@ -145,6 +144,9 @@ public class Program
         }
 
         ConfigureRouting(app);
+        // HttpLoggingMiddlewareはエンドポイント単位の設定(/healthzの.WithHttpLogging)を
+        // context.GetEndpoint()から読むため、UseRouting()より後に置く必要がある
+        ConfigureHttpLogging(app);
         ConfigureCors(app);
         ConfigureAuthentication(app);
         ConfigureAuthorization(app);
@@ -166,7 +168,11 @@ public class Program
         // ログの設定
         builder.Services.AddHttpLogging(options =>
         {
-            options.LoggingFields = HttpLoggingFields.RequestPropertiesAndHeaders;
+            // 組込みのリクエストログ(Hosting.Diagnostics等)を落とす代わりに、
+            // HttpLoggingを1リクエスト=1レコードの唯一のリクエストログとして使う
+            options.LoggingFields = HttpLoggingFields.RequestPropertiesAndHeaders
+                                    | HttpLoggingFields.ResponseStatusCode
+                                    | HttpLoggingFields.Duration;
         });
     }
 
@@ -257,7 +263,9 @@ public class Program
         // (enableAuthorization=true時はendpointBuildersのAllowAnonymous一括付与に乗らないため)
         app.MapGet("/healthz", (InitializationState initializationState) =>
                 initializationState.IsInitialized ? Results.Ok() : Results.StatusCode(StatusCodes.Status503ServiceUnavailable))
-            .AllowAnonymous();
+            .AllowAnonymous()
+            // healthcheckが数秒おきに叩くためログには出さない
+            .WithHttpLogging(HttpLoggingFields.None);
 
         return
         [
