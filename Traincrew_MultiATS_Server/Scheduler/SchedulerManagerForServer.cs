@@ -16,13 +16,8 @@ public class SchedulerManagerForServer(
     {
         return [
             new OperationNotificationScheduler(serviceScopeFactory),
-            new InterlockingHubScheduler(serviceScopeFactory),
-            new TIDHubScheduler(serviceScopeFactory),
-            new CTCPHubScheduler(serviceScopeFactory),
-            new CommanderTableHubScheduler(serviceScopeFactory),
             new DestinationButtonScheduler(serviceScopeFactory),
-            new TrainScheduler(serviceScopeFactory),
-            new SignalScheduler(serviceScopeFactory)
+            new BroadcastScheduler(serviceScopeFactory)
         ];
     }
 

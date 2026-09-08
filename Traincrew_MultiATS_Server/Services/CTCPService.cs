@@ -3,8 +3,6 @@ using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.General;
 using Traincrew_MultiATS_Server.Repositories.Mutex;
 using Traincrew_MultiATS_Server.Repositories.Route;
-using Traincrew_MultiATS_Server.Repositories.RouteCentralControlLever;
-using Traincrew_MultiATS_Server.Repositories.Station;
 using RouteData = Traincrew_MultiATS_Server.Common.Models.RouteData;
 
 namespace Traincrew_MultiATS_Server.Services;
@@ -15,6 +13,7 @@ namespace Traincrew_MultiATS_Server.Services;
 public interface ICTCPService
 {
     Task<DataToCTCP> SendData_CTCP();
+    Task<DataToCTCP> BuildCtcpDataAsync(CommonReads commonReads);
     Task<RouteData> SetCtcRelay(string TcName, RaiseDrop raiseDrop);
 }
 
@@ -24,59 +23,49 @@ public interface ICTCPService
 public class CTCPService(
     IRouteRepository routeRepository,
     IGeneralRepository generalRepository,
-    IStationRepository stationRepository,
-    IRouteCentralControlLeverRepository routeCentralControlLeverRepository,
-    ITrackCircuitService trackCircuitService,
-    ITtcStationControlService ttcStationControlService,
     IRouteService routeService,
     IMutexRepository mutexRepository,
-    IServerService serverService) : ICTCPService
+    ICommonReadsBuilder commonReadsBuilder) : ICTCPService
 {
 
     public async Task<DataToCTCP> SendData_CTCP()
     {
-        await using var mutex = await mutexRepository.AcquireAsync(nameof(InterlockingService));
-        var stations = await stationRepository.GetWhereIsStation();
-        var stationIds = stations.Select(station => station.Id).ToList();
-        var trackCircuits = await trackCircuitService.GetAllTrackCircuitDataList();
-        //var directionSelfControlLevers = await directionSelfControlLeverRepository.GetAllWithState();
-        //var directions = await directionRouteService.GetAllDirectionData();
+        var commonReads = await commonReadsBuilder.BuildAsync();
+        return await BuildCtcpDataAsync(commonReads);
+    }
 
+    /// <summary>
+    /// <see cref="CommonReads"/> からCTCP配信用データを組み立てる。
+    /// mutexもトランザクションも張らない(呼び出し元が既に管理している前提)。
+    /// </summary>
+    public Task<DataToCTCP> BuildCtcpDataAsync(CommonReads commonReads)
+    {
         // 各ランプの状態を取得
-        var lamps = await GetLamps(stationIds);
-        // 列番窓を取得
-        var ttcWindows = await ttcStationControlService.GetTtcWindowsByStationIdsWithState(stationIds);
+        var lamps = GetLamps(commonReads.StationIds, commonReads.StationTimerStates);
 
-        // 駅扱いてこを取得
-        var routeCentralControlLever = await routeCentralControlLeverRepository.GetAllWithState();
-
-
-        Dictionary<string, CenterControlState> centerControlStates = routeCentralControlLever.ToDictionary(
+        Dictionary<string, CenterControlState> centerControlStates = commonReads.RouteCentralControlLevers.ToDictionary(
             lever => lever.Name.Replace("_ROUTE_CTC_LEVER", ""),
             lever => lever.RouteCentralControlLeverState is { IsCenterControlled: true }
                 ? CenterControlState.CenterControl
                 : CenterControlState.StationControl);
 
-        // 時差を取得
-        var timeOffset = await serverService.GetTimeOffsetAsync();
-
         var response = new DataToCTCP
         {
-            TrackCircuits = trackCircuits,
+            TrackCircuits = commonReads.TrackCircuits,
 
             CenterControlStates = centerControlStates,
 
-            Retsubans = ttcWindows
+            Retsubans = commonReads.TtcWindows
                 .Select(ToRetsubanData)
                 .ToList(),
 
             // 各ランプの状態
             Lamps = lamps,
 
-            TimeOffset = timeOffset
+            TimeOffset = commonReads.TimeOffset
         };
 
-        return response;
+        return Task.FromResult(response);
     }
 
     /// <summary>
@@ -120,7 +109,7 @@ public class CTCPService(
         };
     }
 
-    private async Task<Dictionary<string, bool>> GetLamps(List<string> stationIds)
+    private static Dictionary<string, bool> GetLamps(List<string> stationIds, List<StationTimerState> stationTimerStates)
     {
         // Todo: 一旦仮でFalse
         var pwrFailure = stationIds.ToDictionary(
@@ -130,14 +119,14 @@ public class CTCPService(
             stationId => $"{stationId}_CTC-FAILURE",
             _ => false);
         // 駅の時素状態を取得
-        var stationTimerStates = (await stationRepository.GetTimerStatesByStationIds(stationIds))
+        var stationTimerStateLamps = stationTimerStates
             .ToDictionary(
                 timerState => $"{timerState.StationId}_{timerState.Seconds}TEK",
                 timerState => timerState.IsTimerConditionMet);
 
         return pwrFailure
             .Concat(ctcFailure)
-            .Concat(stationTimerStates)
+            .Concat(stationTimerStateLamps)
             .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
     }
 
