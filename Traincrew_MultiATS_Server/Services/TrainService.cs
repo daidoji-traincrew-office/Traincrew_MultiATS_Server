@@ -18,7 +18,7 @@ public interface ITrainService
 {
     Task<ServerToATSData> CreateAtsData(ulong clientDriverId, AtsToServerData clientData);
     Task DriverGetsOff(ulong clientDriverId, string trainNumber);
-    Task<ServerToATSDataBySchedule> CreateDataBySchedule();
+    Task<ServerToATSDataBySchedule> BuildScheduleDataAsync(CommonReads commonReads);
     Task<Dictionary<string, TrainInfo>> GetTrainInfoGroupByTrainNumber();
     Task<List<TrainStateData>> GetAllTrainState();
     Task<TrainStateData> UpdateTrainStateData(TrainStateData trainStateData);
@@ -184,17 +184,17 @@ public partial class TrainService(
     }
 
     /// <summary>
-    /// スケジューラーから定期的にATSに送信するデータを生成する。
+    /// <see cref="CommonReads"/> から定時配信用データ(スケジューラーが定期的にATSへ送るもの)を組み立てる。
+    /// mutexもトランザクションも張らない(呼び出し元が既に管理している前提)。
     /// </summary>
     /// <returns>ATS向けデータ</returns>
-    public async Task<ServerToATSDataBySchedule> CreateDataBySchedule()
+    public async Task<ServerToATSDataBySchedule> BuildScheduleDataAsync(CommonReads commonReads)
     {
-        var timeOffset = await serverService.GetTimeOffsetAsync();
         var routeData = await routeService.GetActiveRoutes();
 
         return new()
         {
-            TimeOffset = timeOffset,
+            TimeOffset = commonReads.TimeOffset,
             RouteData = routeData
         };
     }

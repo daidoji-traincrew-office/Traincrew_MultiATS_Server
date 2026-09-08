@@ -8,7 +8,6 @@ using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
 using Traincrew_MultiATS_Server.Repositories.Lever;
 using Traincrew_MultiATS_Server.Repositories.Mutex;
 using Traincrew_MultiATS_Server.Repositories.RouteCentralControlLever;
-using Traincrew_MultiATS_Server.Repositories.Station;
 
 namespace Traincrew_MultiATS_Server.Services;
 
@@ -18,6 +17,7 @@ namespace Traincrew_MultiATS_Server.Services;
 public interface IInterlockingService
 {
     Task<DataToInterlocking> SendData_Interlocking();
+    Task<DataToInterlocking> BuildInterlockingDataAsync(CommonReads commonReads);
     Task<InterlockingLeverData> SetPhysicalLeverData(InterlockingLeverData leverData);
     Task<InterlockingKeyLeverData> SetPhysicalKeyLeverData(InterlockingKeyLeverData keyLeverData, ulong? memberId);
     Task<DestinationButtonData> SetDestinationButtonState(DestinationButtonData buttonData);
@@ -33,44 +33,42 @@ public class InterlockingService(
     IInterlockingObjectRepository interlockingObjectRepository,
     IDestinationButtonRepository destinationButtonRepository,
     IGeneralRepository generalRepository,
-    IStationRepository stationRepository,
     ILeverRepository leverRepository,
     IDirectionSelfControlLeverRepository directionSelfControlLeverRepository,
     IRouteCentralControlLeverRepository routeCentralControlLeverRepository,
-    ITrackCircuitService trackCircuitService,
-    ITtcStationControlService ttcStationControlService,
-    ISwitchingMachineService switchingMachineService,
-    IDirectionRouteService directionRouteService,
     ISignalService signalService,
     IMutexRepository mutexRepository,
-    IServerService serverService,
+    ICommonReadsBuilder commonReadsBuilder,
     ILogger<InterlockingService> logger) : IInterlockingService
 {
 
     public async Task<DataToInterlocking> SendData_Interlocking()
     {
-        await using var mutex = await mutexRepository.AcquireAsync(nameof(InterlockingService));
-        var stations = await stationRepository.GetWhereIsStation();
-        var stationIds = stations.Select(station => station.Id).ToList();
-        var trackCircuits = await trackCircuitService.GetAllTrackCircuitDataList();
-        var switchingDatas = await switchingMachineService.GetAllSwitchData();
+        // 読み取り経路ではmutexを取らない。整合性はRepeatableReadスナップショットが担保する。
+        // (書き込み経路のmutexは従来どおり残している)
+        var commonReads = await commonReadsBuilder.BuildAsync();
+        return await BuildInterlockingDataAsync(commonReads);
+    }
+
+    /// <summary>
+    /// <see cref="CommonReads"/> から連動盤配信用データを組み立てる。
+    /// mutexもトランザクションも張らない(呼び出し元が既に管理している前提)。
+    /// </summary>
+    public async Task<DataToInterlocking> BuildInterlockingDataAsync(CommonReads commonReads)
+    {
+        var stationIds = commonReads.StationIds;
         var lever = await leverRepository.GetAllWithState();
         var directionSelfControlLevers = await directionSelfControlLeverRepository.GetAllWithState();
-        var routeCentralControlLevers = await routeCentralControlLeverRepository.GetAllWithState();
-        var directions = await directionRouteService.GetAllDirectionData();
         var destinationButtons = await destinationButtonRepository.GetAllWithState();
-        var timeOffset = await serverService.GetTimeOffsetAsync();
 
         // 各ランプの状態を取得
-        var lamps = await GetLamps(stationIds, directionSelfControlLevers, routeCentralControlLevers);
-        // 列番窓を取得
-        var ttcWindows = await ttcStationControlService.GetTtcWindowsByStationIdsWithState(stationIds);
+        var lamps = GetLamps(stationIds, commonReads.RouteCentralControlLevers, commonReads.StationTimerStates);
 
         var response = new DataToInterlocking
         {
-            TrackCircuits = trackCircuits,
+            TrackCircuits = commonReads.TrackCircuits,
 
-            Points = switchingDatas,
+            Points = commonReads.Switches,
 
             // Todo: 方向てこのほうのリストを連結する
             PhysicalLevers = lever
@@ -79,32 +77,32 @@ public class InterlockingService(
 
             PhysicalKeyLevers = directionSelfControlLevers
                 .Select(ToKeyLeverData)
-                .Concat(routeCentralControlLevers.Select(ToKeyLeverDataFromRouteCentral))
+                .Concat(commonReads.RouteCentralControlLevers.Select(ToKeyLeverDataFromRouteCentral))
                 .ToList(),
 
             PhysicalButtons = destinationButtons
                 .Select(button => ToDestinationButtonData(button.DestinationButtonState))
                 .ToList(),
 
-            Directions = directions,
+            Directions = commonReads.Directions,
 
-            Retsubans = ttcWindows
+            Retsubans = commonReads.TtcWindows
                 .Select(ToRetsubanData)
                 .ToList(),
 
             // 各ランプの状態
             Lamps = lamps,
 
-            TimeOffset = timeOffset
+            TimeOffset = commonReads.TimeOffset
         };
 
         return response;
     }
 
-    private async Task<Dictionary<string, bool>> GetLamps(
+    private static Dictionary<string, bool> GetLamps(
         List<string> stationIds,
-        List<DirectionSelfControlLever> directionSelfControlLevers,
-        List<RouteCentralControlLever> routeCentralControlLevers)
+        List<RouteCentralControlLever> routeCentralControlLevers,
+        List<StationTimerState> stationTimerStates)
     {
         // Todo: 一旦仮でFalse
         var pwrFailure = stationIds.ToDictionary(
@@ -129,7 +127,7 @@ public class InterlockingService(
             })
             .ToDictionary();
         // 駅の時素状態を取得
-        var stationTimerStates = (await stationRepository.GetTimerStatesByStationIds(stationIds))
+        var stationTimerStateLamps = stationTimerStates
             .ToDictionary(
                 timerState => $"{timerState.StationId}_{timerState.Seconds}TEK",
                 timerState => timerState.IsTimerConditionMet);
@@ -137,7 +135,7 @@ public class InterlockingService(
         return pwrFailure
             .Concat(ctcFailure)
             .Concat(chrLamps)
-            .Concat(stationTimerStates)
+            .Concat(stationTimerStateLamps)
             .ToDictionary();
     }
 
