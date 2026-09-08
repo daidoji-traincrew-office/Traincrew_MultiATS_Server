@@ -21,8 +21,8 @@ public record CommonReads(
 
 /// <summary>
 /// <see cref="CommonReads"/> を組み立てる。
-/// <see cref="BroadcastSnapshotService"/> と、Hub RPC 用の既存 public メソッド(SendData_Interlocking 等)の
-/// 両方から使われる、共通読み取りロジックの唯一の実装。
+/// <see cref="BroadcastSnapshotService"/> がプッシュ配信(<c>ReceiveData</c>)のために各Build*Asyncを呼ぶ際に使う、
+/// 共通読み取りロジックの唯一の実装。
 /// </summary>
 public interface ICommonReadsBuilder
 {
