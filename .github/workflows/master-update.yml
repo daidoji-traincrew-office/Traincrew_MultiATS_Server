@@ -18,13 +18,13 @@ jobs:
     steps:
       - name: Generate GitHub App Token
         id: generate_token
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@v3.2.0
         with:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
 
       - name: Checkout repository
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
           token: ${{ steps.generate_token.outputs.token }}
@@ -46,20 +46,20 @@ jobs:
           git pull --no-rebase origin ${{ steps.branch.outputs.name }} || true
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4.4.0
+        uses: actions/setup-node@v7.0.0
         with:
           node-version: '24'
 
       - name: Authenticate to Google Cloud
         id: auth
-        uses: google-github-actions/auth@v2.1.13
+        uses: google-github-actions/auth@v3.0.0
         with:
           project_id: ${{ secrets.GOOGLE_PROJECT_ID }}
           service_account: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
           workload_identity_provider: ${{ secrets.GOOGLE_WORKLOAD_IDENTITY_PROVIDER }}
 
       - name: Set up Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2.2.1
+        uses: google-github-actions/setup-gcloud@v3.0.1
 
       - name: Install dependencies
         run: npm install @googleapis/sheets google-auth-library
