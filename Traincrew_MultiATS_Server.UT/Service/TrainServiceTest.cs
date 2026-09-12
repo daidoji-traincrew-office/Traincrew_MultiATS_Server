@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Traincrew_MultiATS_Server.Common.Models;
@@ -6,6 +7,7 @@ using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.DiagramTrain;
 using Traincrew_MultiATS_Server.Repositories.TrackCircuitDepartmentTime;
 using Traincrew_MultiATS_Server.Repositories.Train;
+using Traincrew_MultiATS_Server.Repositories.TrainCar;
 using Traincrew_MultiATS_Server.Services;
 using Traincrew_MultiATS_Server.UT.Service.TestHelpers;
 
@@ -24,7 +26,8 @@ public class TrainServiceTest
         Mock<ITrackCircuitDepartmentTimeRepository>? mockTrackCircuitDepartmentTimeRepository = null,
         Mock<IDateTimeRepository>? mockDateTimeRepository = null,
         TestServerService? testServerService = null,
-        Mock<ILogger<TrainService>>? mockLogger = null)
+        Mock<ILogger<TrainService>>? mockLogger = null,
+        Mock<ITrainCarRepository>? mockTrainCarRepository = null)
     {
         // nullの場合はデフォルトのインスタンスを使用
         testTrackCircuitService ??= new TestTrackCircuitService();
@@ -33,6 +36,7 @@ public class TrainServiceTest
         mockTrackCircuitDepartmentTimeRepository ??= new Mock<ITrackCircuitDepartmentTimeRepository>();
         mockDateTimeRepository ??= new Mock<IDateTimeRepository>();
         testServerService ??= new TestServerService();
+        mockTrainCarRepository ??= new Mock<ITrainCarRepository>();
         mockLogger ??= new Mock<ILogger<TrainService>>();
 
         // 使用しない依存関係はnull!で渡す（テスト対象メソッドで使用されない）
@@ -43,7 +47,7 @@ public class TrainServiceTest
             null!, // ProtectionService
             null!, // RouteService
             mockTrainRepository.Object,
-            null!, // ITrainCarRepository
+            mockTrainCarRepository.Object,
             mockDiagramTrainRepository.Object,
             null!, // ITransactionRepository
             null!, // BannedUserService
@@ -53,6 +57,7 @@ public class TrainServiceTest
             null!, // ITrainSignalStateRepository
             mockTrackCircuitDepartmentTimeRepository.Object,
             mockDateTimeRepository.Object,
+            new MemoryCache(new MemoryCacheOptions()),
             mockLogger.Object
         );
     }
@@ -1098,5 +1103,111 @@ public class TrainServiceTest
 
         // Assert - -179秒 / 60 = -2.98分 → ToZero丸めで-2分
         mockTrainRepository.Verify(x => x.SetDelayByTrainNumber(trainNumber, -2), Times.Once);
+    }
+
+    // ヘルパーメソッド: 差分スキップ確認用のCarStateを作る
+    private static CarState CreateCarState(
+        string carModel = "1000",
+        bool doorClose = true,
+        float bcPress = 0f,
+        float ampare = 0f)
+    {
+        return new CarState
+        {
+            CarModel = carModel,
+            HasPantograph = true,
+            HasDriverCab = true,
+            HasConductorCab = false,
+            HasMotor = true,
+            DoorClose = doorClose,
+            BC_Press = bcPress,
+            Ampare = ampare
+        };
+    }
+
+    [Fact]
+    public async Task UpdateTrainCarStates_SameCarStates_WritesOnlyOnce()
+    {
+        // Arrange
+        var mockTrainCarRepository = new Mock<ITrainCarRepository>();
+        var trainService = CreateTrainService(mockTrainCarRepository: mockTrainCarRepository);
+        var carStates = new List<CarState> { CreateCarState(), CreateCarState() };
+
+        // Act - 同じ内容を2回送る
+        await trainService.UpdateTrainCarStates(1L, carStates);
+        await trainService.UpdateTrainCarStates(1L, carStates);
+
+        // Assert - 2回目はDBを触らない
+        mockTrainCarRepository.Verify(
+            x => x.UpdateAll(1L, It.IsAny<List<TrainCarState>>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task UpdateTrainCarStates_OnlyMeterValuesChanged_WritesOnlyOnce()
+    {
+        // Arrange
+        var mockTrainCarRepository = new Mock<ITrainCarRepository>();
+        var trainService = CreateTrainService(mockTrainCarRepository: mockTrainCarRepository);
+
+        // Act - BC圧・電流値だけが変わったケース(走行中は毎tickこうなる)
+        await trainService.UpdateTrainCarStates(1L, [CreateCarState(bcPress: 0f, ampare: 0f)]);
+        await trainService.UpdateTrainCarStates(1L, [CreateCarState(bcPress: 340f, ampare: 120f)]);
+
+        // Assert
+        mockTrainCarRepository.Verify(
+            x => x.UpdateAll(1L, It.IsAny<List<TrainCarState>>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task UpdateTrainCarStates_DoorStateChanged_WritesAgain()
+    {
+        // Arrange
+        var mockTrainCarRepository = new Mock<ITrainCarRepository>();
+        var trainService = CreateTrainService(mockTrainCarRepository: mockTrainCarRepository);
+
+        // Act - ドア状態は即座に反映したいので書き込まれること
+        await trainService.UpdateTrainCarStates(1L, [CreateCarState(doorClose: true)]);
+        await trainService.UpdateTrainCarStates(1L, [CreateCarState(doorClose: false)]);
+
+        // Assert
+        mockTrainCarRepository.Verify(
+            x => x.UpdateAll(1L, It.IsAny<List<TrainCarState>>()), Times.Exactly(2));
+    }
+
+    [Fact]
+    public async Task UpdateTrainCarStates_CarCountChanged_WritesAgain()
+    {
+        // Arrange
+        var mockTrainCarRepository = new Mock<ITrainCarRepository>();
+        var trainService = CreateTrainService(mockTrainCarRepository: mockTrainCarRepository);
+
+        // Act - 両数が変わったら書き込まれること
+        await trainService.UpdateTrainCarStates(1L, [CreateCarState()]);
+        await trainService.UpdateTrainCarStates(1L, [CreateCarState(), CreateCarState()]);
+
+        // Assert
+        mockTrainCarRepository.Verify(
+            x => x.UpdateAll(1L, It.IsAny<List<TrainCarState>>()), Times.Exactly(2));
+    }
+
+    [Fact]
+    public async Task UpdateTrainCarStates_DoesNotWriteMeterValues()
+    {
+        // Arrange
+        var mockTrainCarRepository = new Mock<ITrainCarRepository>();
+        List<TrainCarState>? written = null;
+        mockTrainCarRepository
+            .Setup(x => x.UpdateAll(It.IsAny<long>(), It.IsAny<List<TrainCarState>>()))
+            .Callback<long, List<TrainCarState>>((_, states) => written = states)
+            .Returns(Task.CompletedTask);
+        var trainService = CreateTrainService(mockTrainCarRepository: mockTrainCarRepository);
+
+        // Act
+        await trainService.UpdateTrainCarStates(1L, [CreateCarState(bcPress: 340f, ampare: 120f)]);
+
+        // Assert - BC圧・電流値はDBに書かない
+        Assert.NotNull(written);
+        Assert.Equal(0d, written[0].BcPress);
+        Assert.Equal(0d, written[0].Ampare);
     }
 }

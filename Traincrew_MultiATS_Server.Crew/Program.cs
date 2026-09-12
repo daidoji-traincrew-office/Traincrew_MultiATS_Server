@@ -486,6 +486,7 @@ public class Program
     private static void ConfigureDependencyInjectionService(WebApplicationBuilder builder, bool enableAuthorization)
     {
         // DI周り
+        builder.Services.AddMemoryCache();
         builder.Services
             // CSV Loaders
             .AddScoped<StationCsvLoader>()
