@@ -1,5 +1,6 @@
 using System.Data;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.Caching.Memory;
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
@@ -43,6 +44,7 @@ public partial class TrainService(
     ITrainSignalStateRepository trainSignalStateRepository,
     ITrackCircuitDepartmentTimeRepository trackCircuitDepartmentTimeRepository,
     IDateTimeRepository dateTimeRepository,
+    IMemoryCache cache,
     ILogger<TrainService> logger
 ) : ITrainService
 {
@@ -53,6 +55,25 @@ public partial class TrainService(
     /// 営業日の開始時刻。鉄道の営業日は通常4:00から開始される。
     /// </summary>
     private static readonly TimeSpan ServiceDayStartTime = TimeSpan.FromHours(4);
+
+    /// <summary>
+    /// 列車単位のキャッシュの保持期間。列車が消えた分は放っておいても期限切れで落ちる。
+    /// </summary>
+    private static readonly TimeSpan TrainScopedCacheTtl = TimeSpan.FromMinutes(10);
+
+    private static string CacheKeyCarStates(long trainStateId) => $"train:carstates:{trainStateId}";
+
+    /// <summary>
+    /// 車両状態のうち、変化したら DB に反映したい項目。
+    /// BC圧・電流値は DB に書き込まないため含めない。
+    /// </summary>
+    private readonly record struct CarStateSignature(
+        string CarModel,
+        bool HasPantograph,
+        bool HasDriverCab,
+        bool HasConductorCab,
+        bool HasMotor,
+        bool DoorClose);
 
     public async Task<ServerToATSData> CreateAtsData(ulong clientDriverId, AtsToServerData clientData)
     {
@@ -516,9 +537,24 @@ public partial class TrainService(
 
     /// <summary>
     /// TrainCarState更新
+    ///
+    /// ATSは10回/秒で送ってくるので、素直に書くと1列車あたり毎秒(両数 × 10)本のUPDATEが出て
+    /// DBのCPUを最も強く支配する。BC圧・電流値は走行中つねに変動するため差分判定が効かないが、
+    /// この2項目はPassenger APIの表示以外に使い道が無いのでDBへの書き込み自体をやめる。
+    /// 残る編成構成(両数・車種・パンタ・運転台・車掌室・電動機・ドア状態)は乗務中ほぼ不変なので、
+    /// 前回書き込んだ内容と一致していればUpdateAllを丸ごと呼ばない。
+    ///
+    /// (CalculateAndUpdateDelaysと同様、ユニットテストから直接叩くためpublicにしている)
     /// </summary>
-    private async Task UpdateTrainCarStates(long trainStateId, List<CarState> carStates)
+    public async Task UpdateTrainCarStates(long trainStateId, List<CarState> carStates)
     {
+        var cacheKey = CacheKeyCarStates(trainStateId);
+        if (cache.TryGetValue<CarStateSignature[]>(cacheKey, out var previous)
+            && IsSameCarStates(previous, carStates))
+        {
+            return;
+        }
+
         var trainCarStates = carStates.Select(cs => new TrainCarState
         {
             CarModel = cs.CarModel,
@@ -527,10 +563,43 @@ public partial class TrainService(
             HasConductorCab = cs.HasConductorCab,
             HasMotor = cs.HasMotor,
             DoorClose = cs.DoorClose,
-            BcPress = cs.BC_Press,
-            Ampare = cs.Ampare,
         }).ToList();
         await trainCarRepository.UpdateAll(trainStateId, trainCarStates);
+
+        cache.Set(cacheKey, carStates.Select(ToCarStateSignature).ToArray(), TrainScopedCacheTtl);
+    }
+
+    /// <summary>
+    /// 前回書き込んだ署名と今回の車両状態が完全に一致するかどうか。
+    /// ヒット時にアロケーションが出ないよう、LINQを使わず要素ごとに比較する。
+    /// </summary>
+    private static bool IsSameCarStates(CarStateSignature[]? previous, List<CarState> carStates)
+    {
+        if (previous == null || previous.Length != carStates.Count)
+        {
+            return false;
+        }
+
+        for (var i = 0; i < previous.Length; i++)
+        {
+            if (previous[i] != ToCarStateSignature(carStates[i]))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static CarStateSignature ToCarStateSignature(CarState carState)
+    {
+        return new(
+            carState.CarModel,
+            carState.HasPantograph,
+            carState.HasDriverCab,
+            carState.HasConductorCab,
+            carState.HasMotor,
+            carState.DoorClose);
     }
 
     /// <summary>
@@ -538,9 +607,17 @@ public partial class TrainService(
     /// </summary>
     public async Task DeleteTrainState(string trainNumber)
     {
+        // 削除後に同じIDが復活することは無いが、差分判定のキャッシュを残す意味も無いので消しておく
+        var trainStates = await trainRepository.GetByTrainNumbers([trainNumber]);
+
         await trainCarRepository.DeleteByTrainNumber(trainNumber);
         await trainSignalStateRepository.DeleteByTrainNumber(trainNumber);
         await trainRepository.DeleteByTrainNumber(trainNumber);
+
+        foreach (var trainState in trainStates)
+        {
+            cache.Remove(CacheKeyCarStates(trainState.Id));
+        }
     }
 
     /// <summary>
@@ -561,6 +638,8 @@ public partial class TrainService(
 
         // 列車情報を取得して削除する
         await generalRepository.Delete(trainState);
+
+        cache.Remove(CacheKeyCarStates(id));
     }
 
     /// <summary>
