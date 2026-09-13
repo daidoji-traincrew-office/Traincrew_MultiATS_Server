@@ -159,3 +159,122 @@ DB アクセスを減らすだけでなく EF Core の使い方（行単位更�
 - ベースライン・変更後とも、本計測の前に 5 秒のウォームアップ負荷をかけている。
 - `dotnet-trace` の対象は必ず `pgrep -f "Traincrew_MultiATS_Server.Crew/bin/Release"` の
   バイナリ PID を使うこと。`dotnet run` ラッパーを掴むとアプリのフレームが出ない。
+
+---
+
+## 計測 2：サーバ状態キャッシュ + 在線変化なし時の UPDATE 抑止（`a6f3f67` / `d11b846`）
+
+計測 1 の「次の改善候補」表に残っていた中位 2 項目を `perf/server-state-cache` から
+チェリーピックし、**それぞれ単独で適用した場合**と**両方入れた場合**の CPU を実測した。
+
+| ラベル | 内容 | コミット |
+|---|---|---|
+| **A** | サーバ状態系 getter（ServerMode / TimeOffset / SelectedDiagramId / IsUserBanned）を `IMemoryCache` TTL 10 秒でキャッシュ。setter で `cache.Remove` して即時無効化。`CreateAtsData` は `GetServerModeCachedAsync` を呼ぶ | `a6f3f67`（`c186124` + `128579d` + UT 修正 2 件の squash） |
+| **B** | `SetTrackCircuitDataList` / `ClearTrackCircuitDataList` が対象 0 件なら早期 return | `d11b846`（`012b4ac`） |
+
+### 計測条件
+
+| 項目 | 値 |
+|------|-----|
+| ベースライン | `7c1dd02` |
+| 計測ツール | `Doc/measure_cpu.sh`（`/proc/<pid>/stat` と DB コンテナの cgroup `cpu.stat`）+ `SpanTimingCollector` |
+| 負荷条件 | `POST /test/load?clients=14&seconds=30&cars=10&rate=10`（前段に 5 秒のウォームアップ） |
+| 実呼び出し数 | 約 4,000 /run |
+| 起動条件 | Release ビルドのバイナリを直接起動（`ASPNETCORE_ENVIRONMENT=Development`, port 5154） |
+| DB | `Database/compose.yml` の PostgreSQL、`server_state.mode = public` |
+| 試行 | 4 条件を**ラウンドロビンで交互に** 5 ラウンド、中央値を採用 |
+
+#### インターリーブが必要だった理由
+
+最初は条件ごとに 3 回連続で測ったが、**測定順にサーバ CPU が単調に悪化**した。
+対照としてベースラインを最後に測り直すと合計 84.9% → 94.4% と 9.5pt も上がっており、
+「条件を変えた効果」と「時間方向のドリフト」が分離できていなかった
+（サーバ CPU が 54% と 63% の二峰に振れる。DB CPU は常に安定していた）。
+
+そこで 4 条件のバイナリを `Traincrew_MultiATS_Server.Crew/bin/variant_{base,a,b,ab}` に
+別々にビルドし、1 run ごとにプロセスを入れ替えてラウンドロビンで測る方式に変えた。
+ドリフトが全条件に均等に配分され、ベースラインのばらつきは 87.4〜89.2%（1.8pt 幅）に収まった。
+**以後の CPU 比較はこの方式で測ること。条件ごとの連続測定は信用できない。**
+
+### CPU 使用率（1 コア = 100% 換算、中央値と 5 run のレンジ）
+
+| 条件 | Server CPU | DB CPU | 合計 |
+|---|---:|---:|---:|
+| ベースライン | 56.3 (55.9–56.9) | 32.0 (31.1–32.3) | **87.9** (87.4–89.2) |
+| **A のみ** | 49.6 (47.7–56.3) | 29.4 (28.6–29.6) | **79.3** (76.4–85.7) |
+| **B のみ** | 52.1 (50.2–53.6) | 27.4 (27.0–27.6) | **79.4** (77.6–81.0) |
+| **A + B** | 44.6 (43.2–48.5) | 25.0 (23.7–25.5) | **69.9** (68.2–72.9) |
+
+| 条件 | ΔServer | ΔDB | Δ合計 | 改善率 |
+|---|---:|---:|---:|---:|
+| A のみ | -6.7pt | -2.6pt | **-8.6pt** | **-9.8%** |
+| B のみ | -4.2pt | -4.6pt | **-8.5pt** | **-9.7%** |
+| A + B | -11.7pt | -7.0pt | **-18.0pt** | **-20.5%** |
+
+単独の改善幅の和が -17.1pt、両方入れた実測が -18.0pt でほぼ加算的。
+2 つの改善は互いに干渉していない。
+
+### フェーズ別 wall time（`SpanTimingCollector`, ms/call）
+
+| フェーズ | ベースライン | A のみ | B のみ | A + B |
+|---|---:|---:|---:|---:|
+| `GetServerModeAsyncWithoutLock` → `GetServerModeCachedAsync` | 0.3985 | **0.0062** | 0.3952 | **0.0066** |
+| `IsUserBannedAsync` | 0.3188 | **0.0076** | 0.3156 | **0.0073** |
+| `SetTrackCircuitDataList` | 0.4185 | 0.4199 | **0.0183** | **0.0180** |
+| `ClearTrackCircuitDataList` | 0.3901 | 0.3881 | **0.0163** | **0.0169** |
+| `CreateAtsData`（全体） | 5.6537 | 4.8490 | 4.8302 | **4.0561** |
+
+`CreateAtsData` 全体で **5.65 → 4.06 ms/call (-28.2%)**。
+A が -0.80 ms、B が -0.82 ms を削り、合計 -1.60 ms で、こちらも加算的。
+
+### B の節約は「行の書き込み」ではなく「文の発行」
+
+`pg_stat_user_tables` の差分を取ると、`track_circuit_state` の UPDATE 行数は
+ベースラインも A+B も **308 行 / 30 秒で変化なし**だった。
+
+| テーブル | ベースライン UPDATE | A+B UPDATE |
+|---|---:|---:|
+| track_circuit_state | 308 | 308 |
+| train_car_state | 1,400 | 1,400 |
+
+`n_tup_upd` は「実際に更新された行数」なので、**0 行にヒットする UPDATE 文は
+もともとカウントされていなかった**。つまり B が消したのは書き込みそのものではなく、
+1 call あたり 2 本の「何も更新しない UPDATE 文」の
+**EF Core 側の `ExecuteUpdate` 組み立て + ラウンドトリップ + PostgreSQL 側の parse/plan** である。
+それだけで DB CPU が 4.6pt 落ちる。空振りのクエリは想像以上に高い。
+
+（`pg_stat_statements` はこの DB に導入していないため、文単位の回数は取れていない。）
+
+### 副作用
+
+- **TTL 10 秒のラグ**: setter は同一プロセス内では `cache.Remove` で即時無効化するが、
+  Crew と Passenger は別プロセスで同じ DB を見ている。Crew 側で BAN / 時刻オフセット /
+  選択ダイヤを変えても、Passenger 側のキャッシュは最大 10 秒古いままになる。
+- `ServerMode` については `PassengerController.GetServerModeAsync` が非キャッシュの
+  `GetServerModeAsyncWithoutLock` を呼ぶので影響しない。
+  `ServerModeScheduler` / `CommanderTableHub` もミューテックス付きの `GetServerModeAsync`
+  のままなので、運用上のモード切替の即時性は保たれている。
+- `IsUserBannedAsync` もキャッシュ対象に入った。計測 1 まで同メソッドを
+  「コード変更のないベースラインメソッド」として `dotnet-trace` の
+  スレッド数正規化に使っていたが、**以後その役は `GetNextSignalNames` に移す**
+  （本計測でも 0.3276 → 0.3305 ms/call でほぼ動いていない）。
+- B は在線に変化がある call では従来どおり UPDATE を発行する。在線更新のログ
+  （`[在線更新]`）も従来どおり出る。
+
+### 検証
+
+- UT 132 件成功（A で追加された `ServerServiceCacheTest` / `BannedUserServiceCacheTest` の 10 件を含む）
+- IT 19 件成功・2 スキップ（スキップはスナップショット生成用で従来どおり）
+
+### 次の改善候補（この計測時点）
+
+| 優先度 | フェーズ | 平均 ms/call | 備考 |
+|---|---|---:|---|
+| 高 | GetOperationNotificationDataByTrackCircuitIds | 0.7715 | 運転告知器はほぼ不変。`perf/server-state-cache` の `f450510` にキャッシュ実装あり |
+| 高 | GetTrackCircuitsByTrainNumber / ByNames | 0.6330 / 0.4883 | `986333d` がマスタ/状態分離 + 1 クエリ化で 3.19 → 1.15 ms を報告 |
+| 高 | RegisterOrUpdateTrainState | 0.5846 | 変化が無い場合の UPDATE 抑止 |
+| 中 | IsProtectionEnabledForTrackCircuits / UpdateBougoState | 0.3325 / 0.2925 | `34db59d` が防護無線のキャッシュ化 + 未発報時 DELETE 停止 |
+| 中 | UpdateTrainSignalState | 0.3015 | `81d2b99` が可視信号機に変化が無い場合のスキップ |
+
+本計測で「空振りのクエリを 1 本消すと DB CPU が 2pt 級で落ちる」ことが分かったので、
+残りの候補も**行数ではなく文の本数**を基準に優先度を付けるのが正しい。
