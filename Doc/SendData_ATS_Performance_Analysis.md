@@ -98,6 +98,46 @@ wall time の -22.3% より小さく出る。実効的な改善は wall time の
   DTO と `Traincrew_MultiATS_Server.Common/Models/Passenger.cs` のスキーマ仕様は変えていない。
 - 表示ラグは発生しない。編成構成の変化（ドア開閉を含む）は従来どおり即座に DB へ反映される。
 
+### Server / DB の CPU 内訳（`Doc/measure_cpu.sh`）
+
+「保存先を Redis 等のメモリストアに替えれば更に下がるのか」を判断するために、
+同じ負荷条件で Crew プロセスと PostgreSQL コンテナの CPU を別々に実測した。
+値は 1 コア = 100% 換算（計測機は 24 コア）。
+
+| | Server CPU | DB CPU | 合計 |
+|---|---:|---:|---:|
+| ベースライン | 62.3% | 35.7% | 98.0% |
+| 変更後 | 54.9% | 30.1% | 84.9% |
+| **差** | **-7.4pt** | **-5.6pt** | **-13.1pt (-13.4%)** |
+
+わかったこと:
+
+1. **PostgreSQL はもともと主たる消費者ではない。** 合計 98% のうち DB は 35.7%、
+   Crew プロセスが 62.3%。保存先の選択は最初から小さい方の皿の話だった。
+2. **行単位 UPDATE は想定より安い。** 毎秒 1,231 本（38,350 → 1,400）の UPDATE を消して
+   DB CPU の節約は 5.6pt にとどまる。1 行あたり約 4.5 µs の DB CPU に相当する。
+3. **削れた 13.1pt の内訳は Crew 側 7.4 : DB 側 5.6。**
+   節約された wall time 1.18 ms/call のうち Crew の CPU は約 0.57 ms/call 相当で、
+   残りは DB 待ち。つまり今回の効果の過半は「EF Core の行単位更新をやめたこと」であって、
+   「PostgreSQL に書かなくなったこと」ではない。
+
+### メモリストア（Redis 等）への移行についての結論
+
+**現時点では見合わない。**
+
+- 車両状態の書き込みコストを完全にゼロにしても、上記のとおり削れるのは 5.6pt であり、
+  それは本変更で既に回収済み。
+- 残る DB CPU 30.1% は `GetTrackCircuitsBy*` や `RegisterOrUpdateTrainState` などの
+  他クエリであり、電流計・BC 圧とは無関係。Redis はここには一切効かない。
+- Redis 導入のコストは `Database/compose.yml` とルートの 4 サービス構成の両方、
+  IT の `WebApplicationFactory` フィクスチャ、self-hosted runner の CI、接続 Secrets に及ぶ。
+
+将来 BC 圧・電流値を復活させる場合は、**PostgreSQL のまま「1 列車 1 行 (jsonb) + UNLOGGED テーブル」**
+で十分と見込まれる。10 行 → 1 行で書き込み回数が 1/10、UNLOGGED で WAL が消えるため、
+上で測った 5.6pt よりさらに一桁下に収まるはず。
+メモリストアを検討する価値が出るのは、在線位置など他の高頻度・揮発状態もまとめて逃がす
+構想が立ったときで、そのときは基盤の判断として測り直すこと。
+
 ### 次の改善候補（この計測時点）
 
 | 優先度 | フェーズ | 平均 ms/call | 備考 |
@@ -107,6 +147,10 @@ wall time の -22.3% より小さく出る。実効的な改善は wall time の
 | 中 | GetTrackCircuitsByTrainNumber / ByNames | 0.5362 / 0.4937 | 不変マスタとのマスタ/状態分離 |
 | 中 | GetServerModeAsyncWithoutLock | 0.4302 | 毎 call の SELECT。短 TTL キャッシュ |
 | 中 | SetTrackCircuitDataList / Clear | 0.4342 / 0.4094 | 在線に変化が無いときの UPDATE 抑止 |
+
+いずれも Crew プロセス側の CPU が支配的（上記 CPU 内訳を参照）なので、
+DB アクセスを減らすだけでなく EF Core の使い方（行単位更新・エンティティ materialize）
+を見直す方が効く可能性が高い。
 
 ### 計測上の注意
 
