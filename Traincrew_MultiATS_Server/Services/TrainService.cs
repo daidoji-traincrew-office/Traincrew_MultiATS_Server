@@ -1,5 +1,7 @@
 using System.Data;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.Caching.Memory;
+using Traincrew_MultiATS_Server.Activity;
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
@@ -43,6 +45,7 @@ public partial class TrainService(
     ITrainSignalStateRepository trainSignalStateRepository,
     ITrackCircuitDepartmentTimeRepository trackCircuitDepartmentTimeRepository,
     IDateTimeRepository dateTimeRepository,
+    IMemoryCache cache,
     ILogger<TrainService> logger
 ) : ITrainService
 {
@@ -54,9 +57,34 @@ public partial class TrainService(
     /// </summary>
     private static readonly TimeSpan ServiceDayStartTime = TimeSpan.FromHours(4);
 
+    /// <summary>
+    /// 列車単位のキャッシュの保持期間。列車が消えた分は放っておいても期限切れで落ちる。
+    /// </summary>
+    private static readonly TimeSpan TrainScopedCacheTtl = TimeSpan.FromMinutes(10);
+
+    private static string CacheKeyCarStates(long trainStateId) => $"train:carstates:{trainStateId}";
+
+    private static string CacheKeySignalStates(string trainNumber) => $"train:signalstates:{trainNumber}";
+
+    /// <summary>
+    /// 車両状態のうち、変化したら DB に反映したい項目。
+    /// BC圧・電流値は DB に書き込まないため含めない。
+    /// </summary>
+    private readonly record struct CarStateSignature(
+        string CarModel,
+        bool HasPantograph,
+        bool HasDriverCab,
+        bool HasConductorCab,
+        bool HasMotor,
+        bool DoorClose);
+
     public async Task<ServerToATSData> CreateAtsData(ulong clientDriverId, AtsToServerData clientData)
     {
-        var serverMode = await serverService.GetServerModeAsyncWithoutLock();
+        using var _rootActivity = ActivitySources.TrainService.StartActivity("CreateAtsData");
+
+        ServerMode serverMode;
+        using (ActivitySources.TrainService.StartActivity("GetServerModeCachedAsync"))
+            serverMode = await serverService.GetServerModeCachedAsync();
         // 定時処理が停止している場合、その旨だけ返す
         if (serverMode == ServerMode.Off)
         {
@@ -67,7 +95,9 @@ public partial class TrainService(
         }
 
         // 接続拒否チェック
-        var isBanned = await bannedUserService.IsUserBannedAsync(clientDriverId);
+        bool isBanned;
+        using (ActivitySources.TrainService.StartActivity("IsUserBannedAsync"))
+            isBanned = await bannedUserService.IsUserBannedAsync(clientDriverId);
         if (isBanned)
         {
             return new()
@@ -78,7 +108,9 @@ public partial class TrainService(
 
         var clientTrainNumber = clientData.DiaName;
         // 軌道回路情報の更新
-        var oldTrackCircuitList = await trackCircuitService.GetTrackCircuitsByTrainNumber(clientTrainNumber);
+        List<TrackCircuit> oldTrackCircuitList;
+        using (ActivitySources.TrainService.StartActivity("GetTrackCircuitsByTrainNumber"))
+            oldTrackCircuitList = await trackCircuitService.GetTrackCircuitsByTrainNumber(clientTrainNumber);
         var oldTrackCircuitDataList = oldTrackCircuitList.Select(TrackCircuitService.ToTrackCircuitData).ToList();
         // 新規登録軌道回路
         var incrementalTrackCircuitDataList = clientData.OnTrackList.Except(oldTrackCircuitDataList).ToList();
@@ -86,8 +118,10 @@ public partial class TrainService(
         var decrementalTrackCircuitDataList = oldTrackCircuitDataList.Except(clientData.OnTrackList).ToList();
 
         // 軌道回路を取得しようとする
-        var trackCircuitList = await trackCircuitService.GetTrackCircuitsByNames(
-            clientData.OnTrackList.Select(tcd => tcd.Name).ToList());
+        List<TrackCircuit> trackCircuitList;
+        using (ActivitySources.TrainService.StartActivity("GetTrackCircuitsByNames"))
+            trackCircuitList = await trackCircuitService.GetTrackCircuitsByNames(
+                clientData.OnTrackList.Select(tcd => tcd.Name).ToList());
         // Todo: 文字化けへの対応ができたら以下の処理はいらない
         // 取得できない軌道回路がある場合、一旦前回のデータを使う
         if (trackCircuitList.Count != clientData.OnTrackList.Count)
@@ -98,29 +132,36 @@ public partial class TrainService(
         }
 
         // ☆情報は割と常に送るため共通で演算する
-        var serverData = new ServerToATSData
-        {
-            // 在線している軌道回路上で防護無線が発報されているか確認
-            BougoState = await protectionService.IsProtectionEnabledForTrackCircuits(trackCircuitList)
-        };
+        bool bougoState;
+        using (ActivitySources.TrainService.StartActivity("IsProtectionEnabledForTrackCircuits"))
+            bougoState = await protectionService.IsProtectionEnabledForTrackCircuits(trackCircuitList);
+        var serverData = new ServerToATSData { BougoState = bougoState };
         // 防護無線を発報している場合のDB更新
-        await protectionService.UpdateBougoState(clientTrainNumber, trackCircuitList, clientData.BougoState);
+        using (ActivitySources.TrainService.StartActivity("UpdateBougoState"))
+            await protectionService.UpdateBougoState(clientTrainNumber, trackCircuitList, clientData.BougoState);
 
         // 運転告知器の表示
-        serverData.OperationNotificationData = await operationNotificationService
-            .GetOperationNotificationDataByTrackCircuitIds(trackCircuitList.Select(tc => tc.Id).ToList());
+        using (ActivitySources.TrainService.StartActivity("GetOperationNotificationDataByTrackCircuitIds"))
+            serverData.OperationNotificationData = await operationNotificationService
+                .GetOperationNotificationDataByTrackCircuitIds(trackCircuitList.Select(tc => tc.Id).ToList());
 
         // トランザクション開始
-        await using var transaction = await transactionRepository.BeginTransactionAsync(IsolationLevel.RepeatableRead);
+        Traincrew_MultiATS_Server.Repositories.Transaction.ITransactionScope transaction;
+        using (ActivitySources.TrainService.StartActivity("BeginTransaction"))
+            transaction = await transactionRepository.BeginTransactionAsync(IsolationLevel.RepeatableRead);
+        await using var _tx = transaction;
         // 運番が同じ列車の情報を取得する
-        var trainState = await RegisterOrUpdateTrainState(
-            clientDriverId, clientData, trackCircuitList, incrementalTrackCircuitDataList,
-            serverData);
+        TrainState? trainState;
+        using (ActivitySources.TrainService.StartActivity("RegisterOrUpdateTrainState"))
+            trainState = await RegisterOrUpdateTrainState(
+                clientDriverId, clientData, trackCircuitList, incrementalTrackCircuitDataList,
+                serverData);
 
         if (trainState == null)
         {
             // 列車情報の更新が不要な場合は、ここで終了
-            await transaction.CommitAsync();
+            using (ActivitySources.TrainService.StartActivity("CommitTransaction"))
+                await transaction.CommitAsync();
             return serverData;
         }
 
@@ -133,22 +174,28 @@ public partial class TrainService(
                 string.Join(", ", decrementalTrackCircuitDataList.Select(tc => tc.Name)));
         }
 
-        await trackCircuitService.SetTrackCircuitDataList(incrementalTrackCircuitDataList, clientTrainNumber);
-        await trackCircuitService.ClearTrackCircuitDataList(decrementalTrackCircuitDataList);
+        using (ActivitySources.TrainService.StartActivity("SetTrackCircuitDataList"))
+            await trackCircuitService.SetTrackCircuitDataList(incrementalTrackCircuitDataList, clientTrainNumber);
+        using (ActivitySources.TrainService.StartActivity("ClearTrackCircuitDataList"))
+            await trackCircuitService.ClearTrackCircuitDataList(decrementalTrackCircuitDataList);
 
         // 車両情報の登録
-        await UpdateTrainCarStates(trainState.Id, clientData.CarStates);
+        using (ActivitySources.TrainService.StartActivity("UpdateTrainCarStates"))
+            await UpdateTrainCarStates(trainState.Id, clientData.CarStates);
 
         // TrainSignalStateの更新
         if (clientData.VisibleSignalNames is { Count: > 0 })
         {
-            await trainSignalStateRepository.UpdateByTrainNumber(clientTrainNumber, clientData.VisibleSignalNames);
+            using (ActivitySources.TrainService.StartActivity("UpdateTrainSignalState"))
+                await UpdateTrainSignalState(clientTrainNumber, clientData.VisibleSignalNames);
         }
 
         // NextSignalNamesの設定
-        serverData.NextSignalNames = await GetNextSignalNames(clientTrainNumber, clientData.VisibleSignalNames);
+        using (ActivitySources.TrainService.StartActivity("GetNextSignalNames"))
+            serverData.NextSignalNames = await GetNextSignalNames(clientTrainNumber, clientData.VisibleSignalNames);
 
-        await transaction.CommitAsync();
+        using (ActivitySources.TrainService.StartActivity("CommitTransaction"))
+            await transaction.CommitAsync();
 
         if (decrementalTrackCircuitDataList.Count > 0)
         {
@@ -515,10 +562,43 @@ public partial class TrainService(
     }
 
     /// <summary>
-    /// TrainCarState更新
+    /// TrainSignalState更新
+    ///
+    /// 可視信号機は数秒に 1 度しか変わらないので、前回書き込んだ内容と同じなら DB を触らない。
     /// </summary>
-    private async Task UpdateTrainCarStates(long trainStateId, List<CarState> carStates)
+    private async Task UpdateTrainSignalState(string trainNumber, List<string> visibleSignalNames)
     {
+        var signature = string.Join(',', visibleSignalNames.Order());
+        var cacheKey = CacheKeySignalStates(trainNumber);
+        if (cache.TryGetValue<string>(cacheKey, out var previous) && previous == signature)
+        {
+            return;
+        }
+
+        await trainSignalStateRepository.UpdateByTrainNumber(trainNumber, visibleSignalNames);
+        cache.Set(cacheKey, signature, TrainScopedCacheTtl);
+    }
+
+    /// <summary>
+    /// TrainCarState更新
+    ///
+    /// ATSは10回/秒で送ってくるので、素直に書くと1列車あたり毎秒(両数 × 10)本のUPDATEが出て
+    /// DBのCPUを最も強く支配する。BC圧・電流値は走行中つねに変動するため差分判定が効かないが、
+    /// この2項目はPassenger APIの表示以外に使い道が無いのでDBへの書き込み自体をやめる。
+    /// 残る編成構成(両数・車種・パンタ・運転台・車掌室・電動機・ドア状態)は乗務中ほぼ不変なので、
+    /// 前回書き込んだ内容と一致していればUpdateAllを丸ごと呼ばない。
+    ///
+    /// (CalculateAndUpdateDelaysと同様、ユニットテストから直接叩くためpublicにしている)
+    /// </summary>
+    public async Task UpdateTrainCarStates(long trainStateId, List<CarState> carStates)
+    {
+        var cacheKey = CacheKeyCarStates(trainStateId);
+        if (cache.TryGetValue<CarStateSignature[]>(cacheKey, out var previous)
+            && IsSameCarStates(previous, carStates))
+        {
+            return;
+        }
+
         var trainCarStates = carStates.Select(cs => new TrainCarState
         {
             CarModel = cs.CarModel,
@@ -527,10 +607,43 @@ public partial class TrainService(
             HasConductorCab = cs.HasConductorCab,
             HasMotor = cs.HasMotor,
             DoorClose = cs.DoorClose,
-            BcPress = cs.BC_Press,
-            Ampare = cs.Ampare,
         }).ToList();
         await trainCarRepository.UpdateAll(trainStateId, trainCarStates);
+
+        cache.Set(cacheKey, carStates.Select(ToCarStateSignature).ToArray(), TrainScopedCacheTtl);
+    }
+
+    /// <summary>
+    /// 前回書き込んだ署名と今回の車両状態が完全に一致するかどうか。
+    /// ヒット時にアロケーションが出ないよう、LINQを使わず要素ごとに比較する。
+    /// </summary>
+    private static bool IsSameCarStates(CarStateSignature[]? previous, List<CarState> carStates)
+    {
+        if (previous == null || previous.Length != carStates.Count)
+        {
+            return false;
+        }
+
+        for (var i = 0; i < previous.Length; i++)
+        {
+            if (previous[i] != ToCarStateSignature(carStates[i]))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static CarStateSignature ToCarStateSignature(CarState carState)
+    {
+        return new(
+            carState.CarModel,
+            carState.HasPantograph,
+            carState.HasDriverCab,
+            carState.HasConductorCab,
+            carState.HasMotor,
+            carState.DoorClose);
     }
 
     /// <summary>
@@ -538,9 +651,19 @@ public partial class TrainService(
     /// </summary>
     public async Task DeleteTrainState(string trainNumber)
     {
+        // 削除後に同じIDが復活することは無いが、差分判定のキャッシュを残す意味も無いので消しておく
+        var trainStates = await trainRepository.GetByTrainNumbers([trainNumber]);
+
         await trainCarRepository.DeleteByTrainNumber(trainNumber);
         await trainSignalStateRepository.DeleteByTrainNumber(trainNumber);
         await trainRepository.DeleteByTrainNumber(trainNumber);
+
+        foreach (var trainState in trainStates)
+        {
+            cache.Remove(CacheKeyCarStates(trainState.Id));
+        }
+
+        cache.Remove(CacheKeySignalStates(trainNumber));
     }
 
     /// <summary>
@@ -561,6 +684,9 @@ public partial class TrainService(
 
         // 列車情報を取得して削除する
         await generalRepository.Delete(trainState);
+
+        cache.Remove(CacheKeyCarStates(id));
+        cache.Remove(CacheKeySignalStates(trainState.TrainNumber));
     }
 
     /// <summary>

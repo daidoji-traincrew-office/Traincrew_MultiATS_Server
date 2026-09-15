@@ -6,7 +6,7 @@ namespace Traincrew_MultiATS_Server.UT.Service.TestHelpers;
 /// ServerServiceのテスト用ヘルパークラス
 /// モック可能なメソッドを提供
 /// </summary>
-public class TestServerService() : ServerService(null!, null!, null!)
+public class TestServerService() : ServerService(null!, null!, null!, null!)
 {
     private Func<Task<int>>? getTimeOffsetAsyncFunc;
 
