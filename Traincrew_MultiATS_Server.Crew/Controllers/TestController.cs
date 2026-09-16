@@ -139,6 +139,11 @@ public class TestController(
         cancellationTokenSource.CancelAfter(TimeSpan.FromSeconds(seconds));
         var intervalMs = Math.Max(1, 1000 / Math.Max(1, rate));
 
+        // 呼び出しが全部失敗していても「速くなった」ように見えてしまうので、成否を数えて結果に載せる
+        var successCount = 0;
+        var errorCount = 0;
+        string? firstError = null;
+
         for (var i = 0; i < clients; i++)
         {
             var driverId = (ulong)(i + 1);
@@ -210,6 +215,7 @@ public class TestController(
                         await using var scope = scopeFactory.CreateAsyncScope();
                         var service = scope.ServiceProvider.GetRequiredService<ITrainService>();
                         await service.CreateAtsData(driverId, clientData);
+                        Interlocked.Increment(ref successCount);
 
                         await Task.Delay(
                             Math.Max(0, intervalMs + random.Next(-10, 10)),
@@ -221,17 +227,30 @@ public class TestController(
                     }
                     catch (System.Exception ex)
                     {
+                        Interlocked.Increment(ref errorCount);
+                        Interlocked.CompareExchange(ref firstError, ex.Message, null);
                         Console.WriteLine($"[Load Test] Error for client {driverId}: {ex.Message}");
+                        // 例外時はここで待たないとビジーループになり、CPU 計測そのものが汚れる
+                        try
+                        {
+                            await Task.Delay(intervalMs, cancellationTokenSource.Token);
+                        }
+                        catch (OperationCanceledException)
+                        {
+                            break;
+                        }
                     }
                 }
-            }, cancellationTokenSource.Token);
+                // 打ち切りは Task.WhenAll を落とさないよう、トークンを渡さず自前で判定する
+            }, CancellationToken.None);
 
             tasks.Add(task);
         }
 
         await Task.WhenAll(tasks);
-        Console.WriteLine("[Load Test] Load test completed");
+        Console.WriteLine(
+            $"[Load Test] Load test completed (success: {successCount}, error: {errorCount})");
 
-        return Ok(new { clients, seconds, cars, rate, moveIntervalMs });
+        return Ok(new { clients, seconds, cars, rate, moveIntervalMs, successCount, errorCount, firstError });
     }
 }
