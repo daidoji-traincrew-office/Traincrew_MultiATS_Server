@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Caching.Memory;
 using Traincrew_MultiATS_Server.Common.Models;
+using Traincrew_MultiATS_Server.HostedService;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.General;
@@ -21,7 +22,8 @@ public class OperationNotificationService(
     IGeneralRepository generalRepository,
     IDateTimeRepository dateTimeRepository,
     IMutexRepository mutexRepository,
-    IMemoryCache cache) : IOperationNotificationService
+    IMemoryCache cache,
+    InitializationState initializationState) : IOperationNotificationService
 {
     static readonly int kaijoTime = 20;
 
@@ -31,7 +33,7 @@ public class OperationNotificationService(
     private const string CacheKeyTopology = "operationnotification:topology";
 
     /// <summary>
-    /// 対応関係の保持期間。DB初期化の完了前にリクエストを受けた場合に備えて、保険として期限を切る。
+    /// 対応関係の保持期間。マスタデータが載せ替えられた場合に備えた保険としての TTL。
     /// </summary>
     private static readonly TimeSpan TopologyCacheTtl = TimeSpan.FromMinutes(10);
 
@@ -73,9 +75,10 @@ public class OperationNotificationService(
             byDisplayName.ToDictionary(kv => kv.Key, kv => kv.Value.ToHashSet()),
             byTrackCircuitId);
 
-        // DB初期化が終わる前に呼ばれると空の対応関係を掴んでしまい、
-        // それをキャッシュすると以後ずっと告知器が出なくなるため、空のときは載せない
-        if (byTrackCircuitId.Count > 0)
+        // DB初期化が終わる前に呼ばれると、空または投入途中の不完全な対応関係を掴んでしまう。
+        // それをキャッシュすると一部の告知器が TTL の間ずっと出なくなるため、
+        // 初期化が完走するまではキャッシュに載せず、毎回DBを読む
+        if (byTrackCircuitId.Count > 0 && initializationState.IsInitialized)
         {
             cache.Set(CacheKeyTopology, topology, TopologyCacheTtl);
         }

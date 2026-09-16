@@ -1,6 +1,9 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Npgsql;
 using Traincrew_MultiATS_Server.Data;
+using Traincrew_MultiATS_Server.HostedService;
+using Traincrew_MultiATS_Server.Passenger.Caching;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.DiagramTrain;
 using Traincrew_MultiATS_Server.Repositories.General;
@@ -73,7 +76,17 @@ public class Program
         // Todo: (優先度低)キャッシュ制御, Response Compression
 
         // DI
-        builder.Services.AddMemoryCache();
+        // 共有サービス層のキャッシュ無効化は書き込みを行ったプロセス内でしか効かず、
+        // 書き込み経路はすべて Crew 側にあるため、旅客用プロセスでは一切キャッシュしない
+        // (詳細は NoOpMemoryCache の remarks を参照)
+        builder.Services.AddSingleton<IMemoryCache, NoOpMemoryCache>();
+        // DB初期化は Crew 側が行うため、旅客用プロセスでは常に初期化済みとして扱う
+        builder.Services.AddSingleton(_ =>
+        {
+            var state = new InitializationState();
+            state.MarkInitialized();
+            return state;
+        });
         builder.Services
             // Repository (ABC順)
             .AddScoped<IDateTimeRepository, DateTimeRepository>()
