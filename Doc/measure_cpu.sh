@@ -12,7 +12,9 @@ SECONDS_RUN="${3:-30}"
 PORT="${PORT:-5154}"
 DB_CONTAINER="${DB_CONTAINER:-database-db-1}"
 
-SERVER_PID="$(pgrep -f 'Traincrew_MultiATS_Server.Crew/bin' | head -1)"
+# pipefail が有効なので、pgrep が何も見つけられないと head を挟んでもここで落ちる。
+# 下の分かりやすいエラーメッセージを出すために、失敗を握って空文字にする。
+SERVER_PID="$(pgrep -f 'Traincrew_MultiATS_Server.Crew/bin' | head -1 || true)"
 if [ -z "$SERVER_PID" ]; then
   echo "サーバープロセスが見つかりません" >&2
   exit 1

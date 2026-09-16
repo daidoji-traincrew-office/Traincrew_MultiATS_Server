@@ -132,6 +132,12 @@ public class TestController(
             return BadRequest("信号機のマスタデータが投入されていません");
         }
 
+        if (moveIntervalMs <= 0)
+        {
+            // position の計算で 0 除算になるため、全リクエストが例外で潰れる前に弾く
+            return BadRequest("moveIntervalMs には 1 以上を指定してください");
+        }
+
         SpanTimingCollector.Reset();
 
         var tasks = new List<Task>();

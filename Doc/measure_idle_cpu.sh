@@ -5,7 +5,12 @@ set -euo pipefail
 
 DURATION="${1:-20}"
 DB_CONTAINER="${DB_CONTAINER:-database-db-1}"
-SERVER_PID="$(pgrep -f 'bin/Release/net8.0/Traincrew_MultiATS_Server.Crew$' | head -1)"
+# pipefail が有効なので、見つからなかった場合に分かりやすく落とすため一旦握る
+SERVER_PID="$(pgrep -f 'bin/Release/net8.0/Traincrew_MultiATS_Server.Crew$' | head -1 || true)"
+if [ -z "$SERVER_PID" ]; then
+  echo "サーバープロセス(Release ビルド)が見つかりません" >&2
+  exit 1
+fi
 CLK="$(getconf CLK_TCK)"
 CID="$(docker inspect -f '{{.Id}}' "$DB_CONTAINER")"
 DB_CPU_STAT="/sys/fs/cgroup/system.slice/docker-$CID.scope/cpu.stat"
