@@ -8,6 +8,13 @@ public static class SpanTimingCollector
     private static readonly ConcurrentDictionary<string, Bucket> _buckets = new();
     private static ActivityListener? _listener;
 
+    /// <summary>
+    /// 1 スパン名あたりに保持するサンプル数の上限。
+    /// 無制限に溜めると計測セッションが長いだけでメモリを食い潰すため頭を打たせる。
+    /// (30 秒 × 14 列車 × 10 回/秒 でも 4200 件なので、通常の計測では上限 200,000 件に到達しない)
+    /// </summary>
+    private const int MaxSamplesPerBucket = 200_000;
+
     public sealed class Bucket
     {
         private readonly object _lock = new();

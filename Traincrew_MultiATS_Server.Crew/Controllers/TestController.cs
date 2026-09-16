@@ -95,6 +95,18 @@ public class TestController(
                 $"軌道回路が不足しています (必要: {clients * circuitsPerClient}, 実際: {trackCircuitNames.Count})");
         }
 
+        if (signalNames.Count == 0)
+        {
+            // 0 除算になるので、マスタ未投入のまま呼ばれたら明示的に弾く
+            return BadRequest("信号機のマスタデータが投入されていません");
+        }
+
+        if (moveIntervalMs <= 0)
+        {
+            // position の計算で 0 除算になるため、全リクエストが例外で潰れる前に弾く
+            return BadRequest("moveIntervalMs には 1 以上を指定してください");
+        }
+
         SpanTimingCollector.Reset();
 
         var tasks = new List<Task>();

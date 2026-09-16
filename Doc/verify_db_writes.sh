@@ -54,6 +54,8 @@ echo "=== 登録された列車と在線 ==="
 psql "select train_number, dia_number, driver_id from train_state order by train_number;"
 echo "-- 在線中の軌道回路数:"
 psql "select count(*) from track_circuit_state where is_short_circuit;"
-echo "-- 直近の車両状態サンプル (BC圧/電流が更新されているか):"
+# bc_press / ampare は意図的に書き込みを廃止したため常に 0 になる(更新確認には使えない)。
+# ここでは「編成構成とドア状態が実際に入っているか」を目視するためにダンプする。
+echo "-- 直近の車両状態サンプル (編成構成・ドア状態。bc_press/ampare は書き込み廃止のため常に 0):"
 psql "select train_state_id, index, bc_press, ampare, door_close
       from train_car_state order by train_state_id, index limit 5;"
