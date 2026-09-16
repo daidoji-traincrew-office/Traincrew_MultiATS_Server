@@ -17,7 +17,8 @@ public class PassengerService(
     public async Task<ServerToPassengerData> GetServerToPassengerData()
     {
         var serverMode = ServerMode.Public == await serverService.GetServerModeAsync();
-        var timeOffset = await serverService.GetTimeOffsetAsync();
+        // 旅客用プロセスのキャッシュはCrew側の書き込みで無効化されないため、キャッシュを経由せず読む
+        var timeOffset = await serverService.GetTimeOffsetAsyncWithoutCache();
         var trackCircuitData = await trackCircuitService.GetShortCircuitedTrackCircuitDataList();
         var trainInfoByTrainNumber = await trainService.GetTrainInfoGroupByTrainNumber();
         var operationInformations = await operationInformationService.GetOperationInformations();

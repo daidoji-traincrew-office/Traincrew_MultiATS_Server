@@ -14,10 +14,12 @@ public interface IServerService
     Task SetServerModeAsync(ServerMode mode);
     Task UpdateSchedulerAsync();
     Task<int> GetTimeOffsetAsync();
+    Task<int> GetTimeOffsetAsyncWithoutCache();
     Task SetTimeOffsetAsync(int timeOffset);
     Task SetSwitchMoveTimeAsync(int switchMoveTime);
     Task SetUseOneSecondRelayAsync(bool useOneSecondRelay);
     Task<ulong?> GetSelectedDiagramIdAsync();
+    Task<ulong?> GetSelectedDiagramIdAsyncWithoutCache();
     Task SetSelectedDiagramIdAsync(ulong? diaId);
 }
 
@@ -124,6 +126,20 @@ public class ServerService(
         return await GetCachedAsync(CacheKeyTimeOffset, serverRepository.GetTimeOffset);
     }
 
+    /// <summary>
+    /// 時刻オフセットをキャッシュを経由せずDBから取得する。
+    /// </summary>
+    /// <remarks>
+    /// キャッシュの無効化は書き込みを行ったプロセス内でしか効かず、書き込み経路はすべて Crew 側にある。
+    /// そのため旅客用プロセスがキャッシュを読むと、指令卓の操作が TTL 分だけ旅客に反映されない。
+    /// 旅客APIの呼び出し頻度は ATS と比べて圧倒的に少なく毎回DBを読んでも負荷にならないため、
+    /// 旅客用プロセスからはこちらを呼ぶこと。
+    /// </remarks>
+    public async Task<int> GetTimeOffsetAsyncWithoutCache()
+    {
+        return await serverRepository.GetTimeOffset();
+    }
+
     public async Task SetTimeOffsetAsync(int timeOffset)
     {
         await serverRepository.SetTimeOffsetAsync(timeOffset);
@@ -143,6 +159,15 @@ public class ServerService(
     public async Task<ulong?> GetSelectedDiagramIdAsync()
     {
         return await GetCachedAsync(CacheKeySelectedDiaId, serverRepository.GetSelectedDiagramIdAsync);
+    }
+
+    /// <summary>
+    /// 選択中のダイヤIDをキャッシュを経由せずDBから取得する。
+    /// 旅客用プロセスから呼ぶ理由は <see cref="GetTimeOffsetAsyncWithoutCache"/> を参照。
+    /// </summary>
+    public async Task<ulong?> GetSelectedDiagramIdAsyncWithoutCache()
+    {
+        return await serverRepository.GetSelectedDiagramIdAsync();
     }
 
     public async Task SetSelectedDiagramIdAsync(ulong? diaId)

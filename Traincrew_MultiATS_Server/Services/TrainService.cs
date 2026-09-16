@@ -449,7 +449,9 @@ public partial class TrainService(
             .GroupBy(carState => carState.TrainStateId)
             .ToDictionary(group => group.Key, group => group.ToList());
         // 列車のダイアグラムを取得
-        var diaId = await serverService.GetSelectedDiagramIdAsync();
+        // 本メソッドは旅客用プロセスからのみ呼ばれる。そちらのキャッシュはCrew側の書き込みで
+        // 無効化されないため、キャッシュを経由せず読む
+        var diaId = await serverService.GetSelectedDiagramIdAsyncWithoutCache();
         var trainNumbers = trainStates.Select(s => s.TrainNumber).ToHashSet();
         var diagramTrains = diaId.HasValue
             ? await diagramTrainRepository.GetByDiaIdAndTrainNumbers(diaId.Value, trainNumbers)
