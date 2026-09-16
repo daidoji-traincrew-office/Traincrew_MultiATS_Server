@@ -12,14 +12,6 @@ public class TrainSignalStateRepository(ApplicationDbContext context) : ITrainSi
             .ToListAsync();
     }
 
-    public async Task<List<string>> GetSignalNamesByTrainNumber(string trainNumber)
-    {
-        return await context.TrainSignalStates
-            .Where(tss => tss.TrainNumber == trainNumber)
-            .Select(tss => tss.SignalName)
-            .ToListAsync();
-    }
-
     public async Task UpdateByTrainNumber(string trainNumber, List<string> visibleSignalNames)
     {
         // 既存のTrainSignalStateを取得

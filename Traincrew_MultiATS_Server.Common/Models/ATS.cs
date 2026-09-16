@@ -160,10 +160,6 @@ public class ServerToATSData
     /// ステータスフラグ(ビットフラグ)
     /// </summary>
     public ServerStatusFlags StatusFlags { get; set; } = ServerStatusFlags.None;
-    /// <summary>
-    /// 次の信号機名リスト
-    /// </summary>
-    public List<string> NextSignalNames { get; set; } = [];
 }
 
 public class ServerToATSDataBySchedule

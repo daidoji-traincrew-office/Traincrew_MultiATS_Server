@@ -25,14 +25,6 @@ public interface INextSignalRepository
     public Task<List<Models.NextSignal>> GetAllByDepth(int depth);
 
     /// <summary>
-    /// 指定された信号機名のリストに一致し、Depth以下のNextSignalをDepth昇順で取得します。
-    /// </summary>
-    /// <param name="signalNames">信号機名のリスト</param>
-    /// <param name="depth">最大Depth値（この値以下のものを取得）</param>
-    /// <returns>NextSignalのリスト（Depth昇順）</returns>
-    public Task<List<Models.NextSignal>> GetByNamesAndMaxDepthOrderByDepth(List<string> signalNames, int depth);
-
-    /// <summary>
     /// 全てのNextSignalを取得する
     /// </summary>
     /// <param name="cancellationToken">キャンセルトークン</param>
