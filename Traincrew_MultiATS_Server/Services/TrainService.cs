@@ -188,10 +188,6 @@ public partial class TrainService(
                 await trainSignalStateRepository.UpdateByTrainNumber(clientTrainNumber, clientData.VisibleSignalNames);
         }
 
-        // NextSignalNamesの設定
-        using (ActivitySources.TrainService.StartActivity("GetNextSignalNames"))
-            serverData.NextSignalNames = await GetNextSignalNames(clientTrainNumber, clientData.VisibleSignalNames);
-
         using (ActivitySources.TrainService.StartActivity("CommitTransaction"))
             await transaction.CommitAsync();
 
@@ -747,45 +743,6 @@ public partial class TrainService(
         // 上りか下りか判断(偶数なら上り、奇数なら下り)
         var lastDiaNumber = trainNumber.Last(char.IsDigit) - '0';
         return lastDiaNumber % 2 == 0;
-    }
-
-    /// <summary>
-    /// NextSignalNamesを取得
-    /// VisibleSignalNamesが空ならTrainSignalStateのものを、そうでないならVisibleSignalNamesのものを使って、
-    /// NextSignal.SignalNameが一致しているものをすべて取得し、TargetSignalNameでFlatten.Distinctして返す
-    /// </summary>
-    /// <param name="trainNumber">列車番号</param>
-    /// <param name="visibleSignalNames">可視信号機名リスト</param>
-    /// <returns>次の信号機名リスト</returns>
-    private async Task<List<string>> GetNextSignalNames(string trainNumber, List<string> visibleSignalNames)
-    {
-        const int maxDepth = 3;
-        List<string> signalNames;
-
-        if (visibleSignalNames is { Count: > 0 })
-        {
-            // VisibleSignalNamesを使用
-            signalNames = visibleSignalNames;
-        }
-        else
-        {
-            // TrainSignalStateから取得
-            signalNames = await trainSignalStateRepository.GetSignalNamesByTrainNumber(trainNumber);
-        }
-
-        if (signalNames.Count == 0)
-        {
-            return [];
-        }
-
-        // NextSignal.SignalNameが一致しているものをすべて取得
-        var nextSignals = await nextSignalRepository.GetByNamesAndMaxDepthOrderByDepth(signalNames, maxDepth);
-
-        // TargetSignalNameでFlatten.Distinctして返す
-        return signalNames
-            .Concat(nextSignals.Select(ns => ns.TargetSignalName))
-            .Distinct()
-            .ToList();
     }
 
     /// <summary>
