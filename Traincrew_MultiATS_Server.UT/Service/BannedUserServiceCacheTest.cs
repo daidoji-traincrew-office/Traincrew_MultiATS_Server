@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Caching.Memory;
 using Moq;
+using Traincrew_MultiATS_Server.Repositories.Mutex;
 using Traincrew_MultiATS_Server.Repositories.UserDisconnection;
 using Traincrew_MultiATS_Server.Services;
 
@@ -14,7 +15,8 @@ public class BannedUserServiceCacheTest
     {
         var repoMock = new Mock<IUserDisconnectionRepository>();
         var cache = new MemoryCache(new MemoryCacheOptions());
-        var service = new BannedUserService(repoMock.Object, cache);
+        // 実物のミューテックス(Crew/Passenger では Singleton 登録)
+        var service = new BannedUserService(repoMock.Object, new MutexRepository(), cache);
         return (service, repoMock);
     }
 

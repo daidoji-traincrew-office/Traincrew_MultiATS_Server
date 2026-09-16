@@ -53,7 +53,6 @@ public class TrainServiceTest
             null!, // BannedUserService
             null!, // IGeneralRepository
             testServerService,
-            null!, // INextSignalRepository
             null!, // ITrainSignalStateRepository
             mockTrackCircuitDepartmentTimeRepository.Object,
             mockDateTimeRepository.Object,

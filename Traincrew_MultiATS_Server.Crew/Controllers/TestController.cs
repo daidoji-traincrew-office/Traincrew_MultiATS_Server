@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using Traincrew_MultiATS_Server.Activity;
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Repositories.NextSignal;
-using Traincrew_MultiATS_Server.Repositories.Route;
 using Traincrew_MultiATS_Server.Repositories.TrackCircuit;
 using Traincrew_MultiATS_Server.Services;
 
@@ -11,19 +10,36 @@ namespace Traincrew_MultiATS_Server.Crew.Controllers;
 [ApiController]
 [Route("test")]
 public class TestController(
-    IRouteRepository routeRepository,
     ITrainService trainService,
-    IServiceScopeFactory scopeFactory) : ControllerBase
+    IServiceScopeFactory scopeFactory,
+    IHostEnvironment environment) : ControllerBase
 {
+    /// <summary>
+    /// 計測・負荷試験専用のエンドポイント群。
+    /// 認可を掛けていない(開発時は endpointBuilders に AllowAnonymous が一括付与される)ため、
+    /// 本番環境では存在しないものとして扱い、DB を書き換えられないようにする。
+    /// </summary>
+    private bool IsEnabled => environment.IsDevelopment();
+
     [HttpGet("")]
-    public async Task<IActionResult> Test()
+    public IActionResult Test()
     {
+        if (!IsEnabled)
+        {
+            return NotFound();
+        }
+
         return Ok("Test endpoint is working.");
     }
 
     [HttpPost("createatsdata")]
     public async Task<IActionResult> TestCreateAtsData([FromBody] AtsToServerData data)
     {
+        if (!IsEnabled)
+        {
+            return NotFound();
+        }
+
         try
         {
             var result = await trainService.CreateAtsData(1001, data);
@@ -38,6 +54,11 @@ public class TestController(
     [HttpGet("perf-stats")]
     public IActionResult GetPerfStats()
     {
+        if (!IsEnabled)
+        {
+            return NotFound();
+        }
+
         var stats = SpanTimingCollector.GetStats()
             .OrderByDescending(kv => kv.Value.TotalMs)
             .ToDictionary(kv => kv.Key, kv => kv.Value);
@@ -47,6 +68,11 @@ public class TestController(
     [HttpPost("perf-stats/reset")]
     public IActionResult ResetPerfStats()
     {
+        if (!IsEnabled)
+        {
+            return NotFound();
+        }
+
         SpanTimingCollector.Reset();
         return Ok(new { reset = true });
     }
@@ -68,6 +94,11 @@ public class TestController(
         [FromQuery] int rate = 10,
         [FromQuery] int moveIntervalMs = 3000)
     {
+        if (!IsEnabled)
+        {
+            return NotFound();
+        }
+
         Console.WriteLine(
             $"[Load Test] {clients} clients x {rate} calls/sec x {seconds} sec, {cars} cars/train, move every {moveIntervalMs} ms");
 
@@ -95,10 +126,16 @@ public class TestController(
                 $"軌道回路が不足しています (必要: {clients * circuitsPerClient}, 実際: {trackCircuitNames.Count})");
         }
 
+        if (signalNames.Count == 0)
+        {
+            // 0 除算になるので、マスタ未投入のまま呼ばれたら明示的に弾く
+            return BadRequest("信号機のマスタデータが投入されていません");
+        }
+
         SpanTimingCollector.Reset();
 
         var tasks = new List<Task>();
-        var cancellationTokenSource = new CancellationTokenSource();
+        using var cancellationTokenSource = new CancellationTokenSource();
         cancellationTokenSource.CancelAfter(TimeSpan.FromSeconds(seconds));
         var intervalMs = Math.Max(1, 1000 / Math.Max(1, rate));
 
@@ -174,7 +211,9 @@ public class TestController(
                         var service = scope.ServiceProvider.GetRequiredService<ITrainService>();
                         await service.CreateAtsData(driverId, clientData);
 
-                        await Task.Delay(intervalMs + random.Next(-10, 10), cancellationTokenSource.Token);
+                        await Task.Delay(
+                            Math.Max(0, intervalMs + random.Next(-10, 10)),
+                            cancellationTokenSource.Token);
                     }
                     catch (OperationCanceledException)
                     {

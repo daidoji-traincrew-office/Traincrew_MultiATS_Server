@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -130,6 +131,7 @@ public static class MockDependencyProvider
         services.AddScoped(_ => new Mock<ITtcStationControlService>().Object);
 
         // Register common test dependencies
+        services.AddMemoryCache();
         services.AddSingleton(typeof(ILogger<>), typeof(NullLogger<>));
     }
 

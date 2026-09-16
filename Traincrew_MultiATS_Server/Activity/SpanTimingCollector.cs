@@ -6,13 +6,34 @@ namespace Traincrew_MultiATS_Server.Activity;
 public static class SpanTimingCollector
 {
     private static readonly ConcurrentDictionary<string, Bucket> _buckets = new();
+    private static readonly object _registerLock = new();
     private static ActivityListener? _listener;
+
+    /// <summary>
+    /// 1 スパン名あたりに保持するサンプル数の上限。
+    /// 無制限に溜めると計測セッションが長いだけでメモリを食い潰すため頭を打たせる。
+    /// (30 秒 × 14 列車 × 10 回/秒 でも 4200 件なので、通常の計測では到達しない)
+    /// </summary>
+    private const int MaxSamplesPerBucket = 200_000;
 
     public sealed class Bucket
     {
         private readonly object _lock = new();
         private readonly List<double> _samples = new();
-        public void Add(double ms) { lock (_lock) _samples.Add(ms); }
+
+        public void Add(double ms)
+        {
+            lock (_lock)
+            {
+                if (_samples.Count >= MaxSamplesPerBucket)
+                {
+                    return;
+                }
+
+                _samples.Add(ms);
+            }
+        }
+
         public IReadOnlyList<double> Snapshot() { lock (_lock) return _samples.ToArray(); }
     }
 
@@ -47,7 +68,15 @@ public static class SpanTimingCollector
 
     public static void Register(params string[] sourceNames)
     {
-        if (_listener != null) return;
+        lock (_registerLock)
+        {
+            if (_listener != null) return;
+            RegisterCore(sourceNames);
+        }
+    }
+
+    private static void RegisterCore(string[] sourceNames)
+    {
         var names = new HashSet<string>(sourceNames);
         _listener = new ActivityListener
         {

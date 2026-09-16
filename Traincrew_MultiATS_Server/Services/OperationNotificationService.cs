@@ -3,6 +3,7 @@ using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.General;
+using Traincrew_MultiATS_Server.Repositories.Mutex;
 using Traincrew_MultiATS_Server.Repositories.OperationNotification;
 
 namespace Traincrew_MultiATS_Server.Services;
@@ -19,6 +20,7 @@ public class OperationNotificationService(
     IOperationNotificationRepository operationNotificationRepository,
     IGeneralRepository generalRepository,
     IDateTimeRepository dateTimeRepository,
+    IMutexRepository mutexRepository,
     IMemoryCache cache) : IOperationNotificationService
 {
     static readonly int kaijoTime = 20;
@@ -27,6 +29,11 @@ public class OperationNotificationService(
     /// 告知器と軌道回路の対応関係。初期化時に投入されるマスタデータで、以後変化しない。
     /// </summary>
     private const string CacheKeyTopology = "operationnotification:topology";
+
+    /// <summary>
+    /// 対応関係の保持期間。DB初期化の完了前にリクエストを受けた場合に備えて、保険として期限を切る。
+    /// </summary>
+    private static readonly TimeSpan TopologyCacheTtl = TimeSpan.FromMinutes(10);
 
     /// <summary>
     /// 告知器の状態。更新はすべて本サービス経由なので、書き込み時に明示的に無効化する。
@@ -38,6 +45,12 @@ public class OperationNotificationService(
     /// </summary>
     private static readonly TimeSpan StateCacheTtl = TimeSpan.FromSeconds(10);
 
+    /// <summary>
+    /// 告知器状態キャッシュの充填と無効化を直列化するためのミューテックスキー。
+    /// <see cref="CacheKeyStates"/> と 1:1 に対応する。
+    /// </summary>
+    private const string MutexKeyStates = "operationnotification:states:mutex";
+
     /// <param name="TrackCircuitIdsByDisplayName">告知器名 -> 紐づく軌道回路 ID 集合</param>
     /// <param name="DisplayNameByTrackCircuitId">軌道回路 ID -> 告知器名</param>
     private sealed record Topology(
@@ -46,28 +59,66 @@ public class OperationNotificationService(
 
     private async Task<Topology> GetTopology()
     {
-        return (await cache.GetOrCreateAsync(CacheKeyTopology, async _ =>
+        if (cache.TryGetValue(CacheKeyTopology, out Topology? cached))
         {
-            var byDisplayName = await operationNotificationRepository.GetTrackCircuitIdsByDisplayName();
-            var byTrackCircuitId = await operationNotificationRepository.GetDisplayNameByTrackCircuitId();
-            return new Topology(
-                byDisplayName.ToDictionary(kv => kv.Key, kv => kv.Value.ToHashSet()),
-                byTrackCircuitId);
-        }))!;
+            return cached!;
+        }
+
+        var byDisplayName = await operationNotificationRepository.GetTrackCircuitIdsByDisplayName();
+        // 逆引きは同じ対応関係から作れるので、DB へは 1 度しか問い合わせない
+        var byTrackCircuitId = byDisplayName
+            .SelectMany(kv => kv.Value.Select(trackCircuitId => (trackCircuitId, kv.Key)))
+            .ToDictionary(x => x.trackCircuitId, x => x.Key);
+        var topology = new Topology(
+            byDisplayName.ToDictionary(kv => kv.Key, kv => kv.Value.ToHashSet()),
+            byTrackCircuitId);
+
+        // DB初期化が終わる前に呼ばれると空の対応関係を掴んでしまい、
+        // それをキャッシュすると以後ずっと告知器が出なくなるため、空のときは載せない
+        if (byTrackCircuitId.Count > 0)
+        {
+            cache.Set(CacheKeyTopology, topology, TopologyCacheTtl);
+        }
+
+        return topology;
     }
 
+    /// <summary>
+    /// 全告知器の状態をキャッシュ経由で取得する。
+    /// </summary>
+    /// <remarks>
+    /// キャッシュミス時の SELECT と <see cref="InvalidateStates"/> の Remove はミューテックスで
+    /// 直列化する。GetOrCreateAsync だとファクトリ実行中に走った Remove は何も消さず、
+    /// その後で陳腐化したスナップショットが TTL 分だけ格納されてしまい、
+    /// 指令卓からの告知が最大 TTL の間運転士に見えなくなる。
+    /// </remarks>
     private async Task<Dictionary<string, OperationNotificationState>> GetCachedStates()
     {
-        return (await cache.GetOrCreateAsync(CacheKeyStates, async entry =>
+        // ヒット時はここで終わり(ミューテックスに触れない)
+        if (cache.TryGetValue(CacheKeyStates, out Dictionary<string, OperationNotificationState>? cached))
         {
-            entry.AbsoluteExpirationRelativeToNow = StateCacheTtl;
-            var states = await operationNotificationRepository.GetAllStates();
-            return states.ToDictionary(s => s.DisplayName);
-        }))!;
+            return cached!;
+        }
+
+        await using var mutex = await mutexRepository.AcquireAsync(MutexKeyStates);
+        // ゲート取得後に再チェック(同時ミス時に SELECT が並走するのを防ぐ)
+        if (cache.TryGetValue(CacheKeyStates, out cached))
+        {
+            return cached!;
+        }
+
+        var states = await operationNotificationRepository.GetAllStates();
+        var byDisplayName = states.ToDictionary(s => s.DisplayName);
+        cache.Set(CacheKeyStates, byDisplayName, StateCacheTtl);
+        return byDisplayName;
     }
 
-    private void InvalidateStates()
+    /// <summary>
+    /// 全告知器の状態のキャッシュを破棄する。必ず DB 書き込みの完了後に呼ぶこと。
+    /// </summary>
+    private async Task InvalidateStates()
     {
+        await using var mutex = await mutexRepository.AcquireAsync(MutexKeyStates);
         cache.Remove(CacheKeyStates);
     }
 
@@ -142,7 +193,7 @@ public class OperationNotificationService(
         };
 
         await generalRepository.Save(state);
-        InvalidateStates();
+        await InvalidateStates();
     }
 
     public async Task SetNoneWhereKaijoOrTorikeshiAndSpendMuchTime()
@@ -161,7 +212,7 @@ public class OperationNotificationService(
         }
 
         await operationNotificationRepository.SetNoneWhereKaijoOrTorikeshiAndOperatedBeforeOrEqual(operatedAt);
-        InvalidateStates();
+        await InvalidateStates();
     }
 
     private static OperationNotificationData ToOperationNotificationData(

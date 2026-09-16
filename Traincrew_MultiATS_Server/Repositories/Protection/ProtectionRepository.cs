@@ -8,15 +8,10 @@ public class ProtectionRepository(ApplicationDbContext context) : IProtectionRep
 {
     public async Task<List<ProtectionZoneState>> GetProtectionZoneStates()
     {
+        // プロセス内キャッシュに載せるので、DbContext の変更追跡には乗せない
         return await context.protectionZoneStates
+            .AsNoTracking()
             .ToListAsync();
-    }
-
-    public async Task<bool> IsProtectionEnabled(int minProtectionZone, int maxProtectionZone)
-    {
-        return await context.protectionZoneStates
-            .Where(x => minProtectionZone <= x.ProtectionZone && x.ProtectionZone <= maxProtectionZone)
-            .AnyAsync();
     }
 
     public async Task EnableProtection(string trainNumber, List<int> protectionZones)

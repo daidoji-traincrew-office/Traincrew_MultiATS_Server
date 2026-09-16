@@ -78,7 +78,7 @@ public class Program
             // Repository (ABC順)
             .AddScoped<IDateTimeRepository, DateTimeRepository>()
             .AddScoped<IGeneralRepository, GeneralRepository>()
-            .AddScoped<IMutexRepository, MutexRepository>()
+            .AddSingleton<IMutexRepository, MutexRepository>()
             .AddScoped<INextSignalRepository, NextSignalRepository>()
             .AddScoped<IOperationInformationRepository, OperationInformationRepository>()
             .AddScoped<IOperationNotificationRepository, OperationNotificationRepository>()

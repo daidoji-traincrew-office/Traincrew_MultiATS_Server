@@ -7,7 +7,6 @@ using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.DiagramTrain;
 using Traincrew_MultiATS_Server.Repositories.General;
-using Traincrew_MultiATS_Server.Repositories.NextSignal;
 using Traincrew_MultiATS_Server.Repositories.TrackCircuitDepartmentTime;
 using Traincrew_MultiATS_Server.Repositories.Train;
 using Traincrew_MultiATS_Server.Repositories.TrainCar;
@@ -41,7 +40,6 @@ public partial class TrainService(
     IBannedUserService bannedUserService,
     IGeneralRepository generalRepository,
     IServerService serverService,
-    INextSignalRepository nextSignalRepository,
     ITrainSignalStateRepository trainSignalStateRepository,
     ITrackCircuitDepartmentTimeRepository trackCircuitDepartmentTimeRepository,
     IDateTimeRepository dateTimeRepository,
@@ -146,52 +144,68 @@ public partial class TrainService(
                 .GetOperationNotificationDataByTrackCircuitIds(trackCircuitList.Select(tc => tc.Id).ToList());
 
         // トランザクション開始
-        Traincrew_MultiATS_Server.Repositories.Transaction.ITransactionScope transaction;
+        ITransactionScope transaction;
         using (ActivitySources.TrainService.StartActivity("BeginTransaction"))
             transaction = await transactionRepository.BeginTransactionAsync(IsolationLevel.RepeatableRead);
         await using var _tx = transaction;
         // 運番が同じ列車の情報を取得する
-        TrainState? trainState;
-        using (ActivitySources.TrainService.StartActivity("RegisterOrUpdateTrainState"))
-            trainState = await RegisterOrUpdateTrainState(
-                clientDriverId, clientData, trackCircuitList, incrementalTrackCircuitDataList,
-                serverData);
-
-        if (trainState == null)
+        TrainState? trainState = null;
+        try
         {
-            // 列車情報の更新が不要な場合は、ここで終了
+            using (ActivitySources.TrainService.StartActivity("RegisterOrUpdateTrainState"))
+                trainState = await RegisterOrUpdateTrainState(
+                    clientDriverId, clientData, trackCircuitList, incrementalTrackCircuitDataList,
+                    serverData);
+
+            if (trainState == null)
+            {
+                // 列車情報の更新が不要な場合は、ここで終了
+                using (ActivitySources.TrainService.StartActivity("CommitTransaction"))
+                    await transaction.CommitAsync();
+                return serverData;
+            }
+
+            // 在線軌道回路の更新
+            if (incrementalTrackCircuitDataList.Count > 0 || decrementalTrackCircuitDataList.Count > 0)
+            {
+                logger.LogDebug("[{LogType}] 列車: {trainNumber}, 落下: [{NewTrackCircuits}], 扛上: [{EndTrackCircuits}]",
+                    "在線更新", clientTrainNumber,
+                    string.Join(", ", incrementalTrackCircuitDataList.Select(tc => tc.Name)),
+                    string.Join(", ", decrementalTrackCircuitDataList.Select(tc => tc.Name)));
+            }
+
+            using (ActivitySources.TrainService.StartActivity("SetTrackCircuitDataList"))
+                await trackCircuitService.SetTrackCircuitDataList(incrementalTrackCircuitDataList, clientTrainNumber);
+            using (ActivitySources.TrainService.StartActivity("ClearTrackCircuitDataList"))
+                await trackCircuitService.ClearTrackCircuitDataList(decrementalTrackCircuitDataList);
+
+            // 車両情報の登録
+            using (ActivitySources.TrainService.StartActivity("UpdateTrainCarStates"))
+                await UpdateTrainCarStates(trainState.Id, clientData.CarStates);
+
+            // TrainSignalStateの更新
+            if (clientData.VisibleSignalNames is { Count: > 0 })
+            {
+                using (ActivitySources.TrainService.StartActivity("UpdateTrainSignalState"))
+                    await UpdateTrainSignalState(clientTrainNumber, clientData.VisibleSignalNames);
+            }
+
             using (ActivitySources.TrainService.StartActivity("CommitTransaction"))
                 await transaction.CommitAsync();
-            return serverData;
         }
-
-        // 在線軌道回路の更新
-        if (incrementalTrackCircuitDataList.Count > 0 || decrementalTrackCircuitDataList.Count > 0)
+        catch
         {
-            logger.LogDebug("[{LogType}] 列車: {trainNumber}, 落下: [{NewTrackCircuits}], 扛上: [{EndTrackCircuits}]",
-                "在線更新", clientTrainNumber,
-                string.Join(", ", incrementalTrackCircuitDataList.Select(tc => tc.Name)),
-                string.Join(", ", decrementalTrackCircuitDataList.Select(tc => tc.Name)));
+            // コミット前に「DBへ書き込み済み」として載せた差分キャッシュを捨てる。
+            // 残したままにすると、ロールバックで消えた内容を書き込み済みとみなして
+            // TTLが切れるまで UPDATE が抑止され、DBに反映されないままになる。
+            if (trainState != null)
+            {
+                cache.Remove(CacheKeyCarStates(trainState.Id));
+            }
+
+            cache.Remove(CacheKeySignalStates(clientTrainNumber));
+            throw;
         }
-
-        using (ActivitySources.TrainService.StartActivity("SetTrackCircuitDataList"))
-            await trackCircuitService.SetTrackCircuitDataList(incrementalTrackCircuitDataList, clientTrainNumber);
-        using (ActivitySources.TrainService.StartActivity("ClearTrackCircuitDataList"))
-            await trackCircuitService.ClearTrackCircuitDataList(decrementalTrackCircuitDataList);
-
-        // 車両情報の登録
-        using (ActivitySources.TrainService.StartActivity("UpdateTrainCarStates"))
-            await UpdateTrainCarStates(trainState.Id, clientData.CarStates);
-
-        // TrainSignalStateの更新
-        if (clientData.VisibleSignalNames is { Count: > 0 })
-        {
-            using (ActivitySources.TrainService.StartActivity("UpdateTrainSignalState"))
-                await UpdateTrainSignalState(clientTrainNumber, clientData.VisibleSignalNames);
-        }
-
-        using (ActivitySources.TrainService.StartActivity("CommitTransaction"))
-            await transaction.CommitAsync();
 
         if (decrementalTrackCircuitDataList.Count > 0)
         {

@@ -32,6 +32,45 @@ public class ServerService(
     private const string CacheKeySelectedDiaId = "selectedDiaId";
     private static readonly TimeSpan CacheTtl = TimeSpan.FromSeconds(10);
 
+    /// <summary>
+    /// キャッシュの充填と無効化を直列化して取得する。
+    /// </summary>
+    /// <remarks>
+    /// GetOrCreateAsync だとファクトリ実行中に走った Remove は何も消さず、その後で陳腐化した値が
+    /// TTL 分だけ格納されてしまう(サーバモードを Off にしても最大 TTL の間反映されない)ため、
+    /// ミューテックスで充填と無効化を直列化する。
+    /// </remarks>
+    private async Task<T> GetCachedAsync<T>(string cacheKey, Func<Task<T>> factory)
+    {
+        // ヒット時はここで終わり(ミューテックスに触れない)
+        if (cache.TryGetValue(cacheKey, out T? cached))
+        {
+            return cached!;
+        }
+
+        await using var mutex = await mutexRepository.AcquireAsync(CacheMutexKey(cacheKey));
+        // ゲート取得後に再チェック(同時ミス時に SELECT が並走するのを防ぐ)
+        if (cache.TryGetValue(cacheKey, out cached))
+        {
+            return cached!;
+        }
+
+        var value = await factory();
+        cache.Set(cacheKey, value, CacheTtl);
+        return value;
+    }
+
+    /// <summary>
+    /// キャッシュを破棄する。必ず DB 書き込みの完了後に呼ぶこと。
+    /// </summary>
+    private async Task InvalidateCacheAsync(string cacheKey)
+    {
+        await using var mutex = await mutexRepository.AcquireAsync(CacheMutexKey(cacheKey));
+        cache.Remove(cacheKey);
+    }
+
+    private static string CacheMutexKey(string cacheKey) => $"{cacheKey}:mutex";
+
     public async Task<ServerMode> GetServerModeAsync()
     {
         await using var mutex = await mutexRepository.AcquireAsync(nameof(ServerService));
@@ -50,18 +89,14 @@ public class ServerService(
 
     public async Task<ServerMode> GetServerModeCachedAsync()
     {
-        return await cache.GetOrCreateAsync(CacheKeyServerMode, async entry =>
-        {
-            entry.AbsoluteExpirationRelativeToNow = CacheTtl;
-            return await GetServerModeAsyncWithoutLock();
-        });
+        return await GetCachedAsync(CacheKeyServerMode, GetServerModeAsyncWithoutLock);
     }
 
     public async Task SetServerModeAsync(ServerMode mode)
     {
         await using var mutex = await mutexRepository.AcquireAsync(nameof(ServerService));
         await serverRepository.SetServerStateAsync(mode);
-        cache.Remove(CacheKeyServerMode);
+        await InvalidateCacheAsync(CacheKeyServerMode);
         await UpdateSchedulerAsyncWithoutLock();
     }
 
@@ -86,17 +121,13 @@ public class ServerService(
 
     public virtual async Task<int> GetTimeOffsetAsync()
     {
-        return (await cache.GetOrCreateAsync(CacheKeyTimeOffset, async entry =>
-        {
-            entry.AbsoluteExpirationRelativeToNow = CacheTtl;
-            return await serverRepository.GetTimeOffset();
-        }))!;
+        return await GetCachedAsync(CacheKeyTimeOffset, serverRepository.GetTimeOffset);
     }
 
     public async Task SetTimeOffsetAsync(int timeOffset)
     {
         await serverRepository.SetTimeOffsetAsync(timeOffset);
-        cache.Remove(CacheKeyTimeOffset);
+        await InvalidateCacheAsync(CacheKeyTimeOffset);
     }
 
     public async Task SetSwitchMoveTimeAsync(int switchMoveTime)
@@ -111,16 +142,12 @@ public class ServerService(
 
     public async Task<ulong?> GetSelectedDiagramIdAsync()
     {
-        return await cache.GetOrCreateAsync(CacheKeySelectedDiaId, async entry =>
-        {
-            entry.AbsoluteExpirationRelativeToNow = CacheTtl;
-            return await serverRepository.GetSelectedDiagramIdAsync();
-        });
+        return await GetCachedAsync(CacheKeySelectedDiaId, serverRepository.GetSelectedDiagramIdAsync);
     }
 
     public async Task SetSelectedDiagramIdAsync(ulong? diaId)
     {
         await serverRepository.SetSelectedDiagramIdAsync(diaId);
-        cache.Remove(CacheKeySelectedDiaId);
+        await InvalidateCacheAsync(CacheKeySelectedDiaId);
     }
 }

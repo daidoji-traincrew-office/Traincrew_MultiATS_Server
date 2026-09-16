@@ -2,6 +2,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.General;
+using Traincrew_MultiATS_Server.Repositories.Mutex;
 using Traincrew_MultiATS_Server.Repositories.Protection;
 
 namespace Traincrew_MultiATS_Server.Services;
@@ -19,6 +20,7 @@ public interface IProtectionService
 public class ProtectionService(
     IProtectionRepository protectionRepository,
     IGeneralRepository generalRepository,
+    IMutexRepository mutexRepository,
     IMemoryCache cache) : IProtectionService
 {
     /// <summary>
@@ -29,6 +31,12 @@ public class ProtectionService(
     private const string CacheKeyProtectionZoneStates = "protection:zonestates";
 
     /// <summary>
+    /// 発報中の防護無線一覧のキャッシュ充填と無効化を直列化するためのミューテックスキー。
+    /// <see cref="CacheKeyProtectionZoneStates"/> と 1:1 に対応する。
+    /// </summary>
+    private const string MutexKeyProtectionZoneStates = "protection:zonestates:mutex";
+
+    /// <summary>
     /// 明示的な無効化が漏れた場合の保険としての TTL。
     /// </summary>
     private static readonly TimeSpan CacheTtl = TimeSpan.FromSeconds(10);
@@ -36,17 +44,44 @@ public class ProtectionService(
     /// <summary>
     /// 発報中の防護無線一覧をキャッシュ経由で取得する。
     /// </summary>
-    private async Task<List<ProtectionZoneState>> GetCachedProtectionZoneStates()
+    /// <remarks>
+    /// キャッシュミス時の SELECT と <see cref="InvalidateProtectionZoneStates"/> の Remove は
+    /// ミューテックスで直列化する。こうしないと「SELECT 実行中に走った Remove が何も消さず、
+    /// その後で陳腐化した値が格納される」競合が起き、発報/解除が TTL の間見えなくなる。
+    /// キャッシュヒット時は ATS のホットパス(10 回/秒/列車)そのものなので、
+    /// 二重チェックにしてゲートには一切触れない。
+    /// </remarks>
+    private async Task<IReadOnlyList<ProtectionZoneState>> GetCachedProtectionZoneStates()
     {
-        return (await cache.GetOrCreateAsync(CacheKeyProtectionZoneStates, async entry =>
+        // ヒット時はここで終わり(ミューテックスに触れない)
+        // キャッシュは全呼び出しで共有されるので、書き換えられないよう読み取り専用で返す
+        if (cache.TryGetValue(CacheKeyProtectionZoneStates, out IReadOnlyList<ProtectionZoneState>? cached))
         {
-            entry.AbsoluteExpirationRelativeToNow = CacheTtl;
-            return await protectionRepository.GetProtectionZoneStates();
-        }))!;
+            return cached!;
+        }
+
+        await using var mutex = await mutexRepository.AcquireAsync(MutexKeyProtectionZoneStates);
+        // ゲート取得後に再チェック(同時ミス時に SELECT が並走するのを防ぐ)
+        if (cache.TryGetValue(CacheKeyProtectionZoneStates, out cached))
+        {
+            return cached!;
+        }
+
+        IReadOnlyList<ProtectionZoneState> states = await protectionRepository.GetProtectionZoneStates();
+        cache.Set(CacheKeyProtectionZoneStates, states, CacheTtl);
+        return states;
     }
 
-    private void InvalidateProtectionZoneStates()
+    /// <summary>
+    /// 発報中の防護無線一覧のキャッシュを破棄する。
+    /// </summary>
+    /// <remarks>
+    /// 必ず DB 書き込みのコミット後に、かつミューテックスの外で書き込みを終えてから呼ぶこと。
+    /// ゲート内では Remove のみを行う(DB 書き込みを持ち込むとロック保持時間が跳ね上がる)。
+    /// </remarks>
+    private async Task InvalidateProtectionZoneStates()
     {
+        await using var mutex = await mutexRepository.AcquireAsync(MutexKeyProtectionZoneStates);
         cache.Remove(CacheKeyProtectionZoneStates);
     }
 
@@ -69,13 +104,13 @@ public class ProtectionService(
     {
         await protectionRepository.EnableProtection(
             trainNumber, trackCircuits.Select(tc => tc.ProtectionZone).ToList());
-        InvalidateProtectionZoneStates();
+        await InvalidateProtectionZoneStates();
     }
 
     private async Task DisableProtection(string trainNumber)
     {
         await protectionRepository.DisableProtection(trainNumber);
-        InvalidateProtectionZoneStates();
+        await InvalidateProtectionZoneStates();
     }
 
     public async Task UpdateBougoState(string trainNumber, List<TrackCircuit> trackCircuits, bool clientBougoState)
@@ -131,7 +166,7 @@ public class ProtectionService(
             TrainNumber = data.TrainNumber,
             ProtectionZone = data.ProtectionZone
         });
-        InvalidateProtectionZoneStates();
+        await InvalidateProtectionZoneStates();
     }
 
     // ProtectionZoneStateの更新
@@ -143,13 +178,13 @@ public class ProtectionService(
             TrainNumber = data.TrainNumber,
             ProtectionZone = data.ProtectionZone
         });
-        InvalidateProtectionZoneStates();
+        await InvalidateProtectionZoneStates();
     }
 
     // ProtectionZoneStateの削除
     public async Task DeleteProtectionZoneState(ulong id)
     {
         await protectionRepository.DeleteById(id);
-        InvalidateProtectionZoneStates();
+        await InvalidateProtectionZoneStates();
     }
 }
