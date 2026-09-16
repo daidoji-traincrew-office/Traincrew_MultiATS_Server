@@ -66,21 +66,35 @@ public static class SpanTimingCollector
         return result;
     }
 
+    /// <summary>
+    /// 購読対象の ActivitySource 名。2 回目以降の <see cref="Register"/> でも
+    /// 取りこぼさないよう、リスナーを作り直さずこの集合に追加していく。
+    /// </summary>
+    private static readonly HashSet<string> _sourceNames = [];
+
     public static void Register(params string[] sourceNames)
     {
         lock (_registerLock)
         {
+            foreach (var sourceName in sourceNames)
+            {
+                _sourceNames.Add(sourceName);
+            }
+
             if (_listener != null) return;
-            RegisterCore(sourceNames);
+            RegisterCore();
         }
     }
 
-    private static void RegisterCore(string[] sourceNames)
+    private static void RegisterCore()
     {
-        var names = new HashSet<string>(sourceNames);
         _listener = new ActivityListener
         {
-            ShouldListenTo = src => names.Contains(src.Name),
+            // 後から Register された分も拾えるよう、判定時に集合を引く
+            ShouldListenTo = src =>
+            {
+                lock (_registerLock) return _sourceNames.Contains(src.Name);
+            },
             Sample = (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllData,
             SampleUsingParentId = (ref ActivityCreationOptions<string> _) => ActivitySamplingResult.AllData,
             ActivityStopped = act =>
