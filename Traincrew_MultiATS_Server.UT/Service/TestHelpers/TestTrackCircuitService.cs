@@ -1,4 +1,4 @@
-using Traincrew_MultiATS_Server.Models;
+﻿using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Services;
 
 namespace Traincrew_MultiATS_Server.UT.Service.TestHelpers;
@@ -7,7 +7,7 @@ namespace Traincrew_MultiATS_Server.UT.Service.TestHelpers;
 /// TrackCircuitServiceのテスト用ヘルパークラス
 /// モック可能なメソッドを提供
 /// </summary>
-public class TestTrackCircuitService() : TrackCircuitService(null!, null!)
+public class TestTrackCircuitService() : TrackCircuitService(null!, null!, null!)
 {
     private Func<List<string>, Task<List<TrackCircuit>>>? getTrackCircuitsByNamesFunc;
 
