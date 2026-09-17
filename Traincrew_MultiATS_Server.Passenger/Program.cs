@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
@@ -99,6 +99,9 @@ public class Program
             .AddScoped<IUserDisconnectionRepository, UserDisconnectionRepository>()
             // Service (ABC順)
             .AddScoped<IBannedUserService, BannedUserService>()
+            // 旅客用プロセスはマスタのスナップショットを使わず毎回SQLを読むため、実際にロードされることはない。
+            // TrackCircuitService の DI 解決に必要なので登録だけしておく
+            .AddSingleton<IInterlockingObjectMasterStore, InterlockingObjectMasterStore>()
             .AddScoped<IOperationInformationService, OperationInformationService>()
             .AddScoped<IOperationNotificationService, OperationNotificationService>()
             .AddScoped<IPassengerService, PassengerService>()

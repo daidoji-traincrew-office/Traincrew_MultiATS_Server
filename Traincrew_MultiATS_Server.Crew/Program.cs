@@ -597,6 +597,7 @@ public class Program
             .AddScoped<ITIDService, TIDService>()
             .AddScoped<ITtcStationControlService, TtcStationControlService>()
             .AddSingleton<EnableAuthorizationStore>(_ => new(enableAuthorization))
+            .AddSingleton<IInterlockingObjectMasterStore, InterlockingObjectMasterStore>()
             .AddSingleton<IDiscordService, DiscordService>()
             .AddSingleton<MetricsCollector>()
             .AddSingleton<SchedulerManagerForServer>()

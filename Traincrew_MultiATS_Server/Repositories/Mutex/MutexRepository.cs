@@ -6,10 +6,10 @@ public class MutexRepository: IMutexRepository
 {
     private readonly ConcurrentDictionary<string, SemaphoreSlim> _mutexes = new();
 
-    public async Task<IAsyncDisposable> AcquireAsync(string key)
+    public async Task<IAsyncDisposable> AcquireAsync(string key, CancellationToken ct = default)
     {
         var semaphore = _mutexes.GetOrAdd(key, _ => new(1, 1));
-        await semaphore.WaitAsync();
+        await semaphore.WaitAsync(ct);
         return new Releaser(() =>
         {
             semaphore.Release();

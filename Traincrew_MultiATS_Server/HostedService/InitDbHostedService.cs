@@ -11,6 +11,7 @@ namespace Traincrew_MultiATS_Server.HostedService;
 public class InitDbHostedService(
     IServiceScopeFactory serviceScopeFactory,
     InitializationState initializationState,
+    IInterlockingObjectMasterStore interlockingObjectMasterStore,
     ILogger<InitDbHostedService> logger)
     : IHostedService
 {
@@ -26,6 +27,9 @@ public class InitDbHostedService(
         using var scope = serviceScopeFactory.CreateScope();
         var orchestrator = scope.ServiceProvider.GetRequiredService<DatabaseInitializationOrchestrator>();
         await orchestrator.InitializeAsync(cancellationToken);
+
+        // Initialize master store
+        await interlockingObjectMasterStore.ReloadAsync(cancellationToken);
 
         // Start server mode scheduler
         var serverService = scope.ServiceProvider.GetRequiredService<IServerService>();
@@ -50,10 +54,14 @@ public class InitDbHostedService(
         logger.LogInformation("InitDbHostedService stopping");
 
         using var scope = serviceScopeFactory.CreateScope();
+        // Todo: healthzに止まったぞオイを渡すべきか？
+
         var schedulerManager = scope.ServiceProvider.GetRequiredService<SchedulerManagerForServer>();
 
         await schedulerManager.Stop();
         await schedulerManager.StopServerModeScheduler();
+
+        interlockingObjectMasterStore.Unload();
 
         logger.LogInformation("InitDbHostedService stopped");
 

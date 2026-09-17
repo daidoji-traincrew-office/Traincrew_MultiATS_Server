@@ -19,25 +19,51 @@ public interface ITrackCircuitService
 
 public class TrackCircuitService(
     ITrackCircuitRepository trackCircuitRepository,
+    IInterlockingObjectMasterStore interlockingObjectMasterStore,
     IGeneralRepository generalRepository) : ITrackCircuitService
 {
     public async Task<List<TrackCircuitData>> GetAllTrackCircuitDataList()
     {
-        var trackCircuitsDb = await trackCircuitRepository.GetAllTrackCircuitList();
-        var trackCircuitDataList = trackCircuitsDb
-            .Select(ToTrackCircuitData)
+        var master = interlockingObjectMasterStore.Current;
+        var states = await trackCircuitRepository.GetAllStates();
+        return states
+            .Select(state =>
+                master.TryGetById<TrackCircuit>(state.Id, out var trackCircuit)
+                    ? ToTrackCircuitData(trackCircuit, state)
+                    : null
+            )
+            .OfType<TrackCircuitData>()
             .ToList();
-        return trackCircuitDataList;
     }
 
     public virtual async Task<List<TrackCircuit>> GetTrackCircuitsByNames(List<string> trackCircuitNames)
     {
-        return await trackCircuitRepository.GetTrackCircuitByName(trackCircuitNames);
+        var master = interlockingObjectMasterStore.Current;
+        var trackCircuits = master.GetByNames<TrackCircuit>(trackCircuitNames);
+        var states = await trackCircuitRepository
+            .GetStateByIds(trackCircuits.Select(t => t.Id).ToList());
+        return states
+            .Select(state =>
+                master.TryGetById<TrackCircuit>(state.Id, out var trackCircuit)
+                    ? trackCircuit.CloneWithState(state)
+                    : null
+            )
+            .OfType<TrackCircuit>()
+            .ToList();
     }
 
     public async Task<List<TrackCircuit>> GetTrackCircuitsByTrainNumber(string trainNumber)
     {
-        return await trackCircuitRepository.GetTrackCircuitListByTrainNumber(trainNumber);
+        var master = interlockingObjectMasterStore.Current;
+        var states = await trackCircuitRepository.GetStateByTrainNumber(trainNumber);
+        return states
+            .Select(state =>
+                master.TryGetById<TrackCircuit>(state.Id, out var trackCircuit)
+                    ? trackCircuit.CloneWithState(state)
+                    : null
+            )
+            .OfType<TrackCircuit>()
+            .ToList();
     }
 
     public async Task SetTrackCircuitDataList(List<TrackCircuitData> trackCircuitData, string trainNumber)
@@ -54,8 +80,8 @@ public class TrackCircuitService(
 
     public async Task SetTrackCircuitData(TrackCircuitData trackCircuitData)
     {
-        var trackCircuits = await trackCircuitRepository.GetTrackCircuitByName([trackCircuitData.Name]);
-        if (trackCircuits.Count == 0)
+        var master = interlockingObjectMasterStore.Current;
+        if (!master.TryGetByName<TrackCircuit>(trackCircuitData.Name, out _))
         {
             // Todo: 例外を吐いたほうが良いとされている
             return;
@@ -89,12 +115,14 @@ public class TrackCircuitService(
 
     internal static TrackCircuitData ToTrackCircuitData(TrackCircuit trackCircuit)
     {
-        return new()
-        {
-            Last = trackCircuit.TrackCircuitState.TrainNumber,
-            Name = trackCircuit.Name,
-            On = trackCircuit.TrackCircuitState.IsShortCircuit,
-            Lock = trackCircuit.TrackCircuitState.IsLocked
-        };
+        return ToTrackCircuitData(trackCircuit, trackCircuit.TrackCircuitState);
     }
+
+    private static TrackCircuitData ToTrackCircuitData(TrackCircuit trackCircuit, TrackCircuitState state) => new()
+    {
+        Name = trackCircuit.Name,
+        Last = state.TrainNumber,
+        On = state.IsShortCircuit,
+        Lock = state.IsLocked
+    };
 }
