@@ -6,17 +6,20 @@ namespace Traincrew_MultiATS_Server.Repositories.Protection;
 
 public class ProtectionRepository(ApplicationDbContext context) : IProtectionRepository
 {
+    /// <summary>
+    /// protection_zone_stateを全件取得する。
+    /// </summary>
+    /// <remarks>
+    /// ATSのホットパスから毎tick呼ばれる。通常0行、発報中でも数行の極小テーブルなので、
+    /// 絞り込みの述語を付けず(=パラメータ無しで文面を固定し)全件取る方が
+    /// 文の本数とプランニングの両方で軽い。
+    /// 追跡すると毎tickのエンティティがchange trackerに積まれるのでAsNoTrackingにする。
+    /// </remarks>
     public async Task<List<ProtectionZoneState>> GetProtectionZoneStates()
     {
         return await context.protectionZoneStates
+            .AsNoTracking()
             .ToListAsync();
-    }
-
-    public async Task<bool> IsProtectionEnabled(int minProtectionZone, int maxProtectionZone)
-    {
-        return await context.protectionZoneStates
-            .Where(x => minProtectionZone <= x.ProtectionZone && x.ProtectionZone <= maxProtectionZone)
-            .AnyAsync();
     }
 
     public async Task EnableProtection(string trainNumber, List<int> protectionZones)

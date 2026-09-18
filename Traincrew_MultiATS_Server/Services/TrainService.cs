@@ -130,13 +130,12 @@ public partial class TrainService(
         }
 
         // ☆情報は割と常に送るため共通で演算する
+        // 受報判定と発報状態のDB更新は、同一tickの1回の読みでまとめて行う
         bool bougoState;
-        using (ActivitySources.TrainService.StartActivity("IsProtectionEnabledForTrackCircuits"))
-            bougoState = await protectionService.IsProtectionEnabledForTrackCircuits(trackCircuitList);
+        using (ActivitySources.TrainService.StartActivity("EvaluateAndUpdateBougo"))
+            bougoState = await protectionService.EvaluateAndUpdateBougo(
+                clientTrainNumber, trackCircuitList, clientData.BougoState);
         var serverData = new ServerToATSData { BougoState = bougoState };
-        // 防護無線を発報している場合のDB更新
-        using (ActivitySources.TrainService.StartActivity("UpdateBougoState"))
-            await protectionService.UpdateBougoState(clientTrainNumber, trackCircuitList, clientData.BougoState);
 
         // 運転告知器の表示
         using (ActivitySources.TrainService.StartActivity("GetOperationNotificationDataByTrackCircuitIds"))
