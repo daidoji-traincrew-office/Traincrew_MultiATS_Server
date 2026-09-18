@@ -95,7 +95,7 @@ public partial class TrainService(
         // 接続拒否チェック
         bool isBanned;
         using (ActivitySources.TrainService.StartActivity("IsUserBannedAsync"))
-            isBanned = await bannedUserService.IsUserBannedAsync(clientDriverId);
+            isBanned = await bannedUserService.IsUserBannedCachedAsync(clientDriverId);
         if (isBanned)
         {
             return new()
