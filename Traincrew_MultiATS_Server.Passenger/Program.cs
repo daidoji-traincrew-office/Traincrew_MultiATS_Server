@@ -78,7 +78,8 @@ public class Program
             // Repository (ABC順)
             .AddScoped<IDateTimeRepository, DateTimeRepository>()
             .AddScoped<IGeneralRepository, GeneralRepository>()
-            .AddScoped<IMutexRepository, MutexRepository>()
+            // Scopedだとスコープごとに別のSemaphoreSlimになり排他にならない。Crewと揃えてSingletonにする
+            .AddSingleton<IMutexRepository, MutexRepository>()
             .AddScoped<INextSignalRepository, NextSignalRepository>()
             .AddScoped<IOperationInformationRepository, OperationInformationRepository>()
             .AddScoped<IOperationNotificationRepository, OperationNotificationRepository>()
@@ -102,6 +103,9 @@ public class Program
             // 旅客用プロセスはマスタのスナップショットを使わず毎回SQLを読むため、実際にロードされることはない。
             // TrackCircuitService の DI 解決に必要なので登録だけしておく
             .AddSingleton<IInterlockingObjectMasterStore, InterlockingObjectMasterStore>()
+            // 同上。旅客用プロセスは OperationNotificationService のメソッドを呼ばないが、
+            // TrainService のコンストラクタ引数なので DI 解決には必要
+            .AddSingleton<IOperationNotificationMasterStore, OperationNotificationMasterStore>()
             .AddScoped<IOperationInformationService, OperationInformationService>()
             .AddScoped<IOperationNotificationService, OperationNotificationService>()
             .AddScoped<IPassengerService, PassengerService>()

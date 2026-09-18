@@ -598,6 +598,7 @@ public class Program
             .AddScoped<ITtcStationControlService, TtcStationControlService>()
             .AddSingleton<EnableAuthorizationStore>(_ => new(enableAuthorization))
             .AddSingleton<IInterlockingObjectMasterStore, InterlockingObjectMasterStore>()
+            .AddSingleton<IOperationNotificationMasterStore, OperationNotificationMasterStore>()
             .AddSingleton<IDiscordService, DiscordService>()
             .AddSingleton<MetricsCollector>()
             .AddSingleton<SchedulerManagerForServer>()
