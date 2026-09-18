@@ -35,7 +35,7 @@ public class OperationNotificationService(
         List<ulong> trackCircuitIds)
     {
         var master = operationNotificationMasterStore.Current;
-        // 起動回路に該当する告知器を探す
+        // 軌道回路に該当する告知器を探す
         var displayName = master.TryGetDisplayName(trackCircuitIds);
         // なければnullで返す
         if (displayName == null)
