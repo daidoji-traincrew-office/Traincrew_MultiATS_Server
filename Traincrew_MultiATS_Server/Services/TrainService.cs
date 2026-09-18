@@ -81,8 +81,8 @@ public partial class TrainService(
         using var _rootActivity = ActivitySources.TrainService.StartActivity("CreateAtsData");
 
         ServerMode serverMode;
-        using (ActivitySources.TrainService.StartActivity("GetServerModeAsyncWithoutLock"))
-            serverMode = await serverService.GetServerModeAsyncWithoutLock();
+        using (ActivitySources.TrainService.StartActivity("GetServerModeCachedAsync"))
+            serverMode = await serverService.GetServerModeCachedAsync();
         // 定時処理が停止している場合、その旨だけ返す
         if (serverMode == ServerMode.Off)
         {
