@@ -66,6 +66,7 @@ using Traincrew_MultiATS_Server.Repositories.TtcWindowTrackCircuit;
 using Traincrew_MultiATS_Server.Repositories.UserDisconnection;
 using Traincrew_MultiATS_Server.Scheduler;
 using Traincrew_MultiATS_Server.Services;
+using Traincrew_MultiATS_Server.Services.Cache;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace Traincrew_MultiATS_Server.Crew;
@@ -530,6 +531,8 @@ public class Program
             .AddScoped<DatabaseInitializationOrchestrator>()
             // 初期化完了状態(/healthz が参照する)
             .AddSingleton<InitializationState>()
+            // キャッシュの充填と無効化の土台
+            .AddSingleton<ICacheGate, CacheGate>()
             .AddScoped<IDateTimeRepository, DateTimeRepository>()
             .AddScoped<IDestinationButtonRepository, DestinationButtonRepository>()
             .AddScoped<IDirectionRouteRepository, DirectionRouteRepository>()

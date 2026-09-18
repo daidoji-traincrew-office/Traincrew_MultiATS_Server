@@ -24,6 +24,8 @@ using Traincrew_MultiATS_Server.Repositories.Transaction;
 using Traincrew_MultiATS_Server.Repositories.UserDisconnection;
 using Traincrew_MultiATS_Server.Scheduler;
 using Traincrew_MultiATS_Server.Services;
+using Traincrew_MultiATS_Server.Services.Cache;
+using Traincrew_MultiATS_Server.HostedService;
 
 namespace Traincrew_MultiATS_Server.Passenger;
 
@@ -98,6 +100,13 @@ public class Program
             .AddScoped<ITrainSignalStateRepository, TrainSignalStateRepository>()
             .AddScoped<ITransactionRepository, TransactionRepository>()
             .AddScoped<IUserDisconnectionRepository, UserDisconnectionRepository>()
+            // 旅客用プロセスは InitDbHostedService を持たないため MarkInitialized が呼ばれず、
+            // CacheGate は永久に「初期化未完了」と判断してキャッシュを充填しない。
+            // つまり旅客用プロセスは構造的にキャッシュを持たず、常にDBを読む。
+            // (書き込み経路を持たないプロセスが無効化を取りこぼして古い値を返すのを、
+            //  ...WithoutCache のような別メソッドを作らずに防いでいる)
+            .AddSingleton<InitializationState>()
+            .AddSingleton<ICacheGate, CacheGate>()
             // Service (ABC順)
             .AddScoped<IBannedUserService, BannedUserService>()
             // 旅客用プロセスはマスタのスナップショットを使わず毎回SQLを読むため、実際にロードされることはない。
