@@ -10,7 +10,7 @@ public class OperationNotificationRepository(ApplicationDbContext context) : IOp
     {
         return await context.OperationNotificationStates
             .AsNoTracking()
-            .SingleOrDefaultAsync(s => s.DisplayName == displayName);
+            .FirstOrDefaultAsync(s => s.DisplayName == displayName);
     }
 
     public async Task<List<Models.OperationNotificationState>> GetAllStates()
