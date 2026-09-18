@@ -12,6 +12,7 @@ public class InitDbHostedService(
     IServiceScopeFactory serviceScopeFactory,
     InitializationState initializationState,
     IInterlockingObjectMasterStore interlockingObjectMasterStore,
+    IOperationNotificationMasterStore operationNotificationMasterStore,
     ILogger<InitDbHostedService> logger)
     : IHostedService
 {
@@ -30,6 +31,7 @@ public class InitDbHostedService(
 
         // Initialize master store
         await interlockingObjectMasterStore.ReloadAsync(cancellationToken);
+        await operationNotificationMasterStore.ReloadAsync(cancellationToken);
 
         // Start server mode scheduler
         var serverService = scope.ServiceProvider.GetRequiredService<IServerService>();
@@ -61,6 +63,7 @@ public class InitDbHostedService(
         await schedulerManager.Stop();
         await schedulerManager.StopServerModeScheduler();
 
+        operationNotificationMasterStore.Unload();
         interlockingObjectMasterStore.Unload();
 
         logger.LogInformation("InitDbHostedService stopped");

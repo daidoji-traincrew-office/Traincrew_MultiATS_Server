@@ -15,34 +15,39 @@ public interface IOperationNotificationService
 }
 
 public class OperationNotificationService(
+    IOperationNotificationMasterStore operationNotificationMasterStore,
     IOperationNotificationRepository operationNotificationRepository,
     IGeneralRepository generalRepository,
     IDateTimeRepository dateTimeRepository) : IOperationNotificationService
 {
     static readonly int kaijoTime = 20;
+
     public async Task<List<OperationNotificationData>> GetOperationNotificationData()
     {
-        var displays = await operationNotificationRepository.GetAllDisplay();
-        return displays.Select(ToOperationNotificationData).ToList();
+        // Stateを全取得
+        var states = await operationNotificationRepository.GetAllStates();
+        return states
+            .Select(ToOperationNotificationData)
+            .ToList();
     }
-    
+
     public async Task<OperationNotificationData?> GetOperationNotificationDataByTrackCircuitIds(
         List<ulong> trackCircuitIds)
     {
-        var displays = await operationNotificationRepository
-            .GetDisplayByTrackCircuitIds(trackCircuitIds);
-        // 運転告知器のない軌道回路があるならnullを返す
-        if(displays.Any(d => d == null) || displays.Count != 1)
+        var master = operationNotificationMasterStore.Current;
+        // 起動回路に該当する告知器を探す
+        var displayName = master.TryGetDisplayName(trackCircuitIds);
+        // なければnullで返す
+        if (displayName == null)
         {
             return null;
         }
-        var display = displays.First();
-        if(!display.TrackCircuits.Select(tc => tc.Id).ToHashSet().SetEquals(trackCircuitIds.ToHashSet()))
-        {
-            // まだホームトラックに入りきってない場合、nullを返す
-            return null;
-        }
-        return ToOperationNotificationData(display);
+
+        // 名前からState取得
+        var state = await operationNotificationRepository.GetStateByDisplayName(displayName);
+        return state != null
+            ? ToOperationNotificationData(state)
+            : null;
     }
 
     public async Task SetOperationNotificationData(OperationNotificationData operationNotificationData)
@@ -65,15 +70,14 @@ public class OperationNotificationService(
         await operationNotificationRepository.SetNoneWhereKaijoOrTorikeshiAndOperatedBeforeOrEqual(operatedAt);
     }
 
-    private static OperationNotificationData ToOperationNotificationData(
-        OperationNotificationDisplay operationNotificationDisplay)
+    private static OperationNotificationData ToOperationNotificationData(OperationNotificationState state)
     {
         return new()
         {
-            DisplayName = operationNotificationDisplay.Name,
-            Type = operationNotificationDisplay.OperationNotificationState.Type,
-            Content = operationNotificationDisplay.OperationNotificationState.Content,
-            OperatedAt = operationNotificationDisplay.OperationNotificationState.OperatedAt
+            DisplayName = state.DisplayName,
+            Type = state.Type,
+            Content = state.Content,
+            OperatedAt = state.OperatedAt
         };
     }
 }

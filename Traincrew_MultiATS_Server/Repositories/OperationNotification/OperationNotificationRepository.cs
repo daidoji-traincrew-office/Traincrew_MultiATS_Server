@@ -6,22 +6,17 @@ namespace Traincrew_MultiATS_Server.Repositories.OperationNotification;
 
 public class OperationNotificationRepository(ApplicationDbContext context) : IOperationNotificationRepository
 {
-    public async Task<List<Models.OperationNotificationDisplay>> GetAllDisplay()
+    public async Task<Models.OperationNotificationState?> GetStateByDisplayName(string displayName)
     {
-        return await context.OperationNotificationDisplays
-            .Include(d => d.OperationNotificationState)
-            .ToListAsync();
+        return await context.OperationNotificationStates
+            .AsNoTracking()
+            .SingleOrDefaultAsync(s => s.DisplayName == displayName);
     }
 
-    public async Task<List<Models.OperationNotificationDisplay?>> GetDisplayByTrackCircuitIds(List<ulong> trackCircuitIds)
+    public async Task<List<Models.OperationNotificationState>> GetAllStates()
     {
-        return await context.TrackCircuits
-            .Where(tc => trackCircuitIds.Contains(tc.Id))
-            .Include(tc => tc.OperationNotificationDisplay)
-            .ThenInclude(d => d.OperationNotificationState)
-            .Include(tc => tc.OperationNotificationDisplay)
-            .ThenInclude(d => d.TrackCircuits)
-            .Select(tc => tc.OperationNotificationDisplay)
+        return await context.OperationNotificationStates
+            .AsNoTracking()
             .ToListAsync();
     }
 
