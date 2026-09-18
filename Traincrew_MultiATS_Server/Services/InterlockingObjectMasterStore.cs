@@ -27,6 +27,7 @@ namespace Traincrew_MultiATS_Server.Services;
 /// </remarks>
 public sealed class InterlockingObjectMaster
 {
+    public IReadOnlyList<InterlockingObject> All { get; }
     private readonly Dictionary<ulong, InterlockingObject> byId;
     private readonly Dictionary<string, InterlockingObject> byName;
     private readonly Dictionary<string, InterlockingObject[]> byStationId;
@@ -41,8 +42,6 @@ public sealed class InterlockingObjectMaster
             .GroupBy(o => o.StationId!, StringComparer.Ordinal)
             .ToDictionary(g => g.Key, g => g.ToArray(), StringComparer.Ordinal);
     }
-
-    public IReadOnlyList<InterlockingObject> All { get; }
 
     public bool TryGetById<T>(ulong id, [NotNullWhen(true)] out T? value)
         where T : InterlockingObject
