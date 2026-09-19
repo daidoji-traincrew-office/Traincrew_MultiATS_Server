@@ -15,14 +15,14 @@ public class ProtectionRepository(ApplicationDbContext context) : IProtectionRep
     /// 文の本数とプランニングの両方で軽い。
     /// 追跡すると毎tickのエンティティがchange trackerに積まれるのでAsNoTrackingにする。
     /// </remarks>
-    public async Task<List<ProtectionZoneState>> GetProtectionZoneStates()
+    public async Task<List<ProtectionZoneState>> GetAll()
     {
         return await context.protectionZoneStates
             .AsNoTracking()
             .ToListAsync();
     }
 
-    public async Task EnableProtection(string trainNumber, List<int> protectionZones)
+    public async Task Enable(string trainNumber, List<int> protectionZones)
     {
         // トランザクション内で処理する(追加削除は同時操作としたいため)
         await using var transaction = await context.Database.BeginTransactionAsync();
@@ -63,7 +63,7 @@ public class ProtectionRepository(ApplicationDbContext context) : IProtectionRep
         await transaction.CommitAsync();
     }
 
-    public async Task DisableProtection(string trainNumber)
+    public async Task Disable(string trainNumber)
     {
         await context.protectionZoneStates
             .Where(x => x.TrainNumber == trainNumber)

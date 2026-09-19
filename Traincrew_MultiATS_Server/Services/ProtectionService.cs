@@ -41,7 +41,7 @@ public class ProtectionService(
     {
         // 全件取得。通常0行、発報中でも数行の極小テーブルであり、
         // パラメータが無いので文面が固定されauto-prepareが確実に効く。
-        var states = await protectionRepository.GetProtectionZoneStates();
+        var states = await protectionRepository.GetAll();
 
         var bougoState = IsProtectionEnabledForTrackCircuits(states, trackCircuits);
 
@@ -50,13 +50,13 @@ public class ProtectionService(
             // 発報は毎回打つ。ゾーンの追加・削除の差分計算はリポジトリ側の責務。
             // なお在線が空のときは空のゾーンリストを渡すことになり、結果その列車の行は
             // 全削除される(実質解除)。統合前と同じ挙動。
-            await protectionRepository.EnableProtection(
+            await protectionRepository.Enable(
                 trainNumber, trackCircuits.Select(tc => tc.ProtectionZone).ToList());
         }
         else if (states.Any(state => state.TrainNumber == trainNumber))
         {
             // 自分の行が無いなら空振りのDELETEを打たない(毎tick全クライアント分発行されていた)
-            await protectionRepository.DisableProtection(trainNumber);
+            await protectionRepository.Disable(trainNumber);
         }
 
         return bougoState;
@@ -90,7 +90,7 @@ public class ProtectionService(
     // ProtectionZoneStateの取得
     public async Task<List<ProtectionRadioData>> GetProtectionRadioStates()
     {
-        var entities = await protectionRepository.GetProtectionZoneStates();
+        var entities = await protectionRepository.GetAll();
         return entities
             .Select(entity => new ProtectionRadioData
             {

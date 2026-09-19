@@ -48,12 +48,12 @@ public class ProtectionServiceTest : ServiceTestBase
     public ProtectionServiceTest()
     {
         _protectionRepositoryMock
-            .Setup(r => r.GetProtectionZoneStates())
+            .Setup(r => r.GetAll())
             // 毎回コピーを返す(サービス側が受け取ったリストを握り続けても後続tickに影響しないように)
             .ReturnsAsync(() => _rows.Select(CloneRow).ToList());
 
         _protectionRepositoryMock
-            .Setup(r => r.EnableProtection(It.IsAny<string>(), It.IsAny<List<int>>()))
+            .Setup(r => r.Enable(It.IsAny<string>(), It.IsAny<List<int>>()))
             .Callback<string, List<int>>((trainNumber, zones) =>
             {
                 _enableCalls.Add([..zones]);
@@ -72,7 +72,7 @@ public class ProtectionServiceTest : ServiceTestBase
             .Returns(Task.CompletedTask);
 
         _protectionRepositoryMock
-            .Setup(r => r.DisableProtection(It.IsAny<string>()))
+            .Setup(r => r.Disable(It.IsAny<string>()))
             .Callback<string>(trainNumber => _rows.RemoveAll(row => row.TrainNumber == trainNumber))
             .Returns(Task.CompletedTask);
     }
@@ -110,7 +110,7 @@ public class ProtectionServiceTest : ServiceTestBase
     {
         await Tick(OnTrack(10), false);
 
-        _protectionRepositoryMock.Verify(r => r.DisableProtection(It.IsAny<string>()), Times.Never);
+        _protectionRepositoryMock.Verify(r => r.Disable(It.IsAny<string>()), Times.Never);
     }
 
     [Fact(DisplayName = "自分の行があって未発報なら、解除のDELETEを打つこと")]
@@ -120,7 +120,7 @@ public class ProtectionServiceTest : ServiceTestBase
 
         await Tick(OnTrack(10), false);
 
-        _protectionRepositoryMock.Verify(r => r.DisableProtection(TrainNumber), Times.Once);
+        _protectionRepositoryMock.Verify(r => r.Disable(TrainNumber), Times.Once);
     }
 
     [Fact(DisplayName = "他列車の行だけがある場合は、自分の解除を打たないこと")]
@@ -130,7 +130,7 @@ public class ProtectionServiceTest : ServiceTestBase
 
         await Tick(OnTrack(10), false);
 
-        _protectionRepositoryMock.Verify(r => r.DisableProtection(It.IsAny<string>()), Times.Never);
+        _protectionRepositoryMock.Verify(r => r.Disable(It.IsAny<string>()), Times.Never);
     }
 
     [Fact(DisplayName = "発報中は、既に同じゾーン集合が入っていても毎回書き込むこと")]
@@ -142,7 +142,7 @@ public class ProtectionServiceTest : ServiceTestBase
         await Tick(OnTrack(10), true);
 
         _protectionRepositoryMock.Verify(
-            r => r.EnableProtection(TrainNumber, It.IsAny<List<int>>()), Times.Once);
+            r => r.Enable(TrainNumber, It.IsAny<List<int>>()), Times.Once);
     }
 
     [Fact(DisplayName = "在線が空でも例外にならず、受報なしを返すこと")]
@@ -264,7 +264,7 @@ public class ProtectionServiceTest : ServiceTestBase
 
         // ゾーン集合が一致していても省略しない = 発報漏れが構造的に起きない
         _protectionRepositoryMock.Verify(
-            r => r.EnableProtection(TrainNumber, It.IsAny<List<int>>()), Times.Exactly(3));
+            r => r.Enable(TrainNumber, It.IsAny<List<int>>()), Times.Exactly(3));
     }
 
     [Fact(DisplayName = "発報を解除したとき、解除のDELETEが確実に1回打たれること")]
@@ -277,7 +277,7 @@ public class ProtectionServiceTest : ServiceTestBase
         await Tick(OnTrack(10), false);
         await Tick(OnTrack(10), false);
 
-        _protectionRepositoryMock.Verify(r => r.DisableProtection(TrainNumber), Times.Once);
+        _protectionRepositoryMock.Verify(r => r.Disable(TrainNumber), Times.Once);
         Assert.Empty(_rows);
     }
 
