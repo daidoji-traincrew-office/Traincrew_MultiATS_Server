@@ -180,13 +180,6 @@ public partial class TrainService(
         using (ActivitySources.TrainService.StartActivity("UpdateTrainCarStates"))
             await UpdateTrainCarStates(trainState.Id, clientData.CarStates);
 
-        // TrainSignalStateの更新
-        if (clientData.VisibleSignalNames is { Count: > 0 })
-        {
-            using (ActivitySources.TrainService.StartActivity("UpdateTrainSignalState"))
-                await trainSignalStateRepository.UpdateByTrainNumber(clientTrainNumber, clientData.VisibleSignalNames);
-        }
-
         using (ActivitySources.TrainService.StartActivity("CommitTransaction"))
             await transaction.CommitAsync();
 
