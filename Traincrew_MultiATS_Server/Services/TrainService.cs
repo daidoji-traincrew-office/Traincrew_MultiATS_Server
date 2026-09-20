@@ -1,7 +1,6 @@
 using System.Data;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Caching.Memory;
-using Traincrew_MultiATS_Server.Activity;
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
@@ -78,11 +77,7 @@ public partial class TrainService(
 
     public async Task<ServerToATSData> CreateAtsData(ulong clientDriverId, AtsToServerData clientData)
     {
-        using var _rootActivity = ActivitySources.TrainService.StartActivity("CreateAtsData");
-
-        ServerMode serverMode;
-        using (ActivitySources.TrainService.StartActivity("GetServerModeCachedAsync"))
-            serverMode = await serverService.GetServerModeCachedAsync();
+        var serverMode = await serverService.GetServerModeCachedAsync();
         // 定時処理が停止している場合、その旨だけ返す
         if (serverMode == ServerMode.Off)
         {
@@ -93,9 +88,7 @@ public partial class TrainService(
         }
 
         // 接続拒否チェック
-        bool isBanned;
-        using (ActivitySources.TrainService.StartActivity("IsUserBannedAsync"))
-            isBanned = await bannedUserService.IsUserBannedCachedAsync(clientDriverId);
+        var isBanned = await bannedUserService.IsUserBannedCachedAsync(clientDriverId);
         if (isBanned)
         {
             return new()
@@ -106,9 +99,7 @@ public partial class TrainService(
 
         var clientTrainNumber = clientData.DiaName;
         // 軌道回路情報の更新
-        List<TrackCircuit> oldTrackCircuitList;
-        using (ActivitySources.TrainService.StartActivity("GetTrackCircuitsByTrainNumber"))
-            oldTrackCircuitList = await trackCircuitService.GetTrackCircuitsByTrainNumber(clientTrainNumber);
+        var oldTrackCircuitList = await trackCircuitService.GetTrackCircuitsByTrainNumber(clientTrainNumber);
         var oldTrackCircuitDataList = oldTrackCircuitList.Select(TrackCircuitService.ToTrackCircuitData).ToList();
         // 新規登録軌道回路
         var incrementalTrackCircuitDataList = clientData.OnTrackList.Except(oldTrackCircuitDataList).ToList();
@@ -116,10 +107,8 @@ public partial class TrainService(
         var decrementalTrackCircuitDataList = oldTrackCircuitDataList.Except(clientData.OnTrackList).ToList();
 
         // 軌道回路を取得しようとする
-        List<TrackCircuit> trackCircuitList;
-        using (ActivitySources.TrainService.StartActivity("GetTrackCircuitsByNames"))
-            trackCircuitList = await trackCircuitService.GetTrackCircuitsByNames(
-                clientData.OnTrackList.Select(tcd => tcd.Name).ToList());
+        var trackCircuitList = await trackCircuitService.GetTrackCircuitsByNames(
+            clientData.OnTrackList.Select(tcd => tcd.Name).ToList());
         // Todo: 文字化けへの対応ができたら以下の処理はいらない
         // 取得できない軌道回路がある場合、一旦前回のデータを使う
         if (trackCircuitList.Count != clientData.OnTrackList.Count)
@@ -131,34 +120,25 @@ public partial class TrainService(
 
         // ☆情報は割と常に送るため共通で演算する
         // 受報判定と発報状態のDB更新は、同一tickの1回の読みでまとめて行う
-        bool bougoState;
-        using (ActivitySources.TrainService.StartActivity("EvaluateAndUpdateBougo"))
-            bougoState = await protectionService.EvaluateAndUpdateBougo(
-                clientTrainNumber, trackCircuitList, clientData.BougoState);
+        var bougoState = await protectionService.EvaluateAndUpdateBougo(
+            clientTrainNumber, trackCircuitList, clientData.BougoState);
         var serverData = new ServerToATSData { BougoState = bougoState };
 
         // 運転告知器の表示
-        using (ActivitySources.TrainService.StartActivity("GetOperationNotificationDataByTrackCircuitIds"))
-            serverData.OperationNotificationData = await operationNotificationService
-                .GetOperationNotificationDataByTrackCircuitIds(trackCircuitList.Select(tc => tc.Id).ToList());
+        serverData.OperationNotificationData = await operationNotificationService
+            .GetOperationNotificationDataByTrackCircuitIds(trackCircuitList.Select(tc => tc.Id).ToList());
 
         // トランザクション開始
-        Traincrew_MultiATS_Server.Repositories.Transaction.ITransactionScope transaction;
-        using (ActivitySources.TrainService.StartActivity("BeginTransaction"))
-            transaction = await transactionRepository.BeginTransactionAsync(IsolationLevel.RepeatableRead);
-        await using var _tx = transaction;
+        await using var transaction = await transactionRepository.BeginTransactionAsync(IsolationLevel.RepeatableRead);
         // 運番が同じ列車の情報を取得する
-        TrainState? trainState;
-        using (ActivitySources.TrainService.StartActivity("RegisterOrUpdateTrainState"))
-            trainState = await RegisterOrUpdateTrainState(
-                clientDriverId, clientData, trackCircuitList, incrementalTrackCircuitDataList,
-                serverData);
+        var trainState = await RegisterOrUpdateTrainState(
+            clientDriverId, clientData, trackCircuitList, incrementalTrackCircuitDataList,
+            serverData);
 
         if (trainState == null)
         {
             // 列車情報の更新が不要な場合は、ここで終了
-            using (ActivitySources.TrainService.StartActivity("CommitTransaction"))
-                await transaction.CommitAsync();
+            await transaction.CommitAsync();
             return serverData;
         }
 
@@ -171,17 +151,13 @@ public partial class TrainService(
                 string.Join(", ", decrementalTrackCircuitDataList.Select(tc => tc.Name)));
         }
 
-        using (ActivitySources.TrainService.StartActivity("SetTrackCircuitDataList"))
-            await trackCircuitService.SetTrackCircuitDataList(incrementalTrackCircuitDataList, clientTrainNumber);
-        using (ActivitySources.TrainService.StartActivity("ClearTrackCircuitDataList"))
-            await trackCircuitService.ClearTrackCircuitDataList(decrementalTrackCircuitDataList);
+        await trackCircuitService.SetTrackCircuitDataList(incrementalTrackCircuitDataList, clientTrainNumber);
+        await trackCircuitService.ClearTrackCircuitDataList(decrementalTrackCircuitDataList);
 
         // 車両情報の登録
-        using (ActivitySources.TrainService.StartActivity("UpdateTrainCarStates"))
-            await UpdateTrainCarStates(trainState.Id, clientData.CarStates);
+        await UpdateTrainCarStates(trainState.Id, clientData.CarStates);
 
-        using (ActivitySources.TrainService.StartActivity("CommitTransaction"))
-            await transaction.CommitAsync();
+        await transaction.CommitAsync();
 
         if (decrementalTrackCircuitDataList.Count > 0)
         {
