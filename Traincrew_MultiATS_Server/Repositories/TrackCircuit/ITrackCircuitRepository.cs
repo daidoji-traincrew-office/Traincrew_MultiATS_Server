@@ -69,6 +69,14 @@ public interface ITrackCircuitRepository
     Task<List<ulong>> GetAllIds(CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// IDを指定してTrackCircuit本体(TrackCircuitState込み)を取得する
+    /// </summary>
+    /// <param name="ids">TrackCircuit IDのリスト</param>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    /// <returns>TrackCircuitのリスト</returns>
+    Task<List<Models.TrackCircuit>> GetByIds(List<ulong> ids, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// TrackCircuit名からIDへのマッピングを取得する
     /// </summary>
     /// <param name="trackCircuitNames">TrackCircuit名のリスト</param>

@@ -165,6 +165,14 @@ public class TrackCircuitRepository(ApplicationDbContext context) : ITrackCircui
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<List<Models.TrackCircuit>> GetByIds(List<ulong> ids, CancellationToken cancellationToken = default)
+    {
+        return await context.TrackCircuits
+            .Include(tc => tc.TrackCircuitState)
+            .Where(tc => ids.Contains(tc.Id))
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<Dictionary<string, Models.TrackCircuit>> GetTrackCircuitsByNamesAsync(
         HashSet<string> trackCircuitNames, CancellationToken cancellationToken = default)
     {
