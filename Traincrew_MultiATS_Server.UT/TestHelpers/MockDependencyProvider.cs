@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
+using Traincrew_MultiATS_Server.Repositories.ClosedCircuitLockTrackCircuit;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.DestinationButton;
 using Traincrew_MultiATS_Server.Repositories.DiagramTrain;
@@ -84,6 +85,7 @@ public static class MockDependencyProvider
         services.AddScoped(_ => new Mock<IRouteCentralControlLeverRepository>().Object);
         services.AddScoped(_ => new Mock<IRouteLeverDestinationRepository>().Object);
         services.AddScoped(_ => new Mock<IRouteLockTrackCircuitRepository>().Object);
+        services.AddScoped(_ => new Mock<IClosedCircuitLockTrackCircuitRepository>().Object);
         services.AddScoped(_ => new Mock<IServerRepository>().Object);
         services.AddScoped(_ => new Mock<ISignalRepository>().Object);
         services.AddScoped(_ => new Mock<ISignalRouteRepository>().Object);

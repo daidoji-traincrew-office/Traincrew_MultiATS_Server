@@ -1,0 +1,10 @@
+-- Create "closed_circuit_lock_track_circuit" table
+CREATE TABLE "closed_circuit_lock_track_circuit" (
+  "id" bigserial NOT NULL,
+  "route_id" bigint NOT NULL,
+  "track_circuit_id" bigint NOT NULL,
+  PRIMARY KEY ("id"),
+  CONSTRAINT "closed_circuit_lock_track_circuit_route_id_track_circuit_id_key" UNIQUE ("route_id", "track_circuit_id"),
+  CONSTRAINT "closed_circuit_lock_track_circuit_route_id_fkey" FOREIGN KEY ("route_id") REFERENCES "route" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT "closed_circuit_lock_track_circuit_track_circuit_id_fkey" FOREIGN KEY ("track_circuit_id") REFERENCES "track_circuit" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION
+);

@@ -422,6 +422,15 @@ CREATE TABLE route_lock_track_circuit
     UNIQUE (route_id, track_circuit_id)
 );
 
+-- 閉路鎖錠対象の軌道回路のリスト(進路鎖錠欄にあり、信号制御欄になく、鎖錠欄にある軌道回路)
+CREATE TABLE closed_circuit_lock_track_circuit
+(
+    id               BIGSERIAL PRIMARY KEY,
+    route_id         BIGINT REFERENCES route (id)         NOT NULL,
+    track_circuit_id BIGINT REFERENCES track_circuit (ID) NOT NULL,
+    UNIQUE (route_id, track_circuit_id)
+);
+
 -- 列車種別
 CREATE TABLE train_type
 (
