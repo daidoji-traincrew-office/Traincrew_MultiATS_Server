@@ -3,9 +3,37 @@ namespace Traincrew_MultiATS_Server.Repositories.TrackCircuit;
 public interface ITrackCircuitRepository
 {
     Task<List<Models.TrackCircuit>> GetAllTrackCircuitList(CancellationToken cancellationToken = default);
-    Task<List<Models.TrackCircuit>> GetTrackCircuitListByTrainNumber(string trainNumber);
-    Task<List<Models.TrackCircuit>> GetTrackCircuitByName(List<string> trackCircuitNames);
-    Task<List<Models.TrackCircuit>> GetTrackCircuitsById(List<ulong> Ids);
+
+    /// <summary>
+    /// IDを指定してTrackCircuitStateのみを取得する(TrackCircuit本体はJoinしない)
+    /// </summary>
+    /// <param name="ids">TrackCircuit ID(=TrackCircuitState ID)のリスト</param>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    /// <returns>TrackCircuitStateのリスト</returns>
+    Task<List<Models.TrackCircuitState>> GetStateByIds(List<ulong> ids, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// IDを指定してTrackCircuitStateのみを取得する(TrackCircuit本体はJoinしない)
+    /// </summary>
+    /// <param name="id">TrackCircuit ID(=TrackCircuitState ID)</param>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    /// <returns>TrackCircuitState、存在しない場合はnull</returns>
+    Task<Models.TrackCircuitState?> GetStateById(ulong id, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// すべてのTrackCircuitStateを取得する(TrackCircuit本体はJoinしない)
+    /// </summary>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    /// <returns>TrackCircuitStateのリスト</returns>
+    Task<List<Models.TrackCircuitState>> GetAllStates(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 列車番号を指定してTrackCircuitStateのみを取得する(TrackCircuit本体はJoinしない)
+    /// </summary>
+    /// <param name="trainNumber">列車番号</param>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    /// <returns>TrackCircuitStateのリスト</returns>
+    Task<List<Models.TrackCircuitState>> GetStateByTrainNumber(string trainNumber, CancellationToken cancellationToken = default);
     Task SetTrainNumberByNames(List<string> names, string trainNumber);
     Task ClearTrainNumberByNames(List<string> names);
 
@@ -39,6 +67,14 @@ public interface ITrackCircuitRepository
     /// <param name="cancellationToken">キャンセルトークン</param>
     /// <returns>軌道回路IDのリスト</returns>
     Task<List<ulong>> GetAllIds(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// IDを指定してTrackCircuit本体(TrackCircuitState込み)を取得する
+    /// </summary>
+    /// <param name="ids">TrackCircuit IDのリスト</param>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    /// <returns>TrackCircuitのリスト</returns>
+    Task<List<Models.TrackCircuit>> GetByIds(List<ulong> ids, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// TrackCircuit名からIDへのマッピングを取得する

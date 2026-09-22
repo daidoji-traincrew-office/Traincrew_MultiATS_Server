@@ -12,6 +12,13 @@ public class ServerRepository(ApplicationDbContext context) : IServerRepository
         return await context.ServerStates.FirstOrDefaultAsync();
     }
 
+    public async Task<ServerMode?> GetModeAsync()
+    {
+        return await context.ServerStates
+            .Select(state => (ServerMode?)state.Mode)
+            .FirstOrDefaultAsync();
+    }
+
     public async Task SetServerStateAsync(ServerMode mode)
     {
         var state = await context.ServerStates.FirstOrDefaultAsync();

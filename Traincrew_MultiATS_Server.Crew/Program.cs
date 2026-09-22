@@ -67,6 +67,7 @@ using Traincrew_MultiATS_Server.Repositories.TtcWindowTrackCircuit;
 using Traincrew_MultiATS_Server.Repositories.UserDisconnection;
 using Traincrew_MultiATS_Server.Scheduler;
 using Traincrew_MultiATS_Server.Services;
+using Traincrew_MultiATS_Server.Services.Cache;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace Traincrew_MultiATS_Server.Crew;
@@ -495,6 +496,7 @@ public class Program
     private static void ConfigureDependencyInjectionService(WebApplicationBuilder builder, bool enableAuthorization)
     {
         // DI周り
+        builder.Services.AddMemoryCache();
         builder.Services
             // CSV Loaders
             .AddScoped<StationCsvLoader>()
@@ -530,6 +532,8 @@ public class Program
             .AddScoped<DatabaseInitializationOrchestrator>()
             // 初期化完了状態(/healthz が参照する)
             .AddSingleton<InitializationState>()
+            // キャッシュの充填と無効化の土台
+            .AddSingleton<ICacheGate, CacheGate>()
             .AddScoped<IDateTimeRepository, DateTimeRepository>()
             .AddScoped<IDestinationButtonRepository, DestinationButtonRepository>()
             .AddScoped<IDirectionRouteRepository, DirectionRouteRepository>()
@@ -578,8 +582,12 @@ public class Program
             .AddScoped<ICommanderTableService, CommanderTableService>()
             .AddScoped<ICTCPService, CTCPService>()
             .AddScoped<IDateTimeService, DateTimeService>()
+            .AddScoped<IDestinationButtonService, DestinationButtonService>()
             .AddScoped<IDirectionRouteService, DirectionRouteService>()
+            .AddScoped<IDirectionSelfControlLeverService, DirectionSelfControlLeverService>()
             .AddScoped<IInterlockingService, InterlockingService>()
+            .AddScoped<ILeverService, LeverService>()
+            .AddScoped<IRouteCentralControlLeverService, RouteCentralControlLeverService>()
             .AddScoped<IOperationNotificationService, OperationNotificationService>()
             .AddScoped<IOperationInformationService, OperationInformationService>()
             .AddScoped<IProtectionService, ProtectionService>()
@@ -594,6 +602,8 @@ public class Program
             .AddScoped<ITIDService, TIDService>()
             .AddScoped<ITtcStationControlService, TtcStationControlService>()
             .AddSingleton<EnableAuthorizationStore>(_ => new(enableAuthorization))
+            .AddSingleton<IInterlockingObjectMasterStore, InterlockingObjectMasterStore>()
+            .AddSingleton<IOperationNotificationMasterStore, OperationNotificationMasterStore>()
             .AddSingleton<IDiscordService, DiscordService>()
             .AddSingleton<MetricsCollector>()
             .AddSingleton<SchedulerManagerForServer>()
