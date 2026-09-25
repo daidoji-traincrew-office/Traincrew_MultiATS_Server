@@ -67,4 +67,12 @@ public interface IRouteRepository
     /// <param name="ids">進路のIDリスト</param>
     /// <param name="isCtcControlled">CTC制御中か</param>
     Task SetIsCtcControlledByIds(List<ulong> ids, RaiseDrop isCtcControlled);
+
+    /// <summary>
+    /// IDを指定してRouteStateのみを取得する(Route本体はJoinしない)
+    /// </summary>
+    /// <param name="ids">Route ID(=RouteState ID)のリスト</param>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    /// <returns>RouteStateのリスト</returns>
+    Task<List<Models.RouteState>> GetStateByIds(IEnumerable<ulong> ids, CancellationToken cancellationToken = default);
 }

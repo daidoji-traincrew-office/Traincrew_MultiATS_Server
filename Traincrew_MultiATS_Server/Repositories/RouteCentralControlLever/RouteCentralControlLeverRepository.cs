@@ -83,4 +83,18 @@ public class RouteCentralControlLeverRepository(ApplicationDbContext context) : 
                 .SetProperty(state => state.IsInsertedKey, isInsertedKey)
                 .SetProperty(state => state.IsReversed, isReversed));
     }
+
+    /// <summary>
+    /// IDを指定してRouteCentralControlLeverStateのみを取得する(RouteCentralControlLever本体はJoinしない)
+    /// </summary>
+    /// <param name="ids">RouteCentralControlLever ID(=RouteCentralControlLeverState ID)のリスト</param>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    /// <returns>RouteCentralControlLeverStateのリスト</returns>
+    public async Task<List<Models.RouteCentralControlLeverState>> GetStateByIds(IEnumerable<ulong> ids, CancellationToken cancellationToken = default)
+    {
+        var idList = ids.ToList();
+        return await context.RouteCentralControlLeverStates
+            .Where(state => idList.Contains(state.Id))
+            .ToListAsync(cancellationToken);
+    }
 }

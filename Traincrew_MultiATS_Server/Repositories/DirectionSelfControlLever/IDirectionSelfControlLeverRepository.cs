@@ -27,4 +27,12 @@ public interface IDirectionSelfControlLeverRepository
     /// <param name="cancellationToken">キャンセルトークン</param>
     /// <returns>DirectionSelfControlLever名をキー、DirectionSelfControlLeverエンティティを値とする辞書</returns>
     Task<Dictionary<string, Models.DirectionSelfControlLever>> GetByNamesAsDictionaryAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// IDを指定してDirectionSelfControlLeverStateのみを取得する(DirectionSelfControlLever本体はJoinしない)
+    /// </summary>
+    /// <param name="ids">DirectionSelfControlLever ID(=DirectionSelfControlLeverState ID)のリスト</param>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    /// <returns>DirectionSelfControlLeverStateのリスト</returns>
+    Task<List<Models.DirectionSelfControlLeverState>> GetStateByIds(IEnumerable<ulong> ids, CancellationToken cancellationToken = default);
 }

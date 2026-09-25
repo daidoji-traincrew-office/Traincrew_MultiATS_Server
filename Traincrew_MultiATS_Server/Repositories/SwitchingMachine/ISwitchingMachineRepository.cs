@@ -35,4 +35,12 @@ public interface ISwitchingMachineRepository
     /// <param name="cancellationToken">キャンセルトークン</param>
     /// <returns>転てつ器名をキー、転てつ器IDを値とする辞書</returns>
     Task<Dictionary<string, ulong>> GetIdsByNameAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// IDを指定してSwitchingMachineStateのみを取得する(SwitchingMachine本体はJoinしない)
+    /// </summary>
+    /// <param name="ids">SwitchingMachine ID(=SwitchingMachineState ID)のリスト</param>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    /// <returns>SwitchingMachineStateのリスト</returns>
+    Task<List<Models.SwitchingMachineState>> GetStateByIds(IEnumerable<ulong> ids, CancellationToken cancellationToken = default);
 }
