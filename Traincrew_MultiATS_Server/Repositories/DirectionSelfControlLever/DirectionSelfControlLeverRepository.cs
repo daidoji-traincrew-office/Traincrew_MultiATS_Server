@@ -49,4 +49,18 @@ public class DirectionSelfControlLeverRepository(ApplicationDbContext context) :
         return await context.DirectionSelfControlLevers
             .ToDictionaryAsync(dscl => dscl.Name, cancellationToken);
     }
+
+    /// <summary>
+    /// IDを指定してDirectionSelfControlLeverStateのみを取得する(DirectionSelfControlLever本体はJoinしない)
+    /// </summary>
+    /// <param name="ids">DirectionSelfControlLever ID(=DirectionSelfControlLeverState ID)のリスト</param>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    /// <returns>DirectionSelfControlLeverStateのリスト</returns>
+    public async Task<List<Models.DirectionSelfControlLeverState>> GetStateByIds(IEnumerable<ulong> ids, CancellationToken cancellationToken = default)
+    {
+        var idList = ids.ToList();
+        return await context.Set<Models.DirectionSelfControlLeverState>()
+            .Where(state => idList.Contains(state.Id))
+            .ToListAsync(cancellationToken);
+    }
 }
