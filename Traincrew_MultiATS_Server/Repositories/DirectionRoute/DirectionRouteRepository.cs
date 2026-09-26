@@ -92,7 +92,7 @@ public class DirectionRouteRepository(ApplicationDbContext context) : IDirection
     public async Task<List<Models.DirectionRouteState>> GetStateByIds(IEnumerable<ulong> ids, CancellationToken cancellationToken = default)
     {
         var idList = ids.ToList();
-        return await context.Set<Models.DirectionRouteState>()
+        return await context.DirectionRouteStates
             .Where(state => idList.Contains(state.Id))
             .ToListAsync(cancellationToken);
     }

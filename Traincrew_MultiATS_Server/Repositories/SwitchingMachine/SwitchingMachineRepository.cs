@@ -65,7 +65,7 @@ public class SwitchingMachineRepository(ApplicationDbContext context) : ISwitchi
     public async Task<List<Models.SwitchingMachineState>> GetStateByIds(IEnumerable<ulong> ids, CancellationToken cancellationToken = default)
     {
         var idList = ids.ToList();
-        return await context.Set<Models.SwitchingMachineState>()
+        return await context.SwitchingMachineStates
             .Where(state => idList.Contains(state.Id))
             .ToListAsync(cancellationToken);
     }
