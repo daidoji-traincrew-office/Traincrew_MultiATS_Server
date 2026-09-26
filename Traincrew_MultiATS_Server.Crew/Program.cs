@@ -20,6 +20,7 @@ using Traincrew_MultiATS_Server.Initialization;
 using Traincrew_MultiATS_Server.Initialization.CsvLoaders;
 using Traincrew_MultiATS_Server.Initialization.DbInitializers;
 using Traincrew_MultiATS_Server.Initialization.JsonLoaders;
+using Traincrew_MultiATS_Server.Repositories.ClosedCircuitLockTrackCircuit;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.DestinationButton;
 using Traincrew_MultiATS_Server.Repositories.Diagram;
@@ -66,6 +67,7 @@ using Traincrew_MultiATS_Server.Repositories.TtcWindowTrackCircuit;
 using Traincrew_MultiATS_Server.Repositories.UserDisconnection;
 using Traincrew_MultiATS_Server.Scheduler;
 using Traincrew_MultiATS_Server.Services;
+using Traincrew_MultiATS_Server.Services.Cache;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace Traincrew_MultiATS_Server.Crew;
@@ -133,7 +135,6 @@ public class Program
         bool isDevelopment,
         bool enableAuthorization)
     {
-        ConfigureHttpLogging(app);
         if (isDevelopment)
         {
             ConfigureSwagger(app);
@@ -144,6 +145,9 @@ public class Program
         }
 
         ConfigureRouting(app);
+        // HttpLoggingMiddlewareはエンドポイント単位の設定(/healthzの.WithHttpLogging)を
+        // context.GetEndpoint()から読むため、UseRouting()より後に置く必要がある
+        ConfigureHttpLogging(app);
         ConfigureCors(app);
         ConfigureAuthentication(app);
         ConfigureAuthorization(app);
@@ -165,7 +169,11 @@ public class Program
         // ログの設定
         builder.Services.AddHttpLogging(options =>
         {
-            options.LoggingFields = HttpLoggingFields.RequestPropertiesAndHeaders;
+            // 組込みのリクエストログ(Hosting.Diagnostics等)を落とす代わりに、
+            // HttpLoggingを1リクエスト=1レコードの唯一のリクエストログとして使う
+            options.LoggingFields = HttpLoggingFields.RequestPropertiesAndHeaders
+                                    | HttpLoggingFields.ResponseStatusCode
+                                    | HttpLoggingFields.Duration;
         });
     }
 
@@ -256,7 +264,9 @@ public class Program
         // (enableAuthorization=true時はendpointBuildersのAllowAnonymous一括付与に乗らないため)
         app.MapGet("/healthz", (InitializationState initializationState) =>
                 initializationState.IsInitialized ? Results.Ok() : Results.StatusCode(StatusCodes.Status503ServiceUnavailable))
-            .AllowAnonymous();
+            .AllowAnonymous()
+            // healthcheckが数秒おきに叩くためログには出さない
+            .WithHttpLogging(HttpLoggingFields.None);
 
         return
         [
@@ -486,6 +496,7 @@ public class Program
     private static void ConfigureDependencyInjectionService(WebApplicationBuilder builder, bool enableAuthorization)
     {
         // DI周り
+        builder.Services.AddMemoryCache();
         builder.Services
             // CSV Loaders
             .AddScoped<StationCsvLoader>()
@@ -509,6 +520,7 @@ public class Program
             .AddScoped<TrainDbInitializer>()
             .AddScoped<OperationNotificationDisplayDbInitializer>()
             .AddScoped<RouteLockTrackCircuitDbInitializer>()
+            .AddScoped<ClosedCircuitLockTrackCircuitDbInitializer>()
             .AddScoped<ServerStatusDbInitializer>()
             .AddScoped<TtcDbInitializer>()
             .AddScoped<ThrowOutControlDbInitializer>()
@@ -520,6 +532,8 @@ public class Program
             .AddScoped<DatabaseInitializationOrchestrator>()
             // 初期化完了状態(/healthz が参照する)
             .AddSingleton<InitializationState>()
+            // キャッシュの充填と無効化の土台
+            .AddSingleton<ICacheGate, CacheGate>()
             .AddScoped<IDateTimeRepository, DateTimeRepository>()
             .AddScoped<IDestinationButtonRepository, DestinationButtonRepository>()
             .AddScoped<IDirectionRouteRepository, DirectionRouteRepository>()
@@ -539,6 +553,7 @@ public class Program
             .AddScoped<IRouteCentralControlLeverRepository, RouteCentralControlLeverRepository>()
             .AddScoped<IRouteLeverDestinationRepository, RouteLeverDestinationRepository>()
             .AddScoped<IRouteLockTrackCircuitRepository, RouteLockTrackCircuitRepository>()
+            .AddScoped<IClosedCircuitLockTrackCircuitRepository, ClosedCircuitLockTrackCircuitRepository>()
             .AddScoped<IServerRepository, ServerRepository>()
             .AddScoped<ISignalRepository, SignalRepository>()
             .AddScoped<ISignalRouteRepository, SignalRouteRepository>()
@@ -567,8 +582,12 @@ public class Program
             .AddScoped<ICommanderTableService, CommanderTableService>()
             .AddScoped<ICTCPService, CTCPService>()
             .AddScoped<IDateTimeService, DateTimeService>()
+            .AddScoped<IDestinationButtonService, DestinationButtonService>()
             .AddScoped<IDirectionRouteService, DirectionRouteService>()
+            .AddScoped<IDirectionSelfControlLeverService, DirectionSelfControlLeverService>()
             .AddScoped<IInterlockingService, InterlockingService>()
+            .AddScoped<ILeverService, LeverService>()
+            .AddScoped<IRouteCentralControlLeverService, RouteCentralControlLeverService>()
             .AddScoped<IOperationNotificationService, OperationNotificationService>()
             .AddScoped<IOperationInformationService, OperationInformationService>()
             .AddScoped<IProtectionService, ProtectionService>()
@@ -583,6 +602,8 @@ public class Program
             .AddScoped<ITIDService, TIDService>()
             .AddScoped<ITtcStationControlService, TtcStationControlService>()
             .AddSingleton<EnableAuthorizationStore>(_ => new(enableAuthorization))
+            .AddSingleton<IInterlockingObjectMasterStore, InterlockingObjectMasterStore>()
+            .AddSingleton<IOperationNotificationMasterStore, OperationNotificationMasterStore>()
             .AddSingleton<IDiscordService, DiscordService>()
             .AddSingleton<MetricsCollector>()
             .AddSingleton<SchedulerManagerForServer>()

@@ -22,4 +22,8 @@
     <ItemGroup>
         <ProjectReference Include="..\Traincrew_MultiATS_Server.Common\Traincrew_MultiATS_Server.Common.csproj"/>
     </ItemGroup>
+    <ItemGroup>
+        <!-- InterlockingObjectMaster のコンストラクタや ShallowClone など internal なものをテストするため -->
+        <InternalsVisibleTo Include="Traincrew_MultiATS_Server.UT"/>
+    </ItemGroup>
 </Project>

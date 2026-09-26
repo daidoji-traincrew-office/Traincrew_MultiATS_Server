@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
+using Traincrew_MultiATS_Server.Repositories.ClosedCircuitLockTrackCircuit;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.DestinationButton;
 using Traincrew_MultiATS_Server.Repositories.DiagramTrain;
@@ -84,6 +85,7 @@ public static class MockDependencyProvider
         services.AddScoped(_ => new Mock<IRouteCentralControlLeverRepository>().Object);
         services.AddScoped(_ => new Mock<IRouteLeverDestinationRepository>().Object);
         services.AddScoped(_ => new Mock<IRouteLockTrackCircuitRepository>().Object);
+        services.AddScoped(_ => new Mock<IClosedCircuitLockTrackCircuitRepository>().Object);
         services.AddScoped(_ => new Mock<IServerRepository>().Object);
         services.AddScoped(_ => new Mock<ISignalRepository>().Object);
         services.AddScoped(_ => new Mock<ISignalRouteRepository>().Object);
@@ -107,12 +109,16 @@ public static class MockDependencyProvider
         services.AddScoped(_ => new Mock<ITransactionRepository>().Object);
         services.AddScoped(_ => new Mock<IUserDisconnectionRepository>().Object);
 
-        // Register all Service mocks (20 services)
+        // Register all Service mocks (24 services)
         services.AddScoped(_ => new Mock<IBannedUserService>().Object);
         services.AddScoped(_ => new Mock<ICommanderTableService>().Object);
         services.AddScoped(_ => new Mock<ICTCPService>().Object);
         services.AddScoped(_ => new Mock<IDateTimeService>().Object);
+        services.AddScoped(_ => new Mock<IDestinationButtonService>().Object);
         services.AddScoped(_ => new Mock<IDirectionRouteService>().Object);
+        services.AddScoped(_ => new Mock<IDirectionSelfControlLeverService>().Object);
+        services.AddScoped(_ => new Mock<ILeverService>().Object);
+        services.AddScoped(_ => new Mock<IRouteCentralControlLeverService>().Object);
         services.AddScoped(_ => new Mock<IDiscordService>().Object);
         services.AddScoped(_ => new Mock<IInterlockingService>().Object);
         services.AddScoped(_ => new Mock<IOperationInformationService>().Object);

@@ -6,28 +6,16 @@ namespace Traincrew_MultiATS_Server.Repositories.OperationNotification;
 
 public class OperationNotificationRepository(ApplicationDbContext context) : IOperationNotificationRepository
 {
-    public async Task<List<Models.OperationNotificationDisplay>> GetAllDisplay()
+    public async Task<List<Models.OperationNotificationState>> GetAllStates()
     {
-        return await context.OperationNotificationDisplays
-            .Include(d => d.OperationNotificationState)
+        return await context.OperationNotificationStates
+            .AsNoTracking()
             .ToListAsync();
     }
 
-    public async Task<List<Models.OperationNotificationDisplay?>> GetDisplayByTrackCircuitIds(List<ulong> trackCircuitIds)
+    public async Task<int> SetNoneWhereKaijoOrTorikeshiAndOperatedBeforeOrEqual(DateTime operatedAt)
     {
-        return await context.TrackCircuits
-            .Where(tc => trackCircuitIds.Contains(tc.Id))
-            .Include(tc => tc.OperationNotificationDisplay)
-            .ThenInclude(d => d.OperationNotificationState)
-            .Include(tc => tc.OperationNotificationDisplay)
-            .ThenInclude(d => d.TrackCircuits)
-            .Select(tc => tc.OperationNotificationDisplay)
-            .ToListAsync();
-    }
-
-    public async Task SetNoneWhereKaijoOrTorikeshiAndOperatedBeforeOrEqual(DateTime operatedAt)
-    {
-        await context.OperationNotificationStates
+        return await context.OperationNotificationStates
             .Where(s =>
                 (s.Type ==  OperationNotificationType.Kaijo || s.Type == OperationNotificationType.Torikeshi) && s.OperatedAt <= operatedAt)
             .ExecuteUpdateAsync(s => s

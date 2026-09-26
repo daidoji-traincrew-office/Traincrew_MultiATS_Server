@@ -12,28 +12,30 @@ public class TrackCircuitRepository(ApplicationDbContext context) : ITrackCircui
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<List<Models.TrackCircuit>> GetTrackCircuitByName(List<string> trackCircuitNames)
+    public async Task<List<Models.TrackCircuitState>> GetStateByIds(List<ulong> ids, CancellationToken cancellationToken = default)
     {
-        return await context.TrackCircuits
-            .Where(obj => trackCircuitNames.Contains(obj.Name))
-            .Include(obj => obj.TrackCircuitState)
-            .ToListAsync();
+        return await context.TrackCircuitStates
+            .Where(tcs => ids.Contains(tcs.Id))
+            .ToListAsync(cancellationToken);
     }
 
-    public async Task<List<Models.TrackCircuit>> GetTrackCircuitsById(List<ulong> Ids)
+    public async Task<Models.TrackCircuitState?> GetStateById(ulong id, CancellationToken cancellationToken = default)
     {
-        return await context.TrackCircuits
-            .Where(tc => Ids.Contains(tc.Id))
-            .Include(tc => tc.TrackCircuitState)
-            .ToListAsync();
+        return await context.TrackCircuitStates
+            .FirstOrDefaultAsync(tcs => tcs.Id == id, cancellationToken);
     }
 
-    public async Task<List<Models.TrackCircuit>> GetTrackCircuitListByTrainNumber(string trainNumber)
+    public async Task<List<Models.TrackCircuitState>> GetAllStates(CancellationToken cancellationToken = default)
     {
-        List<Models.TrackCircuit> trackcircuitlist_db = await context.TrackCircuits
-            .Where(odj => odj.TrackCircuitState.TrainNumber == trainNumber)
-            .Include(obj => obj.TrackCircuitState).ToListAsync();
-        return trackcircuitlist_db;
+        return await context.TrackCircuitStates
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<List<Models.TrackCircuitState>> GetStateByTrainNumber(string trainNumber, CancellationToken cancellationToken = default)
+    {
+        return await context.TrackCircuitStates
+            .Where(tcs => tcs.TrainNumber == trainNumber)
+            .ToListAsync(cancellationToken);
     }
 
     public async Task SetTrainNumberByNames(List<string> names, string trainNumber)
@@ -160,6 +162,14 @@ public class TrackCircuitRepository(ApplicationDbContext context) : ITrackCircui
     {
         return await context.TrackCircuits
             .Select(tc => tc.Id)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<List<Models.TrackCircuit>> GetByIds(List<ulong> ids, CancellationToken cancellationToken = default)
+    {
+        return await context.TrackCircuits
+            .Include(tc => tc.TrackCircuitState)
+            .Where(tc => ids.Contains(tc.Id))
             .ToListAsync(cancellationToken);
     }
 

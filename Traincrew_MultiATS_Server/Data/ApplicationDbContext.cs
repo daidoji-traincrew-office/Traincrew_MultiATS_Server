@@ -23,6 +23,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<InterlockingObject> InterlockingObjects { get; set; }
     public DbSet<Route> Routes { get; set; }
     public DbSet<RouteLockTrackCircuit> RouteLockTrackCircuits { get; set; }
+    public DbSet<ClosedCircuitLockTrackCircuit> ClosedCircuitLockTrackCircuits { get; set; }
     public DbSet<RouteState> RouteStates { get; set; }
     public DbSet<SwitchingMachine> SwitchingMachines { get; set; }
     public DbSet<TrackCircuit> TrackCircuits { get; set; }

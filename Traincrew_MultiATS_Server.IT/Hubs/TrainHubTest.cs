@@ -420,7 +420,9 @@ public class TrainHubTest(WebApplicationFixture factory)
             }
             finally
             {
-                await DeleteTrainsAsync([trainNumber]);
+                // 事前登録した列車は運転士がいないため列番が付け替えられず残る。
+                // 消し忘れると次回実行時に train_number の一意制約に衝突する
+                await DeleteTrainsAsync([trainNumber, oldTrainNumber]);
             }
         }
     }

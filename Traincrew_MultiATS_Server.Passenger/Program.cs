@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
@@ -24,6 +24,8 @@ using Traincrew_MultiATS_Server.Repositories.Transaction;
 using Traincrew_MultiATS_Server.Repositories.UserDisconnection;
 using Traincrew_MultiATS_Server.Scheduler;
 using Traincrew_MultiATS_Server.Services;
+using Traincrew_MultiATS_Server.Services.Cache;
+using Traincrew_MultiATS_Server.HostedService;
 
 namespace Traincrew_MultiATS_Server.Passenger;
 
@@ -73,11 +75,13 @@ public class Program
         // Todo: (優先度低)キャッシュ制御, Response Compression
 
         // DI
+        builder.Services.AddMemoryCache();
         builder.Services
             // Repository (ABC順)
             .AddScoped<IDateTimeRepository, DateTimeRepository>()
             .AddScoped<IGeneralRepository, GeneralRepository>()
-            .AddScoped<IMutexRepository, MutexRepository>()
+            // Scopedだとスコープごとに別のSemaphoreSlimになり排他にならない。Crewと揃えてSingletonにする
+            .AddSingleton<IMutexRepository, MutexRepository>()
             .AddScoped<INextSignalRepository, NextSignalRepository>()
             .AddScoped<IOperationInformationRepository, OperationInformationRepository>()
             .AddScoped<IOperationNotificationRepository, OperationNotificationRepository>()
@@ -96,8 +100,21 @@ public class Program
             .AddScoped<ITrainSignalStateRepository, TrainSignalStateRepository>()
             .AddScoped<ITransactionRepository, TransactionRepository>()
             .AddScoped<IUserDisconnectionRepository, UserDisconnectionRepository>()
+            // 旅客用プロセスは InitDbHostedService を持たないため MarkInitialized が呼ばれず、
+            // CacheGate は永久に「初期化未完了」と判断してキャッシュを充填しない。
+            // つまり旅客用プロセスは構造的にキャッシュを持たず、常にDBを読む。
+            // (書き込み経路を持たないプロセスが無効化を取りこぼして古い値を返すのを、
+            //  ...WithoutCache のような別メソッドを作らずに防いでいる)
+            .AddSingleton<InitializationState>()
+            .AddSingleton<ICacheGate, CacheGate>()
             // Service (ABC順)
             .AddScoped<IBannedUserService, BannedUserService>()
+            // 旅客用プロセスはマスタのスナップショットを使わず毎回SQLを読むため、実際にロードされることはない。
+            // TrackCircuitService の DI 解決に必要なので登録だけしておく
+            .AddSingleton<IInterlockingObjectMasterStore, InterlockingObjectMasterStore>()
+            // 同上。旅客用プロセスは OperationNotificationService のメソッドを呼ばないが、
+            // TrainService のコンストラクタ引数なので DI 解決には必要
+            .AddSingleton<IOperationNotificationMasterStore, OperationNotificationMasterStore>()
             .AddScoped<IOperationInformationService, OperationInformationService>()
             .AddScoped<IOperationNotificationService, OperationNotificationService>()
             .AddScoped<IPassengerService, PassengerService>()
