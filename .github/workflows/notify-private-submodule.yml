@@ -1,0 +1,60 @@
+# ブランチが更新されたことを Private 側 (daidoji-traincrew-office/Traincrew_Rendo_Server) へ通知し、
+# 向こうの同名ブランチの public submodule の pin を追従させる。
+# 受け手は Private 側の .github/workflows/sync-public-submodule.yml。
+#
+# Private 側に同名のブランチが無ければ向こうで何もせず終わるので、こちらは
+# ブランチを選ばず全部通知してよい。pin の更新は向こうで fast-forward のみに絞ってある。
+# pin 追従のあとに Private 側の UT / Build と、変更された連動図表CSVの駅の連動IT が走る。
+#
+# このリポジトリはPUBLICなのでActionsは無料。runs-onはGitHub-hostedでよい。
+name: Notify Private submodule pin
+
+on:
+  push:
+    branches: ['**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: notify-private-submodule-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  dispatch:
+    # ブランチ削除の push では追従先が無いので何もしない。
+    if: github.event_name != 'push' || github.event.deleted != true
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Generate GitHub App Token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          owner: daidoji-traincrew-office
+          repositories: Traincrew_Rendo_Server
+
+      - name: Dispatch to private
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          BRANCH: ${{ github.ref_name }}
+          SHA: ${{ github.sha }}
+        run: |
+          jq -n --arg branch "$BRANCH" --arg sha "$SHA" \
+            '{event_type:"public-branch-updated", client_payload:{branch:$branch, public_sha:$sha}}' \
+          | gh api repos/daidoji-traincrew-office/Traincrew_Rendo_Server/dispatches --input -
+
+      - name: Summary
+        env:
+          BRANCH: ${{ github.ref_name }}
+          SHA: ${{ github.sha }}
+        run: |
+          {
+            echo "## Notify Private submodule pin"
+            echo ""
+            echo "- branch: \`${BRANCH}\`"
+            echo "- public_sha: \`${SHA}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
