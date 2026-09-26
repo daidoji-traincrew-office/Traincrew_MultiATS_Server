@@ -51,7 +51,7 @@ public class LeverRepository(ApplicationDbContext context) : ILeverRepository
     public async Task<List<Models.LeverState>> GetStateByIds(IEnumerable<ulong> ids, CancellationToken cancellationToken = default)
     {
         var idList = ids.ToList();
-        return await context.Set<Models.LeverState>()
+        return await context.LeverStates
             .Where(state => idList.Contains(state.Id))
             .ToListAsync(cancellationToken);
     }

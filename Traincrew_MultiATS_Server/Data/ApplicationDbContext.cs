@@ -26,6 +26,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<ClosedCircuitLockTrackCircuit> ClosedCircuitLockTrackCircuits { get; set; }
     public DbSet<RouteState> RouteStates { get; set; }
     public DbSet<SwitchingMachine> SwitchingMachines { get; set; }
+    public DbSet<SwitchingMachineState> SwitchingMachineStates { get; set; }
     public DbSet<TrackCircuit> TrackCircuits { get; set; }
     public DbSet<TrackCircuitState> TrackCircuitStates { get; set; }
     public DbSet<Lock> Locks { get; set; }
@@ -39,6 +40,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<RouteLeverDestinationButton> RouteLeverDestinationButtons { get; set; }
     public DbSet<SwitchingMachineRoute> SwitchingMachineRoutes { get; set; }
     public DbSet<Lever> Levers { get; set; }
+    public DbSet<LeverState> LeverStates { get; set; }
     public DbSet<DestinationButton> DestinationButtons { get; set; }
     public DbSet<DestinationButtonState> DestinationButtonStates { get; set; }
     public DbSet<SignalRoute> SignalRoutes { get; internal set; }
@@ -46,7 +48,9 @@ public class ApplicationDbContext : DbContext
     public DbSet<OperationNotificationDisplay> OperationNotificationDisplays { get; set; }
     public DbSet<OperationNotificationState> OperationNotificationStates { get; set; }
     public DbSet<DirectionRoute> DirectionRoutes { get; set; }
+    public DbSet<DirectionRouteState> DirectionRouteStates { get; set; }
     public DbSet<DirectionSelfControlLever> DirectionSelfControlLevers { get; set; }
+    public DbSet<DirectionSelfControlLeverState> DirectionSelfControlLeverStates { get; set; }
     public DbSet<TtcWindow> TtcWindows { get; set; }
     public DbSet<TtcWindowLink> TtcWindowLinks { get; set; }
     public DbSet<TtcWindowDisplayStation> TtcWindowDisplayStations { get; set; }

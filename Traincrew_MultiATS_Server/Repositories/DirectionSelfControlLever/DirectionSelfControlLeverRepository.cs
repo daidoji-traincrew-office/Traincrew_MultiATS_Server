@@ -59,7 +59,7 @@ public class DirectionSelfControlLeverRepository(ApplicationDbContext context) :
     public async Task<List<Models.DirectionSelfControlLeverState>> GetStateByIds(IEnumerable<ulong> ids, CancellationToken cancellationToken = default)
     {
         var idList = ids.ToList();
-        return await context.Set<Models.DirectionSelfControlLeverState>()
+        return await context.DirectionSelfControlLeverStates
             .Where(state => idList.Contains(state.Id))
             .ToListAsync(cancellationToken);
     }
