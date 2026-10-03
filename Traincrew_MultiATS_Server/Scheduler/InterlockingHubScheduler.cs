@@ -10,9 +10,10 @@ public class InterlockingHubScheduler(IServiceScopeFactory serviceScopeFactory) 
     protected override int Interval => 250;
     protected override async Task ExecuteTaskAsync(IServiceScope scope, System.Diagnostics.Activity? activity)
     {
-        var hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<InterlockingHub, IInterlockingClientContract>>();
+        // 全状態のスナップショットなので、詰まった接続に待たされないlatest-onlyで送る
+        var latestOnlySender = scope.ServiceProvider.GetRequiredService<ILatestOnlySender<InterlockingHub>>();
         var interlockingService = scope.ServiceProvider.GetRequiredService<IInterlockingService>();
         var data = await interlockingService.SendData_Interlocking();
-        await hubContext.Clients.All.ReceiveData(data);
+        await latestOnlySender.SendAllAsync(nameof(IInterlockingClientContract.ReceiveData), data);
     }
 }
