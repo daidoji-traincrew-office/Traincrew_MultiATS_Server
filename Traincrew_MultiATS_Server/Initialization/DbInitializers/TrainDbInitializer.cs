@@ -1,3 +1,4 @@
+using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.DiagramTrain;
 using Traincrew_MultiATS_Server.Repositories.General;
@@ -153,6 +154,7 @@ public class TrainDbInitializer(
                 Index = i + 1,
                 StationId = stationData.stationID,
                 TrackNumber = stationData.stopPosName ?? "",
+                StopType = ConvertToStopType(stationData.stopType),
                 ArrivalTime = ConvertToTimeSpan(stationData.arrivalTime),
                 DepartureTime = ConvertToTimeSpan(stationData.departureTime)
             }).ToList();
@@ -224,6 +226,19 @@ public class TrainDbInitializer(
     // 全角ASCII変換(U+FF01-U+FF5E → U+0021-U+007E)
     private static string ToHalfWidth(string input) =>
         new(input.Select(c => c is >= '！' and <= '～' ? (char)(c - 0xFEE0) : c).ToArray());
+
+    /// <summary>
+    ///     Convert stopType string in JSON to StopType
+    /// </summary>
+    private static StopType ConvertToStopType(string? stopType)
+    {
+        return stopType switch
+        {
+            "pass" => StopType.Pass,
+            "operational_stop" => StopType.OperationalStop,
+            _ => StopType.Stop
+        };
+    }
 
     /// <summary>
     ///     Convert TimeOfDay to TimeSpan

@@ -239,6 +239,9 @@ public class TTC_StationData
     [JsonPropertyName("stopPosName")]
     public string StopPosName { get; set; } = "";
 
+    [JsonPropertyName("stopType")]
+    public string StopType { get; set; } = "stop";
+
     [JsonPropertyName("arrivalTime")]
     public TimeOfDay? ArrivalTime { get; set; }
 
@@ -412,6 +415,7 @@ public class Oud2ToTtcConverter
                         StationID = sta.StationID,
                         StationName = sta.StationName,
                         StopPosName = sta.StopPosName,
+                        StopType = sta.StopType,
                         ArrivalTime = sta.ArrivalTime,
                         DepartureTime = sta.DepartureTime
                     };
@@ -419,6 +423,11 @@ public class Oud2ToTtcConverter
                 else
                 {
                     // 情報補完: null の場合は新しい値を採用、競合は先勝ちで警告
+                    if (existing.StopType != sta.StopType)
+                        Console.Error.WriteLine(
+                            $"[WARN] {trainNumber}: {sta.StationName} 停車種別競合 "
+                            + $"{existing.StopType} vs {sta.StopType} → 先勝ち");
+
                     if (existing.ArrivalTime == null && sta.ArrivalTime != null)
                         existing.ArrivalTime = sta.ArrivalTime;
                     else if (existing.ArrivalTime != null && sta.ArrivalTime != null
@@ -750,6 +759,7 @@ public class Oud2ToTtcConverter
             StationID = stationId,
             StationName = stationName,
             StopPosName = stopPosName,
+            StopType = ekiAtsukai == "2" ? "pass" : "stop",
             ArrivalTime = arrivalTime,
             DepartureTime = departureTime
         };

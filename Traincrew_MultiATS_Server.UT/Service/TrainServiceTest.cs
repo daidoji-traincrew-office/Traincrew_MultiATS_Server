@@ -279,8 +279,9 @@ public class TrainServiceTest
         var trackCircuit = new TrackCircuit { Id = 100, Name = "TC1", StationId = "ST01", StationIdForDelay = "ST01" };
         var timetable = new DiagramTrainTimetable
         {
-            Id = 1, Index = 3, StationId = "ST01", // 始発駅でない
-            ArrivalTime = TimeSpan.FromHours(11), // 到着時刻 = 出発時刻 (通過)
+            Id = 1, Index = 3, StationId = "ST01",
+            StopType = StopType.Pass, // 通過
+            ArrivalTime = TimeSpan.FromHours(11),
             DepartureTime = TimeSpan.FromHours(11)
         };
         var departmentTime = new TrackCircuitDepartmentTime { Id = 1, TrackCircuitId = 100, CarCount = 0, IsUp = true, TimeElement = 0 };
@@ -333,7 +334,7 @@ public class TrainServiceTest
         {
             Id = 1, Index = 1, StationId = "ST01", // 始発駅
             ArrivalTime = TimeSpan.FromHours(8),
-            DepartureTime = TimeSpan.FromHours(8) // 到着時刻 = 出発時刻でも始発なので実両数使用
+            DepartureTime = TimeSpan.FromHours(8) // 停車種別が停車なので実両数使用 (着=発でも通過扱いにならない)
         };
         var departmentTime = new TrackCircuitDepartmentTime { Id = 1, TrackCircuitId = 100, CarCount = 12, IsUp = false, TimeElement = 15 };
 
