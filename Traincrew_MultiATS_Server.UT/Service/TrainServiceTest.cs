@@ -369,6 +369,110 @@ public class TrainServiceTest
     }
 
     [Fact]
+    public async Task CalculateAndUpdateDelays_OperationalStop_UsesActualCarCount()
+    {
+        // Arrange
+        var diaId = 1UL;
+        var trainNumber = "4003"; // 奇数 = 下り
+        var carCount = 12;
+        var trackCircuitDataList = new List<TrackCircuitData>
+        {
+            new() { Name = "TC1", Last = trainNumber, On = true, Lock = false }
+        };
+
+        var trackCircuit = new TrackCircuit { Id = 100, Name = "TC1", StationId = "ST01", StationIdForDelay = "ST01" };
+        var timetable = new DiagramTrainTimetable
+        {
+            Id = 1, Index = 3, StationId = "ST01",
+            StopType = StopType.OperationalStop, // 運転停車
+            ArrivalTime = TimeSpan.FromHours(8),
+            DepartureTime = TimeSpan.FromHours(8) // 運転停車なので実両数使用 (着=発でも通過扱いにならない)
+        };
+        var departmentTime = new TrackCircuitDepartmentTime { Id = 1, TrackCircuitId = 100, CarCount = 12, IsUp = false, TimeElement = 15 };
+
+        var currentTime = new DateTime(2024, 1, 1, 8, 2, 0);
+
+        var testTrackCircuitService = new TestTrackCircuitService();
+        testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
+
+        var mockDiagramTrainRepository = new Mock<IDiagramTrainRepository>();
+        mockDiagramTrainRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
+
+        var mockTrackCircuitDepartmentTimeRepository = new Mock<ITrackCircuitDepartmentTimeRepository>();
+        mockTrackCircuitDepartmentTimeRepository.Setup(x => x.GetByTrackCircuitIdAndIsUpAndMaxCarCount(100, false, 12)).ReturnsAsync(departmentTime);
+
+        var mockDateTimeRepository = new Mock<IDateTimeRepository>();
+        mockDateTimeRepository.Setup(x => x.GetNow()).Returns(currentTime);
+
+        var testServerService = new TestServerService();
+        testServerService.SetupGetTimeOffsetAsync(() => Task.FromResult(0));
+
+        var mockTrainRepository = new Mock<ITrainRepository>();
+        mockTrainRepository.Setup(x => x.SetDelayByTrainNumber(trainNumber, It.IsAny<int>())).Returns(Task.CompletedTask);
+
+        var trainService = CreateTrainService(testTrackCircuitService, mockTrainRepository, mockDiagramTrainRepository,
+            mockTrackCircuitDepartmentTimeRepository, mockDateTimeRepository, testServerService);
+
+        // Act
+        await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList);
+
+        // Assert - 実両数12で問い合わせることを確認
+        mockTrackCircuitDepartmentTimeRepository.Verify(x => x.GetByTrackCircuitIdAndIsUpAndMaxCarCount(100, false, 12), Times.Once);
+    }
+
+    [Fact]
+    public async Task CalculateAndUpdateDelays_NonFirstStationStopWithSameArrivalDeparture_UsesActualCarCount()
+    {
+        // Arrange
+        var diaId = 1UL;
+        var trainNumber = "4005"; // 奇数 = 下り
+        var carCount = 12;
+        var trackCircuitDataList = new List<TrackCircuitData>
+        {
+            new() { Name = "TC1", Last = trainNumber, On = true, Lock = false }
+        };
+
+        var trackCircuit = new TrackCircuit { Id = 100, Name = "TC1", StationId = "ST01", StationIdForDelay = "ST01" };
+        var timetable = new DiagramTrainTimetable
+        {
+            Id = 1, Index = 3, StationId = "ST01",
+            StopType = StopType.Stop, // 停車
+            ArrivalTime = TimeSpan.FromHours(8),
+            DepartureTime = TimeSpan.FromHours(8) // 停車種別が停車なので実両数使用 (始発でなく着=発でも通過扱いにならない)
+        };
+        var departmentTime = new TrackCircuitDepartmentTime { Id = 1, TrackCircuitId = 100, CarCount = 12, IsUp = false, TimeElement = 15 };
+
+        var currentTime = new DateTime(2024, 1, 1, 8, 2, 0);
+
+        var testTrackCircuitService = new TestTrackCircuitService();
+        testTrackCircuitService.SetupGetTrackCircuitsByNames(_ => Task.FromResult(new List<TrackCircuit> { trackCircuit }));
+
+        var mockDiagramTrainRepository = new Mock<IDiagramTrainRepository>();
+        mockDiagramTrainRepository.Setup(x => x.GetTimetableByTrainNumberStationIdAndDiaId(diaId, trainNumber, "ST01")).ReturnsAsync(timetable);
+
+        var mockTrackCircuitDepartmentTimeRepository = new Mock<ITrackCircuitDepartmentTimeRepository>();
+        mockTrackCircuitDepartmentTimeRepository.Setup(x => x.GetByTrackCircuitIdAndIsUpAndMaxCarCount(100, false, 12)).ReturnsAsync(departmentTime);
+
+        var mockDateTimeRepository = new Mock<IDateTimeRepository>();
+        mockDateTimeRepository.Setup(x => x.GetNow()).Returns(currentTime);
+
+        var testServerService = new TestServerService();
+        testServerService.SetupGetTimeOffsetAsync(() => Task.FromResult(0));
+
+        var mockTrainRepository = new Mock<ITrainRepository>();
+        mockTrainRepository.Setup(x => x.SetDelayByTrainNumber(trainNumber, It.IsAny<int>())).Returns(Task.CompletedTask);
+
+        var trainService = CreateTrainService(testTrackCircuitService, mockTrainRepository, mockDiagramTrainRepository,
+            mockTrackCircuitDepartmentTimeRepository, mockDateTimeRepository, testServerService);
+
+        // Act
+        await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList);
+
+        // Assert - 実両数12で問い合わせることを確認
+        mockTrackCircuitDepartmentTimeRepository.Verify(x => x.GetByTrackCircuitIdAndIsUpAndMaxCarCount(100, false, 12), Times.Once);
+    }
+
+    [Fact]
     public async Task CalculateAndUpdateDelays_NoTimetableData_SkipsStation()
     {
         // Arrange

@@ -728,7 +728,6 @@ public class Oud2ToTtcConverter
             timesPart = "";
         }
 
-        // 駅扱いが空でもOK（パターンによっては）
         // 着時刻・発時刻を解析
         TimeOfDay? arrivalTime = null;
         TimeOfDay? departureTime = null;
