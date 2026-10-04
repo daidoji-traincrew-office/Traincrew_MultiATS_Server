@@ -458,7 +458,7 @@ public class TrainServiceTest
         var mockLogger = new Mock<ILogger<TrainService>>();
 
         var trainService = CreateTrainService(testTrackCircuitService, mockTrainRepository, mockDiagramTrainRepository,
-            mockTrackCircuitDepartmentTimeRepository, testDateTimeService, mockLogger);
+            mockTrackCircuitDepartmentTimeRepository, testDateTimeService, mockLogger: mockLogger);
 
         // Act
         await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList);
