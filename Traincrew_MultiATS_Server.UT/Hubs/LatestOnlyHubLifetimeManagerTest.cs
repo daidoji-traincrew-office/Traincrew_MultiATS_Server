@@ -209,8 +209,25 @@ public class LatestOnlyHubLifetimeManagerTest
             => Entries.Enqueue((logLevel, formatter(state, exception)));
     }
 
+    private sealed class TypedCapturingLogger<T>(CapturingLogger inner) : ILogger<T>
+    {
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+        public bool IsEnabled(LogLevel logLevel) => true;
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, System.Exception? exception,
+            Func<TState, System.Exception?, string> formatter)
+            => inner.Log(logLevel, eventId, state, exception, formatter);
+    }
+
+    private static SerializedHubMessage Message(string method, int value)
+        => new(new InvocationMessage(method, [value]));
+
+    // pumpの終了確認用
+    private static Task GetPumpTask(ConnectionMailbox mailbox)
+        => mailbox.PumpTask;
+
     [Fact]
-    public async Task OnDisconnectedAsync_切断後はpumpが終了し_送信しても例外にならず何も書かれない()
+    public async Task OnDisconnectedAsync_切断後はpumpが終了し_送信しても例外にならない()
     {
         var manager = CreateManager();
         await using var connection = new TestConnection("c", false);
@@ -222,10 +239,127 @@ public class LatestOnlyHubLifetimeManagerTest
 
         await manager.OnDisconnectedAsync(connection.Context).WaitAsync(Timeout);
 
+        // 切断後のmailboxは辞書から外れているので、マネージャー経由では誰にも届かず例外にもならない
         await manager.SendAllLatestAsync("Receive", [2]);
+    }
+
+    [Fact]
+    public async Task Mailbox_StopAsync後にPostしても例外にならず何も書かれない()
+    {
+        await using var connection = new TestConnection("c", false);
+        var mailbox = new ConnectionMailbox("TestHub", NullLogger.Instance);
+        mailbox.Start(connection.Context);
+        mailbox.Post("Receive", Message("Receive", 1));
+        await connection.ReadUntilAsync(r => r.Count >= 1);
+
+        await mailbox.StopAsync().WaitAsync(Timeout);
+
+        // 停止後に(スケジューラが辞書から外れる前のmailboxへ)Postが来ても、Disposeされた_ctsやCompleteしたChannelで落ちない
+        mailbox.Post("Receive", Message("Receive", 2));
         await Task.Delay(300);
 
         Assert.False(connection.HasPendingData());
+    }
+
+    [Fact]
+    public async Task OnDisconnectedAsync_送信を回し続けていてもタイムアウト内に完了する()
+    {
+        var manager = CreateManager();
+        await using var connection = new TestConnection("c", false);
+        await manager.OnConnectedAsync(connection.Context);
+
+        using var stop = new CancellationTokenSource();
+        var sender = Task.Run(async () =>
+        {
+            for (var i = 0; !stop.IsCancellationRequested; i++)
+            {
+                await manager.SendAllLatestAsync("Receive", [i]);
+                await Task.Yield();
+            }
+        });
+        // 送信が走り始めてから切断する
+        await Task.Delay(100);
+
+        try
+        {
+            await manager.OnDisconnectedAsync(connection.Context).WaitAsync(Timeout);
+            // 送信側も例外を出さずに回り続けられている
+            Assert.False(sender.IsFaulted);
+        }
+        finally
+        {
+            await stop.CancelAsync();
+            await sender;
+        }
+    }
+
+    [Fact]
+    public async Task Mailbox_接続がAbortされるとStopAsyncなしでもpumpが終了する()
+    {
+        await using var connection = new TestConnection("c", false);
+        var mailbox = new ConnectionMailbox("TestHub", NullLogger.Instance);
+        mailbox.Start(connection.Context);
+        mailbox.Post("Receive", Message("Receive", 1));
+        await connection.ReadUntilAsync(r => r.Count >= 1);
+
+        connection.Context.Abort();
+
+        // StopAsyncは呼ばない。ConnectionAbortedだけでpumpが抜ける
+        await GetPumpTask(mailbox).WaitAsync(Timeout);
+        await mailbox.StopAsync().WaitAsync(Timeout);
+    }
+
+    [Fact]
+    public async Task Mailbox_1件目の送信が詰まっている間に2件目を上書きすると_2件目は新しい値だけが届く()
+    {
+        var logger = new CapturingLogger();
+        var mailbox = new ConnectionMailbox("TestHub", logger, TimeSpan.FromMilliseconds(100));
+        await using var blocked = new TestConnection("blocked", true);
+
+        // pump開始前にA→Bの順で置く。一括で取り出す実装だと、Bは取り出し時点の値(1)で固定される
+        mailbox.Post("A", Message("A", 1));
+        mailbox.Post("B", Message("B", 1));
+        mailbox.Start(blocked.Context);
+
+        // Aの送信が詰まっている(閾値超過のWarning)ことを確認してからBを上書きする
+        var deadline = DateTime.UtcNow + Timeout;
+        while (!logger.Entries.Any(e => e.Level == LogLevel.Warning) && DateTime.UtcNow < deadline)
+        {
+            await Task.Delay(20);
+        }
+
+        Assert.Contains(logger.Entries, e => e.Level == LogLevel.Warning);
+        mailbox.Post("B", Message("B", 2));
+
+        // 詰まりを解除する。Bは古い値(1)を送らず、新しい値(2)だけが届く
+        var received = await blocked.ReadUntilAsync(r => r.Any(x => x.Method == "B"));
+        await mailbox.StopAsync().WaitAsync(Timeout);
+
+        Assert.Equal([("A", 1), ("B", 2)], received);
+    }
+
+    [Fact]
+    public async Task OnConnectedAsync_ConnectionIdが重複して登録できなくてもErrorが出て_先に登録した接続のmailboxは残る()
+    {
+        var logger = new CapturingLogger();
+        var manager = new LatestOnlyHubLifetimeManager<TestHub>(
+            new TypedCapturingLogger<LatestOnlyHubLifetimeManager<TestHub>>(logger),
+            NullLogger<DefaultHubLifetimeManager<TestHub>>.Instance);
+        await using var first = new TestConnection("dup", false);
+        await using var second = new TestConnection("dup", false);
+        await manager.OnConnectedAsync(first.Context);
+        await manager.OnConnectedAsync(second.Context);
+
+        var error = Assert.Single(logger.Entries, e => e.Level == LogLevel.Error);
+        Assert.Contains("ConnectionId=dup", error.Message);
+
+        // 登録できなかった方の切断は、先に登録した接続のmailboxを外さない
+        await manager.OnDisconnectedAsync(second.Context).WaitAsync(Timeout);
+        await manager.SendAllLatestAsync("Receive", [5]);
+        var received = await first.ReadUntilAsync(r => r.Count >= 1);
+        Assert.Equal([("Receive", 5)], received);
+
+        await manager.OnDisconnectedAsync(first.Context).WaitAsync(Timeout);
     }
 
     [Fact]
@@ -280,6 +414,59 @@ public class LatestOnlyHubLifetimeManagerTest
         Assert.Matches(@"Count=[1-9]\d*", debug.Message);
 
         await mailbox.StopAsync().WaitAsync(Timeout);
+    }
+
+    [Fact]
+    public async Task Mailbox_Postが流れ続けて送信が追いつかない間も上書き破棄のDebugログが出る()
+    {
+        var logger = new CapturingLogger();
+        var mailbox = new ConnectionMailbox("TestHub", logger, TimeSpan.FromMilliseconds(100));
+        await using var slow = new TestConnection("slow", true);
+        mailbox.Start(slow.Context);
+
+        // 1件目の送信を詰まらせる(閾値超過のWarningで、書き込み待ちに入ったことを確認する)
+        mailbox.Post("Receive", Message("Receive", 0));
+        var deadline = DateTime.UtcNow + Timeout;
+        while (!logger.Entries.Any(e => e.Level == LogLevel.Warning) && DateTime.UtcNow < deadline)
+        {
+            await Task.Delay(20);
+        }
+
+        Assert.Contains(logger.Entries, e => e.Level == LogLevel.Warning);
+
+        // 詰まっている間に送信より速くPostし続ける。以降はスロットが空にならず、pumpの内側ループが終わらない
+        using var stop = new CancellationTokenSource();
+        var value = 0;
+        var feeder = Task.Run(() =>
+        {
+            while (!stop.IsCancellationRequested)
+            {
+                mailbox.Post("Receive", Message("Receive", Interlocked.Increment(ref value)));
+            }
+        });
+        while (Volatile.Read(ref value) < 10 && DateTime.UtcNow < deadline)
+        {
+            await Task.Delay(1);
+        }
+
+        // クライアントが1回だけ読んで1件目の送信を完了させる。次の取り出しではスロットが埋まっており、
+        // 2件目の書き込みでまた詰まるので、内側ループは空にならないまま止まる。この状態でログが出るかを見る
+        await slow.ReadUntilAsync(r => r.Count >= 1);
+
+        deadline = DateTime.UtcNow + Timeout;
+        while (!logger.Entries.Any(e => e.Level == LogLevel.Debug) && DateTime.UtcNow < deadline)
+        {
+            await Task.Delay(20);
+        }
+
+        // Postを止めてから後始末する
+        await stop.CancelAsync();
+        await feeder.WaitAsync(Timeout);
+        await mailbox.StopAsync().WaitAsync(Timeout);
+
+        var debug = Assert.Single(logger.Entries, e => e.Level == LogLevel.Debug);
+        Assert.Contains("上書き破棄", debug.Message);
+        Assert.Contains("ConnectionId=slow", debug.Message);
     }
 
     [Fact]

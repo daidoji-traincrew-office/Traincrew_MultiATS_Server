@@ -46,20 +46,27 @@ internal sealed class ConnectionMailbox(string hubName, ILogger logger, TimeSpan
     private readonly List<string> _standbyMethodNames = [];
 
     // pumpの起床通知。データ本体はスロットにあり、ここは「何かある」を伝えるだけなので容量1(DropWrite)で足りる。
-    // TryReadとTakeAllの間にPostが入っても、通知が1件残って空振りの1周が増えるだけで取りこぼしはない
+    // TryReadとTryTakeNextの間にPostが入っても、通知が1件残って空振りの1周が増えるだけで取りこぼしはない
     private readonly Channel<byte> _wakeupChannel = Channel.CreateBounded<byte>(
         new BoundedChannelOptions(1) { FullMode = BoundedChannelFullMode.DropWrite });
 
     private readonly CancellationTokenSource _cts = new();
 
     // ログのレート制限用。pumpの単一ループからしか触らないのでロック不要
-    // 遅延・書き込み失敗のログ用と、上書き破棄のログ用で、間引きの状態を分ける
+    // 遅延(Warning/Information)・書き込み失敗(Error)・上書き破棄(Debug)で、間引きの状態を分ける。
+    // 遅延と書き込み失敗で枠を共有すると、直前の遅延Warningで重大な書き込み失敗Errorが30秒抑止され得る
     private long _lastSlowWriteLogTimestamp;
+    private long _lastWriteFailureLogTimestamp;
     private long _lastOverwriteLogTimestamp;
 
     // 前回の上書きログ以降に上書きで捨てた件数。Postはスケジューラの複数スレッドから呼ばれ得るのでInterlockedで触る
     private long _overwrittenSinceLastLog;
     private Task _pumpTask = Task.CompletedTask;
+
+    /// <summary>
+    /// テストから終了を観測するため。
+    /// </summary>
+    internal Task PumpTask => _pumpTask;
 
     /// <summary>
     /// メッセージをスロットに置く。同じメソッドの未送信メッセージがあれば上書きして破棄する(順序位置は保持)。
@@ -129,25 +136,32 @@ internal sealed class ConnectionMailbox(string hubName, ILogger logger, TimeSpan
     }
 
     /// <summary>
-    /// 溜まっているメッセージを送信順に全部取り出し、スロットを空にする。
+    /// 送信待ちの先頭を1件だけ取り出し、そのスロットを空にする。取り出せるものが無ければfalse。
     /// </summary>
     /// <remarks>
-    /// 取り出し後に届いたPostは次の周回で送る。送信(await)はlockの外で行うので、
-    /// 送信が詰まっている間もPostは待たされず、スロットの上書きだけが進む。
+    /// 全件を一括で取り出すと、1件目の送信が長引いた間にスロットが新しくなっても、
+    /// 2件目以降は取り出した時点の古い値を送ってしまう。
+    /// 1件ずつ取り出せば、各メソッドとも「送る直前のスロットの最新」を送れる。
+    /// 取り出し後に届いたPostは、そのメソッドが空なら末尾に追加され、同じ周回の続きで送る。
+    /// 送信(await)はlockの外で行うので、送信が詰まっている間もPostは待たされず、スロットの上書きだけが進む。
     /// </remarks>
-    private List<(string MethodName, SerializedHubMessage Message)> TakeAll()
+    private bool TryTakeNext(out string methodName, out SerializedHubMessage message)
     {
         lock (_lock)
         {
-            // 送信待ちの順にスロットの中身を並べる
-            var result = _standbyMethodNames
-                .Select(methodName => (methodName, _messagesByMethodName[methodName]))
-                .ToList();
+            if (_standbyMethodNames.Count == 0)
+            {
+                methodName = "";
+                message = null!;
+                return false;
+            }
 
-            // 取り出した分は空にする
-            _standbyMethodNames.Clear();
-            _messagesByMethodName.Clear();
-            return result;
+            // 送信待ちの先頭を取り出し、スロットを空にする
+            methodName = _standbyMethodNames[0];
+            _standbyMethodNames.RemoveAt(0);
+            message = _messagesByMethodName[methodName];
+            _messagesByMethodName.Remove(methodName);
+            return true;
         }
     }
 
@@ -166,20 +180,24 @@ internal sealed class ConnectionMailbox(string hubName, ILogger logger, TimeSpan
         var token = linked.Token;
         try
         {
-            // 起床通知が来るたびに、溜まっているものを全部取り出して順に送る
+            // 起床通知が来るたびに、溜まっているものを空になるまで1件ずつ取り出して順に送る
             while (await _wakeupChannel.Reader.WaitToReadAsync(token))
             {
-                // 通知を消費してから取り出す。逆順だと、取り出し後・消費前のPostの通知を消してしまい、次のPostまで送られない
+                // 通知を消費してから取り出す。逆順だと、取り出し中・消費前のPostの通知を消してしまい、
+                // 取り出しが空になった後に入ったPostが次のPostまで送られない。
+                // この順なら、消費後のPostは取り出しで拾うか、通知が残って次の周回で拾うかのどちらかになる
                 _wakeupChannel.Reader.TryRead(out _);
-                foreach (var (methodName, message) in TakeAll())
+                while (TryTakeNext(out var methodName, out var message))
                 {
                     // 切断後に残りを送り続けないよう、メッセージごとに確認する
                     token.ThrowIfCancellationRequested();
                     await WriteAsync(connection, methodName, message, token);
-                }
 
-                // 送信が一巡するたびに、上書き破棄が起きていればログで接続を特定する
-                TryLogOverwritten(connection);
+                    // 内側ループの中で呼ぶ。遅い接続にPostが送信より速く流れ続けると内側ループが空にならず、
+                    // ループの外では遅い接続に限って上書き破棄のログが一度も出なくなる。
+                    // Debug無効・上書き0件なら即returnし、30秒のレート制限もあるので毎メッセージ呼んでも安い
+                    TryLogOverwritten(connection);
+                }
             }
         }
         catch (OperationCanceledException)
@@ -191,6 +209,9 @@ internal sealed class ConnectionMailbox(string hubName, ILogger logger, TimeSpan
             // pumpが落ちるとその接続はlatest-onlyを受け取れなくなるので、握りつぶさず必ずログに残す
             logger.LogError(e, "latest-only pumpが異常終了しました ConnectionId={ConnectionId}",
                 connection.ConnectionId);
+            // pumpが死ぬとその接続は接続したまま定時配信が永久に止まり、クライアントは気付けない。
+            // 切断させてクライアントの再接続で復旧させる
+            connection.Abort();
         }
     }
 
@@ -251,9 +272,9 @@ internal sealed class ConnectionMailbox(string hubName, ILogger logger, TimeSpan
             // HubConnectionContext.WriteAsyncは書き込みを内部ロックで直列化し、失敗時は自分で接続をAbortする(例外はほぼ外に出ない)。
             // Abort後のWriteAsyncは何もせず即returnするので、続けて書いてもフレームは壊れない。
             // AbortでConnectionAbortedが発火し、pumpは次のThrowIfCancellationRequested/WaitToReadAsyncで抜けるので、このcatchは防御用。
-            // ここに来るのは想定外なので、Errorで出す。
+            // ここに来るのは想定外なので、Errorで出す。遅延ログとは間引きの枠を分け、重大なErrorが遅延Warningで抑止されないようにする。
             // 後始末はその接続の切断処理(OnDisconnectedAsync)に任せ、ここでpumpを止めて自前で後始末はしない
-            if (TryAcquireLogSlot(ref _lastSlowWriteLogTimestamp, Stopwatch.GetTimestamp()))
+            if (TryAcquireLogSlot(ref _lastWriteFailureLogTimestamp, Stopwatch.GetTimestamp()))
             {
                 logger.LogError(e,
                     "latest-only書き込みに失敗しました Hub={Hub} Method={Method} ConnectionId={ConnectionId}",
@@ -375,6 +396,9 @@ public class LatestOnlyHubLifetimeManager<THub>(
     private readonly string _hubName = typeof(THub).Name;
     private readonly ConcurrentDictionary<string, ConnectionMailbox> _mailboxByConnectionId = new();
 
+    // 接続自身に自分のmailboxを持たせるキー。切断時に、辞書の同じConnectionIdの別mailboxではなく自分のものだけを外すために使う
+    private const string MailboxItemKey = "LatestOnly.Mailbox";
+
     /// <summary>
     /// Defaultへ登録したうえで、この接続のmailboxとpumpを用意する。
     /// </summary>
@@ -386,7 +410,16 @@ public class LatestOnlyHubLifetimeManager<THub>(
         // 登録できた時だけ起動する。登録できなかったmailboxのpumpを走らせると誰にも止められず残る
         if (_mailboxByConnectionId.TryAdd(connection.ConnectionId, mailbox))
         {
+            // 登録できた接続にだけ紐付ける。切断時はこの紐付けがある接続だけが自分のmailboxを外す
+            connection.Items[MailboxItemKey] = mailbox;
             mailbox.Start(connection);
+        }
+        else
+        {
+            // ConnectionIdが重複した異常系。この接続にはlatest-onlyが配信されないので、握りつぶさず残す
+            _logger.LogError(
+                "latest-only mailboxを登録できませんでした(ConnectionIdが重複) Hub={Hub} ConnectionId={ConnectionId}",
+                _hubName, connection.ConnectionId);
         }
     }
 
@@ -398,8 +431,12 @@ public class LatestOnlyHubLifetimeManager<THub>(
         // pumpの停止で何かあってもDefaultの登録解除は必ず行う。漏れると切断済み接続が全配信の対象に残り続ける
         try
         {
-            if (_mailboxByConnectionId.TryRemove(connection.ConnectionId, out var mailbox))
+            // 登録できなかった接続はItemsに何も無いので何もしない。
+            // 辞書からは同一インスタンスの時だけ外し、重複した別接続のmailboxを巻き込まない。
+            // 二重に呼ばれても2回止めないよう取得と同時に外す。
+            if (connection.Items.Remove(MailboxItemKey, out var item) && item is ConnectionMailbox mailbox)
             {
+                _mailboxByConnectionId.TryRemove(KeyValuePair.Create(connection.ConnectionId, mailbox));
                 await mailbox.StopAsync();
             }
         }
