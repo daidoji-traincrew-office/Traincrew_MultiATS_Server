@@ -42,13 +42,13 @@ public class DateTimeService(
     /// <returns>[4:00, 28:00) の範囲に写像された時刻</returns>
     public static TimeSpan NormalizeToServiceDay(TimeSpan time)
     {
-        const double secondsPerDay = 86400.0;
-        var startSeconds = ServiceDayStartTime.TotalSeconds;
-        var offsetFromStart = time.TotalSeconds - startSeconds;
+        const long ticksPerDay = TimeSpan.TicksPerDay;
+        var startTicks = ServiceDayStartTime.Ticks;
+        var offsetFromStart = time.Ticks - startTicks;
 
         // C# の % は負の被除数に対して負を返すため、二重剰余で常に非負へ寄せる
-        var normalized = (offsetFromStart % secondsPerDay + secondsPerDay) % secondsPerDay;
+        var normalized = (offsetFromStart % ticksPerDay + ticksPerDay) % ticksPerDay;
 
-        return TimeSpan.FromSeconds(normalized + startSeconds);
+        return TimeSpan.FromTicks(normalized + startTicks);
     }
 }

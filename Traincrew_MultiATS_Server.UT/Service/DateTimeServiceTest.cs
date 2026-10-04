@@ -64,4 +64,27 @@ public class DateTimeServiceTest
         // Assert
         Assert.Equal(expectedSeconds, actual.TotalSeconds);
     }
+
+    [Theory]
+    // 1tick単位の端数を持つ時刻でも、丸め誤差なく正規化されることを検証する
+    // 旧実装(double秒計算)は端数が切り捨てられて1tickずれていた
+    [InlineData(5 * TimeSpan.TicksPerHour + 12, 5 * TimeSpan.TicksPerHour + 12)] // 5:00:00.0000012 -> そのまま
+    [InlineData(10 * TimeSpan.TicksPerHour + 15, 10 * TimeSpan.TicksPerHour + 15)] // 10:00:00.0000015 -> そのまま
+    [InlineData(TimeSpan.TicksPerHour + 28, 25 * TimeSpan.TicksPerHour + 28)] // 1:00:00.0000028 -> 25:00:00.0000028
+    [InlineData(11, 24 * TimeSpan.TicksPerHour + 11)] // 0:00:00.0000011 -> 24:00:00.0000011
+    [InlineData(4 * TimeSpan.TicksPerHour - 1, 28 * TimeSpan.TicksPerHour - 1)] // 3:59:59.9999999 -> 27:59:59.9999999
+    [InlineData(28 * TimeSpan.TicksPerHour + 1, 4 * TimeSpan.TicksPerHour + 1)] // 28:00:00.0000001 -> 4:00:00.0000001
+    [InlineData(-24 * TimeSpan.TicksPerHour, 24 * TimeSpan.TicksPerHour)] // -24:00:00 -> 24:00:00
+    public void NormalizeToServiceDay_FractionalTicks_PreservesTicksPrecision(
+        long inputTicks, long expectedTicks)
+    {
+        // Arrange
+        var time = TimeSpan.FromTicks(inputTicks);
+
+        // Act
+        var actual = DateTimeService.NormalizeToServiceDay(time);
+
+        // Assert
+        Assert.Equal(expectedTicks, actual.Ticks);
+    }
 }
