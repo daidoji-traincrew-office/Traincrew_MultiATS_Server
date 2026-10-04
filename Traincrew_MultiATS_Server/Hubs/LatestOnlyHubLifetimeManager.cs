@@ -18,7 +18,7 @@ namespace Traincrew_MultiATS_Server.Hubs;
 /// 配信対象は全状態のスナップショットなので古い分は不要であり、
 /// 送信が詰まってもメモリは「接続数×メソッド数」件で頭打ちになる。
 /// 送信待ちメソッド名のリストは、上書きしても位置を保つ。
-/// これにより同一pump内ではPostした順どおりに送られる(例: ReceiveData→ReceiveSignalData)。
+/// これにより同一pump内ではPostした順どおりに送られる。
 /// ただしこの順序が保証されるのは同じmailbox内だけで、
 /// 別スケジューラ間(同一ハブのReceiveDataとReceiveSignalData等)や通常のSendAllAsync(Default委譲)との順序は保証しない。
 /// 共有状態はlockで保護し、送信(await)はlockの外で行う。
@@ -170,8 +170,10 @@ internal sealed class ConnectionMailbox(string hubName, ILogger logger, TimeSpan
     /// </summary>
     /// <remarks>
     /// 1接続につき1本だけ走らせ、WriteAsyncの待機はこの接続の中で完結させる。
-    /// 詰まった接続を自分から切ることはしない。上書き方式でメモリは有界なので放置しても他に害はなく、
-    /// 切断はフレームワーク側のタイムアウトに任せる。遅い接続の特定はログとメトリクスで行う。
+    /// 詰まった接続を自分から切ることはしない。読むのが遅いだけで生きているクライアントはpingが届くので、
+    /// フレームワークのタイムアウトには掛からず残り得る。ただし保持するのはメソッドごとに最新1件なので、
+    /// メモリは「接続数×メソッド数」件で有界であり、放置しても他に害はない。
+    /// 切断するかどうかは、ログとメトリクスで遅い接続を観測してから判断する。
     /// </remarks>
     private async Task PumpAsync(HubConnectionContext connection)
     {
@@ -450,12 +452,14 @@ public class LatestOnlyHubLifetimeManager<THub>(
     /// 全接続のメールボックスに置いて即returnする。送信は接続ごとのpumpが行う。
     /// </summary>
     /// <remarks>
-    /// シリアライズ結果(SerializedHubMessage)は1回だけ作り、全接続で共有する。接続ごとには作り直さない。
+    /// SerializedHubMessageは1つだけ作り、全接続で共有する。接続ごとには作り直さない。
+    /// 実際のシリアライズはプロトコルごとに最初に書き込むpumpで1回だけ行われる(SerializedHubMessage内部でロックされる)。
+    /// そのため渡したargsは、pumpが書き込み終えるまで変更・再利用してはならない。
     /// 送信の完了を待たず即returnするので、スケジューラは接続の状態に関係なく次のティックへ進める。
     /// </remarks>
     public Task SendAllLatestAsync(string methodName, object?[] args)
     {
-        // シリアライズ結果を1つ作る
+        // 全接続で共有するメッセージを1つ作る(シリアライズは書き込み時に遅延実行される)
         var message = new SerializedHubMessage(new InvocationMessage(methodName, args));
         // 接続中の全mailboxに置く
         foreach (var mailbox in _mailboxByConnectionId.Values)

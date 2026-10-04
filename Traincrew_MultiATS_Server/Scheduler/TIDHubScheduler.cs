@@ -16,6 +16,6 @@ public class TIDHubScheduler(IServiceScopeFactory serviceScopeFactory) : Schedul
 
         var data = await tidService.CreateTidData();
 
-        await latestOnlySender.SendAllAsync(nameof(ITIDClientContract.ReceiveData), data);
+        await latestOnlySender.SendAllLatestAsync(nameof(ITIDClientContract.ReceiveData), data);
     }
 }

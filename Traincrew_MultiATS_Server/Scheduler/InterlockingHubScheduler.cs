@@ -14,6 +14,6 @@ public class InterlockingHubScheduler(IServiceScopeFactory serviceScopeFactory) 
         var latestOnlySender = scope.ServiceProvider.GetRequiredService<ILatestOnlySender<InterlockingHub>>();
         var interlockingService = scope.ServiceProvider.GetRequiredService<IInterlockingService>();
         var data = await interlockingService.SendData_Interlocking();
-        await latestOnlySender.SendAllAsync(nameof(IInterlockingClientContract.ReceiveData), data);
+        await latestOnlySender.SendAllLatestAsync(nameof(IInterlockingClientContract.ReceiveData), data);
     }
 }

@@ -46,10 +46,10 @@ public class SignalScheduler(IServiceScopeFactory serviceScopeFactory) : Schedul
         _oldSignalDataByName = signalData.ToDictionary(s => s.Name, s => s.phase);
 
         await Task.WhenAll(
-            trainSender.SendAllAsync(nameof(ITrainClientContract.ReceiveSignalData), signalData),
-            tidSender.SendAllAsync(nameof(ITIDClientContract.ReceiveSignalData), signalData),
-            commanderTableSender.SendAllAsync(nameof(ICommanderTableClientContract.ReceiveSignalData), signalData),
-            interlockingSender.SendAllAsync(nameof(IInterlockingClientContract.ReceiveSignalData), signalData)
+            trainSender.SendAllLatestAsync(nameof(ITrainClientContract.ReceiveSignalData), signalData),
+            tidSender.SendAllLatestAsync(nameof(ITIDClientContract.ReceiveSignalData), signalData),
+            commanderTableSender.SendAllLatestAsync(nameof(ICommanderTableClientContract.ReceiveSignalData), signalData),
+            interlockingSender.SendAllLatestAsync(nameof(IInterlockingClientContract.ReceiveSignalData), signalData)
         );
     }
 }

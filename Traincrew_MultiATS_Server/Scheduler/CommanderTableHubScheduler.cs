@@ -16,6 +16,6 @@ public class CommanderTableHubScheduler(IServiceScopeFactory serviceScopeFactory
 
         var data = await commanderTableService.SendData_CommanderTable();
 
-        await latestOnlySender.SendAllAsync(nameof(ICommanderTableClientContract.ReceiveData), data);
+        await latestOnlySender.SendAllLatestAsync(nameof(ICommanderTableClientContract.ReceiveData), data);
     }
 }

@@ -17,6 +17,6 @@ public class ServerModeScheduler(IServiceScopeFactory serviceScopeFactory) : Sch
 
         var serverMode = await serverService.GetServerModeAsync();
 
-        await latestOnlySender.SendAllAsync(nameof(ICommanderTableClientContract.ReceiveServerMode), serverMode);
+        await latestOnlySender.SendAllLatestAsync(nameof(ICommanderTableClientContract.ReceiveServerMode), serverMode);
     }
 }

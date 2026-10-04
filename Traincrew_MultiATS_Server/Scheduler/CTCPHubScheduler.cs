@@ -16,6 +16,6 @@ public class CTCPHubScheduler(IServiceScopeFactory serviceScopeFactory) : Schedu
 
         var data = await ctcpService.SendData_CTCP();
 
-        await latestOnlySender.SendAllAsync(nameof(ICTCPClientContract.ReceiveData), data);
+        await latestOnlySender.SendAllLatestAsync(nameof(ICTCPClientContract.ReceiveData), data);
     }
 }

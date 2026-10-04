@@ -16,6 +16,6 @@ public class TrainScheduler(IServiceScopeFactory serviceScopeFactory) : Schedule
 
         var data = await trainService.CreateDataBySchedule();
 
-        await latestOnlySender.SendAllAsync(nameof(ITrainClientContract.ReceiveData), data);
+        await latestOnlySender.SendAllLatestAsync(nameof(ITrainClientContract.ReceiveData), data);
     }
 }

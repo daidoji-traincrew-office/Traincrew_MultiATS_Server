@@ -89,6 +89,19 @@ public class LatestOnlyHubLifetimeManagerTest
             return result;
         }
 
+        /// <summary>
+        /// クライアント側にデータが届くまで(または上限時間まで)待つ。データは消費しない。
+        /// 書き手(pump)のFlushは再開されないまま=詰まった状態が保たれ、後でReadUntilAsyncを呼べば同じデータを読める。
+        /// </summary>
+        public async Task WaitForUnconsumedDataAsync()
+        {
+            using var cts = new CancellationTokenSource(Timeout);
+            var readResult = await _toClient.Reader.ReadAsync(cts.Token);
+            var buffer = readResult.Buffer;
+            // consumed=Start / examined=Start なので、未消費データは残り次の ReadAsync は即座に返す
+            _toClient.Reader.AdvanceTo(buffer.Start, buffer.Start);
+        }
+
         public bool HasPendingData() => _toClient.Reader.TryRead(out var r) && r.Buffer.Length > 0;
 
         public async ValueTask DisposeAsync()
@@ -241,6 +254,26 @@ public class LatestOnlyHubLifetimeManagerTest
 
         // 切断後のmailboxは辞書から外れているので、マネージャー経由では誰にも届かず例外にもならない
         await manager.SendAllLatestAsync("Receive", [2]);
+    }
+
+    [Fact]
+    public async Task OnDisconnectedAsync_書き込みが詰まった接続でもタイムアウト内に完了する()
+    {
+        var manager = CreateManager();
+        await using var blocked = new TestConnection("blocked", true);
+        await manager.OnConnectedAsync(blocked.Context);
+
+        // 1件目がpumpに書き込まれ、クライアントが読まないためFlushで待たされている状態を作る
+        await manager.SendAllLatestAsync("Receive", [0]);
+        await blocked.WaitForUnconsumedDataAsync();
+        // 2件目以降はmailboxに溜まるだけ(pumpはFlushで詰まったまま)
+        for (var i = 1; i < 3; i++)
+        {
+            await manager.SendAllLatestAsync("Receive", [i]);
+        }
+
+        // マネージャー経由の切断が、詰まった書き込みでハングしない
+        await manager.OnDisconnectedAsync(blocked.Context).WaitAsync(Timeout);
     }
 
     [Fact]
@@ -504,7 +537,7 @@ public class LatestOnlyHubLifetimeManagerTest
         await manager.OnConnectedAsync(connection.Context);
 
         var sender = provider.GetRequiredService<ILatestOnlySender<TestHub>>();
-        await sender.SendAllAsync("Receive", 7);
+        await sender.SendAllLatestAsync("Receive", 7);
 
         var received = await connection.ReadUntilAsync(r => r.Count >= 1);
         Assert.Equal([("Receive", 7)], received);
@@ -518,6 +551,6 @@ public class LatestOnlyHubLifetimeManagerTest
         var sender = new LatestOnlySender<TestHub>(
             new DefaultHubLifetimeManager<TestHub>(NullLogger<DefaultHubLifetimeManager<TestHub>>.Instance));
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() => sender.SendAllAsync("Receive", 1));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => sender.SendAllLatestAsync("Receive", 1));
     }
 }
