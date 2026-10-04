@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.SignalR;
 using Traincrew_MultiATS_Server.Common.Contract;
 using Traincrew_MultiATS_Server.Hubs;
 using Traincrew_MultiATS_Server.Services;
@@ -11,11 +10,12 @@ public class CTCPHubScheduler(IServiceScopeFactory serviceScopeFactory) : Schedu
 
     protected override async Task ExecuteTaskAsync(IServiceScope scope, System.Diagnostics.Activity? activity)
     {
-        var hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<CTCPHub, ICTCPClientContract>>();
+        // 全状態のスナップショットなので、詰まった接続に待たされないlatest-onlyで送る
+        var latestOnlySender = scope.ServiceProvider.GetRequiredService<ILatestOnlySender<CTCPHub>>();
         var ctcpService = scope.ServiceProvider.GetRequiredService<ICTCPService>();
 
         var data = await ctcpService.SendData_CTCP();
 
-        await hubContext.Clients.All.ReceiveData(data);
+        await latestOnlySender.SendAllAsync(nameof(ICTCPClientContract.ReceiveData), data);
     }
 }

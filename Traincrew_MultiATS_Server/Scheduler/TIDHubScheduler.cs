@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.SignalR;
 using Traincrew_MultiATS_Server.Common.Contract;
 using Traincrew_MultiATS_Server.Hubs;
 using Traincrew_MultiATS_Server.Services;
@@ -11,11 +10,12 @@ public class TIDHubScheduler(IServiceScopeFactory serviceScopeFactory) : Schedul
 
     protected override async Task ExecuteTaskAsync(IServiceScope scope, System.Diagnostics.Activity? activity)
     {
-        var hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<TIDHub, ITIDClientContract>>();
+        // 全状態のスナップショットなので、詰まった接続に待たされないlatest-onlyで送る
+        var latestOnlySender = scope.ServiceProvider.GetRequiredService<ILatestOnlySender<TIDHub>>();
         var tidService = scope.ServiceProvider.GetRequiredService<ITIDService>();
 
         var data = await tidService.CreateTidData();
 
-        await hubContext.Clients.All.ReceiveData(data);
+        await latestOnlySender.SendAllAsync(nameof(ITIDClientContract.ReceiveData), data);
     }
 }

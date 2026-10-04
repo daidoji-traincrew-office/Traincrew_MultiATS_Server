@@ -20,7 +20,7 @@ namespace Traincrew_MultiATS_Server.Hubs;
 /// 送信待ちメソッド名のリストは、上書きしても位置を保つ。
 /// これにより同一pump内ではPostした順どおりに送られる(例: ReceiveData→ReceiveSignalData)。
 /// ただしこの順序が保証されるのは同じmailbox内だけで、
-/// 通常のSendAllAsync(Default委譲)との間や別スケジューラ間の順序は保証しない。
+/// 別スケジューラ間(同一ハブのReceiveDataとReceiveSignalData等)や通常のSendAllAsync(Default委譲)との順序は保証しない。
 /// 共有状態はlockで保護し、送信(await)はlockの外で行う。
 /// </remarks>
 internal sealed class ConnectionMailbox(string hubName, ILogger logger, TimeSpan? slowWriteThreshold = null)
@@ -307,7 +307,8 @@ internal sealed class ConnectionMailbox(string hubName, ILogger logger, TimeSpan
 /// OnConnectedAsync/OnDisconnectedAsyncで生成・破棄している。
 /// SendAllAsyncを含む既存のメソッドはすべてDefaultへ委譲した既存挙動のままで、
 /// latest-onlyは呼び出し側がSendAllLatestAsync(ILatestOnlySender経由)を選んだ配信だけに掛かるopt-inである。
-/// latest-onlyと既存挙動の間では送信順序が保証されないので、順序依存のあるメソッド同士は同じ側に揃えること。
+/// 現在、定時送信(各スケジューラのReceiveData/ReceiveSignalData/ReceiveServerMode)はすべてlatest-onlyを選んでいる。
+/// latest-onlyと通常配信の間では送信順序が保証されないので、通常配信を新たに足すときは順序依存に注意すること。
 /// </remarks>
 public class LatestOnlyHubLifetimeManager<THub>(
     ILogger<LatestOnlyHubLifetimeManager<THub>> logger,

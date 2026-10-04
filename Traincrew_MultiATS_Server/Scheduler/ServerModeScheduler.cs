@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.SignalR;
 using Traincrew_MultiATS_Server.Common.Contract;
 using Traincrew_MultiATS_Server.Hubs;
 using Traincrew_MultiATS_Server.Services;
@@ -12,11 +11,12 @@ public class ServerModeScheduler(IServiceScopeFactory serviceScopeFactory) : Sch
 
     protected override async Task ExecuteTaskAsync(IServiceScope scope, System.Diagnostics.Activity? activity)
     {
-        var hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<CommanderTableHub, ICommanderTableClientContract>>();
+        // 全状態のスナップショットなので、詰まった接続に待たされないlatest-onlyで送る
+        var latestOnlySender = scope.ServiceProvider.GetRequiredService<ILatestOnlySender<CommanderTableHub>>();
         var serverService = scope.ServiceProvider.GetRequiredService<IServerService>();
 
         var serverMode = await serverService.GetServerModeAsync();
 
-        await hubContext.Clients.All.ReceiveServerMode(serverMode);
+        await latestOnlySender.SendAllAsync(nameof(ICommanderTableClientContract.ReceiveServerMode), serverMode);
     }
 }
