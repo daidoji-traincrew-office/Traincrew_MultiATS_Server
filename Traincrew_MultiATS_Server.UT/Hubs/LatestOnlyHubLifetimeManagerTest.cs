@@ -253,6 +253,36 @@ public class LatestOnlyHubLifetimeManagerTest
     }
 
     [Fact]
+    public async Task Mailbox_上書き破棄が起きた接続はConnectionIdと件数付きでDebugログが出る()
+    {
+        var logger = new CapturingLogger();
+        var mailbox = new ConnectionMailbox("TestHub", logger);
+        await using var blocked = new TestConnection("blocked", true);
+        mailbox.Start(blocked.Context);
+
+        // 1件目をpumpに取らせて書き込み待ちにしてから、続けてPostして上書きを起こす
+        mailbox.Post("Receive", new SerializedHubMessage(new InvocationMessage("Receive", [1])));
+        await Task.Delay(200);
+        mailbox.Post("Receive", new SerializedHubMessage(new InvocationMessage("Receive", [2])));
+        mailbox.Post("Receive", new SerializedHubMessage(new InvocationMessage("Receive", [3])));
+
+        // クライアントが読み始めると送信が一巡し、上書きログが出る(30秒のレート制限なので最初の1回だけ)
+        await blocked.ReadUntilAsync(r => r.Any(x => x.Value == 3));
+        var deadline = DateTime.UtcNow + Timeout;
+        while (!logger.Entries.Any(e => e.Level == LogLevel.Debug) && DateTime.UtcNow < deadline)
+        {
+            await Task.Delay(20);
+        }
+
+        var debug = Assert.Single(logger.Entries, e => e.Level == LogLevel.Debug);
+        Assert.Contains("上書き破棄", debug.Message);
+        Assert.Contains("ConnectionId=blocked", debug.Message);
+        Assert.Matches(@"Count=[1-9]\d*", debug.Message);
+
+        await mailbox.StopAsync().WaitAsync(Timeout);
+    }
+
+    [Fact]
     public async Task SendAllAsync_既存挙動は上書きされず全件届く()
     {
         var manager = CreateManager();

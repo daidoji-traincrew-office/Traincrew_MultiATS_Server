@@ -53,7 +53,12 @@ internal sealed class ConnectionMailbox(string hubName, ILogger logger, TimeSpan
     private readonly CancellationTokenSource _cts = new();
 
     // ログのレート制限用。pumpの単一ループからしか触らないのでロック不要
+    // 遅延・書き込み失敗のログ用と、上書き破棄のログ用で、間引きの状態を分ける
     private long _lastSlowWriteLogTimestamp;
+    private long _lastOverwriteLogTimestamp;
+
+    // 前回の上書きログ以降に上書きで捨てた件数。Postはスケジューラの複数スレッドから呼ばれ得るのでInterlockedで触る
+    private long _overwrittenSinceLastLog;
     private Task _pumpTask = Task.CompletedTask;
 
     /// <summary>
@@ -83,6 +88,9 @@ internal sealed class ConnectionMailbox(string hubName, ILogger logger, TimeSpan
         // 上書きで捨てた分を計上する(遅い接続の発見に使う)
         if (overwritten)
         {
+            // メトリクスは遅い接続がいるかの検知用。接続IDをタグに入れるとカーディナリティが爆発するので入れない。
+            // どの接続かの特定はpumpのログ(件数だけここで積む)で行う
+            Interlocked.Increment(ref _overwrittenSinceLastLog);
             OverwrittenCounter.Add(1,
                 new("hub", hubName),
                 new("method", methodName));
@@ -169,6 +177,9 @@ internal sealed class ConnectionMailbox(string hubName, ILogger logger, TimeSpan
                     token.ThrowIfCancellationRequested();
                     await WriteAsync(connection, methodName, message, token);
                 }
+
+                // 送信が一巡するたびに、上書き破棄が起きていればログで接続を特定する
+                TryLogOverwritten(connection);
             }
         }
         catch (OperationCanceledException)
@@ -216,7 +227,7 @@ internal sealed class ConnectionMailbox(string hubName, ILogger logger, TimeSpan
                     {
                         // tokenキャンセルでDelayが完了した場合はここでOCEが投げられる
                         await delayTask;
-                        slowLogged = TryLogWarning(connection, methodName,
+                        slowLogged = TryLogSlowWrite(LogLevel.Warning, connection, methodName,
                             "latest-only送信が閾値を超えても完了しません(送信中)", Stopwatch.GetElapsedTime(start));
                     }
                 }
@@ -237,10 +248,14 @@ internal sealed class ConnectionMailbox(string hubName, ILogger logger, TimeSpan
         }
         catch (System.Exception e)
         {
-            // 書き込み失敗はその接続の切断処理(OnDisconnectedAsync)に任せる。ここでpumpを止めて自前で後始末はしない
-            if (TryAcquireLogSlot(Stopwatch.GetTimestamp()))
+            // HubConnectionContext.WriteAsyncは書き込みを内部ロックで直列化し、失敗時は自分で接続をAbortする(例外はほぼ外に出ない)。
+            // Abort後のWriteAsyncは何もせず即returnするので、続けて書いてもフレームは壊れない。
+            // AbortでConnectionAbortedが発火し、pumpは次のThrowIfCancellationRequested/WaitToReadAsyncで抜けるので、このcatchは防御用。
+            // ここに来るのは想定外なので、Errorで出す。
+            // 後始末はその接続の切断処理(OnDisconnectedAsync)に任せ、ここでpumpを止めて自前で後始末はしない
+            if (TryAcquireLogSlot(ref _lastSlowWriteLogTimestamp, Stopwatch.GetTimestamp()))
             {
-                logger.LogWarning(e,
+                logger.LogError(e,
                     "latest-only書き込みに失敗しました Hub={Hub} Method={Method} ConnectionId={ConnectionId}",
                     hubName, methodName, connection.ConnectionId);
             }
@@ -248,11 +263,12 @@ internal sealed class ConnectionMailbox(string hubName, ILogger logger, TimeSpan
             return;
         }
 
-        // 完了後に遅延していたら警告。閾値前に出せなかった遅延(閾値直後に完了した場合など)をここで拾う。出し済みなら二重に出さない
+        // 完了後に遅延していたらInformationで残す(詰まり続けている場合は送信中のWarningが既に出ている)。
+        // 閾値前に出せなかった遅延(閾値直後に完了した場合など)をここで拾う。出し済みなら二重に出さない
         var elapsed = Stopwatch.GetElapsedTime(start);
         if (!slowLogged && elapsed >= _slowWriteThreshold)
         {
-            TryLogWarning(connection, methodName, "latest-only送信が遅延しました(完了)", elapsed);
+            TryLogSlowWrite(LogLevel.Information, connection, methodName, "latest-only送信が遅延しました(完了)", elapsed);
         }
     }
 
@@ -263,33 +279,70 @@ internal sealed class ConnectionMailbox(string hubName, ILogger logger, TimeSpan
     /// 状態はmailboxごと(=接続ごと)に持つので、1接続の連続ログが他の接続のログを潰さない。
     /// 呼ぶのはpumpの単一ループだけなので、Interlockedやlockは使わない。
     /// </remarks>
-    private bool TryAcquireLogSlot(long now)
+    private static bool TryAcquireLogSlot(ref long lastTimestamp, long now)
     {
         // 前回のログから間隔が空いていなければ出さない
-        var last = _lastSlowWriteLogTimestamp;
+        var last = lastTimestamp;
         if (last != 0 && Stopwatch.GetElapsedTime(last, now) < SlowWriteLogInterval)
         {
             return false;
         }
 
         // 出す場合は時刻を記録する
-        _lastSlowWriteLogTimestamp = now;
+        lastTimestamp = now;
         return true;
     }
 
-    private bool TryLogWarning(HubConnectionContext connection, string methodName, string text, TimeSpan elapsed)
+    /// <summary>
+    /// 上書き破棄が起きていれば、その接続を特定するログを出す。
+    /// </summary>
+    /// <remarks>
+    /// 遅延ログの閾値(1秒)より短い、250ms〜1秒ほどかかる接続は、上書きが起きても遅延ログに出ない。
+    /// そのため上書きの件数を別に数え、レート制限の許す時だけログに出す。
+    /// 枠が取れない間は件数を取り出さず、次のログまで累積する(Countは前回のログ以降の累計)。
+    /// latest-onlyは上書きで捨てる前提の設計なので上書きは異常ではなく、Debugで出す。
+    /// 傾向はメトリクス signalr.latest_only.overwritten で見て、接続の特定が必要な時だけDebugを有効にする。
+    /// </remarks>
+    private void TryLogOverwritten(HubConnectionContext connection)
+    {
+        // Debugが無効なら件数の取り出しもレート制限枠の消費もしない
+        if (!logger.IsEnabled(LogLevel.Debug))
+        {
+            return;
+        }
+
+        // 上書きが無ければ枠を消費しない
+        if (Interlocked.Read(ref _overwrittenSinceLastLog) <= 0
+            || !TryAcquireLogSlot(ref _lastOverwriteLogTimestamp, Stopwatch.GetTimestamp()))
+        {
+            return;
+        }
+
+        var count = Interlocked.Exchange(ref _overwrittenSinceLastLog, 0);
+        logger.LogDebug(
+            "latest-only配信で未送信のまま上書き破棄しました Hub={Hub} ConnectionId={ConnectionId} User={User} Count={Count}",
+            hubName, connection.ConnectionId, ResolveUser(connection), count);
+    }
+
+    // 原因クライアントの特定用。認証方式によりsubが無いことがあるので順に探す
+    private static string? ResolveUser(HubConnectionContext connection)
+    {
+        return connection.User.FindFirst("sub")?.Value
+               ?? connection.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+               ?? connection.UserIdentifier;
+    }
+
+    private bool TryLogSlowWrite(LogLevel level, HubConnectionContext connection, string methodName, string text,
+        TimeSpan elapsed)
     {
         // レート制限に掛かったら出さない
-        if (!TryAcquireLogSlot(Stopwatch.GetTimestamp()))
+        if (!TryAcquireLogSlot(ref _lastSlowWriteLogTimestamp, Stopwatch.GetTimestamp()))
         {
             return false;
         }
 
-        // 原因クライアントの特定用。認証方式によりsubが無いことがあるので順に探す
-        var user = connection.User.FindFirst("sub")?.Value
-                   ?? connection.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                   ?? connection.UserIdentifier;
-        logger.LogWarning(
+        var user = ResolveUser(connection);
+        logger.Log(level,
             "{Text} Hub={Hub} Method={Method} ConnectionId={ConnectionId} User={User} Elapsed={ElapsedMs}ms",
             text, hubName, methodName, connection.ConnectionId, user, (long)elapsed.TotalMilliseconds);
         return true;
