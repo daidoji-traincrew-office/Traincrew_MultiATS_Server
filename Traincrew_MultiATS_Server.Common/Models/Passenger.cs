@@ -60,5 +60,5 @@ root(object)
       2.2.6.2.TrackNumber(string)　番線
       2.2.6.3.DepartureTime(TimeSpan?)　発車時刻
       2.2.6.4.ArrivalTime(TimeSpan?)　到着時刻
-      2.2.6.5.StopType(StopType)　停車種別(Stop/OperationalStop/Pass)
+      2.2.6.5.StopType(StopType)　停車種別(0=停車/1=運転停車/2=通過)
 */

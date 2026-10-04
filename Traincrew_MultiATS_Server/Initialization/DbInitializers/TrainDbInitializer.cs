@@ -154,7 +154,7 @@ public class TrainDbInitializer(
                 Index = i + 1,
                 StationId = stationData.stationID,
                 TrackNumber = stationData.stopPosName ?? "",
-                StopType = ConvertToStopType(stationData.stopType),
+                StopType = ConvertToStopType(stationData.stopType, ttcTrain.trainNumber, stationData.stationID),
                 ArrivalTime = ConvertToTimeSpan(stationData.arrivalTime),
                 DepartureTime = ConvertToTimeSpan(stationData.departureTime)
             }).ToList();
@@ -229,15 +229,25 @@ public class TrainDbInitializer(
 
     /// <summary>
     ///     Convert stopType string in JSON to StopType
+    ///     "stop"/"pass" は OudiaConverter/Program.cs の ParseEkiJikoku が出力する文字列と対応
     /// </summary>
-    private static StopType ConvertToStopType(string? stopType)
+    private StopType ConvertToStopType(string? stopType, string trainNumber, string stationId)
     {
-        return stopType switch
+        switch (stopType)
         {
-            "pass" => StopType.Pass,
-            "operational_stop" => StopType.OperationalStop,
-            _ => StopType.Stop
-        };
+            // stopTypeキーが無い古いJSONとの互換(警告なし)
+            case null:
+            case "stop":
+                return StopType.Stop;
+            case "pass":
+                return StopType.Pass;
+            case "operational_stop":
+                return StopType.OperationalStop;
+            default:
+                logger.LogWarning("列車番号 {TrainNumber} の駅 {StationId} の stopType {StopType} が不明です。停車として扱います。",
+                    trainNumber, stationId, stopType);
+                return StopType.Stop;
+        }
     }
 
     /// <summary>
