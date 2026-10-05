@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using OpenIddict.Abstractions;
@@ -254,6 +255,11 @@ public class Program
         {
             options.ClientTimeoutInterval = TimeSpan.FromMinutes(3);
         });
+        // HubLifetimeManagerをlatest-only対応版に差し替える(配信が詰まっても他接続・スケジューラに波及させないため)。
+        // AddSignalRはTryAddSingletonでDefaultを登録するので、後から登録した方が勝つ
+        builder.Services.AddSingleton(typeof(HubLifetimeManager<>), typeof(LatestOnlyHubLifetimeManager<>));
+        // スケジューラがlatest-onlyを選んで送るための入口
+        builder.Services.AddSingleton(typeof(ILatestOnlySender<>), typeof(LatestOnlySender<>));
     }
 
     private static List<IEndpointConventionBuilder> ConfigureEndpoints(WebApplication app)
