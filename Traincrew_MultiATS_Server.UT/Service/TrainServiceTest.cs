@@ -333,17 +333,14 @@ public class TrainServiceTest
         var mockTrackCircuitDepartmentTimeRepository = new Mock<ITrackCircuitDepartmentTimeRepository>();
         mockTrackCircuitDepartmentTimeRepository.Setup(x => x.GetByTrackCircuitIdAndIsUpAndMaxCarCount(100, false, 12)).ReturnsAsync(departmentTime);
 
-        var mockDateTimeRepository = new Mock<IDateTimeRepository>();
-        mockDateTimeRepository.Setup(x => x.GetNow()).Returns(currentTime);
-
-        var testServerService = new TestServerService();
-        testServerService.SetupGetTimeOffsetAsync(() => Task.FromResult(0));
+        var testDateTimeService = new TestDateTimeService();
+        testDateTimeService.SetupNow(currentTime);
 
         var mockTrainRepository = new Mock<ITrainRepository>();
         mockTrainRepository.Setup(x => x.SetDelayByTrainNumber(trainNumber, It.IsAny<int>())).Returns(Task.CompletedTask);
 
         var trainService = CreateTrainService(testTrackCircuitService, mockTrainRepository, mockDiagramTrainRepository,
-            mockTrackCircuitDepartmentTimeRepository, mockDateTimeRepository, testServerService);
+            mockTrackCircuitDepartmentTimeRepository, testDateTimeService);
 
         // Act
         await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList);
@@ -385,17 +382,14 @@ public class TrainServiceTest
         var mockTrackCircuitDepartmentTimeRepository = new Mock<ITrackCircuitDepartmentTimeRepository>();
         mockTrackCircuitDepartmentTimeRepository.Setup(x => x.GetByTrackCircuitIdAndIsUpAndMaxCarCount(100, false, 12)).ReturnsAsync(departmentTime);
 
-        var mockDateTimeRepository = new Mock<IDateTimeRepository>();
-        mockDateTimeRepository.Setup(x => x.GetNow()).Returns(currentTime);
-
-        var testServerService = new TestServerService();
-        testServerService.SetupGetTimeOffsetAsync(() => Task.FromResult(0));
+        var testDateTimeService = new TestDateTimeService();
+        testDateTimeService.SetupNow(currentTime);
 
         var mockTrainRepository = new Mock<ITrainRepository>();
         mockTrainRepository.Setup(x => x.SetDelayByTrainNumber(trainNumber, It.IsAny<int>())).Returns(Task.CompletedTask);
 
         var trainService = CreateTrainService(testTrackCircuitService, mockTrainRepository, mockDiagramTrainRepository,
-            mockTrackCircuitDepartmentTimeRepository, mockDateTimeRepository, testServerService);
+            mockTrackCircuitDepartmentTimeRepository, testDateTimeService);
 
         // Act
         await trainService.CalculateAndUpdateDelays(diaId, trainNumber, carCount, trackCircuitDataList);
