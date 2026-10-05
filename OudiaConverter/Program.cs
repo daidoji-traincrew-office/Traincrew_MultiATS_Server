@@ -239,6 +239,9 @@ public class TTC_StationData
     [JsonPropertyName("stopPosName")]
     public string StopPosName { get; set; } = "";
 
+    [JsonPropertyName("stopType")]
+    public string StopType { get; set; } = "stop";
+
     [JsonPropertyName("arrivalTime")]
     public TimeOfDay? ArrivalTime { get; set; }
 
@@ -412,6 +415,7 @@ public class Oud2ToTtcConverter
                         StationID = sta.StationID,
                         StationName = sta.StationName,
                         StopPosName = sta.StopPosName,
+                        StopType = sta.StopType,
                         ArrivalTime = sta.ArrivalTime,
                         DepartureTime = sta.DepartureTime
                     };
@@ -419,6 +423,11 @@ public class Oud2ToTtcConverter
                 else
                 {
                     // 情報補完: null の場合は新しい値を採用、競合は先勝ちで警告
+                    if (existing.StopType != sta.StopType)
+                        Console.Error.WriteLine(
+                            $"[WARN] {trainNumber}: {sta.StationName} 停車種別競合 "
+                            + $"{existing.StopType} vs {sta.StopType} → 先勝ち");
+
                     if (existing.ArrivalTime == null && sta.ArrivalTime != null)
                         existing.ArrivalTime = sta.ArrivalTime;
                     else if (existing.ArrivalTime != null && sta.ArrivalTime != null
@@ -719,7 +728,6 @@ public class Oud2ToTtcConverter
             timesPart = "";
         }
 
-        // 駅扱いが空でもOK（パターンによっては）
         // 着時刻・発時刻を解析
         TimeOfDay? arrivalTime = null;
         TimeOfDay? departureTime = null;
@@ -745,11 +753,34 @@ public class Oud2ToTtcConverter
         // 番線からstopPosNameを構築
         var stopPosName = !string.IsNullOrEmpty(trackPart) ? $"{trackPart}番線" : "";
 
+        // OuDiaの駅扱い: 空=運行なし, 1=停車, 2=通過, 3=経由なし
+        // StopType文字列は TrainDbInitializer.ConvertToStopType と対応させること
+        // (OudiaConverterはCommonを参照していないため定数は共有しない)
+        string stopType;
+        switch (ekiAtsukai)
+        {
+            case "1":
+                stopType = "stop";
+                break;
+            case "2":
+                stopType = "pass";
+                break;
+            case "":
+            case "3":
+                // 運行なし・経由なしは駅として出力しない
+                return null;
+            default:
+                Console.Error.WriteLine(
+                    $"[WARN] 未知の駅扱い \"{ekiAtsukai}\" のため駅を出力しません: {stationName} ({jikokuStr})");
+                return null;
+        }
+
         return new TTC_StationData
         {
             StationID = stationId,
             StationName = stationName,
             StopPosName = stopPosName,
+            StopType = stopType,
             ArrivalTime = arrivalTime,
             DepartureTime = departureTime
         };

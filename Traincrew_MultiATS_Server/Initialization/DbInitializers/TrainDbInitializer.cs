@@ -1,3 +1,4 @@
+using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.DiagramTrain;
 using Traincrew_MultiATS_Server.Repositories.General;
@@ -153,6 +154,7 @@ public class TrainDbInitializer(
                 Index = i + 1,
                 StationId = stationData.stationID,
                 TrackNumber = stationData.stopPosName ?? "",
+                StopType = ConvertToStopType(stationData.stopType, ttcTrain.trainNumber, stationData.stationID),
                 ArrivalTime = ConvertToTimeSpan(stationData.arrivalTime),
                 DepartureTime = ConvertToTimeSpan(stationData.departureTime)
             }).ToList();
@@ -224,6 +226,29 @@ public class TrainDbInitializer(
     // 全角ASCII変換(U+FF01-U+FF5E → U+0021-U+007E)
     private static string ToHalfWidth(string input) =>
         new(input.Select(c => c is >= '！' and <= '～' ? (char)(c - 0xFEE0) : c).ToArray());
+
+    /// <summary>
+    ///     Convert stopType string in JSON to StopType
+    ///     "stop"/"pass" は OudiaConverter/Program.cs の ParseEkiJikoku が出力する文字列と対応
+    /// </summary>
+    private StopType ConvertToStopType(string? stopType, string trainNumber, string stationId)
+    {
+        switch (stopType)
+        {
+            // stopTypeキーが無い古いJSONとの互換(警告なし)
+            case null:
+            case "stop":
+                return StopType.Stop;
+            case "pass":
+                return StopType.Pass;
+            case "operational_stop":
+                return StopType.OperationalStop;
+            default:
+                logger.LogWarning("列車番号 {TrainNumber} の駅 {StationId} の stopType {StopType} が不明です。停車として扱います。",
+                    trainNumber, stationId, stopType);
+                return StopType.Stop;
+        }
+    }
 
     /// <summary>
     ///     Convert TimeOfDay to TimeSpan
