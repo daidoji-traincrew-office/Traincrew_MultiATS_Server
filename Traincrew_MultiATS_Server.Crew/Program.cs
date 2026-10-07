@@ -416,20 +416,19 @@ public class Program
 
                 // Discordが RFC 9207 の iss をリダイレクトに付けるようになったが、OpenIddict 5.8.0 の
                 // Discord プロバイダーは静的設定で AuthorizationResponseIssParameterSupported が無く ID2120 で弾かれる。
-                // 上流修正(openiddict-core#2562)が入るまで、Discord に限り iss を自前検証してから取り除く。
+                // 上流修正(openiddict-core#2562)と同じく、Discordの設定で iss 対応を宣言し、
+                // 欠落(ID2029)・不一致(ID2119)の検証は上流の ValidateIssuerParameter に任せる。
+                // Discordの静的設定オブジェクトは共有されるが、毎回同じ値を書くだけなので冪等。
+                // 上流で修正されたバージョンに上げたら、このハンドラは削除すること。
                 options.AddEventHandler<OpenIddictClientEvents.ProcessAuthenticationContext>(handler => handler
                     .AddFilter<OpenIddictClientHandlerFilters.RequireRedirectionRequest>()
                     .UseInlineHandler(context =>
                     {
                         if (context.Registration.ProviderType != ProviderTypes.Discord) return default;
-                        var issuer = (string?)context.Request?[Parameters.Iss];
-                        if (string.IsNullOrEmpty(issuer)) return default;
-                        if (!Uri.TryCreate(issuer, UriKind.Absolute, out var uri) || uri != context.Registration.Issuer)
+                        if (context.Configuration is { } configuration)
                         {
-                            context.Reject(Errors.InvalidRequest, "The 'iss' parameter is invalid.");
-                            return default;
+                            configuration.AuthorizationResponseIssParameterSupported = true;
                         }
-                        context.Request!.RemoveParameter(Parameters.Iss);
                         return default;
                     })
                     .SetOrder(OpenIddictClientHandlers.ValidateIssuerParameter.Descriptor.Order - 1)
