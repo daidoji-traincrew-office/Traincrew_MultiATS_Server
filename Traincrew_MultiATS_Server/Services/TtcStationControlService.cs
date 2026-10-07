@@ -37,16 +37,4 @@ public class TtcStationControlService(
             await generalRepository.Save(ttcWindow.TtcWindowState);
         }
     }
-
-    private readonly Dictionary<string, int> _ciLint = new Dictionary<string, int>();
-
-    public List<int> CiLintTest(IEnumerable<int> src)
-    {
-        var x = new List<int>();
-        foreach (var v in src)
-        {
-            x.Add(v * 2);
-        }
-        return x;
-    }
 }
