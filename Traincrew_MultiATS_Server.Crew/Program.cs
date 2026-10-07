@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using OpenIddict.Abstractions;
+using OpenIddict.Client;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
@@ -69,6 +70,7 @@ using Traincrew_MultiATS_Server.Scheduler;
 using Traincrew_MultiATS_Server.Services;
 using Traincrew_MultiATS_Server.Services.Cache;
 using static OpenIddict.Abstractions.OpenIddictConstants;
+using static OpenIddict.Client.WebIntegration.OpenIddictClientWebIntegrationConstants;
 
 namespace Traincrew_MultiATS_Server.Crew;
 
@@ -411,6 +413,26 @@ public class Program
                             .SetClientSecret(builder.Configuration["Discord:ClientSecret"] ?? "")
                             .SetRedirectUri("auth/callback");
                     });
+
+                // Discordが RFC 9207 の iss をリダイレクトに付けるようになったが、OpenIddict 5.8.0 の
+                // Discord プロバイダーは静的設定で AuthorizationResponseIssParameterSupported が無く ID2120 で弾かれる。
+                // 上流修正(openiddict-core#2562)と同じく、Discordの設定で iss 対応を宣言し、
+                // 欠落(ID2029)・不一致(ID2119)の検証は上流の ValidateIssuerParameter に任せる。
+                // 書き換えるのはDiscord Registrationの静的設定インスタンスだが、毎回同じ値を書くだけなので冪等。
+                // 上流で修正されたバージョンに上げたら、このハンドラは削除すること。
+                options.AddEventHandler<OpenIddictClientEvents.ProcessAuthenticationContext>(handler => handler
+                    .AddFilter<OpenIddictClientHandlerFilters.RequireRedirectionRequest>()
+                    .UseInlineHandler(context =>
+                    {
+                        if (context.Registration.ProviderType != ProviderTypes.Discord) return default;
+                        if (context.Configuration is { } configuration)
+                        {
+                            configuration.AuthorizationResponseIssParameterSupported = true;
+                        }
+                        return default;
+                    })
+                    .SetOrder(OpenIddictClientHandlers.ValidateIssuerParameter.Descriptor.Order - 1)
+                    .SetType(OpenIddictClientHandlerType.Custom));
             });
     }
 
