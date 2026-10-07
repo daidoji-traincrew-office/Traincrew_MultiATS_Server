@@ -32,5 +32,10 @@ jobs:
         env:
           BASE_REF: ${{ github.base_ref }}
         run: |
+          if [ -n "${BASE_REF}" ]; then
+            BASE="origin/${BASE_REF}"
+          else
+            BASE="$(git merge-base origin/main HEAD)"
+          fi
           .github/scripts/rider_lint.sh --sln Traincrew_MultiATS_Server.sln \
-            --base "origin/${BASE_REF:-main}" --format github
+            --base "$BASE" --format github

@@ -31,7 +31,7 @@ resharper_unused_method_return_value_global_highlighting = none
 resharper_unused_parameter_global_highlighting = none
 resharper_not_accessed_positional_property_global_highlighting = none
 
-# var か明示型かは new() 規約と競合するので指摘しない
-resharper_suggest_var_or_type_built_in_types_highlighting = none
-resharper_suggest_var_or_type_elsewhere_highlighting = none
-resharper_suggest_var_or_type_simple_types_highlighting = none
+# ローカル変数は var にそろえる(型が明らかでない場合も含む)
+csharp_style_var_for_built_in_types = true:warning
+csharp_style_var_when_type_is_apparent = true:warning
+csharp_style_var_elsewhere = true:warning

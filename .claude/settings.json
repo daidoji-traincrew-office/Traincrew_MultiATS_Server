@@ -1,5 +1,16 @@
 {
   "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/rider_lint_hook.sh --sln Traincrew_MultiATS_Server.sln",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "hooks": [
