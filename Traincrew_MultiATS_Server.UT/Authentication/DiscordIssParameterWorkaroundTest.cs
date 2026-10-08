@@ -24,7 +24,7 @@ public class DiscordIssParameterWorkaroundTest
         });
         await using var provider = services.BuildServiceProvider();
         var all = provider.GetRequiredService<IOptionsMonitor<OpenIddictClientOptions>>().CurrentValue.Registrations;
-        var registration = all.SingleOrDefault(r => r.ProviderName == "Discord")
+        var registration = all.SingleOrDefault(r => r.ProviderName == OpenIddictClientWebIntegrationConstants.Providers.Discord)
             ?? throw new InvalidOperationException("regs: " + string.Join(",", all.Select(r => r.ProviderType + "/" + r.ProviderName)));
         return await registration.ConfigurationManager.GetConfigurationAsync(default);
     }
