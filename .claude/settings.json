@@ -1,12 +1,13 @@
 {
   "hooks": {
-    "SessionStart": [
+    "PostToolUse": [
       {
+        "matcher": "Edit|Write|MultiEdit",
         "hooks": [
           {
             "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/rider_lint_hook.sh --sln Traincrew_MultiATS_Server.sln",
-            "timeout": 30
+            "command": "python3 -I \"$CLAUDE_PROJECT_DIR\"/.github/scripts/rider_lint.py hook --sln Traincrew_MultiATS_Server.sln",
+            "timeout": 10
           }
         ]
       }
@@ -16,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/rider_lint_hook.sh --sln Traincrew_MultiATS_Server.sln",
+            "command": "python3 -I \"$CLAUDE_PROJECT_DIR\"/.github/scripts/rider_lint.py hook --sln Traincrew_MultiATS_Server.sln",
             "timeout": 300
           }
         ]
@@ -27,7 +28,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/rider_lint_hook.sh --sln Traincrew_MultiATS_Server.sln",
+            "command": "python3 -I \"$CLAUDE_PROJECT_DIR\"/.github/scripts/rider_lint.py hook --sln Traincrew_MultiATS_Server.sln",
             "timeout": 300
           }
         ]

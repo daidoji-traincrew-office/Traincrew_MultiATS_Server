@@ -12,13 +12,16 @@ C#のコードは、JetBrains Rider(ReSharper)の検査で指摘が出ない形�
 
 設定は `.editorconfig` と `Traincrew_MultiATS_Server.sln.DotSettings` にある。
 
-### 自動検査 (SessionStart / Stop / SubagentStop フック)
+### 自動検査 (PostToolUse / Stop / SubagentStop フック)
 
-`.claude/settings.json` のフック (`.claude/hooks/rider_lint_hook.sh`) が、応答の終了時に変更した `.cs` へ `jb inspectcode` を実行する。
+`.claude/settings.json` のフック (`.github/scripts/rider_lint.py hook`) が、Claude が `Edit` / `Write` / `MultiEdit` で触った `.cs` を記録し、応答の終了時にそのファイルの変更行へ `jb inspectcode` を実行する。
 
+- 検査対象は PostToolUse で記録したファイルだけ(ユーザーが手で編集中のファイルは対象外)。何も触っていなければ `jb` は起動しない。
 - 機械的に直せる指摘 (`var` 化、`new()` 化など) は `jb cleanupcode` で自動修正される。ファイルが書き換わるため、差し戻されたら編集前に再Readすること。
-- セッション開始時点ですでに変更済み・未追跡だったファイルは、自動修正の対象外(検査のみ)。
-- 変更した行に残った指摘は exit 2 で差し戻される。直してから終了すること(同一セッションで差し戻されるのは2回まで)。
-- 手動実行: `.github/scripts/rider_lint.sh --sln Traincrew_MultiATS_Server.sln --base HEAD --fix`
+- 自動修正は**ファイル単位**で、Claude が触ったファイルの既存行にもかかる。Claude とユーザーが同じファイルを同時に編集すると、そのファイルも修正対象になる。
+- 変更した行に残った指摘は exit 2 で差し戻される。直してから終了すること(差し戻しは1回まで。2回目は通知のみで終了する)。
+- `stop_hook_active` が既に true のとき(他のフックが継続させた場合など)は、1回目でも差し戻さず通知のみで終了する。
+- フックの想定外のエラーは何もせず終了する(fail-open)。python3 が必要。
+- 手動実行: `python3 .github/scripts/rider_lint.py check --sln Traincrew_MultiATS_Server.sln --base HEAD --fix`
 - 初回は `dotnet tool restore` と `dotnet restore` が必要。
-- CI (`.github/workflows/riderLint.yml`) でも PR の変更行に対して同じ検査を行う。
+- CI (`.github/workflows/riderLint.yml`) でも PR の変更行に対して同じ検査を行い、指摘があれば失敗する。
