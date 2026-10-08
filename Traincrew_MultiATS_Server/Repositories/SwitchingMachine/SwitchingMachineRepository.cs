@@ -55,4 +55,18 @@ public class SwitchingMachineRepository(ApplicationDbContext context) : ISwitchi
             .Select(sm => new { sm.Name, sm.Id })
             .ToDictionaryAsync(sm => sm.Name, sm => sm.Id, cancellationToken);
     }
+
+    /// <summary>
+    /// IDを指定してSwitchingMachineStateのみを取得する(SwitchingMachine本体はJoinしない)
+    /// </summary>
+    /// <param name="ids">SwitchingMachine ID(=SwitchingMachineState ID)のリスト</param>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    /// <returns>SwitchingMachineStateのリスト</returns>
+    public async Task<List<Models.SwitchingMachineState>> GetStateByIds(IEnumerable<ulong> ids, CancellationToken cancellationToken = default)
+    {
+        var idList = ids.ToList();
+        return await context.SwitchingMachineStates
+            .Where(state => idList.Contains(state.Id))
+            .ToListAsync(cancellationToken);
+    }
 }

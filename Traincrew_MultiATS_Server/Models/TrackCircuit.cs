@@ -33,7 +33,7 @@ public class TrackCircuit : InterlockingObject
     /// なお、ここで得た複製を IGeneralRepository.Save に渡してはならない
     /// (InterlockingObjectMaster の注意書きを参照)。
     /// </remarks>
-    internal TrackCircuit CloneWithState(TrackCircuitState state)
+    public TrackCircuit CloneWithState(TrackCircuitState state)
     {
         var clone = ShallowClone();
         clone.TrackCircuitState = state;

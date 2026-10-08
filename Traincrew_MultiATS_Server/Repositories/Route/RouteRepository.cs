@@ -145,4 +145,18 @@ public class RouteRepository(ApplicationDbContext context) : IRouteRepository
             .ExecuteUpdateAsync(setters => setters
                 .SetProperty(routeState => routeState.IsCtcControlled, isCtcControlled));
     }
+
+    /// <summary>
+    /// IDを指定してRouteStateのみを取得する(Route本体はJoinしない)
+    /// </summary>
+    /// <param name="ids">Route ID(=RouteState ID)のリスト</param>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    /// <returns>RouteStateのリスト</returns>
+    public async Task<List<Models.RouteState>> GetStateByIds(IEnumerable<ulong> ids, CancellationToken cancellationToken = default)
+    {
+        var idList = ids.ToList();
+        return await context.RouteStates
+            .Where(routeState => idList.Contains(routeState.Id))
+            .ToListAsync(cancellationToken);
+    }
 }

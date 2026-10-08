@@ -46,4 +46,12 @@ public interface IDirectionRouteRepository
     /// <param name="ids">DirectionRouteのIDリスト</param>
     /// <returns>DirectionRouteのリスト</returns>
     Task<List<Models.DirectionRoute>> GetByIds(List<ulong> ids);
+
+    /// <summary>
+    /// IDを指定してDirectionRouteStateのみを取得する(DirectionRoute本体はJoinしない)
+    /// </summary>
+    /// <param name="ids">DirectionRoute ID(=DirectionRouteState ID)のリスト</param>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    /// <returns>DirectionRouteStateのリスト</returns>
+    Task<List<Models.DirectionRouteState>> GetStateByIds(IEnumerable<ulong> ids, CancellationToken cancellationToken = default);
 }
