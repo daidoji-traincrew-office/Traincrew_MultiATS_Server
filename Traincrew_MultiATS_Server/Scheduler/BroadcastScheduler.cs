@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.SignalR;
 using Traincrew_MultiATS_Server.Activity;
 using Traincrew_MultiATS_Server.Common.Contract;
 using Traincrew_MultiATS_Server.Common.Models;
@@ -39,7 +38,7 @@ public class BroadcastScheduler(IServiceScopeFactory serviceScopeFactory) : Sche
         var ctcpSender = scope.ServiceProvider.GetRequiredService<ILatestOnlySender<CTCPHub>>();
         var trainSender = scope.ServiceProvider.GetRequiredService<ILatestOnlySender<TrainHub>>();
 
-        using (ActivitySources.Scheduler.StartActivity("Broadcast.Send"))
+        using (ActivitySources.Scheduler.StartNamedActivity("Broadcast.Send"))
         {
             await Task.WhenAll(
                 SendInterlockingAsync(interlockingSender, snapshot, logger),
@@ -64,7 +63,7 @@ public class BroadcastScheduler(IServiceScopeFactory serviceScopeFactory) : Sche
         BroadcastSnapshot snapshot,
         ILogger logger)
     {
-        using var activity = ActivitySources.Scheduler.StartActivity("Broadcast.Send.Interlocking");
+        using var activity = ActivitySources.Scheduler.StartNamedActivity("Broadcast.Send.Interlocking");
         try
         {
             await sender.SendAllLatestAsync(nameof(IInterlockingClientContract.ReceiveData), snapshot.Interlocking);
@@ -83,7 +82,7 @@ public class BroadcastScheduler(IServiceScopeFactory serviceScopeFactory) : Sche
         BroadcastSnapshot snapshot,
         ILogger logger)
     {
-        using var activity = ActivitySources.Scheduler.StartActivity("Broadcast.Send.Tid");
+        using var activity = ActivitySources.Scheduler.StartNamedActivity("Broadcast.Send.Tid");
         try
         {
             await Task.WhenAll(
@@ -101,7 +100,7 @@ public class BroadcastScheduler(IServiceScopeFactory serviceScopeFactory) : Sche
         BroadcastSnapshot snapshot,
         ILogger logger)
     {
-        using var activity = ActivitySources.Scheduler.StartActivity("Broadcast.Send.CommanderTable");
+        using var activity = ActivitySources.Scheduler.StartNamedActivity("Broadcast.Send.CommanderTable");
         try
         {
             await Task.WhenAll(
@@ -119,7 +118,7 @@ public class BroadcastScheduler(IServiceScopeFactory serviceScopeFactory) : Sche
         BroadcastSnapshot snapshot,
         ILogger logger)
     {
-        using var activity = ActivitySources.Scheduler.StartActivity("Broadcast.Send.Ctcp");
+        using var activity = ActivitySources.Scheduler.StartNamedActivity("Broadcast.Send.Ctcp");
         try
         {
             // ICTCPClientContract に ReceiveSignalData は存在しない
@@ -136,7 +135,7 @@ public class BroadcastScheduler(IServiceScopeFactory serviceScopeFactory) : Sche
         BroadcastSnapshot snapshot,
         ILogger logger)
     {
-        using var activity = ActivitySources.Scheduler.StartActivity("Broadcast.Send.Train");
+        using var activity = ActivitySources.Scheduler.StartNamedActivity("Broadcast.Send.Train");
         try
         {
             await Task.WhenAll(

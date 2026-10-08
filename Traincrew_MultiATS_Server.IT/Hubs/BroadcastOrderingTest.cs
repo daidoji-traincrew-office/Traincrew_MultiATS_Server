@@ -49,7 +49,7 @@ public class BroadcastOrderingTest(WebApplicationFixture factory)
                     .FirstOrDefault(trackCircuit => trackCircuit.Name == TargetTrackCircuit)?.On ?? false;
                 lock (framesLock)
                 {
-                    frames.Add(new Frame(Interlocked.Increment(ref seq), "Data", on, null));
+                    frames.Add(new(Interlocked.Increment(ref seq), "Data", on, null));
                 }
             })
             .Returns(Task.CompletedTask);
@@ -61,7 +61,7 @@ public class BroadcastOrderingTest(WebApplicationFixture factory)
                     .FirstOrDefault(signal => signal.Name == TargetSignal)?.phase;
                 lock (framesLock)
                 {
-                    frames.Add(new Frame(Interlocked.Increment(ref seq), "Signal", null, phase));
+                    frames.Add(new(Interlocked.Increment(ref seq), "Signal", null, phase));
                 }
             })
             .Returns(Task.CompletedTask);
@@ -173,7 +173,7 @@ public class BroadcastOrderingTest(WebApplicationFixture factory)
     {
         using var scope = factory.Services.CreateScope();
         var trackCircuitService = scope.ServiceProvider.GetRequiredService<ITrackCircuitService>();
-        await trackCircuitService.SetTrackCircuitData(new TrackCircuitData
+        await trackCircuitService.SetTrackCircuitData(new()
         {
             Name = TargetTrackCircuit,
             Last = on ? "回1" : "",

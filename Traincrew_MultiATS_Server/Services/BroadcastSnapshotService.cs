@@ -35,7 +35,7 @@ public class BroadcastSnapshotService(
 {
     public async Task<BroadcastSnapshot> BuildAsync()
     {
-        using var snapshotActivity = ActivitySources.Scheduler.StartActivity("Broadcast.Snapshot");
+        using var snapshotActivity = ActivitySources.Scheduler.StartNamedActivity("Broadcast.Snapshot");
 
         // REPEATABLE READ: このトランザクション内の全読み取りが同一スナップショットを見る。
         // 軌道回路と信号現示(SignalRepository.GetSignalsForCalcIndication が
@@ -44,45 +44,45 @@ public class BroadcastSnapshotService(
         await using var tx = await transactionRepository.BeginTransactionAsync(IsolationLevel.RepeatableRead);
 
         CommonReads commonReads;
-        using (var activity = ActivitySources.Scheduler.StartActivity("Broadcast.Snapshot.CommonReads"))
+        using (var activity = ActivitySources.Scheduler.StartNamedActivity("Broadcast.Snapshot.CommonReads"))
         {
             commonReads = await commonReadsBuilder.BuildAsync();
             activity?.SetTag("trackCircuit.count", commonReads.TrackCircuits.Count);
         }
 
         List<SignalData> signals;
-        using (var activity = ActivitySources.Scheduler.StartActivity("Broadcast.Snapshot.Signals"))
+        using (var activity = ActivitySources.Scheduler.StartNamedActivity("Broadcast.Snapshot.Signals"))
         {
             signals = await signalService.CalcAllSignalIndication();
             activity?.SetTag("signal.count", signals.Count);
         }
 
         DataToInterlocking interlocking;
-        using (ActivitySources.Scheduler.StartActivity("Broadcast.Snapshot.Interlocking"))
+        using (ActivitySources.Scheduler.StartNamedActivity("Broadcast.Snapshot.Interlocking"))
         {
             interlocking = await interlockingService.BuildInterlockingDataAsync(commonReads);
         }
 
         DataToCTCP ctcp;
-        using (ActivitySources.Scheduler.StartActivity("Broadcast.Snapshot.Ctcp"))
+        using (ActivitySources.Scheduler.StartNamedActivity("Broadcast.Snapshot.Ctcp"))
         {
             ctcp = await ctcpService.BuildCtcpDataAsync(commonReads);
         }
 
         ConstantDataToTID tid;
-        using (ActivitySources.Scheduler.StartActivity("Broadcast.Snapshot.Tid"))
+        using (ActivitySources.Scheduler.StartNamedActivity("Broadcast.Snapshot.Tid"))
         {
             tid = tidService.BuildTidData(commonReads);
         }
 
         DataToCommanderTable commanderTable;
-        using (ActivitySources.Scheduler.StartActivity("Broadcast.Snapshot.CommanderTable"))
+        using (ActivitySources.Scheduler.StartNamedActivity("Broadcast.Snapshot.CommanderTable"))
         {
             commanderTable = await commanderTableService.BuildCommanderTableDataAsync(commonReads);
         }
 
         ServerToATSDataBySchedule train;
-        using (ActivitySources.Scheduler.StartActivity("Broadcast.Snapshot.Train"))
+        using (ActivitySources.Scheduler.StartNamedActivity("Broadcast.Snapshot.Train"))
         {
             train = await trainService.BuildScheduleDataAsync(commonReads);
         }
@@ -92,6 +92,6 @@ public class BroadcastSnapshotService(
         snapshotActivity?.SetTag("trackCircuit.count", commonReads.TrackCircuits.Count);
         snapshotActivity?.SetTag("signal.count", signals.Count);
 
-        return new BroadcastSnapshot(signals, interlocking, commanderTable, train, tid, ctcp);
+        return new(signals, interlocking, commanderTable, train, tid, ctcp);
     }
 }

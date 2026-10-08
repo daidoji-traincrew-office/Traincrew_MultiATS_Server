@@ -1,7 +1,6 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Traincrew_MultiATS_Server.Common.Contract;
-using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Hubs;
 using Traincrew_MultiATS_Server.Scheduler;
 using Traincrew_MultiATS_Server.Services;
@@ -15,13 +14,13 @@ public class BroadcastSchedulerTest
 {
     private static BroadcastSnapshot CreateSnapshot()
     {
-        return new BroadcastSnapshot(
+        return new(
             Signals: [],
-            Interlocking: new DataToInterlocking(),
-            CommanderTable: new DataToCommanderTable(),
-            Train: new ServerToATSDataBySchedule(),
-            Tid: new ConstantDataToTID(),
-            Ctcp: new DataToCTCP());
+            Interlocking: new(),
+            CommanderTable: new(),
+            Train: new(),
+            Tid: new(),
+            Ctcp: new());
     }
 
     [Fact]
@@ -31,7 +30,7 @@ public class BroadcastSchedulerTest
         var sender = new Mock<ILatestOnlySender<InterlockingHub>>(MockBehavior.Strict);
         var calls = new List<string>();
         sender.Setup(s => s.SendAllLatestAsync(It.IsAny<string>(), It.IsAny<object?[]>()))
-            .Callback((string method, object?[] args) => calls.Add(method))
+            .Callback((string method, object?[] _) => calls.Add(method))
             .Returns(Task.CompletedTask);
 
         await BroadcastScheduler.SendInterlockingAsync(sender.Object, snapshot, NullLogger.Instance);

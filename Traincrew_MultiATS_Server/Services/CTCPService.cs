@@ -34,7 +34,7 @@ public class CTCPService(
         // 各ランプの状態を取得
         var lamps = GetLamps(commonReads.StationIds, commonReads.StationTimerStates);
 
-        Dictionary<string, CenterControlState> centerControlStates = commonReads.RouteCentralControlLevers.ToDictionary(
+        var centerControlStates = commonReads.RouteCentralControlLevers.ToDictionary(
             lever => lever.Name.Replace("_ROUTE_CTC_LEVER", ""),
             lever => lever.RouteCentralControlLeverState is { IsCenterControlled: true }
                 ? CenterControlState.CenterControl

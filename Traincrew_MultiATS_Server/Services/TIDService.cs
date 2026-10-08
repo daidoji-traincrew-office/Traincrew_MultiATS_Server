@@ -7,6 +7,7 @@ public interface ITIDService
     ConstantDataToTID BuildTidData(CommonReads commonReads);
 }
 
+// ReSharper disable once InconsistentNaming
 public class TIDService : ITIDService
 {
     /// <summary>

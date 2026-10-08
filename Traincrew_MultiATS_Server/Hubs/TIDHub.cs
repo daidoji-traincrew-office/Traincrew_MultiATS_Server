@@ -5,6 +5,7 @@ using Traincrew_MultiATS_Server.Common.Contract;
 
 namespace Traincrew_MultiATS_Server.Hubs;
 // 司令員、乗務助役使用可
+// ReSharper disable once InconsistentNaming
 [Authorize(
 	AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme,
 	Policy = "TIDPolicy"

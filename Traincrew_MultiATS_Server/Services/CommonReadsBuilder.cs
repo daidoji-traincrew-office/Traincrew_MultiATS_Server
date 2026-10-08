@@ -52,7 +52,7 @@ public class CommonReadsBuilder(
         var stationTimerStates = await stationRepository.GetTimerStatesByStationIds(stationIds);
         var timeOffset = await serverService.GetTimeOffsetAsync();
 
-        return new CommonReads(
+        return new(
             stationIds,
             trackCircuits,
             switches,
