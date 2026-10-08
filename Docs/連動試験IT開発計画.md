@@ -348,11 +348,11 @@ jobs:
 
       - name: Run Tests for ${{ matrix.station }}
         run: |
-          dotnet test Traincrew_MultiATS_Server.IT \
+          dotnet test --project Traincrew_MultiATS_Server.IT \
             --no-build \
             --configuration Release \
             --filter "FullyQualifiedName~InterlockingLogicTest" \
-            --logger "trx;LogFileName=${{ matrix.station }}_results.trx"
+            --report-trx --report-trx-filename ${{ matrix.station }}_results.trx
         env:
           TEST_STATION_ID: ${{ matrix.station }}
 

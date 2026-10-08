@@ -57,7 +57,10 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4.3.1
         with:
-          dotnet-version: 8.0.x
+          # net8.0向けのビルドに加え、dotnet testのMicrosoft.Testing.Platformモード(global.json)にSDK 10が必要
+          dotnet-version: |
+            8.0.x
+            10.0.x
 
       - name: Restore dependencies
         run: dotnet restore
