@@ -14,12 +14,12 @@ public class SignalScheduler(IServiceScopeFactory serviceScopeFactory) : Schedul
 
     protected override async Task ExecuteTaskAsync(IServiceScope scope, System.Diagnostics.Activity? activity)
     {
-        var trainHubContext = scope.ServiceProvider.GetRequiredService<IHubContext<TrainHub, ITrainClientContract>>();
-        var tidHubContext = scope.ServiceProvider.GetRequiredService<IHubContext<TIDHub, ITIDClientContract>>();
-        var commanderTableHubContext = scope.ServiceProvider
-            .GetRequiredService<IHubContext<CommanderTableHub, ICommanderTableClientContract>>();
-        var interlockingHubContext = scope.ServiceProvider
-            .GetRequiredService<IHubContext<InterlockingHub, IInterlockingClientContract>>();
+        // 全状態の信号現示なので、1接続の詰まりが他ハブへ波及しないようlatest-onlyで送る。
+        // 4ハブのどれかが通常配信だと、そのWhenAllが詰まって効果が出ないので全てlatest-onlyに揃える
+        var trainSender = scope.ServiceProvider.GetRequiredService<ILatestOnlySender<TrainHub>>();
+        var tidSender = scope.ServiceProvider.GetRequiredService<ILatestOnlySender<TIDHub>>();
+        var commanderTableSender = scope.ServiceProvider.GetRequiredService<ILatestOnlySender<CommanderTableHub>>();
+        var interlockingSender = scope.ServiceProvider.GetRequiredService<ILatestOnlySender<InterlockingHub>>();
         var signalService = scope.ServiceProvider.GetRequiredService<ISignalService>();
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<SignalScheduler>>();
 
@@ -46,10 +46,10 @@ public class SignalScheduler(IServiceScopeFactory serviceScopeFactory) : Schedul
         _oldSignalDataByName = signalData.ToDictionary(s => s.Name, s => s.phase);
 
         await Task.WhenAll(
-            trainHubContext.Clients.All.ReceiveSignalData(signalData),
-            tidHubContext.Clients.All.ReceiveSignalData(signalData),
-            commanderTableHubContext.Clients.All.ReceiveSignalData(signalData),
-            interlockingHubContext.Clients.All.ReceiveSignalData(signalData)
+            trainSender.SendAllLatestAsync(nameof(ITrainClientContract.ReceiveSignalData), signalData),
+            tidSender.SendAllLatestAsync(nameof(ITIDClientContract.ReceiveSignalData), signalData),
+            commanderTableSender.SendAllLatestAsync(nameof(ICommanderTableClientContract.ReceiveSignalData), signalData),
+            interlockingSender.SendAllLatestAsync(nameof(IInterlockingClientContract.ReceiveSignalData), signalData)
         );
     }
 }
