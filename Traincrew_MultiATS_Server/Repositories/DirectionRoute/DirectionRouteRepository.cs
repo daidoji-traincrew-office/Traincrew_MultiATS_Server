@@ -83,4 +83,25 @@ public class DirectionRouteRepository(ApplicationDbContext context) : IDirection
             .ToListAsync();
     }
 
+    /// <summary>
+    /// IDを指定してDirectionRouteStateのみを取得する(DirectionRoute本体はJoinしない)
+    /// </summary>
+    /// <param name="ids">DirectionRoute ID(=DirectionRouteState ID)のリスト</param>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    /// <returns>DirectionRouteStateのリスト</returns>
+    public async Task<List<Models.DirectionRouteState>> GetStateByIds(IEnumerable<ulong> ids, CancellationToken cancellationToken = default)
+    {
+        var idList = ids.ToList();
+        return await context.DirectionRouteStates
+            .Where(state => idList.Contains(state.Id))
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<List<DirectionRouteState>> GetAllStatesForBroadcast(CancellationToken cancellationToken = default)
+    {
+        return await context.DirectionRouteStates
+            .AsNoTracking()
+            .OrderBy(state => state.Id)
+            .ToListAsync(cancellationToken);
+    }
 }

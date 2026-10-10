@@ -41,4 +41,26 @@ public class LeverRepository(ApplicationDbContext context) : ILeverRepository
             .Select(lever => lever.Id)
             .ToListAsync();
     }
+
+    /// <summary>
+    /// IDを指定してLeverStateのみを取得する(Lever本体はJoinしない)
+    /// </summary>
+    /// <param name="ids">Lever ID(=LeverState ID)のリスト</param>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    /// <returns>LeverStateのリスト</returns>
+    public async Task<List<Models.LeverState>> GetStateByIds(IEnumerable<ulong> ids, CancellationToken cancellationToken = default)
+    {
+        var idList = ids.ToList();
+        return await context.LeverStates
+            .Where(state => idList.Contains(state.Id))
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<List<Models.LeverState>> GetAllStatesForBroadcast(CancellationToken cancellationToken = default)
+    {
+        return await context.LeverStates
+            .AsNoTracking()
+            .OrderBy(state => state.Id)
+            .ToListAsync(cancellationToken);
+    }
 }

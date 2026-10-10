@@ -46,4 +46,12 @@ public class DestinationButtonRepository(ApplicationDbContext context) : IDestin
                  .SetProperty(dbs => dbs.OperatedAt, now));
 
     }
+
+    public async Task<List<Models.DestinationButtonState>> GetAllStatesForBroadcast(CancellationToken cancellationToken = default)
+    {
+        return await context.DestinationButtonStates
+            .AsNoTracking()
+            .OrderBy(state => state.Name)
+            .ToListAsync(cancellationToken);
+    }
 }

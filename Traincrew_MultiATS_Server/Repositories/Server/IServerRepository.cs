@@ -8,6 +8,11 @@ public interface IServerRepository
     Task<ServerState?> GetServerStateAsync();
 
     /// <summary>
+    /// ServerStateを取得する。<b>配信(読み取り専用)専用</b>。AsNoTrackingで取得するので更新に使ってはならない。
+    /// </summary>
+    Task<ServerState?> GetServerStateForBroadcastAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// server_state.mode だけを読む。
     /// </summary>
     /// <remarks>

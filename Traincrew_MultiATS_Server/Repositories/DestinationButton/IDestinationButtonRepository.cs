@@ -33,4 +33,13 @@ public interface IDestinationButtonRepository
     /// </summary>
     /// <param name="now">現在の時刻。</param>
     Task UpdateRaisedButtonsAsync(DateTime now);
+
+    /// <summary>
+    /// 全件のDestinationButtonStateを取得する。<b>配信(読み取り専用)専用</b>。
+    /// </summary>
+    /// <remarks>
+    /// AsNoTrackingで取得する(追跡しない)。取得した状態を更新・Saveに使ってはならない。
+    /// 更新用の取得には既存のGetStateByIds等を使うこと。
+    /// </remarks>
+    Task<List<Models.DestinationButtonState>> GetAllStatesForBroadcast(CancellationToken cancellationToken = default);
 }

@@ -46,4 +46,21 @@ public interface IRouteCentralControlLeverRepository
     /// <param name="isInsertedKey">鍵が挿入されているか</param>
     /// <param name="isReversed">てこの位置</param>
     Task SetIsInsertedKeyAndIsReversedById(ulong id, bool isInsertedKey, NR isReversed);
+
+    /// <summary>
+    /// IDを指定してRouteCentralControlLeverStateのみを取得する(RouteCentralControlLever本体はJoinしない)
+    /// </summary>
+    /// <param name="ids">RouteCentralControlLever ID(=RouteCentralControlLeverState ID)のリスト</param>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    /// <returns>RouteCentralControlLeverStateのリスト</returns>
+    Task<List<Models.RouteCentralControlLeverState>> GetStateByIds(IEnumerable<ulong> ids, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 全件のRouteCentralControlLeverStateを取得する。<b>配信(読み取り専用)専用</b>。
+    /// </summary>
+    /// <remarks>
+    /// AsNoTrackingで取得する(追跡しない)。取得した状態を更新・Saveに使ってはならない。
+    /// 更新用の取得には既存のGetStateByIds等を使うこと。
+    /// </remarks>
+    Task<List<RouteCentralControlLeverState>> GetAllStatesForBroadcast(CancellationToken cancellationToken = default);
 }

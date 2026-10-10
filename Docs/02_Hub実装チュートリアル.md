@@ -50,11 +50,6 @@ namespace Traincrew_MultiATS_Server.Common.Contract;
 public interface IInterlockingHubContract
 {
     /// <summary>
-    /// 連動データを取得する
-    /// </summary>
-    Task<DataToInterlocking> SendData_Interlocking(List<string> activeStationsList);
-
-    /// <summary>
     /// 物理てこデータを設定する
     /// </summary>
     Task<InterlockingLeverData> SetPhysicalLeverData(InterlockingLeverData leverData);
@@ -221,13 +216,8 @@ namespace Traincrew_MultiATS_Server.Hubs;
 public class InterlockingHub(InterlockingService interlockingService)
     : Hub<IInterlockingClientContract>, IInterlockingHubContract
 {
-    /// <summary>
-    /// 連動データを送信する
-    /// </summary>
-    public async Task<DataToInterlocking> SendData_Interlocking(List<string> activeStationsList)
-    {
-        return await interlockingService.SendData_Interlocking();
-    }
+    // 連動データの配信はRPCではなくBroadcastScheduler(補足参照)によるプッシュ配信(ReceiveData)で行う。
+    // Hubメソッドはクライアント→サーバー方向の操作のみを持つ。
 
     /// <summary>
     /// 物理てこデータを設定する
@@ -293,35 +283,8 @@ public class InterlockingService(
     IMutexRepository mutexRepository,
     ILogger<InterlockingService> logger)
 {
-    /// <summary>
-    /// 連動データを送信する
-    /// </summary>
-    public async Task<DataToInterlocking> SendData_Interlocking()
-    {
-        // Mutexを取得して排他制御
-        await using var mutex = await mutexRepository.AcquireAsync(nameof(InterlockingService));
-
-        // 各種データを取得
-        var trackCircuits = await trackCircuitService.GetAllTrackCircuitDataList();
-        var switchingDatas = await switchingMachineService.GetAllSwitchData();
-        var lever = await leverRepository.GetAllWithState();
-        var destinationButtons = await destinationButtonRepository.GetAllWithState();
-        var directions = await directionRouteService.GetAllDirectionData();
-
-        // レスポンスを組み立て
-        var response = new DataToInterlocking
-        {
-            TrackCircuits = trackCircuits,
-            Points = switchingDatas,
-            PhysicalLevers = lever.Select(ToLeverData).ToList(),
-            PhysicalButtons = destinationButtons
-                .Select(button => ToDestinationButtonData(button.DestinationButtonState))
-                .ToList(),
-            Directions = directions
-        };
-
-        return response;
-    }
+    // 連動データの組み立て(BuildInterlockingDataAsync)はBroadcastSnapshotServiceから呼ばれる。
+    // Hub RPCとしての公開メソッドは持たない。
 
     /// <summary>
     /// 物理てこデータを設定する
@@ -566,7 +529,9 @@ private static void ConfigureServices(WebApplicationBuilder builder,
 
 Hubからクライアントに定期的にデータをプッシュする場合、Schedulerを使用します。
 
-**ファイル:** `Traincrew_MultiATS_Server/Scheduler/InterlockingHubScheduler.cs`
+実際には連動/TID/CTCP/司令卓/列車の5ハブへの配信は `BroadcastScheduler` に統合されている。
+
+**ファイル:** `Traincrew_MultiATS_Server/Scheduler/BroadcastScheduler.cs`
 
 ```csharp
 using Microsoft.AspNetCore.SignalR;
@@ -576,7 +541,7 @@ using Traincrew_MultiATS_Server.Services;
 
 namespace Traincrew_MultiATS_Server.Scheduler;
 
-public class InterlockingHubScheduler(IServiceScopeFactory serviceScopeFactory)
+public class BroadcastScheduler(IServiceScopeFactory serviceScopeFactory)
     : Scheduler(serviceScopeFactory)
 {
     // 250ms間隔で実行
@@ -584,17 +549,16 @@ public class InterlockingHubScheduler(IServiceScopeFactory serviceScopeFactory)
 
     protected override async Task ExecuteTaskAsync(IServiceScope scope, Activity? activity)
     {
-        // HubContextとServiceを取得
+        // 1ティックにつき1回だけスナップショットを取得(IBroadcastSnapshotService.BuildAsync)
+        var snapshotService = scope.ServiceProvider.GetRequiredService<IBroadcastSnapshotService>();
+        var snapshot = await snapshotService.BuildAsync();
+
+        // HubContextを取得
         var hubContext = scope.ServiceProvider
             .GetRequiredService<IHubContext<InterlockingHub, IInterlockingClientContract>>();
-        var interlockingService = scope.ServiceProvider
-            .GetRequiredService<InterlockingService>();
-
-        // データ取得
-        var data = await interlockingService.SendData_Interlocking();
 
         // 全クライアントに送信
-        await hubContext.Clients.All.ReceiveData(data);
+        await hubContext.Clients.All.ReceiveData(snapshot.Interlocking);
     }
 }
 ```
@@ -602,7 +566,7 @@ public class InterlockingHubScheduler(IServiceScopeFactory serviceScopeFactory)
 **Program.csに登録:**
 ```csharp
 // SchedulerManager経由でSchedulerを起動
-builder.Services.AddSingleton<InterlockingHubScheduler>();
+builder.Services.AddSingleton<BroadcastScheduler>();
 builder.Services.AddHostedService<SchedulerManager>();
 ```
 

@@ -71,4 +71,13 @@ public interface IStationRepository
     /// </summary>
     /// <param name="station">追加するStation</param>
     void Add(Models.Station station);
+
+    /// <summary>
+    /// 全件のStationTimerStateを取得する。<b>配信(読み取り専用)専用</b>。
+    /// </summary>
+    /// <remarks>
+    /// AsNoTrackingで取得する(追跡しない)。取得した状態を更新・Saveに使ってはならない。
+    /// 更新用の取得には既存のGetStateByIds等を使うこと。
+    /// </remarks>
+    Task<List<StationTimerState>> GetAllTimerStatesForBroadcast(CancellationToken cancellationToken = default);
 }

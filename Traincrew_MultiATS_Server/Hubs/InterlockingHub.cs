@@ -15,11 +15,6 @@ namespace Traincrew_MultiATS_Server.Hubs;
 )]
 public class InterlockingHub(IInterlockingService interlockingService) : Hub<IInterlockingClientContract>, IInterlockingHubContract
 {
-    public async Task<DataToInterlocking> SendData_Interlocking(List<string> activeStationsList)
-    {
-        return await interlockingService.SendData_Interlocking();
-    }
-
     public async Task<InterlockingLeverData> SetPhysicalLeverData(InterlockingLeverData leverData)
     {
         return await interlockingService.SetPhysicalLeverData(leverData);

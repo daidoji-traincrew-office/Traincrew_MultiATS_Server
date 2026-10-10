@@ -12,6 +12,11 @@ public class ServerRepository(ApplicationDbContext context) : IServerRepository
         return await context.ServerStates.FirstOrDefaultAsync();
     }
 
+    public async Task<ServerState?> GetServerStateForBroadcastAsync(CancellationToken cancellationToken = default)
+    {
+        return await context.ServerStates.AsNoTracking().FirstOrDefaultAsync(cancellationToken);
+    }
+
     public async Task<ServerMode?> GetModeAsync()
     {
         return await context.ServerStates
