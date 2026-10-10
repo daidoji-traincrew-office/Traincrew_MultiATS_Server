@@ -41,7 +41,8 @@ public class BroadcastSnapshotService(
         // 軌道回路と信号現示(SignalRepository.GetSignalsForCalcIndication が
         // TrackCircuitState.IsShortCircuit を直接参照する)が同一時点になるため、
         // 描画の因果順逆転が原理的に起きなくなる。
-        await using var tx = await transactionRepository.BeginTransactionAsync(IsolationLevel.RepeatableRead);
+        // 読み取り専用(SET TRANSACTION READ ONLY)。配信ティックの中で書き込みが起きたらDBが拒否する。
+        await using var tx = await transactionRepository.BeginReadOnlyTransactionAsync(IsolationLevel.RepeatableRead);
 
         CommonReads commonReads;
         using (var activity = ActivitySources.Scheduler.StartNamedActivity("Broadcast.Snapshot.CommonReads"))
@@ -53,7 +54,7 @@ public class BroadcastSnapshotService(
         List<SignalData> signals;
         using (var activity = ActivitySources.Scheduler.StartNamedActivity("Broadcast.Snapshot.Signals"))
         {
-            signals = await signalService.CalcAllSignalIndication();
+            signals = signalService.CalcAllSignalIndication(commonReads.ServerState, commonReads.SignalInput);
             activity?.SetTag("signal.count", signals.Count);
         }
 

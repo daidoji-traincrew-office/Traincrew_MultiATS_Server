@@ -55,4 +55,12 @@ public class LeverRepository(ApplicationDbContext context) : ILeverRepository
             .Where(state => idList.Contains(state.Id))
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<List<Models.LeverState>> GetAllStatesForBroadcast(CancellationToken cancellationToken = default)
+    {
+        return await context.LeverStates
+            .AsNoTracking()
+            .OrderBy(state => state.Id)
+            .ToListAsync(cancellationToken);
+    }
 }

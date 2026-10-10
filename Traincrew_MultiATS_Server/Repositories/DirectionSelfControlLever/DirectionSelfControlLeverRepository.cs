@@ -63,4 +63,12 @@ public class DirectionSelfControlLeverRepository(ApplicationDbContext context) :
             .Where(state => idList.Contains(state.Id))
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<List<Models.DirectionSelfControlLeverState>> GetAllStatesForBroadcast(CancellationToken cancellationToken = default)
+    {
+        return await context.DirectionSelfControlLeverStates
+            .AsNoTracking()
+            .OrderBy(state => state.Id)
+            .ToListAsync(cancellationToken);
+    }
 }

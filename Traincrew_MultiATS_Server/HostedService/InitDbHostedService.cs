@@ -12,6 +12,7 @@ public class InitDbHostedService(
     IServiceScopeFactory serviceScopeFactory,
     InitializationState initializationState,
     IInterlockingObjectMasterStore interlockingObjectMasterStore,
+    IBroadcastMasterStore broadcastMasterStore,
     IOperationNotificationMasterStore operationNotificationMasterStore,
     ILogger<InitDbHostedService> logger)
     : IHostedService
@@ -31,6 +32,7 @@ public class InitDbHostedService(
 
         // Initialize master store
         await interlockingObjectMasterStore.ReloadAsync(cancellationToken);
+        await broadcastMasterStore.ReloadAsync(cancellationToken);
         await operationNotificationMasterStore.ReloadAsync(cancellationToken);
 
         // Start server mode scheduler
@@ -64,6 +66,7 @@ public class InitDbHostedService(
         await schedulerManager.StopServerModeScheduler();
 
         operationNotificationMasterStore.Unload();
+        broadcastMasterStore.Unload();
         interlockingObjectMasterStore.Unload();
 
         logger.LogInformation("InitDbHostedService stopped");

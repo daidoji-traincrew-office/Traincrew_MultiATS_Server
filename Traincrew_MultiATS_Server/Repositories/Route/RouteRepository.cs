@@ -159,4 +159,12 @@ public class RouteRepository(ApplicationDbContext context) : IRouteRepository
             .Where(routeState => idList.Contains(routeState.Id))
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<List<RouteState>> GetAllStatesForBroadcast(CancellationToken cancellationToken = default)
+    {
+        return await context.RouteStates
+            .AsNoTracking()
+            .OrderBy(state => state.Id)
+            .ToListAsync(cancellationToken);
+    }
 }

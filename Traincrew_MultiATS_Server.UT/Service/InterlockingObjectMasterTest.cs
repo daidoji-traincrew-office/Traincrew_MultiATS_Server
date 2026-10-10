@@ -33,6 +33,15 @@ public class InterlockingObjectMasterTest
     private static InterlockingObjectMaster CreateMaster(params InterlockingObject[] objects) => new(objects);
 
     [Fact]
+    public void All_IsSortedByIdAscending()
+    {
+        // 配信が毎ティック同じ並びで使えるよう、構築時にID昇順へ整列される
+        var master = CreateMaster(TrackCircuit(3, "TC3"), TrackCircuit(1, "TC1"), Route(2, "R2"));
+
+        Assert.Equal([1UL, 2UL, 3UL], master.All.Select(o => o.Id));
+    }
+
+    [Fact]
     public void GetByNames_ReturnsInInputOrder()
     {
         var master = CreateMaster(TrackCircuit(1, "TC1"), TrackCircuit(2, "TC2"), TrackCircuit(3, "TC3"));

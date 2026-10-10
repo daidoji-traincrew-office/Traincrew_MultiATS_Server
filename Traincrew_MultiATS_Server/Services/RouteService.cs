@@ -15,7 +15,7 @@ public interface IRouteService
 
 public class RouteService(IRouteRepository routeRepository) : IRouteService
 {
-    private static RouteData ToRouteData(Route route)
+    internal static RouteData ToRouteData(Route route)
     {
         return new()
         {

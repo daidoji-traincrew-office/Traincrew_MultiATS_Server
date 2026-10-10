@@ -204,4 +204,12 @@ public class TrackCircuitRepository(ApplicationDbContext context) : ITrackCircui
     {
         context.Entry(trackCircuit).State = EntityState.Detached;
     }
+
+    public async Task<List<Models.TrackCircuitState>> GetAllStatesForBroadcast(CancellationToken cancellationToken = default)
+    {
+        return await context.TrackCircuitStates
+            .AsNoTracking()
+            .OrderBy(state => state.Id)
+            .ToListAsync(cancellationToken);
+    }
 }

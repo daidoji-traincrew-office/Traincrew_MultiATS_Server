@@ -76,4 +76,12 @@ public class TtcWindowRepository(ApplicationDbContext context) : ITtcWindowRepos
     {
         await context.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task<List<Models.TtcWindowState>> GetAllStatesForBroadcast(CancellationToken cancellationToken = default)
+    {
+        return await context.Set<Models.TtcWindowState>()
+            .AsNoTracking()
+            .OrderBy(state => state.Name)
+            .ToListAsync(cancellationToken);
+    }
 }

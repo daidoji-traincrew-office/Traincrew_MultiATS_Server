@@ -77,4 +77,12 @@ public class StationRepository(ApplicationDbContext context) : IStationRepositor
     {
         context.Stations.Add(station);
     }
+
+    public async Task<List<StationTimerState>> GetAllTimerStatesForBroadcast(CancellationToken cancellationToken = default)
+    {
+        return await context.StationTimerStates
+            .AsNoTracking()
+            .OrderBy(state => state.Id)
+            .ToListAsync(cancellationToken);
+    }
 }

@@ -11,7 +11,6 @@ public class CommanderTableService(
     IOperationNotificationService operationNotificationService,
     IOperationInformationService operationInformationService,
     IProtectionService protectionService,
-    IServerService serverService,
     IBannedUserService bannedUserService
 ) : ICommanderTableService
 {
@@ -31,7 +30,7 @@ public class CommanderTableService(
             TrainStateDataList = commonReads.TrainStates,
             TimeOffset = commonReads.TimeOffset,
             BannedUserIdList = await bannedUserService.GetBannedUserIdsAsync(),
-            SelectedDiagramId = await serverService.GetSelectedDiagramIdAsync(),
+            SelectedDiagramId = commonReads.ServerState.SelectedDiagramId,
         };
     }
 }

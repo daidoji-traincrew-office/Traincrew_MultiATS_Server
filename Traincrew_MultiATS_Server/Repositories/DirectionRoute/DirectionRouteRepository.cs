@@ -97,4 +97,11 @@ public class DirectionRouteRepository(ApplicationDbContext context) : IDirection
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<List<DirectionRouteState>> GetAllStatesForBroadcast(CancellationToken cancellationToken = default)
+    {
+        return await context.DirectionRouteStates
+            .AsNoTracking()
+            .OrderBy(state => state.Id)
+            .ToListAsync(cancellationToken);
+    }
 }

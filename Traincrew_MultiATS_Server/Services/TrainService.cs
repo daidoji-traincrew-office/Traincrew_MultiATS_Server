@@ -191,15 +191,13 @@ public partial class TrainService(
     /// mutexもトランザクションも張らない(呼び出し元が既に管理している前提)。
     /// </summary>
     /// <returns>ATS向けデータ</returns>
-    public async Task<ServerToATSDataBySchedule> BuildScheduleDataAsync(CommonReads commonReads)
+    public Task<ServerToATSDataBySchedule> BuildScheduleDataAsync(CommonReads commonReads)
     {
-        var routeData = await routeService.GetActiveRoutes();
-
-        return new()
+        return Task.FromResult(new ServerToATSDataBySchedule
         {
             TimeOffset = commonReads.TimeOffset,
-            RouteData = routeData
-        };
+            RouteData = commonReads.ActiveRoutes
+        });
     }
 
     /// <summary>

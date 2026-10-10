@@ -36,9 +36,9 @@ public class InterlockingService(
     public async Task<DataToInterlocking> BuildInterlockingDataAsync(CommonReads commonReads)
     {
         var stationIds = commonReads.StationIds;
-        var levers = await leverService.GetAllLeverData();
-        var directionSelfControlLevers = await directionSelfControlLeverService.GetAllWithState();
-        var destinationButtons = await destinationButtonService.GetAllButtonData();
+        var levers = commonReads.Levers;
+        var directionSelfControlLevers = commonReads.DirectionSelfControlLevers;
+        var destinationButtons = commonReads.DestinationButtons;
 
         // 各ランプの状態を取得
         var lamps = GetLamps(stationIds, commonReads.RouteCentralControlLevers, commonReads.StationTimerStates);

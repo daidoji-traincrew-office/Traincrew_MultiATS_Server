@@ -34,6 +34,20 @@ public interface ITransactionRepository
     /// <param name="cancellationToken">キャンセルトークン</param>
     /// <returns>トランザクションスコープ</returns>
     Task<ITransactionScope> BeginTransactionAsync(IsolationLevel isolationLevel, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// 読み取り専用のトランザクションを開始します。
+    /// </summary>
+    /// <remarks>
+    /// 開始直後(最初のクエリより前)に <c>SET TRANSACTION READ ONLY</c> を実行する。
+    /// トランザクション内の書き込みはDBが拒否する(SQLSTATE 25006 read_only_sql_transaction)。
+    /// 読み取りだけのスナップショット(配信)専用。
+    /// </remarks>
+    /// <param name="isolationLevel">分離レベル</param>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    /// <returns>トランザクションスコープ</returns>
+    Task<ITransactionScope> BeginReadOnlyTransactionAsync(
+        IsolationLevel isolationLevel, CancellationToken cancellationToken = default);
 }
 
 /// <summary>

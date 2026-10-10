@@ -22,7 +22,7 @@ public class DirectionRouteService(IDirectionRouteRepository directionRouteRepos
     /// </summary>
     /// <param name="direction">DirectionRouteオブジェクト</param>
     /// <returns>DirectionDataオブジェクト</returns>
-    private static DirectionData ToDirectionData(DirectionRoute direction)
+    internal static DirectionData ToDirectionData(DirectionRoute direction)
     {
         if (direction.DirectionRouteState == null)
         {

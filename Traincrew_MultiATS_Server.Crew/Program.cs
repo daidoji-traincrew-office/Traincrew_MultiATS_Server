@@ -30,6 +30,7 @@ using Traincrew_MultiATS_Server.Repositories.DirectionRoute;
 using Traincrew_MultiATS_Server.Repositories.DirectionSelfControlLever;
 using Traincrew_MultiATS_Server.Repositories.Discord;
 using Traincrew_MultiATS_Server.Repositories.General;
+using Traincrew_MultiATS_Server.Repositories.BroadcastMaster;
 using Traincrew_MultiATS_Server.Repositories.InterlockingObject;
 using Traincrew_MultiATS_Server.Repositories.Lever;
 using Traincrew_MultiATS_Server.Repositories.Lock;
@@ -546,6 +547,8 @@ public class Program
             .AddScoped<IDirectionSelfControlLeverRepository, DirectionSelfControlLeverRepository>()
             .AddScoped<IGeneralRepository, GeneralRepository>()
             .AddScoped<IInterlockingObjectRepository, InterlockingObjectRepository>()
+            .AddScoped<IBroadcastMasterRepository, BroadcastMasterRepository>()
+            .AddScoped<IInterlockingObjectStateLoader, InterlockingObjectStateLoader>()
             .AddScoped<ILockRepository, LockRepository>()
             .AddScoped<ILockConditionRepository, LockConditionRepository>()
             .AddScoped<ILockConditionByRouteCentralControlLeverRepository, LockConditionByRouteCentralControlLeverRepository>()
@@ -611,6 +614,7 @@ public class Program
             .AddScoped<ITtcStationControlService, TtcStationControlService>()
             .AddSingleton<EnableAuthorizationStore>(_ => new(enableAuthorization))
             .AddSingleton<IInterlockingObjectMasterStore, InterlockingObjectMasterStore>()
+            .AddSingleton<IBroadcastMasterStore, BroadcastMasterStore>()
             .AddSingleton<IOperationNotificationMasterStore, OperationNotificationMasterStore>()
             .AddSingleton<IDiscordService, DiscordService>()
             .AddSingleton<MetricsCollector>()

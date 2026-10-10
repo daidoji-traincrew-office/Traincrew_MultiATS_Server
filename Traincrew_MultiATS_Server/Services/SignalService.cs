@@ -13,6 +13,11 @@ public interface ISignalService
 {
     Task<List<SignalData>> GetSignalIndicationDataByTrackCircuits(List<TrackCircuit> trackCircuits, bool isUp);
     Task<List<SignalData>> CalcAllSignalIndication();
+
+    /// <summary>
+    /// 全信号機の現示を計算する(配信専用。DBを読まず、呼び出し側が用意した入力と1回読んだserver_stateから計算する)。
+    /// </summary>
+    List<SignalData> CalcAllSignalIndication(ServerStateSnapshot serverState, SignalCalcInput input);
     Task<Dictionary<string, Phase>> CalcSignalIndication(List<string> signalNames, bool getDetailedIndication = true);
     Task<List<string>> GetSignalNamesByStationIds(List<string> stationIds);
 }
@@ -39,18 +44,23 @@ public class SignalService(
     /// <returns>信号現示を計算してよい場合true</returns>
     private bool IsInterlockingHealthy(ServerState? serverState)
     {
-        if (serverState?.IsAllSignalRelayRaised != RaiseDropWithForce.Raise)
+        return IsInterlockingHealthy(serverState?.IsAllSignalRelayRaised, serverState?.InterlockingHeartbeatAt);
+    }
+
+    private bool IsInterlockingHealthy(RaiseDropWithForce? isAllSignalRelayRaised, DateTime? interlockingHeartbeatAt)
+    {
+        if (isAllSignalRelayRaised != RaiseDropWithForce.Raise)
         {
             return false;
         }
 
-        if (serverState.InterlockingHeartbeatAt == null)
+        if (interlockingHeartbeatAt == null)
         {
             // 連動サーバーが一度も起動していない
             return false;
         }
 
-        if (dateTimeRepository.GetNow() - serverState.InterlockingHeartbeatAt.Value >= InterlockingHeartbeatTimeout)
+        if (dateTimeRepository.GetNow() - interlockingHeartbeatAt.Value >= InterlockingHeartbeatTimeout)
         {
             // 連動サーバーのハートビートが古い
             return false;
@@ -131,8 +141,33 @@ public class SignalService(
         // 3. SignalRouteを全取得
         var routes = await signalRouteRepository.GetAllRoutes();
 
+        return CalcAllSignalIndication(signals, nextSignalDict, routes);
+    }
+
+    public List<SignalData> CalcAllSignalIndication(ServerStateSnapshot serverState, SignalCalcInput input)
+    {
+        // フェイルセーフチェック: 配信がスナップショット内で1回読んだserver_stateと同じ値で判定する
+        if (!IsInterlockingHealthy(serverState.IsAllSignalRelayRaised, serverState.InterlockingHeartbeatAt))
+        {
+            // すべての信号を停止現示として返す
+            return input.Signals.Keys
+                .Select(name => ToSignalData(name, Phase.R))
+                .ToList();
+        }
+
+        return CalcAllSignalIndication(input.Signals, input.NextSignalNames, input.Routes);
+    }
+
+    /// <summary>
+    /// 全信号機の現示を計算する(DB読み取り済みの入力から)。DB経路と配信経路で共通。
+    /// </summary>
+    private static List<SignalData> CalcAllSignalIndication(
+        Dictionary<string, Signal> signals,
+        Dictionary<string, List<string>> nextSignalDict,
+        Dictionary<string, List<Route>> routes)
+    {
         // 4. 信号名をHashSetに入れて、結果用Dictionaryを定義
-        var remainingSignals = allSignals.Select(x => x.Name).ToHashSet();
+        var remainingSignals = signals.Keys.ToHashSet();
         var result = new Dictionary<string, SignalIndication>();
 
         // 5-7. HashSetから信号名を取得し、現示を計算。HashSetが空になるまで繰り返し

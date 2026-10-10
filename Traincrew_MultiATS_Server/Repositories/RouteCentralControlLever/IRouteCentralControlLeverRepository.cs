@@ -54,4 +54,13 @@ public interface IRouteCentralControlLeverRepository
     /// <param name="cancellationToken">キャンセルトークン</param>
     /// <returns>RouteCentralControlLeverStateのリスト</returns>
     Task<List<Models.RouteCentralControlLeverState>> GetStateByIds(IEnumerable<ulong> ids, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 全件のRouteCentralControlLeverStateを取得する。<b>配信(読み取り専用)専用</b>。
+    /// </summary>
+    /// <remarks>
+    /// AsNoTrackingで取得する(追跡しない)。取得した状態を更新・Saveに使ってはならない。
+    /// 更新用の取得には既存のGetStateByIds等を使うこと。
+    /// </remarks>
+    Task<List<RouteCentralControlLeverState>> GetAllStatesForBroadcast(CancellationToken cancellationToken = default);
 }

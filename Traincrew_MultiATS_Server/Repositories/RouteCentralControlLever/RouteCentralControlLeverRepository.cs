@@ -97,4 +97,12 @@ public class RouteCentralControlLeverRepository(ApplicationDbContext context) : 
             .Where(state => idList.Contains(state.Id))
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<List<RouteCentralControlLeverState>> GetAllStatesForBroadcast(CancellationToken cancellationToken = default)
+    {
+        return await context.RouteCentralControlLeverStates
+            .AsNoTracking()
+            .OrderBy(state => state.Id)
+            .ToListAsync(cancellationToken);
+    }
 }

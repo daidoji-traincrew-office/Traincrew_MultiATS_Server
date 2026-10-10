@@ -75,4 +75,13 @@ public interface IRouteRepository
     /// <param name="cancellationToken">キャンセルトークン</param>
     /// <returns>RouteStateのリスト</returns>
     Task<List<Models.RouteState>> GetStateByIds(IEnumerable<ulong> ids, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 全件のRouteStateを取得する。<b>配信(読み取り専用)専用</b>。
+    /// </summary>
+    /// <remarks>
+    /// AsNoTrackingで取得する(追跡しない)。取得した状態を更新・Saveに使ってはならない。
+    /// 更新用の取得には既存のGetStateByIds等を使うこと。
+    /// </remarks>
+    Task<List<Models.RouteState>> GetAllStatesForBroadcast(CancellationToken cancellationToken = default);
 }

@@ -34,7 +34,9 @@ public sealed class InterlockingObjectMaster
 
     internal InterlockingObjectMaster(IReadOnlyList<InterlockingObject> objects)
     {
-        All = objects;
+        // 配信が毎ティック全件を同じ並び(ID昇順)で使えるよう、構築時に1回だけ整列する。
+        // 以後は読み取り専用なので、利用側でOrderByし直さない
+        All = objects.OrderBy(o => o.Id).ToList();
         byId = objects.ToDictionary(o => o.Id);
         byName = objects.ToDictionary(o => o.Name, StringComparer.Ordinal);
         byStationId = objects

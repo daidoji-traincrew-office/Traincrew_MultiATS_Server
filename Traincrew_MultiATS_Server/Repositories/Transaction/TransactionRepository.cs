@@ -33,6 +33,24 @@ public class TransactionRepository(ApplicationDbContext context) : ITransactionR
         var transaction = await context.Database.BeginTransactionAsync(isolationLevel, cancellationToken);
         return new EfCoreTransactionScope(transaction);
     }
+
+    public async Task<ITransactionScope> BeginReadOnlyTransactionAsync(
+        IsolationLevel isolationLevel, CancellationToken cancellationToken = default)
+    {
+        var transaction = await context.Database.BeginTransactionAsync(isolationLevel, cancellationToken);
+        try
+        {
+            // 最初のクエリより前に実行する必要がある(PostgreSQLの制約)
+            await context.Database.ExecuteSqlRawAsync("SET TRANSACTION READ ONLY", cancellationToken);
+        }
+        catch
+        {
+            await transaction.DisposeAsync();
+            throw;
+        }
+
+        return new EfCoreTransactionScope(transaction);
+    }
 }
 
 public class EfCoreTransactionScope(IDbContextTransaction transaction) : ITransactionScope

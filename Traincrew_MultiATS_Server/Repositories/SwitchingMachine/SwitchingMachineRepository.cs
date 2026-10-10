@@ -69,4 +69,12 @@ public class SwitchingMachineRepository(ApplicationDbContext context) : ISwitchi
             .Where(state => idList.Contains(state.Id))
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<List<SwitchingMachineState>> GetAllStatesForBroadcast(CancellationToken cancellationToken = default)
+    {
+        return await context.SwitchingMachineStates
+            .AsNoTracking()
+            .OrderBy(state => state.Id)
+            .ToListAsync(cancellationToken);
+    }
 }
