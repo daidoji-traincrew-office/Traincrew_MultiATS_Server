@@ -3,7 +3,6 @@ using System.Text.RegularExpressions;
 using Microsoft.Extensions.Caching.Memory;
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Models;
-using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.DiagramTrain;
 using Traincrew_MultiATS_Server.Repositories.General;
 using Traincrew_MultiATS_Server.Repositories.NextSignal;
@@ -43,18 +42,13 @@ public partial class TrainService(
     INextSignalRepository nextSignalRepository,
     ITrainSignalStateRepository trainSignalStateRepository,
     ITrackCircuitDepartmentTimeRepository trackCircuitDepartmentTimeRepository,
-    IDateTimeRepository dateTimeRepository,
+    IDateTimeService dateTimeService,
     IMemoryCache cache,
     ILogger<TrainService> logger
 ) : ITrainService
 {
     [GeneratedRegex(@"\d+")]
     private static partial Regex RegexIsDigits();
-
-    /// <summary>
-    /// 営業日の開始時刻。鉄道の営業日は通常4:00から開始される。
-    /// </summary>
-    private static readonly TimeSpan ServiceDayStartTime = TimeSpan.FromHours(4);
 
     /// <summary>
     /// 列車単位のキャッシュの保持期間。列車が消えた分は放っておいても期限切れで落ちる。
@@ -714,25 +708,6 @@ public partial class TrainService(
     }
 
     /// <summary>
-    /// 営業日開始時刻を基準に時刻を正規化する。
-    /// 営業日開始時刻より前の時刻（例: 02:00）は、前日の遅い時刻として扱うため86400秒を加算する。
-    /// </summary>
-    /// <param name="time">正規化する時刻</param>
-    /// <returns>営業日開始時刻からの経過秒数</returns>
-    private static double NormalizeTimeToServiceDay(TimeSpan time)
-    {
-        var totalSeconds = time.TotalSeconds;
-
-        // 営業日開始時刻より前なら、前日の遅い時刻として扱う
-        if (time < ServiceDayStartTime)
-        {
-            totalSeconds += 86400; // 24時間を加算
-        }
-
-        return totalSeconds;
-    }
-
-    /// <summary>
     /// 遅延を計算して更新する
     /// </summary>
     /// <param name="diaId">ダイヤID</param>
@@ -758,11 +733,8 @@ public partial class TrainService(
         // 上り下り判定
         var isUp = IsTrainUpOrDown(trainNumber);
 
-        // 現在時刻
-        var currentTime = dateTimeRepository.GetNow().TimeOfDay;
-
-        // 現在のTST時差
-        var timeOffset = await serverService.GetTimeOffsetAsync();
+        // TST現在時刻(営業日 [4:00, 28:00) 基準)
+        var currentTimeSeconds = (await dateTimeService.GetTstNow()).TotalSeconds;
 
         // 各駅軌道回路に対して遅延を計算
         foreach (var (trackCircuit, stationId) in stationTrackCircuits)
@@ -797,12 +769,8 @@ public partial class TrainService(
                 timeElement = departmentTime.TimeElement;
             }
 
-            // 遅延を計算（営業日境界を考慮）
-            var adjustedCurrentTime = TimeSpan.FromSeconds(currentTime.TotalSeconds + 3600 * timeOffset);
-
-            // 営業日開始時刻（4:00）を基準に正規化
-            var currentTimeSeconds = NormalizeTimeToServiceDay(adjustedCurrentTime);
-            var departureTimeSeconds = NormalizeTimeToServiceDay(timetable.DepartureTime.Value);
+            // 遅延を計算(営業日 [4:00, 28:00) を基準に正規化して比較)
+            var departureTimeSeconds = DateTimeService.NormalizeToServiceDay(timetable.DepartureTime.Value).TotalSeconds;
 
             var delaySeconds = currentTimeSeconds - departureTimeSeconds - timeElement;
             var delayMinutes = (int)Math.Round(delaySeconds / 60.0, MidpointRounding.ToZero);

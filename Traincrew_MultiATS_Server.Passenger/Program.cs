@@ -115,6 +115,7 @@ public class Program
             // 同上。旅客用プロセスは OperationNotificationService のメソッドを呼ばないが、
             // TrainService のコンストラクタ引数なので DI 解決には必要
             .AddSingleton<IOperationNotificationMasterStore, OperationNotificationMasterStore>()
+            .AddScoped<IDateTimeService, DateTimeService>()
             .AddScoped<IOperationInformationService, OperationInformationService>()
             .AddScoped<IOperationNotificationService, OperationNotificationService>()
             .AddScoped<IPassengerService, PassengerService>()
