@@ -672,7 +672,8 @@ public partial class TrainService(
                 StationId = t.StationId,
                 TrackNumber = t.TrackNumber,
                 DepartureTime = t.DepartureTime,
-                ArrivalTime = t.ArrivalTime
+                ArrivalTime = t.ArrivalTime,
+                StopType = t.StopType
             }).ToList()
         };
     }
@@ -776,8 +777,8 @@ public partial class TrainService(
                 continue;
             }
 
-            // 両数を決定: 到着時刻と出発時刻が同じで始発駅でないなら0（通過扱い）
-            var carCountToUse = (timetable.ArrivalTime == timetable.DepartureTime && timetable.Index != 1)
+            // 両数を決定: 停車種別が通過なら0
+            var carCountToUse = timetable.StopType == StopType.Pass
                 ? 0
                 : carCount;
 
