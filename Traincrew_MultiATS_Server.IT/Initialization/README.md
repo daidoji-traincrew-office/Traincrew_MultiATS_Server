@@ -28,7 +28,7 @@
 2. テストファイルで`GenerateExpectedSnapshot`のSkip属性を一時的にコメントアウト
 3. テストを実行:
    ```bash
-   dotnet test Traincrew_MultiATS_Server.IT/Traincrew_MultiATS_Server.IT.csproj --filter "FullyQualifiedName~DatabaseInitializerSnapshotTest.GenerateExpectedSnapshot"
+   dotnet test --project Traincrew_MultiATS_Server.IT/Traincrew_MultiATS_Server.IT.csproj --filter "FullyQualifiedName~DatabaseInitializerSnapshotTest.GenerateExpectedSnapshot"
    ```
 4. `Traincrew_MultiATS_Server.IT/Initialization/Snapshots/expected_db_snapshot.txt` にスナップショットが生成される
 5. Skip属性を元に戻す
@@ -52,7 +52,7 @@
 
 通常のテスト実行:
 ```bash
-dotnet test Traincrew_MultiATS_Server.IT/Traincrew_MultiATS_Server.IT.csproj --filter "FullyQualifiedName~DatabaseInitializerSnapshotTest.InitializeAsync_EmptyDatabase_MatchesExpectedSnapshot"
+dotnet test --project Traincrew_MultiATS_Server.IT/Traincrew_MultiATS_Server.IT.csproj --filter "FullyQualifiedName~DatabaseInitializerSnapshotTest.InitializeAsync_EmptyDatabase_MatchesExpectedSnapshot"
 ```
 
 ## トラブルシューティング

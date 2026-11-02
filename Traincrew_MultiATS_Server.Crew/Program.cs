@@ -414,7 +414,7 @@ public class Program
                             .SetRedirectUri("auth/callback");
                     });
 
-                // Discordが RFC 9207 の iss をリダイレクトに付けるようになったが、OpenIddict 5.8.0 の
+                // Discordが RFC 9207 の iss をリダイレクトに付けるようになったが、OpenIddict の
                 // Discord プロバイダーは静的設定で AuthorizationResponseIssParameterSupported が無く ID2120 で弾かれる。
                 // 上流修正(openiddict-core#2562)と同じく、Discordの設定で iss 対応を宣言し、
                 // 欠落(ID2029)・不一致(ID2119)の検証は上流の ValidateIssuerParameter に任せる。
@@ -695,10 +695,8 @@ public class Program
         {
             tracing.AddAspNetCoreInstrumentation();
             tracing.AddHttpClientInstrumentation();
-            tracing.AddEntityFrameworkCoreInstrumentation(options =>
-            {
-                options.SetDbStatementForText = true;
-            });
+            // 1.19系ではSetDbStatementForTextが廃止され、SQL文は常に記録される
+            tracing.AddEntityFrameworkCoreInstrumentation();
             tracing.AddSource(ActivitySources.Scheduler.Name);
             tracing.AddSource(ActivitySources.Hubs.Name);
         });
