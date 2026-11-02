@@ -110,6 +110,28 @@ public class RouteData
     public RouteData? Root { get; set; }
     public string? Indicator { get; set; }
     public int? ApproachLockTime { get; set; }
+    public RouteStateData? RouteState { get; set; }
+}
+
+/// <summary>
+/// 進路状態
+/// </summary>
+public class RouteStateData
+{
+    /// <summary>
+    /// 信号制御リレー
+    /// </summary>
+    public RaiseDrop IsSignalControlRaised { get; set; }
+
+    /// <summary>
+    /// 進路確保中か
+    /// </summary>
+    public RaiseDrop IsRouteSecured { get; set; }
+
+    /// <summary>
+    /// CTC制御中か
+    /// </summary>
+    public RaiseDrop IsCtcControlled { get; set; }
 }
 
 [Flags]
