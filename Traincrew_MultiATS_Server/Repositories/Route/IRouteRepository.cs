@@ -18,6 +18,12 @@ public interface IRouteRepository
     /// 駅IDから進路を取得する
     /// </summary>
     Task<List<Models.Route>> GetByStationIds(List<string> stationIds);
+
+    /// <summary>
+    /// 駅IDから進路を状態付きで取得する
+    /// </summary>
+    Task<List<Models.Route>> GetByStationIdsWithState(List<string> stationIds);
+
     /// <summary>
     /// 進路確保中のすべての進路IDを取得する
     /// </summary>
