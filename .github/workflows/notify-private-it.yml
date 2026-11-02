@@ -1,6 +1,11 @@
 # Public側でUnit Testsが通ったら、Private側の連動ITを起動する。
 # fork PRでは pull_request に secrets が渡らないため、baseリポジトリの
 # コンテキストで走る workflow_run を経由している。
+#
+# main への push トリガーは持たない。main が進んだときの連動ITは
+# notify-private-submodule.yml -> Private の sync-public-submodule.yml 経由で
+# (pin を追従したうえで変更された連動図表CSVの駅だけ) 実行されるため、
+# ここから全13駅を投げると二重に走ってしまう。
 # このリポジトリはPUBLICなのでActionsは無料。runs-onはGitHub-hostedのままでよい
 # (self-hostedはPrivate側の課金回避が目的なので、こちらに載せる理由がない)。
 name: Notify Private IT
@@ -23,8 +28,6 @@ on:
   workflow_run:
     workflows: ["Unit Tests"]
     types: [completed]
-  push:
-    branches: [main]
 
 permissions:
   contents: read
@@ -41,7 +44,6 @@ jobs:
     runs-on: ubuntu-latest
     if: >-
       github.event_name == 'workflow_dispatch' ||
-      github.event_name == 'push' ||
       github.event.workflow_run.conclusion == 'success'
     outputs:
       stations: ${{ steps.stations.outputs.stations }}
@@ -72,9 +74,7 @@ jobs:
           IN_STATIONS: ${{ inputs.stations }}
           IN_PR_NUMBER: ${{ inputs.pr_number }}
         run: |
-          if [ "$EVENT_NAME" = "push" ]; then
-            echo "mode=full" >> "$GITHUB_OUTPUT"
-          elif [ "$EVENT_NAME" = "workflow_run" ]; then
+          if [ "$EVENT_NAME" = "workflow_run" ]; then
             echo "mode=targeted" >> "$GITHUB_OUTPUT"
           elif [ -n "$IN_STATIONS" ]; then
             echo "mode=manual" >> "$GITHUB_OUTPUT"
