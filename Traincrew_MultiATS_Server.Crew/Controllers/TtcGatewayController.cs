@@ -31,6 +31,50 @@ public sealed class TtcGatewayController(IHttpClientFactory clientFactory, IConf
     [HttpGet("master")]
     public Task ForwardMaster() => ForwardAsync("api/ttc/master");
 
+    /// <summary>既存時計・列番窓・設備の読取スナップショットを返す。</summary>
+    [HttpGet("observation")]
+    public Task ForwardObservation() => ForwardAsync("api/ttc/observation");
+
+    /// <summary>当日ダイヤの指令状態と履歴を返す。</summary>
+    [HttpGet("operation-days/{id:guid}/status")]
+    public Task ForwardOperationStatus(Guid id) => ForwardAsync($"api/ttc/operation-days/{id:D}/status");
+
+    /// <summary>当日ダイヤの保留・運休指令を中継する。進路要求は行わない。</summary>
+    [HttpPost("operation-days/{id:guid}/commands")]
+    public Task ExecuteOperationCommand(Guid id) => ForwardAsync($"api/ttc/operation-days/{id:D}/commands", forwardBody: true);
+
+    /// <summary>結果不明の指令をサーバー台帳から読み取り専用で照合する。</summary>
+    [HttpGet("operation-days/{id:guid}/commands/{operationId:guid}")]
+    public Task ReadOperationCommand(Guid id, Guid operationId) => ForwardAsync($"api/ttc/operation-days/{id:D}/commands/{operationId:D}");
+
+    /// <summary>ドライランの自動制御状態と候補理由を取得する。</summary>
+    [HttpGet("operation-days/{id:guid}/runtime")]
+    public Task ReadRuntime(Guid id) => ForwardAsync($"api/ttc/operation-days/{id:D}/runtime");
+
+    /// <summary>ドライランの開始・停止・照合を中継する。</summary>
+    [HttpPost("operation-days/{id:guid}/runtime")]
+    public Task ControlRuntime(Guid id) => ForwardAsync($"api/ttc/operation-days/{id:D}/runtime", forwardBody: true);
+
+    /// <summary>設備正本に対応するドライラン専用割当を保存する。</summary>
+    [HttpPut("operation-days/{id:guid}/route-bindings")]
+    public Task SaveRouteBindings(Guid id) => ForwardAsync($"api/ttc/operation-days/{id:D}/route-bindings", forwardBody: true);
+
+    /// <summary>希望TSTの整数時間丸めと日付制約・在線警告を事前確認する。</summary>
+    [HttpPost("sessions/{id:guid}/clock-preview")]
+    public Task PreviewClock(Guid id) => ForwardAsync($"api/ttc/sessions/{id:D}/clock-preview", forwardBody: true);
+
+    /// <summary>時刻変更の確定状態を確認する。</summary>
+    [HttpGet("sessions/{id:guid}/clock-changes/{requestId:guid}")]
+    public Task ReadClockChange(Guid id, Guid requestId) => ForwardAsync($"api/ttc/sessions/{id:D}/clock-changes/{requestId:D}");
+
+    /// <summary>警告承認後の時刻変更を既存サーバーへ要求する。</summary>
+    [HttpPost("sessions/{id:guid}/clock-changes/{requestId:guid}/apply")]
+    public Task ApplyClock(Guid id, Guid requestId) => ForwardAsync($"api/ttc/sessions/{id:D}/clock-changes/{requestId:D}/apply", forwardBody: true);
+
+    /// <summary>結果不明の設定を再設定せず照合する。</summary>
+    [HttpPost("sessions/{id:guid}/clock-changes/{requestId:guid}/reconcile")]
+    public Task ReconcileClock(Guid id, Guid requestId) => ForwardAsync($"api/ttc/sessions/{id:D}/clock-changes/{requestId:D}/reconcile", forwardBody: true);
+
     /// <summary>基本ダイヤ一覧を返す。</summary>
     [HttpGet("diagrams")]
     public Task ForwardDiagrams() => ForwardAsync("api/ttc/diagrams");

@@ -20,6 +20,34 @@ namespace Traincrew_MultiATS_Server.IT.Controllers;
 /// <summary>TTC gatewayの司令卓認証と固定HTTP中継を検証する。</summary>
 public sealed class TtcGatewayControllerTest
 {
+    /// <summary>新しい指令・観測・時計APIも固定経路だけへ中継する。</summary>
+    [Theory]
+    [InlineData("GET", "observation")]
+    [InlineData("GET", "operation-days/11111111-1111-1111-1111-111111111111/status")]
+    [InlineData("POST", "operation-days/11111111-1111-1111-1111-111111111111/commands")]
+    [InlineData("GET", "operation-days/11111111-1111-1111-1111-111111111111/commands/22222222-2222-2222-2222-222222222222")]
+    [InlineData("GET", "operation-days/11111111-1111-1111-1111-111111111111/runtime")]
+    [InlineData("POST", "operation-days/11111111-1111-1111-1111-111111111111/runtime")]
+    [InlineData("PUT", "operation-days/11111111-1111-1111-1111-111111111111/route-bindings")]
+    [InlineData("POST", "sessions/11111111-1111-1111-1111-111111111111/clock-preview")]
+    [InlineData("GET", "sessions/11111111-1111-1111-1111-111111111111/clock-changes/22222222-2222-2222-2222-222222222222")]
+    [InlineData("POST", "sessions/11111111-1111-1111-1111-111111111111/clock-changes/22222222-2222-2222-2222-222222222222/apply")]
+    [InlineData("POST", "sessions/11111111-1111-1111-1111-111111111111/clock-changes/22222222-2222-2222-2222-222222222222/reconcile")]
+    public async Task Gateway_ForwardsNamedOperationRoutes(string method, string path)
+    {
+        var probe = new GatewayProbe((_, _) => Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+            { Content = new StringContent("{}", Encoding.UTF8, "application/json") }));
+        using var server = await CreateServerAsync(probe);
+        using var client = server.CreateClient();
+        using var request = new HttpRequestMessage(new HttpMethod(method), "/api/ttc/" + path + "?url=http%3A%2F%2Fevil.test");
+        if (method is "POST" or "PUT") request.Content = new StringContent("{}", Encoding.UTF8, "application/json");
+        request.Headers.Authorization = new("Bearer", "commander");
+        using var response = await client.SendAsync(request, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("http://interlocking:8080/api/ttc/" + path, probe.Uri?.ToString());
+        Assert.Equal("Bearer commander", probe.Authorization);
+    }
+
     /// <summary>Bearerなし、無効トークン、司令権限なしをupstreamへ転送しない。</summary>
     [Theory]
     [InlineData(null, HttpStatusCode.Unauthorized)]
