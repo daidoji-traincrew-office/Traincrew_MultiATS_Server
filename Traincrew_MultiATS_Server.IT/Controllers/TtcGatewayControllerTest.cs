@@ -130,7 +130,7 @@ public sealed class TtcGatewayControllerTest
         Assert.Equal(1, probe.RequestCount);
     }
 
-    /// <summary>4MiBを超える入力はTTC serviceへ届く前に拒否する。</summary>
+    /// <summary>32MiBを超える入力はTTC serviceへ届く前に拒否する。</summary>
     [Fact]
     public async Task Gateway_RejectsOversizedRequest()
     {
@@ -139,7 +139,7 @@ public sealed class TtcGatewayControllerTest
         using var client = server.CreateClient();
         using var request = new HttpRequestMessage(HttpMethod.Post, "/api/ttc/diagrams/drafts")
         {
-            Content = new ByteArrayContent(new byte[4 * 1024 * 1024 + 1])
+            Content = new ByteArrayContent(new byte[32 * 1024 * 1024 + 1])
         };
         request.Headers.Authorization = new("Bearer", "commander");
 

@@ -13,9 +13,10 @@ namespace Traincrew_MultiATS_Server.Crew.Controllers;
     AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme,
     Policy = "CommanderTablePolicy")]
 [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+[RequestSizeLimit(32 * 1024 * 1024)]
 public sealed class TtcGatewayController(IHttpClientFactory clientFactory, IConfiguration configuration) : ControllerBase
 {
-    private const int MaximumRequestBytes = 4 * 1024 * 1024;
+    private const int MaximumRequestBytes = 32 * 1024 * 1024;
     private const int MaximumResponseBytes = 16 * 1024 * 1024;
 
     /// <summary>TTCのDB保護状態を確認する。</summary>
