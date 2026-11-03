@@ -68,6 +68,7 @@ using Traincrew_MultiATS_Server.Repositories.UserDisconnection;
 using Traincrew_MultiATS_Server.Scheduler;
 using Traincrew_MultiATS_Server.Services;
 using Traincrew_MultiATS_Server.Services.Cache;
+using Traincrew_MultiATS_Server.Crew.Controllers;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace Traincrew_MultiATS_Server.Crew;
@@ -82,6 +83,7 @@ public class Program
         var enableOtlp = builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"] != null;
 
         ConfigureServices(builder, isDevelopment, enableAuthorization, enableOtlp);
+        builder.Services.AddTtcGateway(builder.Configuration);
 
         var app = builder.Build();
 
