@@ -21,6 +21,8 @@ public interface IServerRepository
     Task SetServerStateAsync(ServerMode mode);
     Task<int> GetTimeOffset();
     Task SetTimeOffsetAsync(int timeOffset);
+    /// <summary>唯一のserver_state行が期待時差に一致する場合だけ時差を置換する。</summary>
+    Task<bool> TrySetTimeOffsetAsync(int expectedTimeOffset, int newTimeOffset, CancellationToken cancellationToken = default);
     Task AddServerStateAsync(ServerState serverState, CancellationToken cancellationToken = default);
     Task SetSwitchMoveTimeAsync(int switchMoveTime);
     Task SetUseOneSecondRelayAsync(bool useOneSecondRelay);
