@@ -17,7 +17,7 @@ public static class DatabaseSnapshotHelper
     {
         var snapshot = new DatabaseSnapshot();
 
-        // Get all table names (excluding migrations and OpenIddict tables)
+        // Get all table names (excluding migrations)
         var tableNames = await GetTableNamesAsync(context, cancellationToken);
 
         foreach (var tableName in tableNames)
@@ -39,7 +39,6 @@ public static class DatabaseSnapshotHelper
                 WHERE table_schema = 'public'
                 AND table_type = 'BASE TABLE'
                 AND table_name NOT LIKE '__EFMigrationsHistory'
-                AND table_name NOT LIKE 'OpenIddict%'
                 ORDER BY table_name
                 """)
             .ToListAsync(cancellationToken);
@@ -175,13 +174,13 @@ public static class DatabaseSnapshotHelper
             if (expectedTable.RowCount != actualTable.RowCount)
             {
                 comparison.RowCountDifferences[tableName] =
-                    new RowCountDifference(expectedTable.RowCount, actualTable.RowCount);
+                    new(expectedTable.RowCount, actualTable.RowCount);
             }
 
             if (expectedTable.Schema != actualTable.Schema)
             {
                 comparison.SchemaDifferences[tableName] =
-                    new SchemaDifference(expectedTable.Schema, actualTable.Schema);
+                    new(expectedTable.Schema, actualTable.Schema);
             }
         }
 

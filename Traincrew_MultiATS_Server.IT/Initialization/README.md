@@ -46,7 +46,6 @@
 以下のテーブルはスナップショットから除外されます:
 
 - `__EFMigrationsHistory`: EFマイグレーション履歴
-- `OpenIddict*`: OpenIddictの認証テーブル
 
 ## テストの実行
 
