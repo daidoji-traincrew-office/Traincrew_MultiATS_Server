@@ -37,6 +37,7 @@ public class TrainHub(
     private ulong GetMemberId()
     {
         var enableAuthorization = enableAuthorizationStore.EnableAuthorization;
+        // sub は Discord ユーザー ID。出勤台 IdP との契約で10進数の文字列
         var memberIdString = Context.User?.FindFirst(Claims.Subject)?.Value;
         if (!ulong.TryParse(memberIdString, out var memberId))
         {

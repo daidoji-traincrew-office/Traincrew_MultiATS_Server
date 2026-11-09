@@ -2,6 +2,8 @@ namespace Traincrew_MultiATS_Server.Models;
 
 public class TraincrewRole
 {
+    // 入鋏(運転会への参加資格。認可が有効なら、すべてのエンドポイントで必須)
+    public required bool IsBeginner { get; init; }
     // 運転士 
     public required bool  IsDriver { get; init; }
     // 乗務助役

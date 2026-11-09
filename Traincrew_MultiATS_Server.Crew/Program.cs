@@ -1,14 +1,10 @@
 using System.Net;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
-using OpenIddict.Abstractions;
-using OpenIddict.Client;
+using OpenIddict.Validation.AspNetCore;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
@@ -21,6 +17,7 @@ using Traincrew_MultiATS_Server.Initialization;
 using Traincrew_MultiATS_Server.Initialization.CsvLoaders;
 using Traincrew_MultiATS_Server.Initialization.DbInitializers;
 using Traincrew_MultiATS_Server.Initialization.JsonLoaders;
+using Traincrew_MultiATS_Server.Models;
 using Traincrew_MultiATS_Server.Repositories.ClosedCircuitLockTrackCircuit;
 using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.DestinationButton;
@@ -69,8 +66,6 @@ using Traincrew_MultiATS_Server.Repositories.UserDisconnection;
 using Traincrew_MultiATS_Server.Scheduler;
 using Traincrew_MultiATS_Server.Services;
 using Traincrew_MultiATS_Server.Services.Cache;
-using static OpenIddict.Abstractions.OpenIddictConstants;
-using static OpenIddict.Client.WebIntegration.OpenIddictClientWebIntegrationConstants;
 
 namespace Traincrew_MultiATS_Server.Crew;
 
@@ -87,7 +82,7 @@ public class Program
 
         var app = builder.Build();
 
-        await Configure(app, isDevelopment, enableAuthorization);
+        Configure(app, isDevelopment, enableAuthorization);
 
         await app.RunAsync();
     }
@@ -112,18 +107,13 @@ public class Program
         ConfigureDatabaseService(builder);
         ConfigureSignalRService(builder);
         ConfigureAuthenticationService(builder);
-        var openiddictBuilder = ConfigureOpeniddictService(builder, isDevelopment);
-        if (enableAuthorization)
-        {
-            ConfigureOpeniddictClientService(builder, openiddictBuilder, isDevelopment);
-        }
 
         if (enableOtlp)
         {
             ConfigureOpenTelemetryService(builder);
         }
 
-        ConfigureAuthorizationService(builder);
+        ConfigureAuthorizationService(builder, enableAuthorization);
         ConfigureDependencyInjectionService(builder, enableAuthorization);
         ConfigureHostedServices(builder);
         if (enableAuthorization)
@@ -132,7 +122,7 @@ public class Program
         }
     }
 
-    private static async Task Configure(
+    private static void Configure(
         WebApplication app,
         bool isDevelopment,
         bool enableAuthorization)
@@ -158,11 +148,6 @@ public class Program
         if (!enableAuthorization)
         {
             endpointBuilders.ForEach(builder => builder.AllowAnonymous());
-        }
-        else
-        {
-            // OpenIddictアプリケーション登録
-            await RegisterOpeniddictApplicationAsync(app);
         }
     }
 
@@ -244,8 +229,6 @@ public class Program
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
         {
             options.UseNpgsql(dataSource);
-            // Todo: セッションであることを考えると、Redisを使ったほうが良いかも
-            options.UseOpenIddict();
         });
     }
 
@@ -283,157 +266,10 @@ public class Program
 
     private static void ConfigureAuthenticationService(WebApplicationBuilder builder)
     {
-        // 認可周り
-        // Cookie認可の設定
-        builder.Services
-            .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-            .AddCookie(options => { options.ExpireTimeSpan = TimeSpan.FromMinutes(10); });
-    }
-
-    private static OpenIddictBuilder ConfigureOpeniddictService(WebApplicationBuilder builder, bool isDevelopment)
-    {
-        // OpenIddictの設定
-        return builder.Services.AddOpenIddict()
-            .AddCore(options =>
-            {
-                options.UseEntityFrameworkCore()
-                    .UseDbContext<ApplicationDbContext>();
-            })
-            .AddServer(options =>
-            {
-                // Authorizationとtokenエンドポイントを有効にする
-                options.SetAuthorizationEndpointUris("auth/authorize")
-                    .SetTokenEndpointUris("token");
-
-                // AuthorizationCodeFlowとRefreshTokenFlowを有効にする
-                options.AllowAuthorizationCodeFlow()
-                    .AllowRefreshTokenFlow();
-
-                // トークンの有効期限を設定する
-                options
-                    .SetAccessTokenLifetime(TimeSpan.FromHours(6))
-                    .SetIdentityTokenLifetime(TimeSpan.FromHours(6))
-                    .SetRefreshTokenLifetime(TimeSpan.FromDays(7));
-
-                // 証明書制御
-                if (isDevelopment)
-                {
-                    options.AddDevelopmentEncryptionCertificate()
-                        .AddDevelopmentSigningCertificate();
-                }
-                else
-                {
-                    // 起動時に証明書を生成して登録する
-                    const string encryptionCertificatePath = "cert/server-encryption-certificate.pfx";
-                    const string signingCertificatePath = "cert/server-signing-certificate.pfx";
-                    EnsureCertificateExists(
-                        encryptionCertificatePath,
-                        "CN=Fabrikam Server Encryption Certificate",
-                        X509KeyUsageFlags.KeyEncipherment);
-                    EnsureCertificateExists(
-                        signingCertificatePath,
-                        "CN=Fabrikam Server Signing Certificate",
-                        X509KeyUsageFlags.DigitalSignature);
-                    options.AddEncryptionCertificate(
-                        new X509Certificate2(encryptionCertificatePath, string.Empty));
-                    options.AddSigningCertificate(
-                        new X509Certificate2(signingCertificatePath, string.Empty));
-                }
-
-                // ASP.NET Coreホストを登録して、ASP.NET Core固有のオプションを設定する
-                //
-                // このサーバーではtokenエンドポイントのパススルーを使わない
-                // カスタムMVCアクションでtokenリクエストを処理しないので、
-                // tokenリクエストはOpenIddictが自動的に処理して、authorization codeから
-                // アクセストークンとIDトークンを発行する
-                //
-                options.UseAspNetCore()
-                    .EnableAuthorizationEndpointPassthrough();
-            })
-            .AddValidation(options =>
-            {
-                // ローカルのOpenIddictサーバーインスタンスから設定をインポートする
-                options.UseLocalServer();
-                // ASP.NET Coreホストを登録する
-                options.UseAspNetCore();
-            });
-    }
-
-    private static void ConfigureOpeniddictClientService(
-        WebApplicationBuilder builder, OpenIddictBuilder openiddictBuilder, bool isDevelopment)
-    {
-        // クライアント設定
-        openiddictBuilder
-            .AddClient(options =>
-            {
-                // AuthorizationCodeFlowを有効にする
-                options.AllowAuthorizationCodeFlow();
-
-                // 証明書制御
-                if (isDevelopment)
-                {
-                    options.AddDevelopmentEncryptionCertificate()
-                        .AddDevelopmentSigningCertificate();
-                }
-                else
-                {
-                    // 起動時に証明書を生成して登録する
-                    const string encryptionCertificatePath = "cert/client-encryption-certificate.pfx";
-                    const string signingCertificatePath = "cert/client-signing-certificate.pfx";
-                    EnsureCertificateExists(
-                        encryptionCertificatePath,
-                        "CN=Fabrikam Client Encryption Certificate",
-                        X509KeyUsageFlags.KeyEncipherment);
-                    EnsureCertificateExists(
-                        signingCertificatePath,
-                        "CN=Fabrikam Client Signing Certificate",
-                        X509KeyUsageFlags.DigitalSignature);
-
-                    options.AddEncryptionCertificate(
-                        new X509Certificate2(encryptionCertificatePath, string.Empty));
-                    options.AddSigningCertificate(
-                        new X509Certificate2(signingCertificatePath, string.Empty));
-                }
-
-                // ASP.NET Coreホストを登録してリダイレクトエンドポイントのパススルーを有効にする
-                options.UseAspNetCore()
-                    .EnableRedirectionEndpointPassthrough();
-
-                // System.Net.Http統合とUserAgent
-                options.UseSystemNetHttp()
-                    .SetProductInformation(typeof(Program).Assembly);
-
-                // Discord Web Provider
-                options.UseWebProviders()
-                    .AddDiscord(discord =>
-                    {
-                        discord.AddScopes("identify", "guilds", "guilds.members.read");
-                        discord
-                            .SetClientId(builder.Configuration["Discord:ClientId"] ?? "")
-                            .SetClientSecret(builder.Configuration["Discord:ClientSecret"] ?? "")
-                            .SetRedirectUri("auth/callback");
-                    });
-
-                // Discordが RFC 9207 の iss をリダイレクトに付けるようになったが、OpenIddict 5.8.0 の
-                // Discord プロバイダーは静的設定で AuthorizationResponseIssParameterSupported が無く ID2120 で弾かれる。
-                // 上流修正(openiddict-core#2562)と同じく、Discordの設定で iss 対応を宣言し、
-                // 欠落(ID2029)・不一致(ID2119)の検証は上流の ValidateIssuerParameter に任せる。
-                // 書き換えるのはDiscord Registrationの静的設定インスタンスだが、毎回同じ値を書くだけなので冪等。
-                // 上流で修正されたバージョンに上げたら、このハンドラは削除すること。
-                options.AddEventHandler<OpenIddictClientEvents.ProcessAuthenticationContext>(handler => handler
-                    .AddFilter<OpenIddictClientHandlerFilters.RequireRedirectionRequest>()
-                    .UseInlineHandler(context =>
-                    {
-                        if (context.Registration.ProviderType != ProviderTypes.Discord) return default;
-                        if (context.Configuration is { } configuration)
-                        {
-                            configuration.AuthorizationResponseIssParameterSupported = true;
-                        }
-                        return default;
-                    })
-                    .SetOrder(OpenIddictClientHandlers.ValidateIssuerParameter.Descriptor.Order - 1)
-                    .SetType(OpenIddictClientHandlerType.Custom));
-            });
+        // 認証は出勤台 IdP が発行したアクセストークンの検証だけを行う(Crew 自身はトークンを発行しない)。
+        // トークンの sub は Discord ユーザー ID(10進数の文字列)で、Hub はすべて ulong に変換して使う
+        builder.Services.AddAuthentication(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme);
+        builder.Services.AddIdpTokenValidation();
     }
 
     private static void ConfigureAuthentication(WebApplication app)
@@ -441,78 +277,49 @@ public class Program
         app.UseAuthentication();
     }
 
-    private static void ConfigureAuthorizationService(WebApplicationBuilder builder)
+    private static void ConfigureAuthorizationService(WebApplicationBuilder builder, bool enableAuthorization)
     {
-        builder.Services.AddAuthorization();
-        builder.Services.AddAuthorizationBuilder()
-            .AddPolicy("TrainPolicy", policy =>
+        // 入鋏ロールは、認可が有効なすべてのエンドポイントで必須にする。
+        // 名前付きポリシーを指定したエンドポイントには Default/Fallback が効かないので、名前付きポリシーにも足す
+        var beginnerRequirement = new DiscordRoleRequirement
+        {
+            Condition = role => role.IsBeginner
+        };
+        var beginnerPolicy = new AuthorizationPolicyBuilder(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
+            .RequireAuthenticatedUser()
+            .AddRequirements(beginnerRequirement)
+            .Build();
+
+        var authorizationBuilder = builder.Services.AddAuthorizationBuilder()
+            // [Authorize] だけを付けたエンドポイント
+            .SetDefaultPolicy(beginnerPolicy)
+            .AddPolicy("TrainPolicy", policy => AddRoleRequirements(policy, role => role.IsDriver || role.IsConductor))
+            .AddPolicy("TIDPolicy", policy => AddRoleRequirements(policy, role => role.IsCommander || role.IsDriverManager))
+            .AddPolicy("InterlockingPolicy", policy => AddRoleRequirements(policy, role => role.IsSignalman))
+            .AddPolicy("CommanderTablePolicy", policy => AddRoleRequirements(policy, role => role.IsCommander));
+        if (enableAuthorization)
+        {
+            // [Authorize] も [AllowAnonymous] も付いていないエンドポイント(/me など)。
+            // どのエンドポイントにも一致しないリクエストにも効くので、存在しないパスは 404 ではなく 401 になる。
+            // 認可が無効(開発時)は設定せず、存在しないパスを 404 のままにする
+            authorizationBuilder.SetFallbackPolicy(beginnerPolicy);
+        }
+
+        return;
+
+        void AddRoleRequirements(AuthorizationPolicyBuilder policy, Predicate<TraincrewRole> condition)
+        {
+            policy.Requirements.Add(beginnerRequirement);
+            policy.Requirements.Add(new DiscordRoleRequirement
             {
-                policy.Requirements.Add(new DiscordRoleRequirement
-                {
-                    Condition = role => role.IsDriver || role.IsConductor
-                });
-            })
-            .AddPolicy("TIDPolicy", policy =>
-            {
-                policy.Requirements.Add(new DiscordRoleRequirement
-                {
-                    Condition = role => role.IsCommander || role.IsDriverManager
-                });
-            })
-            .AddPolicy("InterlockingPolicy", policy =>
-            {
-                policy.Requirements.Add(new DiscordRoleRequirement
-                {
-                    Condition = role => role.IsSignalman
-                });
-            })
-            .AddPolicy("CommanderTablePolicy", policy =>
-            {
-                policy.Requirements.Add(new DiscordRoleRequirement
-                {
-                    Condition = role => role.IsCommander
-                });
+                Condition = condition
             });
+        }
     }
 
     private static void ConfigureAuthorization(WebApplication app)
     {
         app.UseAuthorization();
-    }
-
-    private static async Task RegisterOpeniddictApplicationAsync(WebApplication app)
-    {
-        await using var scope = app.Services.CreateAsyncScope();
-        var manager = scope.ServiceProvider.GetRequiredService<IOpenIddictApplicationManager>();
-
-        if (await manager.FindByClientIdAsync("MultiATS_Client") != null)
-        {
-            // 既に登録されている場合は何もしない
-            return;
-        }
-
-        var applicationDescriptor = new OpenIddictApplicationDescriptor
-        {
-            ApplicationType = ApplicationTypes.Native,
-            ClientId = "MultiATS_Client",
-            ClientType = ClientTypes.Public,
-            Permissions =
-            {
-                Permissions.Endpoints.Authorization,
-                Permissions.Endpoints.Token,
-                Permissions.GrantTypes.AuthorizationCode,
-                Permissions.ResponseTypes.Code,
-                Permissions.GrantTypes.RefreshToken
-            }
-        };
-
-        // ローカルで複数ポートで動かす場合のリダイレクトURIを全部登録する
-        Enumerable.Range(49152, 16384)
-            .Select(port => new Uri($"http://localhost:{port}/"))
-            .ToList()
-            .ForEach(uri => applicationDescriptor.RedirectUris.Add(uri));
-
-        await manager.CreateAsync(applicationDescriptor);
     }
 
     private static void ConfigureDependencyInjectionService(WebApplicationBuilder builder, bool enableAuthorization)
@@ -643,27 +450,9 @@ public class Program
 
     private static void ConfigureAuthorizationHostedServices(WebApplicationBuilder builder)
     {
-        // 認可を使う場合はDiscord BOTの起動をする
+        // 認可を使う場合はDiscord BOTの起動と、出勤台 IdP の署名公開鍵の読み込みをする(issuer の設定は必須)
         builder.Services.AddHostedService<DiscordBotHostedService>();
-    }
-
-    private static void EnsureCertificateExists(string certificatePath, string subjectName,
-        X509KeyUsageFlags keyUsageFlags)
-    {
-        if (File.Exists(certificatePath))
-        {
-            return;
-        }
-
-        using var algorithm = RSA.Create(2048);
-
-        var subject = new X500DistinguishedName(subjectName);
-        var request = new CertificateRequest(subject, algorithm, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
-        request.CertificateExtensions.Add(new X509KeyUsageExtension(keyUsageFlags, true));
-
-        var certificate = request.CreateSelfSigned(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddYears(2));
-
-        File.WriteAllBytes(certificatePath, certificate.Export(X509ContentType.Pfx, string.Empty));
+        builder.Services.AddIdpSigningKeyLoading();
     }
 
     private static void ConfigureOpenTelemetryService(WebApplicationBuilder builder)

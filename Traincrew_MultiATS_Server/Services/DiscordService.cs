@@ -1,5 +1,3 @@
-using Discord.Rest;
-using Discord.WebSocket;
 using Traincrew_MultiATS_Server.Authentication;
 using Traincrew_MultiATS_Server.Exception.DiscordAuthenticationException;
 using Traincrew_MultiATS_Server.Models;
@@ -9,10 +7,11 @@ namespace Traincrew_MultiATS_Server.Services;
 
 public interface IDiscordService
 {
-    Task<RestGuildUser> DiscordAuthentication(string token);
-    Task<bool> IsUserCanAuthenticate(ulong userId);
+    /// <summary>
+    /// Discord ユーザー ID(アクセストークンの sub)から、運転会サーバーでのロールを返す。
+    /// </summary>
+    /// <exception cref="DiscordAuthenticationException">運転会サーバーのメンバーではない</exception>
     Task<TraincrewRole> GetRoleByMemberId(ulong? memberId);
-    Task<SocketGuildUser?> GetMemberById(ulong memberId);
 }
 
 public class DiscordService(
@@ -20,25 +19,6 @@ public class DiscordService(
     IDiscordRepository discordRepository,
     EnableAuthorizationStore enableAuthorizationStore) : IDiscordService
 {
-    public async Task<RestGuildUser> DiscordAuthentication(string token)
-    {
-        var member =  await discordRepository.GetMemberByToken(token);
-        return member;
-    }
-
-    public async Task<bool> IsUserCanAuthenticate(ulong userId)
-    {
-        var beginnerRoleId = configuration.GetValue<ulong>("Discord:Roles:Beginner");
-        var member =  await discordRepository.GetMember(userId);
-        // 運転会サーバーに所属しているか、入鋏ロールを持っているか確認
-        return member is not null && member.Roles.Any(x => x.Id == beginnerRoleId);
-    }
-
-    public async Task<SocketGuildUser?> GetMemberById(ulong memberId)
-    {
-        return await discordRepository.GetMember(memberId);
-    }
-
     public async Task<TraincrewRole> GetRoleByMemberId(ulong? memberId)
     {
         if (memberId == null)
@@ -52,6 +32,7 @@ public class DiscordService(
             // ローカルデバッグ用のTraincrewRoleを返す(全許可)
             return new()
             {
+                IsBeginner = true,
                 IsDriver = true,
                 IsDriverManager = true,
                 IsConductor = true,
@@ -74,6 +55,7 @@ public class DiscordService(
         var roleIdSet = new HashSet<ulong>(roleIds);
         var result = new TraincrewRole
         {
+            IsBeginner = roleIdSet.Contains(configuration.GetValue<ulong>("Discord:Roles:Beginner")),
             IsDriver = configuration.GetSection("Discord:Roles:Driver").Get<ulong[]>().Any(roleIdSet.Contains),
             IsDriverManager = configuration.GetSection("Discord:Roles:DriverManager").Get<ulong[]>().Any(roleIdSet.Contains),
             IsConductor = configuration.GetSection("Discord:Roles:Conductor").Get<ulong[]>().Any(roleIdSet.Contains),

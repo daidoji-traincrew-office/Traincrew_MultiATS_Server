@@ -27,7 +27,7 @@ public class InterlockingHub(IInterlockingService interlockingService) : Hub<IIn
 
     public async Task<InterlockingKeyLeverData> SetPhysicalKeyLeverData(InterlockingKeyLeverData keyLeverData)
     {
-        // MemberIDを取得
+        // MemberIDを取得(sub は Discord ユーザー ID。出勤台 IdP との契約で10進数の文字列)
         var memberIdString = Context.User?.FindFirst(Claims.Subject)?.Value;
         ulong? memberId = memberIdString != null ? ulong.Parse(memberIdString) : null;
         return await interlockingService.SetPhysicalKeyLeverData(keyLeverData, memberId);

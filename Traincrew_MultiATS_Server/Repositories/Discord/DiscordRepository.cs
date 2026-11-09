@@ -1,5 +1,4 @@
 using Discord;
-using Discord.Rest;
 using Discord.WebSocket;
 
 namespace Traincrew_MultiATS_Server.Repositories.Discord;
@@ -50,13 +49,5 @@ public class DiscordRepository(IConfiguration configuration) : IDiscordRepositor
     {
         var guild = _client.GetGuild(configuration.GetValue<ulong>("Discord:GuildId"));
         return Task.FromResult(guild.GetUser(memberId));
-    }
-
-    public async Task<RestGuildUser> GetMemberByToken(string token)
-    {
-        await using var client = new DiscordRestClient();
-        await client.LoginAsync(TokenType.Bearer, token);
-        
-        return await client.GetCurrentUserGuildMemberAsync(configuration.GetValue<ulong>("Discord:GuildId")); 
     }
 }

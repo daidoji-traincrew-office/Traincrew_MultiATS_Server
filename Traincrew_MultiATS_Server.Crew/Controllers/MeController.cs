@@ -1,6 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using OpenIddict.Validation.AspNetCore;
 using Traincrew_MultiATS_Server.Services;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
@@ -9,14 +7,15 @@ namespace Traincrew_MultiATS_Server.Crew.Controllers;
 [ApiController]
 public class MeController(IDiscordService discordService) : ControllerBase
 {
+    /// <remarks>
+    /// [Authorize] を付けず、FallbackPolicy(出勤台 IdP のトークン + 入鋏ロール)で保護する。
+    /// 認可が有効でトークンが無ければ 401、入鋏ロールが無ければ 403 になる。
+    /// 認可が無効(ローカルデバッグ)なら、トークン無しで全許可のロールを返す。
+    /// </remarks>
     [HttpGet("me")]
-    [Authorize(AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
     public async Task<IActionResult> GetMe()
     {
-        // 認可が有効の場合に、トークンなしでアクセスした場合、403が返される
-        // この処理が実行されるのは、認可が有効でトークンあり または、認可が無効の場合(ローカルデバッグ用)
-        
-        // MemberIDを取得
+        // sub は Discord ユーザー ID(10進数の文字列)
         var memberIdString = User.FindFirst(Claims.Subject)?.Value;
         ulong? memberId = memberIdString != null ? ulong.Parse(memberIdString) : null;
 
