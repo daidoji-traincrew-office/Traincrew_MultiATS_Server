@@ -242,7 +242,7 @@ public class InterlockingHub(InterlockingService interlockingService)
     /// </summary>
     public async Task<InterlockingKeyLeverData> SetPhysicalKeyLeverData(InterlockingKeyLeverData keyLeverData)
     {
-        // 認証情報からMemberIDを取得
+        // 認証情報からMemberIDを取得(sub は Discord ユーザー ID。10進数の文字列)
         var memberIdString = Context.User?.FindFirst(Claims.Subject)?.Value;
         ulong? memberId = memberIdString != null ? ulong.Parse(memberIdString) : null;
 
@@ -263,6 +263,9 @@ public class InterlockingHub(InterlockingService interlockingService)
 - `Hub<IInterlockingClientContract>` でクライアント通知用インターフェースを指定
 - `IInterlockingHubContract` を実装してサーバーメソッドを提供
 - `[Authorize]` で認証・認可を設定
+  - 認証は、出勤台 IdP が発行したアクセストークンの検証(`OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme`)
+  - 名前付きポリシー(`Policy = "InterlockingPolicy"` など)は、`Program.cs` の `ConfigureAuthorizationService` で定義する。どのポリシーにも入鋏ロールの条件が入っていて、Hub ごとのロールとの AND になる
+- アクセストークンの `sub` は **Discord ユーザー ID(10進数の文字列)**。`ulong` に変換して使う(出勤台 IdP との契約)
 - Hubメソッド内では基本的にServiceを呼び出すだけ
 - `Context.User` でクライアントの認証情報を取得可能
 
@@ -553,7 +556,7 @@ private static void ConfigureServices(WebApplicationBuilder builder,
 - Singleton（DiscordService、MutexRepositoryなど）はアプリケーション全体で共有
 - `MapHub<T>()` でHubエンドポイントをマッピング
 - URLパス (`/hub/interlocking`) はクライアント側と一致させる
-- 認証・認可の設定は `ConfigureAuthorizationService` で定義
+- 認証・認可の設定は `ConfigureAuthorizationService` で定義(Default/Fallback ポリシーで入鋏ロールを必須にしている)
 
 **ライフタイムの使い分け:**
 - **Scoped**: DbContext、Repository、Service（リクエスト単位）
