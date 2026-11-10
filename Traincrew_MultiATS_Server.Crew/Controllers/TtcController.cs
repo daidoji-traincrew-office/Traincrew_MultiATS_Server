@@ -1,5 +1,4 @@
-﻿using System.Security.Claims;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace Traincrew_MultiATS_Server.Crew.Controllers;
 
@@ -200,10 +199,9 @@ public class TtcController : ControllerBase
     /// ダイヤグラムの検証
     /// </summary>
     /// <param name="dto">ダイヤグラムDTO</param>
-    /// <param name="user">認証ユーザー</param>
     /// <returns>検証結果を返す（未実装）</returns>
     [HttpPost("diagrams/validate")]
-    public async Task<IActionResult> ValidateDiagram([FromBody] object dto, ClaimsPrincipal user)
+    public async Task<IActionResult> ValidateDiagram([FromBody] object dto)
     {
         // TODO: Rendoサーバーで実装
         return Ok(new { Status = "NotImplemented" });
@@ -213,10 +211,9 @@ public class TtcController : ControllerBase
     /// ダイヤグラムのドラフトを保存する
     /// </summary>
     /// <param name="request">ドラフト保存要求</param>
-    /// <param name="user">認証ユーザー</param>
     /// <returns>結果を返す（未実装）</returns>
     [HttpPost("diagrams/drafts")]
-    public async Task<IActionResult> SaveDiagramDraft([FromBody] object request, ClaimsPrincipal user)
+    public async Task<IActionResult> SaveDiagramDraft([FromBody] object request)
     {
         // TODO: Rendoサーバーで実装
         return Ok(new { Status = "NotImplemented" });
@@ -227,10 +224,9 @@ public class TtcController : ControllerBase
     /// </summary>
     /// <param name="id">ダイヤグラムID</param>
     /// <param name="request">公開要求</param>
-    /// <param name="user">認証ユーザー</param>
     /// <returns>結果を返す（未実装）</returns>
     [HttpPost("diagrams/{id:guid}/publish")]
-    public async Task<IActionResult> PublishDiagram(Guid id, [FromBody] object request, ClaimsPrincipal user)
+    public async Task<IActionResult> PublishDiagram(Guid id, [FromBody] object request)
     {
         // TODO: Rendoサーバーで実装
         return Ok(new { Status = "NotImplemented" });
@@ -240,10 +236,9 @@ public class TtcController : ControllerBase
     /// セッションを作成する
     /// </summary>
     /// <param name="request">セッション作成要求</param>
-    /// <param name="user">認証ユーザー</param>
     /// <returns>結果を返す（未実装）</returns>
     [HttpPost("sessions")]
-    public async Task<IActionResult> CreateSession([FromBody] object request, ClaimsPrincipal user)
+    public async Task<IActionResult> CreateSession([FromBody] object request)
     {
         // TODO: Rendoサーバーで実装
         return Ok(new { Status = "NotImplemented" });
@@ -264,10 +259,9 @@ public class TtcController : ControllerBase
     /// オペレーション日を作成する
     /// </summary>
     /// <param name="request">オペレーション日作成要求</param>
-    /// <param name="user">認証ユーザー</param>
     /// <returns>結果を返す（未実装）</returns>
     [HttpPost("operation-days")]
-    public async Task<IActionResult> CreateOperationDay([FromBody] object request, ClaimsPrincipal user)
+    public async Task<IActionResult> CreateOperationDay([FromBody] object request)
     {
         // TODO: Rendoサーバーで実装
         return Ok(new { Status = "NotImplemented" });
