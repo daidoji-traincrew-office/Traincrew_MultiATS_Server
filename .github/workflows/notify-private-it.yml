@@ -20,11 +20,11 @@ on:
         description: '対象PR番号。指定するとそのPRの変更ファイルから駅を判定する'
         required: false
         default: ''
-  workflow_run:
-    workflows: ["Unit Tests"]
-    types: [completed]
-  push:
-    branches: [main]
+#  workflow_run:
+#    workflows: ["Unit Tests"]
+#    types: [completed]
+#  push:
+#    branches: [main]
 
 permissions:
   contents: read
