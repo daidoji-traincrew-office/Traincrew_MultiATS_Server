@@ -84,7 +84,6 @@ public class Program
         var enableOtlp = builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"] != null;
 
         ConfigureServices(builder, isDevelopment, enableAuthorization, enableOtlp);
-        builder.Services.AddTtcGateway(builder.Configuration);
 
         var app = builder.Build();
 
