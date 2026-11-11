@@ -21,15 +21,8 @@ public class SignalService(
     ISignalRepository signalRepository,
     ISignalRouteRepository signalRouteRepository,
     INextSignalRepository nextSignalRepository,
-    IServerRepository serverRepository,
-    IDateTimeRepository dateTimeRepository) : ISignalService
+    IServerRepository serverRepository) : ISignalService
 {
-    /// <summary>
-    /// 連動サーバーのハートビート鮮度の許容タイムアウト
-    /// 連動周期(250ms)の8回分。これを超えて更新がない場合、連動サーバーが停止しているとみなす
-    /// </summary>
-    private static readonly TimeSpan InterlockingHeartbeatTimeout = TimeSpan.FromSeconds(2);
-
     /// <summary>
     /// フェイルセーフチェック: 信号を停止現示にせず現示計算してよいかどうかを判定する
     /// - isAllSignalRelayRaisedがRaiseでない場合は不健全
@@ -37,27 +30,11 @@ public class SignalService(
     /// </summary>
     /// <param name="serverState">サーバー状態</param>
     /// <returns>信号現示を計算してよい場合true</returns>
-    private bool IsInterlockingHealthy(ServerState? serverState)
-    {
-        if (serverState?.IsAllSignalRelayRaised != RaiseDropWithForce.Raise)
-        {
-            return false;
-        }
-
-        if (serverState.InterlockingHeartbeatAt == null)
-        {
-            // 連動サーバーが一度も起動していない
-            return false;
-        }
-
-        if (dateTimeRepository.GetNow() - serverState.InterlockingHeartbeatAt.Value >= InterlockingHeartbeatTimeout)
-        {
-            // 連動サーバーのハートビートが古い
-            return false;
-        }
-
-        return true;
-    }
+    private static bool IsInterlockingHealthy(ServerState? serverState) =>
+        InterlockingHeartbeatClock.IsHealthy(
+            serverState?.IsAllSignalRelayRaised == RaiseDropWithForce.Raise,
+            serverState?.InterlockingHeartbeatAt,
+            InterlockingHeartbeatClock.GetCurrentJst());
 
     /// <summary>
     /// 指定した軌道回路から見える信号機の現示データを計算する
