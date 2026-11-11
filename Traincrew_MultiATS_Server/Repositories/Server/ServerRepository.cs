@@ -51,19 +51,6 @@ public class ServerRepository(ApplicationDbContext context) : IServerRepository
             );
     }
 
-    /// <summary>時差の比較交換を一つのSQLで行い、複数server_state行も変更しない。</summary>
-    public async Task<bool> TrySetTimeOffsetAsync(int expectedTimeOffset, int newTimeOffset, CancellationToken cancellationToken = default)
-    {
-        var affected = await context.Database.ExecuteSqlInterpolatedAsync($"""
-            UPDATE public.server_state
-            SET time_offset = {newTimeOffset}
-            WHERE id = (SELECT id FROM public.server_state ORDER BY id LIMIT 1)
-                AND time_offset = {expectedTimeOffset}
-                AND (SELECT COUNT(*) FROM public.server_state) = 1
-            """, cancellationToken);
-        return affected == 1;
-    }
-
     public async Task AddServerStateAsync(ServerState serverState, CancellationToken cancellationToken = default)
     {
         context.ServerStates.Add(serverState);
