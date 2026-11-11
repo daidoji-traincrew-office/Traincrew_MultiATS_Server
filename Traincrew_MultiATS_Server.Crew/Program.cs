@@ -13,7 +13,6 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 using Traincrew_MultiATS_Server.Activity;
 using Traincrew_MultiATS_Server.Authentication;
-using Traincrew_MultiATS_Server.Crew.Authentication;
 using Traincrew_MultiATS_Server.Data;
 using Traincrew_MultiATS_Server.HostedService;
 using Traincrew_MultiATS_Server.Hubs;
@@ -453,8 +452,6 @@ public class Program
                     Condition = role => role.IsCommander
                 });
             });
-
-        builder.Services.AddDiscordIssuerParameterSupport();
     }
 
     private static void ConfigureAuthorization(WebApplication app)
