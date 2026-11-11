@@ -5,11 +5,14 @@ namespace Traincrew_MultiATS_Server.Repositories.TtcWindow;
 
 public class TtcWindowRepository(ApplicationDbContext context) : ITtcWindowRepository
 {
-    public async Task<List<Models.TtcWindow>> GetAllTtcWindowWithState()
+    public Task<List<Models.TtcWindow>> GetAllTtcWindowWithState() => GetAllTtcWindowWithState(CancellationToken.None);
+
+    /// <summary>読み取りをキャンセル可能な形で設備情報を取得する。</summary>
+    public async Task<List<Models.TtcWindow>> GetAllTtcWindowWithState(CancellationToken cancellationToken)
     {
         return await context.TtcWindows
             .Include(t => t.TtcWindowState)
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
     }
     public async Task<List<Models.TtcWindow>> GetTtcWindowWithStateByName(List<string> ttcWindowNames)
     {
@@ -18,10 +21,13 @@ public class TtcWindowRepository(ApplicationDbContext context) : ITtcWindowRepos
             .Where(t => ttcWindowNames.Contains(t.Name))
             .ToListAsync();
     }
-    public async Task<List<Models.TtcWindowTrackCircuit>> GetWindowTrackCircuits()
+    public Task<List<Models.TtcWindowTrackCircuit>> GetWindowTrackCircuits() => GetWindowTrackCircuits(CancellationToken.None);
+
+    /// <summary>読み取りをキャンセル可能な形で設備情報を取得する。</summary>
+    public async Task<List<Models.TtcWindowTrackCircuit>> GetWindowTrackCircuits(CancellationToken cancellationToken)
     {
         return await context.TtcWindowTrackCircuits
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
     }
     public async Task<List<Models.TtcWindowTrackCircuit>> ttcWindowTrackCircuitsById(List<string> ttcWindowName)
     {

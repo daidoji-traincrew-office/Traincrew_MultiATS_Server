@@ -7,6 +7,10 @@ namespace Traincrew_MultiATS_Server.Repositories.Station;
 public class StationRepository(ApplicationDbContext context) : IStationRepository
 {
 
+    /// <summary>停車場の種別を問わず、全設備駅を取得する。</summary>
+    public Task<List<Models.Station>> GetAllAsync(CancellationToken cancellationToken) =>
+        context.Stations.ToListAsync(cancellationToken);
+
     public async Task<List<Models.Station>> GetWhereIsStation()
     {
         return await context.Stations

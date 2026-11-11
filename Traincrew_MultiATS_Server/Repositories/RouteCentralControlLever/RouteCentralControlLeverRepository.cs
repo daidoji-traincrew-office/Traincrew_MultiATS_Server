@@ -34,11 +34,14 @@ public class RouteCentralControlLeverRepository(ApplicationDbContext context) : 
     /// すべての RouteCentralControlLever を取得する。
     /// </summary>
     /// <returns>RouteCentralControlLever のリスト。</returns>
-    public async Task<List<Models.RouteCentralControlLever>> GetAllWithState()
+    public Task<List<Models.RouteCentralControlLever>> GetAllWithState() => GetAllWithState(CancellationToken.None);
+
+    /// <summary>読み取りをキャンセル可能な形で設備情報を取得する。</summary>
+    public async Task<List<Models.RouteCentralControlLever>> GetAllWithState(CancellationToken cancellationToken)
     {
         return await context.RouteCentralControlLevers
             .Include(lever => lever.RouteCentralControlLeverState)
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
     }
 
     /// <summary>

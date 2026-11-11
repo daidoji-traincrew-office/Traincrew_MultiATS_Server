@@ -25,10 +25,13 @@ public class LockConditionByRouteCentralControlLeverRepository(ApplicationDbCont
             .ToListAsync();
     }
 
-    public async Task<List<Models.LockConditionByRouteCentralControlLever>> GetAll()
+    public Task<List<Models.LockConditionByRouteCentralControlLever>> GetAll() => GetAll(CancellationToken.None);
+
+    /// <summary>読み取りをキャンセル可能な形で設備情報を取得する。</summary>
+    public async Task<List<Models.LockConditionByRouteCentralControlLever>> GetAll(CancellationToken cancellationToken)
     {
         return await context.LockConditionByRouteCentralControlLevers
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
     }
 
     public async Task DeleteAll()

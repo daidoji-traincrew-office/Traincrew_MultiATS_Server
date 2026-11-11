@@ -7,6 +7,10 @@ namespace Traincrew_MultiATS_Server.Repositories.Route;
 
 public class RouteRepository(ApplicationDbContext context) : IRouteRepository
 {
+    /// <summary>全進路を公開状態とともに取得する。</summary>
+    public Task<List<Models.Route>> GetAllWithStateAsync(CancellationToken cancellationToken) =>
+        context.Routes.Include(r => r.RouteState).ToListAsync(cancellationToken);
+
     public async Task<List<Models.Route>> GetByIdsWithState(List<ulong> ids)
     {
         return await context.Routes
