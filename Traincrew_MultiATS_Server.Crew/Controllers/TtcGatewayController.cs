@@ -1,4 +1,3 @@
-using System.Net;
 using System.Net.Http.Headers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,99 +20,108 @@ public sealed class TtcGatewayController(IHttpClientFactory clientFactory, IConf
 
     /// <summary>TTCのDB保護状態を確認する。</summary>
     [HttpGet("healthz")]
-    public Task ForwardHealth() => ForwardAsync("api/ttc/healthz");
+    public Task ForwardHealth() => ForwardAsync("healthz");
 
     /// <summary>認証済み利用者を返す。</summary>
     [HttpGet("me")]
-    public Task ForwardMe() => ForwardAsync("api/ttc/me");
+    public Task ForwardMe() => ForwardAsync("me");
 
     /// <summary>設備マスターの読取専用スナップショットを返す。</summary>
     [HttpGet("master")]
-    public Task ForwardMaster() => ForwardAsync("api/ttc/master");
+    public Task ForwardMaster([FromQuery] bool? includeShuntPaths)
+    {
+        var query = includeShuntPaths switch
+        {
+            true => "?includeShuntPaths=true",
+            false => "?includeShuntPaths=false",
+            null => ""
+        };
+        return ForwardAsync("master" + query);
+    }
 
     /// <summary>既存時計・列番窓・設備の読取スナップショットを返す。</summary>
     [HttpGet("observation")]
-    public Task ForwardObservation() => ForwardAsync("api/ttc/observation");
+    public Task ForwardObservation() => ForwardAsync("observation");
 
     /// <summary>当日ダイヤの指令状態と履歴を返す。</summary>
     [HttpGet("operation-days/{id:guid}/status")]
-    public Task ForwardOperationStatus(Guid id) => ForwardAsync($"api/ttc/operation-days/{id:D}/status");
+    public Task ForwardOperationStatus(Guid id) => ForwardAsync($"operation-days/{id:D}/status");
 
     /// <summary>当日ダイヤの保留・運休指令を中継する。進路要求は行わない。</summary>
     [HttpPost("operation-days/{id:guid}/commands")]
-    public Task ExecuteOperationCommand(Guid id) => ForwardAsync($"api/ttc/operation-days/{id:D}/commands", forwardBody: true);
+    public Task ExecuteOperationCommand(Guid id) => ForwardAsync($"operation-days/{id:D}/commands", forwardBody: true);
 
     /// <summary>結果不明の指令をサーバー台帳から読み取り専用で照合する。</summary>
     [HttpGet("operation-days/{id:guid}/commands/{operationId:guid}")]
-    public Task ReadOperationCommand(Guid id, Guid operationId) => ForwardAsync($"api/ttc/operation-days/{id:D}/commands/{operationId:D}");
+    public Task ReadOperationCommand(Guid id, Guid operationId) => ForwardAsync($"operation-days/{id:D}/commands/{operationId:D}");
 
     /// <summary>ドライランの自動制御状態と候補理由を取得する。</summary>
     [HttpGet("operation-days/{id:guid}/runtime")]
-    public Task ReadRuntime(Guid id) => ForwardAsync($"api/ttc/operation-days/{id:D}/runtime");
+    public Task ReadRuntime(Guid id) => ForwardAsync($"operation-days/{id:D}/runtime");
 
     /// <summary>ドライランの開始・停止・照合を中継する。</summary>
     [HttpPost("operation-days/{id:guid}/runtime")]
-    public Task ControlRuntime(Guid id) => ForwardAsync($"api/ttc/operation-days/{id:D}/runtime", forwardBody: true);
+    public Task ControlRuntime(Guid id) => ForwardAsync($"operation-days/{id:D}/runtime", forwardBody: true);
 
     /// <summary>設備正本に対応するドライラン専用割当を保存する。</summary>
     [HttpPut("operation-days/{id:guid}/route-bindings")]
-    public Task SaveRouteBindings(Guid id) => ForwardAsync($"api/ttc/operation-days/{id:D}/route-bindings", forwardBody: true);
+    public Task SaveRouteBindings(Guid id) => ForwardAsync($"operation-days/{id:D}/route-bindings", forwardBody: true);
 
     /// <summary>希望TSTの整数時間丸めと日付制約・在線警告を事前確認する。</summary>
     [HttpPost("sessions/{id:guid}/clock-preview")]
-    public Task PreviewClock(Guid id) => ForwardAsync($"api/ttc/sessions/{id:D}/clock-preview", forwardBody: true);
+    public Task PreviewClock(Guid id) => ForwardAsync($"sessions/{id:D}/clock-preview", forwardBody: true);
 
     /// <summary>時刻変更の確定状態を確認する。</summary>
     [HttpGet("sessions/{id:guid}/clock-changes/{requestId:guid}")]
-    public Task ReadClockChange(Guid id, Guid requestId) => ForwardAsync($"api/ttc/sessions/{id:D}/clock-changes/{requestId:D}");
+    public Task ReadClockChange(Guid id, Guid requestId) => ForwardAsync($"sessions/{id:D}/clock-changes/{requestId:D}");
 
     /// <summary>警告承認後の時刻変更を既存サーバーへ要求する。</summary>
     [HttpPost("sessions/{id:guid}/clock-changes/{requestId:guid}/apply")]
-    public Task ApplyClock(Guid id, Guid requestId) => ForwardAsync($"api/ttc/sessions/{id:D}/clock-changes/{requestId:D}/apply", forwardBody: true);
+    public Task ApplyClock(Guid id, Guid requestId) => ForwardAsync($"sessions/{id:D}/clock-changes/{requestId:D}/apply", forwardBody: true);
 
     /// <summary>結果不明の設定を再設定せず照合する。</summary>
     [HttpPost("sessions/{id:guid}/clock-changes/{requestId:guid}/reconcile")]
-    public Task ReconcileClock(Guid id, Guid requestId) => ForwardAsync($"api/ttc/sessions/{id:D}/clock-changes/{requestId:D}/reconcile", forwardBody: true);
+    public Task ReconcileClock(Guid id, Guid requestId) => ForwardAsync($"sessions/{id:D}/clock-changes/{requestId:D}/reconcile", forwardBody: true);
 
     /// <summary>基本ダイヤ一覧を返す。</summary>
     [HttpGet("diagrams")]
-    public Task ForwardDiagrams() => ForwardAsync("api/ttc/diagrams");
+    public Task ForwardDiagrams() => ForwardAsync("diagrams");
 
     /// <summary>指定した基本ダイヤを返す。</summary>
     [HttpGet("diagrams/{id:guid}")]
-    public Task ForwardDiagram(Guid id) => ForwardAsync($"api/ttc/diagrams/{id:D}");
+    public Task ForwardDiagram(Guid id) => ForwardAsync($"diagrams/{id:D}");
 
     /// <summary>運転会一覧を返す。</summary>
     [HttpGet("sessions")]
-    public Task ForwardSessions() => ForwardAsync("api/ttc/sessions");
+    public Task ForwardSessions() => ForwardAsync("sessions");
 
     /// <summary>運転会を作成する。</summary>
     [HttpPost("sessions")]
-    public Task CreateSession() => ForwardAsync("api/ttc/sessions", forwardBody: true);
+    public Task CreateSession() => ForwardAsync("sessions", forwardBody: true);
 
     /// <summary>当日制御日一覧を返す。</summary>
     [HttpGet("operation-days")]
     public Task ForwardOperationDays([FromQuery] Guid? sessionId)
     {
         var query = sessionId.HasValue ? $"?sessionId={Uri.EscapeDataString(sessionId.Value.ToString("D"))}" : "";
-        return ForwardAsync("api/ttc/operation-days" + query);
+        return ForwardAsync("operation-days" + query);
     }
 
     /// <summary>採用基本ダイヤを指定して当日制御日を作成する。</summary>
     [HttpPost("operation-days")]
-    public Task CreateOperationDay() => ForwardAsync("api/ttc/operation-days", forwardBody: true);
+    public Task CreateOperationDay() => ForwardAsync("operation-days", forwardBody: true);
 
     /// <summary>送信前の基本ダイヤ整合性を検証する。</summary>
     [HttpPost("diagrams/validate")]
-    public Task ValidateDiagram() => ForwardAsync("api/ttc/diagrams/validate", forwardBody: true);
+    public Task ValidateDiagram() => ForwardAsync("diagrams/validate", forwardBody: true);
 
     /// <summary>基本ダイヤの下書きを保存する。</summary>
     [HttpPost("diagrams/drafts")]
-    public Task SaveDiagramDraft() => ForwardAsync("api/ttc/diagrams/drafts", forwardBody: true);
+    public Task SaveDiagramDraft() => ForwardAsync("diagrams/drafts", forwardBody: true);
 
     /// <summary>基本ダイヤを公開する。</summary>
     [HttpPost("diagrams/{id:guid}/publish")]
-    public Task PublishDiagram(Guid id) => ForwardAsync($"api/ttc/diagrams/{id:D}/publish", forwardBody: true);
+    public Task PublishDiagram(Guid id) => ForwardAsync($"diagrams/{id:D}/publish", forwardBody: true);
 
     /// <summary>固定されたTTC APIへ認証済み要求を15秒deadline付きで中継する。</summary>
     private async Task ForwardAsync(string relativePath, bool forwardBody = false)
@@ -154,8 +162,8 @@ public sealed class TtcGatewayController(IHttpClientFactory clientFactory, IConf
                 body = readResult.Body;
             }
 
-            var target = new Uri(baseUri, relativePath);
-            using var outgoing = new HttpRequestMessage(forwardBody ? HttpMethod.Post : HttpMethod.Get, target);
+            var target = new Uri(baseUri, "internal/ttc/" + relativePath);
+            using var outgoing = new HttpRequestMessage(new HttpMethod(Request.Method), target);
             outgoing.Headers.Authorization = token;
             if (body is not null)
             {

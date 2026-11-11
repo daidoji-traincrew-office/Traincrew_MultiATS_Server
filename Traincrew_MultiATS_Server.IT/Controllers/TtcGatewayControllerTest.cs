@@ -44,7 +44,8 @@ public sealed class TtcGatewayControllerTest
         request.Headers.Authorization = new("Bearer", "commander");
         using var response = await client.SendAsync(request, TestContext.Current.CancellationToken);
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.Equal("http://interlocking:8080/api/ttc/" + path, probe.Uri?.ToString());
+        Assert.Equal("http://interlocking:8080/internal/ttc/" + path, probe.Uri?.ToString());
+        Assert.Equal(method, probe.Method);
         Assert.Equal("Bearer commander", probe.Authorization);
     }
 
@@ -87,29 +88,50 @@ public sealed class TtcGatewayControllerTest
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Contains("no-store", response.Headers.CacheControl?.ToString(), StringComparison.OrdinalIgnoreCase);
         Assert.Equal("application/json", response.Content.Headers.ContentType?.MediaType);
-        Assert.Equal("http://interlocking:8080/api/ttc/operation-days?sessionId=9f743fed-5c0e-4aa3-86ed-7451a5c9ed78", probe.Uri?.ToString());
+        Assert.Equal("http://interlocking:8080/internal/ttc/operation-days?sessionId=9f743fed-5c0e-4aa3-86ed-7451a5c9ed78", probe.Uri?.ToString());
         Assert.Equal("Bearer commander", probe.Authorization);
         Assert.DoesNotContain("X-Forwarded-Host", probe.ForwardedHeaders);
     }
 
-    /// <summary>POST bodyをそのまま連動側へ送り、actor欄を書き換えない。</summary>
-    [Fact]
-    public async Task Gateway_ForwardsDraftBodyAndUpstreamStatus()
+    /// <summary>マスター取得ではエディターの入換経路指定だけを中継する。</summary>
+    [Theory]
+    [InlineData("", "")]
+    [InlineData("&includeShuntPaths=true", "?includeShuntPaths=true")]
+    [InlineData("&includeShuntPaths=false", "?includeShuntPaths=false")]
+    public async Task Gateway_ForwardsMasterShuntPathQuery(string query, string expectedQuery)
+    {
+        var probe = new GatewayProbe((_, _) => Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)));
+        using var server = await CreateServerAsync(probe);
+        using var client = server.CreateClient();
+        using var request = new HttpRequestMessage(HttpMethod.Get, "/api/ttc/master?unrelated=value" + query);
+        request.Headers.Authorization = new("Bearer", "commander");
+
+        using var response = await client.SendAsync(request, TestContext.Current.CancellationToken);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("http://interlocking:8080/internal/ttc/master" + expectedQuery, probe.Uri?.ToString());
+    }
+
+    /// <summary>書込み要求の本文と上流の応答をそのまま中継する。</summary>
+    [Theory]
+    [InlineData("POST", "diagrams/drafts")]
+    [InlineData("PUT", "operation-days/11111111-1111-1111-1111-111111111111/route-bindings")]
+    public async Task Gateway_ForwardsWriteBodyAndUpstreamStatus(string method, string path)
     {
         var forwardedBody = "";
+        const string upstreamBody = "{\"diagramSetId\":\"00000000-0000-0000-0000-000000000001\",\"wasReplay\":false}";
         var probe = new GatewayProbe(async (request, ct) =>
         {
             forwardedBody = await request.Content!.ReadAsStringAsync(ct);
             return new HttpResponseMessage(HttpStatusCode.Created)
             {
-                Content = new StringContent("{\"diagramSetId\":\"00000000-0000-0000-0000-000000000001\",\"wasReplay\":false}",
-                    Encoding.UTF8, "application/json")
+                Content = new StringContent(upstreamBody, Encoding.UTF8, "application/json")
             };
         });
         using var server = await CreateServerAsync(probe);
         using var client = server.CreateClient();
-        const string body = "{\"createdBy\":\"client\",\"actorId\":\"body-actor\"}";
-        using var request = new HttpRequestMessage(HttpMethod.Post, "/api/ttc/diagrams/drafts")
+        const string body = "{ \"createdBy\": \"利用者\", \"actorId\": \"body-actor\" }";
+        using var request = new HttpRequestMessage(new HttpMethod(method), "/api/ttc/" + path)
         {
             Content = new StringContent(body, Encoding.UTF8, "application/json")
         };
@@ -118,8 +140,10 @@ public sealed class TtcGatewayControllerTest
         using var response = await client.SendAsync(request, TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        Assert.Equal(upstreamBody, await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
         Assert.Equal(body, forwardedBody);
-        Assert.Equal("http://interlocking:8080/api/ttc/diagrams/drafts", probe.Uri?.ToString());
+        Assert.Equal("http://interlocking:8080/internal/ttc/" + path, probe.Uri?.ToString());
+        Assert.Equal(method, probe.Method);
     }
 
     /// <summary>連動側停止時に503を返し、接続例外の詳細を応答に含めない。</summary>
@@ -243,6 +267,7 @@ public sealed class TtcGatewayControllerTest
     private sealed class GatewayProbe(Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> handler)
     {
         public Uri? Uri { get; set; }
+        public string? Method { get; set; }
         public string? Authorization { get; set; }
         public HashSet<string> ForwardedHeaders { get; } = new(StringComparer.OrdinalIgnoreCase);
         public int RequestCount { get; set; }
@@ -251,6 +276,7 @@ public sealed class TtcGatewayControllerTest
         {
             RequestCount++;
             Uri = request.RequestUri;
+            Method = request.Method.Method;
             Authorization = request.Headers.Authorization?.ToString();
             foreach (var header in request.Headers) ForwardedHeaders.Add(header.Key);
             return handler(request, cancellationToken);
