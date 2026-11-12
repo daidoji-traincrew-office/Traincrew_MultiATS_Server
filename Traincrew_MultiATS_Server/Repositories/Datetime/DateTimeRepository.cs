@@ -8,4 +8,9 @@ public class DateTimeRepository : IDateTimeRepository
     {
         return _now;
     }
+
+    public DateTimeOffset GetUtcNow()
+    {
+        return DateTimeOffset.UtcNow;
+    }
 }

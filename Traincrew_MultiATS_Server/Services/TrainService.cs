@@ -54,7 +54,6 @@ public partial class TrainService(
     /// <summary>
     /// 営業日の開始時刻。鉄道の営業日は通常4:00から開始される。
     /// </summary>
-    private static readonly TimeSpan ServiceDayStartTime = TimeSpan.FromHours(4);
 
     /// <summary>
     /// 列車単位のキャッシュの保持期間。列車が消えた分は放っておいても期限切れで落ちる。
@@ -724,7 +723,7 @@ public partial class TrainService(
         var totalSeconds = time.TotalSeconds;
 
         // 営業日開始時刻より前なら、前日の遅い時刻として扱う
-        if (time < ServiceDayStartTime)
+        if (time < DateTimeService.ServiceDayStartTime)
         {
             totalSeconds += 86400; // 24時間を加算
         }
