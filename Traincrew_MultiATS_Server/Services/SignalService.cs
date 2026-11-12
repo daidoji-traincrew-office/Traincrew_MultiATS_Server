@@ -31,9 +31,8 @@ public class SignalService(
     /// <param name="serverState">サーバー状態</param>
     /// <returns>信号現示を計算してよい場合true</returns>
     private bool IsInterlockingHealthy(ServerState? serverState) =>
-        dateTimeService.IsInterlockingHealthy(
-            serverState?.IsAllSignalRelayRaised == RaiseDropWithForce.Raise,
-            serverState?.InterlockingHeartbeatAt);
+        serverState?.IsAllSignalRelayRaised == RaiseDropWithForce.Raise &&
+        dateTimeService.IsInterlockingHeartbeatFresh(serverState.InterlockingHeartbeatAt);
 
     /// <summary>
     /// 指定した軌道回路から見える信号機の現示データを計算する

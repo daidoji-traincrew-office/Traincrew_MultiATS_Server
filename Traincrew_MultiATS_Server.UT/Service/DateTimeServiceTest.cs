@@ -47,18 +47,17 @@ public class DateTimeServiceTest
     [InlineData(0, true)]
     [InlineData(1_999, true)]
     [InlineData(2_000, false)]
-    public void IsInterlockingHealthy_ChecksHeartbeatAge(int heartbeatAgeMilliseconds, bool expected)
+    public void IsInterlockingHeartbeatFresh_ChecksHeartbeatAge(int heartbeatAgeMilliseconds, bool expected)
     {
         var heartbeat = JstNow.AddMilliseconds(-heartbeatAgeMilliseconds);
 
-        Assert.Equal(expected, _service.IsInterlockingHealthy(true, heartbeat));
+        Assert.Equal(expected, _service.IsInterlockingHeartbeatFresh(heartbeat));
     }
 
     [Fact]
-    public void IsInterlockingHealthy_ReturnsFalseWhenSignalRelayDroppedOrNoHeartbeat()
+    public void IsInterlockingHeartbeatFresh_NoHeartbeat_ReturnsFalse()
     {
-        Assert.False(_service.IsInterlockingHealthy(false, JstNow));
-        Assert.False(_service.IsInterlockingHealthy(true, null));
+        Assert.False(_service.IsInterlockingHeartbeatFresh(null));
     }
 
     [Theory]

@@ -18,8 +18,11 @@ public interface IDateTimeService
     /// <summary>現在のJSTを、タイムゾーンなしの日時で返す(ホストのタイムゾーンに依存しない)。</summary>
     DateTime GetJstNow();
 
-    /// <summary>全信号リレーが扛上し、現在のJSTに対する連動ハートビートの経過が2秒未満なら健全とする。</summary>
-    bool IsInterlockingHealthy(bool isAllSignalRelayRaised, DateTime? heartbeatJst);
+    /// <summary>
+    /// 現在のJSTに対する連動ハートビートの経過が2秒未満なら true(未記録なら false)。
+    /// 時刻の判定だけを行う。連動が健全か(全信号リレーの扛上など)は呼び出し側で合わせて判定する。
+    /// </summary>
+    bool IsInterlockingHeartbeatFresh(DateTime? heartbeatJst);
 }
 
 public class DateTimeService(
@@ -57,14 +60,9 @@ public class DateTimeService(
         return GetUtcNow().ToOffset(JapanOffset).DateTime;
     }
 
-    public bool IsInterlockingHealthy(bool isAllSignalRelayRaised, DateTime? heartbeatJst)
+    public bool IsInterlockingHeartbeatFresh(DateTime? heartbeatJst)
     {
-        if (!isAllSignalRelayRaised || heartbeatJst is not { } heartbeat)
-        {
-            return false;
-        }
-
-        return GetJstNow() - heartbeat < InterlockingHeartbeatMaximumAge;
+        return heartbeatJst is { } heartbeat && GetJstNow() - heartbeat < InterlockingHeartbeatMaximumAge;
     }
 
     /// <summary>JST(またはサーバーのローカル時刻)に時差を加えてTSTにする。</summary>
