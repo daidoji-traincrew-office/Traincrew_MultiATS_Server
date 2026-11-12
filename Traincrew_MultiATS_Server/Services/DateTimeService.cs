@@ -9,8 +9,8 @@ namespace Traincrew_MultiATS_Server.Services;
 /// </summary>
 public interface IDateTimeService
 {
-    /// <summary>現在のTST(サーバーのローカル時刻 + server_state の時差)を返す。</summary>
-    Task<DateTime> GetTstNow();
+    /// <summary>現在のTST(サーバーのローカル時刻 + server_state の時差)を返す。時刻はスコープの中で固定される(<see cref="IDateTimeRepository.GetNowScoped"/>)。</summary>
+    Task<DateTime> GetTstNowScoped();
 
     /// <summary>現在のUTCを返す。呼ぶたびにその時点の時刻を返す。</summary>
     DateTimeOffset GetUtcNow();
@@ -38,13 +38,13 @@ public class DateTimeService(
     /// <summary>連動ハートビートを新鮮とみなす経過時間の上限(この値を含まない)。</summary>
     public static readonly TimeSpan InterlockingHeartbeatMaximumAge = TimeSpan.FromSeconds(2);
 
-    public async Task<DateTime> GetTstNow()
+    public async Task<DateTime> GetTstNowScoped()
     {
         // 時差を取得
         var timeOffset = await serverRepository.GetTimeOffset();
 
         // 現在時刻を取得
-        var now = dateTimeRepository.GetNow();
+        var now = dateTimeRepository.GetNowScoped();
 
         // 時差を加算してTSTを返す
         return ToTst(now, timeOffset);

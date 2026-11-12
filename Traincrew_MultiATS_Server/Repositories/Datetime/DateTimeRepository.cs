@@ -4,7 +4,7 @@ public class DateTimeRepository : IDateTimeRepository
 {
     private readonly DateTime _now = DateTime.Now;
 
-    public DateTime GetNow()
+    public DateTime GetNowScoped()
     {
         return _now;
     }

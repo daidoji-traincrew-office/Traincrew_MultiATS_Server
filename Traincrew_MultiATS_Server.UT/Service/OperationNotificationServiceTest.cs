@@ -52,7 +52,7 @@ public class OperationNotificationServiceTest : ServiceTestBase, IDisposable
     public OperationNotificationServiceTest()
     {
         _initializationState.MarkInitialized();
-        _dateTimeRepositoryMock.Setup(r => r.GetNow()).Returns(Now);
+        _dateTimeRepositoryMock.Setup(r => r.GetNowScoped()).Returns(Now);
         _repositoryMock.Setup(r => r.GetAllStates())
             .ReturnsAsync(() => _states.ToList());
         _repositoryMock

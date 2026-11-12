@@ -61,7 +61,7 @@ public class OperationInformationService(
 
     public async Task<List<OperationInformationData>> GetOperationInformationsOrderByType()
     {
-        var now = dateTimeRepository.GetNow();
+        var now = dateTimeRepository.GetNowScoped();
         var states = await operationInformationRepository.GetByNowOrderByTypeAndId(now);
         return states.Select(ToOperationInformationData).ToList();
     }

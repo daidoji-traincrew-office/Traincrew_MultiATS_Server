@@ -25,12 +25,12 @@ public class DateTimeServiceTest
     }
 
     [Fact]
-    public async Task GetTstNow_AddsServerTimeOffsetToLocalNow()
+    public async Task GetTstNowScoped_AddsServerTimeOffsetToLocalNow()
     {
-        _dateTimeRepositoryMock.Setup(r => r.GetNow()).Returns(JstNow);
+        _dateTimeRepositoryMock.Setup(r => r.GetNowScoped()).Returns(JstNow);
         _serverRepositoryMock.Setup(r => r.GetTimeOffset()).ReturnsAsync(-3);
 
-        var tst = await _service.GetTstNow();
+        var tst = await _service.GetTstNowScoped();
 
         Assert.Equal(JstNow.AddHours(-3), tst);
     }

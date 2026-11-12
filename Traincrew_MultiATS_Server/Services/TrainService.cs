@@ -758,7 +758,7 @@ public partial class TrainService(
         var isUp = IsTrainUpOrDown(trainNumber);
 
         // 現在時刻
-        var currentTime = dateTimeRepository.GetNow().TimeOfDay;
+        var currentTime = dateTimeRepository.GetNowScoped().TimeOfDay;
 
         // 現在のTST時差
         var timeOffset = await serverService.GetTimeOffsetAsync();
