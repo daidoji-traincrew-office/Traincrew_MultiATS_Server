@@ -5,6 +5,14 @@ namespace Traincrew_MultiATS_Server.Repositories.Server;
 
 public interface IServerRepository
 {
+    /// <summary>
+    /// ServerStateを2行まで取得する
+    /// ServerStateが一意であるかを判定するため複数取得をする。
+    /// </summary>
+    /// <param name="cancellationToken"></param>
+    /// <returns> ServerState。 </returns>
+    Task<List<ServerState>> GetTwo(CancellationToken cancellationToken);
+
     Task<ServerState?> GetServerStateAsync();
 
     /// <summary>
