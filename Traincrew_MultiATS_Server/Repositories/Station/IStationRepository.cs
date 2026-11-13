@@ -14,7 +14,7 @@ public interface IStationRepository
     /// すべての停車場を取得する
     /// </summary>
     /// <param name="cancellationToken">キャンセルトークン</param>
-    /// <returns>停車場のList</returns>
+    /// <returns>停車場のリスト</returns>
     Task<List<Models.Station>> GetAllAsync(CancellationToken cancellationToken);
 
     /// <summary>
