@@ -29,6 +29,13 @@ public interface ILockConditionByRouteCentralControlLeverRepository
     Task<List<Models.LockConditionByRouteCentralControlLever>> GetAll();
 
     /// <summary>
+    /// すべての鎖錠条件を取得する
+    /// </summary>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    /// <returns>すべての鎖錠条件のリスト</returns>
+    Task<List<Models.LockConditionByRouteCentralControlLever>> GetAll(CancellationToken cancellationToken);
+
+    /// <summary>
     /// すべての鎖錠条件を削除する
     /// </summary>
     Task DeleteAll();

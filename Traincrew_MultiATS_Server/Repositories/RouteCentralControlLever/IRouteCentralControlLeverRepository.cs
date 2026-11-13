@@ -24,6 +24,13 @@ public interface IRouteCentralControlLeverRepository
     Task<List<Models.RouteCentralControlLever>> GetAllWithState();
 
     /// <summary>
+    /// すべての RouteCentralControlLever を取得する。
+    /// </summary>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    /// <returns>RouteCentralControlLever のリスト。</returns>
+    Task<List<Models.RouteCentralControlLever>> GetAllWithState(CancellationToken cancellationToken);
+
+    /// <summary>
     /// 指定されたIDのリストから進路集中制御てこを取得する。
     /// </summary>
     /// <param name="ids">進路集中制御てこのIDのリスト。</param>

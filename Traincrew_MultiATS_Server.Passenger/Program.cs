@@ -115,6 +115,8 @@ public class Program
             // 同上。旅客用プロセスは OperationNotificationService のメソッドを呼ばないが、
             // TrainService のコンストラクタ引数なので DI 解決には必要
             .AddSingleton<IOperationNotificationMasterStore, OperationNotificationMasterStore>()
+            // SignalService が連動ハートビートの鮮度判定に使う
+            .AddScoped<IDateTimeService, DateTimeService>()
             .AddScoped<IOperationInformationService, OperationInformationService>()
             .AddScoped<IOperationNotificationService, OperationNotificationService>()
             .AddScoped<IPassengerService, PassengerService>()

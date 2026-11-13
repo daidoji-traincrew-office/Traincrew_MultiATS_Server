@@ -10,6 +10,13 @@ public interface IRouteRepository
     Task<List<Models.Route>> GetByIdsWithState(List<ulong> ids);
 
     /// <summary>
+    /// すべての進路を、状態つきで取得する
+    /// </summary>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    /// <returns>全ての進路のリスト</returns>
+    Task<List<Models.Route>> GetAllWithStateAsync(CancellationToken cancellationToken);
+
+    /// <summary>
     /// TcNameから進路を取得する
     /// </summary>
     Task<List<Models.Route>> GetByTcNameWithState(string tcName);
