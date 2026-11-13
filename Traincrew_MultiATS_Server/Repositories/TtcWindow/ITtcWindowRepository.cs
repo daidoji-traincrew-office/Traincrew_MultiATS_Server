@@ -14,6 +14,14 @@ namespace Traincrew_MultiATS_Server.Repositories.TtcWindow
 
         Task<List<Models.TtcWindow>> GetTtcWindowWithStateByName(List<string> name);
         Task<List<Models.TtcWindowTrackCircuit>> GetWindowTrackCircuits();
+
+        /// <summary>
+        /// すべてのTtcWindowと軌道回路の対応を取得する
+        /// </summary>
+        /// <param name="cancellationToken">キャンセルトークン</param>
+        /// <returns>TtcWindowTrackCircuitのList</returns>
+        Task<List<Models.TtcWindowTrackCircuit>> GetWindowTrackCircuits(CancellationToken cancellationToken);
+
         Task<List<Models.TtcWindowTrackCircuit>> ttcWindowTrackCircuitsById(List<string> ttcWindowName);
         Task<List<Models.TtcWindow>> GetTtcWindowsByStationIdsWithState(List<string> stationIds);
         Task<List<Models.TtcWindow>> GetTtcWindowsByTrainNumber(string diaName);
