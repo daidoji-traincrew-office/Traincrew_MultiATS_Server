@@ -22,4 +22,11 @@ public interface ISignalRepository
     /// <param name="cancellationToken">キャンセルトークン</param>
     /// <returns>Signal名のHashSet</returns>
     Task<HashSet<string>> GetAllNames(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 点灯中(SignalState.IsLighted)のSignal名を取得する
+    /// </summary>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    /// <returns>Signal名のHashSet</returns>
+    Task<HashSet<string>> GetNamesWhereIsLighted(CancellationToken cancellationToken = default);
 }
