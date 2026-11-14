@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.SignalR;
 using Traincrew_MultiATS_Server.Common.Contract;
 using Traincrew_MultiATS_Server.Hubs;
 using Traincrew_MultiATS_Server.Services;
@@ -11,11 +10,12 @@ public class TrainScheduler(IServiceScopeFactory serviceScopeFactory) : Schedule
 
     protected override async Task ExecuteTaskAsync(IServiceScope scope, System.Diagnostics.Activity? activity)
     {
-        var trainHubContext = scope.ServiceProvider.GetRequiredService<IHubContext<TrainHub, ITrainClientContract>>();
+        // 全状態のスナップショットなので、詰まった接続に待たされないlatest-onlyで送る
+        var latestOnlySender = scope.ServiceProvider.GetRequiredService<ILatestOnlySender<TrainHub>>();
         var trainService = scope.ServiceProvider.GetRequiredService<ITrainService>();
 
         var data = await trainService.CreateDataBySchedule();
 
-        await trainHubContext.Clients.All.ReceiveData(data);
+        await latestOnlySender.SendAllLatestAsync(nameof(ITrainClientContract.ReceiveData), data);
     }
 }
