@@ -29,6 +29,18 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
+      # ランナーの最新SDK(11)ではDebugビルドがBlazorのHotReloadエラーで失敗するため、SDKを8系に固定する
+      - name: Create global.json for .NET 8.0.x
+        run: |
+          cat <<EOF > ./global.json
+          {
+            "sdk": {
+              "version": "8.0.0",
+              "rollForward": "latestFeature"
+            }
+          }
+          EOF
+
       - name: Cache NuGet packages
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
