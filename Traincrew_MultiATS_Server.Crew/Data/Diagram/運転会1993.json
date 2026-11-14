@@ -17,6 +17,7 @@
           "stationID": "TH67",
           "stationName": "新野崎",
           "stopPosName": "4番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 10,
             "m": 54,
@@ -27,6 +28,7 @@
           "stationID": "TH68",
           "stationName": "新井川",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 10,
             "m": 55,
@@ -37,6 +39,7 @@
           "stationID": "TH69",
           "stationName": "羽衣橋",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 10,
             "m": 57,
@@ -47,6 +50,7 @@
           "stationID": "TH70",
           "stationName": "浜園",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 10,
             "m": 59,
@@ -62,6 +66,7 @@
           "stationID": "TH71",
           "stationName": "津崎",
           "stopPosName": "3番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 1,
@@ -77,6 +82,7 @@
           "stationID": "TH72",
           "stationName": "虹ヶ浜",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 7,
@@ -87,6 +93,7 @@
           "stationID": "TH73",
           "stationName": "海岸公園",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 9,
@@ -97,6 +104,7 @@
           "stationID": "TH74",
           "stationName": "河原崎",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 11,
@@ -107,6 +115,7 @@
           "stationID": "TH75",
           "stationName": "駒野",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 13,
@@ -122,6 +131,7 @@
           "stationID": "TH76",
           "stationName": "館浜",
           "stopPosName": "3番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 17,
@@ -148,6 +158,7 @@
           "stationID": "TH65",
           "stationName": "大道寺",
           "stopPosName": "5番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 6,
@@ -158,6 +169,7 @@
           "stationID": "TH66S",
           "stationName": "江ノ原信号場",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 7,
@@ -168,6 +180,7 @@
           "stationID": "TH66",
           "stationName": "江ノ原",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 8,
@@ -178,6 +191,7 @@
           "stationID": "TH67",
           "stationName": "新野崎",
           "stopPosName": "3番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 10,
@@ -193,6 +207,7 @@
           "stationID": "TH68",
           "stationName": "新井川",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 12,
@@ -203,6 +218,7 @@
           "stationID": "TH69",
           "stationName": "羽衣橋",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 14,
@@ -213,6 +229,7 @@
           "stationID": "TH70",
           "stationName": "浜園",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 16,
@@ -228,6 +245,7 @@
           "stationID": "TH71",
           "stationName": "津崎",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 18,
@@ -243,6 +261,7 @@
           "stationID": "TH72",
           "stationName": "虹ヶ浜",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 21,
@@ -253,6 +272,7 @@
           "stationID": "TH73",
           "stationName": "海岸公園",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 23,
@@ -263,6 +283,7 @@
           "stationID": "TH74",
           "stationName": "河原崎",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 25,
@@ -273,6 +294,7 @@
           "stationID": "TH75",
           "stationName": "駒野",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 26,
@@ -288,6 +310,7 @@
           "stationID": "TH76",
           "stationName": "館浜",
           "stopPosName": "3番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 30,
@@ -314,6 +337,7 @@
           "stationID": "TH58",
           "stationName": "赤山町",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 0,
@@ -324,6 +348,7 @@
           "stationID": "TH59",
           "stationName": "西赤山",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 2,
@@ -339,6 +364,7 @@
           "stationID": "TH60",
           "stationName": "奥峯口",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 5,
@@ -349,6 +375,7 @@
           "stationID": "TH61",
           "stationName": "日野森",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 6,
@@ -364,6 +391,7 @@
           "stationID": "TH62",
           "stationName": "高見沢",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 9,
@@ -379,6 +407,7 @@
           "stationID": "TH63",
           "stationName": "水越",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 12,
@@ -394,6 +423,7 @@
           "stationID": "TH64",
           "stationName": "藤江",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 15,
@@ -409,6 +439,7 @@
           "stationID": "TH65",
           "stationName": "大道寺",
           "stopPosName": "6番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 18,
@@ -424,6 +455,7 @@
           "stationID": "TH66S",
           "stationName": "江ノ原信号場",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 19,
@@ -434,6 +466,7 @@
           "stationID": "TH66",
           "stationName": "江ノ原",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 21,
@@ -444,6 +477,7 @@
           "stationID": "TH67",
           "stationName": "新野崎",
           "stopPosName": "3番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 23,
@@ -458,17 +492,20 @@
         {
           "stationID": "TH68",
           "stationName": "新井川",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH69",
           "stationName": "羽衣橋",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH70",
           "stationName": "浜園",
           "stopPosName": "2番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 26,
@@ -479,6 +516,7 @@
           "stationID": "TH71",
           "stationName": "津崎",
           "stopPosName": "2番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 26,
@@ -488,22 +526,26 @@
         {
           "stationID": "TH72",
           "stationName": "虹ヶ浜",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH73",
           "stationName": "海岸公園",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH74",
           "stationName": "河原崎",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH75",
           "stationName": "駒野",
           "stopPosName": "2番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 30,
@@ -514,6 +556,7 @@
           "stationID": "TH76",
           "stationName": "館浜",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 33,
@@ -540,6 +583,7 @@
           "stationID": "TH75",
           "stationName": "駒野",
           "stopPosName": "4番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 38,
@@ -550,6 +594,7 @@
           "stationID": "TH76",
           "stationName": "館浜",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 40,
@@ -576,6 +621,7 @@
           "stationID": "TH67",
           "stationName": "新野崎",
           "stopPosName": "4番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 25,
@@ -586,6 +632,7 @@
           "stationID": "TH68",
           "stationName": "新井川",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 26,
@@ -596,6 +643,7 @@
           "stationID": "TH69",
           "stationName": "羽衣橋",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 28,
@@ -606,6 +654,7 @@
           "stationID": "TH70",
           "stationName": "浜園",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 30,
@@ -621,6 +670,7 @@
           "stationID": "TH71",
           "stationName": "津崎",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 32,
@@ -636,6 +686,7 @@
           "stationID": "TH72",
           "stationName": "虹ヶ浜",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 35,
@@ -646,6 +697,7 @@
           "stationID": "TH73",
           "stationName": "海岸公園",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 37,
@@ -656,6 +708,7 @@
           "stationID": "TH74",
           "stationName": "河原崎",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 39,
@@ -666,6 +719,7 @@
           "stationID": "TH75",
           "stationName": "駒野",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 40,
@@ -681,6 +735,7 @@
           "stationID": "TH76",
           "stationName": "館浜",
           "stopPosName": "3番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 44,
@@ -707,6 +762,7 @@
           "stationID": "TH58",
           "stationName": "赤山町",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 19,
@@ -722,6 +778,7 @@
           "stationID": "TH59",
           "stationName": "西赤山",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 24,
@@ -731,12 +788,14 @@
         {
           "stationID": "TH60",
           "stationName": "奥峯口",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH61",
           "stationName": "日野森",
           "stopPosName": "2番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 25,
@@ -747,6 +806,7 @@
           "stationID": "TH62",
           "stationName": "高見沢",
           "stopPosName": "0番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 27,
@@ -757,6 +817,7 @@
           "stationID": "TH63",
           "stationName": "水越",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 28,
@@ -767,6 +828,7 @@
           "stationID": "TH64",
           "stationName": "藤江",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 30,
@@ -777,6 +839,7 @@
           "stationID": "TH65",
           "stationName": "大道寺",
           "stopPosName": "6番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 32,
@@ -792,6 +855,7 @@
           "stationID": "TH66S",
           "stationName": "江ノ原信号場",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 34,
@@ -801,12 +865,14 @@
         {
           "stationID": "TH66",
           "stationName": "江ノ原",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH67",
           "stationName": "新野崎",
           "stopPosName": "3番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 36,
@@ -816,17 +882,20 @@
         {
           "stationID": "TH68",
           "stationName": "新井川",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH69",
           "stationName": "羽衣橋",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH70",
           "stationName": "浜園",
           "stopPosName": "2番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 38,
@@ -837,6 +906,7 @@
           "stationID": "TH71",
           "stationName": "津崎",
           "stopPosName": "2番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 39,
@@ -846,22 +916,26 @@
         {
           "stationID": "TH72",
           "stationName": "虹ヶ浜",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH73",
           "stationName": "海岸公園",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH74",
           "stationName": "河原崎",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH75",
           "stationName": "駒野",
           "stopPosName": "2番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 44,
@@ -872,6 +946,7 @@
           "stationID": "TH76",
           "stationName": "館浜",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 48,
@@ -898,6 +973,7 @@
           "stationID": "TH65",
           "stationName": "大道寺",
           "stopPosName": "5番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 36,
@@ -908,6 +984,7 @@
           "stationID": "TH66S",
           "stationName": "江ノ原信号場",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 37,
@@ -918,6 +995,7 @@
           "stationID": "TH66",
           "stationName": "江ノ原",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 38,
@@ -928,6 +1006,7 @@
           "stationID": "TH67",
           "stationName": "新野崎",
           "stopPosName": "3番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 40,
@@ -943,6 +1022,7 @@
           "stationID": "TH68",
           "stationName": "新井川",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 42,
@@ -953,6 +1033,7 @@
           "stationID": "TH69",
           "stationName": "羽衣橋",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 44,
@@ -963,6 +1044,7 @@
           "stationID": "TH70",
           "stationName": "浜園",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 46,
@@ -978,6 +1060,7 @@
           "stationID": "TH71",
           "stationName": "津崎",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 48,
@@ -993,6 +1076,7 @@
           "stationID": "TH72",
           "stationName": "虹ヶ浜",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 51,
@@ -1003,6 +1087,7 @@
           "stationID": "TH73",
           "stationName": "海岸公園",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 53,
@@ -1013,6 +1098,7 @@
           "stationID": "TH74",
           "stationName": "河原崎",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 55,
@@ -1023,6 +1109,7 @@
           "stationID": "TH75",
           "stationName": "駒野",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 56,
@@ -1038,6 +1125,7 @@
           "stationID": "TH76",
           "stationName": "館浜",
           "stopPosName": "3番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 0,
@@ -1064,6 +1152,7 @@
           "stationID": "TH58",
           "stationName": "赤山町",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 29,
@@ -1079,6 +1168,7 @@
           "stationID": "TH59",
           "stationName": "西赤山",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 32,
@@ -1094,6 +1184,7 @@
           "stationID": "TH60",
           "stationName": "奥峯口",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 34,
@@ -1104,6 +1195,7 @@
           "stationID": "TH61",
           "stationName": "日野森",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 36,
@@ -1119,6 +1211,7 @@
           "stationID": "TH62",
           "stationName": "高見沢",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 39,
@@ -1134,6 +1227,7 @@
           "stationID": "TH63",
           "stationName": "水越",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 41,
@@ -1149,6 +1243,7 @@
           "stationID": "TH64",
           "stationName": "藤江",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 43,
@@ -1164,6 +1259,7 @@
           "stationID": "TH65",
           "stationName": "大道寺",
           "stopPosName": "6番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 47,
@@ -1179,6 +1275,7 @@
           "stationID": "TH66S",
           "stationName": "江ノ原信号場",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 49,
@@ -1189,6 +1286,7 @@
           "stationID": "TH66",
           "stationName": "江ノ原",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 50,
@@ -1199,6 +1297,7 @@
           "stationID": "TH67",
           "stationName": "新野崎",
           "stopPosName": "3番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 52,
@@ -1213,17 +1312,20 @@
         {
           "stationID": "TH68",
           "stationName": "新井川",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH69",
           "stationName": "羽衣橋",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH70",
           "stationName": "浜園",
           "stopPosName": "2番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 55,
@@ -1234,6 +1336,7 @@
           "stationID": "TH71",
           "stationName": "津崎",
           "stopPosName": "2番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 56,
@@ -1243,22 +1346,26 @@
         {
           "stationID": "TH72",
           "stationName": "虹ヶ浜",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH73",
           "stationName": "海岸公園",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH74",
           "stationName": "河原崎",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH75",
           "stationName": "駒野",
           "stopPosName": "2番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 0,
@@ -1269,6 +1376,7 @@
           "stationID": "TH76",
           "stationName": "館浜",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 2,
@@ -1295,6 +1403,7 @@
           "stationID": "TH67",
           "stationName": "新野崎",
           "stopPosName": "4番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 54,
@@ -1305,6 +1414,7 @@
           "stationID": "TH68",
           "stationName": "新井川",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 55,
@@ -1315,6 +1425,7 @@
           "stationID": "TH69",
           "stationName": "羽衣橋",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 57,
@@ -1325,6 +1436,7 @@
           "stationID": "TH70",
           "stationName": "浜園",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 59,
@@ -1340,6 +1452,7 @@
           "stationID": "TH71",
           "stationName": "津崎",
           "stopPosName": "3番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 1,
@@ -1355,6 +1468,7 @@
           "stationID": "TH72",
           "stationName": "虹ヶ浜",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 7,
@@ -1365,6 +1479,7 @@
           "stationID": "TH73",
           "stationName": "海岸公園",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 9,
@@ -1375,6 +1490,7 @@
           "stationID": "TH74",
           "stationName": "河原崎",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 11,
@@ -1385,6 +1501,7 @@
           "stationID": "TH75",
           "stationName": "駒野",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 13,
@@ -1400,6 +1517,7 @@
           "stationID": "TH76",
           "stationName": "館浜",
           "stopPosName": "3番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 17,
@@ -1426,6 +1544,7 @@
           "stationID": "TH58",
           "stationName": "赤山町",
           "stopPosName": "2番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 47,
@@ -1436,6 +1555,7 @@
           "stationID": "TH59",
           "stationName": "西赤山",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 49,
@@ -1445,12 +1565,14 @@
         {
           "stationID": "TH60",
           "stationName": "奥峯口",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH61",
           "stationName": "日野森",
           "stopPosName": "2番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 50,
@@ -1461,6 +1583,7 @@
           "stationID": "TH62",
           "stationName": "高見沢",
           "stopPosName": "0番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 52,
@@ -1471,6 +1594,7 @@
           "stationID": "TH63",
           "stationName": "水越",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 54,
@@ -1481,6 +1605,7 @@
           "stationID": "TH64",
           "stationName": "藤江",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 55,
@@ -1491,6 +1616,7 @@
           "stationID": "TH65",
           "stationName": "大道寺",
           "stopPosName": "6番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 57,
@@ -1501,6 +1627,7 @@
           "stationID": "TH66S",
           "stationName": "江ノ原信号場",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 58,
@@ -1510,12 +1637,14 @@
         {
           "stationID": "TH66",
           "stationName": "江ノ原",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH67",
           "stationName": "新野崎",
           "stopPosName": "3番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 0,
@@ -1525,17 +1654,20 @@
         {
           "stationID": "TH68",
           "stationName": "新井川",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH69",
           "stationName": "羽衣橋",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH70",
           "stationName": "浜園",
           "stopPosName": "2番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 2,
@@ -1546,6 +1678,7 @@
           "stationID": "TH71",
           "stationName": "津崎",
           "stopPosName": "2番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 4,
@@ -1555,22 +1688,26 @@
         {
           "stationID": "TH72",
           "stationName": "虹ヶ浜",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH73",
           "stationName": "海岸公園",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH74",
           "stationName": "河原崎",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH75",
           "stationName": "駒野",
           "stopPosName": "2番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 7,
@@ -1581,6 +1718,7 @@
           "stationID": "TH76",
           "stationName": "館浜",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 9,
@@ -1607,6 +1745,7 @@
           "stationID": "TH65",
           "stationName": "大道寺",
           "stopPosName": "5番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 6,
@@ -1617,6 +1756,7 @@
           "stationID": "TH66S",
           "stationName": "江ノ原信号場",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 7,
@@ -1627,6 +1767,7 @@
           "stationID": "TH66",
           "stationName": "江ノ原",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 8,
@@ -1637,6 +1778,7 @@
           "stationID": "TH67",
           "stationName": "新野崎",
           "stopPosName": "3番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 10,
@@ -1652,6 +1794,7 @@
           "stationID": "TH68",
           "stationName": "新井川",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 12,
@@ -1662,6 +1805,7 @@
           "stationID": "TH69",
           "stationName": "羽衣橋",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 14,
@@ -1672,6 +1816,7 @@
           "stationID": "TH70",
           "stationName": "浜園",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 16,
@@ -1687,6 +1832,7 @@
           "stationID": "TH71",
           "stationName": "津崎",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 18,
@@ -1702,6 +1848,7 @@
           "stationID": "TH72",
           "stationName": "虹ヶ浜",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 21,
@@ -1712,6 +1859,7 @@
           "stationID": "TH73",
           "stationName": "海岸公園",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 23,
@@ -1722,6 +1870,7 @@
           "stationID": "TH74",
           "stationName": "河原崎",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 25,
@@ -1732,6 +1881,7 @@
           "stationID": "TH75",
           "stationName": "駒野",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 26,
@@ -1747,6 +1897,7 @@
           "stationID": "TH76",
           "stationName": "館浜",
           "stopPosName": "3番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 30,
@@ -1773,6 +1924,7 @@
           "stationID": "TH58",
           "stationName": "赤山町",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 0,
@@ -1788,6 +1940,7 @@
           "stationID": "TH59",
           "stationName": "西赤山",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 2,
@@ -1803,6 +1956,7 @@
           "stationID": "TH60",
           "stationName": "奥峯口",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 5,
@@ -1813,6 +1967,7 @@
           "stationID": "TH61",
           "stationName": "日野森",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 6,
@@ -1828,6 +1983,7 @@
           "stationID": "TH62",
           "stationName": "高見沢",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 9,
@@ -1843,6 +1999,7 @@
           "stationID": "TH63",
           "stationName": "水越",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 12,
@@ -1858,6 +2015,7 @@
           "stationID": "TH64",
           "stationName": "藤江",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 15,
@@ -1873,6 +2031,7 @@
           "stationID": "TH65",
           "stationName": "大道寺",
           "stopPosName": "6番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 18,
@@ -1888,6 +2047,7 @@
           "stationID": "TH66S",
           "stationName": "江ノ原信号場",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 19,
@@ -1898,6 +2058,7 @@
           "stationID": "TH66",
           "stationName": "江ノ原",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 21,
@@ -1908,6 +2069,7 @@
           "stationID": "TH67",
           "stationName": "新野崎",
           "stopPosName": "3番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 23,
@@ -1922,17 +2084,20 @@
         {
           "stationID": "TH68",
           "stationName": "新井川",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH69",
           "stationName": "羽衣橋",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH70",
           "stationName": "浜園",
           "stopPosName": "2番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 26,
@@ -1943,6 +2108,7 @@
           "stationID": "TH71",
           "stationName": "津崎",
           "stopPosName": "2番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 26,
@@ -1952,22 +2118,26 @@
         {
           "stationID": "TH72",
           "stationName": "虹ヶ浜",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH73",
           "stationName": "海岸公園",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH74",
           "stationName": "河原崎",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH75",
           "stationName": "駒野",
           "stopPosName": "2番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 30,
@@ -1978,6 +2148,7 @@
           "stationID": "TH76",
           "stationName": "館浜",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 33,
@@ -2004,6 +2175,7 @@
           "stationID": "TH75",
           "stationName": "駒野",
           "stopPosName": "4番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 38,
@@ -2014,6 +2186,7 @@
           "stationID": "TH76",
           "stationName": "館浜",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 40,
@@ -2040,6 +2213,7 @@
           "stationID": "TH67",
           "stationName": "新野崎",
           "stopPosName": "4番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 25,
@@ -2050,6 +2224,7 @@
           "stationID": "TH68",
           "stationName": "新井川",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 26,
@@ -2060,6 +2235,7 @@
           "stationID": "TH69",
           "stationName": "羽衣橋",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 28,
@@ -2070,6 +2246,7 @@
           "stationID": "TH70",
           "stationName": "浜園",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 30,
@@ -2085,6 +2262,7 @@
           "stationID": "TH71",
           "stationName": "津崎",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 32,
@@ -2100,6 +2278,7 @@
           "stationID": "TH72",
           "stationName": "虹ヶ浜",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 35,
@@ -2110,6 +2289,7 @@
           "stationID": "TH73",
           "stationName": "海岸公園",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 37,
@@ -2120,6 +2300,7 @@
           "stationID": "TH74",
           "stationName": "河原崎",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 39,
@@ -2130,6 +2311,7 @@
           "stationID": "TH75",
           "stationName": "駒野",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 40,
@@ -2145,6 +2327,7 @@
           "stationID": "TH76",
           "stationName": "館浜",
           "stopPosName": "3番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 44,
@@ -2171,6 +2354,7 @@
           "stationID": "TH58",
           "stationName": "赤山町",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 19,
@@ -2186,6 +2370,7 @@
           "stationID": "TH59",
           "stationName": "西赤山",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 24,
@@ -2195,12 +2380,14 @@
         {
           "stationID": "TH60",
           "stationName": "奥峯口",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH61",
           "stationName": "日野森",
           "stopPosName": "2番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 25,
@@ -2211,6 +2398,7 @@
           "stationID": "TH62",
           "stationName": "高見沢",
           "stopPosName": "0番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 27,
@@ -2221,6 +2409,7 @@
           "stationID": "TH63",
           "stationName": "水越",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 28,
@@ -2231,6 +2420,7 @@
           "stationID": "TH64",
           "stationName": "藤江",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 30,
@@ -2241,6 +2431,7 @@
           "stationID": "TH65",
           "stationName": "大道寺",
           "stopPosName": "6番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 32,
@@ -2256,6 +2447,7 @@
           "stationID": "TH66S",
           "stationName": "江ノ原信号場",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 34,
@@ -2265,12 +2457,14 @@
         {
           "stationID": "TH66",
           "stationName": "江ノ原",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH67",
           "stationName": "新野崎",
           "stopPosName": "3番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 36,
@@ -2280,17 +2474,20 @@
         {
           "stationID": "TH68",
           "stationName": "新井川",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH69",
           "stationName": "羽衣橋",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH70",
           "stationName": "浜園",
           "stopPosName": "2番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 38,
@@ -2301,6 +2498,7 @@
           "stationID": "TH71",
           "stationName": "津崎",
           "stopPosName": "2番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 39,
@@ -2310,22 +2508,26 @@
         {
           "stationID": "TH72",
           "stationName": "虹ヶ浜",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH73",
           "stationName": "海岸公園",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH74",
           "stationName": "河原崎",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH75",
           "stationName": "駒野",
           "stopPosName": "2番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 44,
@@ -2336,6 +2538,7 @@
           "stationID": "TH76",
           "stationName": "館浜",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 48,
@@ -2362,6 +2565,7 @@
           "stationID": "TH65",
           "stationName": "大道寺",
           "stopPosName": "5番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 36,
@@ -2372,6 +2576,7 @@
           "stationID": "TH66S",
           "stationName": "江ノ原信号場",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 37,
@@ -2382,6 +2587,7 @@
           "stationID": "TH66",
           "stationName": "江ノ原",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 38,
@@ -2392,6 +2598,7 @@
           "stationID": "TH67",
           "stationName": "新野崎",
           "stopPosName": "3番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 40,
@@ -2407,6 +2614,7 @@
           "stationID": "TH68",
           "stationName": "新井川",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 42,
@@ -2417,6 +2625,7 @@
           "stationID": "TH69",
           "stationName": "羽衣橋",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 44,
@@ -2427,6 +2636,7 @@
           "stationID": "TH70",
           "stationName": "浜園",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 46,
@@ -2442,6 +2652,7 @@
           "stationID": "TH71",
           "stationName": "津崎",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 48,
@@ -2457,6 +2668,7 @@
           "stationID": "TH72",
           "stationName": "虹ヶ浜",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 51,
@@ -2467,6 +2679,7 @@
           "stationID": "TH73",
           "stationName": "海岸公園",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 53,
@@ -2477,6 +2690,7 @@
           "stationID": "TH74",
           "stationName": "河原崎",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 55,
@@ -2487,6 +2701,7 @@
           "stationID": "TH75",
           "stationName": "駒野",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 56,
@@ -2502,6 +2717,7 @@
           "stationID": "TH76",
           "stationName": "館浜",
           "stopPosName": "3番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 13,
             "m": 0,
@@ -2528,6 +2744,7 @@
           "stationID": "TH58",
           "stationName": "赤山町",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 29,
@@ -2543,6 +2760,7 @@
           "stationID": "TH59",
           "stationName": "西赤山",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 32,
@@ -2558,6 +2776,7 @@
           "stationID": "TH60",
           "stationName": "奥峯口",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 34,
@@ -2568,6 +2787,7 @@
           "stationID": "TH61",
           "stationName": "日野森",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 36,
@@ -2583,6 +2803,7 @@
           "stationID": "TH62",
           "stationName": "高見沢",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 39,
@@ -2598,6 +2819,7 @@
           "stationID": "TH63",
           "stationName": "水越",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 41,
@@ -2613,6 +2835,7 @@
           "stationID": "TH64",
           "stationName": "藤江",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 43,
@@ -2628,6 +2851,7 @@
           "stationID": "TH65",
           "stationName": "大道寺",
           "stopPosName": "6番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 47,
@@ -2643,6 +2867,7 @@
           "stationID": "TH66S",
           "stationName": "江ノ原信号場",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 49,
@@ -2653,6 +2878,7 @@
           "stationID": "TH66",
           "stationName": "江ノ原",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 50,
@@ -2663,6 +2889,7 @@
           "stationID": "TH67",
           "stationName": "新野崎",
           "stopPosName": "3番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 52,
@@ -2677,17 +2904,20 @@
         {
           "stationID": "TH68",
           "stationName": "新井川",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH69",
           "stationName": "羽衣橋",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH70",
           "stationName": "浜園",
           "stopPosName": "2番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 55,
@@ -2698,6 +2928,7 @@
           "stationID": "TH71",
           "stationName": "津崎",
           "stopPosName": "2番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 56,
@@ -2707,22 +2938,26 @@
         {
           "stationID": "TH72",
           "stationName": "虹ヶ浜",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH73",
           "stationName": "海岸公園",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH74",
           "stationName": "河原崎",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH75",
           "stationName": "駒野",
           "stopPosName": "2番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 13,
             "m": 0,
@@ -2733,6 +2968,7 @@
           "stationID": "TH76",
           "stationName": "館浜",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 13,
             "m": 2,
@@ -2759,6 +2995,7 @@
           "stationID": "TH67",
           "stationName": "新野崎",
           "stopPosName": "4番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 54,
@@ -2769,6 +3006,7 @@
           "stationID": "TH68",
           "stationName": "新井川",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 55,
@@ -2779,6 +3017,7 @@
           "stationID": "TH69",
           "stationName": "羽衣橋",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 57,
@@ -2789,6 +3028,7 @@
           "stationID": "TH70",
           "stationName": "浜園",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 59,
@@ -2804,6 +3044,7 @@
           "stationID": "TH71",
           "stationName": "津崎",
           "stopPosName": "3番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 13,
             "m": 1,
@@ -2819,6 +3060,7 @@
           "stationID": "TH72",
           "stationName": "虹ヶ浜",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 13,
             "m": 7,
@@ -2829,6 +3071,7 @@
           "stationID": "TH73",
           "stationName": "海岸公園",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 13,
             "m": 9,
@@ -2839,6 +3082,7 @@
           "stationID": "TH74",
           "stationName": "河原崎",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 13,
             "m": 11,
@@ -2849,6 +3093,7 @@
           "stationID": "TH75",
           "stationName": "駒野",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 13,
             "m": 13,
@@ -2864,6 +3109,7 @@
           "stationID": "TH76",
           "stationName": "館浜",
           "stopPosName": "3番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 13,
             "m": 17,
@@ -2890,6 +3136,7 @@
           "stationID": "TH58",
           "stationName": "赤山町",
           "stopPosName": "2番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 47,
@@ -2900,6 +3147,7 @@
           "stationID": "TH59",
           "stationName": "西赤山",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 49,
@@ -2909,12 +3157,14 @@
         {
           "stationID": "TH60",
           "stationName": "奥峯口",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH61",
           "stationName": "日野森",
           "stopPosName": "2番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 50,
@@ -2925,6 +3175,7 @@
           "stationID": "TH62",
           "stationName": "高見沢",
           "stopPosName": "0番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 52,
@@ -2935,6 +3186,7 @@
           "stationID": "TH63",
           "stationName": "水越",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 54,
@@ -2945,6 +3197,7 @@
           "stationID": "TH64",
           "stationName": "藤江",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 55,
@@ -2955,6 +3208,7 @@
           "stationID": "TH65",
           "stationName": "大道寺",
           "stopPosName": "6番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 57,
@@ -2965,6 +3219,7 @@
           "stationID": "TH66S",
           "stationName": "江ノ原信号場",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 58,
@@ -2974,12 +3229,14 @@
         {
           "stationID": "TH66",
           "stationName": "江ノ原",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH67",
           "stationName": "新野崎",
           "stopPosName": "3番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 13,
             "m": 0,
@@ -2989,17 +3246,20 @@
         {
           "stationID": "TH68",
           "stationName": "新井川",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH69",
           "stationName": "羽衣橋",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH70",
           "stationName": "浜園",
           "stopPosName": "2番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 13,
             "m": 2,
@@ -3010,6 +3270,7 @@
           "stationID": "TH71",
           "stationName": "津崎",
           "stopPosName": "2番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 13,
             "m": 4,
@@ -3019,22 +3280,26 @@
         {
           "stationID": "TH72",
           "stationName": "虹ヶ浜",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH73",
           "stationName": "海岸公園",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH74",
           "stationName": "河原崎",
-          "stopPosName": "1番線"
+          "stopPosName": "1番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH75",
           "stationName": "駒野",
           "stopPosName": "2番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 13,
             "m": 7,
@@ -3045,6 +3310,7 @@
           "stationID": "TH76",
           "stationName": "館浜",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 13,
             "m": 9,
@@ -3071,6 +3337,7 @@
           "stationID": "TH58",
           "stationName": "赤山町",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 13,
             "m": 0,
@@ -3086,6 +3353,7 @@
           "stationID": "TH59",
           "stationName": "西赤山",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 13,
             "m": 2,
@@ -3101,6 +3369,7 @@
           "stationID": "TH60",
           "stationName": "奥峯口",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 13,
             "m": 5,
@@ -3111,6 +3380,7 @@
           "stationID": "TH61",
           "stationName": "日野森",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 13,
             "m": 6,
@@ -3126,6 +3396,7 @@
           "stationID": "TH62",
           "stationName": "高見沢",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 13,
             "m": 9,
@@ -3141,6 +3412,7 @@
           "stationID": "TH63",
           "stationName": "水越",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 13,
             "m": 12,
@@ -3156,6 +3428,7 @@
           "stationID": "TH64",
           "stationName": "藤江",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 13,
             "m": 15,
@@ -3171,6 +3444,7 @@
           "stationID": "TH65",
           "stationName": "大道寺",
           "stopPosName": "6番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 13,
             "m": 18,
@@ -3197,6 +3471,7 @@
           "stationID": "TH76",
           "stationName": "館浜",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 10,
             "m": 48,
@@ -3207,6 +3482,7 @@
           "stationID": "TH75",
           "stationName": "駒野",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 10,
             "m": 49,
@@ -3216,22 +3492,26 @@
         {
           "stationID": "TH74",
           "stationName": "河原崎",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH73",
           "stationName": "海岸公園",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH72",
           "stationName": "虹ヶ浜",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH71",
           "stationName": "津崎",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 10,
             "m": 55,
@@ -3242,6 +3522,7 @@
           "stationID": "TH70",
           "stationName": "浜園",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 10,
             "m": 56,
@@ -3251,17 +3532,20 @@
         {
           "stationID": "TH69",
           "stationName": "羽衣橋",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH68",
           "stationName": "新井川",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH67",
           "stationName": "新野崎",
           "stopPosName": "2番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 1,
@@ -3271,12 +3555,14 @@
         {
           "stationID": "TH66",
           "stationName": "江ノ原",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH66S",
           "stationName": "江ノ原信号場",
           "stopPosName": "0番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 3,
@@ -3287,6 +3573,7 @@
           "stationID": "TH65",
           "stationName": "大道寺",
           "stopPosName": "4番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 5,
@@ -3313,6 +3600,7 @@
           "stationID": "TH65",
           "stationName": "大道寺",
           "stopPosName": "3番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 10,
             "m": 51,
@@ -3323,6 +3611,7 @@
           "stationID": "TH64",
           "stationName": "藤江",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 10,
             "m": 53,
@@ -3338,6 +3627,7 @@
           "stationID": "TH63",
           "stationName": "水越",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 10,
             "m": 57,
@@ -3353,6 +3643,7 @@
           "stationID": "TH62",
           "stationName": "高見沢",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 0,
@@ -3368,6 +3659,7 @@
           "stationID": "TH61",
           "stationName": "日野森",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 2,
@@ -3383,6 +3675,7 @@
           "stationID": "TH60",
           "stationName": "奥峯口",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 5,
@@ -3393,6 +3686,7 @@
           "stationID": "TH59",
           "stationName": "西赤山",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 6,
@@ -3408,6 +3702,7 @@
           "stationID": "TH58",
           "stationName": "赤山町",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 9,
@@ -3439,6 +3734,7 @@
           "stationID": "TH76",
           "stationName": "館浜",
           "stopPosName": "3番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 10,
             "m": 52,
@@ -3449,6 +3745,7 @@
           "stationID": "TH75",
           "stationName": "駒野",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 10,
             "m": 54,
@@ -3464,6 +3761,7 @@
           "stationID": "TH74",
           "stationName": "河原崎",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 10,
             "m": 56,
@@ -3474,6 +3772,7 @@
           "stationID": "TH73",
           "stationName": "海岸公園",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 10,
             "m": 58,
@@ -3484,6 +3783,7 @@
           "stationID": "TH72",
           "stationName": "虹ヶ浜",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 0,
@@ -3494,6 +3794,7 @@
           "stationID": "TH71",
           "stationName": "津崎",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 3,
@@ -3509,6 +3810,7 @@
           "stationID": "TH70",
           "stationName": "浜園",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 8,
@@ -3524,6 +3826,7 @@
           "stationID": "TH69",
           "stationName": "羽衣橋",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 10,
@@ -3534,6 +3837,7 @@
           "stationID": "TH68",
           "stationName": "新井川",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 12,
@@ -3544,6 +3848,7 @@
           "stationID": "TH67",
           "stationName": "新野崎",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 14,
@@ -3570,6 +3875,7 @@
           "stationID": "TH76",
           "stationName": "館浜",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 10,
             "m": 55,
@@ -3580,6 +3886,7 @@
           "stationID": "TH75",
           "stationName": "駒野",
           "stopPosName": "4番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 10,
             "m": 57,
@@ -3606,6 +3913,7 @@
           "stationID": "TH76",
           "stationName": "館浜",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 0,
@@ -3616,6 +3924,7 @@
           "stationID": "TH75",
           "stationName": "駒野",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 1,
@@ -3625,22 +3934,26 @@
         {
           "stationID": "TH74",
           "stationName": "河原崎",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH73",
           "stationName": "海岸公園",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH72",
           "stationName": "虹ヶ浜",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH71",
           "stationName": "津崎",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 5,
@@ -3651,6 +3964,7 @@
           "stationID": "TH70",
           "stationName": "浜園",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 6,
@@ -3660,17 +3974,20 @@
         {
           "stationID": "TH69",
           "stationName": "羽衣橋",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH68",
           "stationName": "新井川",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH67",
           "stationName": "新野崎",
           "stopPosName": "2番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 8,
@@ -3680,12 +3997,14 @@
         {
           "stationID": "TH66",
           "stationName": "江ノ原",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH66S",
           "stationName": "江ノ原信号場",
           "stopPosName": "0番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 9,
@@ -3696,6 +4015,7 @@
           "stationID": "TH65",
           "stationName": "大道寺",
           "stopPosName": "3番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 10,
@@ -3706,6 +4026,7 @@
           "stationID": "TH64",
           "stationName": "藤江",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 12,
@@ -3716,6 +4037,7 @@
           "stationID": "TH63",
           "stationName": "水越",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 13,
@@ -3726,6 +4048,7 @@
           "stationID": "TH62",
           "stationName": "高見沢",
           "stopPosName": "0番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 14,
@@ -3736,6 +4059,7 @@
           "stationID": "TH61",
           "stationName": "日野森",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 16,
@@ -3745,12 +4069,14 @@
         {
           "stationID": "TH60",
           "stationName": "奥峯口",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH59",
           "stationName": "西赤山",
           "stopPosName": "0番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 18,
@@ -3761,6 +4087,7 @@
           "stationID": "TH58",
           "stationName": "赤山町",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 20,
@@ -3787,6 +4114,7 @@
           "stationID": "TH76",
           "stationName": "館浜",
           "stopPosName": "3番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 5,
@@ -3797,6 +4125,7 @@
           "stationID": "TH75",
           "stationName": "駒野",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 7,
@@ -3812,6 +4141,7 @@
           "stationID": "TH74",
           "stationName": "河原崎",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 11,
@@ -3822,6 +4152,7 @@
           "stationID": "TH73",
           "stationName": "海岸公園",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 13,
@@ -3832,6 +4163,7 @@
           "stationID": "TH72",
           "stationName": "虹ヶ浜",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 15,
@@ -3842,6 +4174,7 @@
           "stationID": "TH71",
           "stationName": "津崎",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 18,
@@ -3857,6 +4190,7 @@
           "stationID": "TH70",
           "stationName": "浜園",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 20,
@@ -3872,6 +4206,7 @@
           "stationID": "TH69",
           "stationName": "羽衣橋",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 22,
@@ -3882,6 +4217,7 @@
           "stationID": "TH68",
           "stationName": "新井川",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 24,
@@ -3892,6 +4228,7 @@
           "stationID": "TH67",
           "stationName": "新野崎",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 26,
@@ -3907,6 +4244,7 @@
           "stationID": "TH66",
           "stationName": "江ノ原",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 28,
@@ -3917,6 +4255,7 @@
           "stationID": "TH66S",
           "stationName": "江ノ原信号場",
           "stopPosName": "0番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 29,
@@ -3927,6 +4266,7 @@
           "stationID": "TH65",
           "stationName": "大道寺",
           "stopPosName": "5番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 30,
@@ -3953,6 +4293,7 @@
           "stationID": "TH76",
           "stationName": "館浜",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 7,
@@ -3963,6 +4304,7 @@
           "stationID": "TH75",
           "stationName": "駒野",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 8,
@@ -3972,22 +4314,26 @@
         {
           "stationID": "TH74",
           "stationName": "河原崎",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH73",
           "stationName": "海岸公園",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH72",
           "stationName": "虹ヶ浜",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH71",
           "stationName": "津崎",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 12,
@@ -3998,6 +4344,7 @@
           "stationID": "TH70",
           "stationName": "浜園",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 13,
@@ -4007,17 +4354,20 @@
         {
           "stationID": "TH69",
           "stationName": "羽衣橋",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH68",
           "stationName": "新井川",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH67",
           "stationName": "新野崎",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 15,
@@ -4033,6 +4383,7 @@
           "stationID": "TH66",
           "stationName": "江ノ原",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 18,
@@ -4043,6 +4394,7 @@
           "stationID": "TH66S",
           "stationName": "江ノ原信号場",
           "stopPosName": "0番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 19,
@@ -4053,6 +4405,7 @@
           "stationID": "TH65",
           "stationName": "大道寺",
           "stopPosName": "3番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 20,
@@ -4068,6 +4421,7 @@
           "stationID": "TH64",
           "stationName": "藤江",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 23,
@@ -4083,6 +4437,7 @@
           "stationID": "TH63",
           "stationName": "水越",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 25,
@@ -4098,6 +4453,7 @@
           "stationID": "TH62",
           "stationName": "高見沢",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 31,
@@ -4113,6 +4469,7 @@
           "stationID": "TH61",
           "stationName": "日野森",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 33,
@@ -4128,6 +4485,7 @@
           "stationID": "TH60",
           "stationName": "奥峯口",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 36,
@@ -4138,6 +4496,7 @@
           "stationID": "TH59",
           "stationName": "西赤山",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 37,
@@ -4153,6 +4512,7 @@
           "stationID": "TH58",
           "stationName": "赤山町",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 40,
@@ -4184,6 +4544,7 @@
           "stationID": "TH76",
           "stationName": "館浜",
           "stopPosName": "3番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 22,
@@ -4194,6 +4555,7 @@
           "stationID": "TH75",
           "stationName": "駒野",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 24,
@@ -4209,6 +4571,7 @@
           "stationID": "TH74",
           "stationName": "河原崎",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 26,
@@ -4219,6 +4582,7 @@
           "stationID": "TH73",
           "stationName": "海岸公園",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 28,
@@ -4229,6 +4593,7 @@
           "stationID": "TH72",
           "stationName": "虹ヶ浜",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 30,
@@ -4239,6 +4604,7 @@
           "stationID": "TH71",
           "stationName": "津崎",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 33,
@@ -4254,6 +4620,7 @@
           "stationID": "TH70",
           "stationName": "浜園",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 38,
@@ -4269,6 +4636,7 @@
           "stationID": "TH69",
           "stationName": "羽衣橋",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 40,
@@ -4279,6 +4647,7 @@
           "stationID": "TH68",
           "stationName": "新井川",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 42,
@@ -4289,6 +4658,7 @@
           "stationID": "TH67",
           "stationName": "新野崎",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 44,
@@ -4315,6 +4685,7 @@
           "stationID": "TH76",
           "stationName": "館浜",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 30,
@@ -4325,6 +4696,7 @@
           "stationID": "TH75",
           "stationName": "駒野",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 31,
@@ -4334,22 +4706,26 @@
         {
           "stationID": "TH74",
           "stationName": "河原崎",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH73",
           "stationName": "海岸公園",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH72",
           "stationName": "虹ヶ浜",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH71",
           "stationName": "津崎",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 35,
@@ -4360,6 +4736,7 @@
           "stationID": "TH70",
           "stationName": "浜園",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 36,
@@ -4369,17 +4746,20 @@
         {
           "stationID": "TH69",
           "stationName": "羽衣橋",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH68",
           "stationName": "新井川",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH67",
           "stationName": "新野崎",
           "stopPosName": "2番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 38,
@@ -4389,12 +4769,14 @@
         {
           "stationID": "TH66",
           "stationName": "江ノ原",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH66S",
           "stationName": "江ノ原信号場",
           "stopPosName": "0番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 39,
@@ -4405,6 +4787,7 @@
           "stationID": "TH65",
           "stationName": "大道寺",
           "stopPosName": "3番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 41,
@@ -4420,6 +4803,7 @@
           "stationID": "TH64",
           "stationName": "藤江",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 44,
@@ -4430,6 +4814,7 @@
           "stationID": "TH63",
           "stationName": "水越",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 45,
@@ -4440,6 +4825,7 @@
           "stationID": "TH62",
           "stationName": "高見沢",
           "stopPosName": "0番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 47,
@@ -4450,6 +4836,7 @@
           "stationID": "TH61",
           "stationName": "日野森",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 49,
@@ -4459,12 +4846,14 @@
         {
           "stationID": "TH60",
           "stationName": "奥峯口",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH59",
           "stationName": "西赤山",
           "stopPosName": "0番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 50,
@@ -4475,6 +4864,7 @@
           "stationID": "TH58",
           "stationName": "赤山町",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 53,
@@ -4506,6 +4896,7 @@
           "stationID": "TH76",
           "stationName": "館浜",
           "stopPosName": "3番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 35,
@@ -4516,6 +4907,7 @@
           "stationID": "TH75",
           "stationName": "駒野",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 37,
@@ -4531,6 +4923,7 @@
           "stationID": "TH74",
           "stationName": "河原崎",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 41,
@@ -4541,6 +4934,7 @@
           "stationID": "TH73",
           "stationName": "海岸公園",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 43,
@@ -4551,6 +4945,7 @@
           "stationID": "TH72",
           "stationName": "虹ヶ浜",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 45,
@@ -4561,6 +4956,7 @@
           "stationID": "TH71",
           "stationName": "津崎",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 48,
@@ -4576,6 +4972,7 @@
           "stationID": "TH70",
           "stationName": "浜園",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 50,
@@ -4591,6 +4988,7 @@
           "stationID": "TH69",
           "stationName": "羽衣橋",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 52,
@@ -4601,6 +4999,7 @@
           "stationID": "TH68",
           "stationName": "新井川",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 54,
@@ -4611,6 +5010,7 @@
           "stationID": "TH67",
           "stationName": "新野崎",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 56,
@@ -4626,6 +5026,7 @@
           "stationID": "TH66",
           "stationName": "江ノ原",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 58,
@@ -4636,6 +5037,7 @@
           "stationID": "TH66S",
           "stationName": "江ノ原信号場",
           "stopPosName": "0番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 59,
@@ -4646,6 +5048,7 @@
           "stationID": "TH65",
           "stationName": "大道寺",
           "stopPosName": "5番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 0,
@@ -4672,6 +5075,7 @@
           "stationID": "TH76",
           "stationName": "館浜",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 37,
@@ -4682,6 +5086,7 @@
           "stationID": "TH75",
           "stationName": "駒野",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 38,
@@ -4691,22 +5096,26 @@
         {
           "stationID": "TH74",
           "stationName": "河原崎",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH73",
           "stationName": "海岸公園",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH72",
           "stationName": "虹ヶ浜",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH71",
           "stationName": "津崎",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 42,
@@ -4717,6 +5126,7 @@
           "stationID": "TH70",
           "stationName": "浜園",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 43,
@@ -4726,17 +5136,20 @@
         {
           "stationID": "TH69",
           "stationName": "羽衣橋",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH68",
           "stationName": "新井川",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH67",
           "stationName": "新野崎",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 45,
@@ -4752,6 +5165,7 @@
           "stationID": "TH66",
           "stationName": "江ノ原",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 48,
@@ -4762,6 +5176,7 @@
           "stationID": "TH66S",
           "stationName": "江ノ原信号場",
           "stopPosName": "0番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 11,
             "m": 49,
@@ -4772,6 +5187,7 @@
           "stationID": "TH65",
           "stationName": "大道寺",
           "stopPosName": "3番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 50,
@@ -4787,6 +5203,7 @@
           "stationID": "TH64",
           "stationName": "藤江",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 53,
@@ -4802,6 +5219,7 @@
           "stationID": "TH63",
           "stationName": "水越",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 57,
@@ -4817,6 +5235,7 @@
           "stationID": "TH62",
           "stationName": "高見沢",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 0,
@@ -4832,6 +5251,7 @@
           "stationID": "TH61",
           "stationName": "日野森",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 2,
@@ -4847,6 +5267,7 @@
           "stationID": "TH60",
           "stationName": "奥峯口",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 5,
@@ -4857,6 +5278,7 @@
           "stationID": "TH59",
           "stationName": "西赤山",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 6,
@@ -4872,6 +5294,7 @@
           "stationID": "TH58",
           "stationName": "赤山町",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 9,
@@ -4903,6 +5326,7 @@
           "stationID": "TH76",
           "stationName": "館浜",
           "stopPosName": "3番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 52,
@@ -4913,6 +5337,7 @@
           "stationID": "TH75",
           "stationName": "駒野",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 54,
@@ -4928,6 +5353,7 @@
           "stationID": "TH74",
           "stationName": "河原崎",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 56,
@@ -4938,6 +5364,7 @@
           "stationID": "TH73",
           "stationName": "海岸公園",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 58,
@@ -4948,6 +5375,7 @@
           "stationID": "TH72",
           "stationName": "虹ヶ浜",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 0,
@@ -4958,6 +5386,7 @@
           "stationID": "TH71",
           "stationName": "津崎",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 3,
@@ -4973,6 +5402,7 @@
           "stationID": "TH70",
           "stationName": "浜園",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 8,
@@ -4988,6 +5418,7 @@
           "stationID": "TH69",
           "stationName": "羽衣橋",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 10,
@@ -4998,6 +5429,7 @@
           "stationID": "TH68",
           "stationName": "新井川",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 12,
@@ -5008,6 +5440,7 @@
           "stationID": "TH67",
           "stationName": "新野崎",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 14,
@@ -5034,6 +5467,7 @@
           "stationID": "TH76",
           "stationName": "館浜",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 11,
             "m": 55,
@@ -5044,6 +5478,7 @@
           "stationID": "TH75",
           "stationName": "駒野",
           "stopPosName": "4番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 11,
             "m": 57,
@@ -5070,6 +5505,7 @@
           "stationID": "TH76",
           "stationName": "館浜",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 0,
@@ -5080,6 +5516,7 @@
           "stationID": "TH75",
           "stationName": "駒野",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 1,
@@ -5089,22 +5526,26 @@
         {
           "stationID": "TH74",
           "stationName": "河原崎",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH73",
           "stationName": "海岸公園",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH72",
           "stationName": "虹ヶ浜",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH71",
           "stationName": "津崎",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 5,
@@ -5115,6 +5556,7 @@
           "stationID": "TH70",
           "stationName": "浜園",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 6,
@@ -5124,17 +5566,20 @@
         {
           "stationID": "TH69",
           "stationName": "羽衣橋",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH68",
           "stationName": "新井川",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH67",
           "stationName": "新野崎",
           "stopPosName": "2番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 8,
@@ -5144,12 +5589,14 @@
         {
           "stationID": "TH66",
           "stationName": "江ノ原",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH66S",
           "stationName": "江ノ原信号場",
           "stopPosName": "0番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 9,
@@ -5160,6 +5607,7 @@
           "stationID": "TH65",
           "stationName": "大道寺",
           "stopPosName": "3番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 10,
@@ -5170,6 +5618,7 @@
           "stationID": "TH64",
           "stationName": "藤江",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 12,
@@ -5180,6 +5629,7 @@
           "stationID": "TH63",
           "stationName": "水越",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 13,
@@ -5190,6 +5640,7 @@
           "stationID": "TH62",
           "stationName": "高見沢",
           "stopPosName": "0番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 14,
@@ -5200,6 +5651,7 @@
           "stationID": "TH61",
           "stationName": "日野森",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 16,
@@ -5209,12 +5661,14 @@
         {
           "stationID": "TH60",
           "stationName": "奥峯口",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH59",
           "stationName": "西赤山",
           "stopPosName": "0番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 18,
@@ -5225,6 +5679,7 @@
           "stationID": "TH58",
           "stationName": "赤山町",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 20,
@@ -5251,6 +5706,7 @@
           "stationID": "TH76",
           "stationName": "館浜",
           "stopPosName": "3番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 5,
@@ -5261,6 +5717,7 @@
           "stationID": "TH75",
           "stationName": "駒野",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 7,
@@ -5276,6 +5733,7 @@
           "stationID": "TH74",
           "stationName": "河原崎",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 11,
@@ -5286,6 +5744,7 @@
           "stationID": "TH73",
           "stationName": "海岸公園",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 13,
@@ -5296,6 +5755,7 @@
           "stationID": "TH72",
           "stationName": "虹ヶ浜",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 15,
@@ -5306,6 +5766,7 @@
           "stationID": "TH71",
           "stationName": "津崎",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 18,
@@ -5321,6 +5782,7 @@
           "stationID": "TH70",
           "stationName": "浜園",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 20,
@@ -5336,6 +5798,7 @@
           "stationID": "TH69",
           "stationName": "羽衣橋",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 22,
@@ -5346,6 +5809,7 @@
           "stationID": "TH68",
           "stationName": "新井川",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 24,
@@ -5356,6 +5820,7 @@
           "stationID": "TH67",
           "stationName": "新野崎",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 26,
@@ -5371,6 +5836,7 @@
           "stationID": "TH66",
           "stationName": "江ノ原",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 28,
@@ -5381,6 +5847,7 @@
           "stationID": "TH66S",
           "stationName": "江ノ原信号場",
           "stopPosName": "0番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 29,
@@ -5391,6 +5858,7 @@
           "stationID": "TH65",
           "stationName": "大道寺",
           "stopPosName": "5番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 30,
@@ -5417,6 +5885,7 @@
           "stationID": "TH76",
           "stationName": "館浜",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 7,
@@ -5427,6 +5896,7 @@
           "stationID": "TH75",
           "stationName": "駒野",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 8,
@@ -5436,22 +5906,26 @@
         {
           "stationID": "TH74",
           "stationName": "河原崎",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH73",
           "stationName": "海岸公園",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH72",
           "stationName": "虹ヶ浜",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH71",
           "stationName": "津崎",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 12,
@@ -5462,6 +5936,7 @@
           "stationID": "TH70",
           "stationName": "浜園",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 13,
@@ -5471,17 +5946,20 @@
         {
           "stationID": "TH69",
           "stationName": "羽衣橋",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH68",
           "stationName": "新井川",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH67",
           "stationName": "新野崎",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 15,
@@ -5497,6 +5975,7 @@
           "stationID": "TH66",
           "stationName": "江ノ原",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 18,
@@ -5507,6 +5986,7 @@
           "stationID": "TH66S",
           "stationName": "江ノ原信号場",
           "stopPosName": "0番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 19,
@@ -5517,6 +5997,7 @@
           "stationID": "TH65",
           "stationName": "大道寺",
           "stopPosName": "3番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 20,
@@ -5532,6 +6013,7 @@
           "stationID": "TH64",
           "stationName": "藤江",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 23,
@@ -5547,6 +6029,7 @@
           "stationID": "TH63",
           "stationName": "水越",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 25,
@@ -5562,6 +6045,7 @@
           "stationID": "TH62",
           "stationName": "高見沢",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 31,
@@ -5577,6 +6061,7 @@
           "stationID": "TH61",
           "stationName": "日野森",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 33,
@@ -5592,6 +6077,7 @@
           "stationID": "TH60",
           "stationName": "奥峯口",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 36,
@@ -5602,6 +6088,7 @@
           "stationID": "TH59",
           "stationName": "西赤山",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 37,
@@ -5617,6 +6104,7 @@
           "stationID": "TH58",
           "stationName": "赤山町",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 40,
@@ -5648,6 +6136,7 @@
           "stationID": "TH76",
           "stationName": "館浜",
           "stopPosName": "3番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 22,
@@ -5658,6 +6147,7 @@
           "stationID": "TH75",
           "stationName": "駒野",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 24,
@@ -5673,6 +6163,7 @@
           "stationID": "TH74",
           "stationName": "河原崎",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 26,
@@ -5683,6 +6174,7 @@
           "stationID": "TH73",
           "stationName": "海岸公園",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 28,
@@ -5693,6 +6185,7 @@
           "stationID": "TH72",
           "stationName": "虹ヶ浜",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 30,
@@ -5703,6 +6196,7 @@
           "stationID": "TH71",
           "stationName": "津崎",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 33,
@@ -5718,6 +6212,7 @@
           "stationID": "TH70",
           "stationName": "浜園",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 38,
@@ -5733,6 +6228,7 @@
           "stationID": "TH69",
           "stationName": "羽衣橋",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 40,
@@ -5743,6 +6239,7 @@
           "stationID": "TH68",
           "stationName": "新井川",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 42,
@@ -5753,6 +6250,7 @@
           "stationID": "TH67",
           "stationName": "新野崎",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 44,
@@ -5779,6 +6277,7 @@
           "stationID": "TH76",
           "stationName": "館浜",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 30,
@@ -5789,6 +6288,7 @@
           "stationID": "TH75",
           "stationName": "駒野",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 31,
@@ -5798,22 +6298,26 @@
         {
           "stationID": "TH74",
           "stationName": "河原崎",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH73",
           "stationName": "海岸公園",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH72",
           "stationName": "虹ヶ浜",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH71",
           "stationName": "津崎",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 35,
@@ -5824,6 +6328,7 @@
           "stationID": "TH70",
           "stationName": "浜園",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 36,
@@ -5833,17 +6338,20 @@
         {
           "stationID": "TH69",
           "stationName": "羽衣橋",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH68",
           "stationName": "新井川",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH67",
           "stationName": "新野崎",
           "stopPosName": "2番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 38,
@@ -5853,12 +6361,14 @@
         {
           "stationID": "TH66",
           "stationName": "江ノ原",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH66S",
           "stationName": "江ノ原信号場",
           "stopPosName": "0番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 39,
@@ -5869,6 +6379,7 @@
           "stationID": "TH65",
           "stationName": "大道寺",
           "stopPosName": "3番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 41,
@@ -5884,6 +6395,7 @@
           "stationID": "TH64",
           "stationName": "藤江",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 44,
@@ -5894,6 +6406,7 @@
           "stationID": "TH63",
           "stationName": "水越",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 45,
@@ -5904,6 +6417,7 @@
           "stationID": "TH62",
           "stationName": "高見沢",
           "stopPosName": "0番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 47,
@@ -5914,6 +6428,7 @@
           "stationID": "TH61",
           "stationName": "日野森",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 49,
@@ -5923,12 +6438,14 @@
         {
           "stationID": "TH60",
           "stationName": "奥峯口",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH59",
           "stationName": "西赤山",
           "stopPosName": "0番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 50,
@@ -5939,6 +6456,7 @@
           "stationID": "TH58",
           "stationName": "赤山町",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 53,
@@ -5970,6 +6488,7 @@
           "stationID": "TH76",
           "stationName": "館浜",
           "stopPosName": "3番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 35,
@@ -5980,6 +6499,7 @@
           "stationID": "TH75",
           "stationName": "駒野",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 37,
@@ -5995,6 +6515,7 @@
           "stationID": "TH74",
           "stationName": "河原崎",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 41,
@@ -6005,6 +6526,7 @@
           "stationID": "TH73",
           "stationName": "海岸公園",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 43,
@@ -6015,6 +6537,7 @@
           "stationID": "TH72",
           "stationName": "虹ヶ浜",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 45,
@@ -6025,6 +6548,7 @@
           "stationID": "TH71",
           "stationName": "津崎",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 48,
@@ -6040,6 +6564,7 @@
           "stationID": "TH70",
           "stationName": "浜園",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 50,
@@ -6055,6 +6580,7 @@
           "stationID": "TH69",
           "stationName": "羽衣橋",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 52,
@@ -6065,6 +6591,7 @@
           "stationID": "TH68",
           "stationName": "新井川",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 54,
@@ -6075,6 +6602,7 @@
           "stationID": "TH67",
           "stationName": "新野崎",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 56,
@@ -6090,6 +6618,7 @@
           "stationID": "TH66",
           "stationName": "江ノ原",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 58,
@@ -6100,6 +6629,7 @@
           "stationID": "TH66S",
           "stationName": "江ノ原信号場",
           "stopPosName": "0番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 59,
@@ -6110,6 +6640,7 @@
           "stationID": "TH65",
           "stationName": "大道寺",
           "stopPosName": "5番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 13,
             "m": 0,
@@ -6136,6 +6667,7 @@
           "stationID": "TH76",
           "stationName": "館浜",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 37,
@@ -6146,6 +6678,7 @@
           "stationID": "TH75",
           "stationName": "駒野",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 38,
@@ -6155,22 +6688,26 @@
         {
           "stationID": "TH74",
           "stationName": "河原崎",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH73",
           "stationName": "海岸公園",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH72",
           "stationName": "虹ヶ浜",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH71",
           "stationName": "津崎",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 42,
@@ -6181,6 +6718,7 @@
           "stationID": "TH70",
           "stationName": "浜園",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 43,
@@ -6190,17 +6728,20 @@
         {
           "stationID": "TH69",
           "stationName": "羽衣橋",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH68",
           "stationName": "新井川",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH67",
           "stationName": "新野崎",
           "stopPosName": "2番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 45,
@@ -6216,6 +6757,7 @@
           "stationID": "TH66",
           "stationName": "江ノ原",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 48,
@@ -6226,6 +6768,7 @@
           "stationID": "TH66S",
           "stationName": "江ノ原信号場",
           "stopPosName": "0番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 12,
             "m": 49,
@@ -6236,6 +6779,7 @@
           "stationID": "TH65",
           "stationName": "大道寺",
           "stopPosName": "3番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 50,
@@ -6251,6 +6795,7 @@
           "stationID": "TH64",
           "stationName": "藤江",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 53,
@@ -6266,6 +6811,7 @@
           "stationID": "TH63",
           "stationName": "水越",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 57,
@@ -6281,6 +6827,7 @@
           "stationID": "TH62",
           "stationName": "高見沢",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 13,
             "m": 0,
@@ -6296,6 +6843,7 @@
           "stationID": "TH61",
           "stationName": "日野森",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 13,
             "m": 2,
@@ -6311,6 +6859,7 @@
           "stationID": "TH60",
           "stationName": "奥峯口",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 13,
             "m": 5,
@@ -6321,6 +6870,7 @@
           "stationID": "TH59",
           "stationName": "西赤山",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 13,
             "m": 6,
@@ -6336,6 +6886,7 @@
           "stationID": "TH58",
           "stationName": "赤山町",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 13,
             "m": 9,
@@ -6362,6 +6913,7 @@
           "stationID": "TH76",
           "stationName": "館浜",
           "stopPosName": "3番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 52,
@@ -6372,6 +6924,7 @@
           "stationID": "TH75",
           "stationName": "駒野",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 54,
@@ -6387,6 +6940,7 @@
           "stationID": "TH74",
           "stationName": "河原崎",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 56,
@@ -6397,6 +6951,7 @@
           "stationID": "TH73",
           "stationName": "海岸公園",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 58,
@@ -6407,6 +6962,7 @@
           "stationID": "TH72",
           "stationName": "虹ヶ浜",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 13,
             "m": 0,
@@ -6417,6 +6973,7 @@
           "stationID": "TH71",
           "stationName": "津崎",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 13,
             "m": 3,
@@ -6432,6 +6989,7 @@
           "stationID": "TH70",
           "stationName": "浜園",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 13,
             "m": 8,
@@ -6447,6 +7005,7 @@
           "stationID": "TH69",
           "stationName": "羽衣橋",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 13,
             "m": 10,
@@ -6457,6 +7016,7 @@
           "stationID": "TH68",
           "stationName": "新井川",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 13,
             "m": 12,
@@ -6467,6 +7027,7 @@
           "stationID": "TH67",
           "stationName": "新野崎",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 13,
             "m": 14,
@@ -6493,6 +7054,7 @@
           "stationID": "TH76",
           "stationName": "館浜",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 12,
             "m": 55,
@@ -6503,6 +7065,7 @@
           "stationID": "TH75",
           "stationName": "駒野",
           "stopPosName": "4番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 12,
             "m": 57,
@@ -6529,6 +7092,7 @@
           "stationID": "TH76",
           "stationName": "館浜",
           "stopPosName": "0番線",
+          "stopType": "stop",
           "departureTime": {
             "h": 13,
             "m": 0,
@@ -6539,6 +7103,7 @@
           "stationID": "TH75",
           "stationName": "駒野",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 13,
             "m": 1,
@@ -6548,22 +7113,26 @@
         {
           "stationID": "TH74",
           "stationName": "河原崎",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH73",
           "stationName": "海岸公園",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH72",
           "stationName": "虹ヶ浜",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH71",
           "stationName": "津崎",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 13,
             "m": 5,
@@ -6574,6 +7143,7 @@
           "stationID": "TH70",
           "stationName": "浜園",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 13,
             "m": 6,
@@ -6583,17 +7153,20 @@
         {
           "stationID": "TH69",
           "stationName": "羽衣橋",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH68",
           "stationName": "新井川",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH67",
           "stationName": "新野崎",
           "stopPosName": "2番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 13,
             "m": 8,
@@ -6603,12 +7176,14 @@
         {
           "stationID": "TH66",
           "stationName": "江ノ原",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH66S",
           "stationName": "江ノ原信号場",
           "stopPosName": "0番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 13,
             "m": 9,
@@ -6619,6 +7194,7 @@
           "stationID": "TH65",
           "stationName": "大道寺",
           "stopPosName": "3番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 13,
             "m": 10,
@@ -6629,6 +7205,7 @@
           "stationID": "TH64",
           "stationName": "藤江",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 13,
             "m": 12,
@@ -6639,6 +7216,7 @@
           "stationID": "TH63",
           "stationName": "水越",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 13,
             "m": 13,
@@ -6649,6 +7227,7 @@
           "stationID": "TH62",
           "stationName": "高見沢",
           "stopPosName": "0番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 13,
             "m": 14,
@@ -6659,6 +7238,7 @@
           "stationID": "TH61",
           "stationName": "日野森",
           "stopPosName": "1番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 13,
             "m": 16,
@@ -6668,12 +7248,14 @@
         {
           "stationID": "TH60",
           "stationName": "奥峯口",
-          "stopPosName": "0番線"
+          "stopPosName": "0番線",
+          "stopType": "pass"
         },
         {
           "stationID": "TH59",
           "stationName": "西赤山",
           "stopPosName": "0番線",
+          "stopType": "pass",
           "departureTime": {
             "h": 13,
             "m": 18,
@@ -6684,6 +7266,7 @@
           "stationID": "TH58",
           "stationName": "赤山町",
           "stopPosName": "1番線",
+          "stopType": "stop",
           "arrivalTime": {
             "h": 13,
             "m": 20,
