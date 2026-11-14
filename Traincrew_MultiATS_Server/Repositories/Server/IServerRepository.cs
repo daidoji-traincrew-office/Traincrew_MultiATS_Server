@@ -29,6 +29,16 @@ public interface IServerRepository
     Task SetServerStateAsync(ServerMode mode);
     Task<int> GetTimeOffset();
     Task SetTimeOffsetAsync(int timeOffset);
+
+    /// <summary>
+    /// 唯一の server_state 行の time_offset が期待値と一致するときだけ、新しい値にする(比較交換)。
+    /// 行が0行・2行以上、または期待値と違えば何もしない。1文で原子的に更新する。
+    /// </summary>
+    /// <param name="expectedTimeOffset">更新前に期待する time_offset</param>
+    /// <param name="newTimeOffset">新しい time_offset</param>
+    /// <param name="cancellationToken"></param>
+    /// <returns>更新した場合に true。</returns>
+    Task<bool> TrySetTimeOffsetAsync(int expectedTimeOffset, int newTimeOffset, CancellationToken cancellationToken = default);
     Task AddServerStateAsync(ServerState serverState, CancellationToken cancellationToken = default);
     Task SetSwitchMoveTimeAsync(int switchMoveTime);
     Task SetUseOneSecondRelayAsync(bool useOneSecondRelay);
