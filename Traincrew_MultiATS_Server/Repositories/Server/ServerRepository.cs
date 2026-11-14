@@ -53,7 +53,7 @@ public class ServerRepository(ApplicationDbContext context) : IServerRepository
     public async Task<bool> TrySetTimeOffsetAsync(int expectedTimeOffset, int newTimeOffset, CancellationToken cancellationToken = default)
     {
         var rows = await context.ServerStates
-            .Where(serverState => serverState.TimeOffset == expectedTimeOffset && context.ServerStates.Count() == 1)
+            .Where(serverState => serverState.TimeOffset == expectedTimeOffset && !context.ServerStates.Any(other => other.Id != serverState.Id))
             .ExecuteUpdateAsync(property => property
                 .SetProperty(serverState => serverState.TimeOffset, newTimeOffset), cancellationToken);
         return rows == 1;

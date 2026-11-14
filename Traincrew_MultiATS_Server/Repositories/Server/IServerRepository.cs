@@ -36,7 +36,7 @@ public interface IServerRepository
     /// </summary>
     /// <param name="expectedTimeOffset">更新前に期待する time_offset</param>
     /// <param name="newTimeOffset">新しい time_offset</param>
-    /// <param name="cancellationToken"></param>
+    /// <param name="cancellationToken">キャンセルトークン。</param>
     /// <returns>更新した場合に true。</returns>
     Task<bool> TrySetTimeOffsetAsync(int expectedTimeOffset, int newTimeOffset, CancellationToken cancellationToken = default);
     Task AddServerStateAsync(ServerState serverState, CancellationToken cancellationToken = default);
