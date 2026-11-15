@@ -74,7 +74,7 @@ public class OperationNotificationService(
             DisplayName = operationNotificationData.DisplayName,
             Type = operationNotificationData.Type,
             Content = operationNotificationData.Content,
-            OperatedAt = dateTimeRepository.GetNow()
+            OperatedAt = dateTimeRepository.GetNowScoped()
         };
 
         await generalRepository.Save(state);
@@ -83,7 +83,7 @@ public class OperationNotificationService(
 
     public async Task SetNoneWhereKaijoOrTorikeshiAndSpendMuchTime()
     {
-        var now = dateTimeRepository.GetNow();
+        var now = dateTimeRepository.GetNowScoped();
         var operatedAt = now.AddSeconds(-kaijoTime);
         var updatedCount = await operationNotificationRepository
             .SetNoneWhereKaijoOrTorikeshiAndOperatedBeforeOrEqual(operatedAt);

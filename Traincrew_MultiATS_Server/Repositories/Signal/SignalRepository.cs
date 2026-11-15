@@ -135,4 +135,14 @@ public class SignalRepository(ApplicationDbContext context) : ISignalRepository
             .ToListAsync(cancellationToken);
         return names.ToHashSet();
     }
+
+    public async Task<HashSet<string>> GetNamesWhereIsLighted(CancellationToken cancellationToken = default)
+    {
+        var names = await context.Signals
+            .AsNoTracking()
+            .Where(s => s.SignalState.IsLighted)
+            .Select(s => s.Name)
+            .ToListAsync(cancellationToken);
+        return names.ToHashSet(StringComparer.Ordinal);
+    }
 }

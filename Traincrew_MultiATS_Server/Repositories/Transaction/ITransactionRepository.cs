@@ -34,6 +34,35 @@ public interface ITransactionRepository
     /// <param name="cancellationToken">キャンセルトークン</param>
     /// <returns>トランザクションスコープ</returns>
     Task<ITransactionScope> BeginTransactionAsync(IsolationLevel isolationLevel, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// 読み取り専用のトランザクションを開始します(<c>SET TRANSACTION READ ONLY</c>)。
+    /// 分離レベルを省略したときは DB の既定です。読み終えたら <see cref="ITransactionScope.CommitAsync()"/> を呼びます。
+    /// </summary>
+    /// <returns>トランザクションスコープ</returns>
+    Task<ITransactionScope> BeginReadOnlyTransactionAsync();
+
+    /// <summary>
+    /// 読み取り専用のトランザクションを開始します。
+    /// </summary>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    /// <returns>トランザクションスコープ</returns>
+    Task<ITransactionScope> BeginReadOnlyTransactionAsync(CancellationToken cancellationToken);
+
+    /// <summary>
+    /// 読み取り専用のトランザクションを開始します。
+    /// </summary>
+    /// <param name="isolationLevel">分離レベル</param>
+    /// <returns>トランザクションスコープ</returns>
+    Task<ITransactionScope> BeginReadOnlyTransactionAsync(IsolationLevel isolationLevel);
+
+    /// <summary>
+    /// 読み取り専用のトランザクションを開始します。
+    /// </summary>
+    /// <param name="isolationLevel">分離レベル</param>
+    /// <param name="cancellationToken">キャンセルトークン</param>
+    /// <returns>トランザクションスコープ</returns>
+    Task<ITransactionScope> BeginReadOnlyTransactionAsync(IsolationLevel isolationLevel, CancellationToken cancellationToken);
 }
 
 /// <summary>

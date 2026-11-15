@@ -1,6 +1,5 @@
 using Traincrew_MultiATS_Server.Common.Models;
 using Traincrew_MultiATS_Server.Models;
-using Traincrew_MultiATS_Server.Repositories.Datetime;
 using Traincrew_MultiATS_Server.Repositories.NextSignal;
 using Traincrew_MultiATS_Server.Repositories.Server;
 using Traincrew_MultiATS_Server.Repositories.Signal;
@@ -21,7 +20,8 @@ public class SignalService(
     ISignalRepository signalRepository,
     ISignalRouteRepository signalRouteRepository,
     INextSignalRepository nextSignalRepository,
-    IServerRepository serverRepository) : ISignalService
+    IServerRepository serverRepository,
+    IDateTimeService dateTimeService) : ISignalService
 {
     /// <summary>
     /// フェイルセーフチェック: 信号を停止現示にせず現示計算してよいかどうかを判定する
@@ -30,11 +30,9 @@ public class SignalService(
     /// </summary>
     /// <param name="serverState">サーバー状態</param>
     /// <returns>信号現示を計算してよい場合true</returns>
-    private static bool IsInterlockingHealthy(ServerState? serverState) =>
-        InterlockingHeartbeatClock.IsHealthy(
-            serverState?.IsAllSignalRelayRaised == RaiseDropWithForce.Raise,
-            serverState?.InterlockingHeartbeatAt,
-            InterlockingHeartbeatClock.GetCurrentJst());
+    private bool IsInterlockingHealthy(ServerState? serverState) =>
+        serverState?.IsAllSignalRelayRaised == RaiseDropWithForce.Raise &&
+        dateTimeService.IsInterlockingHeartbeatFresh(serverState.InterlockingHeartbeatAt);
 
     /// <summary>
     /// 指定した軌道回路から見える信号機の現示データを計算する

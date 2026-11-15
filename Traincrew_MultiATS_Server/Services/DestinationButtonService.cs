@@ -58,7 +58,7 @@ public class DestinationButtonService(
         }
 
         var oldIsRaised = buttonObject.DestinationButtonState.IsRaised;
-        buttonObject.DestinationButtonState.OperatedAt = dateTimeRepository.GetNow();
+        buttonObject.DestinationButtonState.OperatedAt = dateTimeRepository.GetNowScoped();
         buttonObject.DestinationButtonState.IsRaised = buttonData.IsRaised;
 
         if (oldIsRaised != buttonData.IsRaised)
@@ -73,7 +73,7 @@ public class DestinationButtonService(
 
     public async Task ResetRaisedButtonsAsync()
     {
-        var now = dateTimeRepository.GetNow();
+        var now = dateTimeRepository.GetNowScoped();
         await destinationButtonRepository.UpdateRaisedButtonsAsync(now);
     }
 

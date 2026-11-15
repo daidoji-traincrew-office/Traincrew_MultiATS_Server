@@ -7,8 +7,7 @@ namespace Traincrew_MultiATS_Server.Repositories.Server;
 
 public class ServerRepository(ApplicationDbContext context) : IServerRepository
 {
-    /// <summary>時計の設定行が一意か判定するために最大2行を取得する。</summary>
-    public Task<List<ServerState>> GetClockStatesAsync(CancellationToken cancellationToken) =>
+    public Task<List<ServerState>> GetTwo(CancellationToken cancellationToken) =>
         context.ServerStates.OrderBy(s => s.Id).Take(2).ToListAsync(cancellationToken);
 
     public async Task<ServerState?> GetServerStateAsync()
@@ -49,6 +48,15 @@ public class ServerRepository(ApplicationDbContext context) : IServerRepository
             .ExecuteUpdateAsync(property => property
                 .SetProperty(serverState => serverState.TimeOffset, timeOffset)
             );
+    }
+
+    public async Task<bool> TrySetTimeOffsetAsync(int expectedTimeOffset, int newTimeOffset, CancellationToken cancellationToken = default)
+    {
+        var rows = await context.ServerStates
+            .Where(serverState => serverState.TimeOffset == expectedTimeOffset && !context.ServerStates.Any(other => other.Id != serverState.Id))
+            .ExecuteUpdateAsync(property => property
+                .SetProperty(serverState => serverState.TimeOffset, newTimeOffset), cancellationToken);
+        return rows == 1;
     }
 
     public async Task AddServerStateAsync(ServerState serverState, CancellationToken cancellationToken = default)

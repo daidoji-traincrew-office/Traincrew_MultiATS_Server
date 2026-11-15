@@ -58,7 +58,7 @@ public class OperationNotificationDisplayDbInitializerTest
         _operationNotificationDisplayRepositoryMock
             .Setup(r => r.GetAllNames(It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
-        _dateTimeRepositoryMock.Setup(r => r.GetNow()).Returns(now);
+        _dateTimeRepositoryMock.Setup(r => r.GetNowScoped()).Returns(now);
 
         var initializer = new OperationNotificationDisplayDbInitializer(
             _loggerMock.Object,
@@ -119,7 +119,7 @@ public class OperationNotificationDisplayDbInitializerTest
         _operationNotificationDisplayRepositoryMock
             .Setup(r => r.GetAllNames(It.IsAny<CancellationToken>()))
             .ReturnsAsync(["Display1"]);
-        _dateTimeRepositoryMock.Setup(r => r.GetNow()).Returns(now);
+        _dateTimeRepositoryMock.Setup(r => r.GetNowScoped()).Returns(now);
 
         var initializer = new OperationNotificationDisplayDbInitializer(
             _loggerMock.Object,
@@ -170,7 +170,7 @@ public class OperationNotificationDisplayDbInitializerTest
         _operationNotificationDisplayRepositoryMock
             .Setup(r => r.GetAllNames(It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
-        _dateTimeRepositoryMock.Setup(r => r.GetNow()).Returns(now);
+        _dateTimeRepositoryMock.Setup(r => r.GetNowScoped()).Returns(now);
 
         var initializer = new OperationNotificationDisplayDbInitializer(
             _loggerMock.Object,
@@ -215,7 +215,7 @@ public class OperationNotificationDisplayDbInitializerTest
         _operationNotificationDisplayRepositoryMock
             .Setup(r => r.GetAllNames(It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
-        _dateTimeRepositoryMock.Setup(r => r.GetNow()).Returns(now);
+        _dateTimeRepositoryMock.Setup(r => r.GetNowScoped()).Returns(now);
 
         OperationNotificationDisplay? capturedDisplay = null;
         _generalRepositoryMock.Setup(r =>

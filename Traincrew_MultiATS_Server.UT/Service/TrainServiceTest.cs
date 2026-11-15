@@ -120,7 +120,7 @@ public class TrainServiceTest
 
         var mockDateTimeRepository = new Mock<IDateTimeRepository>();
         mockDateTimeRepository
-            .Setup(x => x.GetNow())
+            .Setup(x => x.GetNowScoped())
             .Returns(currentTime);
 
         var testServerService = new TestServerService();
@@ -195,7 +195,7 @@ public class TrainServiceTest
         mockTrackCircuitDepartmentTimeRepository.Setup(x => x.GetByTrackCircuitIdAndIsUpAndMaxCarCount(200, false, 8)).ReturnsAsync(departmentTime2);
 
         var mockDateTimeRepository = new Mock<IDateTimeRepository>();
-        mockDateTimeRepository.Setup(x => x.GetNow()).Returns(currentTime);
+        mockDateTimeRepository.Setup(x => x.GetNowScoped()).Returns(currentTime);
 
         var testServerService = new TestServerService();
         testServerService.SetupGetTimeOffsetAsync(() => Task.FromResult(0));
@@ -246,7 +246,7 @@ public class TrainServiceTest
         mockTrackCircuitDepartmentTimeRepository.Setup(x => x.GetByTrackCircuitIdAndIsUpAndMaxCarCount(100, true, 6)).ReturnsAsync(departmentTime);
 
         var mockDateTimeRepository = new Mock<IDateTimeRepository>();
-        mockDateTimeRepository.Setup(x => x.GetNow()).Returns(currentTime);
+        mockDateTimeRepository.Setup(x => x.GetNowScoped()).Returns(currentTime);
 
         var testServerService = new TestServerService();
         testServerService.SetupGetTimeOffsetAsync(() => Task.FromResult(0));
@@ -297,7 +297,7 @@ public class TrainServiceTest
         mockTrackCircuitDepartmentTimeRepository.Setup(x => x.GetByTrackCircuitIdAndIsUpAndMaxCarCount(100, true, 0)).ReturnsAsync(departmentTime);
 
         var mockDateTimeRepository = new Mock<IDateTimeRepository>();
-        mockDateTimeRepository.Setup(x => x.GetNow()).Returns(currentTime);
+        mockDateTimeRepository.Setup(x => x.GetNowScoped()).Returns(currentTime);
 
         var testServerService = new TestServerService();
         testServerService.SetupGetTimeOffsetAsync(() => Task.FromResult(0));
@@ -349,7 +349,7 @@ public class TrainServiceTest
         mockTrackCircuitDepartmentTimeRepository.Setup(x => x.GetByTrackCircuitIdAndIsUpAndMaxCarCount(100, false, 12)).ReturnsAsync(departmentTime);
 
         var mockDateTimeRepository = new Mock<IDateTimeRepository>();
-        mockDateTimeRepository.Setup(x => x.GetNow()).Returns(currentTime);
+        mockDateTimeRepository.Setup(x => x.GetNowScoped()).Returns(currentTime);
 
         var testServerService = new TestServerService();
         testServerService.SetupGetTimeOffsetAsync(() => Task.FromResult(0));
@@ -469,7 +469,7 @@ public class TrainServiceTest
             .ReturnsAsync((TrackCircuitDepartmentTime?)null); // 出発時素なし
 
         var mockDateTimeRepository = new Mock<IDateTimeRepository>();
-        mockDateTimeRepository.Setup(x => x.GetNow()).Returns(currentTime);
+        mockDateTimeRepository.Setup(x => x.GetNowScoped()).Returns(currentTime);
 
         var testServerService = new TestServerService();
         testServerService.SetupGetTimeOffsetAsync(() => Task.FromResult(0));
@@ -535,7 +535,7 @@ public class TrainServiceTest
         mockTrackCircuitDepartmentTimeRepository.Setup(x => x.GetByTrackCircuitIdAndIsUpAndMaxCarCount(200, false, 8)).ReturnsAsync(departmentTime);
 
         var mockDateTimeRepository = new Mock<IDateTimeRepository>();
-        mockDateTimeRepository.Setup(x => x.GetNow()).Returns(currentTime);
+        mockDateTimeRepository.Setup(x => x.GetNowScoped()).Returns(currentTime);
 
         var testServerService = new TestServerService();
         testServerService.SetupGetTimeOffsetAsync(() => Task.FromResult(0));
@@ -587,7 +587,7 @@ public class TrainServiceTest
         mockTrackCircuitDepartmentTimeRepository.Setup(x => x.GetByTrackCircuitIdAndIsUpAndMaxCarCount(100, true, 6)).ReturnsAsync(departmentTime);
 
         var mockDateTimeRepository = new Mock<IDateTimeRepository>();
-        mockDateTimeRepository.Setup(x => x.GetNow()).Returns(currentTime);
+        mockDateTimeRepository.Setup(x => x.GetNowScoped()).Returns(currentTime);
 
         var testServerService = new TestServerService();
         testServerService.SetupGetTimeOffsetAsync(() => Task.FromResult(0));
@@ -638,7 +638,7 @@ public class TrainServiceTest
         mockTrackCircuitDepartmentTimeRepository.Setup(x => x.GetByTrackCircuitIdAndIsUpAndMaxCarCount(100, false, 6)).ReturnsAsync(departmentTime);
 
         var mockDateTimeRepository = new Mock<IDateTimeRepository>();
-        mockDateTimeRepository.Setup(x => x.GetNow()).Returns(currentTime);
+        mockDateTimeRepository.Setup(x => x.GetNowScoped()).Returns(currentTime);
 
         var testServerService = new TestServerService();
         testServerService.SetupGetTimeOffsetAsync(() => Task.FromResult(0));
@@ -712,7 +712,7 @@ public class TrainServiceTest
         mockTrackCircuitDepartmentTimeRepository.Setup(x => x.GetByTrackCircuitIdAndIsUpAndMaxCarCount(100, true, 8)).ReturnsAsync(departmentTime);
 
         var mockDateTimeRepository = new Mock<IDateTimeRepository>();
-        mockDateTimeRepository.Setup(x => x.GetNow()).Returns(currentTime);
+        mockDateTimeRepository.Setup(x => x.GetNowScoped()).Returns(currentTime);
 
         var testServerService = new TestServerService();
         testServerService.SetupGetTimeOffsetAsync(() => Task.FromResult(0));
@@ -769,7 +769,7 @@ public class TrainServiceTest
         mockTrackCircuitDepartmentTimeRepository.Setup(x => x.GetByTrackCircuitIdAndIsUpAndMaxCarCount(100, true, 8)).ReturnsAsync(departmentTime);
 
         var mockDateTimeRepository = new Mock<IDateTimeRepository>();
-        mockDateTimeRepository.Setup(x => x.GetNow()).Returns(currentTime);
+        mockDateTimeRepository.Setup(x => x.GetNowScoped()).Returns(currentTime);
 
         var testServerService = new TestServerService();
         testServerService.SetupGetTimeOffsetAsync(() => Task.FromResult(0));
@@ -827,7 +827,7 @@ public class TrainServiceTest
         mockTrackCircuitDepartmentTimeRepository.Setup(x => x.GetByTrackCircuitIdAndIsUpAndMaxCarCount(100, true, 10)).ReturnsAsync(departmentTime);
 
         var mockDateTimeRepository = new Mock<IDateTimeRepository>();
-        mockDateTimeRepository.Setup(x => x.GetNow()).Returns(currentTime);
+        mockDateTimeRepository.Setup(x => x.GetNowScoped()).Returns(currentTime);
 
         var testServerService = new TestServerService();
         testServerService.SetupGetTimeOffsetAsync(() => Task.FromResult(timeOffset));
@@ -879,7 +879,7 @@ public class TrainServiceTest
         mockTrackCircuitDepartmentTimeRepository.Setup(x => x.GetByTrackCircuitIdAndIsUpAndMaxCarCount(100, true, 10)).ReturnsAsync(departmentTime);
 
         var mockDateTimeRepository = new Mock<IDateTimeRepository>();
-        mockDateTimeRepository.Setup(x => x.GetNow()).Returns(currentTime);
+        mockDateTimeRepository.Setup(x => x.GetNowScoped()).Returns(currentTime);
 
         var testServerService = new TestServerService();
         testServerService.SetupGetTimeOffsetAsync(() => Task.FromResult(timeOffset));
@@ -931,7 +931,7 @@ public class TrainServiceTest
         mockTrackCircuitDepartmentTimeRepository.Setup(x => x.GetByTrackCircuitIdAndIsUpAndMaxCarCount(100, true, 8)).ReturnsAsync(departmentTime);
 
         var mockDateTimeRepository = new Mock<IDateTimeRepository>();
-        mockDateTimeRepository.Setup(x => x.GetNow()).Returns(currentTime);
+        mockDateTimeRepository.Setup(x => x.GetNowScoped()).Returns(currentTime);
 
         var testServerService = new TestServerService();
         testServerService.SetupGetTimeOffsetAsync(() => Task.FromResult(0));
@@ -983,7 +983,7 @@ public class TrainServiceTest
         mockTrackCircuitDepartmentTimeRepository.Setup(x => x.GetByTrackCircuitIdAndIsUpAndMaxCarCount(100, true, 8)).ReturnsAsync(departmentTime);
 
         var mockDateTimeRepository = new Mock<IDateTimeRepository>();
-        mockDateTimeRepository.Setup(x => x.GetNow()).Returns(currentTime);
+        mockDateTimeRepository.Setup(x => x.GetNowScoped()).Returns(currentTime);
 
         var testServerService = new TestServerService();
         testServerService.SetupGetTimeOffsetAsync(() => Task.FromResult(0));
@@ -1035,7 +1035,7 @@ public class TrainServiceTest
         mockTrackCircuitDepartmentTimeRepository.Setup(x => x.GetByTrackCircuitIdAndIsUpAndMaxCarCount(100, true, 8)).ReturnsAsync(departmentTime);
 
         var mockDateTimeRepository = new Mock<IDateTimeRepository>();
-        mockDateTimeRepository.Setup(x => x.GetNow()).Returns(currentTime);
+        mockDateTimeRepository.Setup(x => x.GetNowScoped()).Returns(currentTime);
 
         var testServerService = new TestServerService();
         testServerService.SetupGetTimeOffsetAsync(() => Task.FromResult(0));
@@ -1087,7 +1087,7 @@ public class TrainServiceTest
         mockTrackCircuitDepartmentTimeRepository.Setup(x => x.GetByTrackCircuitIdAndIsUpAndMaxCarCount(100, true, 8)).ReturnsAsync(departmentTime);
 
         var mockDateTimeRepository = new Mock<IDateTimeRepository>();
-        mockDateTimeRepository.Setup(x => x.GetNow()).Returns(currentTime);
+        mockDateTimeRepository.Setup(x => x.GetNowScoped()).Returns(currentTime);
 
         var testServerService = new TestServerService();
         testServerService.SetupGetTimeOffsetAsync(() => Task.FromResult(0));

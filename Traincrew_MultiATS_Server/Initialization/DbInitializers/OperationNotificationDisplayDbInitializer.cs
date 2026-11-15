@@ -55,7 +55,7 @@ public class OperationNotificationDisplayDbInitializer(
                     DisplayName = name,
                     Type = OperationNotificationType.None,
                     Content = "",
-                    OperatedAt = dateTimeRepository.GetNow().AddDays(-1)
+                    OperatedAt = dateTimeRepository.GetNowScoped().AddDays(-1)
                 }
             });
 

@@ -200,7 +200,7 @@ public partial class DbRendoTableInitializer
                     {
                         IsSwitching = false,
                         IsReverse = NR.Normal,
-                        SwitchEndTime = dateTimeRepository.GetNow().AddDays(-1)
+                        SwitchEndTime = dateTimeRepository.GetNowScoped().AddDays(-1)
                     }
                 };
             }
@@ -341,7 +341,7 @@ public partial class DbRendoTableInitializer
                 DestinationButtonState = new()
                 {
                     IsRaised = RaiseDrop.Drop,
-                    OperatedAt = dateTimeRepository.GetNow().AddDays(-1)
+                    OperatedAt = dateTimeRepository.GetNowScoped().AddDays(-1)
                 }
             });
         }
