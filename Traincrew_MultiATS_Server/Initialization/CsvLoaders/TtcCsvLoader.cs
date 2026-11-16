@@ -3,6 +3,22 @@ using Traincrew_MultiATS_Server.Models;
 namespace Traincrew_MultiATS_Server.Initialization.CsvLoaders;
 
 /// <summary>
+///     Loader for TTC path CSV
+/// </summary>
+public class TtcPathCsvLoader(ILogger<TtcPathCsvLoader> logger) : BaseCsvLoader<TtcPathCsv>(logger)
+{
+   public virtual async Task<List<TtcPathCsv>> LoadAsync(CancellationToken cancellationToken = default)
+   {
+      return await LoadCsvAsync(
+         CsvFilePaths.TtcPath,
+         true,
+         new TtcPathCsvMap(),
+         cancellationToken);
+   }
+}
+
+
+/// <summary>
 ///     Loader for TTC window CSV
 /// </summary>
 public class TtcWindowCsvLoader(ILogger<TtcWindowCsvLoader> logger) : BaseCsvLoader<TtcWindowCsv>(logger)

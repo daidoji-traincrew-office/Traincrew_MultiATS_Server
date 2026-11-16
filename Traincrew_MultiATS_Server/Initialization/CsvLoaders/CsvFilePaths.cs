@@ -66,6 +66,11 @@ public static class CsvFilePaths
     public const string TtcWindowLink = $"{DataDirectory}/TTC列番窓リンク設定.csv";
 
     /// <summary>
+    ///     TTC進路.csv
+    /// </summary>
+    public const string TtcPath = $"{DataDirectory}/TTC進路.csv";
+
+    /// <summary>
     ///     RendoTable directory
     /// </summary>
     public const string RendoTableDirectory = $"{DataDirectory}/RendoTable";
