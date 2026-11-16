@@ -1,6 +1,11 @@
 -- 全リセット用SQL
 -- 実行注意！！！環境確認良いか？
 
+delete from ttc_path_predecessor;
+delete from ttc_path_approach_track_circuit;
+delete from ttc_path_route;
+delete from ttc_path;
+
 delete from ttc_window_link_route_condition;
 delete from ttc_window_link;
 delete from ttc_window_display_station;

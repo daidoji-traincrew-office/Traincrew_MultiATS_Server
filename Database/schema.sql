@@ -255,7 +255,7 @@ CREATE TABLE ttc_path_approach_track_circuit
     UNIQUE (ttc_path_id, index)
 );
 
--- 近接前対応進路 
+-- 近接前対応進路
 CREATE TABLE ttc_path_predecessor
 (
     id                 BIGSERIAL PRIMARY KEY,
@@ -263,7 +263,8 @@ CREATE TABLE ttc_path_predecessor
     source_ttc_path_id BIGINT REFERENCES ttc_path (id) NOT NULL,                    -- 元のパスのID
     target_ttc_path_id BIGINT REFERENCES ttc_path (id) NOT NULL,                    -- 先行パスのID
     UNIQUE (source_ttc_path_id, target_ttc_path_id),
-    UNIQUE (source_ttc_path_id, index)
+    UNIQUE (source_ttc_path_id, index),
+    CHECK (source_ttc_path_id <> target_ttc_path_id) -- 自分自身を先行パスにしない
 );
 
 

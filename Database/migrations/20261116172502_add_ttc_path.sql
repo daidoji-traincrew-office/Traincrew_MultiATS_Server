@@ -38,6 +38,7 @@ CREATE TABLE "ttc_path_predecessor" (
   CONSTRAINT "ttc_path_predecessor_source_ttc_path_id_target_ttc_path_id_key" UNIQUE ("source_ttc_path_id", "target_ttc_path_id"),
   CONSTRAINT "ttc_path_predecessor_source_ttc_path_id_fkey" FOREIGN KEY ("source_ttc_path_id") REFERENCES "ttc_path" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION,
   CONSTRAINT "ttc_path_predecessor_target_ttc_path_id_fkey" FOREIGN KEY ("target_ttc_path_id") REFERENCES "ttc_path" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT "ttc_path_predecessor_check" CHECK (source_ttc_path_id <> target_ttc_path_id),
   CONSTRAINT "ttc_path_predecessor_index_check" CHECK (index >= 0)
 );
 -- Create "ttc_path_route" table
