@@ -23,6 +23,7 @@ public static class EnumTypeMapper
         typeMapper.MapEnum<LR>();
         typeMapper.MapEnum<TtcWindowType>();
         typeMapper.MapEnum<TtcWindowLinkType>();
+        typeMapper.MapEnum<TtcPathType>();
         typeMapper.MapEnum<OperationInformationType>();
         typeMapper.MapEnum<ServerMode>();
         typeMapper.MapEnum<ThrowOutControlType>();

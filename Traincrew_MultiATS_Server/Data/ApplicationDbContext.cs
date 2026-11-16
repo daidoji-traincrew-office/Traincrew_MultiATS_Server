@@ -52,6 +52,10 @@ public class ApplicationDbContext : DbContext
     public DbSet<TtcWindowDisplayStation> TtcWindowDisplayStations { get; set; }
     public DbSet<TtcWindowTrackCircuit> TtcWindowTrackCircuits { get; set; }
     public DbSet<TtcWindowLinkRouteCondition> TtcWindowLinkRouteConditions { get; set; }
+    public DbSet<TtcPath> TtcPaths { get; set; }
+    public DbSet<TtcPathRoute> TtcPathRoutes { get; set; }
+    public DbSet<TtcPathApproachTrackCircuit> TtcPathApproachTrackCircuits { get; set; }
+    public DbSet<TtcPathPredecessor> TtcPathPredecessors { get; set; }
     public DbSet<TrainState> TrainStates { get; set; }
     public DbSet<TrainCarState> TrainCarStates { get; set; }
     public DbSet<TrainType> TrainTypes { get; set; }
@@ -195,6 +199,48 @@ public class ApplicationDbContext : DbContext
             .WithMany()
             .HasForeignKey(t => t.RouteId)
             .HasPrincipalKey(r => r.Id);
+
+        modelBuilder.Entity<TtcPathRoute>()
+            .HasOne(t => t.TtcPath)
+            .WithMany()
+            .HasForeignKey(t => t.TtcPathId)
+            .HasPrincipalKey(t => t.Id);
+
+        modelBuilder.Entity<TtcPathRoute>()
+            .HasOne<Route>()
+            .WithMany()
+            .HasForeignKey(t => t.RouteId)
+            .HasPrincipalKey(r => r.Id);
+
+        modelBuilder.Entity<TtcPathApproachTrackCircuit>()
+            .HasOne(t => t.TtcPath)
+            .WithMany()
+            .HasForeignKey(t => t.TtcPathId)
+            .HasPrincipalKey(t => t.Id);
+
+        modelBuilder.Entity<TtcPathApproachTrackCircuit>()
+            .HasOne<TrackCircuit>()
+            .WithMany()
+            .HasForeignKey(t => t.TrackCircuitId)
+            .HasPrincipalKey(tc => tc.Id);
+
+        modelBuilder.Entity<TtcPathPredecessor>()
+            .HasOne(t => t.SourceTtcPath)
+            .WithMany()
+            .HasForeignKey(t => t.SourceTtcPathId)
+            .HasPrincipalKey(t => t.Id);
+
+        modelBuilder.Entity<TtcPathPredecessor>()
+            .HasOne(t => t.TargetTtcPath)
+            .WithMany()
+            .HasForeignKey(t => t.TargetTtcPathId)
+            .HasPrincipalKey(t => t.Id);
+
+        modelBuilder.Entity<TtcPath>()
+            .HasOne<Station>()
+            .WithMany()
+            .HasForeignKey(t => t.StationId)
+            .HasPrincipalKey(s => s.Id);
 
         modelBuilder.Entity<TtcWindow>()
             .HasOne(tw => tw.TtcWindowState)

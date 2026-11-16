@@ -218,6 +218,54 @@ CREATE table ttc_window_link_route_condition
     UNIQUE (ttc_window_link_id, route_id)
 );
 
+-- TTC進路(パス)
+-- 種類
+CREATE TYPE ttc_path_type AS ENUM ('arriving', 'departure', 'switching');
+
+CREATE TABLE ttc_path
+(
+    id                           BIGSERIAL PRIMARY KEY,
+    name                         TEXT UNIQUE                         NOT NULL, -- 名前
+    station_id                   VARCHAR(10) REFERENCES station (id) NOT NULL, -- 所属する停車場
+    source_track                 TEXT                                NOT NULL, -- 元番線
+    target_track                 TEXT                                NOT NULL, -- 先番線
+    type                         ttc_path_type                       NOT NULL, -- 種類
+    define_order_track_circuit_count INTEGER                         NOT NULL CHECK (define_order_track_circuit_count >= 0) -- 順序断定回路数
+);
+
+-- TTC進路で構成する進路
+CREATE TABLE ttc_path_route
+(
+    id          BIGSERIAL PRIMARY KEY,
+    index       INTEGER                           NOT NULL CHECK (index >= 0), -- パス内の順序
+    ttc_path_id BIGINT REFERENCES ttc_path (id)   NOT NULL,                    -- パスのID
+    route_id    BIGINT REFERENCES route (id)      NOT NULL,                    -- 進路のID
+    UNIQUE (ttc_path_id, route_id),
+    UNIQUE (ttc_path_id, index)
+);
+
+-- TTC進路の接近判定軌道回路
+CREATE TABLE ttc_path_approach_track_circuit
+(
+    id               BIGSERIAL PRIMARY KEY,
+    index            INTEGER                              NOT NULL CHECK (index >= 0), -- パス内の順序
+    ttc_path_id      BIGINT REFERENCES ttc_path (id)      NOT NULL,                    -- パスのID
+    track_circuit_id BIGINT REFERENCES track_circuit (id) NOT NULL,                    -- 軌道回路のID
+    UNIQUE (ttc_path_id, track_circuit_id),
+    UNIQUE (ttc_path_id, index)
+);
+
+-- 近接前対応進路 
+CREATE TABLE ttc_path_predecessor
+(
+    id                 BIGSERIAL PRIMARY KEY,
+    index              INTEGER                         NOT NULL CHECK (index >= 0), -- 順序
+    source_ttc_path_id BIGINT REFERENCES ttc_path (id) NOT NULL,                    -- 元のパスのID
+    target_ttc_path_id BIGINT REFERENCES ttc_path (id) NOT NULL,                    -- 先行パスのID
+    UNIQUE (source_ttc_path_id, target_ttc_path_id),
+    UNIQUE (source_ttc_path_id, index)
+);
+
 
 -- 転てつ機
 CREATE TABLE switching_machine
