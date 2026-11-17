@@ -87,7 +87,7 @@ public class TtcDbInitializerTest
             { "TC2", 200 }
         };
 
-        _ttcWindowRepositoryMock.Setup(r => r.GetAllWindowNamesAsync(It.IsAny<CancellationToken>()))
+        _ttcWindowRepositoryMock.Setup(r => r.GetAll(It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
         _trackCircuitRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>()))
             .ReturnsAsync(trackCircuitIdByName);
@@ -125,6 +125,231 @@ public class TtcDbInitializerTest
     }
 
     [Fact]
+    [DisplayName("TTC窓の追加時、番線が設定されること(空欄は空文字)")]
+    public async Task InitializeTtcWindowsAsync_ShouldSetTrackNumber()
+    {
+        // Arrange
+        var csvRecords = new List<TtcWindowCsv>
+        {
+            new()
+            {
+                Name = "Window1", StationId = "Station1", TrackNumber = "1",
+                Type = TtcWindowType.HomeTrack
+            },
+            new()
+            {
+                Name = "Window2", StationId = "Station1", TrackNumber = "",
+                Type = TtcWindowType.Up
+            }
+        };
+
+        _ttcWindowRepositoryMock.Setup(r => r.GetAll(It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+        _trackCircuitRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Dictionary<string, ulong>());
+
+        var initializer = CreateInitializer();
+
+        // Act
+        await initializer.InitializeTtcWindowsAsync(csvRecords, TestContext.Current.CancellationToken);
+
+        // Assert
+        _generalRepositoryMock.Verify(
+            r => r.AddAll(It.Is<List<TtcWindow>>(list =>
+                list.Count == 2 &&
+                list[0].TrackNumber == "1" &&
+                list[1].TrackNumber == ""
+            ), It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    private static TtcWindow Window(string name, string trackNumber) => new()
+    {
+        Name = name, StationId = "Station1", Type = TtcWindowType.HomeTrack, TrackNumber = trackNumber
+    };
+
+    private static TtcWindowCsv Csv(string name, string trackNumber) => new()
+    {
+        Name = name, StationId = "Station1", Type = TtcWindowType.HomeTrack, TrackNumber = trackNumber
+    };
+
+    private void SetupExistingWindows(params TtcWindow[] windows)
+    {
+        _ttcWindowRepositoryMock.Setup(r => r.GetAll(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(windows.ToList());
+        _trackCircuitRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Dictionary<string, ulong>());
+    }
+
+    // SaveAll<TtcWindow> 呼び出し時点の番線を記録する(同じインスタンスを書き換えるため)
+    private List<string> CaptureWindowSaves(List<string> calls)
+    {
+        _generalRepositoryMock
+            .Setup(r => r.SaveAll(It.IsAny<List<TtcWindow>>(), It.IsAny<CancellationToken>()))
+            .Callback<IEnumerable<TtcWindow>, CancellationToken>((list, _) =>
+                calls.Add("Save:" + string.Join(",", list.Select(w => $"{w.Name}={w.TrackNumber}"))))
+            .Returns(Task.CompletedTask);
+        _generalRepositoryMock
+            .Setup(r => r.AddAll(It.IsAny<List<TtcWindow>>(), It.IsAny<CancellationToken>()))
+            .Callback<IEnumerable<TtcWindow>, CancellationToken>((_, _) => calls.Add("AddWindows"))
+            .Returns(Task.CompletedTask);
+        return calls;
+    }
+
+    [Fact]
+    [DisplayName("既存のTTC窓の番線がCSVと違う場合、番線だけ更新されること")]
+    public async Task InitializeTtcWindowsAsync_ShouldUpdateTrackNumber_WhenExistingWindowDiffers()
+    {
+        var existing = Window("Window1", "");
+        var unchanged = Window("Window2", "2");
+        SetupExistingWindows(existing, unchanged);
+        var calls = CaptureWindowSaves([]);
+
+        await CreateInitializer().InitializeTtcWindowsAsync(
+            [Csv("Window1", "1"), Csv("Window2", "2")], TestContext.Current.CancellationToken);
+
+        Assert.Equal("1", existing.TrackNumber);
+        // いったん空文字で保存してから、目的の番線で保存する
+        Assert.Equal(["Save:Window1=", "Save:Window1=1", "AddWindows"], calls);
+    }
+
+    [Fact]
+    [DisplayName("全てのTTC窓の番線がCSVと同じ場合、SaveAllが呼ばれないこと")]
+    public async Task InitializeTtcWindowsAsync_ShouldNotSave_WhenTrackNumbersAreSame()
+    {
+        SetupExistingWindows(Window("Window1", "1"), Window("Window2", ""));
+
+        await CreateInitializer().InitializeTtcWindowsAsync(
+            [Csv("Window1", "1"), Csv("Window2", "")], TestContext.Current.CancellationToken);
+
+        _generalRepositoryMock.Verify(
+            r => r.SaveAll(It.IsAny<List<TtcWindow>>(), It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    [Fact]
+    [DisplayName("既存のTTC窓の番線を入れ替える場合、いったん空文字で保存してから目的の番線で保存すること")]
+    public async Task InitializeTtcWindowsAsync_ShouldSwapTrackNumbersInTwoSteps()
+    {
+        var a = Window("WindowA", "1");
+        var b = Window("WindowB", "2");
+        SetupExistingWindows(a, b);
+        var calls = CaptureWindowSaves([]);
+
+        await CreateInitializer().InitializeTtcWindowsAsync(
+            [Csv("WindowA", "2"), Csv("WindowB", "1")], TestContext.Current.CancellationToken);
+
+        Assert.Equal("2", a.TrackNumber);
+        Assert.Equal("1", b.TrackNumber);
+        Assert.Equal(["Save:WindowA=,WindowB=", "Save:WindowA=2,WindowB=1", "AddWindows"], calls);
+    }
+
+    [Fact]
+    [DisplayName("既存のTTC窓の番線更新では、表示駅・軌道回路が追加されないこと")]
+    public async Task InitializeTtcWindowsAsync_ShouldNotAddChildren_WhenOnlyUpdatingTrackNumber()
+    {
+        SetupExistingWindows(Window("Window1", ""));
+        var record = Csv("Window1", "1");
+        record.DisplayStations = ["Station2"];
+        record.TrackCircuits = ["TC1"];
+
+        await CreateInitializer().InitializeTtcWindowsAsync([record], TestContext.Current.CancellationToken);
+
+        _generalRepositoryMock.Verify(
+            r => r.AddAll(It.Is<List<TtcWindowDisplayStation>>(list => list.Count == 0),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+        _generalRepositoryMock.Verify(
+            r => r.AddAll(It.Is<List<TtcWindowTrackCircuit>>(list => list.Count == 0),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Fact]
+    [DisplayName("CSV内で同じ駅の番線が重複している場合、窓名を含む例外になること")]
+    public async Task InitializeTtcWindowsAsync_ShouldThrow_WhenTrackNumberDuplicatedInCsv()
+    {
+        SetupExistingWindows();
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            CreateInitializer().InitializeTtcWindowsAsync(
+                [Csv("WindowA", "1"), Csv("WindowB", "1")], TestContext.Current.CancellationToken));
+
+        Assert.Contains("WindowA", exception.Message);
+        Assert.Contains("WindowB", exception.Message);
+    }
+
+    [Fact]
+    [DisplayName("番線が空文字の窓は、同じ駅に複数あっても例外にならないこと")]
+    public async Task InitializeTtcWindowsAsync_ShouldNotThrow_WhenEmptyTrackNumbersDuplicated()
+    {
+        SetupExistingWindows();
+
+        await CreateInitializer().InitializeTtcWindowsAsync(
+            [Csv("WindowA", ""), Csv("WindowB", "")], TestContext.Current.CancellationToken);
+    }
+
+    [Fact]
+    [DisplayName("CSVに無い既存窓は、番線が空文字になること")]
+    public async Task InitializeTtcWindowsAsync_ShouldClearTrackNumber_WhenWindowNotInCsv()
+    {
+        var removed = Window("Removed", "1");
+        SetupExistingWindows(removed, Window("Window2", "2"));
+        var calls = CaptureWindowSaves([]);
+
+        await CreateInitializer().InitializeTtcWindowsAsync([Csv("Window2", "2")],
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal("", removed.TrackNumber);
+        Assert.Equal(["Save:Removed=", "AddWindows"], calls);
+    }
+
+    [Fact]
+    [DisplayName("CSVに無い既存窓の番線が既に空文字なら、更新しないこと")]
+    public async Task InitializeTtcWindowsAsync_ShouldNotSave_WhenWindowNotInCsvHasEmptyTrackNumber()
+    {
+        SetupExistingWindows(Window("Removed", ""));
+
+        await CreateInitializer().InitializeTtcWindowsAsync([], TestContext.Current.CancellationToken);
+
+        _generalRepositoryMock.Verify(
+            r => r.SaveAll(It.IsAny<List<TtcWindow>>(), It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    [Fact]
+    [DisplayName("消えた窓の番線を別の既存窓へ付け替える場合、先に空文字にしてから付け替えること")]
+    public async Task InitializeTtcWindowsAsync_ShouldReassignTrackNumber_FromRemovedToExistingWindow()
+    {
+        var removed = Window("Removed", "1");
+        var other = Window("Other", "");
+        SetupExistingWindows(removed, other);
+        var calls = CaptureWindowSaves([]);
+
+        await CreateInitializer().InitializeTtcWindowsAsync([Csv("Other", "1")],
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal("", removed.TrackNumber);
+        Assert.Equal("1", other.TrackNumber);
+        Assert.Equal(["Save:Removed=,Other=", "Save:Other=1", "AddWindows"], calls);
+    }
+
+    [Fact]
+    [DisplayName("消えた窓の番線を新規窓へ付け替える場合、新規窓の追加より先に空文字にすること")]
+    public async Task InitializeTtcWindowsAsync_ShouldReassignTrackNumber_FromRemovedToNewWindow()
+    {
+        var removed = Window("Removed", "1");
+        SetupExistingWindows(removed);
+        var calls = CaptureWindowSaves([]);
+
+        await CreateInitializer().InitializeTtcWindowsAsync([Csv("New", "1")],
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal("", removed.TrackNumber);
+        Assert.Equal(["Save:Removed=", "AddWindows"], calls);
+    }
+
+    [Fact]
     [DisplayName("既存のTTC窓が存在する場合、スキップされること")]
     public async Task InitializeTtcWindowsAsync_ShouldSkipExistingWindows()
     {
@@ -141,8 +366,8 @@ public class TtcDbInitializerTest
             }
         };
 
-        _ttcWindowRepositoryMock.Setup(r => r.GetAllWindowNamesAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(["Window1"]);
+        _ttcWindowRepositoryMock.Setup(r => r.GetAll(It.IsAny<CancellationToken>()))
+            .ReturnsAsync([new TtcWindow { Name = "Window1", StationId = "Station1", Type = TtcWindowType.HomeTrack }]);
         _trackCircuitRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Dictionary<string, ulong>());
 
@@ -882,7 +1107,7 @@ public class TtcDbInitializerTest
             .ReturnsAsync([]);
         _windowLinkCsvLoaderMock.Setup(l => l.LoadAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
-        _ttcWindowRepositoryMock.Setup(r => r.GetAllWindowNamesAsync(It.IsAny<CancellationToken>()))
+        _ttcWindowRepositoryMock.Setup(r => r.GetAll(It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
         _ttcWindowLinkRepositoryMock.Setup(r => r.GetAllLinkPairsAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(new HashSet<(string, string)>());

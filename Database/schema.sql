@@ -177,8 +177,11 @@ CREATE TABLE ttc_window
 (
     name       VARCHAR(100) PRIMARY KEY,                     -- 名前
     station_id VARCHAR(10) REFERENCES station (id) NOT NULL, -- 所属する停車場
-    type       ttc_window_type                     NOT NULL  -- 列番窓の種類
+    type       ttc_window_type                     NOT NULL, -- 列番窓の種類
+    track_number VARCHAR(10)                       NOT NULL DEFAULT '' -- 番線(TTC経路の元番線/先番線と同じ表記。番線の窓でなければ空文字)
 );
+-- 同じ駅に同じ番線の窓を2つ作らない(空文字=番線なしは重複可)
+CREATE UNIQUE INDEX ttc_window_station_id_track_number_key ON ttc_window (station_id, track_number) WHERE track_number <> '';
 
 CREATE TABLE ttc_window_display_station
 (
