@@ -75,8 +75,8 @@ public class RouteConflictDbInitializer(
                 .ToHashSet();
             foreach (var conflictingRouteId in conflictingRouteIds)
             {
-               conflictPairs.Add((routeId, conflictingRouteId));
-               conflictPairs.Add((conflictingRouteId, routeId));
+                conflictPairs.Add((routeId, conflictingRouteId));
+                conflictPairs.Add((conflictingRouteId, routeId));
             }
         }
 
@@ -84,7 +84,7 @@ public class RouteConflictDbInitializer(
         var routeConflictsToDelete = existingRouteConflicts
             .Where(r => !conflictPairs.Contains((r.RouteId, r.ConflictingRouteId)))
             .ToList();
-        if(routeConflictsToDelete.Count > 0)
+        if (routeConflictsToDelete.Count > 0)
         {
             await generalRepository.DeleteAll(routeConflictsToDelete, cancellationToken);
             logger.LogInformation("競合進路を {Count} 件削除しました", routeConflictsToDelete.Count);
@@ -99,7 +99,7 @@ public class RouteConflictDbInitializer(
                 ConflictingRouteId = pair.ConflictingRouteId
             })
             .ToList();
-        if(routeConflictsToAdd.Count > 0)
+        if (routeConflictsToAdd.Count > 0)
         {
             await generalRepository.AddAll(routeConflictsToAdd, cancellationToken);
             logger.LogInformation("競合進路を {Count} 件登録しました", routeConflictsToAdd.Count);

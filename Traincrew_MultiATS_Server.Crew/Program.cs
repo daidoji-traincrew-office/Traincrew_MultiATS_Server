@@ -241,7 +241,8 @@ public class Program
     private static void ConfigureDatabaseService(WebApplicationBuilder builder)
     {
         // DBの設定
-        var dataSourceBuilder = new NpgsqlDataSourceBuilder(builder.Configuration.GetConnectionString("DefaultConnection"));
+        var dataSourceBuilder =
+            new NpgsqlDataSourceBuilder(builder.Configuration.GetConnectionString("DefaultConnection"));
         // Enumのマッピング
         EnumTypeMapper.MapEnumForNpgsql(dataSourceBuilder);
         var dataSource = dataSourceBuilder.Build();
@@ -256,10 +257,7 @@ public class Program
     private static void ConfigureSignalRService(WebApplicationBuilder builder)
     {
         // SignalRの設定
-        builder.Services.AddSignalR(options =>
-        {
-            options.ClientTimeoutInterval = TimeSpan.FromMinutes(3);
-        });
+        builder.Services.AddSignalR(options => { options.ClientTimeoutInterval = TimeSpan.FromMinutes(3); });
     }
 
     private static List<IEndpointConventionBuilder> ConfigureEndpoints(WebApplication app)
@@ -269,7 +267,9 @@ public class Program
         // にのみ200を返すヘルスチェック。認可を通さないため常に明示的にAllowAnonymousとする
         // (enableAuthorization=true時はendpointBuildersのAllowAnonymous一括付与に乗らないため)
         app.MapGet("/healthz", (InitializationState initializationState) =>
-                initializationState.IsInitialized ? Results.Ok() : Results.StatusCode(StatusCodes.Status503ServiceUnavailable))
+                initializationState.IsInitialized
+                    ? Results.Ok()
+                    : Results.StatusCode(StatusCodes.Status503ServiceUnavailable))
             .AllowAnonymous()
             // healthcheckが数秒おきに叩くためログには出さない
             .WithHttpLogging(HttpLoggingFields.None);
@@ -550,7 +550,8 @@ public class Program
             .AddScoped<IInterlockingObjectRepository, InterlockingObjectRepository>()
             .AddScoped<ILockRepository, LockRepository>()
             .AddScoped<ILockConditionRepository, LockConditionRepository>()
-            .AddScoped<ILockConditionByRouteCentralControlLeverRepository, LockConditionByRouteCentralControlLeverRepository>()
+            .AddScoped<ILockConditionByRouteCentralControlLeverRepository,
+                LockConditionByRouteCentralControlLeverRepository>()
             .AddScoped<ILeverRepository, LeverRepository>()
             .AddScoped<INextSignalRepository, NextSignalRepository>()
             .AddScoped<IOperationNotificationRepository, OperationNotificationRepository>()
@@ -686,10 +687,7 @@ public class Program
         {
             tracing.AddAspNetCoreInstrumentation();
             tracing.AddHttpClientInstrumentation();
-            tracing.AddEntityFrameworkCoreInstrumentation(options =>
-            {
-                options.SetDbStatementForText = true;
-            });
+            tracing.AddEntityFrameworkCoreInstrumentation(options => { options.SetDbStatementForText = true; });
             tracing.AddSource(ActivitySources.Scheduler.Name);
             tracing.AddSource(ActivitySources.Hubs.Name);
         });
