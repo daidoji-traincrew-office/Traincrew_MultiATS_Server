@@ -535,6 +535,7 @@ public class Program
             .AddScoped<InterlockingObjectDbInitializer>()
             .AddScoped<SwitchingMachineRouteDbInitializer>()
             .AddScoped<DiagramDbInitializer>()
+            .AddScoped<RouteConflictDbInitializer>()
             // Orchestrator
             .AddScoped<DatabaseInitializationOrchestrator>()
             // 初期化完了状態(/healthz が参照する)
