@@ -43,6 +43,7 @@ using Traincrew_MultiATS_Server.Repositories.Transaction;
 using Traincrew_MultiATS_Server.Repositories.TtcPath;
 using Traincrew_MultiATS_Server.Repositories.TtcPathApproachTrackCircuit;
 using Traincrew_MultiATS_Server.Repositories.TtcPathPredecessor;
+using Traincrew_MultiATS_Server.Repositories.RouteConflict;
 using Traincrew_MultiATS_Server.Repositories.TtcPathRoute;
 using Traincrew_MultiATS_Server.Repositories.TtcWindow;
 using Traincrew_MultiATS_Server.Repositories.TtcWindowLink;
@@ -112,6 +113,7 @@ public static class MockDependencyProvider
         services.AddScoped(_ => new Mock<ITtcPathRouteRepository>().Object);
         services.AddScoped(_ => new Mock<ITtcPathApproachTrackCircuitRepository>().Object);
         services.AddScoped(_ => new Mock<ITtcPathPredecessorRepository>().Object);
+        services.AddScoped(_ => new Mock<IRouteConflictRepository>().Object);
         services.AddScoped(_ => new Mock<ITtcWindowTrackCircuitRepository>().Object);
         services.AddScoped(_ => new Mock<ITtcWindowLinkRouteConditionRepository>().Object);
         services.AddScoped(_ => new Mock<ITransactionRepository>().Object);

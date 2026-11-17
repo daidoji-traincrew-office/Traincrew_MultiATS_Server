@@ -63,6 +63,7 @@ using Traincrew_MultiATS_Server.Repositories.Transaction;
 using Traincrew_MultiATS_Server.Repositories.TtcPath;
 using Traincrew_MultiATS_Server.Repositories.TtcPathApproachTrackCircuit;
 using Traincrew_MultiATS_Server.Repositories.TtcPathPredecessor;
+using Traincrew_MultiATS_Server.Repositories.RouteConflict;
 using Traincrew_MultiATS_Server.Repositories.TtcPathRoute;
 using Traincrew_MultiATS_Server.Repositories.TtcWindow;
 using Traincrew_MultiATS_Server.Repositories.TtcWindowLink;
@@ -584,6 +585,7 @@ public class Program
             .AddScoped<ITtcPathRouteRepository, TtcPathRouteRepository>()
             .AddScoped<ITtcPathApproachTrackCircuitRepository, TtcPathApproachTrackCircuitRepository>()
             .AddScoped<ITtcPathPredecessorRepository, TtcPathPredecessorRepository>()
+            .AddScoped<IRouteConflictRepository, RouteConflictRepository>()
             .AddScoped<ITtcWindowTrackCircuitRepository, TtcWindowTrackCircuitRepository>()
             .AddScoped<ITtcWindowLinkRouteConditionRepository, TtcWindowLinkRouteConditionRepository>()
             .AddScoped<ITransactionRepository, TransactionRepository>()

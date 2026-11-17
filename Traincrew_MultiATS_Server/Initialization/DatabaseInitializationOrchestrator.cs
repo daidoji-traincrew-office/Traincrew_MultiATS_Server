@@ -47,6 +47,7 @@ public class DatabaseInitializationOrchestrator(
     TtcDbInitializer ttcDbInitializer,
     ThrowOutControlDbInitializer throwOutControlDbInitializer,
     SignalDbInitializer signalDbInitializer,
+    RouteConflictDbInitializer routeConflictDbInitializer,
     ILogger<DatabaseInitializationOrchestrator> logger)
 {
     /// <summary>
@@ -182,6 +183,7 @@ public class DatabaseInitializationOrchestrator(
 
         await interlockingObjectDbInitializer.InitializeAsync(cancellationToken);
         await switchingMachineRouteDbInitializer.InitializeSwitchingMachineRoutesAsync(cancellationToken);
+        await routeConflictDbInitializer.InitializeRouteConflictAsync(cancellationToken);
     }
 
     private void DetachUnchangedEntities()
