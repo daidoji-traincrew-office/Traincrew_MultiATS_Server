@@ -512,6 +512,7 @@ public class Program
             .AddScoped<RendoTableCsvLoader>()
             .AddScoped<OperationNotificationDisplayCsvLoader>()
             .AddScoped<RouteLockTrackCircuitCsvLoader>()
+            .AddScoped<TtcPathCsvLoader>()
             .AddScoped<TtcWindowCsvLoader>()
             .AddScoped<TtcWindowLinkCsvLoader>()
             .AddScoped<ThrowOutControlCsvLoader>()
