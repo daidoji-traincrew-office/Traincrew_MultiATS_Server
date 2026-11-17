@@ -604,11 +604,20 @@ public class TtcDbInitializerTest
         var other = new TtcPathRoute { Id = 3, TtcPathId = 20, Index = 0, RouteId = 300 };
         _ttcPathRouteRepositoryMock.Setup(r => r.GetAll(It.IsAny<CancellationToken>()))
             .ReturnsAsync([old0, old1, other]);
+        var calls = new List<string>();
+        _generalRepositoryMock.Setup(r => r.DeleteAll(It.IsAny<IEnumerable<TtcPathRoute>>(), It.IsAny<CancellationToken>()))
+            .Callback(() => calls.Add("Delete"))
+            .Returns(Task.CompletedTask);
+        _generalRepositoryMock.Setup(r => r.AddAll(It.IsAny<IEnumerable<TtcPathRoute>>(), It.IsAny<CancellationToken>()))
+            .Callback(() => calls.Add("Add"))
+            .Returns(Task.CompletedTask);
         var initializer = CreateInitializer();
 
         await initializer.InitializeTtcPathRoutesAsync(
             [PathCsv("P1", routes: ["R2", "R1"]), PathCsv("P2", routes: ["R3"])],
             TestContext.Current.CancellationToken);
+
+        Assert.Equal(["Delete", "Add"], calls);
 
         _generalRepositoryMock.Verify(
             r => r.DeleteAll(It.Is<List<TtcPathRoute>>(l => l.Count == 2 && l.Contains(old0) && l.Contains(old1)),
@@ -639,6 +648,47 @@ public class TtcDbInitializerTest
 
         Assert.Contains("Unknown", ex.Message);
         Assert.Contains("P1", ex.Message);
+        VerifyNoWrites<TtcPathRoute>();
+    }
+
+    [Fact]
+    [DisplayName("CSVで対応進路が空になった場合、既存行の削除のみ行われること")]
+    public async Task InitializeTtcPathRoutesAsync_ShouldOnlyDelete_WhenCsvBecomesEmpty()
+    {
+        SetupPaths(PathEntity(10, "P1"));
+        _routeRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Dictionary<string, ulong> { ["R1"] = 100 });
+        var old = new TtcPathRoute { Id = 1, TtcPathId = 10, Index = 0, RouteId = 100 };
+        _ttcPathRouteRepositoryMock.Setup(r => r.GetAll(It.IsAny<CancellationToken>())).ReturnsAsync([old]);
+        var initializer = CreateInitializer();
+
+        await initializer.InitializeTtcPathRoutesAsync([PathCsv("P1", routes: [])],
+            TestContext.Current.CancellationToken);
+
+        _generalRepositoryMock.Verify(
+            r => r.DeleteAll(It.Is<List<TtcPathRoute>>(l => l.Count == 1 && l[0] == old),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+        _generalRepositoryMock.Verify(
+            r => r.AddAll(It.IsAny<IEnumerable<TtcPathRoute>>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    [DisplayName("CSVのTTC進路名がttc_pathに存在しない場合、例外がスローされること")]
+    public async Task InitializeTtcPathRoutesAsync_ShouldThrow_WhenPathNameNotInDb()
+    {
+        SetupPaths(PathEntity(10, "P1"));
+        _routeRepositoryMock.Setup(r => r.GetAllIdForName(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Dictionary<string, ulong>());
+        _ttcPathRouteRepositoryMock.Setup(r => r.GetAll(It.IsAny<CancellationToken>())).ReturnsAsync([]);
+        var initializer = CreateInitializer();
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            initializer.InitializeTtcPathRoutesAsync([PathCsv("MissingPath")],
+                TestContext.Current.CancellationToken));
+
+        Assert.Contains("MissingPath", ex.Message);
+        Assert.Contains("TTC進路", ex.Message);
         VerifyNoWrites<TtcPathRoute>();
     }
 
@@ -814,14 +864,14 @@ public class TtcDbInitializerTest
 
 
     [Fact]
-    [DisplayName("InitializeAsync が全ローダーを呼び出すこと")]
-    public async Task InitializeAsync_ShouldCallBothInitializationMethods()
+    [DisplayName("InitializeAsync が全ローダーを呼び出し、TTC進路の子テーブル初期化まで実行すること")]
+    public async Task InitializeAsync_ShouldLoadAllCsvAndInitializePathChildren()
     {
         // Arrange
         _pathCsvLoaderMock.Setup(l => l.LoadAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync([]);
+            .ReturnsAsync([PathCsv("P1")]);
         _ttcPathRepositoryMock.Setup(r => r.GetAll(It.IsAny<CancellationToken>()))
-            .ReturnsAsync([]);
+            .ReturnsAsync([PathEntity(1, "P1")]);
         _ttcPathRouteRepositoryMock.Setup(r => r.GetAll(It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
         _ttcPathApproachTrackCircuitRepositoryMock.Setup(r => r.GetAll(It.IsAny<CancellationToken>()))
@@ -852,6 +902,9 @@ public class TtcDbInitializerTest
 
         // Assert
         _pathCsvLoaderMock.Verify(l => l.LoadAsync(It.IsAny<CancellationToken>()), Times.Once);
+        _ttcPathRouteRepositoryMock.Verify(r => r.GetAll(It.IsAny<CancellationToken>()), Times.Once);
+        _ttcPathApproachTrackCircuitRepositoryMock.Verify(r => r.GetAll(It.IsAny<CancellationToken>()), Times.Once);
+        _ttcPathPredecessorRepositoryMock.Verify(r => r.GetAll(It.IsAny<CancellationToken>()), Times.Once);
         _windowCsvLoaderMock.Verify(l => l.LoadAsync(It.IsAny<CancellationToken>()), Times.Once);
         _windowLinkCsvLoaderMock.Verify(l => l.LoadAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
