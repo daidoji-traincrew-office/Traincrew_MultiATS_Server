@@ -9,7 +9,7 @@ public class TtcPathCsv
     public required string Station { get; set; }
     public required string SourceTrack { get; set; }
     public required string TargetTrack { get; set; }
-    public required string Type { get; set; }
+    public required TtcPathType Type { get; set; }
     public required List<string> TargetRoutes { get; set; }
     public required int DefineOrderTrackCircuitCount { get; set; }
     public required List<string> ApproachTrackCircuits { get; set; }
@@ -32,11 +32,23 @@ public sealed class TtcPathCsvMap : ClassMap<TtcPathCsv>
         Map(m => m.Station).Name("対象駅");
         Map(m => m.SourceTrack).Name("元番線");
         Map(m => m.TargetTrack).Name("先番線");
-        Map(m => m.Type).Name("種類");
+        Map(m => m.Type).Convert(GetType);
         Map(m => m.TargetRoutes).Convert(row => GetList(row, TargetRouteFields));
         Map(m => m.DefineOrderTrackCircuitCount).Name("順序断定回路数");
         Map(m => m.ApproachTrackCircuits).Convert(row => GetList(row, ApproachTrackCircuitFields));
         Map(m => m.Predecessor).Convert(row => GetList(row, PredecessorFields));
+    }
+    
+    private static TtcPathType GetType(ConvertFromStringArgs row)
+    {
+        var value = row.Row.GetField("種類");
+        return value switch
+        {
+            "場内" => TtcPathType.Arriving,
+            "出発" => TtcPathType.Departure,
+            "入換" => TtcPathType.Switching,
+            _ => throw new InvalidOperationException($"Invalid path type: {value}")
+        };
     }
 
     private static List<string> GetList(ConvertFromStringArgs row, IEnumerable<string> fieldNames)
