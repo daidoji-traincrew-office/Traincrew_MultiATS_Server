@@ -73,6 +73,29 @@ public class RouteConflictDbInitializerTest
     }
 
     [Fact]
+    [DisplayName("互いの鎖錠欄と転てつ器の両方で競合する場合でも、組は重複せず2件だけ登録されること")]
+    public async Task ShouldNotDuplicate_WhenConflictIsFoundFromMultipleSources()
+    {
+        Setup(
+            [1, 2],
+            new()
+            {
+                { 1, [new LockConditionObject { ObjectId = 2 }] },
+                { 2, [new LockConditionObject { ObjectId = 1 }] }
+            },
+            [
+                new SwitchingMachineRoute { RouteId = 1, SwitchingMachineId = 10, IsReverse = NR.Normal },
+                new SwitchingMachineRoute { RouteId = 2, SwitchingMachineId = 10, IsReverse = NR.Reversed }
+            ]);
+
+        await CreateInitializer().InitializeRouteConflictAsync(TestContext.Current.CancellationToken);
+
+        // Pairs は HashSet なので重複を見逃す。件数も確かめる
+        Assert.Equal(2, _added.Count);
+        Assert.Equal(new HashSet<(ulong, ulong)> { (1, 2), (2, 1) }, Pairs(_added));
+    }
+
+    [Fact]
     [DisplayName("鎖錠欄の対象が進路以外の場合、競合は登録されないこと")]
     public async Task ShouldNotAdd_WhenLockTargetIsNotRoute()
     {
@@ -111,6 +134,27 @@ public class RouteConflictDbInitializerTest
         await CreateInitializer().InitializeRouteConflictAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal(new HashSet<(ulong, ulong)> { (1, 2), (2, 1), (3, 2), (2, 3) }, Pairs(_added));
+    }
+
+    [Fact]
+    [DisplayName("同じ転てつ器を定位同士、反位同士で鎖錠する進路同士は競合として登録されないこと")]
+    public async Task ShouldNotAdd_WhenSwitchingMachinePositionIsSame()
+    {
+        Setup(
+            [1, 2, 3, 4],
+            [],
+            [
+                new SwitchingMachineRoute { RouteId = 1, SwitchingMachineId = 10, IsReverse = NR.Normal },
+                new SwitchingMachineRoute { RouteId = 2, SwitchingMachineId = 10, IsReverse = NR.Normal },
+                new SwitchingMachineRoute { RouteId = 3, SwitchingMachineId = 20, IsReverse = NR.Reversed },
+                new SwitchingMachineRoute { RouteId = 4, SwitchingMachineId = 20, IsReverse = NR.Reversed }
+            ]);
+
+        await CreateInitializer().InitializeRouteConflictAsync(TestContext.Current.CancellationToken);
+
+        Assert.Empty(_added);
+        _generalRepositoryMock.Verify(
+            r => r.AddAll(It.IsAny<IEnumerable<RouteConflict>>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
