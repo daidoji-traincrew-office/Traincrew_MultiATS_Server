@@ -71,10 +71,9 @@ public class TtcWindowRepository(ApplicationDbContext context) : ITtcWindowRepos
             .ToListAsync();
     }
 
-    public async Task<List<string>> GetAllWindowNamesAsync(CancellationToken cancellationToken = default)
+    public async Task<List<Models.TtcWindow>> GetAll(CancellationToken cancellationToken = default)
     {
         return await context.TtcWindows
-            .Select(w => w.Name)
             .ToListAsync(cancellationToken);
     }
 

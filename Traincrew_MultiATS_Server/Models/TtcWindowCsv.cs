@@ -7,7 +7,7 @@ public class TtcWindowCsv
 {
     public required string Name { get; set; } // 窓名
     public required string StationId { get; set; } // 所属駅
-    public string? TrackNumber { get; set; }
+    public string TrackNumber { get; set; } = ""; // 番線(空欄・なしは空文字)
     public List<string> DisplayStations { get; set; } = []; // 表示駅リスト
     public TtcWindowType Type { get; set; } // 種類
     public List<string> TrackCircuits { get; set; } = []; // 対応軌道回路リスト
@@ -19,12 +19,18 @@ public sealed class TtcWindowCsvMap : ClassMap<TtcWindowCsv>
     {
         Map(m => m.Name).Index(0);
         Map(m => m.StationId).Index(1);
-        Map(m => m.TrackNumber).Index(2);
+        Map(m => m.TrackNumber).Convert(GetTrackNumber);
         Map(m => m.DisplayStations).Convert(GetDisplayStations);
         Map(m => m.Type).Convert(GetType);
         Map(m => m.TrackCircuits).Convert(GetTrackCircuits);
     }
     
+    private static string GetTrackNumber(ConvertFromStringArgs row)
+    {
+        var value = row.Row.GetField(2);
+        return string.IsNullOrWhiteSpace(value) || value == "なし" ? "" : value;
+    }
+
     private static TtcWindowType GetType(ConvertFromStringArgs row)
     {
         var value = row.Row.GetField(7);

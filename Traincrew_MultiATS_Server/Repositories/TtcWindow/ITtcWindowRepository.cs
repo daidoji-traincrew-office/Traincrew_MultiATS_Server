@@ -27,11 +27,11 @@ namespace Traincrew_MultiATS_Server.Repositories.TtcWindow
         Task<List<Models.TtcWindow>> GetTtcWindowsByTrainNumber(string diaName);
 
         /// <summary>
-        /// すべてのTtcWindow名を取得する
+        /// すべてのTtcWindowを、状態なしで取得する
         /// </summary>
         /// <param name="cancellationToken">キャンセルトークン</param>
-        /// <returns>TtcWindow名のList</returns>
-        Task<List<string>> GetAllWindowNamesAsync(CancellationToken cancellationToken = default);
+        /// <returns>TtcWindowのList</returns>
+        Task<List<Models.TtcWindow>> GetAll(CancellationToken cancellationToken = default);
 
         /// <summary>
         /// 変更を保存する

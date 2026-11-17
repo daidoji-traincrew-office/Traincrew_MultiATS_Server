@@ -242,17 +242,39 @@ public class TtcDbInitializer(
     public async Task InitializeTtcWindowsAsync(IEnumerable<TtcWindowCsv> records,
         CancellationToken cancellationToken = default)
     {
-        var existingWindows = (await ttcWindowRepository.GetAllWindowNamesAsync(cancellationToken)).ToHashSet();
+        var existingWindowByName = (await ttcWindowRepository.GetAll(cancellationToken))
+            .ToDictionary(w => w.Name);
         var trackCircuitIdByName = await trackCircuitRepository.GetAllIdForName(cancellationToken);
 
+        // 同じ駅で同じ番線の窓が複数あると、部分一意インデックスに違反する
+        var duplicated = records
+            .Where(r => r.TrackNumber != "")
+            .GroupBy(r => (r.StationId, r.TrackNumber))
+            .FirstOrDefault(g => g.Count() > 1);
+        if (duplicated != null)
+        {
+            throw new InvalidOperationException(
+                $"TTC列番窓の番線が重複しています。駅 '{duplicated.Key.StationId}' の番線 '{duplicated.Key.TrackNumber}': " +
+                $"{string.Join(", ", duplicated.Select(r => r.Name))}");
+        }
+
         var ttcWindowsToAdd = new List<TtcWindow>();
+        var ttcWindowsToUpdate = new List<TtcWindow>();
+        var desiredTrackNumberByWindowName = new Dictionary<string, string>();
         var displayStationsToAdd = new List<TtcWindowDisplayStation>();
         var windowTrackCircuitsToAdd = new List<TtcWindowTrackCircuit>();
 
         foreach (var record in records)
         {
-            if (existingWindows.Contains(record.Name))
+            if (existingWindowByName.TryGetValue(record.Name, out var existingWindow))
             {
+                // 既存の窓は、番線だけCSVに揃える(追加時にしか入らないと、既存DBの窓に番線が入らない)
+                if (existingWindow.TrackNumber != record.TrackNumber)
+                {
+                    ttcWindowsToUpdate.Add(existingWindow);
+                    desiredTrackNumberByWindowName[existingWindow.Name] = record.TrackNumber;
+                }
+
                 continue;
             }
 
@@ -260,6 +282,7 @@ public class TtcDbInitializer(
             {
                 Name = record.Name,
                 StationId = record.StationId,
+                TrackNumber = record.TrackNumber,
                 Type = record.Type,
                 TtcWindowState = new()
                 {
@@ -286,10 +309,40 @@ public class TtcDbInitializer(
             }
         }
 
+        // CSVに無い既存窓は、行は残して番線だけ空文字にする(番線が空でないものだけ)
+        var csvWindowNames = records.Select(r => r.Name).ToHashSet();
+        var ttcWindowsToClear = existingWindowByName.Values
+            .Where(w => !csvWindowNames.Contains(w.Name) && w.TrackNumber != "")
+            .ToList();
+
+        // 番線の入れ替え(A=1,B=2 → A=2,B=1)や、消えた窓の番線の付け替えで部分一意インデックスに
+        // 違反しないよう、いったん空文字にして保存してから、目的の番線で保存する
+        var ttcWindowsToEmpty = ttcWindowsToClear.Concat(ttcWindowsToUpdate).ToList();
+        if (ttcWindowsToEmpty.Count > 0)
+        {
+            foreach (var window in ttcWindowsToEmpty)
+            {
+                window.TrackNumber = "";
+            }
+
+            await generalRepository.SaveAll(ttcWindowsToEmpty, cancellationToken);
+        }
+
+        if (ttcWindowsToUpdate.Count > 0)
+        {
+            foreach (var window in ttcWindowsToUpdate)
+            {
+                window.TrackNumber = desiredTrackNumberByWindowName[window.Name];
+            }
+
+            await generalRepository.SaveAll(ttcWindowsToUpdate, cancellationToken);
+        }
+
         await generalRepository.AddAll(ttcWindowsToAdd, cancellationToken);
         await generalRepository.AddAll(displayStationsToAdd, cancellationToken);
         await generalRepository.AddAll(windowTrackCircuitsToAdd, cancellationToken);
-        logger.LogInformation("Initialized {Count} TTC windows", ttcWindowsToAdd.Count);
+        logger.LogInformation("Initialized {Count} TTC windows, updated {UpdatedCount} TTC window track numbers",
+            ttcWindowsToAdd.Count, ttcWindowsToEmpty.Count);
     }
 
     /// <summary>
