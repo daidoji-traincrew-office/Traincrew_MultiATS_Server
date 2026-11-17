@@ -267,6 +267,14 @@ CREATE TABLE ttc_path_predecessor
     CHECK (source_ttc_path_id <> target_ttc_path_id) -- 自分自身を先行パスにしない
 );
 
+CREATE TABLE route_conflict
+(
+    id                   BIGSERIAL PRIMARY KEY,
+    route_id             BIGINT REFERENCES route (id) NOT NULL, -- 進路
+    conflicting_route_id BIGINT REFERENCES route (id) NOT NULL, -- 競合する進路
+    UNIQUE (route_id, conflicting_route_id),
+    CHECK (route_id <> conflicting_route_id)
+);
 
 -- 転てつ機
 CREATE TABLE switching_machine

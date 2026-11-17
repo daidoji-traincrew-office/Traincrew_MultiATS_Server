@@ -56,6 +56,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<TtcPathRoute> TtcPathRoutes { get; set; }
     public DbSet<TtcPathApproachTrackCircuit> TtcPathApproachTrackCircuits { get; set; }
     public DbSet<TtcPathPredecessor> TtcPathPredecessors { get; set; }
+    public DbSet<RouteConflict> RouteConflicts { get; set; }
     public DbSet<TrainState> TrainStates { get; set; }
     public DbSet<TrainCarState> TrainCarStates { get; set; }
     public DbSet<TrainType> TrainTypes { get; set; }
@@ -235,6 +236,18 @@ public class ApplicationDbContext : DbContext
             .WithMany()
             .HasForeignKey(t => t.TargetTtcPathId)
             .HasPrincipalKey(t => t.Id);
+
+        modelBuilder.Entity<RouteConflict>()
+            .HasOne(r => r.Route)
+            .WithMany()
+            .HasForeignKey(r => r.RouteId)
+            .HasPrincipalKey(r => r.Id);
+
+        modelBuilder.Entity<RouteConflict>()
+            .HasOne(r => r.ConflictingRoute)
+            .WithMany()
+            .HasForeignKey(r => r.ConflictingRouteId)
+            .HasPrincipalKey(r => r.Id);
 
         modelBuilder.Entity<TtcPath>()
             .HasOne<Station>()
