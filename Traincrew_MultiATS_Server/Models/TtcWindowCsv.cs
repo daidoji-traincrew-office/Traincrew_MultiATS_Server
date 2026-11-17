@@ -7,6 +7,7 @@ public class TtcWindowCsv
 {
     public required string Name { get; set; } // 窓名
     public required string StationId { get; set; } // 所属駅
+    public string? TrackNumber { get; set; }
     public List<string> DisplayStations { get; set; } = []; // 表示駅リスト
     public TtcWindowType Type { get; set; } // 種類
     public List<string> TrackCircuits { get; set; } = []; // 対応軌道回路リスト
@@ -18,6 +19,7 @@ public sealed class TtcWindowCsvMap : ClassMap<TtcWindowCsv>
     {
         Map(m => m.Name).Index(0);
         Map(m => m.StationId).Index(1);
+        Map(m => m.TrackNumber).Index(2);
         Map(m => m.DisplayStations).Convert(GetDisplayStations);
         Map(m => m.Type).Convert(GetType);
         Map(m => m.TrackCircuits).Convert(GetTrackCircuits);
@@ -25,7 +27,7 @@ public sealed class TtcWindowCsvMap : ClassMap<TtcWindowCsv>
     
     private static TtcWindowType GetType(ConvertFromStringArgs row)
     {
-        var value = row.Row.GetField(6);
+        var value = row.Row.GetField(7);
         return value switch
         {
             "上り" => TtcWindowType.Up,
@@ -38,7 +40,7 @@ public sealed class TtcWindowCsvMap : ClassMap<TtcWindowCsv>
     
     private static List<string> GetDisplayStations(ConvertFromStringArgs row)
     {
-        IEnumerable<int> indices = [2, 3, 4, 5];
+        IEnumerable<int> indices = [3, 4, 5, 6];
         return indices.Select(i => row.Row.GetField(i))
             .OfType<string>()
             .Where(s => !string.IsNullOrWhiteSpace(s) && s != "なし")
@@ -47,7 +49,7 @@ public sealed class TtcWindowCsvMap : ClassMap<TtcWindowCsv>
 
     private static List<string> GetTrackCircuits(ConvertFromStringArgs row)
     {
-        IEnumerable<int> indices = [7, 8];
+        IEnumerable<int> indices = [8, 9];
         return indices.Select(i => row.Row.GetField(i))
             .OfType<string>()
             .Where(s => !string.IsNullOrWhiteSpace(s) && s != "なし")
