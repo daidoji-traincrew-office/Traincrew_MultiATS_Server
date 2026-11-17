@@ -61,6 +61,9 @@ using Traincrew_MultiATS_Server.Repositories.TrainSignalState;
 using Traincrew_MultiATS_Server.Repositories.TrainType;
 using Traincrew_MultiATS_Server.Repositories.Transaction;
 using Traincrew_MultiATS_Server.Repositories.TtcPath;
+using Traincrew_MultiATS_Server.Repositories.TtcPathApproachTrackCircuit;
+using Traincrew_MultiATS_Server.Repositories.TtcPathPredecessor;
+using Traincrew_MultiATS_Server.Repositories.TtcPathRoute;
 using Traincrew_MultiATS_Server.Repositories.TtcWindow;
 using Traincrew_MultiATS_Server.Repositories.TtcWindowLink;
 using Traincrew_MultiATS_Server.Repositories.TtcWindowLinkRouteCondition;
@@ -577,6 +580,9 @@ public class Program
             .AddScoped<ITtcWindowRepository, TtcWindowRepository>()
             .AddScoped<ITtcWindowLinkRepository, TtcWindowLinkRepository>()
             .AddScoped<ITtcPathRepository, TtcPathRepository>()
+            .AddScoped<ITtcPathRouteRepository, TtcPathRouteRepository>()
+            .AddScoped<ITtcPathApproachTrackCircuitRepository, TtcPathApproachTrackCircuitRepository>()
+            .AddScoped<ITtcPathPredecessorRepository, TtcPathPredecessorRepository>()
             .AddScoped<ITtcWindowTrackCircuitRepository, TtcWindowTrackCircuitRepository>()
             .AddScoped<ITtcWindowLinkRouteConditionRepository, TtcWindowLinkRouteConditionRepository>()
             .AddScoped<ITransactionRepository, TransactionRepository>()
