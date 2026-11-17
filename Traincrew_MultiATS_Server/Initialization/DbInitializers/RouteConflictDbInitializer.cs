@@ -14,7 +14,7 @@ public class RouteConflictDbInitializer(
     ISwitchingMachineRouteRepository switchingMachineRouteRepository,
     IRouteConflictRepository routeConflictRepository,
     IGeneralRepository generalRepository
-)
+): BaseDbInitializer()
 {
     public async Task InitializeRouteConflictAsync(CancellationToken cancellationToken)
     {
@@ -104,5 +104,10 @@ public class RouteConflictDbInitializer(
             await generalRepository.AddAll(routeConflictsToAdd, cancellationToken);
             logger.LogInformation("競合進路を {Count} 件登録しました", routeConflictsToAdd.Count);
         }
+    }
+
+    public override async Task InitializeAsync(CancellationToken cancellationToken = default)
+    {
+        await InitializeRouteConflictAsync(cancellationToken);
     }
 }
