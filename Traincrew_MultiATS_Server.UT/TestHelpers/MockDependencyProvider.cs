@@ -40,6 +40,7 @@ using Traincrew_MultiATS_Server.Repositories.TrainCar;
 using Traincrew_MultiATS_Server.Repositories.TrainSignalState;
 using Traincrew_MultiATS_Server.Repositories.TrainType;
 using Traincrew_MultiATS_Server.Repositories.Transaction;
+using Traincrew_MultiATS_Server.Repositories.TtcPath;
 using Traincrew_MultiATS_Server.Repositories.TtcWindow;
 using Traincrew_MultiATS_Server.Repositories.TtcWindowLink;
 using Traincrew_MultiATS_Server.Repositories.TtcWindowLinkRouteCondition;
@@ -104,6 +105,7 @@ public static class MockDependencyProvider
         services.AddScoped(_ => new Mock<ITrainSignalStateRepository>().Object);
         services.AddScoped(_ => new Mock<ITtcWindowRepository>().Object);
         services.AddScoped(_ => new Mock<ITtcWindowLinkRepository>().Object);
+        services.AddScoped(_ => new Mock<ITtcPathRepository>().Object);
         services.AddScoped(_ => new Mock<ITtcWindowTrackCircuitRepository>().Object);
         services.AddScoped(_ => new Mock<ITtcWindowLinkRouteConditionRepository>().Object);
         services.AddScoped(_ => new Mock<ITransactionRepository>().Object);

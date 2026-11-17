@@ -15,18 +15,18 @@ public class TtcPath
     public required string Name { get; init; }
 
     [Column("station_id")]
-    public required string StationId { get; init; }
+    public required string StationId { get; set; }
 
     [Column("source_track")]
-    public required string SourceTrack { get; init; }
+    public required string SourceTrack { get; set; }
 
     [Column("target_track")]
-    public required string TargetTrack { get; init; }
+    public required string TargetTrack { get; set; }
 
     [Column("type")]
-    public TtcPathType Type { get; init; }
+    public TtcPathType Type { get; set; }
 
     // 順序断定回路数
     [Column("define_order_track_circuit_count")]
-    public int DefineOrderTrackCircuitCount { get; init; }
+    public int DefineOrderTrackCircuitCount { get; set; }
 }
