@@ -1,0 +1,292 @@
+{
+  "repo_notes": [
+    {
+      "content": ""
+    }
+  ],
+  "pages": [
+    {
+      "title": "Overview",
+      "purpose": "Introduce the Traincrew MultiATS Server, explaining it's a multi-user railway automatic train supervision system with real-time interlocking logic, train management, and centralized traffic control capabilities",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Core Railway Interlocking Systems",
+      "purpose": "Provide overview of the interlocking system, which is the most complex and highest-importance component of the server",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Database Schema and Entity Model",
+      "purpose": "Document the comprehensive database schema including InterlockingObject hierarchy, state tables, and railway-specific entities (stations, track circuits, signals, routes, locks, switching machines)",
+      "parent": "Core Railway Interlocking Systems",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Route, Lock, and Signal Control Systems",
+      "purpose": "Explain route establishment logic, complex lock condition evaluation (AND/OR/NOT expression trees), and signal aspect calculation",
+      "parent": "Core Railway Interlocking Systems",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Switching Machine and Throw-Out Control",
+      "purpose": "Document switching machine (points) control, throw-out control types (WithLever, WithoutLever, Direction), and cascading route activation logic",
+      "parent": "Core Railway Interlocking Systems",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Rendo Table Configuration Files",
+      "purpose": "Explain the CSV-based Rendo Table format with Japanese railway notation, covering 13 stations (TH58-TH76) and how they define interlocking rules, signals, levers, and points",
+      "parent": "Core Railway Interlocking Systems",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Direction Control and Bidirectional Traffic",
+      "purpose": "Document direction levers, direction routes, direction self-control levers, and how the system manages bidirectional traffic flow",
+      "parent": "Core Railway Interlocking Systems",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Train Operations Management",
+      "purpose": "Provide overview of the train management subsystem including ATS data processing, driver assignment, track circuit occupancy, and train tracking displays",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Train State Management and Driver Assignment",
+      "purpose": "Document the TrainService's complex state machine with 8 rejection scenarios, conflict detection (IsOnPreviousTrain, IsTherePreviousTrain, IsMaybeWarp, IsLocked), driver handoff logic, and train number changes",
+      "parent": "Train Operations Management",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Track Circuit Detection and Management",
+      "purpose": "Explain track circuit occupancy detection, bulk update operations via ExecuteUpdateAsync, locking mechanisms for routes, and unlock timer management",
+      "parent": "Train Operations Management",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Train Tracking Windows (TTC System)",
+      "purpose": "Document the TTC window system's recursive train propagation algorithm, empty sending mode, conditional movement based on routes and track circuits, and train number display management",
+      "parent": "Train Operations Management",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Real-time Communication Layer",
+      "purpose": "Provide overview of the SignalR-based real-time communication architecture supporting bidirectional communication with multiple client types",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "SignalR Hub Architecture and Contracts",
+      "purpose": "Document the five SignalR hubs (TrainHub, InterlockingHub, CTCPHub, TIDHub, CommanderTableHub), their contracts (ITrainHubContract, ITrainClientContract, etc.), and authorization policies",
+      "parent": "Real-time Communication Layer",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Train Hub and ATS Interface",
+      "purpose": "Document TrainHub's SendData_ATS method, AtsToServerData and ServerToATSData DTOs, scheduled broadcasts (ServerToATSDataBySchedule every 250ms), and status flag system",
+      "parent": "Real-time Communication Layer",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Interlocking Control Hub",
+      "purpose": "Document InterlockingHub's methods for physical lever input (SetPhysicalLeverData), destination button control (SetDestinationButtonState), key lever authorization, and data aggregation (SendData_Interlocking)",
+      "parent": "Real-time Communication Layer",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Display and Commander Hubs",
+      "purpose": "Document CTCPHub for centralized traffic control panel data, TIDHub for train information displays, and CommanderTableHub for administrative operations (DeleteTrain, SetServerMode, track circuit management)",
+      "parent": "Real-time Communication Layer",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "System Infrastructure",
+      "purpose": "Provide overview of application startup, database initialization, background processing, and authentication systems",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Application Bootstrap and Configuration",
+      "purpose": "Document Program.cs for Crew and Passenger applications, service registration, middleware configuration, OpenIddict setup, and hub endpoint mapping",
+      "parent": "System Infrastructure",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Database Initialization Pipeline",
+      "purpose": "Document the 25-phase DatabaseInitializationOrchestrator process, CSV loading (StationCsvLoader, TrackCircuitCsvLoader, SignalCsvLoader, etc.), DbRendoTableInitializer's complex lock parsing, and entity detachment strategy",
+      "parent": "System Infrastructure",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Background Scheduler System",
+      "purpose": "Document SchedulerManager's coordination of background schedulers (SignalScheduler, TrainScheduler, CTCPHubScheduler, CommanderTableHubScheduler, InterlockingHubScheduler, TIDHubScheduler, OperationNotificationScheduler, DestinationButtonScheduler) with 250-500ms intervals",
+      "parent": "System Infrastructure",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Authentication and Authorization",
+      "purpose": "Document OpenIddict OAuth2/OpenID Connect setup with Discord provider, authorization policies (TrainPolicy, InterlockingPolicy, CommanderTablePolicy), role-based access (IsDriver, IsConductor, IsSignalman, IsCommander), and MemberID extraction",
+      "parent": "System Infrastructure",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Server Mode and State Management",
+      "purpose": "Document ServerService's management of ServerState (Mode: Off/Private/Public, TimeOffset, SwitchMoveTime), mutex-based concurrency control, and SchedulerManager integration",
+      "parent": "System Infrastructure",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Configuration Data and Models",
+      "purpose": "Provide overview of CSV configuration files, data models, and domain entities used throughout the system",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "CSV Data Files and Rendo Tables",
+      "purpose": "Document the CSV file formats for stations (駅・停車場.csv), track circuits (軌道回路.csv), signals (信号リスト.csv), trains (列車.csv), signal types (信号何灯式リスト.csv), throw-out control (総括制御ペア一覧.csv), and operation notifications (運転告知器.csv)",
+      "parent": "Configuration Data and Models",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Data Models and Domain Entities",
+      "purpose": "Document core domain models including InterlockingObject hierarchy, Route types, Signal types and phases, TrackCircuit, SwitchingMachine, Lever types, Lock types, and state entities (RouteState, TrackCircuitState, SignalState, etc.)",
+      "parent": "Configuration Data and Models",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "TTC Window and Link Configuration",
+      "purpose": "Document TtcWindow types (HomeTrack, Up, Down, Switching), TtcWindowLink with TrackCircuitCondition and IsEmptySending, TtcWindowLinkRouteCondition, and TtcWindowDisplayStation associations",
+      "parent": "Configuration Data and Models",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Repository and Data Access Layer",
+      "purpose": "Provide overview of the repository pattern implementation with 40+ repositories providing data access abstraction over Entity Framework Core",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Repository Pattern and Interfaces",
+      "purpose": "Document the repository pattern architecture, interface definitions, ApplicationDbContext usage, and common patterns like ExecuteUpdateAsync for bulk operations and Include() for eager loading",
+      "parent": "Repository and Data Access Layer",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Route and Interlocking Repositories",
+      "purpose": "Document IRouteRepository, ILockConditionRepository, IInterlockingObjectRepository, and their query optimization strategies",
+      "parent": "Repository and Data Access Layer",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    }
+  ]
+}
