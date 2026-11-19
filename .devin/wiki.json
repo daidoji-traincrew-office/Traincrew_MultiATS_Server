@@ -1,72 +1,13 @@
 {
   "repo_notes": [
     {
-      "content": ""
+      "content": "このWikiではリレー（連動装置・RendoTable・進路/てこ/鎖錠のリレー処理）とTTC（列番窓・TtcWindow・TtcController）について説明しないこと。これらのクラス・CSV・テーブルに言及するページやセクションを作らないこと。"
     }
   ],
   "pages": [
     {
       "title": "Overview",
       "purpose": "Introduce the Traincrew MultiATS Server, explaining it's a multi-user railway automatic train supervision system with real-time interlocking logic, train management, and centralized traffic control capabilities",
-      "page_notes": [
-        {
-          "content": ""
-        }
-      ]
-    },
-    {
-      "title": "Core Railway Interlocking Systems",
-      "purpose": "Provide overview of the interlocking system, which is the most complex and highest-importance component of the server",
-      "page_notes": [
-        {
-          "content": ""
-        }
-      ]
-    },
-    {
-      "title": "Database Schema and Entity Model",
-      "purpose": "Document the comprehensive database schema including InterlockingObject hierarchy, state tables, and railway-specific entities (stations, track circuits, signals, routes, locks, switching machines)",
-      "parent": "Core Railway Interlocking Systems",
-      "page_notes": [
-        {
-          "content": ""
-        }
-      ]
-    },
-    {
-      "title": "Route, Lock, and Signal Control Systems",
-      "purpose": "Explain route establishment logic, complex lock condition evaluation (AND/OR/NOT expression trees), and signal aspect calculation",
-      "parent": "Core Railway Interlocking Systems",
-      "page_notes": [
-        {
-          "content": ""
-        }
-      ]
-    },
-    {
-      "title": "Switching Machine and Throw-Out Control",
-      "purpose": "Document switching machine (points) control, throw-out control types (WithLever, WithoutLever, Direction), and cascading route activation logic",
-      "parent": "Core Railway Interlocking Systems",
-      "page_notes": [
-        {
-          "content": ""
-        }
-      ]
-    },
-    {
-      "title": "Rendo Table Configuration Files",
-      "purpose": "Explain the CSV-based Rendo Table format with Japanese railway notation, covering 13 stations (TH58-TH76) and how they define interlocking rules, signals, levers, and points",
-      "parent": "Core Railway Interlocking Systems",
-      "page_notes": [
-        {
-          "content": ""
-        }
-      ]
-    },
-    {
-      "title": "Direction Control and Bidirectional Traffic",
-      "purpose": "Document direction levers, direction routes, direction self-control levers, and how the system manages bidirectional traffic flow",
-      "parent": "Core Railway Interlocking Systems",
       "page_notes": [
         {
           "content": ""
@@ -103,16 +44,6 @@
       ]
     },
     {
-      "title": "Train Tracking Windows (TTC System)",
-      "purpose": "Document the TTC window system's recursive train propagation algorithm, empty sending mode, conditional movement based on routes and track circuits, and train number display management",
-      "parent": "Train Operations Management",
-      "page_notes": [
-        {
-          "content": ""
-        }
-      ]
-    },
-    {
       "title": "Real-time Communication Layer",
       "purpose": "Provide overview of the SignalR-based real-time communication architecture supporting bidirectional communication with multiple client types",
       "page_notes": [
@@ -123,7 +54,7 @@
     },
     {
       "title": "SignalR Hub Architecture and Contracts",
-      "purpose": "Document the five SignalR hubs (TrainHub, InterlockingHub, CTCPHub, TIDHub, CommanderTableHub), their contracts (ITrainHubContract, ITrainClientContract, etc.), and authorization policies",
+      "purpose": "Document the SignalR hubs used for train operation, CTCP, TID and the commander table, and their contracts. Do not describe InterlockingHub internals.",
       "parent": "Real-time Communication Layer",
       "page_notes": [
         {
@@ -134,16 +65,6 @@
     {
       "title": "Train Hub and ATS Interface",
       "purpose": "Document TrainHub's SendData_ATS method, AtsToServerData and ServerToATSData DTOs, scheduled broadcasts (ServerToATSDataBySchedule every 250ms), and status flag system",
-      "parent": "Real-time Communication Layer",
-      "page_notes": [
-        {
-          "content": ""
-        }
-      ]
-    },
-    {
-      "title": "Interlocking Control Hub",
-      "purpose": "Document InterlockingHub's methods for physical lever input (SetPhysicalLeverData), destination button control (SetDestinationButtonState), key lever authorization, and data aggregation (SendData_Interlocking)",
       "parent": "Real-time Communication Layer",
       "page_notes": [
         {
@@ -230,8 +151,18 @@
       ]
     },
     {
-      "title": "CSV Data Files and Rendo Tables",
-      "purpose": "Document the CSV file formats for stations (駅・停車場.csv), track circuits (軌道回路.csv), signals (信号リスト.csv), trains (列車.csv), signal types (信号何灯式リスト.csv), throw-out control (総括制御ペア一覧.csv), and operation notifications (運転告知器.csv)",
+      "title": "Database Schema and Entity Model",
+      "purpose": "Document the database schema for stations, track circuits, signals, trains, diagrams and server state. Do not document relay/interlocking logic tables or TTC tables.",
+      "parent": "Configuration Data and Models",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "CSV Data Files",
+      "purpose": "Document the CSV file formats for stations, track circuits, signals and trains. Do not document RendoTable CSVs or TTC CSVs.",
       "parent": "Configuration Data and Models",
       "page_notes": [
         {
@@ -241,17 +172,7 @@
     },
     {
       "title": "Data Models and Domain Entities",
-      "purpose": "Document core domain models including InterlockingObject hierarchy, Route types, Signal types and phases, TrackCircuit, SwitchingMachine, Lever types, Lock types, and state entities (RouteState, TrackCircuitState, SignalState, etc.)",
-      "parent": "Configuration Data and Models",
-      "page_notes": [
-        {
-          "content": ""
-        }
-      ]
-    },
-    {
-      "title": "TTC Window and Link Configuration",
-      "purpose": "Document TtcWindow types (HomeTrack, Up, Down, Switching), TtcWindowLink with TrackCircuitCondition and IsEmptySending, TtcWindowLinkRouteCondition, and TtcWindowDisplayStation associations",
+      "purpose": "Document core domain models for trains, track circuits, signals, stations and diagrams. Do not document relay/route/lever/TTC models.",
       "parent": "Configuration Data and Models",
       "page_notes": [
         {
@@ -271,16 +192,6 @@
     {
       "title": "Repository Pattern and Interfaces",
       "purpose": "Document the repository pattern architecture, interface definitions, ApplicationDbContext usage, and common patterns like ExecuteUpdateAsync for bulk operations and Include() for eager loading",
-      "parent": "Repository and Data Access Layer",
-      "page_notes": [
-        {
-          "content": ""
-        }
-      ]
-    },
-    {
-      "title": "Route and Interlocking Repositories",
-      "purpose": "Document IRouteRepository, ILockConditionRepository, IInterlockingObjectRepository, and their query optimization strategies",
       "parent": "Repository and Data Access Layer",
       "page_notes": [
         {
