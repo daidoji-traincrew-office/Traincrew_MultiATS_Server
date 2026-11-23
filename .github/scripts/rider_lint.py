@@ -403,8 +403,7 @@ def on_stop(a, project_root, active, touched, state_lock, jb_lock):
                 retry.update(n for n, _ in checked)
                 continue
             except Exception as e:  # noqa: BLE001  想定外でも他のグループの結果と記録の整理は続ける
-                notes.append(f"rider_lint 実行失敗(この内容では再実行しません) [{root}]: {e!r}" if not isinstance(e, LintError)
-                             else f"rider_lint 実行失敗(この内容では再実行しません) [{root}]: {e}")
+                notes.append(f"rider_lint 実行失敗(この内容では再実行しません) [{root}]: {e if isinstance(e, LintError) else repr(e)}")
                 drop.update(n for n, _ in checked)
                 continue
             fixed_any = fixed_any or fixed
