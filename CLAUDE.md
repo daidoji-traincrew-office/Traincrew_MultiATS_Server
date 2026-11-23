@@ -22,7 +22,10 @@ C#のコードは、JetBrains Rider(ReSharper)の検査で指摘が出ない形�
 - 自動修正は**ファイル単位**で、Claude が触ったファイルの既存行にもかかる。Claude とユーザーが同じファイルを同時に編集すると、そのファイルも修正対象になる。
 - 変更した行に残った指摘は exit 2 で差し戻される。直してから終了すること(差し戻しは1回まで。2回目は通知のみで終了する)。
 - `stop_hook_active` が既に true のとき(他のフックが継続させた場合など)は、1回目でも差し戻さず通知のみで終了する。
+- `.worktrees/<名前>/` など別の git worktree で編集したファイルは、その worktree の git ルートごとにまとめ、**その worktree の sln・`.editorconfig`・`*.sln.DotSettings`・git 差分(HEAD 基準)**で検査する。記録は絶対パスで、差し戻しのパスも絶対パス。
+- sln は、各 git ルート直下の `--sln` で指定した名前のものを使う。無ければ、そのルート直下の `*.sln` が1つだけならそれを使う。どちらも無ければそのルートのファイルは検査しない。`--exclude` は、フックを動かしたプロジェクトのルートからの相対と、各 git ルート(submodule なら親のルート)からの相対の両方で判定する。
+- sln 内のプロジェクトの `obj/project.assets.json` が無い(restore していない)worktree では、フックが `dotnet tool restore` と `dotnet restore` をしてから検査する(初回は時間がかかる)。全体で 270 秒の制限に収まらなければ、その回は検査せず通知して終了する。restore は残るので、次回から検査される。
 - フックの想定外のエラーは何もせず終了する(fail-open)。python3 が必要。
 - 手動実行: `python3 .github/scripts/rider_lint.py check --sln Traincrew_MultiATS_Server.sln --base HEAD --fix`
-- 初回は `dotnet tool restore` と `dotnet restore` が必要。
+- 手動実行(`check`)の初回は `dotnet tool restore` と `dotnet restore` が必要。フックは未 restore なら自動で行う。
 - CI (`.github/workflows/riderLint.yml`) でも PR の変更行に対して同じ検査を行い、指摘があれば失敗する。
