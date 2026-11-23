@@ -289,7 +289,7 @@ def cmd_hook(a):
     agent = sanitize(data.get("agent_id"))
     state = cache_root()  # chdir 前に求めた絶対パス。グループごとの chdir の影響を受けない
     state.mkdir(parents=True, exist_ok=True)
-    for pattern in ("*.touched", "*.handover", "*.lock"):
+    for pattern in ("*.touched", "*.handover", "*.retries", "*.lock"):
         for f in state.glob(pattern):
             with contextlib.suppress(OSError):
                 if f.name != "jb.lock" and time.time() - f.stat().st_mtime > MAX_AGE:
@@ -298,10 +298,12 @@ def cmd_hook(a):
     state_lock = state / f"{session}.lock"  # .touched / .handover の読み書きだけを守る短いロック
     # サブエージェントが時間切れ等で検査できなかった記録の引き渡し先。同じセッションのメインの Stop が引き取る
     handover = state / f"{session}.handover"
+    # メインの Stop で一度 LintRetry になった記録名。再検査でも LintRetry なら記録を捨てる(.touched の形式は変えない)
+    retries = state / f"{session}.retries"
     if event == "PostToolUse":
         with flock(state_lock):
             return record(data, root, touched, a.exclude)
-    return on_stop(a, root, bool(data.get("stop_hook_active")), touched, state_lock, state / "jb.lock", handover,
+    return on_stop(a, root, bool(data.get("stop_hook_active")), touched, state_lock, state / "jb.lock", handover, retries,
                    is_sub=bool(agent) or event == "SubagentStop")
 
 
@@ -365,7 +367,7 @@ def split_group(a, root, items):
     return checked, [n for n, _ in items if n not in {n for n, _ in checked}], sln
 
 
-def on_stop(a, project_root, active, touched, state_lock, jb_lock, handover, is_sub):
+def on_stop(a, project_root, active, touched, state_lock, jb_lock, handover, retries, is_sub):
     """is_sub: サブエージェントの Stop。時間切れ等の分は handover へ移す。メインの Stop は handover も読んで検査する
     (引き取り分は他エージェントの worktree のファイルなので、自動修正せず検査と通知だけにする)。"""
     with flock(state_lock):
@@ -422,6 +424,18 @@ def on_stop(a, project_root, active, touched, state_lock, jb_lock, handover, is_
                     taken_lines.setdefault(root, []).append(fmt_finding((path, *f[1:])))
                 else:
                     own_lines.append(fmt_finding((path, *f[1:])))
+    giveup_note = ""
+    if not is_sub:  # メインは1回だけ再検査する。2回続けて検査できなかった記録は捨てる
+        with flock(state_lock):
+            retried = set(read_names(retries))
+            giveup = [n for n in retry if n in retried]
+            write_names(retries, [n for n in retry if n not in retried])  # 初めて検査できなかった分だけを覚える
+        drop.update(giveup)
+        for n in giveup:
+            del retry[n]
+        if giveup:
+            giveup_note = ("rider_lint: 2回続けて検査できなかったので、次のファイルの記録を捨てました。PR の CI で検査されます:\n"
+                           + "\n".join(os.path.join(project_root, n) for n in giveup))
     if retry:
         reasons = list(dict.fromkeys(retry.values()))
         if is_sub:  # このエージェントは再検査しない。同じセッションのメインの Stop に引き渡す
@@ -438,6 +452,8 @@ def on_stop(a, project_root, active, touched, state_lock, jb_lock, handover, is_
                       + "\n".join(f"[worktree: {r}]\n" + "\n".join(lines) for r, lines in taken_lines.items()))
     done = set(names) - set(retry) | set(drop)  # 検査を終えた分
     out = "\n".join(own_lines)
+    if giveup_note and not (own_lines or taken_lines):
+        notes.append(giveup_note)
     if not own_lines and not taken_lines:
         consume(done)
         if fixed_any:
@@ -447,6 +463,8 @@ def on_stop(a, project_root, active, touched, state_lock, jb_lock, handover, is_
     if active:  # 差し戻しは1回まで。指摘は通知だけにして、記録は消す(引き取り分も、通知した時点で消す)
         consume(done)
         notes.append("Rider検査の指摘が残っています(差し戻し済みのため終了しました):\n" + "\n\n".join(x for x in (out, taken_note) if x))
+        if giveup_note:
+            notes.append(giveup_note)
         flush(notes)
         return 0
     note = "(機械的に直せるものは cleanupcode で自動修正済みです。ファイルが書き換わっているので、編集前に必ず再Readしてください)\n" if fixed_any else ""
@@ -455,7 +473,7 @@ def on_stop(a, project_root, active, touched, state_lock, jb_lock, handover, is_
     consume(drop | (set(taken) - set(retry)) if own_lines else done)  # 自分の指摘が無ければ、自分の分も除く
     head = "Rider(ReSharper CLI)の検査で、あなたが変更した行に指摘があります。修正してください。" if own_lines \
         else "Rider(ReSharper CLI)の検査で、サブエージェントが検査できなかったファイルに指摘があります(あなた自身の変更ではありません)。"
-    print("\n".join(x for x in (head, note + out if out else "", taken_note) if x), file=sys.stderr)
+    print("\n".join(x for x in (head, note + out if out else "", taken_note, giveup_note) if x), file=sys.stderr)
     return 2
 
 
