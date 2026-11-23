@@ -40,6 +40,10 @@ class LintError(Exception):
     pass
 
 
+class LintRetry(LintError):
+    """時間切れ・restore 失敗など、時間をおけば通る可能性がある失敗。記録を残して次回の Stop で再検査する。"""
+
+
 def git(*args, root=None):
     return subprocess.run(["git", "-c", "core.quotePath=false", *args], cwd=root, capture_output=True,
                           text=True, encoding="utf-8", check=True).stdout
@@ -114,12 +118,12 @@ def caches_dir(sln):
 def run_tool(cmd, log, deadline):
     remaining = None if deadline is None else deadline - time.monotonic()
     if remaining is not None and remaining <= 0:
-        raise LintError(f"{log} skipped: {JB_TIMEOUT}秒の制限を超えました")
+        raise LintRetry(f"{log} skipped: {JB_TIMEOUT}秒の制限を超えました")
     try:
         r = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8",
                            errors="replace", timeout=remaining)
     except subprocess.TimeoutExpired:
-        raise LintError(f"{log} timed out ({JB_TIMEOUT}秒の制限)") from None
+        raise LintRetry(f"{log} timed out ({JB_TIMEOUT}秒の制限)") from None
     except OSError as e:
         raise LintError(f"{log} を起動できません (dotnet がありませんか?): {e}") from e
     if r.returncode != 0:
@@ -131,14 +135,30 @@ def jb(args, log, deadline):
     run_tool(["dotnet", "jb", *args], log, deadline)
 
 
+RESTORE_RETRY_WAIT = 600  # restore に失敗した worktree で、次に restore を試みるまでの秒数
+
+
 def ensure_restored(sln, deadline):
-    """sln 内のプロジェクトに obj/project.assets.json が無ければ、dotnet tool restore と dotnet restore をする。"""
+    """sln 内のプロジェクトに obj/project.assets.json が無ければ、dotnet tool restore と dotnet restore をする。
+    失敗は LintRetry。失敗した worktree では RESTORE_RETRY_WAIT 秒は restore を試みない(毎回の Stop で時間を使わないため)。"""
     base = Path(sln).parent
     projects = [base / p.replace("\\", "/") for p in re.findall(r'"([^"]+\.csproj)"', Path(sln).read_text(encoding="utf-8-sig"))]
-    if all((p.parent / "obj" / "project.assets.json").exists() for p in projects if p.exists()):
+    existing = [p for p in projects if p.exists()]
+    if existing and all((p.parent / "obj" / "project.assets.json").exists() for p in existing):
         return
-    run_tool(["dotnet", "tool", "restore"], "dotnet tool restore", deadline)
-    run_tool(["dotnet", "restore", sln], "dotnet restore", deadline)
+    marker = cache_root() / f"restore-fail-{hashlib.sha256(str(base.resolve()).encode()).hexdigest()[:12]}.lock"
+    with contextlib.suppress(OSError):
+        if time.time() - marker.stat().st_mtime < RESTORE_RETRY_WAIT:
+            raise LintRetry(f"最近 restore に失敗したため、{RESTORE_RETRY_WAIT}秒は restore を試みません")
+    try:
+        run_tool(["dotnet", "tool", "restore"], "dotnet tool restore", deadline)
+        run_tool(["dotnet", "restore", sln], "dotnet restore", deadline)
+    except LintRetry:
+        raise
+    except LintError as e:
+        marker.touch()
+        raise LintRetry(str(e)) from e
+    marker.unlink(missing_ok=True)
 
 
 def run_jb(sln, files, fix_files, caches, sarif, timeout=None):
@@ -296,24 +316,40 @@ def pick_sln(root, name):
     return slns[0] if len(slns) == 1 else None
 
 
-def group_by_root(paths):
-    """{git ルート: [ルート相対パス]}。ディレクトリごとに git を1回だけ呼ぶ。"""
-    roots, groups = {}, {}
-    for p in paths:
+def group_by_root(items):
+    """items=[(記録名, 絶対パス)] を ({git ルート: [(記録名, ルート相対パス)]}, git ルートが取れなかった記録名) にする。
+    ディレクトリごとに git を1回だけ呼ぶ。"""
+    roots, groups, noroot = {}, {}, []
+    for name, p in items:
         d = os.path.dirname(p)
         if d not in roots:
             try:
-                roots[d] = git_root(d)
+                roots[d] = os.path.realpath(git_root(d))
             except (subprocess.CalledProcessError, OSError):
                 roots[d] = None
         if roots[d]:
-            groups.setdefault(roots[d], []).append(os.path.relpath(p, roots[d]))
-    return groups
+            groups.setdefault(roots[d], []).append((name, os.path.relpath(p, roots[d])))
+        else:
+            noroot.append(name)
+    return groups, noroot
 
 
 def flush(notes):
     if notes:
         say("\n".join(notes))
+
+
+def split_group(a, root, items):
+    """(検査する [(名前, 相対パス)], 検査しない名前, sln)。--exclude は各 git ルート(submodule なら親のルート)相対でも判定する。"""
+    tops = [root]  # worktree 内の public/ を外すため
+    with contextlib.suppress(subprocess.CalledProcessError, OSError):
+        parent = git("rev-parse", "--show-superproject-working-tree", root=root).strip()
+        if parent:
+            tops.append(parent)
+    sln = pick_sln(root, a.sln)
+    checked = [] if sln is None else [
+        (n, r) for n, r in items if not any(excluded(os.path.relpath(os.path.join(root, r), t), a.exclude) for t in tops)]
+    return checked, [n for n, _ in items if n not in {n for n, _ in checked}], sln
 
 
 def on_stop(a, project_root, active, touched, state_lock, jb_lock):
@@ -322,60 +358,68 @@ def on_stop(a, project_root, active, touched, state_lock, jb_lock):
     if not names:
         return 0
 
-    def consume(done=None):  # 今回処理した分だけ除く(jb 実行中に PostToolUse が追記した分は残す)
-        done = names if done is None else done
+    def consume(done):  # 指定した分だけ除く(jb 実行中に PostToolUse が追記した分は残す)
         with flock(state_lock):
             write_names(touched, [n for n in read_names(touched) if n not in done])
 
     project_root = os.path.realpath(project_root)
-    paths = [os.path.join(project_root, n) for n in names]  # 旧形式(相対)の記録も読めるように
-    paths = [p for p in paths if os.path.isfile(p) and not excluded(os.path.relpath(p, project_root), a.exclude)]
-    groups = group_by_root(paths)
-    out_lines, fixed_any, failed, notes = [], False, set(), []  # notes: stdout の JSON は1回の Stop で1つにまとめる
-    deadline = time.monotonic() + JB_TIMEOUT
+    items = [(n, os.path.realpath(os.path.join(project_root, n))) for n in names]  # 旧形式(相対)の記録も読めるように
+    # 実在しない・--exclude 対象の記録は、検査せずに捨てる
+    items = [(n, p) for n, p in items if os.path.isfile(p) and not excluded(os.path.relpath(p, project_root), a.exclude)]
+    groups, noroot = group_by_root(items)
+    drop = set(names) - {n for n, _ in items} | set(noroot)  # 今回で記録から除く分(検査しない・この内容では再実行しない)
+    retry = set()  # 時間切れ・restore 失敗で検査できなかった分。記録に残して次回再検査する
+    notes = []  # stdout の JSON は1回の Stop で1つにまとめる
+    if noroot:
+        notes.append("rider_lint: git ルートが取れないため検査しませんでした: " + ", ".join(noroot))
+    out_lines, fixed_any = [], False
+    deadline = time.monotonic() + JB_TIMEOUT  # ロック待ちも含めて、フックの timeout を超えないようにする
     with flock(jb_lock):  # jb とキャッシュの同時実行を防ぐ(全セッション共通)
-        for root, rels in groups.items():
+        for root, group_items in groups.items():
+            checked, skipped, sln = split_group(a, root, group_items)
+            drop.update(skipped)
+            if not checked:
+                continue
             try:
-                found, fixed = lint_group(a, root, rels, deadline)
+                found, fixed = lint_group(root, sln, [r for _, r in checked], deadline)
+            except LintRetry as e:
+                notes.append(f"rider_lint 検査できませんでした [{root}]: {e}(記録を残したので、次回の応答終了時に再検査します)")
+                retry.update(n for n, _ in checked)
+                continue
             except LintError as e:
-                notes.append(f"rider_lint 実行失敗 [{root}]: {e}")
-                failed.update(os.path.join(root, r) for r in rels)
+                notes.append(f"rider_lint 実行失敗(この内容では再実行しません) [{root}]: {e}")
+                drop.update(n for n, _ in checked)
                 continue
             fixed_any = fixed_any or fixed
             out_lines += [fmt_finding((os.path.join(root, f[0]), *f[1:])) for f in found]
     out = "\n".join(out_lines)
     if not out_lines:
-        consume()
+        consume(set(names) - retry)
         if fixed_any:
             notes.append("Rider検査: 指摘は cleanupcode による自動修正で解消しました(ファイルが書き換わっています)。")
         flush(notes)
         return 0
     if active:  # 差し戻しは1回まで
-        consume()
+        consume(set(names) - retry)
         notes.append("Rider検査の指摘が残っています(差し戻し済みのため終了しました):\n" + out)
         flush(notes)
         return 0
     note = "(機械的に直せるものは cleanupcode で自動修正済みです。ファイルが書き換わっているので、編集前に必ず再Readしてください)\n" if fixed_any else ""
     flush(notes)
-    consume([n for n in names if os.path.join(project_root, n) in failed])  # 失敗したグループの分は再実行しない
+    consume(drop)  # 検査した分は、差し戻し後の再実行のために残す
     print(f"Rider(ReSharper CLI)の検査で、あなたが変更した行に指摘があります。修正してください。\n{note}\n{out}", file=sys.stderr)
     return 2
 
 
-def lint_group(a, root, rels, deadline):
-    """git ルート root(メイン作業ツリーまたは worktree)内の rels を、そのルートの sln・設定・差分で検査する。"""
+def lint_group(root, sln, files, deadline):
+    """git ルート root(メイン作業ツリーまたは worktree)内の files を、そのルートの sln・設定・差分で検査する。"""
+    cwd = os.getcwd()
     os.chdir(root)
-    tops = [root]  # submodule なら親のルート相対でも --exclude を判定する(worktree 内の public/ を外すため)
-    with contextlib.suppress(subprocess.CalledProcessError, OSError):
-        parent = git("rev-parse", "--show-superproject-working-tree", root=root).strip()
-        if parent:
-            tops.append(parent)
-    files = [f for f in rels if not any(excluded(os.path.relpath(os.path.join(root, f), t), a.exclude) for t in tops)]
-    sln = pick_sln(root, a.sln)
-    if not files or sln is None:
-        return [], False
-    ensure_restored(sln, deadline)
-    return lint(sln, files, files, untracked_cs() & set(files), "HEAD", timeout=deadline - time.monotonic())
+    try:
+        ensure_restored(sln, deadline)
+        return lint(sln, files, files, untracked_cs() & set(files), "HEAD", timeout=deadline - time.monotonic())
+    finally:
+        os.chdir(cwd)
 
 
 def main():
