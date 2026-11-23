@@ -429,17 +429,22 @@ def on_stop(a, project_root, active, touched, state_lock, jb_lock, handover, is_
         else:
             suffix = "(記録を残したので、次回の応答終了時に再検査します)"
         notes += [f"rider_lint 検査できませんでした {r}{suffix}" for r in reasons]
-    if taken_lines:
-        notes.append("サブエージェントが検査できず、メインが引き取ったファイルの指摘です(自動修正はしていません):\n" + "\n".join(taken_lines))
+    # exit 2 のときは stdout の JSON が読まれないので、引き取り分の指摘は stderr 側に載せる
+    taken_note = ("サブエージェントが検査できず、メインが引き取ったファイルの指摘です(自動修正はしていません):\n" + "\n".join(taken_lines)
+                  if taken_lines else "")
     done = set(names) - set(retry) | set(drop)  # 検査を終えた分
     out = "\n".join(own_lines)
     if not own_lines:
+        if taken_note:
+            notes.append(taken_note)
         consume(done)
         if fixed_any:
             notes.append("Rider検査: 指摘は cleanupcode による自動修正で解消しました(ファイルが書き換わっています)。")
         flush(notes)
         return 0
     if active:  # 差し戻しは1回まで
+        if taken_note:
+            notes.append(taken_note)
         consume(done)
         notes.append("Rider検査の指摘が残っています(差し戻し済みのため終了しました):\n" + out)
         flush(notes)
@@ -448,7 +453,8 @@ def on_stop(a, project_root, active, touched, state_lock, jb_lock, handover, is_
     flush(notes)
     # 自分の検査済みの分は、差し戻し後の再実行のために残す。引き取り分は通知済みなので記録から除く
     consume(drop | (set(taken) - set(retry)))
-    print(f"Rider(ReSharper CLI)の検査で、あなたが変更した行に指摘があります。修正してください。\n{note}\n{out}", file=sys.stderr)
+    taken_part = f"\n\n{taken_note}\n(上は、あなたの変更ではなく、引き取ったファイルの指摘です。このあと記録から除きます)" if taken_note else ""
+    print(f"Rider(ReSharper CLI)の検査で、あなたが変更した行に指摘があります。修正してください。\n{note}\n{out}{taken_part}", file=sys.stderr)
     return 2
 
 
