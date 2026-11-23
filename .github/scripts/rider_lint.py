@@ -18,6 +18,7 @@ hook が依存する Claude Code フック仕様 (変わったらここを見直
 """
 import argparse
 import contextlib
+import functools
 import hashlib
 import json
 import os
@@ -87,8 +88,9 @@ def changed_lines(base):
     return result
 
 
-def cache_root():
-    return Path(os.environ.get("RIDER_LINT_CACHES") or Path.home() / ".cache" / "rider-lint")
+@functools.lru_cache(maxsize=None)
+def cache_root():  # 相対指定でも最初の呼び出し時の cwd で固定する(後の chdir で動かさない)
+    return Path(os.environ.get("RIDER_LINT_CACHES") or Path.home() / ".cache" / "rider-lint").expanduser().absolute()
 
 
 def caches_dir(sln):
@@ -255,7 +257,7 @@ def cmd_hook(a):
     # .touched はエージェント単位。PostToolUse に agent_id が来ない仕様だった場合は、サブエージェントの編集が
     # メインの .touched に入ってメインの Stop で検査され、SubagentStop は空なので何もしない(どちらでも安全側)。
     agent = sanitize(data.get("agent_id"))
-    state = cache_root()
+    state = cache_root()  # chdir 前に求めた絶対パス。グループごとの chdir の影響を受けない
     state.mkdir(parents=True, exist_ok=True)
     for pattern in ("*.touched", "*.lock"):
         for f in state.glob(pattern):
@@ -315,22 +317,24 @@ def on_stop(a, project_root, active, touched, state_lock, jb_lock):
     if not names:
         return 0
 
-    def consume():  # 今回処理した分だけ除く(jb 実行中に PostToolUse が追記した分は残す)
+    def consume(done=None):  # 今回処理した分だけ除く(jb 実行中に PostToolUse が追記した分は残す)
+        done = names if done is None else done
         with flock(state_lock):
-            write_names(touched, [n for n in read_names(touched) if n not in names])
+            write_names(touched, [n for n in read_names(touched) if n not in done])
 
     project_root = os.path.realpath(project_root)
     paths = [os.path.join(project_root, n) for n in names]  # 旧形式(相対)の記録も読めるように
     paths = [p for p in paths if os.path.isfile(p) and not excluded(os.path.relpath(p, project_root), a.exclude)]
     groups = group_by_root(paths)
-    out_lines, fixed_any = [], False
+    out_lines, fixed_any, failed = [], False, set()
     deadline = time.monotonic() + JB_TIMEOUT
     with flock(jb_lock):  # jb とキャッシュの同時実行を防ぐ(全セッション共通)
         for root, rels in groups.items():
             try:
                 found, fixed = lint_group(a, root, rels, deadline)
             except LintError as e:
-                say(f"rider_lint 実行失敗(この内容では再実行しません) [{root}]: {e}")
+                say(f"rider_lint 実行失敗 [{root}]: {e}")
+                failed.update(os.path.join(root, r) for r in rels)
                 continue
             fixed_any = fixed_any or fixed
             out_lines += [fmt_finding((os.path.join(root, f[0]), *f[1:])) for f in found]
@@ -345,6 +349,7 @@ def on_stop(a, project_root, active, touched, state_lock, jb_lock):
         say("Rider検査の指摘が残っています(差し戻し済みのため終了しました):\n" + out)
         return 0
     note = "(機械的に直せるものは cleanupcode で自動修正済みです。ファイルが書き換わっているので、編集前に必ず再Readしてください)\n" if fixed_any else ""
+    consume([n for n in names if os.path.join(project_root, n) in failed])  # 失敗したグループの分は再実行しない
     print(f"Rider(ReSharper CLI)の検査で、あなたが変更した行に指摘があります。修正してください。\n{note}\n{out}", file=sys.stderr)
     return 2
 
