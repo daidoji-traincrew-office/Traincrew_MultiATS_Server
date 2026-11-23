@@ -311,6 +311,11 @@ def group_by_root(paths):
     return groups
 
 
+def flush(notes):
+    if notes:
+        say("\n".join(notes))
+
+
 def on_stop(a, project_root, active, touched, state_lock, jb_lock):
     with flock(state_lock):
         names = read_names(touched)
@@ -326,14 +331,14 @@ def on_stop(a, project_root, active, touched, state_lock, jb_lock):
     paths = [os.path.join(project_root, n) for n in names]  # 旧形式(相対)の記録も読めるように
     paths = [p for p in paths if os.path.isfile(p) and not excluded(os.path.relpath(p, project_root), a.exclude)]
     groups = group_by_root(paths)
-    out_lines, fixed_any, failed = [], False, set()
+    out_lines, fixed_any, failed, notes = [], False, set(), []  # notes: stdout の JSON は1回の Stop で1つにまとめる
     deadline = time.monotonic() + JB_TIMEOUT
     with flock(jb_lock):  # jb とキャッシュの同時実行を防ぐ(全セッション共通)
         for root, rels in groups.items():
             try:
                 found, fixed = lint_group(a, root, rels, deadline)
             except LintError as e:
-                say(f"rider_lint 実行失敗 [{root}]: {e}")
+                notes.append(f"rider_lint 実行失敗 [{root}]: {e}")
                 failed.update(os.path.join(root, r) for r in rels)
                 continue
             fixed_any = fixed_any or fixed
@@ -342,13 +347,16 @@ def on_stop(a, project_root, active, touched, state_lock, jb_lock):
     if not out_lines:
         consume()
         if fixed_any:
-            say("Rider検査: 指摘は cleanupcode による自動修正で解消しました(ファイルが書き換わっています)。")
+            notes.append("Rider検査: 指摘は cleanupcode による自動修正で解消しました(ファイルが書き換わっています)。")
+        flush(notes)
         return 0
     if active:  # 差し戻しは1回まで
         consume()
-        say("Rider検査の指摘が残っています(差し戻し済みのため終了しました):\n" + out)
+        notes.append("Rider検査の指摘が残っています(差し戻し済みのため終了しました):\n" + out)
+        flush(notes)
         return 0
     note = "(機械的に直せるものは cleanupcode で自動修正済みです。ファイルが書き換わっているので、編集前に必ず再Readしてください)\n" if fixed_any else ""
+    flush(notes)
     consume([n for n in names if os.path.join(project_root, n) in failed])  # 失敗したグループの分は再実行しない
     print(f"Rider(ReSharper CLI)の検査で、あなたが変更した行に指摘があります。修正してください。\n{note}\n{out}", file=sys.stderr)
     return 2
