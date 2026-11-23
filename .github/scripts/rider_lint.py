@@ -289,17 +289,20 @@ def cmd_hook(a):
     agent = sanitize(data.get("agent_id"))
     state = cache_root()  # chdir 前に求めた絶対パス。グループごとの chdir の影響を受けない
     state.mkdir(parents=True, exist_ok=True)
-    for pattern in ("*.touched", "*.lock"):
+    for pattern in ("*.touched", "*.handover", "*.lock"):
         for f in state.glob(pattern):
             with contextlib.suppress(OSError):
                 if f.name != "jb.lock" and time.time() - f.stat().st_mtime > MAX_AGE:
                     f.unlink(missing_ok=True)
     touched = state / (f"{session}_{agent}.touched" if agent else f"{session}.touched")
-    state_lock = state / f"{session}.lock"  # .touched の読み書きだけを守る短いロック
+    state_lock = state / f"{session}.lock"  # .touched / .handover の読み書きだけを守る短いロック
+    # サブエージェントが時間切れ等で検査できなかった記録の引き渡し先。同じセッションのメインの Stop が引き取る
+    handover = state / f"{session}.handover"
     if event == "PostToolUse":
         with flock(state_lock):
             return record(data, root, touched, a.exclude)
-    return on_stop(a, root, bool(data.get("stop_hook_active")), touched, state_lock, state / "jb.lock")
+    return on_stop(a, root, bool(data.get("stop_hook_active")), touched, state_lock, state / "jb.lock", handover,
+                   is_sub=bool(agent) or event == "SubagentStop")
 
 
 def record(data, root, touched, excludes):
@@ -362,78 +365,100 @@ def split_group(a, root, items):
     return checked, [n for n, _ in items if n not in {n for n, _ in checked}], sln
 
 
-def on_stop(a, project_root, active, touched, state_lock, jb_lock):
+def on_stop(a, project_root, active, touched, state_lock, jb_lock, handover, is_sub):
+    """is_sub: サブエージェントの Stop。時間切れ等の分は handover へ移す。メインの Stop は handover も読んで検査する
+    (引き取り分は他エージェントの worktree のファイルなので、自動修正せず検査と通知だけにする)。"""
     with flock(state_lock):
-        names = read_names(touched)
+        own = read_names(touched)
+        taken = [] if is_sub else [n for n in read_names(handover) if n not in own]
+    names = own + taken
     if not names:
         return 0
 
     def consume(done):  # 指定した分だけ除く(jb 実行中に PostToolUse が追記した分は残す)
         with flock(state_lock):
-            write_names(touched, [n for n in read_names(touched) if n not in done])
+            for f in (touched,) if is_sub else (touched, handover):  # サブエージェントは handover を読まないので触らない
+                write_names(f, [n for n in read_names(f) if n not in done])
 
     project_root = os.path.realpath(project_root)
     items = [(n, os.path.realpath(os.path.join(project_root, n))) for n in names]  # 旧形式(相対)の記録も読めるように
     # 実在しない・--exclude 対象の記録は、検査せずに捨てる
     items = [(n, p) for n, p in items if os.path.isfile(p) and not excluded(os.path.relpath(p, project_root), a.exclude)]
+    taken_paths = {p for n, p in items if n in set(taken)}  # 引き取り分(自動修正しない・指摘は通知だけ)
     groups, noroot = group_by_root(items)
     drop = set(names) - {n for n, _ in items} | set(noroot)  # 今回で記録から除く分(検査しない・この内容では再実行しない)
-    retry = set()  # 時間切れ・restore 失敗で検査できなかった分。記録に残して次回再検査する
+    retry = {}  # 時間切れ・restore 失敗で検査できなかった分 {記録名: 理由}。記録に残して(サブエージェントなら引き渡して)再検査する
     notes = []  # stdout の JSON は1回の Stop で1つにまとめる
     if noroot:
         notes.append("rider_lint: git ルートが取れないため検査しませんでした: " + ", ".join(noroot))
-    out_lines, fixed_any = [], False
+    own_lines, taken_lines, fixed_any = [], [], False
     deadline = time.monotonic() + JB_TIMEOUT  # ロック待ちも含めて、フックの timeout を超えないようにする
     with contextlib.ExitStack() as stack:
         try:
             stack.enter_context(flock(jb_lock, deadline))  # jb とキャッシュの同時実行を防ぐ(全セッション共通)
         except LintRetry as e:  # ロックが取れなかった。全グループを次回に回す
-            notes.append(f"rider_lint 検査できませんでした: {e}(記録を残したので、次回の応答終了時に再検査します)")
-            retry.update(n for n, _ in items)
+            retry.update((n, f"{e}") for n, _ in items)
             groups = {}
         for root, group_items in groups.items():
             checked, skipped, sln = split_group(a, root, group_items)
             drop.update(skipped)
             if not checked:
                 continue
+            rels = list(dict.fromkeys(r for _, r in checked))
+            fix_rels = [r for r in rels if os.path.join(root, r) not in taken_paths]
             try:
-                found, fixed = lint_group(root, sln, list(dict.fromkeys(r for _, r in checked)), deadline)
+                found, fixed = lint_group(root, sln, rels, fix_rels, deadline)
             except LintRetry as e:
-                notes.append(f"rider_lint 検査できませんでした [{root}]: {e}(記録を残したので、次回の応答終了時に再検査します)")
-                retry.update(n for n, _ in checked)
+                retry.update((n, f"[{root}]: {e}") for n, _ in checked)
                 continue
             except Exception as e:  # noqa: BLE001  想定外でも他のグループの結果と記録の整理は続ける
                 notes.append(f"rider_lint 実行失敗(この内容では再実行しません) [{root}]: {e if isinstance(e, LintError) else repr(e)}")
                 drop.update(n for n, _ in checked)
                 continue
             fixed_any = fixed_any or fixed
-            out_lines += [fmt_finding((os.path.join(root, f[0]), *f[1:])) for f in found]
-    out = "\n".join(out_lines)
-    if not out_lines:
-        consume(set(names) - retry)
+            for f in found:
+                path = os.path.join(root, f[0])
+                (taken_lines if os.path.realpath(path) in taken_paths else own_lines).append(fmt_finding((path, *f[1:])))
+    if retry:
+        reasons = list(dict.fromkeys(retry.values()))
+        if is_sub:  # このエージェントは再検査しない。同じセッションのメインの Stop に引き渡す
+            with flock(state_lock):
+                write_names(handover, list(dict.fromkeys(read_names(handover) + list(retry))))
+            drop.update(retry)
+            suffix = "(時間切れ等のため、メインのセッションの応答終了時に検査します)"
+        else:
+            suffix = "(記録を残したので、次回の応答終了時に再検査します)"
+        notes += [f"rider_lint 検査できませんでした {r}{suffix}" for r in reasons]
+    if taken_lines:
+        notes.append("サブエージェントが検査できず、メインが引き取ったファイルの指摘です(自動修正はしていません):\n" + "\n".join(taken_lines))
+    done = set(names) - set(retry) | set(drop)  # 検査を終えた分
+    out = "\n".join(own_lines)
+    if not own_lines:
+        consume(done)
         if fixed_any:
             notes.append("Rider検査: 指摘は cleanupcode による自動修正で解消しました(ファイルが書き換わっています)。")
         flush(notes)
         return 0
     if active:  # 差し戻しは1回まで
-        consume(set(names) - retry)
+        consume(done)
         notes.append("Rider検査の指摘が残っています(差し戻し済みのため終了しました):\n" + out)
         flush(notes)
         return 0
     note = "(機械的に直せるものは cleanupcode で自動修正済みです。ファイルが書き換わっているので、編集前に必ず再Readしてください)\n" if fixed_any else ""
     flush(notes)
-    consume(drop)  # 検査した分は、差し戻し後の再実行のために残す
+    # 自分の検査済みの分は、差し戻し後の再実行のために残す。引き取り分は通知済みなので記録から除く
+    consume(drop | (set(taken) - set(retry)))
     print(f"Rider(ReSharper CLI)の検査で、あなたが変更した行に指摘があります。修正してください。\n{note}\n{out}", file=sys.stderr)
     return 2
 
 
-def lint_group(root, sln, files, deadline):
+def lint_group(root, sln, files, fix_files, deadline):
     """git ルート root(メイン作業ツリーまたは worktree)内の files を、そのルートの sln・設定・差分で検査する。"""
     cwd = os.getcwd()
     os.chdir(root)
     try:
         ensure_restored(sln, deadline)
-        return lint(sln, files, files, untracked_cs() & set(files), "HEAD", timeout=deadline - time.monotonic())
+        return lint(sln, files, fix_files, untracked_cs() & set(files), "HEAD", timeout=deadline - time.monotonic())
     finally:
         os.chdir(cwd)
 

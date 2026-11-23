@@ -24,7 +24,7 @@ C#のコードは、JetBrains Rider(ReSharper)の検査で指摘が出ない形�
 - `stop_hook_active` が既に true のとき(他のフックが継続させた場合など)は、1回目でも差し戻さず通知のみで終了する。
 - `.worktrees/<名前>/` など別の git worktree で編集したファイルは、その worktree の git ルートごとにまとめ、**その worktree の sln・`.editorconfig`・`*.sln.DotSettings`・git 差分(HEAD 基準)**で検査する。記録も差し戻しのパス(メインの作業ツリーのものを含む)も絶対パス。`CLAUDE_PROJECT_DIR` の外にある worktree(`/tmp` など)のファイルは記録されず、検査されない。
 - sln は、各 git ルート直下の `--sln` で指定した名前のものを使う。無ければ、そのルート直下の `*.sln` が1つだけならそれを使う。どちらも無ければそのルートのファイルは検査しない。`--exclude` は、フックを動かしたプロジェクトのルートからの相対と、各 git ルート(submodule なら親のルート)からの相対の両方で判定する。
-- sln 内のプロジェクトの `obj/project.assets.json` が無い(restore していない)worktree では、フックが `dotnet tool restore` と `dotnet restore` をしてから検査する(初回は時間がかかる)。全体で 270 秒の制限に収まらなければ、その回は検査せず通知して終了する。restore は残るので、次回から検査される。時間切れ・restore 失敗で検査できなかったファイルは記録を残し、次回の応答終了時に再検査する(restore に失敗した worktree では10分間 restore を試みず、通知だけ出す)。
+- sln 内のプロジェクトの `obj/project.assets.json` が無い(restore していない)worktree では、フックが `dotnet tool restore` と `dotnet restore` をしてから検査する(初回は時間がかかる)。全体で 270 秒の制限に収まらなければ、その回は検査せず通知して終了する。restore は残るので、次回から検査される。時間切れ・ロック待ち切れ・restore 失敗で検査できなかったファイルは記録を残す。メイン(Stop)の分はメイン自身の次の Stop で再検査し、サブエージェント(SubagentStop)の分は同じセッションの引き取り記録(`<セッション>.handover`)へ移して、メインの次の Stop が引き取って検査する(終了して再開しないサブエージェントの分もここで拾う。差し戻し中のサブエージェント自身の記録は、メインは読まない)。メインが引き取った分は、他のエージェントが作業中の worktree のファイルなので、自動修正はせず、検査結果の通知だけにする(restore に失敗した worktree では10分間 restore を試みず、通知だけ出す)。
 - フックが restore を自動実行するので、その worktree 内の `nuget.config`・`Directory.Build.props`・`.config/dotnet-tools.json` などが評価される。エージェントが編集した内容がそのまま実行される点に注意する。
 - フックの想定外のエラーは何もせず終了する(fail-open)。python3 が必要。
 - 手動実行: `python3 .github/scripts/rider_lint.py check --sln Traincrew_MultiATS_Server.sln --base HEAD --fix`
