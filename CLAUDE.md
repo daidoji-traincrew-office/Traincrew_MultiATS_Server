@@ -9,7 +9,7 @@ C#のコードは、JetBrains Rider(ReSharper)の検査で指摘が出ない形�
 - コレクション初期化は collection expression (`[]`) を使える場合は使う。
 - 要素を詰め替えるだけの `foreach` / `for` ループは書かず、LINQ (`Select` / `Where` / `ToList()` など) にする。
 - 使っていないメンバー・`using`・変数を残さない。
-- if / else / for / foreach / while / do / using / lock は本体が1行でも `{}` を付ける。
+- `if` / `else` / `for` / `foreach` / `while` / `do` / `using` / `lock` / `fixed` は本体が1行でも `{}` を付ける。
 
 設定は `.editorconfig` と `Traincrew_MultiATS_Server.sln.DotSettings` にある。
 
