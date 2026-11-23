@@ -391,7 +391,7 @@ def on_stop(a, project_root, active, touched, state_lock, jb_lock, handover, is_
     notes = []  # stdout の JSON は1回の Stop で1つにまとめる
     if noroot:
         notes.append("rider_lint: git ルートが取れないため検査しませんでした: " + ", ".join(noroot))
-    own_lines, taken_lines, fixed_any = [], [], False
+    own_lines, taken_lines, fixed_any = [], {}, False  # taken_lines: {worktree のルート: [指摘]}
     deadline = time.monotonic() + JB_TIMEOUT  # ロック待ちも含めて、フックの timeout を超えないようにする
     with contextlib.ExitStack() as stack:
         try:
@@ -418,7 +418,10 @@ def on_stop(a, project_root, active, touched, state_lock, jb_lock, handover, is_
             fixed_any = fixed_any or fixed
             for f in found:
                 path = os.path.join(root, f[0])
-                (taken_lines if os.path.realpath(path) in taken_paths else own_lines).append(fmt_finding((path, *f[1:])))
+                if os.path.realpath(path) in taken_paths:
+                    taken_lines.setdefault(root, []).append(fmt_finding((path, *f[1:])))
+                else:
+                    own_lines.append(fmt_finding((path, *f[1:])))
     if retry:
         reasons = list(dict.fromkeys(retry.values()))
         if is_sub:  # このエージェントは再検査しない。同じセッションのメインの Stop に引き渡す
@@ -429,32 +432,30 @@ def on_stop(a, project_root, active, touched, state_lock, jb_lock, handover, is_
         else:
             suffix = "(記録を残したので、次回の応答終了時に再検査します)"
         notes += [f"rider_lint 検査できませんでした {r}{suffix}" for r in reasons]
-    # exit 2 のときは stdout の JSON が読まれないので、引き取り分の指摘は stderr 側に載せる
-    taken_note = ("サブエージェントが検査できず、メインが引き取ったファイルの指摘です(自動修正はしていません):\n" + "\n".join(taken_lines)
-                  if taken_lines else "")
+    taken_note = ""  # 引き取り分の指摘。どの worktree(=どの実装者)の分か分かるようにルートごとに出す
+    if taken_lines:
+        taken_note = ("サブエージェントの worktree のファイルの指摘です。自動修正していません。該当の実装者に中継してください。\n"
+                      + "\n".join(f"[worktree: {r}]\n" + "\n".join(lines) for r, lines in taken_lines.items()))
     done = set(names) - set(retry) | set(drop)  # 検査を終えた分
     out = "\n".join(own_lines)
-    if not own_lines:
-        if taken_note:
-            notes.append(taken_note)
+    if not own_lines and not taken_lines:
         consume(done)
         if fixed_any:
             notes.append("Rider検査: 指摘は cleanupcode による自動修正で解消しました(ファイルが書き換わっています)。")
         flush(notes)
         return 0
-    if active:  # 差し戻しは1回まで
-        if taken_note:
-            notes.append(taken_note)
+    if active:  # 差し戻しは1回まで。指摘は通知だけにして、記録は消す(引き取り分も、通知した時点で消す)
         consume(done)
-        notes.append("Rider検査の指摘が残っています(差し戻し済みのため終了しました):\n" + out)
+        notes.append("Rider検査の指摘が残っています(差し戻し済みのため終了しました):\n" + "\n\n".join(x for x in (out, taken_note) if x))
         flush(notes)
         return 0
     note = "(機械的に直せるものは cleanupcode で自動修正済みです。ファイルが書き換わっているので、編集前に必ず再Readしてください)\n" if fixed_any else ""
     flush(notes)
-    # 自分の検査済みの分は、差し戻し後の再実行のために残す。引き取り分は通知済みなので記録から除く
-    consume(drop | (set(taken) - set(retry)))
-    taken_part = f"\n\n{taken_note}\n(上は、あなたの変更ではなく、引き取ったファイルの指摘です。このあと記録から除きます)" if taken_note else ""
-    print(f"Rider(ReSharper CLI)の検査で、あなたが変更した行に指摘があります。修正してください。\n{note}\n{out}{taken_part}", file=sys.stderr)
+    # 自分の検査済みの分は、差し戻し後の再実行のために残す。引き取り分は、差し戻しで見せた時点で除く(中継は受け取った側が行う)
+    consume(drop | (set(taken) - set(retry)) if own_lines else done)  # 自分の指摘が無ければ、自分の分も除く
+    head = "Rider(ReSharper CLI)の検査で、あなたが変更した行に指摘があります。修正してください。" if own_lines \
+        else "Rider(ReSharper CLI)の検査で、サブエージェントが検査できなかったファイルに指摘があります(あなた自身の変更ではありません)。"
+    print("\n".join(x for x in (head, note + out if out else "", taken_note) if x), file=sys.stderr)
     return 2
 
 
