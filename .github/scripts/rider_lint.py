@@ -381,13 +381,14 @@ def on_stop(a, project_root, active, touched, state_lock, jb_lock):
             if not checked:
                 continue
             try:
-                found, fixed = lint_group(root, sln, [r for _, r in checked], deadline)
+                found, fixed = lint_group(root, sln, list(dict.fromkeys(r for _, r in checked)), deadline)
             except LintRetry as e:
                 notes.append(f"rider_lint 検査できませんでした [{root}]: {e}(記録を残したので、次回の応答終了時に再検査します)")
                 retry.update(n for n, _ in checked)
                 continue
-            except LintError as e:
-                notes.append(f"rider_lint 実行失敗(この内容では再実行しません) [{root}]: {e}")
+            except Exception as e:  # noqa: BLE001  想定外でも他のグループの結果と記録の整理は続ける
+                notes.append(f"rider_lint 実行失敗(この内容では再実行しません) [{root}]: {e!r}" if not isinstance(e, LintError)
+                             else f"rider_lint 実行失敗(この内容では再実行しません) [{root}]: {e}")
                 drop.update(n for n, _ in checked)
                 continue
             fixed_any = fixed_any or fixed
