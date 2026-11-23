@@ -18,6 +18,7 @@ hook が依存する Claude Code フック仕様 (変わったらここを見直
 """
 import argparse
 import contextlib
+import functools
 import hashlib
 import json
 import os
@@ -37,6 +38,10 @@ JB_TIMEOUT = 270  # hook でだけ使う制限秒数 (settings.json のフック
 
 class LintError(Exception):
     pass
+
+
+class LintRetry(LintError):
+    """時間切れ・restore 失敗など、時間をおけば通る可能性がある失敗。記録を残して次回の Stop で再検査する。"""
 
 
 def git(*args, root=None):
@@ -87,8 +92,9 @@ def changed_lines(base):
     return result
 
 
-def cache_root():
-    return Path(os.environ.get("RIDER_LINT_CACHES") or Path.home() / ".cache" / "rider-lint")
+@functools.lru_cache(maxsize=None)
+def cache_root():  # 相対指定でも最初の呼び出し時の cwd で固定する(後の chdir で動かさない)
+    return Path(os.environ.get("RIDER_LINT_CACHES") or Path.home() / ".cache" / "rider-lint").expanduser().absolute()
 
 
 def caches_dir(sln):
@@ -109,20 +115,50 @@ def caches_dir(sln):
     return d
 
 
-def jb(args, log, deadline):
+def run_tool(cmd, log, deadline):
     remaining = None if deadline is None else deadline - time.monotonic()
     if remaining is not None and remaining <= 0:
-        raise LintError(f"{log} skipped: {JB_TIMEOUT}秒の制限を超えました")
+        raise LintRetry(f"{log} skipped: {JB_TIMEOUT}秒の制限を超えました")
     try:
-        r = subprocess.run(["dotnet", "jb", *args], capture_output=True, text=True, encoding="utf-8",
+        r = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8",
                            errors="replace", timeout=remaining)
     except subprocess.TimeoutExpired:
-        raise LintError(f"{log} timed out ({JB_TIMEOUT}秒の制限)") from None
+        raise LintRetry(f"{log} timed out ({JB_TIMEOUT}秒の制限)") from None
     except OSError as e:
         raise LintError(f"{log} を起動できません (dotnet がありませんか?): {e}") from e
     if r.returncode != 0:
         lines = [l for l in (r.stdout + r.stderr).splitlines() if not l.lstrip().startswith("at ")]
         raise LintError(f"{log} failed:\n" + "\n".join(lines[-20:]))
+
+
+def jb(args, log, deadline):
+    run_tool(["dotnet", "jb", *args], log, deadline)
+
+
+RESTORE_RETRY_WAIT = 600  # restore に失敗した worktree で、次に restore を試みるまでの秒数
+
+
+def ensure_restored(sln, deadline):
+    """sln 内のプロジェクトに obj/project.assets.json が無ければ、dotnet tool restore と dotnet restore をする。
+    失敗は LintRetry。失敗した worktree では RESTORE_RETRY_WAIT 秒は restore を試みない(毎回の Stop で時間を使わないため)。"""
+    base = Path(sln).parent
+    projects = [base / p.replace("\\", "/") for p in re.findall(r'"([^"]+\.csproj)"', Path(sln).read_text(encoding="utf-8-sig"))]
+    existing = [p for p in projects if p.exists()]
+    if existing and all((p.parent / "obj" / "project.assets.json").exists() for p in existing):
+        return
+    marker = cache_root() / f"restore-fail-{hashlib.sha256(str(base.resolve()).encode()).hexdigest()[:12]}.lock"
+    with contextlib.suppress(OSError):
+        if time.time() - marker.stat().st_mtime < RESTORE_RETRY_WAIT:
+            raise LintRetry(f"最近 restore に失敗したため、{RESTORE_RETRY_WAIT}秒は restore を試みません")
+    try:
+        run_tool(["dotnet", "tool", "restore"], "dotnet tool restore", deadline)
+        run_tool(["dotnet", "restore", sln], "dotnet restore", deadline)
+    except LintRetry:
+        raise
+    except LintError as e:
+        marker.touch()
+        raise LintRetry(str(e)) from e
+    marker.unlink(missing_ok=True)
 
 
 def run_jb(sln, files, fix_files, caches, sarif, timeout=None):
@@ -209,10 +245,20 @@ def say(msg):
 
 
 @contextmanager
-def flock(path):
+def flock(path, deadline=None):
+    """deadline(time.monotonic の値)を指定すると、それまでしか待たず、取れなければ LintRetry。"""
     import fcntl  # Windows では存在しない。hook 経路でだけ必要
     with open(path, "w") as f:
-        fcntl.flock(f, fcntl.LOCK_EX)
+        while deadline is not None:
+            try:
+                fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                break
+            except BlockingIOError:
+                if time.monotonic() >= deadline:
+                    raise LintRetry(f"他の検査のロック待ちで{JB_TIMEOUT}秒の制限を超えました") from None
+                time.sleep(0.5)
+        else:
+            fcntl.flock(f, fcntl.LOCK_EX)
         yield
 
 
@@ -237,24 +283,28 @@ def cmd_hook(a):
     if event not in ("PostToolUse", "Stop", "SubagentStop"):
         return 0
     root = git_root(os.environ.get("CLAUDE_PROJECT_DIR") or ".")
-    os.chdir(root)
     session = sanitize(data.get("session_id")) or "nosession"
     # .touched はエージェント単位。PostToolUse に agent_id が来ない仕様だった場合は、サブエージェントの編集が
     # メインの .touched に入ってメインの Stop で検査され、SubagentStop は空なので何もしない(どちらでも安全側)。
     agent = sanitize(data.get("agent_id"))
-    state = cache_root()
+    state = cache_root()  # chdir 前に求めた絶対パス。グループごとの chdir の影響を受けない
     state.mkdir(parents=True, exist_ok=True)
-    for pattern in ("*.touched", "*.lock"):
+    for pattern in ("*.touched", "*.handover", "*.retries", "*.lock"):
         for f in state.glob(pattern):
             with contextlib.suppress(OSError):
                 if f.name != "jb.lock" and time.time() - f.stat().st_mtime > MAX_AGE:
                     f.unlink(missing_ok=True)
     touched = state / (f"{session}_{agent}.touched" if agent else f"{session}.touched")
-    state_lock = state / f"{session}.lock"  # .touched の読み書きだけを守る短いロック
+    state_lock = state / f"{session}.lock"  # .touched / .handover の読み書きだけを守る短いロック
+    # サブエージェントが時間切れ等で検査できなかった記録の引き渡し先。同じセッションのメインの Stop が引き取る
+    handover = state / f"{session}.handover"
+    # メインの Stop で一度 LintRetry になった記録名。再検査でも LintRetry なら記録を捨てる(.touched の形式は変えない)
+    retries = state / f"{session}.retries"
     if event == "PostToolUse":
         with flock(state_lock):
             return record(data, root, touched, a.exclude)
-    return on_stop(a, bool(data.get("stop_hook_active")), touched, state_lock, state / "jb.lock")
+    return on_stop(a, root, bool(data.get("stop_hook_active")), touched, state_lock, state / "jb.lock", handover, retries,
+                   is_sub=bool(agent) or event == "SubagentStop")
 
 
 def record(data, root, touched, excludes):
@@ -265,46 +315,177 @@ def record(data, root, touched, excludes):
     rel = os.path.relpath(os.path.realpath(path), real_root)
     if rel.startswith("..") or excluded(rel, excludes):
         return 0
-    if rel not in read_names(touched):
+    # 記録は絶対パス。どの git ルート(worktree)のファイルかは Stop 時に求める(PostToolUse は 10 秒制限なので git を呼ばない)
+    real = os.path.realpath(path)
+    if real not in read_names(touched):
         with open(touched, "a", encoding="utf-8") as f:
-            f.write(rel + "\n")
+            f.write(real + "\n")
     return 0
 
 
-def on_stop(a, active, touched, state_lock, jb_lock):
+def pick_sln(root, name):
+    """root 直下の name の sln。無ければ、直下の *.sln が1つだけならそれ。どちらも無ければ None。"""
+    if (Path(root) / name).is_file():
+        return name
+    slns = sorted(p.name for p in Path(root).glob("*.sln"))
+    return slns[0] if len(slns) == 1 else None
+
+
+def group_by_root(items):
+    """items=[(記録名, 絶対パス)] を ({git ルート: [(記録名, ルート相対パス)]}, git ルートが取れなかった記録名) にする。
+    ディレクトリごとに git を1回だけ呼ぶ。"""
+    roots, groups, noroot = {}, {}, []
+    for name, p in items:
+        d = os.path.dirname(p)
+        if d not in roots:
+            try:
+                roots[d] = os.path.realpath(git_root(d))
+            except (subprocess.CalledProcessError, OSError):
+                roots[d] = None
+        if roots[d]:
+            groups.setdefault(roots[d], []).append((name, os.path.relpath(p, roots[d])))
+        else:
+            noroot.append(name)
+    return groups, noroot
+
+
+def flush(notes):
+    if notes:
+        say("\n".join(notes))
+
+
+def split_group(a, root, items):
+    """(検査する [(名前, 相対パス)], 検査しない名前, sln)。--exclude は各 git ルート(submodule なら親のルート)相対でも判定する。"""
+    tops = [root]  # worktree 内の public/ を外すため
+    with contextlib.suppress(subprocess.CalledProcessError, OSError):
+        parent = git("rev-parse", "--show-superproject-working-tree", root=root).strip()
+        if parent:
+            tops.append(parent)
+    sln = pick_sln(root, a.sln)
+    checked = [] if sln is None else [
+        (n, r) for n, r in items if not any(excluded(os.path.relpath(os.path.join(root, r), t), a.exclude) for t in tops)]
+    return checked, [n for n, _ in items if n not in {n for n, _ in checked}], sln
+
+
+def on_stop(a, project_root, active, touched, state_lock, jb_lock, handover, retries, is_sub):
+    """is_sub: サブエージェントの Stop。時間切れ等の分は handover へ移す。メインの Stop は handover も読んで検査する
+    (引き取り分は他エージェントの worktree のファイルなので、自動修正せず検査と通知だけにする)。"""
     with flock(state_lock):
-        names = read_names(touched)
+        own = read_names(touched)
+        taken = [] if is_sub else [n for n in read_names(handover) if n not in own]
+    names = own + taken
     if not names:
         return 0
 
-    def consume():  # 今回処理した分だけ除く(jb 実行中に PostToolUse が追記した分は残す)
+    def consume(done):  # 指定した分だけ除く(jb 実行中に PostToolUse が追記した分は残す)
         with flock(state_lock):
-            write_names(touched, [n for n in read_names(touched) if n not in names])
+            for f in (touched,) if is_sub else (touched, handover):  # サブエージェントは handover を読まないので触らない
+                write_names(f, [n for n in read_names(f) if n not in done])
 
-    files = [n for n in names if os.path.isfile(n) and not excluded(n, a.exclude)]
-    if not files:
-        consume()
+    project_root = os.path.realpath(project_root)
+    items = [(n, os.path.realpath(os.path.join(project_root, n))) for n in names]  # 旧形式(相対)の記録も読めるように
+    # 実在しない・--exclude 対象の記録は、検査せずに捨てる
+    items = [(n, p) for n, p in items if os.path.isfile(p) and not excluded(os.path.relpath(p, project_root), a.exclude)]
+    taken_paths = {p for n, p in items if n in set(taken)}  # 引き取り分(自動修正しない・指摘は通知だけ)
+    groups, noroot = group_by_root(items)
+    drop = set(names) - {n for n, _ in items} | set(noroot)  # 今回で記録から除く分(検査しない・この内容では再実行しない)
+    retry = {}  # 時間切れ・restore 失敗で検査できなかった分 {記録名: 理由}。記録に残して(サブエージェントなら引き渡して)再検査する
+    notes = []  # stdout の JSON は1回の Stop で1つにまとめる
+    if noroot:
+        notes.append("rider_lint: git ルートが取れないため検査しませんでした: " + ", ".join(noroot))
+    own_lines, taken_lines, fixed_any = [], {}, False  # taken_lines: {worktree のルート: [指摘]}
+    deadline = time.monotonic() + JB_TIMEOUT  # ロック待ちも含めて、フックの timeout を超えないようにする
+    with contextlib.ExitStack() as stack:
+        try:
+            stack.enter_context(flock(jb_lock, deadline))  # jb とキャッシュの同時実行を防ぐ(全セッション共通)
+        except LintRetry as e:  # ロックが取れなかった。全グループを次回に回す
+            retry.update((n, f"{e}") for n, _ in items)
+            groups = {}
+        for root, group_items in groups.items():
+            checked, skipped, sln = split_group(a, root, group_items)
+            drop.update(skipped)
+            if not checked:
+                continue
+            rels = list(dict.fromkeys(r for _, r in checked))
+            fix_rels = [r for r in rels if os.path.join(root, r) not in taken_paths]
+            try:
+                found, fixed = lint_group(root, sln, rels, fix_rels, deadline)
+            except LintRetry as e:
+                retry.update((n, f"[{root}]: {e}") for n, _ in checked)
+                continue
+            except Exception as e:  # noqa: BLE001  想定外でも他のグループの結果と記録の整理は続ける
+                notes.append(f"rider_lint 実行失敗(この内容では再実行しません) [{root}]: {e if isinstance(e, LintError) else repr(e)}")
+                drop.update(n for n, _ in checked)
+                continue
+            fixed_any = fixed_any or fixed
+            for f in found:
+                path = os.path.join(root, f[0])
+                if os.path.realpath(path) in taken_paths:
+                    taken_lines.setdefault(root, []).append(fmt_finding((path, *f[1:])))
+                else:
+                    own_lines.append(fmt_finding((path, *f[1:])))
+    giveup_note = ""
+    if not is_sub:  # メインは1回だけ再検査する。2回続けて検査できなかった記録は捨てる
+        with flock(state_lock):
+            retried = set(read_names(retries))
+            giveup = [n for n in retry if n in retried]
+            write_names(retries, [n for n in retry if n not in retried])  # 初めて検査できなかった分だけを覚える
+        drop.update(giveup)
+        for n in giveup:
+            del retry[n]
+        if giveup:
+            giveup_note = ("rider_lint: 2回続けて検査できなかったので、次のファイルの記録を捨てました。PR の CI で検査されます:\n"
+                           + "\n".join(os.path.join(project_root, n) for n in giveup))
+    if retry:
+        reasons = list(dict.fromkeys(retry.values()))
+        if is_sub:  # このエージェントは再検査しない。同じセッションのメインの Stop に引き渡す
+            with flock(state_lock):
+                write_names(handover, list(dict.fromkeys(read_names(handover) + list(retry))))
+            drop.update(retry)
+            suffix = "(時間切れ等のため、メインのセッションの応答終了時に検査します)"
+        else:
+            suffix = "(記録を残したので、次回の応答終了時に再検査します)"
+        notes += [f"rider_lint 検査できませんでした {r}{suffix}" for r in reasons]
+    taken_note = ""  # 引き取り分の指摘。どの worktree(=どの実装者)の分か分かるようにルートごとに出す
+    if taken_lines:
+        taken_note = ("サブエージェントの worktree のファイルの指摘です。自動修正していません。該当の実装者に中継してください。\n"
+                      + "\n".join(f"[worktree: {r}]\n" + "\n".join(lines) for r, lines in taken_lines.items()))
+    done = set(names) - set(retry) | set(drop)  # 検査を終えた分
+    out = "\n".join(own_lines)
+    if giveup_note and not (own_lines or taken_lines):
+        notes.append(giveup_note)
+    if not own_lines and not taken_lines:
+        consume(done)
+        if fixed_any:
+            notes.append("Rider検査: 指摘は cleanupcode による自動修正で解消しました(ファイルが書き換わっています)。")
+        flush(notes)
         return 0
-    try:
-        with flock(jb_lock):  # jb とキャッシュの同時実行を防ぐ(全セッション共通)
-            found, fixed = lint(a.sln, files, files, untracked_cs() & set(files), "HEAD", timeout=JB_TIMEOUT)
-    except LintError as e:
-        consume()  # 同じ内容では再実行しない
-        say(f"rider_lint 実行失敗(この内容では再実行しません): {e}")
+    if active:  # 差し戻しは1回まで。指摘は通知だけにして、記録は消す(引き取り分も、通知した時点で消す)
+        consume(done)
+        notes.append("Rider検査の指摘が残っています(差し戻し済みのため終了しました):\n" + "\n\n".join(x for x in (out, taken_note) if x))
+        if giveup_note:
+            notes.append(giveup_note)
+        flush(notes)
         return 0
-    out = "\n".join(fmt_finding(f) for f in found)
-    if not found:
-        consume()
-        if fixed:
-            say("Rider検査: 指摘は cleanupcode による自動修正で解消しました(ファイルが書き換わっています)。")
-        return 0
-    if active:  # 差し戻しは1回まで
-        consume()
-        say("Rider検査の指摘が残っています(差し戻し済みのため終了しました):\n" + out)
-        return 0
-    note = "(機械的に直せるものは cleanupcode で自動修正済みです。ファイルが書き換わっているので、編集前に必ず再Readしてください)\n" if fixed else ""
-    print(f"Rider(ReSharper CLI)の検査で、あなたが変更した行に指摘があります。修正してください。\n{note}\n{out}", file=sys.stderr)
+    note = "(機械的に直せるものは cleanupcode で自動修正済みです。ファイルが書き換わっているので、編集前に必ず再Readしてください)\n" if fixed_any else ""
+    # exit 2 では stdout の JSON が読まれないので、通知(notes)は stderr の本文の後ろに足す
+    # 自分の検査済みの分は、差し戻し後の再実行のために残す。引き取り分は、差し戻しで見せた時点で除く(中継は受け取った側が行う)
+    consume(drop | (set(taken) - set(retry)) if own_lines else done)  # 自分の指摘が無ければ、自分の分も除く
+    head = "Rider(ReSharper CLI)の検査で、あなたが変更した行に指摘があります。修正してください。" if own_lines \
+        else "Rider(ReSharper CLI)の検査で、サブエージェントが検査できなかったファイルに指摘があります(あなた自身の変更ではありません)。"
+    print("\n".join(x for x in (head, note + out if out else "", taken_note, giveup_note, *notes) if x), file=sys.stderr)
     return 2
+
+
+def lint_group(root, sln, files, fix_files, deadline):
+    """git ルート root(メイン作業ツリーまたは worktree)内の files を、そのルートの sln・設定・差分で検査する。"""
+    cwd = os.getcwd()
+    os.chdir(root)
+    try:
+        ensure_restored(sln, deadline)
+        return lint(sln, files, fix_files, untracked_cs() & set(files), "HEAD", timeout=deadline - time.monotonic())
+    finally:
+        os.chdir(cwd)
 
 
 def main():
