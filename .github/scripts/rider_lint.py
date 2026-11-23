@@ -468,12 +468,12 @@ def on_stop(a, project_root, active, touched, state_lock, jb_lock, handover, ret
         flush(notes)
         return 0
     note = "(機械的に直せるものは cleanupcode で自動修正済みです。ファイルが書き換わっているので、編集前に必ず再Readしてください)\n" if fixed_any else ""
-    flush(notes)
+    # exit 2 では stdout の JSON が読まれないので、通知(notes)は stderr の本文の後ろに足す
     # 自分の検査済みの分は、差し戻し後の再実行のために残す。引き取り分は、差し戻しで見せた時点で除く(中継は受け取った側が行う)
     consume(drop | (set(taken) - set(retry)) if own_lines else done)  # 自分の指摘が無ければ、自分の分も除く
     head = "Rider(ReSharper CLI)の検査で、あなたが変更した行に指摘があります。修正してください。" if own_lines \
         else "Rider(ReSharper CLI)の検査で、サブエージェントが検査できなかったファイルに指摘があります(あなた自身の変更ではありません)。"
-    print("\n".join(x for x in (head, note + out if out else "", taken_note, giveup_note) if x), file=sys.stderr)
+    print("\n".join(x for x in (head, note + out if out else "", taken_note, giveup_note, *notes) if x), file=sys.stderr)
     return 2
 
 
