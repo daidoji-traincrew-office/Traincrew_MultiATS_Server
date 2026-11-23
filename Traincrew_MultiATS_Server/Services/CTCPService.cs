@@ -57,6 +57,9 @@ public class CTCPService(
                 ? CenterControlState.CenterControl
                 : CenterControlState.StationControl);
 
+        // 進路状態を取得
+        var routeDataList = await routeService.GetRoutesWithStateByStationIds(stationIds);
+
         // 時差を取得
         var timeOffset = await serverService.GetTimeOffsetAsync();
 
@@ -72,6 +75,8 @@ public class CTCPService(
 
             // 各ランプの状態
             Lamps = lamps,
+
+            Routes = routeDataList,
 
             TimeOffset = timeOffset
         };

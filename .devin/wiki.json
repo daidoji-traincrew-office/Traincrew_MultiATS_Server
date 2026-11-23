@@ -1,0 +1,203 @@
+{
+  "repo_notes": [
+    {
+      "content": "このWikiではリレー（連動装置・RendoTable・進路/てこ/鎖錠のリレー処理）とTTC（列番窓・TtcWindow・TtcController）について説明しないこと。これらのクラス・CSV・テーブルに言及するページやセクションを作らないこと。"
+    }
+  ],
+  "pages": [
+    {
+      "title": "Overview",
+      "purpose": "Introduce the Traincrew MultiATS Server, explaining it's a multi-user railway automatic train supervision system with real-time interlocking logic, train management, and centralized traffic control capabilities",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Train Operations Management",
+      "purpose": "Provide overview of the train management subsystem including ATS data processing, driver assignment, track circuit occupancy, and train tracking displays",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Train State Management and Driver Assignment",
+      "purpose": "Document the TrainService's complex state machine with 8 rejection scenarios, conflict detection (IsOnPreviousTrain, IsTherePreviousTrain, IsMaybeWarp, IsLocked), driver handoff logic, and train number changes",
+      "parent": "Train Operations Management",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Track Circuit Detection and Management",
+      "purpose": "Explain track circuit occupancy detection, bulk update operations via ExecuteUpdateAsync, locking mechanisms for routes, and unlock timer management",
+      "parent": "Train Operations Management",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Real-time Communication Layer",
+      "purpose": "Provide overview of the SignalR-based real-time communication architecture supporting bidirectional communication with multiple client types",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "SignalR Hub Architecture and Contracts",
+      "purpose": "Document the SignalR hubs used for train operation, CTCP, TID and the commander table, and their contracts. Do not describe InterlockingHub internals.",
+      "parent": "Real-time Communication Layer",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Train Hub and ATS Interface",
+      "purpose": "Document TrainHub's SendData_ATS method, AtsToServerData and ServerToATSData DTOs, scheduled broadcasts (ServerToATSDataBySchedule every 250ms), and status flag system",
+      "parent": "Real-time Communication Layer",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Display and Commander Hubs",
+      "purpose": "Document CTCPHub for centralized traffic control panel data, TIDHub for train information displays, and CommanderTableHub for administrative operations (DeleteTrain, SetServerMode, track circuit management)",
+      "parent": "Real-time Communication Layer",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "System Infrastructure",
+      "purpose": "Provide overview of application startup, database initialization, background processing, and authentication systems",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Application Bootstrap and Configuration",
+      "purpose": "Document Program.cs for Crew and Passenger applications, service registration, middleware configuration, OpenIddict setup, and hub endpoint mapping",
+      "parent": "System Infrastructure",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Database Initialization Pipeline",
+      "purpose": "Document the 25-phase DatabaseInitializationOrchestrator process, CSV loading (StationCsvLoader, TrackCircuitCsvLoader, SignalCsvLoader, etc.), DbRendoTableInitializer's complex lock parsing, and entity detachment strategy",
+      "parent": "System Infrastructure",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Background Scheduler System",
+      "purpose": "Document SchedulerManager's coordination of background schedulers (SignalScheduler, TrainScheduler, CTCPHubScheduler, CommanderTableHubScheduler, InterlockingHubScheduler, TIDHubScheduler, OperationNotificationScheduler, DestinationButtonScheduler) with 250-500ms intervals",
+      "parent": "System Infrastructure",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Authentication and Authorization",
+      "purpose": "Document OpenIddict OAuth2/OpenID Connect setup with Discord provider, authorization policies (TrainPolicy, InterlockingPolicy, CommanderTablePolicy), role-based access (IsDriver, IsConductor, IsSignalman, IsCommander), and MemberID extraction",
+      "parent": "System Infrastructure",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Server Mode and State Management",
+      "purpose": "Document ServerService's management of ServerState (Mode: Off/Private/Public, TimeOffset, SwitchMoveTime), mutex-based concurrency control, and SchedulerManager integration",
+      "parent": "System Infrastructure",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Configuration Data and Models",
+      "purpose": "Provide overview of CSV configuration files, data models, and domain entities used throughout the system",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Database Schema and Entity Model",
+      "purpose": "Document the database schema for stations, track circuits, signals, trains, diagrams and server state. Do not document relay/interlocking logic tables or TTC tables.",
+      "parent": "Configuration Data and Models",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "CSV Data Files",
+      "purpose": "Document the CSV file formats for stations, track circuits, signals and trains. Do not document RendoTable CSVs or TTC CSVs.",
+      "parent": "Configuration Data and Models",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Data Models and Domain Entities",
+      "purpose": "Document core domain models for trains, track circuits, signals, stations and diagrams. Do not document relay/route/lever/TTC models.",
+      "parent": "Configuration Data and Models",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Repository and Data Access Layer",
+      "purpose": "Provide overview of the repository pattern implementation with 40+ repositories providing data access abstraction over Entity Framework Core",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Repository Pattern and Interfaces",
+      "purpose": "Document the repository pattern architecture, interface definitions, ApplicationDbContext usage, and common patterns like ExecuteUpdateAsync for bulk operations and Include() for eager loading",
+      "parent": "Repository and Data Access Layer",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    }
+  ]
+}

@@ -26,6 +26,11 @@ public class DataToCTCP
     public Dictionary<string, bool> Lamps { get; set; }
 
     /// <summary>
+    /// 進路情報リスト
+    /// </summary>
+    public List<RouteData> Routes { get; set; } = [];
+
+    /// <summary>
     /// 時差
     /// </summary>
     public long TimeOffset { get; set; }

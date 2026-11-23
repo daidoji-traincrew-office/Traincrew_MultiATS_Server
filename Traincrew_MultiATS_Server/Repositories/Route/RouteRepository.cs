@@ -34,6 +34,14 @@ public class RouteRepository(ApplicationDbContext context) : IRouteRepository
             .ToListAsync();
     }
 
+    public async Task<List<Models.Route>> GetByStationIdsWithState(List<string> stationIds)
+    {
+        return await context.Routes
+            .Include(r => r.RouteState)
+            .Where(r => r.StationId != null && stationIds.Contains(r.StationId))
+            .ToListAsync();
+    }
+
     public async Task<List<ulong>> GetIdsToOpenWithThrowOutControl()
     {
         return await context.ThrowOutControls
