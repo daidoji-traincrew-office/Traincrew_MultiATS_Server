@@ -245,10 +245,20 @@ def say(msg):
 
 
 @contextmanager
-def flock(path):
+def flock(path, deadline=None):
+    """deadline(time.monotonic の値)を指定すると、それまでしか待たず、取れなければ LintRetry。"""
     import fcntl  # Windows では存在しない。hook 経路でだけ必要
     with open(path, "w") as f:
-        fcntl.flock(f, fcntl.LOCK_EX)
+        while deadline is not None:
+            try:
+                fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                break
+            except BlockingIOError:
+                if time.monotonic() >= deadline:
+                    raise LintRetry(f"他の検査のロック待ちで{JB_TIMEOUT}秒の制限を超えました") from None
+                time.sleep(0.5)
+        else:
+            fcntl.flock(f, fcntl.LOCK_EX)
         yield
 
 
@@ -374,7 +384,13 @@ def on_stop(a, project_root, active, touched, state_lock, jb_lock):
         notes.append("rider_lint: git ルートが取れないため検査しませんでした: " + ", ".join(noroot))
     out_lines, fixed_any = [], False
     deadline = time.monotonic() + JB_TIMEOUT  # ロック待ちも含めて、フックの timeout を超えないようにする
-    with flock(jb_lock):  # jb とキャッシュの同時実行を防ぐ(全セッション共通)
+    with contextlib.ExitStack() as stack:
+        try:
+            stack.enter_context(flock(jb_lock, deadline))  # jb とキャッシュの同時実行を防ぐ(全セッション共通)
+        except LintRetry as e:  # ロックが取れなかった。全グループを次回に回す
+            notes.append(f"rider_lint 検査できませんでした: {e}(記録を残したので、次回の応答終了時に再検査します)")
+            retry.update(n for n, _ in items)
+            groups = {}
         for root, group_items in groups.items():
             checked, skipped, sln = split_group(a, root, group_items)
             drop.update(skipped)
