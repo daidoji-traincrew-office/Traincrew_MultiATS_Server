@@ -53,3 +53,6 @@ resharper_enforce_do_while_statement_braces_highlighting = warning
 resharper_enforce_using_statement_braces_highlighting = warning
 resharper_enforce_lock_statement_braces_highlighting = warning
 resharper_enforce_fixed_statement_braces_highlighting = warning
+
+# {} 自動付与時にブロック直後へ空行を入れない
+resharper_csharp_blank_lines_after_block_statements = 0
