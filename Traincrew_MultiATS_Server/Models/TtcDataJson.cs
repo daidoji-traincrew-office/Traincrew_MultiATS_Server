@@ -39,6 +39,7 @@ public class TTC_StationData
     public string stationID = "";
     public string stationName;
     public string stopPosName;
+    public string? stopType;
     public TimeOfDay arrivalTime;
     public TimeOfDay departureTime;
 }

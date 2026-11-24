@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Traincrew_MultiATS_Server.Common.Models;
 
 namespace Traincrew_MultiATS_Server.Models;
 
@@ -32,6 +33,9 @@ public class DiagramTrainTimetable
 
     [Column("departure_time")]
     public TimeSpan? DepartureTime { get; set; }
+
+    [Column("stop_type")]
+    public StopType StopType { get; set; } = StopType.Stop;
 
     // ナビゲーションプロパティ
     [ForeignKey(nameof(TrainDiagramId))]

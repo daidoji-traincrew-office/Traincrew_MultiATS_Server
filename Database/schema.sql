@@ -461,6 +461,9 @@ CREATE TABLE diagram_train
 -- ユニークインデックス作成
 CREATE UNIQUE INDEX idx_diagram_train_dia_id_train_number ON diagram_train (dia_id, train_number);
 
+-- 停車種別
+CREATE TYPE stop_type AS ENUM ('stop', 'operational_stop', 'pass');
+
 -- 列車ダイヤグラム時刻表（各駅の時刻情報）
 CREATE TABLE diagram_train_timetable
 (
@@ -470,7 +473,8 @@ CREATE TABLE diagram_train_timetable
     station_id       VARCHAR(10) NOT NULL REFERENCES station (id),          -- 駅ID
     track_number     VARCHAR(50) NOT NULL,                                   -- 番線
     arrival_time     INTERVAL    NULL,                                       -- 到着時刻
-    departure_time   INTERVAL    NULL                                        -- 出発時刻
+    departure_time   INTERVAL    NULL,                                       -- 出発時刻
+    stop_type        stop_type   NOT NULL DEFAULT 'stop'                     -- 停車種別
 );
 
 -- インデックス作成
