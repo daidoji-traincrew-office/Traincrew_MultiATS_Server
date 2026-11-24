@@ -67,7 +67,7 @@ CREATE TABLE "OpenIddictTokens"
     reference_id      character varying(100),
     status            character varying(50),
     subject           character varying(400),
-    type              character varying(50),
+    type              character varying(150),
     CONSTRAINT "PK_OpenIddictTokens" PRIMARY KEY (id),
     CONSTRAINT "FK_OpenIddictTokens_OpenIddictApplications_application_id" FOREIGN KEY (application_id) REFERENCES "OpenIddictApplications" (id),
     CONSTRAINT "FK_OpenIddictTokens_OpenIddictAuthorizations_authorization_id" FOREIGN KEY (authorization_id) REFERENCES "OpenIddictAuthorizations" (id)
