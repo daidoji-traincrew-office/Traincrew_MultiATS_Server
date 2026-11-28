@@ -29,7 +29,8 @@ const RENDO_RANGES = [
 
 // サーバーマスタの設定
 const MASTER_RANGES = [
-    ['駅・停車場', '駅・停車場', ['A1:D80']],
+    // E〜M 列は公開しない。A〜D と N 列(駅制御装置ブロック)だけを、行ごとに横に連結して出す
+    ['駅・停車場', '駅・停車場', [['A1:D80', 'N1:N80']]],
     ['進路', '進路', ['A1:L338']],
     ['信号(進路条件付き)', '信号リスト', ['A1:X381']],
     ['軌道回路', '軌道回路に対する計算するべき信号機リスト', ['A1:AQ395']],
@@ -68,15 +69,36 @@ async function getSpreadsheetData(sheets, spreadsheetId, sheetName, range) {
         spreadsheetId,
         range: `${sheetName}!${range}`
     });
-    const max = response.data.values.reduce((c, e) => {
+    const rows = response.data.values ?? [];
+    const max = rows.reduce((c, e) => {
         const len = e.length;
         return c < len ? len : c;
     }, 0);
-    const values = response.data.values.map((e) => {
+    const values = rows.map((e) => {
         const len = e.length;
         return len < max ? e.concat(Array(max - len).fill("")) : e;
     });
     return values || [];
+}
+
+/**
+ * 複数の範囲を取得し、行ごとに列を横に連結する
+ * 範囲どうしの開始行を揃えておくこと(終端が足りない行は空欄で埋める)
+ * どれかの範囲が空なら、空のCSVを書かないよう例外を投げる
+ */
+async function getHorizontallyJoinedData(sheets, spreadsheetId, sheetName, ranges) {
+    const parts = [];
+    for (const range of ranges) {
+        const part = await getSpreadsheetData(sheets, spreadsheetId, sheetName, range);
+        if (part.length === 0) {
+            throw new Error(`範囲が空です: ${sheetName}!${range}`);
+        }
+        parts.push(part);
+    }
+    const rowCount = Math.max(...parts.map(p => p.length));
+    return Array.from({ length: rowCount }, (_, i) =>
+        parts.flatMap(p => p[i] ?? Array((p[0] ?? []).length).fill(""))
+    );
 }
 
 /**
@@ -143,9 +165,16 @@ async function exportOneDataToCSV(
                 : `${stationName}${index + 1}`;
 
             try {
-                const values = await getSpreadsheetData(sheets, spreadsheetId, sheetName, range);
+                // 範囲が配列のときは、同じ行の範囲を横に連結する(縦に積むのは配列の外側)
+                const values = Array.isArray(range)
+                    ? await getHorizontallyJoinedData(sheets, spreadsheetId, sheetName, range)
+                    : await getSpreadsheetData(sheets, spreadsheetId, sheetName, range);
                 allData = allData.concat(values);
             } catch (error) {
+                // 横連結の範囲は、読めなければ空のCSVを書かずにジョブを落とす
+                if (Array.isArray(range)) {
+                    throw error;
+                }
                 console.error(`シートが見つかりません: ${sheetName}`, error.message);
                 continue;
             }
