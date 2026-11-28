@@ -83,7 +83,8 @@ CREATE TABLE station
     id                   VARCHAR(10) PRIMARY KEY,
     name                 VARCHAR(100) NOT NULL UNIQUE,
     is_station           BOOLEAN      NOT NULL, -- 停車場かどうか
-    is_passenger_station BOOLEAN      NOT NULL  -- 旅客駅かどうか
+    is_passenger_station BOOLEAN      NOT NULL, -- 旅客駅かどうか
+    control_block        VARCHAR(10)            -- 駅制御装置ブロック。同じ値の駅は同じブロック。未設定は NULL
 );
 
 CREATE TYPE object_type AS ENUM ('route', 'switching_machine', 'track_circuit', 'lever', 'direction_route', 'direction_self_control_lever', 'route_central_control_lever');
