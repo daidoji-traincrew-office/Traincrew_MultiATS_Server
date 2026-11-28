@@ -69,11 +69,12 @@ async function getSpreadsheetData(sheets, spreadsheetId, sheetName, range) {
         spreadsheetId,
         range: `${sheetName}!${range}`
     });
-    const max = response.data.values.reduce((c, e) => {
+    const rows = response.data.values ?? [];
+    const max = rows.reduce((c, e) => {
         const len = e.length;
         return c < len ? len : c;
     }, 0);
-    const values = response.data.values.map((e) => {
+    const values = rows.map((e) => {
         const len = e.length;
         return len < max ? e.concat(Array(max - len).fill("")) : e;
     });
@@ -81,12 +82,18 @@ async function getSpreadsheetData(sheets, spreadsheetId, sheetName, range) {
 }
 
 /**
- * 複数の範囲を取得し、行ごとに列を連結する(範囲どうしの行数は揃えておくこと)
+ * 複数の範囲を取得し、行ごとに列を横に連結する
+ * 範囲どうしの開始行を揃えておくこと(終端が足りない行は空欄で埋める)
+ * どれかの範囲が空なら、空のCSVを書かないよう例外を投げる
  */
-async function getHorizontalData(sheets, spreadsheetId, sheetName, ranges) {
+async function getHorizontallyJoinedData(sheets, spreadsheetId, sheetName, ranges) {
     const parts = [];
     for (const range of ranges) {
-        parts.push(await getSpreadsheetData(sheets, spreadsheetId, sheetName, range));
+        const part = await getSpreadsheetData(sheets, spreadsheetId, sheetName, range);
+        if (part.length === 0) {
+            throw new Error(`範囲が空です: ${sheetName}!${range}`);
+        }
+        parts.push(part);
     }
     const rowCount = Math.max(...parts.map(p => p.length));
     return Array.from({ length: rowCount }, (_, i) =>
@@ -160,10 +167,14 @@ async function exportOneDataToCSV(
             try {
                 // 範囲が配列のときは、同じ行の範囲を横に連結する(縦に積むのは配列の外側)
                 const values = Array.isArray(range)
-                    ? await getHorizontalData(sheets, spreadsheetId, sheetName, range)
+                    ? await getHorizontallyJoinedData(sheets, spreadsheetId, sheetName, range)
                     : await getSpreadsheetData(sheets, spreadsheetId, sheetName, range);
                 allData = allData.concat(values);
             } catch (error) {
+                // 横連結の範囲は、読めなければ空のCSVを書かずにジョブを落とす
+                if (Array.isArray(range)) {
+                    throw error;
+                }
                 console.error(`シートが見つかりません: ${sheetName}`, error.message);
                 continue;
             }
