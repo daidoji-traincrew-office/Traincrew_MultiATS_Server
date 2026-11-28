@@ -343,8 +343,9 @@ public class TtcDbInitializer(
         await generalRepository.AddAll(ttcWindowsToAdd, cancellationToken);
         await generalRepository.AddAll(displayStationsToAdd, cancellationToken);
         await generalRepository.AddAll(windowTrackCircuitsToAdd, cancellationToken);
-        logger.LogInformation("Initialized {Count} TTC windows, updated {UpdatedCount} TTC window track numbers or types",
-            ttcWindowsToAdd.Count, ttcWindowsToEmpty.Count);
+        logger.LogInformation(
+            "Initialized {Count} TTC windows, updated {UpdatedCount} TTC window track numbers or types, cleared {ClearedCount} TTC window track numbers",
+            ttcWindowsToAdd.Count, ttcWindowsToUpdate.Count, ttcWindowsToClear.Count);
     }
 
     /// <summary>
