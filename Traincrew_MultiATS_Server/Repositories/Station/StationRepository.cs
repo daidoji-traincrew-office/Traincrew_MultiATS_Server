@@ -62,13 +62,6 @@ public class StationRepository(ApplicationDbContext context) : IStationRepositor
                 .SetProperty(s => s.IsTimerConditionMet, isTimerConditionMet));
     }
 
-    public async Task<List<string>> GetAllNames(CancellationToken cancellationToken = default)
-    {
-        return await context.Stations
-            .Select(s => s.Name)
-            .ToListAsync(cancellationToken);
-    }
-
     public async Task<List<string>> GetIdsWhereIsStation(CancellationToken cancellationToken = default)
     {
         return await context.Stations

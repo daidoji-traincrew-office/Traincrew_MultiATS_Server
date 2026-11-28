@@ -60,13 +60,6 @@ public interface IStationRepository
     Task SetIsTimerConditionMetByIds(List<ulong> ids, bool isTimerConditionMet);
 
     /// <summary>
-    /// すべての停車場の名前を取得する
-    /// </summary>
-    /// <param name="cancellationToken">キャンセルトークン</param>
-    /// <returns>停車場名のList</returns>
-    Task<List<string>> GetAllNames(CancellationToken cancellationToken = default);
-
-    /// <summary>
     /// IsStation=trueの停車場IDを取得する
     /// </summary>
     /// <param name="cancellationToken">キャンセルトークン</param>
