@@ -23,7 +23,7 @@ public class StationDbInitializer(
         var existingStationByName = (await stationRepository.GetAllAsync(cancellationToken))
             .ToDictionary(s => s.Name);
 
-        var stations = new List<Station>();
+        var stationsToAdd = new List<Station>();
         var stationsToUpdate = new List<Station>();
         foreach (var station in stationList)
         {
@@ -39,7 +39,7 @@ public class StationDbInitializer(
                 continue;
             }
 
-            stations.Add(new()
+            stationsToAdd.Add(new()
             {
                 Id = station.Id,
                 Name = station.Name,
@@ -49,10 +49,14 @@ public class StationDbInitializer(
             });
         }
 
-        await generalRepository.SaveAll(stationsToUpdate, cancellationToken);
-        await generalRepository.AddAll(stations, cancellationToken);
+        if (stationsToUpdate.Count > 0)
+        {
+            await generalRepository.SaveAll(stationsToUpdate, cancellationToken);
+        }
+
+        await generalRepository.AddAll(stationsToAdd, cancellationToken);
         logger.LogInformation("Initialized {Count} stations, updated {UpdatedCount} station control blocks",
-            stations.Count, stationsToUpdate.Count);
+            stationsToAdd.Count, stationsToUpdate.Count);
     }
 
     /// <summary>

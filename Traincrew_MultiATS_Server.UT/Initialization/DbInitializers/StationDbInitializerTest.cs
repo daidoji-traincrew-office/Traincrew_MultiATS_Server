@@ -109,16 +109,38 @@ public class StationDbInitializerTest
         // Arrange
         var existing = new Station
         {
-            Id = "ST1", Name = "Station1", IsStation = true, IsPassengerStation = true, ControlBlock = null
+            Id = "ST1",
+            Name = "Station1",
+            IsStation = true,
+            IsPassengerStation = true,
+            ControlBlock = null
         };
         var unchanged = new Station
         {
-            Id = "ST2", Name = "Station2", IsStation = true, IsPassengerStation = true, ControlBlock = "B"
+            Id = "ST2",
+            Name = "Station2",
+            IsStation = true,
+            IsPassengerStation = true,
+            ControlBlock = "B"
         };
         var stationCsvList = new List<StationCsv>
         {
-            new() { Id = "ST1", Name = "Station1", IsStation = true, IsPassengerStation = true, ControlBlock = "A" },
-            new() { Id = "ST2", Name = "Station2", IsStation = true, IsPassengerStation = true, ControlBlock = "B" }
+            new()
+            {
+                Id = "ST1",
+                Name = "Station1",
+                IsStation = true,
+                IsPassengerStation = true,
+                ControlBlock = "A"
+            },
+            new()
+            {
+                Id = "ST2",
+                Name = "Station2",
+                IsStation = true,
+                IsPassengerStation = true,
+                ControlBlock = "B"
+            }
         };
         _stationRepositoryMock.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync([existing, unchanged]);
@@ -134,6 +156,50 @@ public class StationDbInitializerTest
 
         // Assert
         Assert.Equal("A", existing.ControlBlock);
+        _generalRepositoryMock.Verify(
+            r => r.SaveAll(It.Is<List<Station>>(list => list.Count == 1 && list[0].Id == "ST1"),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Fact]
+    [DisplayName("既存の駅にブロックがありCSVがnullの場合、nullに戻されること")]
+    public async Task InitializeStationsAsync_ShouldClearControlBlock_WhenCsvIsNull()
+    {
+        // Arrange
+        var existing = new Station
+        {
+            Id = "ST1",
+            Name = "Station1",
+            IsStation = true,
+            IsPassengerStation = true,
+            ControlBlock = "A"
+        };
+        var stationCsvList = new List<StationCsv>
+        {
+            new()
+            {
+                Id = "ST1",
+                Name = "Station1",
+                IsStation = true,
+                IsPassengerStation = true,
+                ControlBlock = null
+            }
+        };
+        _stationRepositoryMock.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync([existing]);
+
+        var initializer = new StationDbInitializer(
+            _loggerMock.Object,
+            _stationRepositoryMock.Object,
+            _stationTimerStateRepositoryMock.Object,
+            _generalRepositoryMock.Object);
+
+        // Act
+        await initializer.InitializeStationsAsync(stationCsvList, TestContext.Current.CancellationToken);
+
+        // Assert
+        Assert.Null(existing.ControlBlock);
         _generalRepositoryMock.Verify(
             r => r.SaveAll(It.Is<List<Station>>(list => list.Count == 1 && list[0].Id == "ST1"),
                 It.IsAny<CancellationToken>()),

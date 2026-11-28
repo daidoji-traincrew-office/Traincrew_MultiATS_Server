@@ -1,3 +1,4 @@
+using CsvHelper;
 using CsvHelper.Configuration;
 
 namespace Traincrew_MultiATS_Server.Models;
@@ -19,8 +20,14 @@ public sealed class StationCsvMap : ClassMap<StationCsv>
         Map(m => m.Name).Name("駅名");
         Map(m => m.IsStation).Convert(row => ParseOX(row.Row.GetField("停車場？")));
         Map(m => m.IsPassengerStation).Convert(row => ParseOX(row.Row.GetField("旅客駅？")));
-        Map(m => m.ControlBlock).Convert(row =>
-            row.Row.TryGetField<string>("駅制御装置ブロック", out var value) && !string.IsNullOrEmpty(value) ? value : null);
+        Map(m => m.ControlBlock).Convert(GetControlBlock);
+    }
+
+    private static string? GetControlBlock(ConvertFromStringArgs row)
+    {
+        return row.Row.TryGetField<string>("駅制御装置ブロック", out var value) && !string.IsNullOrWhiteSpace(value)
+            ? value
+            : null;
     }
 
     private static bool ParseOX(string? value)
