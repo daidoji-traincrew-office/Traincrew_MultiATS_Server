@@ -260,7 +260,7 @@ public class TtcDbInitializer(
 
         var ttcWindowsToAdd = new List<TtcWindow>();
         var ttcWindowsToUpdate = new List<TtcWindow>();
-        var desiredTrackNumberByWindowName = new Dictionary<string, string>();
+        var desiredByWindowName = new Dictionary<string, (string TrackNumber, TtcWindowType Type)>();
         var displayStationsToAdd = new List<TtcWindowDisplayStation>();
         var windowTrackCircuitsToAdd = new List<TtcWindowTrackCircuit>();
 
@@ -268,11 +268,11 @@ public class TtcDbInitializer(
         {
             if (existingWindowByName.TryGetValue(record.Name, out var existingWindow))
             {
-                // 既存の窓は、番線だけCSVに揃える(追加時にしか入らないと、既存DBの窓に番線が入らない)
-                if (existingWindow.TrackNumber != record.TrackNumber)
+                // 既存の窓は、番線と種類をCSVに揃える(追加時にしか入らないと、既存DBの窓に反映されない)
+                if (existingWindow.TrackNumber != record.TrackNumber || existingWindow.Type != record.Type)
                 {
                     ttcWindowsToUpdate.Add(existingWindow);
-                    desiredTrackNumberByWindowName[existingWindow.Name] = record.TrackNumber;
+                    desiredByWindowName[existingWindow.Name] = (record.TrackNumber, record.Type);
                 }
 
                 continue;
@@ -332,7 +332,9 @@ public class TtcDbInitializer(
         {
             foreach (var window in ttcWindowsToUpdate)
             {
-                window.TrackNumber = desiredTrackNumberByWindowName[window.Name];
+                var desired = desiredByWindowName[window.Name];
+                window.TrackNumber = desired.TrackNumber;
+                window.Type = desired.Type;
             }
 
             await generalRepository.SaveAll(ttcWindowsToUpdate, cancellationToken);
@@ -341,7 +343,7 @@ public class TtcDbInitializer(
         await generalRepository.AddAll(ttcWindowsToAdd, cancellationToken);
         await generalRepository.AddAll(displayStationsToAdd, cancellationToken);
         await generalRepository.AddAll(windowTrackCircuitsToAdd, cancellationToken);
-        logger.LogInformation("Initialized {Count} TTC windows, updated {UpdatedCount} TTC window track numbers",
+        logger.LogInformation("Initialized {Count} TTC windows, updated {UpdatedCount} TTC window track numbers or types",
             ttcWindowsToAdd.Count, ttcWindowsToEmpty.Count);
     }
 

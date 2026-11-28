@@ -17,7 +17,7 @@ TH75_TTC_Track2,TH75,2,,,,,番線,TH75_5RBT,なし
 TH75_TTC_Track3,TH75,3,TH76,,,,番線,TH75_9LCT,なし
 TH75_TTC_Track5,TH75,5,TH76,,,,番線,TH75_5T,なし
 TH75_TTC_Track6,TH75,6,TH76,,,,番線,TH75_6T,なし
-TH75_TTC_TrackT,TH75,T,,,,,入換,TH75_TST,なし
+TH75_TTC_TrackT,TH75,T,,,,,本線入換,TH75_TST,なし
 TH75_TTC_Down1,TH75,,TH76,,,,下り,なし,なし
 TH75_TTC_Down2,TH75,,,,,,下り,なし,なし
 TH75_TTC_Down3,TH75,,,,,,下り,なし,なし
@@ -50,7 +50,7 @@ TH70_TTC_Up2,TH70,,,,,,上り,なし,なし
 TH70_TTC_Up3,TH70,,,,,,上り,なし,なし
 TH70_TTC_Track1,TH70,1,,,,,番線,TH70_1RAT,なし
 TH70_TTC_Track2,TH70,2,TH71,,,,番線,TH70_5LBT,なし
-TH70_TTC_TrackS,TH70,S,,,,,入換,TH70_SST,なし
+TH70_TTC_TrackS,TH70,S,,,,,本線入換,TH70_SST,なし
 TH70_TTC_Down1,TH70,,TH71,,,,下り,なし,なし
 TH70_TTC_Down2,TH70,,,,,,下り,なし,なし
 TH70_TTC_Down3,TH70,,,,,,下り,なし,なし
@@ -68,7 +68,7 @@ TH67_TTC_Track1,TH67,1,TH66S,,,,番線,TH67_1RAT,なし
 TH67_TTC_Track2,TH67,2,TH66S,,,,番線,TH67_1RBT,なし
 TH67_TTC_Track3,TH67,3,TH66S,,,,番線,TH67_4LT,なし
 TH67_TTC_Track4,TH67,4,TH66S,,,,番線,TH67_5LT,なし
-TH67_TTC_Track5,TH67,5,,,,,番線,TH67_23RT,なし
+TH67_TTC_Track5,TH67,5,,,,,入換番線,TH67_23RT,なし
 TH67_TTC_Down1,TH67,,,,,,下り,なし,なし
 TH67_TTC_Down2,TH67,,,,,,下り,なし,なし
 TH67_TTC_Down3,TH67,,,,,,下り,なし,なし
@@ -92,9 +92,9 @@ TH65_TTC_Track3,TH65,3,TH66S,TH64,,,番線,TH65_11LT,なし
 TH65_TTC_Track4,TH65,4,TH66S,TH64,,,番線,TH65_12LT,なし
 TH65_TTC_DownArr1,TH65,,TH66S,,,,番線,なし,なし
 TH65_TTC_DownArr2,TH65,,TH66S,,,,番線,なし,なし
-TH65_TTC_TrackE,TH65,E,,,,,番線,TH65_ET,なし
-TH65_TTC_TrackX,TH65,X,,,,,入換,TH65_XT,なし
-TH65_TTC_TrackY,TH65,Y,,,,,番線,TH65_YT,なし
+TH65_TTC_TrackE,TH65,E,,,,,入換番線,TH65_ET,なし
+TH65_TTC_TrackX,TH65,X,,,,,本線入換,TH65_XT,なし
+TH65_TTC_TrackY,TH65,Y,,,,,入換番線,TH65_YT,なし
 TH65_TTC_Down1,TH65,,,,,,下り,なし,なし
 TH65_TTC_Down2,TH65,,,,,,下り,なし,なし
 TH65_TTC_Down3,TH65,,,,,,下り,なし,なし
@@ -147,7 +147,7 @@ TH58_TTC_Up3,TH58,,,,,,上り,なし,なし
 TH58_TTC_Track1,TH58,1,TH59,,,,番線,TH58_2RAT,なし
 TH58_TTC_Track2,TH58,2,TH59,,,,番線,TH58_2RBT,なし
 TH58_TTC_Track3,TH58,3,TH59,,,,番線,TH58_9LCT,なし
-TH58_TTC_Track4,TH58,4,,,,,番線,TH58_DT,なし
-TH58_TTC_Track5,TH58,5,,,,,番線,TH58_ET,なし
+TH58_TTC_Track4,TH58,4,,,,,入換番線,TH58_DT,なし
+TH58_TTC_Track5,TH58,5,,,,,入換番線,TH58_ET,なし
 TH58_TTC_Down1,TH58,,,,,,下り,なし,なし
 TH58_TTC_Down2,TH58,,,,,,下り,なし,なし

@@ -61,10 +61,29 @@ public class TtcWindowCsvMapTest
     }
 
     [Fact]
+    [DisplayName("種類「入換番線」「本線入換」は、それぞれShuntTrack・Switchingとして読めること")]
+    public void ShouldReadShuntTrackAndSwitchingTypes()
+    {
+        var records = Read(
+            "Window_Shunt,TH76,5,,,,,入換番線,TH76_1T,",
+            "Window_Main,TH76,T,,,,,本線入換,TH76_2T,");
+
+        Assert.Equal(TtcWindowType.ShuntTrack, records[0].Type);
+        Assert.Equal(TtcWindowType.Switching, records[1].Type);
+    }
+
+    [Fact]
+    [DisplayName("古い種類「入換」は、読み込みで誤りになること")]
+    public void ShouldRejectLegacySwitchingType()
+    {
+        Assert.NotNull(Record.Exception(() => Read("Window_Old,TH76,,,,,,入換,TH76_1T,")));
+    }
+
+    [Fact]
     [DisplayName("対応軌道回路1・2の両方に値がある場合、両方が読めること")]
     public void ShouldReadBothTrackCircuits()
     {
-        var records = Read("Window_Switching,TH76,,TH75,,,,入換,TH76_1T,TH76_2T");
+        var records = Read("Window_Switching,TH76,,TH75,,,,本線入換,TH76_1T,TH76_2T");
 
         Assert.Equal(["TH76_1T", "TH76_2T"], Assert.Single(records).TrackCircuits);
     }
