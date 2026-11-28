@@ -36,10 +36,11 @@ public sealed class TtcWindowCsvMap : ClassMap<TtcWindowCsv>
         var value = row.Row.GetField(7);
         return value switch
         {
-            "上り" => TtcWindowType.Up,
-            "下り" => TtcWindowType.Down,
-            "番線" => TtcWindowType.HomeTrack,
-            "入換" => TtcWindowType.Switching,
+            "上り閉塞" => TtcWindowType.Up,
+            "下り閉塞" => TtcWindowType.Down,
+            "ホーム番線" or "場内途中" or "出発途中" => TtcWindowType.HomeTrack,
+            "入換番線" => TtcWindowType.SwitchingTrack,
+            "本線入換" => TtcWindowType.SwitchingMainTrack,
             _ => throw new InvalidOperationException($"Invalid TtcWindowType value: {value}")
         };
     }

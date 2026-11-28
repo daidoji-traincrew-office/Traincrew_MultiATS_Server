@@ -214,6 +214,23 @@ public class TtcDbInitializerTest
     }
 
     [Fact]
+    [DisplayName("既存のTTC窓の種類がCSVと違う場合、種類が更新されること")]
+    public async Task InitializeTtcWindowsAsync_ShouldUpdateType_WhenExistingWindowDiffers()
+    {
+        var existing = Window("Window1", "5");
+        SetupExistingWindows(existing);
+        var record = Csv("Window1", "5");
+        record.Type = TtcWindowType.SwitchingTrack;
+        var calls = CaptureWindowSaves([]);
+
+        await CreateInitializer().InitializeTtcWindowsAsync([record], TestContext.Current.CancellationToken);
+
+        Assert.Equal(TtcWindowType.SwitchingTrack, existing.Type);
+        Assert.Equal("5", existing.TrackNumber);
+        Assert.Equal(["Save:Window1=", "Save:Window1=5", "AddWindows"], calls);
+    }
+
+    [Fact]
     [DisplayName("全てのTTC窓の番線がCSVと同じ場合、SaveAllが呼ばれないこと")]
     public async Task InitializeTtcWindowsAsync_ShouldNotSave_WhenTrackNumbersAreSame()
     {

@@ -27,7 +27,7 @@ public class TtcWindowCsvMapTest
     [DisplayName("番線の窓は、番線・種類・表示駅・軌道回路が読めること")]
     public void ShouldReadHomeTrackWindow()
     {
-        var records = Read("TH76_TTC_Track1,TH76,1,TH75,,,,番線,TH76_5LAT,");
+        var records = Read("TH76_TTC_Track1,TH76,1,TH75,,,,ホーム番線,TH76_5LAT,");
 
         var record = Assert.Single(records);
         Assert.Equal("TH76_TTC_Track1", record.Name);
@@ -42,7 +42,7 @@ public class TtcWindowCsvMapTest
     [DisplayName("番線が空欄の窓は、TrackNumberが空文字になること")]
     public void ShouldReadBlankTrackNumberAsEmpty()
     {
-        var records = Read("Window_Up,TH76,,TH75,TH77,,,上り,TH76_1T,");
+        var records = Read("Window_Up,TH76,,TH75,TH77,,,上り閉塞,TH76_1T,");
 
         var record = Assert.Single(records);
         Assert.Equal("", record.TrackNumber);
@@ -55,16 +55,50 @@ public class TtcWindowCsvMapTest
     [DisplayName("番線が「なし」の窓は、TrackNumberが空文字になること")]
     public void ShouldReadNashiTrackNumberAsEmpty()
     {
-        var records = Read("Window_Down,TH76,なし,TH75,,,,下り,TH76_1T,");
+        var records = Read("Window_Down,TH76,なし,TH75,,,,下り閉塞,TH76_1T,");
 
         Assert.Equal("", Assert.Single(records).TrackNumber);
+    }
+
+    [Fact]
+    [DisplayName("種類「入換番線」「本線入換」は、それぞれSwitchingTrack・SwitchingMainTrackとして読めること")]
+    public void ShouldReadSwitchingTrackAndSwitchingMainTrackTypes()
+    {
+        var records = Read(
+            "Window_SwitchingTrack,TH76,5,,,,,入換番線,TH76_1T,",
+            "Window_SwitchingMainTrack,TH76,T,,,,,本線入換,TH76_2T,");
+
+        Assert.Equal(TtcWindowType.SwitchingTrack, records[0].Type);
+        Assert.Equal(TtcWindowType.SwitchingMainTrack, records[1].Type);
+    }
+
+    [Theory]
+    [InlineData("場内途中")]
+    [InlineData("出発途中")]
+    [DisplayName("種類「場内途中」「出発途中」は、HomeTrackとして読めること")]
+    public void ShouldReadMidwayTypesAsHomeTrack(string type)
+    {
+        var records = Read($"Window_Midway,TH76,,,,,,{type},TH76_1T,");
+
+        Assert.Equal(TtcWindowType.HomeTrack, Assert.Single(records).Type);
+    }
+
+    [Theory]
+    [InlineData("番線")]
+    [InlineData("上り")]
+    [InlineData("下り")]
+    [InlineData("入換")]
+    [DisplayName("古い種類の呼び方は、読み込みで誤りになること")]
+    public void ShouldRejectLegacyTypeNames(string type)
+    {
+        Assert.NotNull(Record.Exception(() => Read($"Window_Old,TH76,,,,,,{type},TH76_1T,")));
     }
 
     [Fact]
     [DisplayName("対応軌道回路1・2の両方に値がある場合、両方が読めること")]
     public void ShouldReadBothTrackCircuits()
     {
-        var records = Read("Window_Switching,TH76,,TH75,,,,入換,TH76_1T,TH76_2T");
+        var records = Read("Window_SwitchingMain,TH76,,TH75,,,,本線入換,TH76_1T,TH76_2T");
 
         Assert.Equal(["TH76_1T", "TH76_2T"], Assert.Single(records).TrackCircuits);
     }
@@ -74,8 +108,8 @@ public class TtcWindowCsvMapTest
     public void ShouldSkipBlankOrNashiTrackCircuit()
     {
         var records = Read(
-            "Window1,TH76,1,TH75,,,,番線,TH76_5LAT,",
-            "Window2,TH76,2,TH75,,,,番線,TH76_5LBT,なし");
+            "Window1,TH76,1,TH75,,,,ホーム番線,TH76_5LAT,",
+            "Window2,TH76,2,TH75,,,,ホーム番線,TH76_5LBT,なし");
 
         Assert.Equal(["TH76_5LAT"], records[0].TrackCircuits);
         Assert.Equal(["TH76_5LBT"], records[1].TrackCircuits);
