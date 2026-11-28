@@ -20,13 +20,22 @@ public class StationDbInitializer(
     public async Task InitializeStationsAsync(List<StationCsv> stationList,
         CancellationToken cancellationToken = default)
     {
-        var stationNames = (await stationRepository.GetAllNames(cancellationToken)).ToHashSet();
+        var existingStationByName = (await stationRepository.GetAllAsync(cancellationToken))
+            .ToDictionary(s => s.Name);
 
         var stations = new List<Station>();
+        var stationsToUpdate = new List<Station>();
         foreach (var station in stationList)
         {
-            if (stationNames.Contains(station.Name))
+            if (existingStationByName.TryGetValue(station.Name, out var existingStation))
             {
+                // 既存の駅は、駅制御装置ブロックだけCSVに揃える(追加時にしか入らないと、既存DBの駅に入らない)
+                if (existingStation.ControlBlock != station.ControlBlock)
+                {
+                    existingStation.ControlBlock = station.ControlBlock;
+                    stationsToUpdate.Add(existingStation);
+                }
+
                 continue;
             }
 
@@ -35,12 +44,15 @@ public class StationDbInitializer(
                 Id = station.Id,
                 Name = station.Name,
                 IsStation = station.IsStation,
-                IsPassengerStation = station.IsPassengerStation
+                IsPassengerStation = station.IsPassengerStation,
+                ControlBlock = station.ControlBlock
             });
         }
 
+        await generalRepository.SaveAll(stationsToUpdate, cancellationToken);
         await generalRepository.AddAll(stations, cancellationToken);
-        logger.LogInformation("Initialized {Count} stations", stations.Count);
+        logger.LogInformation("Initialized {Count} stations, updated {UpdatedCount} station control blocks",
+            stations.Count, stationsToUpdate.Count);
     }
 
     /// <summary>

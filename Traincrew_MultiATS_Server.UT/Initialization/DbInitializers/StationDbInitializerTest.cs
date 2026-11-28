@@ -28,7 +28,8 @@ public class StationDbInitializerTest
                 Id = "ST1",
                 Name = "Station1",
                 IsStation = true,
-                IsPassengerStation = true
+                IsPassengerStation = true,
+                ControlBlock = "A"
             },
             new()
             {
@@ -39,7 +40,7 @@ public class StationDbInitializerTest
             }
         };
 
-        _stationRepositoryMock.Setup(r => r.GetAllNames(It.IsAny<CancellationToken>()))
+        _stationRepositoryMock.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
 
         var initializer = new StationDbInitializer(
@@ -59,8 +60,10 @@ public class StationDbInitializerTest
                 list[0].Name == "Station1" &&
                 list[0].IsStation == true &&
                 list[0].IsPassengerStation == true &&
+                list[0].ControlBlock == "A" &&
                 list[1].Id == "ST2" &&
-                list[1].Name == "Station2"
+                list[1].Name == "Station2" &&
+                list[1].ControlBlock == null
             ), It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -81,8 +84,8 @@ public class StationDbInitializerTest
             }
         };
 
-        _stationRepositoryMock.Setup(r => r.GetAllNames(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(["Station1"]);
+        _stationRepositoryMock.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync([new() { Id = "ST1", Name = "Station1", IsStation = true, IsPassengerStation = true }]);
 
         var initializer = new StationDbInitializer(
             _loggerMock.Object,
@@ -96,6 +99,44 @@ public class StationDbInitializerTest
         // Assert
         _generalRepositoryMock.Verify(
             r => r.AddAll(It.Is<List<Station>>(list => list.Count == 0), It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Fact]
+    [DisplayName("既存の駅の駅制御装置ブロックがCSVと違う場合、更新されること")]
+    public async Task InitializeStationsAsync_ShouldUpdateControlBlock_WhenExistingStationDiffers()
+    {
+        // Arrange
+        var existing = new Station
+        {
+            Id = "ST1", Name = "Station1", IsStation = true, IsPassengerStation = true, ControlBlock = null
+        };
+        var unchanged = new Station
+        {
+            Id = "ST2", Name = "Station2", IsStation = true, IsPassengerStation = true, ControlBlock = "B"
+        };
+        var stationCsvList = new List<StationCsv>
+        {
+            new() { Id = "ST1", Name = "Station1", IsStation = true, IsPassengerStation = true, ControlBlock = "A" },
+            new() { Id = "ST2", Name = "Station2", IsStation = true, IsPassengerStation = true, ControlBlock = "B" }
+        };
+        _stationRepositoryMock.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync([existing, unchanged]);
+
+        var initializer = new StationDbInitializer(
+            _loggerMock.Object,
+            _stationRepositoryMock.Object,
+            _stationTimerStateRepositoryMock.Object,
+            _generalRepositoryMock.Object);
+
+        // Act
+        await initializer.InitializeStationsAsync(stationCsvList, TestContext.Current.CancellationToken);
+
+        // Assert
+        Assert.Equal("A", existing.ControlBlock);
+        _generalRepositoryMock.Verify(
+            r => r.SaveAll(It.Is<List<Station>>(list => list.Count == 1 && list[0].Id == "ST1"),
+                It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
