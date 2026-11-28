@@ -15,8 +15,8 @@ TH75_TTC_DownDep1,TH75,,TH76,,,,出発途中,なし,なし
 TH75_TTC_Track1,TH75,1,,,,,ホーム番線,TH75_5RAT,なし
 TH75_TTC_Track2,TH75,2,,,,,ホーム番線,TH75_5RBT,なし
 TH75_TTC_Track3,TH75,3,TH76,,,,ホーム番線,TH75_9LCT,なし
-TH75_TTC_Track5,TH75,5,TH76,,,,入換番線,TH75_5T,なし
-TH75_TTC_Track6,TH75,6,TH76,,,,入換番線,TH75_6T,なし
+TH75_TTC_Track5,TH75,5,TH76,,,,ホーム番線,TH75_5T,なし
+TH75_TTC_Track6,TH75,6,TH76,,,,ホーム番線,TH75_6T,なし
 TH75_TTC_TrackT,TH75,T,,,,,本線入換,TH75_TST,なし
 TH75_TTC_Down1,TH75,,TH76,,,,下り閉塞,なし,なし
 TH75_TTC_Down2,TH75,,,,,,下り閉塞,なし,なし
@@ -68,7 +68,7 @@ TH67_TTC_Track1,TH67,1,TH66S,,,,ホーム番線,TH67_1RAT,なし
 TH67_TTC_Track2,TH67,2,TH66S,,,,ホーム番線,TH67_1RBT,なし
 TH67_TTC_Track3,TH67,3,TH66S,,,,ホーム番線,TH67_4LT,なし
 TH67_TTC_Track4,TH67,4,TH66S,,,,ホーム番線,TH67_5LT,なし
-TH67_TTC_Track5,TH67,5,,,,,ホーム番線,TH67_23RT,なし
+TH67_TTC_Track5,TH67,5,,,,,入換番線,TH67_23RT,なし
 TH67_TTC_Down1,TH67,,,,,,下り閉塞,なし,なし
 TH67_TTC_Down2,TH67,,,,,,下り閉塞,なし,なし
 TH67_TTC_Down3,TH67,,,,,,下り閉塞,なし,なし
@@ -78,7 +78,7 @@ TH66S_TTC_Up1,TH66S,,TH65,,,,上り閉塞,なし,なし
 TH66S_TTC_Up2,TH66S,,,,,,上り閉塞,なし,なし
 TH66S_TTC_Up3,TH66S,,,,,,上り閉塞,なし,なし
 TH66S_TTC_Up4,TH66S,,,,,,上り閉塞,なし,なし
-TH66S_TTC_Track10,TH66S,10,,,,,入換番線,TH66S_5LDT,なし
+TH66S_TTC_Track10,TH66S,10,,,,,ホーム番線,TH66S_5LDT,なし
 TH66S_TTC_Track11,TH66S,11,,,,,ホーム番線,TH66S_1RAT,なし
 TH66S_TTC_Track12,TH66S,12,,,,,ホーム番線,TH66S_1RBT,なし
 TH66S_TTC_Track13,TH66S,13,TH65,,,,ホーム番線,TH66S_13T,なし
