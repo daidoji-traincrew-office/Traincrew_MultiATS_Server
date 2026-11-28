@@ -68,8 +68,8 @@ public class TtcWindowCsvMapTest
             "Window_Shunt,TH76,5,,,,,入換番線,TH76_1T,",
             "Window_Main,TH76,T,,,,,本線入換,TH76_2T,");
 
-        Assert.Equal(TtcWindowType.ShuntTrack, records[0].Type);
-        Assert.Equal(TtcWindowType.Switching, records[1].Type);
+        Assert.Equal(TtcWindowType.SwitchingTrack, records[0].Type);
+        Assert.Equal(TtcWindowType.SwitchingMainTrack, records[1].Type);
     }
 
     [Theory]

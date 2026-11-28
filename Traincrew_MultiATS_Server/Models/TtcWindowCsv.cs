@@ -39,8 +39,8 @@ public sealed class TtcWindowCsvMap : ClassMap<TtcWindowCsv>
             "上り閉塞" => TtcWindowType.Up,
             "下り閉塞" => TtcWindowType.Down,
             "ホーム番線" or "場内途中" or "出発途中" => TtcWindowType.HomeTrack,
-            "入換番線" => TtcWindowType.ShuntTrack,
-            "本線入換" => TtcWindowType.Switching,
+            "入換番線" => TtcWindowType.SwitchingTrack,
+            "本線入換" => TtcWindowType.SwitchingMainTrack,
             _ => throw new InvalidOperationException($"Invalid TtcWindowType value: {value}")
         };
     }

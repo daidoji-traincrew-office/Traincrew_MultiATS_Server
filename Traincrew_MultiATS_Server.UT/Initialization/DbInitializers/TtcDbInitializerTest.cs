@@ -220,12 +220,12 @@ public class TtcDbInitializerTest
         var existing = Window("Window1", "5");
         SetupExistingWindows(existing);
         var record = Csv("Window1", "5");
-        record.Type = TtcWindowType.ShuntTrack;
+        record.Type = TtcWindowType.SwitchingTrack;
         var calls = CaptureWindowSaves([]);
 
         await CreateInitializer().InitializeTtcWindowsAsync([record], TestContext.Current.CancellationToken);
 
-        Assert.Equal(TtcWindowType.ShuntTrack, existing.Type);
+        Assert.Equal(TtcWindowType.SwitchingTrack, existing.Type);
         Assert.Equal("5", existing.TrackNumber);
         Assert.Equal(["Save:Window1=", "Save:Window1=5", "AddWindows"], calls);
     }
